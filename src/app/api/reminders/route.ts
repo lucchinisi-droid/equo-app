@@ -10,12 +10,15 @@ import { reminderEmailHtml } from "@/lib/resend/templates";
  * Protezione: richiede header "x-cron-secret" uguale a CRON_SECRET.
  */
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function GET(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const secret = req.headers.get("x-cron-secret");
   if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });

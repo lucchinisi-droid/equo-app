@@ -5,12 +5,15 @@ import { waitlistConfirmationHtml } from "@/lib/resend/templates";
 
 // Client con service role: la tabella waitlist accetta insert pubblici via RLS,
 // ma usiamo la service key lato server per evitare di esporre l'anon key qui.
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const { email, name, role } = await req.json();
 
   if (!email || typeof email !== "string") {
