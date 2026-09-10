@@ -5,7 +5,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 ## 1. Landing Page ✅ (base fatta, da rifinire)
 - [x] Struttura landing (`src/app/page.tsx`) con hero, feature, waitlist form
 - [x] API `/api/waitlist` (salva su Supabase + email conferma Resend)
-- [ ] Rifinire copy (headline, value prop, CTA)
+- [x] Rifinire copy (headline, value prop, CTA)
 - [ ] Verificare responsive mobile reale (iPad/iPhone)
 - [ ] Collegare Supabase reale e testare il flusso waitlist end-to-end
 - [ ] Deploy landing su Netlify con dominio (anche provvisorio tipo equo.netlify.app)

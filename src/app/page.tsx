@@ -2,29 +2,35 @@ import Link from "next/link";
 import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Wallet, Bot, MapPin } from "lucide-react";
+import { ShieldCheck, Wallet, Bot, MapPin, Check } from "lucide-react";
 
 const features = [
   {
     icon: ShieldCheck,
     title: "Libretto sanitario digitale",
-    desc: "Vaccini, Coggins test, ferratura e sverminazioni con scadenziario automatico. Basta carta.",
+    desc: "Vaccini, Coggins test, ferratura e sverminazioni con promemoria automatico via email. Niente più fogli persi in scuderia.",
   },
   {
     icon: Wallet,
     title: "Registro spese",
-    desc: "Traccia pensione, mangimi e visite veterinarie per ogni cavallo, mese per mese.",
+    desc: "Pensione, mangimi, veterinario, maniscalco: sai sempre quanto ti costa davvero il tuo cavallo, mese per mese.",
   },
   {
     icon: Bot,
     title: "Assistente AI equestre",
-    desc: "Un esperto virtuale sempre disponibile per dubbi su gestione ed etologia.",
+    desc: "Un esperto virtuale h24 per dubbi su alimentazione, comportamento e gestione — sempre nel telefono.",
   },
   {
     icon: MapPin,
     title: "Servizi vicino a te",
-    desc: "Trova cliniche 24h e maneggi vicino alla tua scuderia in un tap.",
+    desc: "Clinica 24h o maniscalco più vicini, un tap per chiamare o farti indicare la strada.",
   },
+];
+
+const proofPoints = [
+  "Gratis per i primi iscritti",
+  "Nessuna carta di credito richiesta",
+  "5 minuti per creare il libretto del tuo cavallo",
 ];
 
 export default function LandingPage() {
@@ -43,14 +49,24 @@ export default function LandingPage() {
       </header>
 
       <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-16 text-center sm:py-24">
+        <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
+          In arrivo — iscriviti alla waitlist
+        </span>
         <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-          Prenditi cura del tuo cavallo, <span className="text-primary">senza carta e senza pensieri</span>
+          Il tuo cavallo, <span className="text-primary">senza più carta e senza scadenze dimenticate</span>
         </h1>
         <p className="max-w-xl text-lg text-muted-foreground">
-          Equo digitalizza la gestione sanitaria e amministrativa del tuo cavallo: scadenze, spese e un
-          assistente AI esperto, sempre con te.
+          Equo tiene traccia di vaccini, spese e scadenze del tuo cavallo al posto tuo, e ti avvisa prima
+          che sia troppo tardi. Un assistente AI esperto sempre a portata di mano.
         </p>
         <WaitlistForm />
+        <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          {proofPoints.map((p) => (
+            <li key={p} className="flex items-center gap-1.5">
+              <Check className="size-4 text-primary" /> {p}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="mx-auto grid max-w-5xl gap-6 px-6 pb-24 sm:grid-cols-2">
@@ -67,6 +83,19 @@ export default function LandingPage() {
             </CardContent>
           </Card>
         ))}
+      </section>
+
+      <section className="mx-auto max-w-3xl px-6 pb-24 text-center">
+        <Card className="bg-secondary/40">
+          <CardContent className="flex flex-col items-center gap-4 py-10">
+            <p className="text-xl font-semibold">Gestisci una scuderia?</p>
+            <p className="max-w-md text-muted-foreground">
+              Equo funziona anche per gestori di scuderie con più cavalli e più proprietari da coordinare.
+              Scrivici per una demo dedicata.
+            </p>
+            <WaitlistForm />
+          </CardContent>
+        </Card>
       </section>
 
       <footer className="border-t px-6 py-8 text-center text-sm text-muted-foreground">
