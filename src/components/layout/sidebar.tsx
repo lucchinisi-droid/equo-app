@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { LayoutDashboard, PawPrint, Wallet, MessageCircle, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +20,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 shrink-0 border-r bg-card md:flex md:flex-col">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <span className="text-lg font-bold text-primary">Equo 🐴</span>
+        <Image src="/logo-equo.png" alt="Equo" width={120} height={40} className="h-8 w-auto" />
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {items.map(({ href, label, icon: Icon }) => {

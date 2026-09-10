@@ -7,6 +7,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] API `/api/waitlist` (salva su Supabase + email conferma Resend)
 - [x] Rifinire copy (headline, value prop, CTA)
 - [ ] Verificare responsive mobile reale (iPad/iPhone) — verifica solo via codice (mobile-first), da controllare a occhio su dispositivo vero
+- [x] Logo reale integrato (header, sidebar, favicon, auth) + CTA hero aggiornata (beta + 250 posti gratis 6 mesi Pro)
 - [x] Collegare Supabase reale e testare il flusso waitlist end-to-end — testato in produzione, riga salvata correttamente
 - [x] Deploy landing su Netlify — **https://equo-app.netlify.app** live
 

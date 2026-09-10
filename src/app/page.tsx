@@ -1,8 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Wallet, Bot, MapPin, Check } from "lucide-react";
+import { ShieldCheck, Wallet, Bot, MapPin, Sparkles } from "lucide-react";
 
 const features = [
   {
@@ -27,17 +28,11 @@ const features = [
   },
 ];
 
-const proofPoints = [
-  "Gratis per i primi iscritti",
-  "Nessuna carta di credito richiesta",
-  "5 minuti per creare il libretto del tuo cavallo",
-];
-
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
       <header className="flex items-center justify-between px-6 py-4">
-        <span className="text-xl font-bold text-primary">Equo 🐴</span>
+        <Image src="/logo-equo.png" alt="Equo" width={140} height={47} priority className="h-9 w-auto" />
         <div className="flex gap-2">
           <Button variant="ghost" asChild>
             <Link href="/login">Accedi</Link>
@@ -49,24 +44,19 @@ export default function LandingPage() {
       </header>
 
       <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-16 text-center sm:py-24">
-        <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-          In arrivo — iscriviti alla waitlist
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
+          <Sparkles className="size-3.5" /> Solo per i primi 250 iscritti
         </span>
         <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-          Il tuo cavallo, <span className="text-primary">senza più carta e senza scadenze dimenticate</span>
+          Ricevi in anteprima la <span className="text-primary">versione beta</span> dell&apos;app
         </h1>
         <p className="max-w-xl text-lg text-muted-foreground">
-          Equo tiene traccia di vaccini, spese e scadenze del tuo cavallo al posto tuo, e ti avvisa prima
-          che sia troppo tardi. Un assistente AI esperto sempre a portata di mano.
+          I primi <strong className="text-foreground">250 iscritti</strong> avranno{" "}
+          <strong className="text-foreground">6 mesi della versione Pro gratis</strong>. Equo tiene traccia di
+          vaccini, spese e scadenze del tuo cavallo al posto tuo — e ti avvisa prima che sia troppo tardi.
         </p>
         <WaitlistForm />
-        <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-          {proofPoints.map((p) => (
-            <li key={p} className="flex items-center gap-1.5">
-              <Check className="size-4 text-primary" /> {p}
-            </li>
-          ))}
-        </ul>
+        <p className="text-sm text-muted-foreground">Nessuna carta di credito richiesta · 5 minuti per iscriverti</p>
       </section>
 
       <section className="mx-auto grid max-w-5xl gap-6 px-6 pb-24 sm:grid-cols-2">
@@ -98,7 +88,8 @@ export default function LandingPage() {
         </Card>
       </section>
 
-      <footer className="border-t px-6 py-8 text-center text-sm text-muted-foreground">
+      <footer className="flex flex-col items-center gap-3 border-t px-6 py-8 text-center text-sm text-muted-foreground">
+        <Image src="/icona-equo.png" alt="Equo" width={28} height={28} className="opacity-70" />
         © {new Date().getFullYear()} Equo. Tutti i diritti riservati.
       </footer>
     </div>
