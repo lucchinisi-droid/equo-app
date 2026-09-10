@@ -6,9 +6,9 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] Struttura landing (`src/app/page.tsx`) con hero, feature, waitlist form
 - [x] API `/api/waitlist` (salva su Supabase + email conferma Resend)
 - [x] Rifinire copy (headline, value prop, CTA)
-- [ ] Verificare responsive mobile reale (iPad/iPhone)
-- [ ] Collegare Supabase reale e testare il flusso waitlist end-to-end
-- [ ] Deploy landing su Netlify con dominio (anche provvisorio tipo equo.netlify.app)
+- [ ] Verificare responsive mobile reale (iPad/iPhone) — verifica solo via codice (mobile-first), da controllare a occhio su dispositivo vero
+- [x] Collegare Supabase reale e testare il flusso waitlist end-to-end — testato in produzione, riga salvata correttamente
+- [x] Deploy landing su Netlify — **https://equo-app.netlify.app** live
 
 ## 2. Web App base navigabile (non ancora funzionante al 100%)
 - [x] Auth (login/signup) collegata a Supabase
@@ -24,8 +24,9 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] `.env.local` compilato con URL + anon key reali (service_role/Resend/Anthropic da inserire manualmente per motivi di sicurezza)
 - [ ] Account Resend + dominio email verificato (per non restare su onboarding@resend.dev)
 - [ ] API key Anthropic (Claude) per l'assistente
-- [ ] Repo Git remoto (GitHub) collegato
-- [ ] Deploy su Netlify: env vars, build settings, dominio — in corso, riconnessione connettore Netlify richiesta
+- [x] Repo Git remoto (GitHub) collegato — github.com/lucchinisi-droid/equo-app
+- [x] Deploy su Netlify: sito live, build automatica ad ogni push su master
+- [ ] Dominio custom (opzionale, per ora equo-app.netlify.app)
 - [ ] Cron giornaliero per `/api/reminders` (Netlify Scheduled Functions o cron-job.org)
 
 ## 4. Altro fondamentale prima del lancio
