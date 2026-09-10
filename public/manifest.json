@@ -1,0 +1,13 @@
+{
+  "name": "Equo — Prenditi cura del tuo cavallo",
+  "short_name": "Equo",
+  "description": "Gestione sanitaria e amministrativa del cavallo",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3f5d3a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
