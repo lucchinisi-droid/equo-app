@@ -19,12 +19,13 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Pagina profilo utente / impostazioni scuderia
 
 ## 3. Configurazione infrastruttura
-- [ ] Creare progetto Supabase (produzione) + applicare migration `0001_init.sql`
+- [x] Creare progetto Supabase (produzione) + applicare migration `0001_init.sql` — progetto "equo" (eu-west-1), 7 tabelle con RLS attivo
 - [ ] Configurare Supabase Storage (bucket per foto cavalli e documenti PDF)
+- [x] `.env.local` compilato con URL + anon key reali (service_role/Resend/Anthropic da inserire manualmente per motivi di sicurezza)
 - [ ] Account Resend + dominio email verificato (per non restare su onboarding@resend.dev)
 - [ ] API key Anthropic (Claude) per l'assistente
 - [ ] Repo Git remoto (GitHub) collegato
-- [ ] Deploy su Netlify: env vars, build settings, dominio
+- [ ] Deploy su Netlify: env vars, build settings, dominio — in corso, riconnessione connettore Netlify richiesta
 - [ ] Cron giornaliero per `/api/reminders` (Netlify Scheduled Functions o cron-job.org)
 
 ## 4. Altro fondamentale prima del lancio
