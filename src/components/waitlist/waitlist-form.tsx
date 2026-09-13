@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-export function WaitlistForm() {
+export function WaitlistForm({ role }: { role: "proprietario" | "scuderia" }) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"proprietario" | "scuderia">("proprietario");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -59,20 +57,6 @@ export function WaitlistForm() {
         <Button type="submit" disabled={loading}>
           {loading ? "Invio..." : "Iscriviti"}
         </Button>
-      </div>
-      <div className="flex justify-center gap-4 text-sm sm:justify-start">
-        {(["proprietario", "scuderia"] as const).map((r) => (
-          <label key={r} className="flex items-center gap-1.5">
-            <input
-              type="radio"
-              name="role"
-              checked={role === r}
-              onChange={() => setRole(r)}
-              className={cn("size-4")}
-            />
-            {r === "proprietario" ? "Sono proprietario" : "Gestisco una scuderia"}
-          </label>
-        ))}
       </div>
       {status === "error" && <p className="text-sm text-destructive">{message}</p>}
     </form>
