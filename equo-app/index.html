@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Equo">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
@@ -27,6 +28,8 @@
 .icon{width:20px;height:20px;display:inline-block;vertical-align:middle;flex-shrink:0}
 .icon svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .icon-fill svg{fill:currentColor;stroke:none}
+.fa-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;
+  font-size:18px;line-height:1;flex-shrink:0}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;height:100dvh;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;
@@ -195,8 +198,22 @@ select.input{cursor:pointer}
   display:flex;align-items:center;gap:8px}
 .modal-title .icon{color:var(--accent);width:20px;height:20px}
 
+/* AI FAB + SHEET */
+.ai-fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));
+  width:56px;height:56px;border-radius:50%;background:var(--accent);color:#14231b;
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:60}
+.ai-fab .icon{width:24px;height:24px}
+.ai-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:70;align-items:flex-end;justify-content:center}
+.ai-sheet-overlay.active{display:flex}
+.ai-sheet{background:var(--bg);width:100%;max-width:480px;height:58vh;
+  border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.ai-sheet-header{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+
 /* AI CHAT */
-.chat-wrap{display:flex;flex-direction:column;height:100%}
+.chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
 .chat-bubble{max-width:80%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.45}
 .chat-bubble.user{align-self:flex-end;background:var(--accent);color:#14231b;border-bottom-right-radius:4px}
@@ -210,13 +227,13 @@ select.input{cursor:pointer}
   body{display:flex;justify-content:center;background:#000}
   .screen{max-width:480px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,.3)}
   .bottom-nav{max-width:480px;left:50%;transform:translateX(-50%)}
+  .ai-fab{right:calc(50% - 240px + 16px)}
 }
 </style>
 </head>
 <body>
 
 <svg style="display:none">
-  <symbol id="i-horse" viewBox="0 0 24 24"><path d="M6 20v-3.3c0-1 .3-1.9.9-2.7L9 11V7.5a3.5 3.5 0 0 1 3.5-3.5c1 0 1.9.4 2.6 1.1l2.8 2.8c1 1 1.6 2.3 1.6 3.7V15c0 1.8-1 3.4-2.5 4.2L15 20.5"/><path d="M9 7.8C7.3 8 5.9 9.1 5.3 10.7L4 14"/><circle cx="14.3" cy="8" r=".6" fill="currentColor" stroke="none"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></symbol>
   <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></symbol>
   <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
@@ -283,13 +300,13 @@ select.input{cursor:pointer}
   <div class="page-content active" id="page-home">
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
-        <div class="icon" style="width:40px;height:40px;color:var(--accent);margin:0 auto 12px"><svg><use href="#i-horse"/></svg></div>
+        <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
         <div class="section-title" style="margin-bottom:8px">Aggiungi il tuo primo cavallo</div>
         <div class="muted" style="font-size:14px;line-height:1.6;margin-bottom:20px">
           Crea la scheda del tuo cavallo per iniziare a tracciare vaccini, spese e scadenze.
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-add-horse')" style="width:100%;margin-bottom:10px">
-          <span class="icon"><svg><use href="#i-horse"/></svg></span> Aggiungi cavallo
+          <span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span> Aggiungi cavallo
         </button>
         <button class="btn btn-outline" onclick="openModal('modal-join-stable')" style="width:100%">
           <span class="icon"><svg><use href="#i-link"/></svg></span> Collega una scuderia con un codice
@@ -397,19 +414,6 @@ select.input{cursor:pointer}
     </div>
   </div>
 
-  <!-- AI -->
-  <div class="page-content" id="page-ai" style="padding:0;display:flex">
-    <div class="chat-wrap" style="width:100%">
-      <div class="chat-messages" id="chat-messages">
-        <div class="chat-bubble ai">Ciao! Sono l'assistente equestre di Equo. Chiedimi pure di alimentazione, comportamento o gestione del tuo cavallo.</div>
-      </div>
-      <div class="chat-input-row">
-        <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
-        <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
-      </div>
-    </div>
-  </div>
-
   <!-- SPESE -->
   <div class="page-content" id="page-spese">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -426,10 +430,36 @@ select.input{cursor:pointer}
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
-    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="icon"><svg><use href="#i-horse"/></svg></span><small>Cavalli</small></button>
-    <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Prenotazioni</small></button>
-    <button class="nav-btn" data-page="ai" onclick="showPage('ai')"><span class="icon"><svg><use href="#i-sparkles"/></svg></span><small>AI</small></button>
+    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><small>Cavalli</small></button>
+    <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Calendario</small></button>
     <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
+  </div>
+
+  <!-- AI FAB -->
+  <button class="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
+    <span class="icon"><svg><use href="#i-sparkles"/></svg></span>
+  </button>
+
+  <!-- AI SHEET (mezza schermata) -->
+  <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="closeOut(event,'ai-sheet-overlay')">
+    <div class="ai-sheet">
+      <div class="ai-sheet-header">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700">
+          <span class="icon" style="color:var(--accent)"><svg><use href="#i-sparkles"/></svg></span>
+          Assistente AI
+        </div>
+        <button class="back-btn" onclick="closeAiSheet()"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-bubble ai">Ciao! Sono l'assistente equestre di Equo. Chiedimi pure di alimentazione, comportamento o gestione del tuo cavallo.</div>
+        </div>
+        <div class="chat-input-row">
+          <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+          <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -438,7 +468,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-horse" onclick="closeOut(event,'modal-add-horse')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-horse"/></svg></span>Nuovo cavallo</div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span>Nuovo cavallo</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Nome</label>
@@ -965,6 +995,9 @@ function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
+function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); }
+function closeAiSheet(){ document.getElementById("ai-sheet-overlay").classList.remove("active"); }
+
 /* ---------- HORSES ---------- */
 async function loadHorses(){
   horses = await DB.listHorses();
@@ -991,12 +1024,12 @@ function renderHome(){
 function renderHorsesList(){
   const box = document.getElementById("horses-list");
   if(horses.length === 0){
-    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-horse"/></svg></div>Nessun cavallo ancora. Aggiungine uno per iniziare.</div>';
+    box.innerHTML = '<div class="empty-state"><div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px"><i class="fa-solid fa-horse-head"></i></div>Nessun cavallo ancora. Aggiungine uno per iniziare.</div>';
     return;
   }
   box.innerHTML = horses.map(h => `
     <div class="card horse-card" onclick="openHorseDetail('${h.id}')">
-      <div class="horse-avatar"><svg class="icon" style="width:26px;height:26px"><use href="#i-horse"/></svg></div>
+      <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:22px"></i></div>
       <div>
         <div style="font-weight:700">${escapeHtml(h.name)}</div>
         <div class="muted" style="font-size:13px">${escapeHtml(h.breed || "Razza non specificata")}</div>
