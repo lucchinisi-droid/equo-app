@@ -18,14 +18,15 @@
   --text:#f4f1ea; --muted:#93a99e; --card:#14312a;
   --green:#5cc88f; --red:#e2685f;
 }
-@media(prefers-color-scheme:light){
-  :root {
-    --bg:#f8f6f0; --surface:#ffffff; --surface2:#f1ede1;
-    --border:#e3ddcc; --accent:#c98f2e; --accent2:#a5721f;
-    --text:#14312a; --muted:#5f6f67; --card:#ffffff;
-    --green:#1f8a52; --red:#c94b40;
-  }
+:root[data-theme="light"] {
+  --bg:#f8f6f0; --surface:#ffffff; --surface2:#f1ede1;
+  --border:#e3ddcc; --accent:#c98f2e; --accent2:#a5721f;
+  --text:#14312a; --muted:#5f6f67; --card:#ffffff;
+  --green:#1f8a52; --red:#c94b40;
 }
+.icon{width:20px;height:20px;display:inline-block;vertical-align:middle;flex-shrink:0}
+.icon svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-fill svg{fill:currentColor;stroke:none}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;height:100dvh;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;
@@ -39,9 +40,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 #screen-auth{align-items:center;justify-content:center;padding:32px 24px;
   background:radial-gradient(ellipse at top left,rgba(232,176,75,.15),transparent 60%),
               radial-gradient(ellipse at bottom right,rgba(92,200,143,.12),transparent 60%),var(--bg)}
-.auth-logo{font-family:'Fraunces',serif;font-size:44px;font-weight:700;color:var(--accent);
-  margin-bottom:6px;text-align:center}
-.auth-tagline{color:var(--muted);font-size:15px;text-align:center;margin-bottom:36px}
+.auth-logo-img{display:block;height:56px;width:auto;margin:0 auto 10px}
+.auth-tagline{color:var(--muted);font-size:15px;text-align:center;margin-bottom:32px}
+.auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;
+  width:100%;max-width:360px;margin:2px 0}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.btn-google{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.btn-google:hover{border-color:var(--accent)}
 .auth-tabs{display:flex;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:24px;width:100%;max-width:360px}
 .auth-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);
   font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s}
@@ -76,7 +81,7 @@ select.input{cursor:pointer}
 #screen-app{background:var(--bg)}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
   border-bottom:1px solid var(--border);flex-shrink:0}
-.topbar-logo{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--accent)}
+.topbar-logo-img{height:26px;width:auto;cursor:pointer}
 .topbar-context{font-size:13px;color:var(--muted);flex:1;text-align:center;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap;padding:0 10px}
 .topbar-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);
@@ -111,7 +116,7 @@ select.input{cursor:pointer}
   padding-bottom:env(safe-area-inset-bottom);z-index:50}
 .nav-btn{flex:1;background:none;border:none;padding:10px 4px 8px;display:flex;
   flex-direction:column;align-items:center;gap:3px;color:var(--muted);cursor:pointer;font-size:10px}
-.nav-btn span{font-size:20px;line-height:1}
+.nav-btn .icon{width:22px;height:22px}
 .nav-btn.active{color:var(--accent)}
 
 /* HOME */
@@ -149,6 +154,36 @@ select.input{cursor:pointer}
 .event-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
 .event-item + .event-item{border-top:1px solid var(--border)}
 
+/* MENU */
+.menu-profile{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.menu-profile-avatar{width:48px;height:48px;border-radius:50%;background:var(--accent);
+  color:#14231b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0}
+.menu-section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin:18px 0 8px}
+.menu-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 14px}
+.menu-row + .menu-row{margin-top:8px}
+.menu-row-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+
+.switch{position:relative;width:42px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-track{position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:background .2s}
+.switch-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s}
+.switch input:checked + .switch-track{background:var(--accent)}
+.switch input:checked + .switch-track .switch-thumb{transform:translateX(18px)}
+
+.pm-item{display:flex;align-items:center;gap:12px;padding:11px 0}
+.pm-item + .pm-item{border-top:1px solid var(--border)}
+.pm-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pm-remove{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px}
+.pm-remove:hover{color:var(--red)}
+.pm-type-row{display:flex;gap:8px;margin-bottom:14px}
+.pm-type-btn{flex:1;padding:12px 8px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface);color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;
+  display:flex;flex-direction:column;align-items:center;gap:6px}
+.pm-type-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(232,176,75,.08)}
+
 /* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;
   align-items:flex-end;justify-content:center}
@@ -156,7 +191,9 @@ select.input{cursor:pointer}
 .modal{background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;
   max-height:85vh;overflow-y:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
-.modal-title{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-bottom:16px}
+.modal-title{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px}
+.modal-title .icon{color:var(--accent);width:20px;height:20px}
 
 /* AI CHAT */
 .chat-wrap{display:flex;flex-direction:column;height:100%}
@@ -178,15 +215,42 @@ select.input{cursor:pointer}
 </head>
 <body>
 
+<svg style="display:none">
+  <symbol id="i-horse" viewBox="0 0 24 24"><path d="M6 20v-3.3c0-1 .3-1.9.9-2.7L9 11V7.5a3.5 3.5 0 0 1 3.5-3.5c1 0 1.9.4 2.6 1.1l2.8 2.8c1 1 1.6 2.3 1.6 3.7V15c0 1.8-1 3.4-2.5 4.2L15 20.5"/><path d="M9 7.8C7.3 8 5.9 9.1 5.3 10.7L4 14"/><circle cx="14.3" cy="8" r=".6" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M21 12.5V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3.5h-4a2 2 0 0 1 0-3.5z"/></symbol>
+  <symbol id="i-mappin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="4" rx="1"/><path d="M9 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h6"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></symbol>
+  <symbol id="i-paypal" viewBox="0 0 24 24"><path d="M7 4h6.5a4 4 0 0 1 0 8H9.5l-1 5H5z"/><path d="M9.5 8h6a4 4 0 0 1 0 8H10l-.7 3.5"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 10h16"/><path d="M6 10v9M10 10v9M14 10v9M18 10v9"/><path d="M3 10l9-6 9 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+</svg>
+
 <!-- ═══ AUTH ═══ -->
 <div class="screen active" id="screen-auth">
-  <div class="auth-logo">equo</div>
+  <img src="assets/logo-equo.png" alt="Equo" class="auth-logo-img">
   <div class="auth-tagline">Prenditi cura del tuo cavallo</div>
 
   <div class="auth-tabs">
     <button class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">Accedi</button>
     <button class="auth-tab" id="tab-signup" onclick="setAuthTab('signup')">Registrati</button>
   </div>
+
+  <button class="btn btn-google" onclick="signInWithGoogle()" style="width:100%;max-width:360px;margin-bottom:16px">
+    <span class="icon icon-fill">
+      <svg viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+    </span> Continua con Google
+  </button>
+  <div class="auth-divider">oppure con email</div>
+  <div style="height:16px"></div>
 
   <div class="auth-form">
     <div class="input-group" id="signup-name-group" style="display:none">
@@ -203,31 +267,32 @@ select.input{cursor:pointer}
     </div>
     <div class="auth-error" id="auth-error" style="display:none"></div>
     <button class="btn btn-primary" id="auth-submit" onclick="submitAuth()">Accedi</button>
+    <button class="btn btn-ghost" onclick="startDemo()" style="width:100%">Prova la demo (senza account)</button>
   </div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div class="screen" id="screen-app">
   <div class="topbar">
-    <div class="topbar-logo" onclick="showPage('home')" style="cursor:pointer">equo</div>
+    <img src="assets/icona-equo.png" alt="Equo" class="topbar-logo-img" onclick="showPage('home')">
     <div class="topbar-context" id="topbar-context">Nessun cavallo</div>
-    <div class="topbar-avatar" id="topbar-avatar" onclick="openModal('modal-profile')">?</div>
+    <div class="topbar-avatar" id="topbar-avatar" onclick="openMenu()">?</div>
   </div>
 
   <!-- HOME -->
   <div class="page-content active" id="page-home">
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
-        <div style="font-size:44px;margin-bottom:12px">🐴</div>
+        <div class="icon" style="width:40px;height:40px;color:var(--accent);margin:0 auto 12px"><svg><use href="#i-horse"/></svg></div>
         <div class="section-title" style="margin-bottom:8px">Aggiungi il tuo primo cavallo</div>
         <div class="muted" style="font-size:14px;line-height:1.6;margin-bottom:20px">
           Crea la scheda del tuo cavallo per iniziare a tracciare vaccini, spese e scadenze.
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-add-horse')" style="width:100%;margin-bottom:10px">
-          🐴 Aggiungi cavallo
+          <span class="icon"><svg><use href="#i-horse"/></svg></span> Aggiungi cavallo
         </button>
         <button class="btn btn-outline" onclick="openModal('modal-join-stable')" style="width:100%">
-          🔗 Collega una scuderia con un codice
+          <span class="icon"><svg><use href="#i-link"/></svg></span> Collega una scuderia con un codice
         </button>
       </div>
     </div>
@@ -279,7 +344,9 @@ select.input{cursor:pointer}
         <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
       </div>
 
-      <button class="btn btn-outline" onclick="openServicesMap()" style="width:100%">📍 Servizi vicino a te</button>
+      <button class="btn btn-outline" onclick="openServicesMap()" style="width:100%">
+        <span class="icon"><svg><use href="#i-mappin"/></svg></span> Servizi vicino a te
+      </button>
     </div>
   </div>
 
@@ -295,7 +362,7 @@ select.input{cursor:pointer}
 
     <div id="cavalli-detail-view" style="display:none">
       <div class="detail-header">
-        <button class="back-btn" onclick="closeHorseDetail()">←</button>
+        <button class="back-btn" onclick="closeHorseDetail()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
         <div class="section-title" style="margin-bottom:0" id="detail-horse-name">Cavallo</div>
       </div>
 
@@ -315,7 +382,7 @@ select.input{cursor:pointer}
   <div class="page-content" id="page-prenotazioni">
     <div class="section-title">Prenotazioni</div>
     <div id="prenotazioni-locked" class="card" style="text-align:center;padding:28px">
-      <div style="font-size:36px;margin-bottom:10px">📅</div>
+      <div class="icon" style="width:36px;height:36px;color:var(--accent);margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>
       <div style="font-weight:700;margin-bottom:6px">Collega la tua scuderia</div>
       <div class="muted" style="font-size:13px;line-height:1.6;margin-bottom:18px">
         Le prenotazioni si sbloccano quando colleghi il cavallo a una scuderia che usa Equo Scuderia.
@@ -324,7 +391,7 @@ select.input{cursor:pointer}
     </div>
     <div id="prenotazioni-unlocked" style="display:none">
       <div class="empty-state">
-        <div class="emoji">📅</div>
+        <div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>
         Calendario lezioni in arrivo — la tua scuderia potrà pubblicare gli slot disponibili.
       </div>
     </div>
@@ -338,7 +405,7 @@ select.input{cursor:pointer}
       </div>
       <div class="chat-input-row">
         <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
-        <button class="btn btn-primary chat-send" onclick="sendChatMessage()">→</button>
+        <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
       </div>
     </div>
   </div>
@@ -358,11 +425,11 @@ select.input{cursor:pointer}
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span>🏠</span><small>Home</small></button>
-    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span>🐴</span><small>Cavalli</small></button>
-    <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span>📅</span><small>Prenotazioni</small></button>
-    <button class="nav-btn" data-page="ai" onclick="showPage('ai')"><span>✨</span><small>AI</small></button>
-    <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span>💶</span><small>Spese</small></button>
+    <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
+    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="icon"><svg><use href="#i-horse"/></svg></span><small>Cavalli</small></button>
+    <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Prenotazioni</small></button>
+    <button class="nav-btn" data-page="ai" onclick="showPage('ai')"><span class="icon"><svg><use href="#i-sparkles"/></svg></span><small>AI</small></button>
+    <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
   </div>
 </div>
 
@@ -371,7 +438,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-horse" onclick="closeOut(event,'modal-add-horse')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">🐴 Nuovo cavallo</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-horse"/></svg></span>Nuovo cavallo</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Nome</label>
@@ -393,7 +460,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-join-stable" onclick="closeOut(event,'modal-join-stable')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">🔗 Collega una scuderia</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-link"/></svg></span>Collega una scuderia</div>
     <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
       Chiedi il codice al gestore della tua scuderia per collegare il cavallo e sbloccare la prenotazione lezioni.
     </div>
@@ -411,7 +478,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-event" onclick="closeOut(event,'modal-add-event')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">📋 Nuovo evento sanitario</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Nuovo evento sanitario</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Tipo</label>
@@ -442,7 +509,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-expense" onclick="closeOut(event,'modal-add-expense')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">💶 Nuova spesa</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span>Nuova spesa</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Categoria</label>
@@ -472,15 +539,90 @@ select.input{cursor:pointer}
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-profile" onclick="closeOut(event,'modal-profile')">
+<div class="modal-overlay" id="modal-menu" onclick="closeOut(event,'modal-menu')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Profilo</div>
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700" id="profile-name">—</div>
-      <div class="muted" style="font-size:13px" id="profile-email">—</div>
+
+    <div class="menu-profile">
+      <div class="menu-profile-avatar" id="menu-avatar">?</div>
+      <div>
+        <div style="font-weight:700" id="profile-name">—</div>
+        <div class="muted" style="font-size:13px" id="profile-email">—</div>
+      </div>
     </div>
+
+    <div class="menu-section-label">Aspetto</div>
+    <div class="menu-row">
+      <div class="menu-row-label">
+        <span class="icon" id="theme-icon"></span>
+        <span id="theme-label">Modalità scura</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+
+    <div class="menu-section-label">Metodo di pagamento</div>
+    <div class="card" id="payment-methods-card">
+      <div id="payment-methods-list" class="muted" style="font-size:13px">Nessun metodo salvato.</div>
+      <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-payment')" style="width:100%;margin-top:12px">
+        + Aggiungi metodo di pagamento
+      </button>
+    </div>
+
+    <div style="height:8px"></div>
     <button class="btn btn-outline" style="width:100%" onclick="logout()">Esci</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Aggiungi metodo di pagamento</div>
+
+    <div class="pm-type-row">
+      <button class="pm-type-btn active" data-pm-type="carta" onclick="selectPmType('carta')">
+        <span class="icon"><svg><use href="#i-card"/></svg></span> Carta
+      </button>
+      <button class="pm-type-btn" data-pm-type="paypal" onclick="selectPmType('paypal')">
+        <span class="icon"><svg><use href="#i-paypal"/></svg></span> PayPal
+      </button>
+      <button class="pm-type-btn" data-pm-type="iban" onclick="selectPmType('iban')">
+        <span class="icon"><svg><use href="#i-bank"/></svg></span> IBAN
+      </button>
+    </div>
+
+    <div id="pm-form-carta">
+      <div class="muted" style="font-size:13px;line-height:1.6;margin-bottom:14px">
+        La carta viene aggiunta tramite il modulo sicuro Stripe — i dati della carta non passano mai dai
+        nostri server. (In questo scheletro il flusso Stripe non è ancora collegato.)
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="addPaymentMethod('carta')">Continua con Stripe</button>
+    </div>
+
+    <div id="pm-form-paypal" style="display:none">
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group">
+          <label class="input-label">Email PayPal</label>
+          <input class="input" id="pm-paypal-email" type="email" placeholder="tuaemail@esempio.it">
+        </div>
+        <button class="btn btn-primary" onclick="addPaymentMethod('paypal')" style="width:100%">Salva PayPal</button>
+      </div>
+    </div>
+
+    <div id="pm-form-iban" style="display:none">
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group">
+          <label class="input-label">IBAN</label>
+          <input class="input" id="pm-iban" placeholder="IT00 X000 0000 0000 0000 0000 000" style="text-transform:uppercase">
+        </div>
+        <div class="muted" style="font-size:12px;line-height:1.5">
+          Usato per bonifici o addebiti SEPA. Conservato solo per il tuo profilo.
+        </div>
+        <button class="btn btn-primary" onclick="addPaymentMethod('iban')" style="width:100%">Salva IBAN</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -504,6 +646,111 @@ let currentUser = null;
 let horses = [];
 let currentHorseId = null;
 let authMode = "login";
+
+/* ---------- DEMO MODE ----------
+   Nessun account/Supabase ancora configurato: la demo lavora su dati
+   finti in memoria (si perdono al refresh), così puoi provare tutti
+   i flussi della UI prima di collegare il database vero. */
+let DEMO_MODE = false;
+let demoIdCounter = 1;
+const demoState = {
+  horses: [
+    { id: "demo-1", name: "Aurora", breed: "Maremmano", birth_date: "2018-04-12", stable_id: null },
+  ],
+  events: {
+    "demo-1": [
+      { id: "de-1", type: "vaccino", date: "2026-06-01", next_due_date: "2026-12-01", notes: "Dr. Bianchi" },
+      { id: "de-2", type: "ferratura", date: "2026-08-10", next_due_date: "2026-09-25", notes: "" },
+    ],
+  },
+  expenses: [
+    { id: "dx-1", horse_id: "demo-1", horse_name: "Aurora", category: "pensione", amount: 220, date: "2026-09-01", notes: "" },
+    { id: "dx-2", horse_id: "demo-1", horse_name: "Aurora", category: "maniscalco", amount: 60, date: "2026-08-10", notes: "" },
+  ],
+  stables: [{ id: "demo-stable-1", name: "Scuderia Le Querce", join_code: "EQUO-DEMO" }],
+  paymentMethods: [],
+};
+
+const DB = {
+  async listHorses(){
+    if(DEMO_MODE) return demoState.horses;
+    const { data, error } = await sb.from("horses").select("*").eq("owner_id", currentUser.id).order("created_at", { ascending: true });
+    return error ? [] : (data || []);
+  },
+  async insertHorse({ name, breed, birth_date }){
+    if(DEMO_MODE){
+      demoState.horses.push({ id: "demo-" + (++demoIdCounter), name, breed, birth_date, stable_id: null });
+      return { error: null };
+    }
+    const { error } = await sb.from("horses").insert({ owner_id: currentUser.id, name, breed, birth_date });
+    return { error };
+  },
+  async deleteHorse(id){
+    if(DEMO_MODE){
+      demoState.horses = demoState.horses.filter(h => h.id !== id);
+      delete demoState.events[id];
+      return;
+    }
+    await sb.from("horses").delete().eq("id", id);
+  },
+  async listEvents(horseId){
+    if(DEMO_MODE) return (demoState.events[horseId] || []).slice().sort((a,b) => new Date(b.date) - new Date(a.date));
+    const { data, error } = await sb.from("health_events").select("*").eq("horse_id", horseId).order("date", { ascending: false });
+    return error ? [] : (data || []);
+  },
+  async insertEvent({ horse_id, type, date, next_due_date, notes }){
+    if(DEMO_MODE){
+      if(!demoState.events[horse_id]) demoState.events[horse_id] = [];
+      demoState.events[horse_id].push({ id: "de-" + (++demoIdCounter), type, date, next_due_date, notes });
+      return { error: null };
+    }
+    const { error } = await sb.from("health_events").insert({ horse_id, type, date, next_due_date, notes });
+    return { error };
+  },
+  async listUpcomingDeadlines(horseIds, limit){
+    if(DEMO_MODE){
+      const all = [];
+      horseIds.forEach(hid => {
+        const horse = demoState.horses.find(h => h.id === hid);
+        (demoState.events[hid] || []).forEach(ev => {
+          if(ev.next_due_date) all.push({ ...ev, horses: { name: horse?.name } });
+        });
+      });
+      return all.sort((a,b) => new Date(a.next_due_date) - new Date(b.next_due_date)).slice(0, limit);
+    }
+    const { data, error } = await sb.from("health_events").select("*, horses(name)")
+      .in("horse_id", horseIds).not("next_due_date", "is", null)
+      .order("next_due_date", { ascending: true }).limit(limit);
+    return error ? [] : (data || []);
+  },
+  async listExpenses(){
+    if(DEMO_MODE) return demoState.expenses.slice().sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => ({ ...e, horses: { name: e.horse_name } }));
+    const { data, error } = await sb.from("expenses").select("*, horses(name)").eq("owner_id", currentUser.id).order("date", { ascending: false }).limit(50);
+    return error ? [] : (data || []);
+  },
+  async insertExpense({ horse_id, category, amount, date, notes }){
+    if(DEMO_MODE){
+      const horse = demoState.horses.find(h => h.id === horse_id);
+      demoState.expenses.push({ id: "dx-" + (++demoIdCounter), horse_id, horse_name: horse?.name || "", category, amount, date, notes });
+      return { error: null };
+    }
+    const { error } = await sb.from("expenses").insert({ owner_id: currentUser.id, horse_id, category, amount, date, notes });
+    return { error };
+  },
+  async findStableByCode(code){
+    if(DEMO_MODE) return demoState.stables.find(s => s.join_code === code) || null;
+    const { data } = await sb.from("stables").select("id, name").eq("join_code", code).maybeSingle();
+    return data || null;
+  },
+  async linkHorseToStable(horseId, stableId){
+    if(DEMO_MODE){
+      const horse = demoState.horses.find(h => h.id === horseId);
+      if(horse) horse.stable_id = stableId;
+      return;
+    }
+    await sb.from("horses").update({ stable_id: stableId }).eq("id", horseId);
+  },
+};
 
 /* ---------- AUTH ---------- */
 function setAuthTab(mode){
@@ -543,16 +790,43 @@ async function submitAuth(){
 }
 
 async function logout(){
-  await sb.auth.signOut();
+  if(!DEMO_MODE) await sb.auth.signOut();
   currentUser = null;
-  closeModal("modal-profile");
+  DEMO_MODE = false;
+  closeModal("modal-menu");
   document.getElementById("screen-app").classList.remove("active");
   document.getElementById("screen-auth").classList.add("active");
 }
 
+function setAvatarInitial(letter){
+  document.getElementById("topbar-avatar").textContent = letter;
+  document.getElementById("menu-avatar").textContent = letter;
+}
+
+async function startDemo(){
+  DEMO_MODE = true;
+  currentUser = { id: "demo-user", email: "demo@equo.app" };
+  document.getElementById("screen-auth").classList.remove("active");
+  document.getElementById("screen-app").classList.add("active");
+  setAvatarInitial("D");
+  document.getElementById("profile-email").textContent = currentUser.email;
+  document.getElementById("profile-name").textContent = "Modalità demo";
+  await loadHorses();
+  renderPaymentMethods();
+  startPromoRotation();
+}
+
 /* ---------- BOOT ---------- */
 async function boot(){
-  const { data: { user } } = await sb.auth.getUser();
+  initTheme();
+  if(DEMO_MODE) return;
+  let user = null;
+  try{
+    const res = await sb.auth.getUser();
+    user = res.data.user;
+  } catch(e){
+    console.warn("Supabase non ancora configurato:", e.message);
+  }
   if(!user){
     document.getElementById("screen-auth").classList.add("active");
     document.getElementById("screen-app").classList.remove("active");
@@ -562,13 +836,122 @@ async function boot(){
   document.getElementById("screen-auth").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
 
-  document.getElementById("topbar-avatar").textContent = (user.email || "?").charAt(0).toUpperCase();
+  setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
   document.getElementById("profile-email").textContent = user.email || "";
   const { data: profile } = await sb.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
 
   await loadHorses();
+  renderPaymentMethods();
   startPromoRotation();
+}
+
+/* ---------- GOOGLE SIGN-IN ---------- */
+async function signInWithGoogle(){
+  const errBox = document.getElementById("auth-error");
+  try{
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + window.location.pathname },
+    });
+    if(error) throw error;
+    // Supabase reindirizza a Google e poi torna qui: boot() gestisce la sessione al ritorno.
+  } catch(e){
+    errBox.textContent = e.message || "Errore con l'accesso Google.";
+    errBox.style.display = "block";
+  }
+}
+
+/* ---------- MENU / DARK MODE ---------- */
+function openMenu(){
+  document.getElementById("theme-switch").checked = document.documentElement.getAttribute("data-theme") === "light" ? false : true;
+  updateThemeMenuUI();
+  openModal("modal-menu");
+}
+
+function initTheme(){
+  const saved = localStorage.getItem("equo-theme");
+  if(saved) document.documentElement.setAttribute("data-theme", saved);
+  updateThemeMenuUI();
+}
+
+function toggleTheme(){
+  const isLight = document.documentElement.getAttribute("data-theme") === "light";
+  const next = isLight ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("equo-theme", next);
+  updateThemeMenuUI();
+}
+
+function updateThemeMenuUI(){
+  const isLight = document.documentElement.getAttribute("data-theme") === "light";
+  const switchEl = document.getElementById("theme-switch");
+  const iconEl = document.getElementById("theme-icon");
+  const labelEl = document.getElementById("theme-label");
+  if(!switchEl) return;
+  switchEl.checked = !isLight;
+  iconEl.innerHTML = `<svg><use href="#i-${isLight ? "sun" : "moon"}"/></svg>`;
+  labelEl.textContent = isLight ? "Modalità chiara" : "Modalità scura";
+}
+
+/* ---------- PAYMENT METHODS ---------- */
+let selectedPmType = "carta";
+const PM_LABELS = { carta: "Carta", paypal: "PayPal", iban: "IBAN" };
+
+function selectPmType(type){
+  selectedPmType = type;
+  document.querySelectorAll(".pm-type-btn").forEach(b => b.classList.toggle("active", b.dataset.pmType === type));
+  ["carta","paypal","iban"].forEach(t => {
+    document.getElementById("pm-form-" + t).style.display = t === type ? "block" : "none";
+  });
+}
+
+async function addPaymentMethod(type){
+  let detail = "";
+  if(type === "paypal"){
+    detail = document.getElementById("pm-paypal-email").value.trim();
+    if(!detail) return;
+  } else if(type === "iban"){
+    detail = document.getElementById("pm-iban").value.trim().toUpperCase();
+    if(!detail) return;
+  } else {
+    detail = "•••• in attesa di Stripe";
+  }
+  // NOTA: per le carte non salvare mai il numero completo — questo è solo
+  // un placeholder finché non colleghiamo Stripe (Setup Intent). Non è
+  // ancora persistito su Supabase: quando lo colleghiamo, IBAN/email vanno
+  // protetti con RLS (idealmente cifrati) prima di andare in produzione.
+  demoState.paymentMethods = demoState.paymentMethods || [];
+  demoState.paymentMethods.push({ id: "pm-" + Date.now(), type, detail });
+  closeModal("modal-add-payment");
+  renderPaymentMethods();
+}
+
+function removePaymentMethod(id){
+  demoState.paymentMethods = (demoState.paymentMethods || []).filter(p => p.id !== id);
+  renderPaymentMethods();
+}
+
+function renderPaymentMethods(){
+  const box = document.getElementById("payment-methods-list");
+  const methods = demoState.paymentMethods || [];
+  if(methods.length === 0){
+    box.innerHTML = "Nessun metodo salvato.";
+    return;
+  }
+  const iconFor = { carta: "i-card", paypal: "i-paypal", iban: "i-bank" };
+  box.innerHTML = methods.map(m => `
+    <div class="pm-item">
+      <div class="pm-icon"><span class="icon"><svg><use href="#${iconFor[m.type]}"/></svg></span></div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${PM_LABELS[m.type]}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml(m.detail)}</div>
+      </div>
+      <button class="pm-remove" onclick="removePaymentMethod('${m.id}')">
+        <span class="icon"><svg><use href="#i-x"/></svg></span>
+      </button>
+    </div>
+  `).join("");
 }
 
 /* ---------- NAV ---------- */
@@ -584,8 +967,7 @@ function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
 /* ---------- HORSES ---------- */
 async function loadHorses(){
-  const { data, error } = await sb.from("horses").select("*").eq("owner_id", currentUser.id).order("created_at", { ascending: true });
-  horses = error ? [] : (data || []);
+  horses = await DB.listHorses();
   renderHome();
   renderHorsesList();
 }
@@ -609,12 +991,12 @@ function renderHome(){
 function renderHorsesList(){
   const box = document.getElementById("horses-list");
   if(horses.length === 0){
-    box.innerHTML = '<div class="empty-state"><div class="emoji">🐴</div>Nessun cavallo ancora. Aggiungine uno per iniziare.</div>';
+    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-horse"/></svg></div>Nessun cavallo ancora. Aggiungine uno per iniziare.</div>';
     return;
   }
   box.innerHTML = horses.map(h => `
     <div class="card horse-card" onclick="openHorseDetail('${h.id}')">
-      <div class="horse-avatar">🐴</div>
+      <div class="horse-avatar"><svg class="icon" style="width:26px;height:26px"><use href="#i-horse"/></svg></div>
       <div>
         <div style="font-weight:700">${escapeHtml(h.name)}</div>
         <div class="muted" style="font-size:13px">${escapeHtml(h.breed || "Razza non specificata")}</div>
@@ -628,7 +1010,7 @@ async function createHorse(){
   if(!name) return;
   const breed = document.getElementById("horse-breed").value.trim();
   const birth_date = document.getElementById("horse-birthdate").value || null;
-  const { error } = await sb.from("horses").insert({ owner_id: currentUser.id, name, breed, birth_date });
+  const { error } = await DB.insertHorse({ name, breed, birth_date });
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("horse-name").value = "";
   document.getElementById("horse-breed").value = "";
@@ -656,7 +1038,7 @@ function closeHorseDetail(){
 async function deleteCurrentHorse(){
   if(!currentHorseId) return;
   if(!confirm("Eliminare questo cavallo e tutti i suoi dati?")) return;
-  await sb.from("horses").delete().eq("id", currentHorseId);
+  await DB.deleteHorse(currentHorseId);
   closeHorseDetail();
   await loadHorses();
 }
@@ -667,8 +1049,8 @@ const EVENT_LABELS = { vaccino: "Vaccino", coggins: "Test Coggins", ferratura: "
 async function loadHorseEvents(horseId){
   const box = document.getElementById("horse-events-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
-  const { data, error } = await sb.from("health_events").select("*").eq("horse_id", horseId).order("date", { ascending: false });
-  if(error || !data || data.length === 0){
+  const data = await DB.listEvents(horseId);
+  if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun evento registrato.</div>';
     return;
   }
@@ -690,7 +1072,7 @@ async function createHorseEvent(){
   const next_due_date = document.getElementById("event-next-date").value || null;
   const notes = document.getElementById("event-notes").value.trim();
   if(!date) return;
-  const { error } = await sb.from("health_events").insert({ horse_id: currentHorseId, type, date, next_due_date, notes });
+  const { error } = await DB.insertEvent({ horse_id: currentHorseId, type, date, next_due_date, notes });
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("event-date").value = "";
   document.getElementById("event-next-date").value = "";
@@ -710,10 +1092,8 @@ async function loadDeadlines(){
   const box = document.getElementById("home-deadlines");
   const horseIds = horses.map(h => h.id);
   if(horseIds.length === 0){ box.innerHTML = '<div class="muted" style="font-size:13px">Nessuna scadenza.</div>'; return; }
-  const { data, error } = await sb.from("health_events").select("*, horses(name)")
-    .in("horse_id", horseIds).not("next_due_date", "is", null)
-    .order("next_due_date", { ascending: true }).limit(5);
-  if(error || !data || data.length === 0){
+  const data = await DB.listUpcomingDeadlines(horseIds, 5);
+  if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>';
     document.getElementById("stat-deadlines").textContent = "0";
     return;
@@ -736,15 +1116,15 @@ async function joinStable(){
   const errBox = document.getElementById("stable-error");
   errBox.style.display = "none";
   if(!code) return;
-  const { data: stable, error } = await sb.from("stables").select("id, name").eq("join_code", code).maybeSingle();
-  if(error || !stable){
-    errBox.textContent = "Codice non valido.";
+  const stable = await DB.findStableByCode(code);
+  if(!stable){
+    errBox.textContent = "Codice non valido." + (DEMO_MODE ? " (in demo prova EQUO-DEMO)" : "");
     errBox.style.display = "block";
     return;
   }
   if(currentHorseId || horses[0]){
     const horseId = currentHorseId || horses[0].id;
-    await sb.from("horses").update({ stable_id: stable.id }).eq("id", horseId);
+    await DB.linkHorseToStable(horseId, stable.id);
   }
   closeModal("modal-join-stable");
   document.getElementById("prenotazioni-locked").style.display = "none";
@@ -757,17 +1137,17 @@ async function loadExpensesSummary(){
   const horseIds = horses.map(h => h.id);
   if(horseIds.length === 0) return;
   const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
-  const { data } = await sb.from("expenses").select("amount").eq("owner_id", currentUser.id).gte("date", startOfMonth.toISOString().slice(0,10));
-  const total = (data || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const all = await DB.listExpenses();
+  const total = all.filter(e => new Date(e.date) >= startOfMonth).reduce((sum, e) => sum + Number(e.amount || 0), 0);
   document.getElementById("stat-expenses").textContent = "€ " + total.toFixed(0);
 }
 
 async function loadExpenses(){
   const box = document.getElementById("expenses-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
-  const { data, error } = await sb.from("expenses").select("*, horses(name)").eq("owner_id", currentUser.id).order("date", { ascending: false }).limit(50);
-  if(error || !data || data.length === 0){
-    box.innerHTML = '<div class="empty-state"><div class="emoji">💶</div>Nessuna spesa registrata.</div>';
+  const data = await DB.listExpenses();
+  if(!data || data.length === 0){
+    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-wallet"/></svg></div>Nessuna spesa registrata.</div>';
     document.getElementById("expenses-month-total").textContent = "€ 0";
     return;
   }
@@ -792,7 +1172,7 @@ async function createExpense(){
   const notes = document.getElementById("expense-notes").value.trim();
   if(!amount || !date) return;
   const horse_id = currentHorseId || (horses[0] ? horses[0].id : null);
-  const { error } = await sb.from("expenses").insert({ owner_id: currentUser.id, horse_id, category, amount, date, notes });
+  const { error } = await DB.insertExpense({ horse_id, category, amount, date, notes });
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("expense-amount").value = "";
   document.getElementById("expense-date").value = "";
@@ -815,6 +1195,14 @@ async function sendChatMessage(){
   box.insertAdjacentHTML("beforeend", `<div class="chat-bubble ai" id="${thinkingId}">…</div>`);
   box.scrollTop = box.scrollHeight;
 
+  if(DEMO_MODE){
+    setTimeout(() => {
+      document.getElementById(thinkingId).textContent =
+        "[Risposta demo] In app vera qui risponde l'assistente AI collegato a Claude — questa è solo l'interfaccia, non ancora collegata.";
+      box.scrollTop = box.scrollHeight;
+    }, 500);
+    return;
+  }
   try{
     const res = await fetch("/.netlify/functions/ai-proxy", {
       method: "POST",
