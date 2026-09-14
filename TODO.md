@@ -60,5 +60,10 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Gestione/controllo email raccolte dalla waitlist (to-do aperto)
 - [ ] Auto-renew dominio: verificare se attivarlo su Namecheap prima della scadenza
 
+## 5. Feature innovative (wow factor) — in ordine di priorità
+- [ ] **1. QR Code passaporto emergenza** — richiede ampliare la scheda cavallo: genera QR univoco per cavallo, pagina pubblica read-only (senza login) con allergie, vaccinazioni, gruppo sanguigno, contatti proprietario, scansionabile da un veterinario in emergenza
+- [ ] **2. Voice logging** — richiede creare nuova sezione "Diario Sanitario": nota vocale trascritta e strutturata via AI (Whisper/Claude), utile per loggare osservazioni a mani libere in scuderia
+- [ ] **3. Body Condition Score via foto** — carichi foto del cavallo, l'AI (Claude vision) stima il punteggio di condizione corporea (scala 1-9) e segnala sovrappeso/sottopeso
+
 ---
 **Prossimo step**: aggiungere `ANTHROPIC_API_KEY` su Netlify per rendere l'AI di equo-app pienamente funzionante.
