@@ -198,6 +198,14 @@ select.input{cursor:pointer}
   display:flex;align-items:center;gap:8px}
 .modal-title .icon{color:var(--accent);width:20px;height:20px}
 
+/* TOAST */
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));
+  transform:translate(-50%,12px);background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:12px 18px;border-radius:12px;font-size:13.5px;font-weight:600;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:90;opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;max-width:88%;text-align:center}
+.toast.active{opacity:1;transform:translate(-50%,0)}
+
 /* AI FAB + SHEET */
 .ai-fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));
   width:56px;height:56px;border-radius:50%;background:var(--accent);color:#14231b;
@@ -441,9 +449,12 @@ select.input{cursor:pointer}
   </div>
 
   <!-- AI FAB -->
-  <button class="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
+  <button class="ai-fab" onclick="showAiComingSoon()" aria-label="Assistente AI">
     <span class="icon"><svg><use href="#i-sparkles"/></svg></span>
   </button>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
 
   <!-- AI SHEET (mezza schermata) -->
   <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="closeOut(event,'ai-sheet-overlay')">
@@ -607,7 +618,19 @@ select.input{cursor:pointer}
     </div>
 
     <div style="height:8px"></div>
-    <button class="btn btn-outline" style="width:100%" onclick="logout()">Esci</button>
+    <button class="btn btn-outline" style="width:100%" onclick="openModal('modal-confirm-logout')">Esci</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirm-logout" onclick="closeOut(event,'modal-confirm-logout')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Conferma logout</div>
+    <p class="muted" style="font-size:14px;margin-bottom:20px">Sei sicuro di voler effettuare il logout dall'account?</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-confirm-logout')">Annulla</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-confirm-logout');logout()">Esci</button>
+    </div>
   </div>
 </div>
 
@@ -1001,6 +1024,18 @@ function closeModal(id){ document.getElementById(id).classList.remove("active");
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
 function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); }
+
+let toastTimer = null;
+function showToast(message){
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.classList.add("active");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("active"), 2600);
+}
+function showAiComingSoon(){
+  showToast("Equo AI sarà presto disponibile");
+}
 function closeAiSheet(){ document.getElementById("ai-sheet-overlay").classList.remove("active"); }
 
 /* ---------- HORSES ---------- */
