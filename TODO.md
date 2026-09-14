@@ -28,6 +28,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Test navigazione completa con un utente reale end-to-end (login vero, non demo)
 - [ ] Upload foto cavallo + documenti sanitari (Supabase Storage) — non ancora implementato
 - [ ] Pagina profilo utente / impostazioni scuderia
+- [ ] Playlist Spotify Equo: creare playlist pubblica (account gestione.equo@gmail.com), integrare via embed ufficiale Spotify (iframe) — salvataggio/condivisione gestiti nativamente da Spotify, no OAuth/backend necessario
 
 ## 3. Infrastruttura
 - [x] Account dedicati creati con gestione.equo@gmail.com (Supabase + Netlify, separati dagli altri progetti)
