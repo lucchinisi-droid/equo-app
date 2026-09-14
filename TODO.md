@@ -41,6 +41,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] `RESEND_API_KEY` da configurare (per email transazionali equo-app, se serve oltre alla landing)
 - [ ] Configurare Supabase Storage (bucket foto cavalli e documenti PDF)
 - [ ] Dominio custom (opzionale, per ora *.netlify.app)
+- [ ] Quando si acquista equohub.com: aggiornare dominio custom su Netlify (equo-land + equo-app), redirect URI OAuth Google, Authorized JavaScript origins, e URL di callback Supabase con il nuovo dominio
 - [ ] Stripe: skeleton pronto (check-plan, create-checkout, stripe-webhook) ma NON collegato alla UI — da attivare solo quando si decide il piano Pro
 
 ## 4. Altro fondamentale prima del lancio
