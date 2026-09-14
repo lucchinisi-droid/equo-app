@@ -47,7 +47,12 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 
 ## 4. Altro fondamentale prima del lancio
 - [ ] **Monetizzazione**: definire piano free vs pro (limite cavalli? assistente AI limitato? export PDF a pagamento?) — nessuna feature senza logica di business
-- [ ] Privacy Policy + Termini di Servizio (obbligatori per dati sanitari/email)
+- [ ] **Privacy & Cookie**: gestione completa su landing e app —
+  - [ ] Privacy Policy + Termini di Servizio (obbligatori per dati sanitari/email)
+  - [ ] Cookie banner (accetta/rifiuta/personalizza) su equo-land
+  - [ ] Cookie banner su equo-app (se si aggiungono analytics/tracking)
+  - [ ] Pagina/consenso trattamento dati sanitari cavallo (dato sensibile-adiacente)
+  - [ ] Diritto di cancellazione account e dati (GDPR) da impostazioni profilo
 - [ ] Analytics base (Plausible o simile)
 - [ ] Seed iniziale tabella `services`/mappa (cliniche 24h, maneggi) — almeno la tua zona
 - [ ] Onboarding primo utente
