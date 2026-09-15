@@ -196,6 +196,17 @@ tr:last-child td{border-bottom:none}
   border-radius:var(--radius);padding:12px 14px;font-family:ui-monospace,monospace;font-size:15px;font-weight:700;
   letter-spacing:.05em}
 .join-code-box button{margin-left:auto}
+
+/* ---------- CAVALLI ---------- */
+.cavallo-card{cursor:pointer;transition:box-shadow .15s ease}
+.cavallo-card:hover{box-shadow:var(--shadow-md)}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13.5px;
+  font-weight:600;background:none;border:none;cursor:pointer;padding:6px 0;margin-bottom:10px}
+.back-link:hover{color:var(--text)}
+.scad-tile{border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.scad-tile .t{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.scad-tile .t .lbl{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.scad-tile .meta{font-size:12px;color:var(--muted);line-height:1.5}
 </style>
 </head>
 <body>
@@ -395,7 +406,56 @@ tr:last-child td{border-bottom:none}
         </div>
 
         <!-- MODULI PLACEHOLDER (verranno sviluppati nei prossimi step) -->
-        <div class="module-page" id="module-cavalli" style="display:none"></div>
+        <div class="module-page" id="module-cavalli" style="display:none">
+          <!-- LISTA CAVALLI -->
+          <div id="cavalli-list-view">
+            <div class="page-header">
+              <div>
+                <h1>Cavalli &amp; Salute</h1>
+                <p>Anagrafica cavalli del centro e scadenzario sanitario.</p>
+              </div>
+              <button class="btn btn-primary" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+            </div>
+            <div class="grid grid-3" id="cavalli-grid"></div>
+            <div class="empty-state" id="cavalli-empty" style="display:none">
+              <i class="fa-solid fa-horse-head"></i><div>Nessun cavallo registrato. Aggiungi il primo.</div>
+            </div>
+          </div>
+
+          <!-- DETTAGLIO CAVALLO -->
+          <div id="cavalli-detail-view" style="display:none">
+            <button class="back-link" onclick="closeCavalloDetail()"><i class="fa-solid fa-arrow-left"></i> Torna ai cavalli</button>
+            <div class="page-header">
+              <div>
+                <h1 id="detail-cavallo-nome">—</h1>
+                <p id="detail-cavallo-sub">—</p>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline btn-sm" onclick="openCavalloForm(currentCavalloId)"><i class="fa-solid fa-pen"></i> Modifica</button>
+                <button class="btn btn-danger btn-sm" onclick="askDeleteCavallo()"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <h3 style="margin-top:0">Scadenzario sanitario</h3>
+              <div class="grid grid-2" id="scadenzario-grid"></div>
+            </div>
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <h3 style="margin:0">Storico eventi</h3>
+                <button class="btn btn-outline btn-sm" onclick="openEventoForm()"><i class="fa-solid fa-plus"></i> Registra evento</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Tipo</th><th>Data</th><th>Scadenza</th><th>Note</th><th></th></tr></thead>
+                  <tbody id="eventi-table-body"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="eventi-empty" style="display:none">
+                <i class="fa-solid fa-clipboard-list"></i><div>Nessun evento registrato ancora.</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="module-page" id="module-lezioni" style="display:none"></div>
         <div class="module-page" id="module-pacchetti" style="display:none"></div>
         <div class="module-page" id="module-comunicazioni" style="display:none"></div>
@@ -434,6 +494,73 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- MODAL: nuovo/modifica cavallo -->
+<div class="modal-overlay" id="modal-cavallo" onclick="closeOut(event,'modal-cavallo')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-cavallo-title">Nuovo cavallo</span><span class="x" onclick="closeModal('modal-cavallo')">✕</span></div>
+    <div class="field"><label>Nome</label><input class="input" id="cav-nome" placeholder="Es. Ares"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Razza</label><input class="input" id="cav-razza" placeholder="Es. Maremmano"></div>
+      <div class="field"><label>Mantello</label><input class="input" id="cav-mantello" placeholder="Es. Baio"></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data di nascita</label><input class="input" id="cav-nascita" type="date"></div>
+      <div class="field"><label>Microchip</label><input class="input" id="cav-microchip" placeholder="15 cifre"></div>
+    </div>
+    <div class="field"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario"></div>
+    <div class="field"><label>Note</label><input class="input" id="cav-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="cavallo-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveCavallo()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL: registra evento sanitario -->
+<div class="modal-overlay" id="modal-evento" onclick="closeOut(event,'modal-evento')">
+  <div class="modal">
+    <div class="modal-title">Registra evento sanitario <span class="x" onclick="closeModal('modal-evento')">✕</span></div>
+    <div class="field">
+      <label>Tipo</label>
+      <select class="input" id="ev-tipo">
+        <option value="vaccino">Vaccino</option>
+        <option value="coggins">Coggins test</option>
+        <option value="ferratura">Ferratura</option>
+        <option value="sverminazione">Sverminazione</option>
+      </select>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data evento</label><input class="input" id="ev-data" type="date"></div>
+      <div class="field"><label>Prossima scadenza</label><input class="input" id="ev-scadenza" type="date"></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="ev-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="evento-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveEvento()">Salva evento</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina cavallo -->
+<div class="modal-overlay" id="modal-delete-cavallo" onclick="closeOut(event,'modal-delete-cavallo')">
+  <div class="modal">
+    <div class="modal-title">Elimina cavallo <span class="x" onclick="closeModal('modal-delete-cavallo')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo cavallo e tutto il suo storico sanitario? L'azione non è reversibile.</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-cavallo')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteCavallo()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: elimina evento -->
+<div class="modal-overlay" id="modal-delete-evento" onclick="closeOut(event,'modal-delete-evento')">
+  <div class="modal">
+    <div class="modal-title">Elimina evento <span class="x" onclick="closeModal('modal-delete-evento')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo evento dallo storico sanitario?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-evento')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteEvento()">Elimina</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════════
    EQUO SCUDERIA — v1 (Modulo 1: Auth + Onboarding + Team)
@@ -453,11 +580,14 @@ const COMING_SOON_COPY = {
   ai: { icon:"fa-sparkles", titolo:"Assistente AI", testo:"Un assistente AI per il gestore del centro: risponde a domande gestionali, suggerisce ottimizzazioni su lezioni e cavalli, automatizza i promemoria." },
 };
 const ACTIVE_PLACEHOLDER_COPY = {
-  cavalli: { icon:"fa-horse-head", titolo:"Cavalli & Salute", testo:"Anagrafica cavalli del centro, cartelle cliniche, vaccinazioni e promemoria — in sviluppo nel prossimo step." },
   lezioni: { icon:"fa-calendar-days", titolo:"Lezioni & Prenotazioni", testo:"Calendario condiviso, slot, assegnazione istruttore e cavallo, rilevamento conflitti — in sviluppo nel prossimo step." },
   pacchetti: { icon:"fa-ticket", titolo:"Pacchetti & Abbonamenti", testo:"Carnet a scalare, abbonamenti, pacchetti pensione e cruscotto a semaforo per le scadenze — in sviluppo nel prossimo step." },
   comunicazioni: { icon:"fa-comments", titolo:"Comunicazioni", testo:"Messaggi a singoli, gruppi o ruoli, con priorità e notifiche in-app — in sviluppo nel prossimo step." },
 };
+
+const TIPO_LABELS = { vaccino:"Vaccino", coggins:"Coggins test", ferratura:"Ferratura", sverminazione:"Sverminazione" };
+const TIPO_ICONS = { vaccino:"fa-syringe", coggins:"fa-vial", ferratura:"fa-horseshoe", sverminazione:"fa-pills" };
+const TIPO_ORDER = ["vaccino","coggins","ferratura","sverminazione"];
 
 let DEMO_MODE = false;
 let currentUser = null;   // { id, email }
@@ -467,12 +597,36 @@ let teamList = [];
 let memberToRemove = null;
 let demoIdCounter = 1;
 
+let cavalliList = [];
+let eventiAll = [];
+let currentCavalloId = null;
+let editingCavalloId = null;
+let cavalloToDelete = null;
+let eventoToDelete = null;
+
+function isoDaysFromNow(n){
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
+
 let demoState = {
   centro: { id:"demo-centro", nome:"Centro Ippico Demo", indirizzo:"Via delle Scuderie 12, Colleferro (RM)", telefono:"+39 06 1234567", join_code:"EQUO-DEMO1", owner_id:"demo-user" },
   membri: [
     { id:"m1", user_id:"demo-user", ruolo:"admin", nome_visualizzato:"Tu (admin)" },
     { id:"m2", user_id:"u2", ruolo:"istruttore", nome_visualizzato:"Marco Bianchi" },
     { id:"m3", user_id:"u3", ruolo:"allievo", nome_visualizzato:"Giulia Verdi" },
+  ],
+  cavalli: [
+    { id:"c1", centro_id:"demo-centro", nome:"Ares", razza:"Maremmano", mantello:"Baio", data_nascita:"2015-04-10", microchip:"380271000123456", proprietario:"Giulia Verdi", note:"" },
+    { id:"c2", centro_id:"demo-centro", nome:"Luna", razza:"Quarter Horse", mantello:"Sauro", data_nascita:"2018-09-02", microchip:"380271000987654", proprietario:"Centro Ippico Demo", note:"Cavallo da scuola, carattere docile" },
+  ],
+  eventi: [
+    { id:"e1", centro_id:"demo-centro", cavallo_id:"c1", tipo:"vaccino", data_evento: isoDaysFromNow(-300), data_scadenza: isoDaysFromNow(65), note:"" },
+    { id:"e2", centro_id:"demo-centro", cavallo_id:"c1", tipo:"coggins", data_evento: isoDaysFromNow(-200), data_scadenza: isoDaysFromNow(-5), note:"" },
+    { id:"e3", centro_id:"demo-centro", cavallo_id:"c1", tipo:"ferratura", data_evento: isoDaysFromNow(-20), data_scadenza: isoDaysFromNow(20), note:"" },
+    { id:"e4", centro_id:"demo-centro", cavallo_id:"c2", tipo:"vaccino", data_evento: isoDaysFromNow(-100), data_scadenza: isoDaysFromNow(180), note:"" },
+    { id:"e5", centro_id:"demo-centro", cavallo_id:"c2", tipo:"sverminazione", data_evento: isoDaysFromNow(-80), data_scadenza: isoDaysFromNow(10), note:"" },
   ],
 };
 
@@ -722,6 +876,298 @@ function renderPlaceholderModules(){
   });
 }
 
+/* ---------- CAVALLI & SALUTE ---------- */
+async function refreshCavalliModule(){
+  await loadCavalli();
+  await loadEventiAll();
+  document.getElementById("cavalli-detail-view").style.display = "none";
+  document.getElementById("cavalli-list-view").style.display = "block";
+  currentCavalloId = null;
+  renderCavalliList();
+}
+
+async function loadCavalli(){
+  if(DEMO_MODE){ cavalliList = demoState.cavalli; return; }
+  const { data, error } = await sb.from("scuderia_cavalli")
+    .select("id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note")
+    .eq("centro_id", currentCentro.id)
+    .order("nome", { ascending: true });
+  if(!error) cavalliList = data || [];
+}
+
+async function loadEventiAll(){
+  if(DEMO_MODE){ eventiAll = demoState.eventi; return; }
+  const { data, error } = await sb.from("scuderia_eventi_sanitari")
+    .select("id, centro_id, cavallo_id, tipo, data_evento, data_scadenza, note")
+    .eq("centro_id", currentCentro.id)
+    .order("data_evento", { ascending: false });
+  if(!error) eventiAll = data || [];
+}
+
+function scadenzarioFor(cavalloId){
+  const eventiCavallo = eventiAll.filter(e => e.cavallo_id === cavalloId);
+  const result = {};
+  TIPO_ORDER.forEach(tipo => {
+    const eventi = eventiCavallo.filter(e => e.tipo === tipo)
+      .sort((a,b) => new Date(b.data_evento) - new Date(a.data_evento));
+    const ultimo = eventi[0] || null;
+    result[tipo] = { ultimo, status: statusFor(ultimo) };
+  });
+  return result;
+}
+
+function statusFor(evento){
+  if(!evento) return "gray";
+  if(!evento.data_scadenza) return "gray";
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const scad = new Date(evento.data_scadenza);
+  const giorni = Math.round((scad - oggi) / 86400000);
+  if(giorni < 0) return "red";
+  if(giorni <= 30) return "yellow";
+  return "green";
+}
+
+function worstStatus(cavalloId){
+  const scad = scadenzarioFor(cavalloId);
+  const order = { red:0, yellow:1, gray:2, green:3 };
+  let worst = "green";
+  TIPO_ORDER.forEach(tipo => { if(order[scad[tipo].status] < order[worst]) worst = scad[tipo].status; });
+  return worst;
+}
+
+const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", gray:"Da registrare" };
+
+function renderCavalliList(){
+  const grid = document.getElementById("cavalli-grid");
+  const empty = document.getElementById("cavalli-empty");
+  grid.innerHTML = "";
+  empty.style.display = cavalliList.length === 0 ? "block" : "none";
+
+  cavalliList.forEach(c => {
+    const worst = worstStatus(c.id);
+    const sub = [c.razza, c.mantello].filter(Boolean).join(" · ") || "Dati non specificati";
+    const div = document.createElement("div");
+    div.className = "card cavallo-card";
+    div.onclick = () => openCavalloDetail(c.id);
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <h3 style="margin:0 0 2px">${escapeHtml(c.nome)}</h3>
+          <div style="color:var(--muted);font-size:13px">${escapeHtml(sub)}</div>
+        </div>
+        <span class="badge-pill badge-${worst}">${STATUS_LABELS[worst]}</span>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function openCavalloDetail(id){
+  currentCavalloId = id;
+  document.getElementById("cavalli-list-view").style.display = "none";
+  document.getElementById("cavalli-detail-view").style.display = "block";
+  renderCavalloDetail();
+}
+
+function closeCavalloDetail(){
+  currentCavalloId = null;
+  document.getElementById("cavalli-detail-view").style.display = "none";
+  document.getElementById("cavalli-list-view").style.display = "block";
+  renderCavalliList();
+}
+
+function renderCavalloDetail(){
+  const c = cavalliList.find(x => x.id === currentCavalloId);
+  if(!c){ closeCavalloDetail(); return; }
+
+  document.getElementById("detail-cavallo-nome").textContent = c.nome;
+  const sub = [c.razza, c.mantello, c.proprietario ? "proprietario: " + c.proprietario : null].filter(Boolean).join(" · ");
+  document.getElementById("detail-cavallo-sub").textContent = sub || "Nessun dettaglio aggiuntivo";
+
+  const scad = scadenzarioFor(c.id);
+  const grid = document.getElementById("scadenzario-grid");
+  grid.innerHTML = TIPO_ORDER.map(tipo => {
+    const s = scad[tipo];
+    const meta = s.ultimo
+      ? `Ultimo: ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · Scadenza: " + formatDate(s.ultimo.data_scadenza) : ""}`
+      : "Nessun evento registrato";
+    return `
+      <div class="scad-tile">
+        <div class="t">
+          <span class="lbl"><i class="fa-solid ${TIPO_ICONS[tipo]}"></i> ${TIPO_LABELS[tipo]}</span>
+          <span class="badge-pill badge-${s.status}">${STATUS_LABELS[s.status]}</span>
+        </div>
+        <div class="meta">${meta}</div>
+      </div>`;
+  }).join("");
+
+  renderEventiTable(c.id);
+}
+
+function renderEventiTable(cavalloId){
+  const eventi = eventiAll.filter(e => e.cavallo_id === cavalloId)
+    .sort((a,b) => new Date(b.data_evento) - new Date(a.data_evento));
+  const body = document.getElementById("eventi-table-body");
+  const empty = document.getElementById("eventi-empty");
+  body.innerHTML = "";
+  empty.style.display = eventi.length === 0 ? "block" : "none";
+
+  eventi.forEach(e => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><i class="fa-solid ${TIPO_ICONS[e.tipo]}" style="color:var(--muted);margin-right:6px"></i>${TIPO_LABELS[e.tipo]}</td>
+      <td>${formatDate(e.data_evento)}</td>
+      <td>${e.data_scadenza ? formatDate(e.data_scadenza) : "—"}</td>
+      <td style="color:var(--muted)">${escapeHtml(e.note || "—")}</td>
+      <td style="text-align:right">
+        ${currentMembro?.ruolo === "admin" ? `<button class="btn btn-ghost btn-sm" onclick="askDeleteEvento('${e.id}')"><i class="fa-solid fa-trash"></i></button>` : ""}
+      </td>`;
+    body.appendChild(tr);
+  });
+}
+
+function openCavalloForm(id){
+  editingCavalloId = id || null;
+  document.getElementById("cavallo-error").style.display = "none";
+  if(editingCavalloId){
+    const c = cavalliList.find(x => x.id === editingCavalloId);
+    document.getElementById("modal-cavallo-title").textContent = "Modifica cavallo";
+    document.getElementById("cav-nome").value = c?.nome || "";
+    document.getElementById("cav-razza").value = c?.razza || "";
+    document.getElementById("cav-mantello").value = c?.mantello || "";
+    document.getElementById("cav-nascita").value = c?.data_nascita || "";
+    document.getElementById("cav-microchip").value = c?.microchip || "";
+    document.getElementById("cav-proprietario").value = c?.proprietario || "";
+    document.getElementById("cav-note").value = c?.note || "";
+  } else {
+    document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
+    ["cav-nome","cav-razza","cav-mantello","cav-nascita","cav-microchip","cav-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
+  }
+  openModal("modal-cavallo");
+}
+
+async function saveCavallo(){
+  const nome = document.getElementById("cav-nome").value.trim();
+  const errBox = document.getElementById("cavallo-error");
+  errBox.style.display = "none";
+  if(!nome){ errBox.textContent = "Inserisci il nome del cavallo."; errBox.style.display = "block"; return; }
+
+  const payload = {
+    nome,
+    razza: document.getElementById("cav-razza").value.trim() || null,
+    mantello: document.getElementById("cav-mantello").value.trim() || null,
+    data_nascita: document.getElementById("cav-nascita").value || null,
+    microchip: document.getElementById("cav-microchip").value.trim() || null,
+    proprietario: document.getElementById("cav-proprietario").value.trim() || null,
+    note: document.getElementById("cav-note").value.trim() || null,
+  };
+
+  try{
+    if(DEMO_MODE){
+      if(editingCavalloId){
+        const idx = demoState.cavalli.findIndex(c => c.id === editingCavalloId);
+        if(idx >= 0) demoState.cavalli[idx] = { ...demoState.cavalli[idx], ...payload };
+      } else {
+        demoState.cavalli.push({ id:"c" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, ...payload });
+      }
+    } else if(editingCavalloId){
+      const { error } = await sb.from("scuderia_cavalli").update(payload).eq("id", editingCavalloId);
+      if(error) throw error;
+    } else {
+      const { error } = await sb.from("scuderia_cavalli").insert({ centro_id: currentCentro.id, ...payload });
+      if(error) throw error;
+    }
+    await loadCavalli();
+    if(currentCavalloId){ renderCavalloDetail(); } else { renderCavalliList(); }
+    closeModal("modal-cavallo");
+    showToast(editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+function askDeleteCavallo(){
+  cavalloToDelete = currentCavalloId;
+  openModal("modal-delete-cavallo");
+}
+
+async function confirmDeleteCavallo(){
+  if(!cavalloToDelete) return;
+  if(DEMO_MODE){
+    demoState.cavalli = demoState.cavalli.filter(c => c.id !== cavalloToDelete);
+    demoState.eventi = demoState.eventi.filter(e => e.cavallo_id !== cavalloToDelete);
+  } else {
+    const { error } = await sb.from("scuderia_cavalli").delete().eq("id", cavalloToDelete);
+    if(error){ showToast("Errore nell'eliminazione."); closeModal("modal-delete-cavallo"); return; }
+  }
+  closeModal("modal-delete-cavallo");
+  closeCavalloDetail();
+  await loadCavalli();
+  await loadEventiAll();
+  renderCavalliList();
+  showToast("Cavallo eliminato.");
+}
+
+function openEventoForm(){
+  document.getElementById("evento-error").style.display = "none";
+  document.getElementById("ev-tipo").value = "vaccino";
+  document.getElementById("ev-data").value = new Date().toISOString().slice(0,10);
+  document.getElementById("ev-scadenza").value = "";
+  document.getElementById("ev-note").value = "";
+  openModal("modal-evento");
+}
+
+async function saveEvento(){
+  const tipo = document.getElementById("ev-tipo").value;
+  const data_evento = document.getElementById("ev-data").value;
+  const data_scadenza = document.getElementById("ev-scadenza").value || null;
+  const note = document.getElementById("ev-note").value.trim() || null;
+  const errBox = document.getElementById("evento-error");
+  errBox.style.display = "none";
+  if(!data_evento){ errBox.textContent = "Inserisci la data dell'evento."; errBox.style.display = "block"; return; }
+
+  try{
+    if(DEMO_MODE){
+      demoState.eventi.push({ id:"e" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
+    } else {
+      const { error } = await sb.from("scuderia_eventi_sanitari").insert({ centro_id: currentCentro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
+      if(error) throw error;
+    }
+    await loadEventiAll();
+    renderCavalloDetail();
+    closeModal("modal-evento");
+    showToast("Evento registrato.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+function askDeleteEvento(id){
+  eventoToDelete = id;
+  openModal("modal-delete-evento");
+}
+
+async function confirmDeleteEvento(){
+  if(!eventoToDelete) return;
+  if(DEMO_MODE){
+    demoState.eventi = demoState.eventi.filter(e => e.id !== eventoToDelete);
+  } else {
+    const { error } = await sb.from("scuderia_eventi_sanitari").delete().eq("id", eventoToDelete);
+    if(error){ showToast("Errore nell'eliminazione."); closeModal("modal-delete-evento"); return; }
+  }
+  await loadEventiAll();
+  renderCavalloDetail();
+  closeModal("modal-delete-evento");
+  showToast("Evento eliminato.");
+}
+
+function formatDate(iso){
+  if(!iso) return "—";
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
 function comingSoonHtml(icon, titolo, testo, badgeText){
   return `
     <div class="coming-soon">
@@ -743,6 +1189,7 @@ function showModule(key){
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.module === key));
   document.getElementById("topbar-title").textContent = MODULE_TITLES[key] || "";
   closeSidebar();
+  if(key === "cavalli") refreshCavalliModule();
 }
 
 function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebar-overlay").classList.add("active"); }
