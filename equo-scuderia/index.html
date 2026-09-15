@@ -7,6 +7,15 @@
 <meta name="description" content="Gestionale per centri ippici, maneggi e scuderie: anagrafica cavalli, lezioni, abbonamenti e comunicazioni in un unico posto.">
 <meta name="theme-color" content="#3f5d3a">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icona-equo.png">
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem("equo-scuderia-theme") || "light";
+      document.documentElement.setAttribute("data-theme", t);
+    }catch(e){}
+  })();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
@@ -21,13 +30,25 @@
   --shadow-sm:0 1px 2px rgba(25,22,11,.06);
   --shadow-md:0 4px 12px rgba(25,22,11,.08);
   --shadow-lg:0 10px 30px rgba(25,22,11,.12);
-  --sidebar-w:248px;
+  --sidebar-w:248px; --sidebar-w-collapsed:76px;
+}
+:root[data-theme="dark"]{
+  --bg:#17150f; --surface:#201e17; --text:#f2efe6; --muted:#a29b88;
+  --muted-bg:#28251c; --border:#3a362a;
+  --primary:#6a9a60; --primary-hover:#7fae74; --primary-fg:#12150f;
+  --secondary:#332c1c; --secondary-fg:#f4d9bb;
+  --accent:#4a3f2a; --accent-fg:#f4d9bb;
+  --danger:#e2685f; --danger-bg:#3a221e;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.35);
+  --shadow-md:0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg:0 10px 30px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
   font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+  transition:background .15s ease,color .15s ease;
 }
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 a{color:inherit}
@@ -40,35 +61,53 @@ a{color:inherit}
 .sidebar{
   width:var(--sidebar-w); flex-shrink:0; background:var(--surface);
   border-right:1px solid var(--border); display:flex; flex-direction:column;
-  position:fixed; top:0; bottom:0; left:0; z-index:40; transition:transform .2s ease;
+  position:fixed; top:0; bottom:0; left:0; z-index:40; transition:transform .2s ease,width .18s ease;
 }
-.sidebar-brand{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid var(--border)}
-.sidebar-brand .logo-dot{width:34px;height:34px;border-radius:var(--radius);background:var(--primary);
-  display:flex;align-items:center;justify-content:center;color:var(--primary-fg);font-weight:700;flex-shrink:0}
-.sidebar-brand .name{font-weight:700;font-size:15px;line-height:1.2}
-.sidebar-brand .sub{font-size:11.5px;color:var(--muted)}
-.sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px}
+.sidebar.collapsed{width:var(--sidebar-w-collapsed)}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:16px 14px;border-bottom:1px solid var(--border);position:relative}
+.brand-logo{display:block;background:#fff;border-radius:8px;padding:4px 6px;flex-shrink:0}
+.brand-logo-full{height:26px;width:auto}
+.brand-logo-icon{display:none;height:34px;width:34px;object-fit:contain;padding:5px}
+.sidebar.collapsed .brand-logo-full{display:none}
+.sidebar.collapsed .brand-logo-icon{display:block}
+.sidebar.collapsed .sidebar-brand{justify-content:center;padding:16px 8px}
+.brand-text{overflow:hidden}
+.sidebar.collapsed .brand-text{display:none}
+.sidebar-brand .sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-toggle{position:absolute;top:50%;right:-13px;transform:translateY(-50%);width:26px;height:26px;
+  border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;box-shadow:var(--shadow-sm)}
+.sidebar-toggle:hover{color:var(--text)}
+@media (max-width:900px){.sidebar-toggle{display:none}}
+.sidebar-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 10px}
 .nav-item{
   display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius);
   color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; cursor:pointer;
-  margin-bottom:2px; border:none; background:none; width:100%; text-align:left;
+  margin-bottom:2px; border:none; background:none; width:100%; text-align:left; white-space:nowrap;
 }
 .nav-item i{width:18px;text-align:center;font-size:15px;flex-shrink:0}
 .nav-item:hover{background:var(--muted-bg);color:var(--text)}
 .nav-item.active{background:var(--secondary);color:var(--primary-hover);font-weight:600}
 .nav-item .badge{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.03em;
   background:var(--accent);color:var(--accent-fg);padding:2px 6px;border-radius:var(--radius-full)}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px 0;gap:0}
+.sidebar.collapsed .nav-item .nav-label,.sidebar.collapsed .nav-item .badge{display:none}
 .nav-divider{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);
-  text-transform:uppercase;padding:14px 12px 6px}
+  text-transform:uppercase;padding:14px 12px 6px;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .nav-divider{text-align:center;padding:14px 4px 6px;font-size:0}
+.sidebar.collapsed .nav-divider::after{content:"";display:block;height:1px;background:var(--border)}
 .sidebar-footer{padding:14px;border-top:1px solid var(--border)}
 .sidebar-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius);cursor:pointer}
 .sidebar-user:hover{background:var(--muted-bg)}
+.sidebar.collapsed .sidebar-user{justify-content:center}
+.sidebar.collapsed .sidebar-user .u-text{display:none}
 .avatar{width:32px;height:32px;border-radius:var(--radius-full);background:var(--secondary);
   color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
 .sidebar-user .u-name{font-size:13px;font-weight:600;line-height:1.2}
 .sidebar-user .u-role{font-size:11px;color:var(--muted)}
 
-.main{flex:1;margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+.main{flex:1;margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .18s ease}
+.app-shell.collapsed .main{margin-left:var(--sidebar-w-collapsed)}
 .topbar{
   display:none; align-items:center; justify-content:space-between; padding:14px 18px;
   background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:30;
@@ -80,9 +119,9 @@ a{color:inherit}
 .sidebar-overlay.active{display:block}
 
 @media (max-width:900px){
-  .sidebar{transform:translateX(-100%)}
+  .sidebar{transform:translateX(-100%);width:var(--sidebar-w)!important}
   .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
+  .main,.app-shell.collapsed .main{margin-left:0}
   .topbar{display:flex}
   .content{padding:18px}
 }
@@ -150,8 +189,7 @@ tr:last-child td{border-bottom:none}
 .auth-card{width:100%;max-width:400px;background:var(--surface);border-radius:var(--radius-lg);
   border:1px solid var(--border);box-shadow:var(--shadow-md);padding:32px 28px}
 .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.auth-logo .logo-dot{width:38px;height:38px;border-radius:var(--radius);background:var(--primary);
-  color:var(--primary-fg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.auth-logo img{height:32px;width:auto;background:#fff;border-radius:8px;padding:4px 6px}
 .auth-logo .t{font-weight:700;font-size:18px}
 .auth-tag{color:var(--muted);font-size:13.5px;margin:0 0 22px}
 .auth-tabs{display:flex;background:var(--muted-bg);border-radius:var(--radius-full);padding:4px;margin-bottom:20px}
@@ -218,6 +256,23 @@ textarea.input{resize:vertical}
 .msg-item .who{font-weight:600;font-size:13.5px}
 .msg-item .when{font-size:11.5px;color:var(--muted)}
 .msg-item .body{font-size:13.5px;color:var(--text);white-space:pre-wrap}
+
+/* ---------- HOME ---------- */
+.home-hello{font-size:13.5px;color:var(--muted);margin:0 0 2px}
+.quick-card{display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:box-shadow .15s ease}
+.quick-card:hover{box-shadow:var(--shadow-md)}
+.quick-card .ic{width:42px;height:42px;border-radius:var(--radius);background:var(--secondary);
+  color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.quick-card.is-soon .ic{background:var(--accent);color:var(--accent-fg)}
+.quick-card h4{margin:0 0 3px;font-size:14.5px}
+.quick-card p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4}
+.quick-card .badge-pill{margin-top:8px}
+
+/* ---------- MENU UTENTE / TEMA ---------- */
+.theme-toggle{display:flex;background:var(--muted-bg);border-radius:var(--radius-full);padding:4px;margin-top:6px}
+.theme-opt{flex:1;text-align:center;padding:9px;border-radius:var(--radius-full);cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--muted)}
+.theme-opt.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
 </style>
 </head>
 <body>
@@ -229,7 +284,7 @@ textarea.input{resize:vertical}
 <div class="screen active" id="screen-auth">
   <div class="auth-wrap">
     <div class="auth-card">
-      <div class="auth-logo"><div class="logo-dot">ES</div><div class="t">Equo Scuderia</div></div>
+      <div class="auth-logo"><img src="assets/logo-equo.png" alt="Equo"></div>
       <p class="auth-tag">Il gestionale per centri ippici, maneggi e scuderie.</p>
       <div class="auth-tabs">
         <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">Accedi</div>
@@ -262,7 +317,8 @@ textarea.input{resize:vertical}
 <div class="screen" id="screen-onboarding">
   <div class="onboard-wrap">
     <div class="onboard-card">
-      <div class="auth-logo"><div class="logo-dot">ES</div><div class="t">Benvenuto su Equo Scuderia</div></div>
+      <div class="auth-logo"><img src="assets/logo-equo.png" alt="Equo"></div>
+      <div class="t" style="font-weight:700;font-size:18px;margin:8px 0 0">Benvenuto su Equo Scuderia</div>
       <p class="auth-tag" style="margin-bottom:24px">Per iniziare, dicci come vuoi usare il gestionale.</p>
 
       <div class="onboard-choice" onclick="showOnboardCreate()">
@@ -319,51 +375,58 @@ textarea.input{resize:vertical}
 <!-- ═══════════ APP SHELL (admin/staff) ═══════════ -->
 <div class="screen" id="screen-app">
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-  <div class="app-shell">
+  <div class="app-shell" id="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="logo-dot">ES</div>
-        <div>
-          <div class="name">Equo Scuderia</div>
+        <img src="assets/logo-equo.png" alt="Equo" class="brand-logo brand-logo-full">
+        <img src="assets/icona-equo.png" alt="Equo" class="brand-logo brand-logo-icon">
+        <div class="brand-text">
+          <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase">Scuderia</div>
           <div class="sub" id="sidebar-centro-name">—</div>
         </div>
+        <button class="sidebar-toggle" onclick="toggleSidebarCollapse()" title="Riduci/espandi menu">
+          <i class="fa-solid fa-chevron-left" id="sidebar-toggle-icon"></i>
+        </button>
       </div>
       <nav class="sidebar-nav">
         <div class="nav-divider">Gestione</div>
-        <button class="nav-item active" data-module="centro" onclick="showModule('centro')">
-          <i class="fa-solid fa-house-chimney"></i> Il tuo Centro
+        <button class="nav-item active" data-module="home" onclick="showModule('home')">
+          <i class="fa-solid fa-gauge-high"></i> <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-module="centro" onclick="showModule('centro')">
+          <i class="fa-solid fa-house-chimney"></i> <span class="nav-label">Il tuo Centro</span>
         </button>
         <button class="nav-item" data-module="cavalli" onclick="showModule('cavalli')">
-          <i class="fa-solid fa-horse-head"></i> Cavalli &amp; Salute
+          <i class="fa-solid fa-horse-head"></i> <span class="nav-label">Cavalli &amp; Salute</span>
         </button>
         <button class="nav-item" data-module="lezioni" onclick="showModule('lezioni')">
-          <i class="fa-solid fa-calendar-days"></i> Lezioni &amp; Prenotazioni
+          <i class="fa-solid fa-calendar-days"></i> <span class="nav-label">Lezioni &amp; Prenotazioni</span>
         </button>
         <button class="nav-item" data-module="pacchetti" onclick="showModule('pacchetti')">
-          <i class="fa-solid fa-ticket"></i> Pacchetti &amp; Abbonamenti
+          <i class="fa-solid fa-ticket"></i> <span class="nav-label">Pacchetti &amp; Abbonamenti</span>
         </button>
         <button class="nav-item" data-module="comunicazioni" onclick="showModule('comunicazioni')">
-          <i class="fa-solid fa-comments"></i> Comunicazioni
+          <i class="fa-solid fa-comments"></i> <span class="nav-label">Comunicazioni</span>
         </button>
 
         <div class="nav-divider">In arrivo</div>
         <button class="nav-item" data-module="mascalcia" onclick="showModule('mascalcia')">
-          <i class="fa-solid fa-horseshoe"></i> Mascalcia <span class="badge">SOON</span>
+          <i class="fa-solid fa-horseshoe"></i> <span class="nav-label">Mascalcia</span> <span class="badge">SOON</span>
         </button>
         <button class="nav-item" data-module="selleria" onclick="showModule('selleria')">
-          <i class="fa-solid fa-bag-shopping"></i> Selleria &amp; Attrezzatura <span class="badge">SOON</span>
+          <i class="fa-solid fa-bag-shopping"></i> <span class="nav-label">Selleria &amp; Attrezzatura</span> <span class="badge">SOON</span>
         </button>
         <button class="nav-item" data-module="fatturazione" onclick="showModule('fatturazione')">
-          <i class="fa-solid fa-file-invoice"></i> Fatturazione SDI <span class="badge">SOON</span>
+          <i class="fa-solid fa-file-invoice"></i> <span class="nav-label">Fatturazione SDI</span> <span class="badge">SOON</span>
         </button>
         <button class="nav-item" data-module="ai" onclick="showModule('ai')">
-          <i class="fa-solid fa-sparkles"></i> Assistente AI <span class="badge">SOON</span>
+          <i class="fa-solid fa-sparkles"></i> <span class="nav-label">Assistente AI</span> <span class="badge">SOON</span>
         </button>
       </nav>
       <div class="sidebar-footer">
-        <div class="sidebar-user" onclick="logout()">
+        <div class="sidebar-user" onclick="openUserMenu()">
           <div class="avatar" id="user-avatar">U</div>
-          <div>
+          <div class="u-text">
             <div class="u-name" id="user-name">Utente</div>
             <div class="u-role" id="user-role">—</div>
           </div>
@@ -374,13 +437,27 @@ textarea.input{resize:vertical}
     <div class="main">
       <div class="topbar">
         <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
-        <div class="topbar-title" id="topbar-title">Il tuo Centro</div>
-        <div class="avatar" id="user-avatar-mobile" onclick="logout()">U</div>
+        <div class="topbar-title" id="topbar-title">Home</div>
+        <div class="avatar" id="user-avatar-mobile" onclick="openUserMenu()">U</div>
       </div>
       <div class="content">
 
+        <!-- MODULO: HOME -->
+        <div class="module-page" id="module-home">
+          <div class="page-header">
+            <div>
+              <p class="home-hello">Bentornato</p>
+              <h1 id="home-centro-name">Il tuo centro</h1>
+              <p>Panoramica rapida di tutto il gestionale.</p>
+            </div>
+          </div>
+          <div class="grid grid-3" id="home-stats" style="margin-bottom:26px"></div>
+          <h3 style="margin:0 0 10px">Accesso rapido</h3>
+          <div class="grid grid-3" id="home-quick-grid"></div>
+        </div>
+
         <!-- MODULO: IL TUO CENTRO -->
-        <div class="module-page" id="module-centro">
+        <div class="module-page" id="module-centro" style="display:none">
           <div class="page-header">
             <div>
               <h1 id="centro-page-title">Il tuo Centro</h1>
@@ -548,7 +625,7 @@ textarea.input{resize:vertical}
 <div class="screen" id="screen-allievo">
   <div class="onboard-wrap">
     <div class="onboard-card" style="max-width:420px;text-align:center">
-      <div class="auth-logo" style="justify-content:center"><div class="logo-dot">ES</div></div>
+      <div class="auth-logo" style="justify-content:center"><img src="assets/logo-equo.png" alt="Equo"></div>
       <h2 style="margin:14px 0 6px" id="allievo-centro-name">Il tuo centro</h2>
       <p class="auth-tag" style="margin-bottom:24px">Benvenuto! Il portale allievo con lezioni e prenotazioni arriva a breve.</p>
       <div class="badge-pill badge-yellow" style="margin-bottom:20px"><i class="fa-solid fa-clock"></i> PRESTO DISPONIBILE</div>
@@ -702,6 +779,23 @@ textarea.input{resize:vertical}
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-pacchetto')">Annulla</button>
       <button class="btn btn-danger" style="flex:1" onclick="confirmDeletePacchetto()">Elimina</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: menu utente / tema -->
+<div class="modal-overlay" id="modal-user-menu" onclick="closeOut(event,'modal-user-menu')">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-title">Il tuo profilo <span class="x" onclick="closeModal('modal-user-menu')">✕</span></div>
+    <div class="field">
+      <label>Aspetto</label>
+      <div class="theme-toggle">
+        <div class="theme-opt" id="theme-opt-light" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> Giorno</div>
+        <div class="theme-opt" id="theme-opt-dark" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> Notte</div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeModal('modal-user-menu');logout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
+    </button>
   </div>
 </div>
 
@@ -1050,6 +1144,7 @@ function enterAppShell(){
   document.getElementById("centro-view-indirizzo").textContent = currentCentro?.indirizzo || "Non impostato";
   document.getElementById("centro-view-telefono").textContent = currentCentro?.telefono || "Non impostato";
   document.getElementById("centro-view-code").textContent = currentCentro?.join_code || "—";
+  document.getElementById("home-centro-name").textContent = currentCentro?.nome || "Il tuo centro";
 
   const label = RUOLO_LABELS[currentMembro?.ruolo] || currentMembro?.ruolo || "";
   const displayName = currentMembro?.nome_visualizzato || currentUser?.email || "Utente";
@@ -1061,8 +1156,48 @@ function enterAppShell(){
 
   renderTeam();
   renderPlaceholderModules();
-  showModule("centro");
+  applySavedSidebarState();
+  applySavedTheme();
+  showModule("home");
   showScreen("screen-app");
+}
+
+/* ---------- TEMA GIORNO/NOTTE ---------- */
+function applySavedTheme(){
+  let t = "light";
+  try{ t = localStorage.getItem("equo-scuderia-theme") || "light"; }catch(e){}
+  setTheme(t, true);
+}
+function setTheme(mode, silent){
+  document.documentElement.setAttribute("data-theme", mode);
+  try{ localStorage.setItem("equo-scuderia-theme", mode); }catch(e){}
+  document.getElementById("theme-opt-light")?.classList.toggle("active", mode === "light");
+  document.getElementById("theme-opt-dark")?.classList.toggle("active", mode === "dark");
+  if(!silent) showToast(mode === "dark" ? "Tema notte attivo." : "Tema giorno attivo.");
+}
+function openUserMenu(){
+  const t = document.documentElement.getAttribute("data-theme") || "light";
+  document.getElementById("theme-opt-light").classList.toggle("active", t === "light");
+  document.getElementById("theme-opt-dark").classList.toggle("active", t === "dark");
+  openModal("modal-user-menu");
+}
+
+/* ---------- SIDEBAR RIDUCIBILE ---------- */
+function applySavedSidebarState(){
+  let collapsed = false;
+  try{ collapsed = localStorage.getItem("equo-scuderia-sidebar-collapsed") === "1"; }catch(e){}
+  setSidebarCollapsed(collapsed);
+}
+function toggleSidebarCollapse(){
+  const isCollapsed = document.getElementById("sidebar").classList.contains("collapsed");
+  setSidebarCollapsed(!isCollapsed);
+}
+function setSidebarCollapsed(collapsed){
+  document.getElementById("sidebar").classList.toggle("collapsed", collapsed);
+  document.getElementById("app-shell").classList.toggle("collapsed", collapsed);
+  const icon = document.getElementById("sidebar-toggle-icon");
+  if(icon) icon.className = collapsed ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left";
+  try{ localStorage.setItem("equo-scuderia-sidebar-collapsed", collapsed ? "1" : "0"); }catch(e){}
 }
 
 function renderPlaceholderModules(){
@@ -1772,6 +1907,64 @@ function formatDateTime(iso){
   return d.toLocaleDateString("it-IT") + " " + d.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
 }
 
+/* ---------- HOME (cruscotto) ---------- */
+const QUICK_ACCESS_ITEMS = [
+  { key:"centro", icon:"fa-house-chimney", titolo:"Il tuo Centro", testo:"Anagrafica centro, team e codice invito." },
+  { key:"cavalli", icon:"fa-horse-head", titolo:"Cavalli & Salute", testo:"Anagrafica cavalli e scadenzario sanitario." },
+  { key:"lezioni", icon:"fa-calendar-days", titolo:"Lezioni & Prenotazioni", testo:"Calendario delle lezioni del centro." },
+  { key:"pacchetti", icon:"fa-ticket", titolo:"Pacchetti & Abbonamenti", testo:"Carnet, abbonamenti e cruscotto scadenze." },
+  { key:"comunicazioni", icon:"fa-comments", titolo:"Comunicazioni", testo:"Messaggi al team e agli allievi." },
+  { key:"mascalcia", icon:"fa-horseshoe", titolo:"Mascalcia", testo:"Ferrature e sferrature.", soon:true },
+  { key:"selleria", icon:"fa-bag-shopping", titolo:"Selleria & Attrezzatura", testo:"Inventario selle e finimenti.", soon:true },
+  { key:"fatturazione", icon:"fa-file-invoice", titolo:"Fatturazione SDI", testo:"Fatture elettroniche conformi SDI.", soon:true },
+  { key:"ai", icon:"fa-sparkles", titolo:"Assistente AI", testo:"Assistente AI per il gestore.", soon:true },
+];
+
+async function refreshHomeModule(){
+  await Promise.all([
+    cavalliList.length === 0 ? loadCavalli() : Promise.resolve(),
+    loadEventiAll(), loadLezioni(), loadPacchetti(), loadMessaggi(),
+  ]);
+  renderHomeStats();
+  renderHomeQuickAccess();
+}
+
+function renderHomeStats(){
+  const oggi = new Date().toISOString().slice(0,10);
+  let scadRosse = 0, scadGialle = 0;
+  cavalliList.forEach(c => {
+    const s = worstStatus(c.id);
+    if(s === "red") scadRosse++; else if(s === "yellow") scadGialle++;
+  });
+  const in7gg = new Date(); in7gg.setDate(in7gg.getDate() + 7);
+  const in7ggIso = in7gg.toISOString().slice(0,10);
+  const lezioniProssime = lezioniList.filter(l => l.data >= oggi && l.data <= in7ggIso && l.stato !== "annullata").length;
+  const pacchettiCritici = pacchettiList.filter(p => ["red","yellow"].includes(statusPacchetto(p))).length;
+
+  const tiles = [
+    { label:"Scadenze sanitarie urgenti", value: scadRosse + scadGialle, icon:"fa-heart-pulse", tone: scadRosse > 0 ? "red" : scadGialle > 0 ? "yellow" : "green" },
+    { label:"Lezioni nei prossimi 7 giorni", value: lezioniProssime, icon:"fa-calendar-days", tone:"green" },
+    { label:"Pacchetti da rinnovare", value: pacchettiCritici, icon:"fa-ticket", tone: pacchettiCritici > 0 ? "yellow" : "green" },
+  ];
+  document.getElementById("home-stats").innerHTML = tiles.map(t => `
+    <div class="stat-tile">
+      <div class="label"><i class="fa-solid ${t.icon}" style="margin-right:6px"></i>${t.label}</div>
+      <div class="value" style="color:${t.tone === 'red' ? 'var(--danger)' : t.tone === 'yellow' ? '#8a6a12' : 'var(--text)'}">${t.value}</div>
+    </div>`).join("");
+}
+
+function renderHomeQuickAccess(){
+  document.getElementById("home-quick-grid").innerHTML = QUICK_ACCESS_ITEMS.map(item => `
+    <div class="card quick-card ${item.soon ? "is-soon" : ""}" onclick="showModule('${item.key}')">
+      <div class="ic"><i class="fa-solid ${item.icon}"></i></div>
+      <div>
+        <h4>${escapeHtml(item.titolo)}</h4>
+        <p>${escapeHtml(item.testo)}</p>
+        ${item.soon ? `<span class="badge-pill badge-yellow">Presto</span>` : ""}
+      </div>
+    </div>`).join("");
+}
+
 function comingSoonHtml(icon, titolo, testo, badgeText){
   return `
     <div class="coming-soon">
@@ -1783,7 +1976,7 @@ function comingSoonHtml(icon, titolo, testo, badgeText){
 }
 
 const MODULE_TITLES = {
-  centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
+  home:"Home", centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
   pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Comunicazioni",
   mascalcia:"Mascalcia", selleria:"Selleria & Attrezzatura", fatturazione:"Fatturazione SDI", ai:"Assistente AI",
 };
@@ -1793,6 +1986,7 @@ function showModule(key){
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.module === key));
   document.getElementById("topbar-title").textContent = MODULE_TITLES[key] || "";
   closeSidebar();
+  if(key === "home") refreshHomeModule();
   if(key === "cavalli") refreshCavalliModule();
   if(key === "lezioni") refreshLezioniModule();
   if(key === "pacchetti") refreshPacchettiModule();
