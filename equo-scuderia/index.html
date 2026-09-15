@@ -207,6 +207,17 @@ tr:last-child td{border-bottom:none}
 .scad-tile .t{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .scad-tile .t .lbl{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
 .scad-tile .meta{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ---------- LEZIONI / PACCHETTI / COMUNICAZIONI ---------- */
+.lez-filter-btn{background:var(--muted-bg);color:var(--muted);border:none}
+.lez-filter-btn.active{background:var(--secondary);color:var(--primary-hover)}
+textarea.input{resize:vertical}
+.msg-item{border-bottom:1px solid var(--border);padding:14px 0}
+.msg-item:last-child{border-bottom:none}
+.msg-item .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:10px;flex-wrap:wrap}
+.msg-item .who{font-weight:600;font-size:13.5px}
+.msg-item .when{font-size:11.5px;color:var(--muted)}
+.msg-item .body{font-size:13.5px;color:var(--text);white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -405,7 +416,7 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
 
-        <!-- MODULI PLACEHOLDER (verranno sviluppati nei prossimi step) -->
+        <!-- MODULI GESTIONE -->
         <div class="module-page" id="module-cavalli" style="display:none">
           <!-- LISTA CAVALLI -->
           <div id="cavalli-list-view">
@@ -456,9 +467,73 @@ tr:last-child td{border-bottom:none}
             </div>
           </div>
         </div>
-        <div class="module-page" id="module-lezioni" style="display:none"></div>
-        <div class="module-page" id="module-pacchetti" style="display:none"></div>
-        <div class="module-page" id="module-comunicazioni" style="display:none"></div>
+        <div class="module-page" id="module-lezioni" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1>Lezioni &amp; Prenotazioni</h1>
+              <p>Calendario delle lezioni del centro.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openLezioneForm()"><i class="fa-solid fa-plus"></i> Nuova lezione</button>
+          </div>
+          <div class="card" style="margin-bottom:16px;padding:12px 16px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-sm lez-filter-btn active" data-filter="prossime" onclick="setLezioniFilter('prossime')">Prossime</button>
+              <button class="btn btn-sm lez-filter-btn" data-filter="passate" onclick="setLezioniFilter('passate')">Passate</button>
+              <button class="btn btn-sm lez-filter-btn" data-filter="tutte" onclick="setLezioniFilter('tutte')">Tutte</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Data</th><th>Orario</th><th>Istruttore</th><th>Cavallo</th><th>Allievo</th><th>Stato</th><th></th></tr></thead>
+                <tbody id="lezioni-table-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="lezioni-empty" style="display:none">
+              <i class="fa-solid fa-calendar-days"></i><div>Nessuna lezione in questo filtro.</div>
+            </div>
+          </div>
+        </div>
+        <div class="module-page" id="module-pacchetti" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1>Pacchetti &amp; Abbonamenti</h1>
+              <p>Carnet, abbonamenti e cruscotto scadenze del centro.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openPacchettoForm()"><i class="fa-solid fa-plus"></i> Nuovo pacchetto</button>
+          </div>
+
+          <h3 style="margin:0 0 10px">Cruscotto scadenze</h3>
+          <div class="grid grid-3" id="cruscotto-grid" style="margin-bottom:24px"></div>
+
+          <h3 style="margin:0 0 10px">Pacchetti e abbonamenti attivi</h3>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Tipo</th><th>Dettaglio</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead>
+                <tbody id="pacchetti-table-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="pacchetti-empty" style="display:none">
+              <i class="fa-solid fa-ticket"></i><div>Nessun pacchetto registrato ancora.</div>
+            </div>
+          </div>
+        </div>
+        <div class="module-page" id="module-comunicazioni" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1>Comunicazioni</h1>
+              <p>Messaggi a tutto il centro, per ruolo o a un singolo membro.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
+          </div>
+          <div class="card">
+            <div id="messaggi-list"></div>
+            <div class="empty-state" id="messaggi-empty" style="display:none">
+              <i class="fa-solid fa-comments"></i><div>Nessun messaggio ancora. Scrivi il primo al tuo team.</div>
+            </div>
+          </div>
+        </div>
         <div class="module-page" id="module-mascalcia" style="display:none"></div>
         <div class="module-page" id="module-selleria" style="display:none"></div>
         <div class="module-page" id="module-fatturazione" style="display:none"></div>
@@ -561,6 +636,113 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- MODAL: nuova lezione -->
+<div class="modal-overlay" id="modal-lezione" onclick="closeOut(event,'modal-lezione')">
+  <div class="modal">
+    <div class="modal-title">Nuova lezione <span class="x" onclick="closeModal('modal-lezione')">✕</span></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data</label><input class="input" id="lez-data" type="date"></div>
+      <div class="field"><label>Ora inizio</label><input class="input" id="lez-ora" type="time"></div>
+    </div>
+    <div class="field"><label>Istruttore</label><select class="input" id="lez-istruttore"></select></div>
+    <div class="field"><label>Cavallo</label><select class="input" id="lez-cavallo"><option value="">Nessuno / da definire</option></select></div>
+    <div class="field"><label>Allievo</label><select class="input" id="lez-allievo"></select></div>
+    <div class="field"><label>Note</label><input class="input" id="lez-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="lezione-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveLezione()">Salva lezione</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina lezione -->
+<div class="modal-overlay" id="modal-delete-lezione" onclick="closeOut(event,'modal-delete-lezione')">
+  <div class="modal">
+    <div class="modal-title">Annulla lezione <span class="x" onclick="closeModal('modal-delete-lezione')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questa lezione?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-lezione')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteLezione()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: nuovo pacchetto/abbonamento -->
+<div class="modal-overlay" id="modal-pacchetto" onclick="closeOut(event,'modal-pacchetto')">
+  <div class="modal">
+    <div class="modal-title">Nuovo pacchetto <span class="x" onclick="closeModal('modal-pacchetto')">✕</span></div>
+    <div class="field"><label>Cliente</label><input class="input" id="pac-cliente" placeholder="Nome allievo / proprietario"></div>
+    <div class="field">
+      <label>Tipo</label>
+      <select class="input" id="pac-tipo" onchange="toggleTipoPacchetto()">
+        <option value="carnet">Carnet lezioni (a scalare)</option>
+        <option value="abbonamento">Abbonamento periodico</option>
+        <option value="pensione">Pensione cavallo</option>
+      </select>
+    </div>
+    <div class="grid grid-2" id="pac-carnet-fields">
+      <div class="field"><label>Lezioni totali</label><input class="input" id="pac-unita-totali" type="number" min="1" placeholder="Es. 10"></div>
+      <div class="field"><label>Lezioni usate</label><input class="input" id="pac-unita-usate" type="number" min="0" value="0"></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data inizio</label><input class="input" id="pac-inizio" type="date"></div>
+      <div class="field"><label>Scadenza</label><input class="input" id="pac-scadenza" type="date"></div>
+    </div>
+    <div class="field"><label>Prezzo (€, facoltativo)</label><input class="input" id="pac-prezzo" type="number" min="0" step="0.01" placeholder="Es. 250"></div>
+    <div class="field"><label>Note</label><input class="input" id="pac-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="pacchetto-error"></div>
+    <button class="btn btn-primary btn-block" onclick="savePacchetto()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina pacchetto -->
+<div class="modal-overlay" id="modal-delete-pacchetto" onclick="closeOut(event,'modal-delete-pacchetto')">
+  <div class="modal">
+    <div class="modal-title">Elimina pacchetto <span class="x" onclick="closeModal('modal-delete-pacchetto')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo pacchetto?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-pacchetto')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeletePacchetto()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: nuovo messaggio -->
+<div class="modal-overlay" id="modal-messaggio" onclick="closeOut(event,'modal-messaggio')">
+  <div class="modal">
+    <div class="modal-title">Nuovo messaggio <span class="x" onclick="closeModal('modal-messaggio')">✕</span></div>
+    <div class="field">
+      <label>Destinatari</label>
+      <select class="input" id="msg-destinatario" onchange="toggleDestinatarioMsg()">
+        <option value="tutti">Tutto il centro</option>
+        <option value="ruolo">Per ruolo</option>
+        <option value="singolo">Un membro specifico</option>
+      </select>
+    </div>
+    <div class="field" id="msg-ruolo-field" style="display:none">
+      <label>Ruolo</label>
+      <select class="input" id="msg-ruolo">
+        <option value="istruttore">Istruttori</option>
+        <option value="veterinario">Veterinari</option>
+        <option value="maniscalco">Maniscalchi</option>
+        <option value="allievo">Allievi/Genitori</option>
+      </select>
+    </div>
+    <div class="field" id="msg-membro-field" style="display:none">
+      <label>Membro</label>
+      <select class="input" id="msg-membro"></select>
+    </div>
+    <div class="field"><label>Messaggio</label><textarea class="input" id="msg-testo" rows="4" placeholder="Scrivi il messaggio..." style="resize:vertical"></textarea></div>
+    <div class="field">
+      <label>Priorità</label>
+      <select class="input" id="msg-priorita">
+        <option value="normale">Normale</option>
+        <option value="urgente">Urgente</option>
+      </select>
+    </div>
+    <div class="auth-error" id="messaggio-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveMessaggio()">Invia messaggio</button>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════════
    EQUO SCUDERIA — v1 (Modulo 1: Auth + Onboarding + Team)
@@ -579,11 +761,7 @@ const COMING_SOON_COPY = {
   fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"Genera e invia fatture elettroniche conformi SDI direttamente dagli abbonamenti e dalle lezioni registrate nel gestionale." },
   ai: { icon:"fa-sparkles", titolo:"Assistente AI", testo:"Un assistente AI per il gestore del centro: risponde a domande gestionali, suggerisce ottimizzazioni su lezioni e cavalli, automatizza i promemoria." },
 };
-const ACTIVE_PLACEHOLDER_COPY = {
-  lezioni: { icon:"fa-calendar-days", titolo:"Lezioni & Prenotazioni", testo:"Calendario condiviso, slot, assegnazione istruttore e cavallo, rilevamento conflitti — in sviluppo nel prossimo step." },
-  pacchetti: { icon:"fa-ticket", titolo:"Pacchetti & Abbonamenti", testo:"Carnet a scalare, abbonamenti, pacchetti pensione e cruscotto a semaforo per le scadenze — in sviluppo nel prossimo step." },
-  comunicazioni: { icon:"fa-comments", titolo:"Comunicazioni", testo:"Messaggi a singoli, gruppi o ruoli, con priorità e notifiche in-app — in sviluppo nel prossimo step." },
-};
+const ACTIVE_PLACEHOLDER_COPY = {};
 
 const TIPO_LABELS = { vaccino:"Vaccino", coggins:"Coggins test", ferratura:"Ferratura", sverminazione:"Sverminazione" };
 const TIPO_ICONS = { vaccino:"fa-syringe", coggins:"fa-vial", ferratura:"fa-horseshoe", sverminazione:"fa-pills" };
@@ -603,6 +781,15 @@ let currentCavalloId = null;
 let editingCavalloId = null;
 let cavalloToDelete = null;
 let eventoToDelete = null;
+
+let lezioniList = [];
+let lezioniFilter = "prossime";
+let lezioneToDelete = null;
+
+let pacchettiList = [];
+let pacchettoToDelete = null;
+
+let messaggiList = [];
 
 function isoDaysFromNow(n){
   const d = new Date();
@@ -627,6 +814,19 @@ let demoState = {
     { id:"e3", centro_id:"demo-centro", cavallo_id:"c1", tipo:"ferratura", data_evento: isoDaysFromNow(-20), data_scadenza: isoDaysFromNow(20), note:"" },
     { id:"e4", centro_id:"demo-centro", cavallo_id:"c2", tipo:"vaccino", data_evento: isoDaysFromNow(-100), data_scadenza: isoDaysFromNow(180), note:"" },
     { id:"e5", centro_id:"demo-centro", cavallo_id:"c2", tipo:"sverminazione", data_evento: isoDaysFromNow(-80), data_scadenza: isoDaysFromNow(10), note:"" },
+  ],
+  lezioni: [
+    { id:"l1", centro_id:"demo-centro", data: isoDaysFromNow(2), ora_inizio:"16:00", istruttore_id:"m2", cavallo_id:"c1", allievo_id:"m3", stato:"confermata", note:"" },
+    { id:"l2", centro_id:"demo-centro", data: isoDaysFromNow(-3), ora_inizio:"10:30", istruttore_id:"m2", cavallo_id:"c2", allievo_id:"m3", stato:"completata", note:"" },
+    { id:"l3", centro_id:"demo-centro", data: isoDaysFromNow(5), ora_inizio:"18:00", istruttore_id:"m2", cavallo_id:null, allievo_id:"m3", stato:"prenotata", note:"Prima lezione di prova" },
+  ],
+  pacchetti: [
+    { id:"p1", centro_id:"demo-centro", cliente:"Giulia Verdi", tipo:"carnet", unita_totali:10, unita_usate:7, data_inizio: isoDaysFromNow(-40), data_scadenza: isoDaysFromNow(20), prezzo:250, note:"" },
+    { id:"p2", centro_id:"demo-centro", cliente:"Marco Bianchi", tipo:"abbonamento", unita_totali:null, unita_usate:null, data_inizio: isoDaysFromNow(-10), data_scadenza: isoDaysFromNow(-2), prezzo:80, note:"Mensile" },
+  ],
+  messaggi: [
+    { id:"msg1", centro_id:"demo-centro", mittente_id:"m1", mittente_nome:"Tu (admin)", destinatario_tipo:"tutti", destinatario_ruolo:null, destinatario_nome:null, testo:"Ricordo a tutti che sabato il maneggio chiude alle 18:00 per manutenzione.", priorita:"normale", created_at: isoDaysFromNow(-2) },
+    { id:"msg2", centro_id:"demo-centro", mittente_id:"m1", mittente_nome:"Tu (admin)", destinatario_tipo:"ruolo", destinatario_ruolo:"istruttore", destinatario_nome:null, testo:"Riunione istruttori lunedì alle 9:00 in ufficio.", priorita:"urgente", created_at: isoDaysFromNow(-1) },
   ],
 };
 
@@ -1168,6 +1368,410 @@ function formatDate(iso){
   return `${d}/${m}/${y}`;
 }
 
+/* ---------- LEZIONI & PRENOTAZIONI ---------- */
+const STATO_LEZIONE_LABELS = { prenotata:"Prenotata", confermata:"Confermata", completata:"Completata", annullata:"Annullata" };
+const STATO_LEZIONE_BADGE = { prenotata:"gray", confermata:"green", completata:"green", annullata:"red" };
+
+async function refreshLezioniModule(){
+  if(cavalliList.length === 0) await loadCavalli();
+  await loadLezioni();
+  populateLezioneSelects();
+  renderLezioni();
+}
+
+async function loadLezioni(){
+  if(DEMO_MODE){ lezioniList = demoState.lezioni; return; }
+  const { data, error } = await sb.from("scuderia_lezioni")
+    .select("id, centro_id, data, ora_inizio, istruttore_id, cavallo_id, allievo_id, stato, note")
+    .eq("centro_id", currentCentro.id)
+    .order("data", { ascending: true }).order("ora_inizio", { ascending: true });
+  if(!error) lezioniList = data || [];
+}
+
+function membroNome(id){
+  const m = teamList.find(x => x.id === id);
+  return m ? (m.nome_visualizzato || RUOLO_LABELS[m.ruolo]) : "—";
+}
+function cavalloNome(id){
+  const c = cavalliList.find(x => x.id === id);
+  return c ? c.nome : "—";
+}
+
+function setLezioniFilter(f){
+  lezioniFilter = f;
+  document.querySelectorAll(".lez-filter-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === f));
+  renderLezioni();
+}
+
+function renderLezioni(){
+  const oggi = new Date().toISOString().slice(0,10);
+  let list = [...lezioniList];
+  if(lezioniFilter === "prossime") list = list.filter(l => l.data >= oggi);
+  if(lezioniFilter === "passate") list = list.filter(l => l.data < oggi);
+  list.sort((a,b) => (a.data + a.ora_inizio).localeCompare(b.data + b.ora_inizio) * (lezioniFilter === "passate" ? -1 : 1));
+
+  const body = document.getElementById("lezioni-table-body");
+  const empty = document.getElementById("lezioni-empty");
+  body.innerHTML = "";
+  empty.style.display = list.length === 0 ? "block" : "none";
+
+  list.forEach(l => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDate(l.data)}</td>
+      <td>${l.ora_inizio || "—"}</td>
+      <td>${escapeHtml(membroNome(l.istruttore_id))}</td>
+      <td>${escapeHtml(cavalloNome(l.cavallo_id))}</td>
+      <td>${escapeHtml(membroNome(l.allievo_id))}</td>
+      <td><span class="badge-pill badge-${STATO_LEZIONE_BADGE[l.stato] || "gray"}">${STATO_LEZIONE_LABELS[l.stato] || l.stato}</span></td>
+      <td style="text-align:right">
+        ${l.stato !== "annullata" ? `<button class="btn btn-ghost btn-sm" onclick="setLezioneStato('${l.id}','completata')" title="Segna completata"><i class="fa-solid fa-check"></i></button>` : ""}
+        <button class="btn btn-ghost btn-sm" onclick="askDeleteLezione('${l.id}')"><i class="fa-solid fa-trash"></i></button>
+      </td>`;
+    body.appendChild(tr);
+  });
+}
+
+function populateLezioneSelects(){
+  const istruttori = teamList.filter(m => ["istruttore","admin"].includes(m.ruolo));
+  const allievi = teamList.filter(m => m.ruolo === "allievo");
+  const selIst = document.getElementById("lez-istruttore");
+  const selAll = document.getElementById("lez-allievo");
+  const selCav = document.getElementById("lez-cavallo");
+  selIst.innerHTML = istruttori.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])}</option>`).join("") || `<option value="">Nessun istruttore nel team</option>`;
+  selAll.innerHTML = allievi.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || "Allievo")}</option>`).join("") || `<option value="">Nessun allievo nel team</option>`;
+  selCav.innerHTML = `<option value="">Nessuno / da definire</option>` + cavalliList.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+}
+
+function openLezioneForm(){
+  document.getElementById("lezione-error").style.display = "none";
+  populateLezioneSelects();
+  document.getElementById("lez-data").value = new Date().toISOString().slice(0,10);
+  document.getElementById("lez-ora").value = "10:00";
+  document.getElementById("lez-note").value = "";
+  openModal("modal-lezione");
+}
+
+async function saveLezione(){
+  const data = document.getElementById("lez-data").value;
+  const ora_inizio = document.getElementById("lez-ora").value;
+  const istruttore_id = document.getElementById("lez-istruttore").value || null;
+  const cavallo_id = document.getElementById("lez-cavallo").value || null;
+  const allievo_id = document.getElementById("lez-allievo").value || null;
+  const note = document.getElementById("lez-note").value.trim() || null;
+  const errBox = document.getElementById("lezione-error");
+  errBox.style.display = "none";
+  if(!data || !ora_inizio){ errBox.textContent = "Inserisci data e orario."; errBox.style.display = "block"; return; }
+
+  const payload = { data, ora_inizio, istruttore_id, cavallo_id, allievo_id, note, stato:"prenotata" };
+  try{
+    if(DEMO_MODE){
+      demoState.lezioni.push({ id:"l" + (demoIdCounter++ + 200), centro_id: demoState.centro.id, ...payload });
+    } else {
+      const { error } = await sb.from("scuderia_lezioni").insert({ centro_id: currentCentro.id, ...payload });
+      if(error) throw error;
+    }
+    await loadLezioni();
+    renderLezioni();
+    closeModal("modal-lezione");
+    showToast("Lezione aggiunta.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+async function setLezioneStato(id, stato){
+  if(DEMO_MODE){
+    const l = demoState.lezioni.find(x => x.id === id);
+    if(l) l.stato = stato;
+  } else {
+    const { error } = await sb.from("scuderia_lezioni").update({ stato }).eq("id", id);
+    if(error){ showToast("Errore nell'aggiornamento."); return; }
+  }
+  await loadLezioni();
+  renderLezioni();
+  showToast("Lezione aggiornata.");
+}
+
+function askDeleteLezione(id){ lezioneToDelete = id; openModal("modal-delete-lezione"); }
+
+async function confirmDeleteLezione(){
+  if(!lezioneToDelete) return;
+  if(DEMO_MODE){
+    demoState.lezioni = demoState.lezioni.filter(l => l.id !== lezioneToDelete);
+  } else {
+    const { error } = await sb.from("scuderia_lezioni").delete().eq("id", lezioneToDelete);
+    if(error){ showToast("Errore nell'eliminazione."); closeModal("modal-delete-lezione"); return; }
+  }
+  await loadLezioni();
+  renderLezioni();
+  closeModal("modal-delete-lezione");
+  showToast("Lezione eliminata.");
+}
+
+/* ---------- PACCHETTI & ABBONAMENTI ---------- */
+const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonamento", pensione:"Pensione" };
+
+async function refreshPacchettiModule(){
+  if(cavalliList.length === 0) await loadCavalli();
+  await loadEventiAll();
+  await loadPacchetti();
+  renderCruscotto();
+  renderPacchetti();
+}
+
+async function loadPacchetti(){
+  if(DEMO_MODE){ pacchettiList = demoState.pacchetti; return; }
+  const { data, error } = await sb.from("scuderia_pacchetti")
+    .select("id, centro_id, cliente, tipo, unita_totali, unita_usate, data_inizio, data_scadenza, prezzo, note")
+    .eq("centro_id", currentCentro.id)
+    .order("data_scadenza", { ascending: true });
+  if(!error) pacchettiList = data || [];
+}
+
+function statusPacchetto(p){
+  if(p.tipo === "carnet" && p.unita_totali != null && p.unita_usate >= p.unita_totali) return "red";
+  if(!p.data_scadenza) return "gray";
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const giorni = Math.round((new Date(p.data_scadenza) - oggi) / 86400000);
+  if(giorni < 0) return "red";
+  if(giorni <= 14) return "yellow";
+  return "green";
+}
+
+function renderCruscotto(){
+  // riusa lo scadenzario sanitario già caricato (eventiAll) + i pacchetti
+  const countByStatus = { red:0, yellow:0 };
+  cavalliList.forEach(c => {
+    const s = worstStatus(c.id);
+    if(s === "red") countByStatus.red++;
+    else if(s === "yellow") countByStatus.yellow++;
+  });
+  let pacchettiInScadenza = 0, pacchettiScaduti = 0;
+  pacchettiList.forEach(p => {
+    const s = statusPacchetto(p);
+    if(s === "red") pacchettiScaduti++;
+    else if(s === "yellow") pacchettiInScadenza++;
+  });
+
+  const tiles = [
+    { label:"Cavalli con scadenze sanitarie scadute", value: countByStatus.red, tone: countByStatus.red > 0 ? "red" : "green", icon:"fa-triangle-exclamation" },
+    { label:"Cavalli in scadenza (30 gg)", value: countByStatus.yellow, tone: countByStatus.yellow > 0 ? "yellow" : "green", icon:"fa-clock" },
+    { label:"Pacchetti scaduti / esauriti", value: pacchettiScaduti, tone: pacchettiScaduti > 0 ? "red" : "green", icon:"fa-ticket" },
+  ];
+  document.getElementById("cruscotto-grid").innerHTML = tiles.map(t => `
+    <div class="stat-tile">
+      <div class="label"><i class="fa-solid ${t.icon}" style="margin-right:6px"></i>${t.label}</div>
+      <div class="value" style="color:${t.tone === 'red' ? 'var(--danger)' : t.tone === 'yellow' ? '#8a6a12' : 'var(--text)'}">${t.value}</div>
+    </div>`).join("");
+}
+
+function renderPacchetti(){
+  const body = document.getElementById("pacchetti-table-body");
+  const empty = document.getElementById("pacchetti-empty");
+  body.innerHTML = "";
+  empty.style.display = pacchettiList.length === 0 ? "block" : "none";
+
+  pacchettiList.forEach(p => {
+    const s = statusPacchetto(p);
+    const dettaglio = p.tipo === "carnet"
+      ? `${p.unita_usate ?? 0} / ${p.unita_totali ?? "—"} lezioni`
+      : (p.prezzo ? `€ ${Number(p.prezzo).toFixed(2)}` : "—");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(p.cliente)}</td>
+      <td>${TIPO_PACCHETTO_LABELS[p.tipo] || p.tipo}</td>
+      <td>${dettaglio}</td>
+      <td>${p.data_scadenza ? formatDate(p.data_scadenza) : "—"}</td>
+      <td><span class="badge-pill badge-${s}">${s === "red" ? "Scaduto" : s === "yellow" ? "In scadenza" : "Attivo"}</span></td>
+      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="askDeletePacchetto('${p.id}')"><i class="fa-solid fa-trash"></i></button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+function toggleTipoPacchetto(){
+  const tipo = document.getElementById("pac-tipo").value;
+  document.getElementById("pac-carnet-fields").style.display = tipo === "carnet" ? "grid" : "none";
+}
+
+function openPacchettoForm(){
+  document.getElementById("pacchetto-error").style.display = "none";
+  document.getElementById("pac-cliente").value = "";
+  document.getElementById("pac-tipo").value = "carnet";
+  document.getElementById("pac-unita-totali").value = "";
+  document.getElementById("pac-unita-usate").value = "0";
+  document.getElementById("pac-inizio").value = new Date().toISOString().slice(0,10);
+  document.getElementById("pac-scadenza").value = "";
+  document.getElementById("pac-prezzo").value = "";
+  document.getElementById("pac-note").value = "";
+  toggleTipoPacchetto();
+  openModal("modal-pacchetto");
+}
+
+async function savePacchetto(){
+  const cliente = document.getElementById("pac-cliente").value.trim();
+  const tipo = document.getElementById("pac-tipo").value;
+  const errBox = document.getElementById("pacchetto-error");
+  errBox.style.display = "none";
+  if(!cliente){ errBox.textContent = "Inserisci il nome del cliente."; errBox.style.display = "block"; return; }
+
+  const payload = {
+    cliente, tipo,
+    unita_totali: tipo === "carnet" ? (parseInt(document.getElementById("pac-unita-totali").value) || null) : null,
+    unita_usate: tipo === "carnet" ? (parseInt(document.getElementById("pac-unita-usate").value) || 0) : null,
+    data_inizio: document.getElementById("pac-inizio").value || null,
+    data_scadenza: document.getElementById("pac-scadenza").value || null,
+    prezzo: document.getElementById("pac-prezzo").value ? parseFloat(document.getElementById("pac-prezzo").value) : null,
+    note: document.getElementById("pac-note").value.trim() || null,
+  };
+
+  try{
+    if(DEMO_MODE){
+      demoState.pacchetti.push({ id:"p" + (demoIdCounter++ + 300), centro_id: demoState.centro.id, ...payload });
+    } else {
+      const { error } = await sb.from("scuderia_pacchetti").insert({ centro_id: currentCentro.id, ...payload });
+      if(error) throw error;
+    }
+    await loadPacchetti();
+    renderCruscotto();
+    renderPacchetti();
+    closeModal("modal-pacchetto");
+    showToast("Pacchetto salvato.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+function askDeletePacchetto(id){ pacchettoToDelete = id; openModal("modal-delete-pacchetto"); }
+
+async function confirmDeletePacchetto(){
+  if(!pacchettoToDelete) return;
+  if(DEMO_MODE){
+    demoState.pacchetti = demoState.pacchetti.filter(p => p.id !== pacchettoToDelete);
+  } else {
+    const { error } = await sb.from("scuderia_pacchetti").delete().eq("id", pacchettoToDelete);
+    if(error){ showToast("Errore nell'eliminazione."); closeModal("modal-delete-pacchetto"); return; }
+  }
+  await loadPacchetti();
+  renderCruscotto();
+  renderPacchetti();
+  closeModal("modal-delete-pacchetto");
+  showToast("Pacchetto eliminato.");
+}
+
+/* ---------- COMUNICAZIONI ---------- */
+async function refreshComunicazioniModule(){
+  await loadMessaggi();
+  renderMessaggi();
+}
+
+async function loadMessaggi(){
+  if(DEMO_MODE){ messaggiList = demoState.messaggi; return; }
+  const { data, error } = await sb.from("scuderia_messaggi")
+    .select("id, centro_id, mittente_id, destinatario_tipo, destinatario_ruolo, destinatario_membro_id, testo, priorita, created_at")
+    .eq("centro_id", currentCentro.id)
+    .order("created_at", { ascending: false });
+  if(!error) messaggiList = data || [];
+}
+
+function destinatarioLabel(m){
+  if(m.destinatario_tipo === "tutti") return "Tutto il centro";
+  if(m.destinatario_tipo === "ruolo") return "Per ruolo: " + (RUOLO_LABELS[m.destinatario_ruolo] || m.destinatario_ruolo);
+  const nome = m.destinatario_nome || membroNome(m.destinatario_membro_id);
+  return "A: " + nome;
+}
+
+function renderMessaggi(){
+  const list = document.getElementById("messaggi-list");
+  const empty = document.getElementById("messaggi-empty");
+  list.innerHTML = "";
+  empty.style.display = messaggiList.length === 0 ? "block" : "none";
+
+  messaggiList.forEach(m => {
+    const mittente = m.mittente_nome || membroNome(m.mittente_id) || "Un membro";
+    const div = document.createElement("div");
+    div.className = "msg-item";
+    div.innerHTML = `
+      <div class="head">
+        <span class="who">${escapeHtml(mittente)} <span style="color:var(--muted);font-weight:400">→ ${escapeHtml(destinatarioLabel(m))}</span></span>
+        <span style="display:flex;align-items:center;gap:8px">
+          ${m.priorita === "urgente" ? `<span class="badge-pill badge-red">Urgente</span>` : ""}
+          <span class="when">${formatDateTime(m.created_at)}</span>
+        </span>
+      </div>
+      <div class="body">${escapeHtml(m.testo)}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleDestinatarioMsg(){
+  const tipo = document.getElementById("msg-destinatario").value;
+  document.getElementById("msg-ruolo-field").style.display = tipo === "ruolo" ? "block" : "none";
+  document.getElementById("msg-membro-field").style.display = tipo === "singolo" ? "block" : "none";
+  if(tipo === "singolo"){
+    const sel = document.getElementById("msg-membro");
+    sel.innerHTML = teamList.filter(m => m.user_id !== currentUser.id)
+      .map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])}</option>`).join("");
+  }
+}
+
+function openMessaggioForm(){
+  document.getElementById("messaggio-error").style.display = "none";
+  document.getElementById("msg-destinatario").value = "tutti";
+  document.getElementById("msg-testo").value = "";
+  document.getElementById("msg-priorita").value = "normale";
+  toggleDestinatarioMsg();
+  openModal("modal-messaggio");
+}
+
+async function saveMessaggio(){
+  const testo = document.getElementById("msg-testo").value.trim();
+  const errBox = document.getElementById("messaggio-error");
+  errBox.style.display = "none";
+  if(!testo){ errBox.textContent = "Scrivi un messaggio prima di inviare."; errBox.style.display = "block"; return; }
+
+  const destinatario_tipo = document.getElementById("msg-destinatario").value;
+  const destinatario_ruolo = destinatario_tipo === "ruolo" ? document.getElementById("msg-ruolo").value : null;
+  const destinatario_membro_id = destinatario_tipo === "singolo" ? document.getElementById("msg-membro").value : null;
+  const priorita = document.getElementById("msg-priorita").value;
+
+  try{
+    if(DEMO_MODE){
+      demoState.messaggi.unshift({
+        id:"msg" + (demoIdCounter++ + 400), centro_id: demoState.centro.id,
+        mittente_id: currentMembro ? "m1" : null, mittente_nome: currentMembro?.nome_visualizzato || "Tu (admin)",
+        destinatario_tipo, destinatario_ruolo, destinatario_nome: destinatario_membro_id ? membroNome(destinatario_membro_id) : null,
+        testo, priorita, created_at: new Date().toISOString(),
+      });
+    } else {
+      const { error } = await sb.from("scuderia_messaggi").insert({
+        centro_id: currentCentro.id, mittente_id: currentMembroId(), destinatario_tipo, destinatario_ruolo, destinatario_membro_id, testo, priorita,
+      });
+      if(error) throw error;
+    }
+    await loadMessaggi();
+    renderMessaggi();
+    closeModal("modal-messaggio");
+    showToast("Messaggio inviato.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nell'invio.";
+    errBox.style.display = "block";
+  }
+}
+
+function currentMembroId(){
+  const m = teamList.find(x => x.user_id === currentUser.id);
+  return m ? m.id : null;
+}
+
+function formatDateTime(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("it-IT") + " " + d.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
+}
+
 function comingSoonHtml(icon, titolo, testo, badgeText){
   return `
     <div class="coming-soon">
@@ -1190,6 +1794,9 @@ function showModule(key){
   document.getElementById("topbar-title").textContent = MODULE_TITLES[key] || "";
   closeSidebar();
   if(key === "cavalli") refreshCavalliModule();
+  if(key === "lezioni") refreshLezioniModule();
+  if(key === "pacchetti") refreshPacchettiModule();
+  if(key === "comunicazioni") refreshComunicazioniModule();
 }
 
 function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebar-overlay").classList.add("active"); }
