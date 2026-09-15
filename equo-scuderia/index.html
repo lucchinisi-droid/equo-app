@@ -16,7 +16,7 @@
     }catch(e){}
   })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -83,9 +83,11 @@ a{color:inherit}
 .nav-item{
   display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius);
   color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; cursor:pointer;
-  margin-bottom:2px; border:none; background:none; width:100%; text-align:left; white-space:nowrap;
+  margin-bottom:2px; border:none; background:none; width:100%; text-align:left;
 }
 .nav-item i{width:18px;text-align:center;font-size:15px;flex-shrink:0}
+.nav-item .nav-label{overflow:hidden;text-overflow:ellipsis}
+.sidebar.collapsed .nav-item{white-space:nowrap}
 .nav-item:hover{background:var(--muted-bg);color:var(--text)}
 .nav-item.active{background:var(--secondary);color:var(--primary-hover);font-weight:600}
 .nav-item .badge{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.03em;
@@ -128,8 +130,10 @@ a{color:inherit}
 
 /* ---------- UI PRIMITIVES ---------- */
 .page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
-.page-header h1{font-size:22px;margin:0;font-weight:700}
+.page-header h1{font-size:22px;margin:0;font-weight:700;display:flex;align-items:center;gap:10px}
 .page-header p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.page-icon{width:32px;height:32px;border-radius:var(--radius);background:var(--secondary);
+  color:var(--primary-hover);display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
   padding:20px;box-shadow:var(--shadow-sm)}
 .grid{display:grid;gap:16px}
@@ -267,6 +271,31 @@ textarea.input{resize:vertical}
 .quick-card h4{margin:0 0 3px;font-size:14.5px}
 .quick-card p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4}
 .quick-card .badge-pill{margin-top:8px}
+.stat-tile-clickable{cursor:pointer;transition:box-shadow .15s ease}
+.stat-tile-clickable:hover{box-shadow:var(--shadow-md)}
+.detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.detail-row .main{font-size:13.5px;font-weight:600}
+.detail-row .sub{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* ---------- POST-IT ---------- */
+.postit-board{display:flex;flex-wrap:wrap;gap:16px}
+.postit{width:200px;min-height:130px;border-radius:6px;padding:16px 14px;position:relative;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);font-size:13.5px;line-height:1.45;
+  transform:rotate(var(--postit-rot,-1deg));color:#3a3320;white-space:pre-wrap;word-break:break-word}
+.postit .close-x{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;
+  background:rgba(0,0,0,.08);color:#3a3320}
+.postit .close-x:hover{background:rgba(0,0,0,.18)}
+.postit-giallo{background:#fdf3b0}
+.postit-rosa{background:#f9c9d8}
+.postit-blu{background:#bfe0f5}
+.color-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+.color-swatch.selected{border-color:var(--text)}
+.color-swatch.postit-giallo{background:#fdf3b0}
+.color-swatch.postit-rosa{background:#f9c9d8}
+.color-swatch.postit-blu{background:#bfe0f5}
 
 /* ---------- MENU UTENTE / TEMA ---------- */
 .theme-toggle{display:flex;background:var(--muted-bg);border-radius:var(--radius-full);padding:4px;margin-top:6px}
@@ -447,20 +476,29 @@ textarea.input{resize:vertical}
           <div class="page-header">
             <div>
               <p class="home-hello">Bentornato</p>
-              <h1 id="home-centro-name">Il tuo centro</h1>
+              <h1><span class="page-icon"><i class="fa-solid fa-gauge-high"></i></span> <span id="home-centro-name">Il tuo centro</span></h1>
               <p>Panoramica rapida di tutto il gestionale.</p>
             </div>
           </div>
           <div class="grid grid-3" id="home-stats" style="margin-bottom:26px"></div>
           <h3 style="margin:0 0 10px">Accesso rapido</h3>
-          <div class="grid grid-3" id="home-quick-grid"></div>
+          <div class="grid grid-3" id="home-quick-grid" style="margin-bottom:26px"></div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <h3 style="margin:0">Promemoria della struttura</h3>
+            <button class="btn btn-outline btn-sm" onclick="openNotaForm()"><i class="fa-solid fa-plus"></i> Nuovo post-it</button>
+          </div>
+          <div class="postit-board" id="note-board"></div>
+          <div class="empty-state" id="note-empty" style="display:none">
+            <i class="fa-solid fa-note-sticky"></i><div>Nessun promemoria ancora. Aggiungi il primo.</div>
+          </div>
         </div>
 
         <!-- MODULO: IL TUO CENTRO -->
         <div class="module-page" id="module-centro" style="display:none">
           <div class="page-header">
             <div>
-              <h1 id="centro-page-title">Il tuo Centro</h1>
+              <h1 id="centro-page-title"><span class="page-icon"><i class="fa-solid fa-house-chimney"></i></span> Il tuo Centro</h1>
               <p>Anagrafica del centro, team e codice invito.</p>
             </div>
           </div>
@@ -499,7 +537,7 @@ textarea.input{resize:vertical}
           <div id="cavalli-list-view">
             <div class="page-header">
               <div>
-                <h1>Cavalli &amp; Salute</h1>
+                <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli &amp; Salute</h1>
                 <p>Anagrafica cavalli del centro e scadenzario sanitario.</p>
               </div>
               <button class="btn btn-primary" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
@@ -515,7 +553,7 @@ textarea.input{resize:vertical}
             <button class="back-link" onclick="closeCavalloDetail()"><i class="fa-solid fa-arrow-left"></i> Torna ai cavalli</button>
             <div class="page-header">
               <div>
-                <h1 id="detail-cavallo-nome">—</h1>
+                <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> <span id="detail-cavallo-nome">—</span></h1>
                 <p id="detail-cavallo-sub">—</p>
               </div>
               <div style="display:flex;gap:8px">
@@ -547,7 +585,7 @@ textarea.input{resize:vertical}
         <div class="module-page" id="module-lezioni" style="display:none">
           <div class="page-header">
             <div>
-              <h1>Lezioni &amp; Prenotazioni</h1>
+              <h1><span class="page-icon"><i class="fa-solid fa-calendar-days"></i></span> Lezioni &amp; Prenotazioni</h1>
               <p>Calendario delle lezioni del centro.</p>
             </div>
             <button class="btn btn-primary" onclick="openLezioneForm()"><i class="fa-solid fa-plus"></i> Nuova lezione</button>
@@ -574,7 +612,7 @@ textarea.input{resize:vertical}
         <div class="module-page" id="module-pacchetti" style="display:none">
           <div class="page-header">
             <div>
-              <h1>Pacchetti &amp; Abbonamenti</h1>
+              <h1><span class="page-icon"><i class="fa-solid fa-ticket"></i></span> Pacchetti &amp; Abbonamenti</h1>
               <p>Carnet, abbonamenti e cruscotto scadenze del centro.</p>
             </div>
             <button class="btn btn-primary" onclick="openPacchettoForm()"><i class="fa-solid fa-plus"></i> Nuovo pacchetto</button>
@@ -599,7 +637,7 @@ textarea.input{resize:vertical}
         <div class="module-page" id="module-comunicazioni" style="display:none">
           <div class="page-header">
             <div>
-              <h1>Comunicazioni</h1>
+              <h1><span class="page-icon"><i class="fa-solid fa-comments"></i></span> Comunicazioni</h1>
               <p>Messaggi a tutto il centro, per ruolo o a un singolo membro.</p>
             </div>
             <button class="btn btn-primary" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
@@ -669,7 +707,7 @@ textarea.input{resize:vertical}
 <!-- MODAL: registra evento sanitario -->
 <div class="modal-overlay" id="modal-evento" onclick="closeOut(event,'modal-evento')">
   <div class="modal">
-    <div class="modal-title">Registra evento sanitario <span class="x" onclick="closeModal('modal-evento')">✕</span></div>
+    <div class="modal-title"><span id="modal-evento-title">Registra evento sanitario</span> <span class="x" onclick="closeModal('modal-evento')">✕</span></div>
     <div class="field">
       <label>Tipo</label>
       <select class="input" id="ev-tipo">
@@ -685,7 +723,7 @@ textarea.input{resize:vertical}
     </div>
     <div class="field"><label>Note</label><input class="input" id="ev-note" placeholder="Facoltativo"></div>
     <div class="auth-error" id="evento-error"></div>
-    <button class="btn btn-primary btn-block" onclick="saveEvento()">Salva evento</button>
+    <button class="btn btn-primary btn-block" id="evento-save-btn" onclick="saveEvento()">Salva evento</button>
   </div>
 </div>
 
@@ -799,6 +837,33 @@ textarea.input{resize:vertical}
   </div>
 </div>
 
+<!-- MODAL: dettaglio statistica home -->
+<div class="modal-overlay" id="modal-home-detail" onclick="closeOut(event,'modal-home-detail')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title"><span id="home-detail-title">Dettaglio</span> <span class="x" onclick="closeModal('modal-home-detail')">✕</span></div>
+    <div id="home-detail-list"></div>
+    <button class="btn btn-outline btn-block" id="home-detail-goto" style="margin-top:14px">Vai al modulo</button>
+  </div>
+</div>
+
+<!-- MODAL: nuovo post-it -->
+<div class="modal-overlay" id="modal-nota" onclick="closeOut(event,'modal-nota')">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">Nuovo post-it <span class="x" onclick="closeModal('modal-nota')">✕</span></div>
+    <div class="field"><label>Promemoria</label><textarea class="input" id="nota-testo" rows="3" placeholder="Scrivi il promemoria..." style="resize:vertical"></textarea></div>
+    <div class="field">
+      <label>Colore</label>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <div class="color-swatch postit-giallo selected" data-colore="giallo" onclick="selectNotaColore('giallo')"></div>
+        <div class="color-swatch postit-rosa" data-colore="rosa" onclick="selectNotaColore('rosa')"></div>
+        <div class="color-swatch postit-blu" data-colore="blu" onclick="selectNotaColore('blu')"></div>
+      </div>
+    </div>
+    <div class="auth-error" id="nota-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveNota()">Aggiungi post-it</button>
+  </div>
+</div>
+
 <!-- MODAL: nuovo messaggio -->
 <div class="modal-overlay" id="modal-messaggio" onclick="closeOut(event,'modal-messaggio')">
   <div class="modal">
@@ -885,6 +950,8 @@ let pacchettoToDelete = null;
 
 let messaggiList = [];
 
+let noteList = [];
+
 function isoDaysFromNow(n){
   const d = new Date();
   d.setDate(d.getDate() + n);
@@ -921,6 +988,10 @@ let demoState = {
   messaggi: [
     { id:"msg1", centro_id:"demo-centro", mittente_id:"m1", mittente_nome:"Tu (admin)", destinatario_tipo:"tutti", destinatario_ruolo:null, destinatario_nome:null, testo:"Ricordo a tutti che sabato il maneggio chiude alle 18:00 per manutenzione.", priorita:"normale", created_at: isoDaysFromNow(-2) },
     { id:"msg2", centro_id:"demo-centro", mittente_id:"m1", mittente_nome:"Tu (admin)", destinatario_tipo:"ruolo", destinatario_ruolo:"istruttore", destinatario_nome:null, testo:"Riunione istruttori lunedì alle 9:00 in ufficio.", priorita:"urgente", created_at: isoDaysFromNow(-1) },
+  ],
+  note: [
+    { id:"n1", centro_id:"demo-centro", testo:"Ordinare mangime entro venerdì", colore:"giallo", created_at: isoDaysFromNow(-1) },
+    { id:"n2", centro_id:"demo-centro", testo:"Chiamare il veterinario per Ares", colore:"rosa", created_at: isoDaysFromNow(-2) },
   ],
 };
 
@@ -1353,8 +1424,9 @@ function renderEventiTable(cavalloId){
       <td>${formatDate(e.data_evento)}</td>
       <td>${e.data_scadenza ? formatDate(e.data_scadenza) : "—"}</td>
       <td style="color:var(--muted)">${escapeHtml(e.note || "—")}</td>
-      <td style="text-align:right">
-        ${currentMembro?.ruolo === "admin" ? `<button class="btn btn-ghost btn-sm" onclick="askDeleteEvento('${e.id}')"><i class="fa-solid fa-trash"></i></button>` : ""}
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="openEventoForm('${e.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="askDeleteEvento('${e.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>`;
     body.appendChild(tr);
   });
@@ -1443,12 +1515,25 @@ async function confirmDeleteCavallo(){
   showToast("Cavallo eliminato.");
 }
 
-function openEventoForm(){
+let editingEventoId = null;
+
+function openEventoForm(id){
+  editingEventoId = id || null;
   document.getElementById("evento-error").style.display = "none";
-  document.getElementById("ev-tipo").value = "vaccino";
-  document.getElementById("ev-data").value = new Date().toISOString().slice(0,10);
-  document.getElementById("ev-scadenza").value = "";
-  document.getElementById("ev-note").value = "";
+  document.getElementById("modal-evento-title").textContent = editingEventoId ? "Modifica evento sanitario" : "Registra evento sanitario";
+  document.getElementById("evento-save-btn").textContent = editingEventoId ? "Salva modifiche" : "Salva evento";
+  if(editingEventoId){
+    const e = eventiAll.find(x => x.id === editingEventoId);
+    document.getElementById("ev-tipo").value = e?.tipo || "vaccino";
+    document.getElementById("ev-data").value = e?.data_evento || "";
+    document.getElementById("ev-scadenza").value = e?.data_scadenza || "";
+    document.getElementById("ev-note").value = e?.note || "";
+  } else {
+    document.getElementById("ev-tipo").value = "vaccino";
+    document.getElementById("ev-data").value = new Date().toISOString().slice(0,10);
+    document.getElementById("ev-scadenza").value = "";
+    document.getElementById("ev-note").value = "";
+  }
   openModal("modal-evento");
 }
 
@@ -1463,7 +1548,15 @@ async function saveEvento(){
 
   try{
     if(DEMO_MODE){
-      demoState.eventi.push({ id:"e" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
+      if(editingEventoId){
+        const idx = demoState.eventi.findIndex(x => x.id === editingEventoId);
+        if(idx >= 0) demoState.eventi[idx] = { ...demoState.eventi[idx], tipo, data_evento, data_scadenza, note };
+      } else {
+        demoState.eventi.push({ id:"e" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
+      }
+    } else if(editingEventoId){
+      const { error } = await sb.from("scuderia_eventi_sanitari").update({ tipo, data_evento, data_scadenza, note }).eq("id", editingEventoId);
+      if(error) throw error;
     } else {
       const { error } = await sb.from("scuderia_eventi_sanitari").insert({ centro_id: currentCentro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
       if(error) throw error;
@@ -1471,7 +1564,7 @@ async function saveEvento(){
     await loadEventiAll();
     renderCavalloDetail();
     closeModal("modal-evento");
-    showToast("Evento registrato.");
+    showToast(editingEventoId ? "Evento aggiornato." : "Evento registrato.");
   } catch(err){
     errBox.textContent = err.message || "Errore nel salvataggio.";
     errBox.style.display = "block";
@@ -1923,10 +2016,85 @@ const QUICK_ACCESS_ITEMS = [
 async function refreshHomeModule(){
   await Promise.all([
     cavalliList.length === 0 ? loadCavalli() : Promise.resolve(),
-    loadEventiAll(), loadLezioni(), loadPacchetti(), loadMessaggi(),
+    loadEventiAll(), loadLezioni(), loadPacchetti(), loadMessaggi(), loadNote(),
   ]);
   renderHomeStats();
   renderHomeQuickAccess();
+  renderNote();
+}
+
+/* ---------- POST-IT PROMEMORIA ---------- */
+let notaColoreSelezionato = "giallo";
+
+async function loadNote(){
+  if(DEMO_MODE){ noteList = demoState.note; return; }
+  const { data, error } = await sb.from("scuderia_note")
+    .select("id, centro_id, testo, colore, created_at")
+    .eq("centro_id", currentCentro.id)
+    .order("created_at", { ascending: false });
+  if(!error) noteList = data || [];
+}
+
+function renderNote(){
+  const board = document.getElementById("note-board");
+  const empty = document.getElementById("note-empty");
+  board.innerHTML = "";
+  empty.style.display = noteList.length === 0 ? "block" : "none";
+
+  noteList.forEach((n, idx) => {
+    const rot = (idx % 2 === 0 ? -1 : 1) * (1 + (idx % 3));
+    const div = document.createElement("div");
+    div.className = `postit postit-${n.colore}`;
+    div.style.setProperty("--postit-rot", rot + "deg");
+    div.innerHTML = `<div class="close-x" onclick="deleteNota('${n.id}')"><i class="fa-solid fa-xmark"></i></div>${escapeHtml(n.testo)}`;
+    board.appendChild(div);
+  });
+}
+
+function openNotaForm(){
+  document.getElementById("nota-error").style.display = "none";
+  document.getElementById("nota-testo").value = "";
+  selectNotaColore("giallo");
+  openModal("modal-nota");
+}
+
+function selectNotaColore(colore){
+  notaColoreSelezionato = colore;
+  document.querySelectorAll(".color-swatch").forEach(s => s.classList.toggle("selected", s.dataset.colore === colore));
+}
+
+async function saveNota(){
+  const testo = document.getElementById("nota-testo").value.trim();
+  const errBox = document.getElementById("nota-error");
+  errBox.style.display = "none";
+  if(!testo){ errBox.textContent = "Scrivi un promemoria prima di salvare."; errBox.style.display = "block"; return; }
+
+  try{
+    if(DEMO_MODE){
+      demoState.note.unshift({ id:"n" + (demoIdCounter++ + 500), centro_id: demoState.centro.id, testo, colore: notaColoreSelezionato, created_at: new Date().toISOString() });
+    } else {
+      const { error } = await sb.from("scuderia_note").insert({ centro_id: currentCentro.id, testo, colore: notaColoreSelezionato });
+      if(error) throw error;
+    }
+    await loadNote();
+    renderNote();
+    closeModal("modal-nota");
+    showToast("Post-it aggiunto.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+async function deleteNota(id){
+  if(DEMO_MODE){
+    demoState.note = demoState.note.filter(n => n.id !== id);
+  } else {
+    const { error } = await sb.from("scuderia_note").delete().eq("id", id);
+    if(error){ showToast("Errore nell'eliminazione."); return; }
+  }
+  await loadNote();
+  renderNote();
 }
 
 function renderHomeStats(){
@@ -1942,15 +2110,79 @@ function renderHomeStats(){
   const pacchettiCritici = pacchettiList.filter(p => ["red","yellow"].includes(statusPacchetto(p))).length;
 
   const tiles = [
-    { label:"Scadenze sanitarie urgenti", value: scadRosse + scadGialle, icon:"fa-heart-pulse", tone: scadRosse > 0 ? "red" : scadGialle > 0 ? "yellow" : "green" },
-    { label:"Lezioni nei prossimi 7 giorni", value: lezioniProssime, icon:"fa-calendar-days", tone:"green" },
-    { label:"Pacchetti da rinnovare", value: pacchettiCritici, icon:"fa-ticket", tone: pacchettiCritici > 0 ? "yellow" : "green" },
+    { label:"Scadenze sanitarie urgenti", value: scadRosse + scadGialle, icon:"fa-heart-pulse", tone: scadRosse > 0 ? "red" : scadGialle > 0 ? "yellow" : "green", type:"sanitarie" },
+    { label:"Lezioni nei prossimi 7 giorni", value: lezioniProssime, icon:"fa-calendar-days", tone:"green", type:"lezioni" },
+    { label:"Pacchetti da rinnovare", value: pacchettiCritici, icon:"fa-ticket", tone: pacchettiCritici > 0 ? "yellow" : "green", type:"pacchetti" },
   ];
   document.getElementById("home-stats").innerHTML = tiles.map(t => `
-    <div class="stat-tile">
+    <div class="stat-tile stat-tile-clickable" onclick="openHomeDetail('${t.type}')">
       <div class="label"><i class="fa-solid ${t.icon}" style="margin-right:6px"></i>${t.label}</div>
       <div class="value" style="color:${t.tone === 'red' ? 'var(--danger)' : t.tone === 'yellow' ? '#8a6a12' : 'var(--text)'}">${t.value}</div>
     </div>`).join("");
+}
+
+function openHomeDetail(type){
+  const titleEl = document.getElementById("home-detail-title");
+  const listEl = document.getElementById("home-detail-list");
+  const gotoBtn = document.getElementById("home-detail-goto");
+  let rows = [];
+
+  if(type === "sanitarie"){
+    titleEl.textContent = "Scadenze sanitarie urgenti";
+    cavalliList.forEach(c => {
+      const scad = scadenzarioFor(c.id);
+      TIPO_ORDER.forEach(tipo => {
+        const s = scad[tipo];
+        if(s.status === "red" || s.status === "yellow"){
+          rows.push({
+            main: `${c.nome} — ${TIPO_LABELS[tipo]}`,
+            sub: s.ultimo?.data_scadenza ? "Scadenza: " + formatDate(s.ultimo.data_scadenza) : "Mai registrato",
+            badge: s.status,
+          });
+        }
+      });
+    });
+    gotoBtn.onclick = () => { closeModal("modal-home-detail"); showModule("cavalli"); };
+  }
+
+  if(type === "lezioni"){
+    titleEl.textContent = "Lezioni nei prossimi 7 giorni";
+    const oggi = new Date().toISOString().slice(0,10);
+    const in7gg = new Date(); in7gg.setDate(in7gg.getDate() + 7);
+    const in7ggIso = in7gg.toISOString().slice(0,10);
+    lezioniList.filter(l => l.data >= oggi && l.data <= in7ggIso && l.stato !== "annullata")
+      .sort((a,b) => (a.data + a.ora_inizio).localeCompare(b.data + b.ora_inizio))
+      .forEach(l => {
+        rows.push({
+          main: `${formatDate(l.data)} · ${l.ora_inizio} — ${membroNome(l.allievo_id)}`,
+          sub: `Istruttore: ${membroNome(l.istruttore_id)} · Cavallo: ${cavalloNome(l.cavallo_id)}`,
+          badge: STATO_LEZIONE_BADGE[l.stato] || "gray",
+        });
+      });
+    gotoBtn.onclick = () => { closeModal("modal-home-detail"); showModule("lezioni"); };
+  }
+
+  if(type === "pacchetti"){
+    titleEl.textContent = "Pacchetti da rinnovare";
+    pacchettiList.filter(p => ["red","yellow"].includes(statusPacchetto(p))).forEach(p => {
+      rows.push({
+        main: `${p.cliente} — ${TIPO_PACCHETTO_LABELS[p.tipo] || p.tipo}`,
+        sub: p.data_scadenza ? "Scadenza: " + formatDate(p.data_scadenza) : "Lezioni esaurite",
+        badge: statusPacchetto(p),
+      });
+    });
+    gotoBtn.onclick = () => { closeModal("modal-home-detail"); showModule("pacchetti"); };
+  }
+
+  listEl.innerHTML = rows.length === 0
+    ? `<div class="empty-state" style="padding:20px 0"><i class="fa-solid fa-circle-check"></i><div>Nessuna voce da segnalare.</div></div>`
+    : rows.map(r => `
+      <div class="detail-row">
+        <div><div class="main">${escapeHtml(r.main)}</div><div class="sub">${escapeHtml(r.sub)}</div></div>
+        <span class="badge-pill badge-${r.badge}">${STATUS_LABELS[r.badge] || ""}</span>
+      </div>`).join("");
+
+  openModal("modal-home-detail");
 }
 
 function renderHomeQuickAccess(){
