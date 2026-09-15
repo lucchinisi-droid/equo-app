@@ -518,6 +518,7 @@ textarea.input{resize:vertical}
                   <span id="centro-view-code">—</span>
                   <button class="btn btn-outline btn-sm" onclick="copyJoinCode()"><i class="fa-solid fa-copy"></i></button>
                 </div>
+                <p style="margin:6px 0 0;color:var(--muted);font-size:12px">Condividi questo codice per far entrare un nuovo membro nel team: lo inserirà in fase di registrazione.</p>
               </div>
             </div>
             <div class="card">
@@ -531,6 +532,23 @@ textarea.input{resize:vertical}
               <div class="empty-state" id="team-empty" style="display:none">
                 <i class="fa-solid fa-users"></i><div>Nessun altro membro nel team ancora.</div>
               </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <h3 style="margin:0">Contatti utili (<span id="contatti-count">0</span>)</h3>
+              <button class="btn btn-outline btn-sm" onclick="openContattoForm()"><i class="fa-solid fa-plus"></i> Aggiungi contatto</button>
+            </div>
+            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Persone che collaborano con la struttura ma non usano l'app: commercialista, giardiniere, veterinario esterno, ecc.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nome</th><th>Ruolo</th><th>Telefono</th><th>Email</th><th></th></tr></thead>
+                <tbody id="contatti-table-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="contatti-empty" style="display:none">
+              <i class="fa-solid fa-address-book"></i><div>Nessun contatto registrato ancora.</div>
             </div>
           </div>
         </div>
@@ -684,6 +702,70 @@ textarea.input{resize:vertical}
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-remove-member')">Annulla</button>
       <button class="btn btn-danger" style="flex:1" onclick="confirmRemoveMember()">Rimuovi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: modifica membro -->
+<div class="modal-overlay" id="modal-member" onclick="closeOut(event,'modal-member')">
+  <div class="modal">
+    <div class="modal-title">Modifica membro <span class="x" onclick="closeModal('modal-member')">✕</span></div>
+    <div class="field"><label>Nome visualizzato</label><input class="input" id="member-nome" placeholder="Nome e cognome"></div>
+    <div class="field">
+      <label>Ruolo</label>
+      <select class="input" id="member-ruolo">
+        <option value="istruttore">Istruttore</option>
+        <option value="veterinario">Veterinario</option>
+        <option value="maniscalco">Maniscalco</option>
+        <option value="allievo">Allievo/Genitore</option>
+        <option value="admin">Amministratore</option>
+      </select>
+    </div>
+    <div class="auth-error" id="member-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveMember()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL: nuovo/modifica contatto utile -->
+<div class="modal-overlay" id="modal-contatto" onclick="closeOut(event,'modal-contatto')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-contatto-title">Nuovo contatto</span> <span class="x" onclick="closeModal('modal-contatto')">✕</span></div>
+    <div class="field">
+      <label>Ruolo</label>
+      <select class="input" id="cont-tipo" onchange="toggleContattoAltro()">
+        <option value="istruttore_esterno">Istruttore esterno</option>
+        <option value="veterinario">Veterinario</option>
+        <option value="maniscalco">Maniscalco</option>
+        <option value="commercialista">Commercialista</option>
+        <option value="giardiniere">Giardiniere / Manutenzione verde</option>
+        <option value="manutenzione">Manutenzione struttura</option>
+        <option value="fornitore">Fornitore</option>
+        <option value="altro">Altro...</option>
+      </select>
+    </div>
+    <div class="field" id="cont-tipo-altro-field" style="display:none">
+      <label>Specifica ruolo</label>
+      <input class="input" id="cont-tipo-altro" placeholder="Es. Elettricista">
+    </div>
+    <div class="field"><label>Nome</label><input class="input" id="cont-nome" placeholder="Nome e cognome / ragione sociale"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Telefono</label><input class="input" id="cont-telefono" placeholder="+39 ..."></div>
+      <div class="field"><label>Email</label><input class="input" id="cont-email" type="email" placeholder="mail@esempio.it"></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="cont-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="contatto-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveContatto()">Salva contatto</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina contatto -->
+<div class="modal-overlay" id="modal-delete-contatto" onclick="closeOut(event,'modal-delete-contatto')">
+  <div class="modal">
+    <div class="modal-title">Elimina contatto <span class="x" onclick="closeModal('modal-delete-contatto')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo contatto?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-contatto')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteContatto()">Elimina</button>
     </div>
   </div>
 </div>
@@ -918,6 +1000,11 @@ const SUPABASE_ANON_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore" };
+const CONTATTO_TIPO_LABELS = {
+  istruttore_esterno:"Istruttore esterno", veterinario:"Veterinario", maniscalco:"Maniscalco",
+  commercialista:"Commercialista", giardiniere:"Giardiniere / Manutenzione verde", manutenzione:"Manutenzione struttura",
+  fornitore:"Fornitore", altro:"Altro",
+};
 const COMING_SOON_COPY = {
   mascalcia: { icon:"svg:horseshoe", titolo:"Mascalcia", testo:"Pianifica gli interventi del maniscalco, tieni traccia di ferrature e sferrature per ogni cavallo, con promemoria automatici sulle scadenze." },
   selleria: { icon:"fa-bag-shopping", titolo:"Selleria & Attrezzatura", testo:"Inventario di selle, finimenti e attrezzatura del centro: chi la usa, in che stato è, quando va sostituita o manutenuta." },
@@ -946,6 +1033,7 @@ let currentCentro = null; // { id, nome, indirizzo, telefono, join_code, owner_i
 let currentMembro = null; // { ruolo, nome_visualizzato }
 let teamList = [];
 let memberToRemove = null;
+let editingMemberId = null;
 let demoIdCounter = 1;
 
 let cavalliList = [];
@@ -965,6 +1053,10 @@ let pacchettoToDelete = null;
 let messaggiList = [];
 
 let noteList = [];
+
+let contattiList = [];
+let editingContattoId = null;
+let contattoToDelete = null;
 
 function isoDaysFromNow(n){
   const d = new Date();
@@ -1006,6 +1098,11 @@ let demoState = {
   note: [
     { id:"n1", centro_id:"demo-centro", testo:"Ordinare mangime entro venerdì", colore:"giallo", created_at: isoDaysFromNow(-1) },
     { id:"n2", centro_id:"demo-centro", testo:"Chiamare il veterinario per Ares", colore:"rosa", created_at: isoDaysFromNow(-2) },
+  ],
+  contatti: [
+    { id:"ct1", centro_id:"demo-centro", tipo:"commercialista", tipo_altro:null, nome:"Studio Rossi & Associati", telefono:"+39 06 9876543", email:"info@studiorossi.it", note:"" },
+    { id:"ct2", centro_id:"demo-centro", tipo:"giardiniere", tipo_altro:null, nome:"Luca Ferrari", telefono:"+39 333 1234567", email:"", note:"Passa ogni martedì" },
+    { id:"ct3", centro_id:"demo-centro", tipo:"altro", tipo_altro:"Elettricista", nome:"Paolo Neri", telefono:"+39 347 7654321", email:"", note:"" },
   ],
 };
 
@@ -1186,14 +1283,54 @@ function renderTeam(){
     const isMe = m.user_id === currentUser.id;
     const isAdminUser = currentMembro.ruolo === "admin";
     const canRemove = isAdminUser && !isMe && m.ruolo !== "admin";
+    const canEdit = isAdminUser && !isMe;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${escapeHtml(m.nome_visualizzato || (isMe ? "Tu" : "Membro"))}</td>
       <td><span class="badge-pill badge-gray">${RUOLO_LABELS[m.ruolo] || m.ruolo}</span></td>
-      <td style="text-align:right">${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember('${m.id}','${escapeHtml(m.nome_visualizzato || 'questo membro')}')"><i class="fa-solid fa-trash"></i></button>` : ""}</td>
+      <td style="text-align:right;white-space:nowrap">
+        ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openMemberForm('${m.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
+        ${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember('${m.id}','${escapeHtml(m.nome_visualizzato || 'questo membro')}')"><i class="fa-solid fa-trash"></i></button>` : ""}
+      </td>
     `;
     body.appendChild(tr);
   });
+}
+
+function openMemberForm(id){
+  const m = teamList.find(x => x.id === id);
+  if(!m) return;
+  editingMemberId = id;
+  document.getElementById("member-error").style.display = "none";
+  document.getElementById("member-nome").value = m.nome_visualizzato || "";
+  document.getElementById("member-ruolo").value = m.ruolo;
+  openModal("modal-member");
+}
+
+async function saveMember(){
+  if(!editingMemberId) return;
+  const nome_visualizzato = document.getElementById("member-nome").value.trim() || null;
+  const ruolo = document.getElementById("member-ruolo").value;
+  const errBox = document.getElementById("member-error");
+  errBox.style.display = "none";
+
+  try{
+    if(DEMO_MODE){
+      const idx = demoState.membri.findIndex(x => x.id === editingMemberId);
+      if(idx >= 0) demoState.membri[idx] = { ...demoState.membri[idx], nome_visualizzato, ruolo };
+      teamList = demoState.membri;
+    } else {
+      const { error } = await sb.from("scuderia_membri").update({ nome_visualizzato, ruolo }).eq("id", editingMemberId);
+      if(error) throw error;
+      await loadTeam();
+    }
+    renderTeam();
+    closeModal("modal-member");
+    showToast("Membro aggiornato.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
 }
 
 function askRemoveMember(id, nome){
@@ -1215,6 +1352,135 @@ async function confirmRemoveMember(){
   renderTeam();
   closeModal("modal-remove-member");
   showToast("Membro rimosso.");
+}
+
+/* ---------- CONTATTI UTILI ---------- */
+async function refreshContattiModule(){
+  await loadContatti();
+  renderContatti();
+}
+
+async function loadContatti(){
+  if(DEMO_MODE){ contattiList = demoState.contatti; return; }
+  const { data, error } = await sb.from("scuderia_contatti")
+    .select("id, centro_id, tipo, tipo_altro, nome, telefono, email, note")
+    .eq("centro_id", currentCentro.id)
+    .order("nome", { ascending: true });
+  if(!error) contattiList = data || [];
+}
+
+function contattoRuoloLabel(c){
+  return c.tipo === "altro" ? (c.tipo_altro || "Altro") : (CONTATTO_TIPO_LABELS[c.tipo] || c.tipo);
+}
+
+function renderContatti(){
+  document.getElementById("contatti-count").textContent = contattiList.length;
+  const body = document.getElementById("contatti-table-body");
+  const empty = document.getElementById("contatti-empty");
+  body.innerHTML = "";
+  empty.style.display = contattiList.length === 0 ? "block" : "none";
+  const isAdminUser = currentMembro?.ruolo === "admin";
+
+  contattiList.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(c.nome)}</td>
+      <td><span class="badge-pill badge-gray">${escapeHtml(contattoRuoloLabel(c))}</span></td>
+      <td>${c.telefono ? escapeHtml(c.telefono) : "—"}</td>
+      <td>${c.email ? escapeHtml(c.email) : "—"}</td>
+      <td style="text-align:right;white-space:nowrap">
+        ${isAdminUser ? `
+          <button class="btn btn-ghost btn-sm" onclick="openContattoForm('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="askDeleteContatto('${c.id}')"><i class="fa-solid fa-trash"></i></button>
+        ` : ""}
+      </td>`;
+    body.appendChild(tr);
+  });
+}
+
+function toggleContattoAltro(){
+  const tipo = document.getElementById("cont-tipo").value;
+  document.getElementById("cont-tipo-altro-field").style.display = tipo === "altro" ? "block" : "none";
+}
+
+function openContattoForm(id){
+  editingContattoId = id || null;
+  document.getElementById("contatto-error").style.display = "none";
+  document.getElementById("modal-contatto-title").textContent = editingContattoId ? "Modifica contatto" : "Nuovo contatto";
+  if(editingContattoId){
+    const c = contattiList.find(x => x.id === editingContattoId);
+    document.getElementById("cont-tipo").value = c?.tipo || "altro";
+    document.getElementById("cont-tipo-altro").value = c?.tipo_altro || "";
+    document.getElementById("cont-nome").value = c?.nome || "";
+    document.getElementById("cont-telefono").value = c?.telefono || "";
+    document.getElementById("cont-email").value = c?.email || "";
+    document.getElementById("cont-note").value = c?.note || "";
+  } else {
+    document.getElementById("cont-tipo").value = "istruttore_esterno";
+    ["cont-tipo-altro","cont-nome","cont-telefono","cont-email","cont-note"].forEach(id => document.getElementById(id).value = "");
+  }
+  toggleContattoAltro();
+  openModal("modal-contatto");
+}
+
+async function saveContatto(){
+  const tipo = document.getElementById("cont-tipo").value;
+  const nome = document.getElementById("cont-nome").value.trim();
+  const errBox = document.getElementById("contatto-error");
+  errBox.style.display = "none";
+  if(!nome){ errBox.textContent = "Inserisci il nome del contatto."; errBox.style.display = "block"; return; }
+
+  const payload = {
+    tipo,
+    tipo_altro: tipo === "altro" ? (document.getElementById("cont-tipo-altro").value.trim() || null) : null,
+    nome,
+    telefono: document.getElementById("cont-telefono").value.trim() || null,
+    email: document.getElementById("cont-email").value.trim() || null,
+    note: document.getElementById("cont-note").value.trim() || null,
+  };
+
+  try{
+    if(DEMO_MODE){
+      if(editingContattoId){
+        const idx = demoState.contatti.findIndex(c => c.id === editingContattoId);
+        if(idx >= 0) demoState.contatti[idx] = { ...demoState.contatti[idx], ...payload };
+      } else {
+        demoState.contatti.push({ id:"ct" + (demoIdCounter++ + 600), centro_id: demoState.centro.id, ...payload });
+      }
+    } else if(editingContattoId){
+      const { error } = await sb.from("scuderia_contatti").update(payload).eq("id", editingContattoId);
+      if(error) throw error;
+    } else {
+      const { error } = await sb.from("scuderia_contatti").insert({ centro_id: currentCentro.id, ...payload });
+      if(error) throw error;
+    }
+    await loadContatti();
+    renderContatti();
+    closeModal("modal-contatto");
+    showToast(editingContattoId ? "Contatto aggiornato." : "Contatto aggiunto.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+function askDeleteContatto(id){
+  contattoToDelete = id;
+  openModal("modal-delete-contatto");
+}
+
+async function confirmDeleteContatto(){
+  if(!contattoToDelete) return;
+  if(DEMO_MODE){
+    demoState.contatti = demoState.contatti.filter(c => c.id !== contattoToDelete);
+  } else {
+    const { error } = await sb.from("scuderia_contatti").delete().eq("id", contattoToDelete);
+    if(error){ showToast("Errore nell'eliminazione."); closeModal("modal-delete-contatto"); return; }
+  }
+  await loadContatti();
+  renderContatti();
+  closeModal("modal-delete-contatto");
+  showToast("Contatto eliminato.");
 }
 
 function copyJoinCode(){
@@ -2300,6 +2566,7 @@ function showModule(key){
   document.getElementById("topbar-title").textContent = MODULE_TITLES[key] || "";
   closeSidebar();
   if(key === "home") refreshHomeModule();
+  if(key === "centro") refreshContattiModule();
   if(key === "cavalli") refreshCavalliModule();
   if(key === "lezioni") refreshLezioniModule();
   if(key === "pacchetti") refreshPacchettiModule();
