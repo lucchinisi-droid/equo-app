@@ -1304,7 +1304,7 @@ async function loadCavalli(){
 async function loadEventiAll(){
   if(DEMO_MODE){ eventiAll = demoState.eventi; return; }
   const { data, error } = await sb.from("scuderia_eventi_sanitari")
-    .select("id, centro_id, cavallo_id, tipo, data_evento, data_scadenza, note")
+    .select("id, centro_id, cavallo_id, tipo, data_evento, data_scadenza, note, creato_da")
     .eq("centro_id", currentCentro.id)
     .order("data_evento", { ascending: false });
   if(!error) eventiAll = data || [];
@@ -1409,6 +1409,11 @@ function renderCavalloDetail(){
   renderEventiTable(c.id);
 }
 
+function canDeleteEvento(e){
+  if(currentMembro?.ruolo === "admin") return true;
+  return e.creato_da && e.creato_da === currentMembroId();
+}
+
 function renderEventiTable(cavalloId){
   const eventi = eventiAll.filter(e => e.cavallo_id === cavalloId)
     .sort((a,b) => new Date(b.data_evento) - new Date(a.data_evento));
@@ -1426,7 +1431,7 @@ function renderEventiTable(cavalloId){
       <td style="color:var(--muted)">${escapeHtml(e.note || "—")}</td>
       <td style="text-align:right;white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="openEventoForm('${e.id}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-ghost btn-sm" onclick="askDeleteEvento('${e.id}')"><i class="fa-solid fa-trash"></i></button>
+        ${canDeleteEvento(e) ? `<button class="btn btn-ghost btn-sm" onclick="askDeleteEvento('${e.id}')"><i class="fa-solid fa-trash"></i></button>` : ""}
       </td>`;
     body.appendChild(tr);
   });
@@ -1552,13 +1557,13 @@ async function saveEvento(){
         const idx = demoState.eventi.findIndex(x => x.id === editingEventoId);
         if(idx >= 0) demoState.eventi[idx] = { ...demoState.eventi[idx], tipo, data_evento, data_scadenza, note };
       } else {
-        demoState.eventi.push({ id:"e" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
+        demoState.eventi.push({ id:"e" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note, creato_da: currentMembroId() });
       }
     } else if(editingEventoId){
       const { error } = await sb.from("scuderia_eventi_sanitari").update({ tipo, data_evento, data_scadenza, note }).eq("id", editingEventoId);
       if(error) throw error;
     } else {
-      const { error } = await sb.from("scuderia_eventi_sanitari").insert({ centro_id: currentCentro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note });
+      const { error } = await sb.from("scuderia_eventi_sanitari").insert({ centro_id: currentCentro.id, cavallo_id: currentCavalloId, tipo, data_evento, data_scadenza, note, creato_da: currentMembroId() });
       if(error) throw error;
     }
     await loadEventiAll();
