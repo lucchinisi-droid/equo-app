@@ -284,7 +284,10 @@ textarea.input{resize:vertical}
 .postit-board{display:flex;flex-wrap:wrap;gap:16px}
 .postit{width:200px;min-height:130px;border-radius:6px;padding:16px 14px;position:relative;
   box-shadow:0 3px 10px rgba(0,0,0,.12);font-size:13.5px;line-height:1.45;
-  transform:rotate(var(--postit-rot,-1deg));color:#3a3320;white-space:pre-wrap;word-break:break-word}
+  transform:rotate(var(--postit-rot,-1deg));color:#3a3320;white-space:pre-wrap;word-break:break-word;
+  cursor:grab;touch-action:none;user-select:none;transition:box-shadow .15s ease}
+.postit.dragging{opacity:.5;cursor:grabbing;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.postit.drag-over{outline:2px dashed var(--primary);outline-offset:3px}
 .postit .close-x{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;
   background:rgba(0,0,0,.08);color:#3a3320}
@@ -2045,8 +2048,9 @@ let notaColoreSelezionato = "giallo";
 async function loadNote(){
   if(DEMO_MODE){ noteList = demoState.note; return; }
   const { data, error } = await sb.from("scuderia_note")
-    .select("id, centro_id, testo, colore, created_at")
+    .select("id, centro_id, testo, colore, created_at, ordine")
     .eq("centro_id", currentCentro.id)
+    .order("ordine", { ascending: true })
     .order("created_at", { ascending: false });
   if(!error) noteList = data || [];
 }
@@ -2061,10 +2065,70 @@ function renderNote(){
     const rot = (idx % 2 === 0 ? -1 : 1) * (1 + (idx % 3));
     const div = document.createElement("div");
     div.className = `postit postit-${n.colore}`;
+    div.dataset.id = n.id;
     div.style.setProperty("--postit-rot", rot + "deg");
     div.innerHTML = `<div class="close-x" onclick="deleteNota('${n.id}')"><i class="fa-solid fa-xmark"></i></div>${escapeHtml(n.testo)}`;
+    div.addEventListener("pointerdown", onPostitPointerDown);
     board.appendChild(div);
   });
+}
+
+/* ---------- DRAG & DROP POST-IT (mouse e touch) ---------- */
+let notaDragState = null;
+
+function onPostitPointerDown(e){
+  if(e.target.closest(".close-x")) return;
+  const el = e.currentTarget;
+  notaDragState = { id: el.dataset.id, el, overId: null, moved: false };
+  el.setPointerCapture(e.pointerId);
+  el.classList.add("dragging");
+  el.addEventListener("pointermove", onPostitPointerMove);
+  el.addEventListener("pointerup", onPostitPointerUp);
+  el.addEventListener("pointercancel", onPostitPointerUp);
+}
+
+function onPostitPointerMove(e){
+  if(!notaDragState) return;
+  notaDragState.moved = true;
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+  const postitEl = target ? target.closest(".postit") : null;
+  document.querySelectorAll(".postit.drag-over").forEach(p => p.classList.remove("drag-over"));
+  if(postitEl && postitEl.dataset.id !== notaDragState.id){
+    postitEl.classList.add("drag-over");
+    notaDragState.overId = postitEl.dataset.id;
+  } else {
+    notaDragState.overId = null;
+  }
+}
+
+async function onPostitPointerUp(){
+  if(!notaDragState) return;
+  const { id, el, overId, moved } = notaDragState;
+  el.removeEventListener("pointermove", onPostitPointerMove);
+  el.removeEventListener("pointerup", onPostitPointerUp);
+  el.removeEventListener("pointercancel", onPostitPointerUp);
+  el.classList.remove("dragging");
+  document.querySelectorAll(".postit.drag-over").forEach(p => p.classList.remove("drag-over"));
+  notaDragState = null;
+
+  if(!moved || !overId || overId === id) return;
+
+  const fromIdx = noteList.findIndex(n => n.id === id);
+  const toIdx = noteList.findIndex(n => n.id === overId);
+  if(fromIdx === -1 || toIdx === -1) return;
+  const [moved_] = noteList.splice(fromIdx, 1);
+  noteList.splice(toIdx, 0, moved_);
+  renderNote();
+  await persistNoteOrder();
+}
+
+async function persistNoteOrder(){
+  noteList.forEach((n, idx) => { n.ordine = idx; });
+  if(DEMO_MODE){
+    demoState.note = noteList;
+    return;
+  }
+  await Promise.all(noteList.map((n, idx) => sb.from("scuderia_note").update({ ordine: idx }).eq("id", n.id)));
 }
 
 function openNotaForm(){
@@ -2086,10 +2150,11 @@ async function saveNota(){
   if(!testo){ errBox.textContent = "Scrivi un promemoria prima di salvare."; errBox.style.display = "block"; return; }
 
   try{
+    const nextOrdine = noteList.length;
     if(DEMO_MODE){
-      demoState.note.unshift({ id:"n" + (demoIdCounter++ + 500), centro_id: demoState.centro.id, testo, colore: notaColoreSelezionato, created_at: new Date().toISOString() });
+      demoState.note.push({ id:"n" + (demoIdCounter++ + 500), centro_id: demoState.centro.id, testo, colore: notaColoreSelezionato, created_at: new Date().toISOString(), ordine: nextOrdine });
     } else {
-      const { error } = await sb.from("scuderia_note").insert({ centro_id: currentCentro.id, testo, colore: notaColoreSelezionato });
+      const { error } = await sb.from("scuderia_note").insert({ centro_id: currentCentro.id, testo, colore: notaColoreSelezionato, ordine: nextOrdine });
       if(error) throw error;
     }
     await loadNote();
