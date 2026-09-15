@@ -1,0 +1,10 @@
+{
+  "name": "Equo Scuderia",
+  "short_name": "Equo Scuderia",
+  "description": "Gestionale per centri ippici, maneggi e scuderie",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfcf8",
+  "theme_color": "#3f5d3a",
+  "icons": []
+}

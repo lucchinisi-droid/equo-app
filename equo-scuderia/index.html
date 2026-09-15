@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Equo Scuderia — Gestionale centro ippico</title>
+<meta name="description" content="Gestionale per centri ippici, maneggi e scuderie: anagrafica cavalli, lezioni, abbonamenti e comunicazioni in un unico posto.">
+<meta name="theme-color" content="#3f5d3a">
+<link rel="manifest" href="manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --radius:10px; --radius-lg:16px; --radius-full:999px;
+  --bg:#fdfcf8; --surface:#ffffff; --text:#19160b; --muted:#676357;
+  --muted-bg:#f4f2ea; --border:#e0ded7;
+  --primary:#3f5d3a; --primary-hover:#324a2e; --primary-fg:#fdfcf8;
+  --secondary:#f9edd9; --secondary-fg:#4a3f2a;
+  --accent:#f4d9bb; --accent-fg:#4a3f2a;
+  --danger:#b3261e; --danger-bg:#fbeceb;
+  --shadow-sm:0 1px 2px rgba(25,22,11,.06);
+  --shadow-md:0 4px 12px rgba(25,22,11,.08);
+  --shadow-lg:0 10px 30px rgba(25,22,11,.12);
+  --sidebar-w:248px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:inherit}
+.screen{display:none}
+.screen.active{display:block}
+[hidden]{display:none!important}
+
+/* ---------- LAYOUT ---------- */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--sidebar-w); flex-shrink:0; background:var(--surface);
+  border-right:1px solid var(--border); display:flex; flex-direction:column;
+  position:fixed; top:0; bottom:0; left:0; z-index:40; transition:transform .2s ease;
+}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid var(--border)}
+.sidebar-brand .logo-dot{width:34px;height:34px;border-radius:var(--radius);background:var(--primary);
+  display:flex;align-items:center;justify-content:center;color:var(--primary-fg);font-weight:700;flex-shrink:0}
+.sidebar-brand .name{font-weight:700;font-size:15px;line-height:1.2}
+.sidebar-brand .sub{font-size:11.5px;color:var(--muted)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius);
+  color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; cursor:pointer;
+  margin-bottom:2px; border:none; background:none; width:100%; text-align:left;
+}
+.nav-item i{width:18px;text-align:center;font-size:15px;flex-shrink:0}
+.nav-item:hover{background:var(--muted-bg);color:var(--text)}
+.nav-item.active{background:var(--secondary);color:var(--primary-hover);font-weight:600}
+.nav-item .badge{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.03em;
+  background:var(--accent);color:var(--accent-fg);padding:2px 6px;border-radius:var(--radius-full)}
+.nav-divider{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);
+  text-transform:uppercase;padding:14px 12px 6px}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border)}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius);cursor:pointer}
+.sidebar-user:hover{background:var(--muted-bg)}
+.avatar{width:32px;height:32px;border-radius:var(--radius-full);background:var(--secondary);
+  color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.sidebar-user .u-name{font-size:13px;font-weight:600;line-height:1.2}
+.sidebar-user .u-role{font-size:11px;color:var(--muted)}
+
+.main{flex:1;margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  display:none; align-items:center; justify-content:space-between; padding:14px 18px;
+  background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:30;
+}
+.topbar-title{font-weight:700;font-size:16px}
+.hamburger{background:none;border:none;font-size:20px;color:var(--text);cursor:pointer;padding:6px}
+.content{padding:28px 32px;flex:1}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(25,22,11,.4);z-index:35}
+.sidebar-overlay.active{display:block}
+
+@media (max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .topbar{display:flex}
+  .content{padding:18px}
+}
+
+/* ---------- UI PRIMITIVES ---------- */
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.page-header h1{font-size:22px;margin:0;font-weight:700}
+.page-header p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;box-shadow:var(--shadow-sm)}
+.grid{display:grid;gap:16px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:760px){.grid-3,.grid-2{grid-template-columns:1fr}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 18px;border-radius:var(--radius-full);border:none;cursor:pointer;
+  font-weight:600;font-size:14px;transition:background .15s ease,opacity .15s ease}
+.btn-primary{background:var(--primary);color:var(--primary-fg)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--muted-bg)}
+.btn-ghost{background:transparent;color:var(--muted)}
+.btn-ghost:hover{color:var(--text)}
+.btn-danger{background:var(--danger-bg);color:var(--danger)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-block{width:100%}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.02em}
+.input,select.input{width:100%;padding:11px 13px;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--bg);color:var(--text)}
+.input:focus,select.input:focus{outline:none;border-color:var(--primary)}
+
+.badge-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+  padding:3px 10px;border-radius:var(--radius-full)}
+.badge-green{background:#e4efe1;color:#2c5228}
+.badge-yellow{background:#fdf3d8;color:#8a6a12}
+.badge-red{background:var(--danger-bg);color:var(--danger)}
+.badge-gray{background:var(--muted-bg);color:var(--muted)}
+
+.stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
+.stat-tile .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:600}
+.stat-tile .value{font-size:26px;font-weight:700;margin-top:4px}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;
+  letter-spacing:.02em;padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:12px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state i{font-size:28px;margin-bottom:10px;opacity:.5}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);
+  background:var(--text);color:var(--bg);padding:12px 20px;border-radius:var(--radius);
+  font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lg);z-index:200;
+  opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;max-width:90%;text-align:center}
+.toast.active{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- AUTH ---------- */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--muted-bg)}
+.auth-card{width:100%;max-width:400px;background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);box-shadow:var(--shadow-md);padding:32px 28px}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.auth-logo .logo-dot{width:38px;height:38px;border-radius:var(--radius);background:var(--primary);
+  color:var(--primary-fg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.auth-logo .t{font-weight:700;font-size:18px}
+.auth-tag{color:var(--muted);font-size:13.5px;margin:0 0 22px}
+.auth-tabs{display:flex;background:var(--muted-bg);border-radius:var(--radius-full);padding:4px;margin-bottom:20px}
+.auth-tab{flex:1;text-align:center;padding:9px;border-radius:var(--radius-full);cursor:pointer;
+  font-size:13.5px;font-weight:600;color:var(--muted)}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.auth-error{background:var(--danger-bg);color:var(--danger);padding:10px 12px;border-radius:var(--radius);
+  font-size:13px;margin-bottom:14px;display:none}
+.auth-demo{text-align:center;margin-top:16px}
+.auth-demo a{font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer}
+
+/* ---------- ONBOARDING ---------- */
+.onboard-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--muted-bg)}
+.onboard-card{width:100%;max-width:460px}
+.onboard-choice{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;margin-bottom:14px;cursor:pointer;transition:border-color .15s ease}
+.onboard-choice:hover{border-color:var(--primary)}
+.onboard-choice .ic{width:40px;height:40px;border-radius:var(--radius);background:var(--secondary);
+  color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px}
+.onboard-choice h3{margin:0 0 4px;font-size:15.5px}
+.onboard-choice p{margin:0;color:var(--muted);font-size:13px}
+
+/* ---------- COMING SOON ---------- */
+.coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:70px 24px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);min-height:360px}
+.coming-soon .ic{width:56px;height:56px;border-radius:var(--radius-lg);background:var(--secondary);
+  color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px}
+.coming-soon .badge-pill{margin-bottom:14px}
+.coming-soon h2{margin:0 0 8px;font-size:19px}
+.coming-soon p{margin:0;color:var(--muted);font-size:14px;max-width:420px}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(25,22,11,.45);z-index:100;
+  align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:440px;
+  max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-title{font-size:17px;font-weight:700;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between}
+.modal-title .x{cursor:pointer;color:var(--muted);font-size:16px}
+.join-code-box{display:flex;align-items:center;gap:10px;background:var(--muted-bg);border:1px dashed var(--border);
+  border-radius:var(--radius);padding:12px 14px;font-family:ui-monospace,monospace;font-size:15px;font-weight:700;
+  letter-spacing:.05em}
+.join-code-box button{margin-left:auto}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ AUTH SCREEN ═══════════ -->
+<div class="screen active" id="screen-auth">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><div class="logo-dot">ES</div><div class="t">Equo Scuderia</div></div>
+      <p class="auth-tag">Il gestionale per centri ippici, maneggi e scuderie.</p>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">Accedi</div>
+        <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">Registrati</div>
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+      <form id="auth-form" onsubmit="submitAuth(event)">
+        <div class="field" id="field-nome" style="display:none">
+          <label>Nome e cognome</label>
+          <input class="input" id="auth-nome" placeholder="Il tuo nome">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input class="input" id="auth-email" type="email" placeholder="tuamail@esempio.it" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="input" id="auth-password" type="password" placeholder="••••••••" required minlength="6">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="auth-submit-btn">Accedi</button>
+      </form>
+      <div class="auth-demo">
+        <a onclick="startDemo()">Prova la demo (senza account)</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ONBOARDING SCREEN ═══════════ -->
+<div class="screen" id="screen-onboarding">
+  <div class="onboard-wrap">
+    <div class="onboard-card">
+      <div class="auth-logo"><div class="logo-dot">ES</div><div class="t">Benvenuto su Equo Scuderia</div></div>
+      <p class="auth-tag" style="margin-bottom:24px">Per iniziare, dicci come vuoi usare il gestionale.</p>
+
+      <div class="onboard-choice" onclick="showOnboardCreate()">
+        <div class="ic"><i class="fa-solid fa-house-chimney"></i></div>
+        <h3>Gestisco un centro ippico</h3>
+        <p>Crea il profilo del tuo centro e diventa amministratore: potrai invitare istruttori, veterinari, maniscalchi e allievi.</p>
+      </div>
+      <div class="onboard-choice" onclick="showOnboardJoin()">
+        <div class="ic"><i class="fa-solid fa-key"></i></div>
+        <h3>Ho un codice invito</h3>
+        <p>Un centro ti ha invitato con un codice. Inseriscilo per entrare a far parte del team.</p>
+      </div>
+
+      <!-- Crea centro -->
+      <div class="card" id="onboard-create" style="display:none;margin-top:6px">
+        <div class="field">
+          <label>Nome del centro</label>
+          <input class="input" id="centro-nome" placeholder="Es. Centro Ippico Colleferro">
+        </div>
+        <div class="field">
+          <label>Indirizzo (facoltativo)</label>
+          <input class="input" id="centro-indirizzo" placeholder="Via, città">
+        </div>
+        <div class="field">
+          <label>Telefono (facoltativo)</label>
+          <input class="input" id="centro-telefono" placeholder="+39 ...">
+        </div>
+        <div class="auth-error" id="create-centro-error"></div>
+        <button class="btn btn-primary btn-block" onclick="createCentro()">Crea centro</button>
+      </div>
+
+      <!-- Unisciti -->
+      <div class="card" id="onboard-join" style="display:none;margin-top:6px">
+        <div class="field">
+          <label>Codice invito</label>
+          <input class="input" id="join-code" placeholder="Es. EQUO-XXXX" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>Il tuo ruolo</label>
+          <select class="input" id="join-ruolo">
+            <option value="istruttore">Istruttore</option>
+            <option value="veterinario">Veterinario</option>
+            <option value="maniscalco">Maniscalco</option>
+            <option value="allievo">Allievo / Genitore</option>
+          </select>
+        </div>
+        <div class="auth-error" id="join-centro-error"></div>
+        <button class="btn btn-primary btn-block" onclick="joinCentro()">Unisciti al centro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ APP SHELL (admin/staff) ═══════════ -->
+<div class="screen" id="screen-app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-dot">ES</div>
+        <div>
+          <div class="name">Equo Scuderia</div>
+          <div class="sub" id="sidebar-centro-name">—</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-divider">Gestione</div>
+        <button class="nav-item active" data-module="centro" onclick="showModule('centro')">
+          <i class="fa-solid fa-house-chimney"></i> Il tuo Centro
+        </button>
+        <button class="nav-item" data-module="cavalli" onclick="showModule('cavalli')">
+          <i class="fa-solid fa-horse-head"></i> Cavalli &amp; Salute
+        </button>
+        <button class="nav-item" data-module="lezioni" onclick="showModule('lezioni')">
+          <i class="fa-solid fa-calendar-days"></i> Lezioni &amp; Prenotazioni
+        </button>
+        <button class="nav-item" data-module="pacchetti" onclick="showModule('pacchetti')">
+          <i class="fa-solid fa-ticket"></i> Pacchetti &amp; Abbonamenti
+        </button>
+        <button class="nav-item" data-module="comunicazioni" onclick="showModule('comunicazioni')">
+          <i class="fa-solid fa-comments"></i> Comunicazioni
+        </button>
+
+        <div class="nav-divider">In arrivo</div>
+        <button class="nav-item" data-module="mascalcia" onclick="showModule('mascalcia')">
+          <i class="fa-solid fa-horseshoe"></i> Mascalcia <span class="badge">SOON</span>
+        </button>
+        <button class="nav-item" data-module="selleria" onclick="showModule('selleria')">
+          <i class="fa-solid fa-bag-shopping"></i> Selleria &amp; Attrezzatura <span class="badge">SOON</span>
+        </button>
+        <button class="nav-item" data-module="fatturazione" onclick="showModule('fatturazione')">
+          <i class="fa-solid fa-file-invoice"></i> Fatturazione SDI <span class="badge">SOON</span>
+        </button>
+        <button class="nav-item" data-module="ai" onclick="showModule('ai')">
+          <i class="fa-solid fa-sparkles"></i> Assistente AI <span class="badge">SOON</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" onclick="logout()">
+          <div class="avatar" id="user-avatar">U</div>
+          <div>
+            <div class="u-name" id="user-name">Utente</div>
+            <div class="u-role" id="user-role">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-title" id="topbar-title">Il tuo Centro</div>
+        <div class="avatar" id="user-avatar-mobile" onclick="logout()">U</div>
+      </div>
+      <div class="content">
+
+        <!-- MODULO: IL TUO CENTRO -->
+        <div class="module-page" id="module-centro">
+          <div class="page-header">
+            <div>
+              <h1 id="centro-page-title">Il tuo Centro</h1>
+              <p>Anagrafica del centro, team e codice invito.</p>
+            </div>
+          </div>
+          <div class="grid grid-2" style="align-items:start">
+            <div class="card">
+              <h3 style="margin-top:0">Dati centro</h3>
+              <div class="field"><label>Nome</label><div id="centro-view-nome" style="font-weight:600">—</div></div>
+              <div class="field"><label>Indirizzo</label><div id="centro-view-indirizzo" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Telefono</label><div id="centro-view-telefono" style="color:var(--muted)">—</div></div>
+              <div class="field">
+                <label>Codice invito</label>
+                <div class="join-code-box">
+                  <span id="centro-view-code">—</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyJoinCode()"><i class="fa-solid fa-copy"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0">Team (<span id="team-count">0</span>)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Nome</th><th>Ruolo</th><th></th></tr></thead>
+                  <tbody id="team-table-body"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="team-empty" style="display:none">
+                <i class="fa-solid fa-users"></i><div>Nessun altro membro nel team ancora.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULI PLACEHOLDER (verranno sviluppati nei prossimi step) -->
+        <div class="module-page" id="module-cavalli" style="display:none"></div>
+        <div class="module-page" id="module-lezioni" style="display:none"></div>
+        <div class="module-page" id="module-pacchetti" style="display:none"></div>
+        <div class="module-page" id="module-comunicazioni" style="display:none"></div>
+        <div class="module-page" id="module-mascalcia" style="display:none"></div>
+        <div class="module-page" id="module-selleria" style="display:none"></div>
+        <div class="module-page" id="module-fatturazione" style="display:none"></div>
+        <div class="module-page" id="module-ai" style="display:none"></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PORTALE ALLIEVO (ruolo allievo — no sidebar) ═══════════ -->
+<div class="screen" id="screen-allievo">
+  <div class="onboard-wrap">
+    <div class="onboard-card" style="max-width:420px;text-align:center">
+      <div class="auth-logo" style="justify-content:center"><div class="logo-dot">ES</div></div>
+      <h2 style="margin:14px 0 6px" id="allievo-centro-name">Il tuo centro</h2>
+      <p class="auth-tag" style="margin-bottom:24px">Benvenuto! Il portale allievo con lezioni e prenotazioni arriva a breve.</p>
+      <div class="badge-pill badge-yellow" style="margin-bottom:20px"><i class="fa-solid fa-clock"></i> PRESTO DISPONIBILE</div>
+      <button class="btn btn-outline btn-block" onclick="logout()">Esci</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: rimuovi membro -->
+<div class="modal-overlay" id="modal-remove-member" onclick="closeOut(event,'modal-remove-member')">
+  <div class="modal">
+    <div class="modal-title">Rimuovi membro <span class="x" onclick="closeModal('modal-remove-member')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px" id="remove-member-text">Confermi di voler rimuovere questo membro dal team?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-remove-member')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmRemoveMember()">Rimuovi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   EQUO SCUDERIA — v1 (Modulo 1: Auth + Onboarding + Team)
+   Stesso progetto Supabase di Equo App (equo-prod): tabelle nuove
+   centri / scuderia_membri, RLS separata (vedi schema-scuderia.sql).
+   ══════════════════════════════════════════════════════ */
+
+const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore" };
+const COMING_SOON_COPY = {
+  mascalcia: { icon:"fa-horseshoe", titolo:"Mascalcia", testo:"Pianifica gli interventi del maniscalco, tieni traccia di ferrature e sferrature per ogni cavallo, con promemoria automatici sulle scadenze." },
+  selleria: { icon:"fa-bag-shopping", titolo:"Selleria & Attrezzatura", testo:"Inventario di selle, finimenti e attrezzatura del centro: chi la usa, in che stato è, quando va sostituita o manutenuta." },
+  fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"Genera e invia fatture elettroniche conformi SDI direttamente dagli abbonamenti e dalle lezioni registrate nel gestionale." },
+  ai: { icon:"fa-sparkles", titolo:"Assistente AI", testo:"Un assistente AI per il gestore del centro: risponde a domande gestionali, suggerisce ottimizzazioni su lezioni e cavalli, automatizza i promemoria." },
+};
+const ACTIVE_PLACEHOLDER_COPY = {
+  cavalli: { icon:"fa-horse-head", titolo:"Cavalli & Salute", testo:"Anagrafica cavalli del centro, cartelle cliniche, vaccinazioni e promemoria — in sviluppo nel prossimo step." },
+  lezioni: { icon:"fa-calendar-days", titolo:"Lezioni & Prenotazioni", testo:"Calendario condiviso, slot, assegnazione istruttore e cavallo, rilevamento conflitti — in sviluppo nel prossimo step." },
+  pacchetti: { icon:"fa-ticket", titolo:"Pacchetti & Abbonamenti", testo:"Carnet a scalare, abbonamenti, pacchetti pensione e cruscotto a semaforo per le scadenze — in sviluppo nel prossimo step." },
+  comunicazioni: { icon:"fa-comments", titolo:"Comunicazioni", testo:"Messaggi a singoli, gruppi o ruoli, con priorità e notifiche in-app — in sviluppo nel prossimo step." },
+};
+
+let DEMO_MODE = false;
+let currentUser = null;   // { id, email }
+let currentCentro = null; // { id, nome, indirizzo, telefono, join_code, owner_id }
+let currentMembro = null; // { ruolo, nome_visualizzato }
+let teamList = [];
+let memberToRemove = null;
+let demoIdCounter = 1;
+
+let demoState = {
+  centro: { id:"demo-centro", nome:"Centro Ippico Demo", indirizzo:"Via delle Scuderie 12, Colleferro (RM)", telefono:"+39 06 1234567", join_code:"EQUO-DEMO1", owner_id:"demo-user" },
+  membri: [
+    { id:"m1", user_id:"demo-user", ruolo:"admin", nome_visualizzato:"Tu (admin)" },
+    { id:"m2", user_id:"u2", ruolo:"istruttore", nome_visualizzato:"Marco Bianchi" },
+    { id:"m3", user_id:"u3", ruolo:"allievo", nome_visualizzato:"Giulia Verdi" },
+  ],
+};
+
+/* ---------- TOAST ---------- */
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("active");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("active"), 2800);
+}
+
+/* ---------- SCREENS ---------- */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* ---------- AUTH ---------- */
+let authMode = "login";
+function setAuthTab(mode){
+  authMode = mode;
+  document.getElementById("tab-login").classList.toggle("active", mode === "login");
+  document.getElementById("tab-register").classList.toggle("active", mode === "register");
+  document.getElementById("field-nome").style.display = mode === "register" ? "block" : "none";
+  document.getElementById("auth-submit-btn").textContent = mode === "register" ? "Crea account" : "Accedi";
+  document.getElementById("auth-error").style.display = "none";
+}
+
+async function submitAuth(e){
+  e.preventDefault();
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+  const nome = document.getElementById("auth-nome").value.trim();
+  const errBox = document.getElementById("auth-error");
+  errBox.style.display = "none";
+
+  try{
+    if(authMode === "register"){
+      const { data, error } = await sb.auth.signUp({ email, password, options:{ data:{ full_name: nome } } });
+      if(error) throw error;
+      if(data.user) currentUser = { id: data.user.id, email: data.user.email };
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      currentUser = { id: data.user.id, email: data.user.email };
+    }
+    DEMO_MODE = false;
+    await afterLogin();
+  } catch(err){
+    errBox.textContent = err.message || "Errore, riprova.";
+    errBox.style.display = "block";
+  }
+}
+
+function startDemo(){
+  DEMO_MODE = true;
+  currentUser = { id:"demo-user", email:"demo@equoscuderia.it" };
+  currentCentro = demoState.centro;
+  currentMembro = demoState.membri[0];
+  teamList = demoState.membri;
+  enterAppShell();
+  showToast("Modalità demo attiva — nessun dato reale viene salvato.");
+}
+
+async function logout(){
+  if(!DEMO_MODE){ try{ await sb.auth.signOut(); }catch(e){} }
+  currentUser = null; currentCentro = null; currentMembro = null; teamList = [];
+  DEMO_MODE = false;
+  document.getElementById("auth-form").reset();
+  showScreen("screen-auth");
+}
+
+/* ---------- POST-LOGIN ROUTING ---------- */
+async function afterLogin(){
+  if(DEMO_MODE){ enterAppShell(); return; }
+
+  const { data: membri, error } = await sb
+    .from("scuderia_membri")
+    .select("id, centro_id, ruolo, nome_visualizzato, centri(id, nome, indirizzo, telefono, join_code, owner_id)")
+    .eq("user_id", currentUser.id);
+
+  if(error){ showToast("Errore nel caricamento del profilo."); return; }
+
+  if(!membri || membri.length === 0){
+    showScreen("screen-onboarding");
+    return;
+  }
+
+  const m = membri[0];
+  currentCentro = m.centri;
+  currentMembro = { ruolo: m.ruolo, nome_visualizzato: m.nome_visualizzato };
+
+  if(m.ruolo === "allievo"){
+    document.getElementById("allievo-centro-name").textContent = currentCentro.nome;
+    showScreen("screen-allievo");
+  } else {
+    await loadTeam();
+    enterAppShell();
+  }
+}
+
+/* ---------- ONBOARDING ---------- */
+function showOnboardCreate(){
+  document.getElementById("onboard-create").style.display = "block";
+  document.getElementById("onboard-join").style.display = "none";
+}
+function showOnboardJoin(){
+  document.getElementById("onboard-join").style.display = "block";
+  document.getElementById("onboard-create").style.display = "none";
+}
+
+async function createCentro(){
+  const nome = document.getElementById("centro-nome").value.trim();
+  const indirizzo = document.getElementById("centro-indirizzo").value.trim();
+  const telefono = document.getElementById("centro-telefono").value.trim();
+  const errBox = document.getElementById("create-centro-error");
+  errBox.style.display = "none";
+  if(!nome){ errBox.textContent = "Inserisci il nome del centro."; errBox.style.display = "block"; return; }
+
+  const join_code = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+  try{
+    const { data, error } = await sb.from("centri").insert({
+      nome, indirizzo: indirizzo || null, telefono: telefono || null,
+      join_code, owner_id: currentUser.id,
+    }).select().single();
+    if(error) throw error;
+    currentCentro = data;
+    currentMembro = { ruolo:"admin", nome_visualizzato:null };
+    await loadTeam();
+    enterAppShell();
+    showToast("Centro creato! Sei l'amministratore.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nella creazione del centro.";
+    errBox.style.display = "block";
+  }
+}
+
+async function joinCentro(){
+  const code = document.getElementById("join-code").value.trim().toUpperCase();
+  const ruolo = document.getElementById("join-ruolo").value;
+  const errBox = document.getElementById("join-centro-error");
+  errBox.style.display = "none";
+  if(!code){ errBox.textContent = "Inserisci un codice invito."; errBox.style.display = "block"; return; }
+
+  try{
+    const { data, error } = await sb.rpc("join_centro_by_code", {
+      p_join_code: code, p_ruolo: ruolo, p_nome_visualizzato: null,
+    });
+    if(error) throw error;
+    await afterLogin();
+    showToast("Ti sei unito al centro!");
+  } catch(err){
+    errBox.textContent = err.message || "Codice non valido.";
+    errBox.style.display = "block";
+  }
+}
+
+/* ---------- TEAM ---------- */
+async function loadTeam(){
+  if(DEMO_MODE){ teamList = demoState.membri; return; }
+  const { data, error } = await sb.from("scuderia_membri")
+    .select("id, user_id, ruolo, nome_visualizzato")
+    .eq("centro_id", currentCentro.id)
+    .order("created_at", { ascending: true });
+  if(!error) teamList = data || [];
+}
+
+function renderTeam(){
+  document.getElementById("team-count").textContent = teamList.length;
+  const body = document.getElementById("team-table-body");
+  const empty = document.getElementById("team-empty");
+  body.innerHTML = "";
+  if(teamList.length <= 1){ empty.style.display = "block"; } else { empty.style.display = "none"; }
+
+  teamList.forEach(m => {
+    const isMe = m.user_id === currentUser.id;
+    const isAdminUser = currentMembro.ruolo === "admin";
+    const canRemove = isAdminUser && !isMe && m.ruolo !== "admin";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(m.nome_visualizzato || (isMe ? "Tu" : "Membro"))}</td>
+      <td><span class="badge-pill badge-gray">${RUOLO_LABELS[m.ruolo] || m.ruolo}</span></td>
+      <td style="text-align:right">${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember('${m.id}','${escapeHtml(m.nome_visualizzato || 'questo membro')}')"><i class="fa-solid fa-trash"></i></button>` : ""}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function askRemoveMember(id, nome){
+  memberToRemove = id;
+  document.getElementById("remove-member-text").textContent = `Confermi di voler rimuovere ${nome} dal team?`;
+  openModal("modal-remove-member");
+}
+
+async function confirmRemoveMember(){
+  if(!memberToRemove) return;
+  if(DEMO_MODE){
+    demoState.membri = demoState.membri.filter(m => m.id !== memberToRemove);
+    teamList = demoState.membri;
+  } else {
+    const { error } = await sb.from("scuderia_membri").delete().eq("id", memberToRemove);
+    if(error){ showToast("Errore nella rimozione."); closeModal("modal-remove-member"); return; }
+    await loadTeam();
+  }
+  renderTeam();
+  closeModal("modal-remove-member");
+  showToast("Membro rimosso.");
+}
+
+function copyJoinCode(){
+  const code = currentCentro?.join_code || "";
+  navigator.clipboard?.writeText(code).then(() => showToast("Codice copiato!"));
+}
+
+/* ---------- APP SHELL ---------- */
+function enterAppShell(){
+  document.getElementById("sidebar-centro-name").textContent = currentCentro?.nome || "—";
+  document.getElementById("centro-view-nome").textContent = currentCentro?.nome || "—";
+  document.getElementById("centro-view-indirizzo").textContent = currentCentro?.indirizzo || "Non impostato";
+  document.getElementById("centro-view-telefono").textContent = currentCentro?.telefono || "Non impostato";
+  document.getElementById("centro-view-code").textContent = currentCentro?.join_code || "—";
+
+  const label = RUOLO_LABELS[currentMembro?.ruolo] || currentMembro?.ruolo || "";
+  const displayName = currentMembro?.nome_visualizzato || currentUser?.email || "Utente";
+  const initial = (displayName || "U").trim().charAt(0).toUpperCase();
+  document.getElementById("user-name").textContent = displayName;
+  document.getElementById("user-role").textContent = label;
+  document.getElementById("user-avatar").textContent = initial;
+  document.getElementById("user-avatar-mobile").textContent = initial;
+
+  renderTeam();
+  renderPlaceholderModules();
+  showModule("centro");
+  showScreen("screen-app");
+}
+
+function renderPlaceholderModules(){
+  Object.keys(ACTIVE_PLACEHOLDER_COPY).forEach(key => {
+    const c = ACTIVE_PLACEHOLDER_COPY[key];
+    document.getElementById("module-" + key).innerHTML = comingSoonHtml(c.icon, c.titolo, c.testo, "IN SVILUPPO");
+  });
+  Object.keys(COMING_SOON_COPY).forEach(key => {
+    const c = COMING_SOON_COPY[key];
+    document.getElementById("module-" + key).innerHTML = comingSoonHtml(c.icon, c.titolo, c.testo, "PRESTO DISPONIBILE");
+  });
+}
+
+function comingSoonHtml(icon, titolo, testo, badgeText){
+  return `
+    <div class="coming-soon">
+      <div class="ic"><i class="fa-solid ${icon}"></i></div>
+      <div class="badge-pill badge-yellow"><i class="fa-solid fa-clock"></i> ${badgeText}</div>
+      <h2>${escapeHtml(titolo)}</h2>
+      <p>${escapeHtml(testo)}</p>
+    </div>`;
+}
+
+const MODULE_TITLES = {
+  centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
+  pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Comunicazioni",
+  mascalcia:"Mascalcia", selleria:"Selleria & Attrezzatura", fatturazione:"Fatturazione SDI", ai:"Assistente AI",
+};
+function showModule(key){
+  document.querySelectorAll(".module-page").forEach(p => p.style.display = "none");
+  document.getElementById("module-" + key).style.display = "block";
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.module === key));
+  document.getElementById("topbar-title").textContent = MODULE_TITLES[key] || "";
+  closeSidebar();
+}
+
+function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebar-overlay").classList.add("active"); }
+function closeSidebar(){ document.getElementById("sidebar").classList.remove("open"); document.getElementById("sidebar-overlay").classList.remove("active"); }
+
+/* ---------- MODALS ---------- */
+function openModal(id){ document.getElementById(id).classList.add("active"); }
+function closeModal(id){ document.getElementById(id).classList.remove("active"); }
+function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
+
+/* ---------- HELPERS ---------- */
+function escapeHtml(str){
+  return (str || "").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ---------- BOOT ---------- */
+async function boot(){
+  try{
+    const { data } = await sb.auth.getSession();
+    if(data?.session?.user){
+      currentUser = { id: data.session.user.id, email: data.session.user.email };
+      await afterLogin();
+    }
+  } catch(e){ /* nessuna sessione, resta su auth */ }
+}
+boot();
+</script>
+</body>
+</html>
