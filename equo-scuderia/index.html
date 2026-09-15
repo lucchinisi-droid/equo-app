@@ -551,6 +551,28 @@ textarea.input{resize:vertical}
               <i class="fa-solid fa-address-book"></i><div>Nessun contatto registrato ancora.</div>
             </div>
           </div>
+
+          <div class="card" id="card-dati-fiscali" style="margin-top:16px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <h3 style="margin:0"><i class="fa-solid fa-building-columns"></i> Dati societari e pagamenti</h3>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline btn-sm" onclick="copyDatiFiscali()"><i class="fa-solid fa-copy"></i> Copia tutto</button>
+                <button class="btn btn-outline btn-sm" onclick="openDatiFiscaliForm()"><i class="fa-solid fa-pen"></i> Modifica</button>
+              </div>
+            </div>
+            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Visibili solo all'amministratore. Usa "Copia tutto" per incollarli in una mail, un preventivo o un modulo di pagamento.</p>
+            <div class="grid grid-2" id="dati-fiscali-view">
+              <div class="field"><label>Denominazione</label><div id="df-view-denominazione" style="font-weight:600">—</div></div>
+              <div class="field"><label>P.IVA</label><div id="df-view-piva" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Cod. REA</label><div id="df-view-cod_rea" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>IBAN</label><div id="df-view-iban" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>PEC</label><div id="df-view-pec" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>SDI</label><div id="df-view-sdi" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Indirizzo</label><div id="df-view-indirizzo" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Telefono fisso</label><div id="df-view-telefono_fisso" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Cellulare</label><div id="df-view-cellulare" style="color:var(--muted)">—</div></div>
+            </div>
+          </div>
         </div>
 
         <!-- MODULI GESTIONE -->
@@ -767,6 +789,30 @@ textarea.input{resize:vertical}
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-contatto')">Annulla</button>
       <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteContatto()">Elimina</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: modifica dati societari e pagamenti -->
+<div class="modal-overlay" id="modal-dati-fiscali" onclick="closeOut(event,'modal-dati-fiscali')">
+  <div class="modal">
+    <div class="modal-title">Dati societari e pagamenti <span class="x" onclick="closeModal('modal-dati-fiscali')">✕</span></div>
+    <div class="field"><label>Denominazione</label><input class="input" id="df-denominazione" placeholder="Ragione sociale"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>P.IVA</label><input class="input" id="df-piva"></div>
+      <div class="field"><label>Cod. REA</label><input class="input" id="df-cod_rea"></div>
+    </div>
+    <div class="field"><label>IBAN</label><input class="input" id="df-iban" placeholder="IT60 X054..."></div>
+    <div class="grid grid-2">
+      <div class="field"><label>PEC</label><input class="input" id="df-pec" type="email"></div>
+      <div class="field"><label>Codice SDI</label><input class="input" id="df-sdi"></div>
+    </div>
+    <div class="field"><label>Indirizzo</label><input class="input" id="df-indirizzo" placeholder="Via, città, provincia"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Telefono fisso</label><input class="input" id="df-telefono_fisso" placeholder="+39 ..."></div>
+      <div class="field"><label>Cellulare</label><input class="input" id="df-cellulare" placeholder="+39 ..."></div>
+    </div>
+    <div class="auth-error" id="dati-fiscali-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveDatiFiscali()">Salva dati</button>
   </div>
 </div>
 
@@ -1058,6 +1104,8 @@ let contattiList = [];
 let editingContattoId = null;
 let contattoToDelete = null;
 
+let datiFiscali = null;
+
 function isoDaysFromNow(n){
   const d = new Date();
   d.setDate(d.getDate() + n);
@@ -1104,6 +1152,12 @@ let demoState = {
     { id:"ct2", centro_id:"demo-centro", tipo:"giardiniere", tipo_altro:null, nome:"Luca Ferrari", telefono:"+39 333 1234567", email:"", note:"Passa ogni martedì" },
     { id:"ct3", centro_id:"demo-centro", tipo:"altro", tipo_altro:"Elettricista", nome:"Paolo Neri", telefono:"+39 347 7654321", email:"", note:"" },
   ],
+  datiFiscali: {
+    id:"df1", centro_id:"demo-centro",
+    denominazione:"Centro Ippico Demo S.r.l.", piva:"01234567890", cod_rea:"RM-1234567",
+    iban:"IT60X0542811101000000123456", pec:"centroippicodemo@pec.it", sdi:"ABC1234",
+    indirizzo:"Via delle Scuderie 12, Colleferro (RM)", telefono_fisso:"+39 06 1234567", cellulare:"+39 333 0001122",
+  },
 };
 
 /* ---------- TOAST ---------- */
@@ -1358,6 +1412,7 @@ async function confirmRemoveMember(){
 async function refreshContattiModule(){
   await loadContatti();
   renderContatti();
+  await refreshDatiFiscaliCard();
 }
 
 async function loadContatti(){
@@ -1486,6 +1541,81 @@ async function confirmDeleteContatto(){
 function copyJoinCode(){
   const code = currentCentro?.join_code || "";
   navigator.clipboard?.writeText(code).then(() => showToast("Codice copiato!"));
+}
+
+/* ---------- DATI SOCIETARI E PAGAMENTI (solo admin) ---------- */
+const DATI_FISCALI_FIELDS = ["denominazione","piva","cod_rea","iban","pec","sdi","indirizzo","telefono_fisso","cellulare"];
+const DATI_FISCALI_LABELS = { denominazione:"Denominazione", piva:"P.IVA", cod_rea:"Cod. REA", iban:"IBAN", pec:"PEC", sdi:"SDI", indirizzo:"Indirizzo", telefono_fisso:"Telefono fisso", cellulare:"Cellulare" };
+
+async function refreshDatiFiscaliCard(){
+  const isAdminUser = currentMembro?.ruolo === "admin";
+  document.getElementById("card-dati-fiscali").style.display = isAdminUser ? "block" : "none";
+  if(!isAdminUser) return;
+  await loadDatiFiscali();
+  renderDatiFiscali();
+}
+
+async function loadDatiFiscali(){
+  if(DEMO_MODE){ datiFiscali = demoState.datiFiscali; return; }
+  const { data, error } = await sb.from("scuderia_dati_fiscali")
+    .select("id, centro_id, denominazione, piva, cod_rea, iban, pec, sdi, indirizzo, telefono_fisso, cellulare")
+    .eq("centro_id", currentCentro.id)
+    .maybeSingle();
+  if(!error) datiFiscali = data || null;
+}
+
+function renderDatiFiscali(){
+  DATI_FISCALI_FIELDS.forEach(f => {
+    const val = datiFiscali?.[f];
+    document.getElementById("df-view-" + f).textContent = val ? val : "—";
+  });
+}
+
+function openDatiFiscaliForm(){
+  document.getElementById("dati-fiscali-error").style.display = "none";
+  DATI_FISCALI_FIELDS.forEach(f => {
+    document.getElementById("df-" + f).value = datiFiscali?.[f] || "";
+  });
+  openModal("modal-dati-fiscali");
+}
+
+async function saveDatiFiscali(){
+  const errBox = document.getElementById("dati-fiscali-error");
+  errBox.style.display = "none";
+  const payload = {};
+  DATI_FISCALI_FIELDS.forEach(f => {
+    payload[f] = document.getElementById("df-" + f).value.trim() || null;
+  });
+
+  try{
+    if(DEMO_MODE){
+      demoState.datiFiscali = { ...demoState.datiFiscali, ...payload };
+      datiFiscali = demoState.datiFiscali;
+    } else if(datiFiscali?.id){
+      const { error } = await sb.from("scuderia_dati_fiscali").update(payload).eq("id", datiFiscali.id);
+      if(error) throw error;
+      await loadDatiFiscali();
+    } else {
+      const { error } = await sb.from("scuderia_dati_fiscali").insert({ centro_id: currentCentro.id, ...payload });
+      if(error) throw error;
+      await loadDatiFiscali();
+    }
+    renderDatiFiscali();
+    closeModal("modal-dati-fiscali");
+    showToast("Dati aggiornati.");
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+function copyDatiFiscali(){
+  if(!datiFiscali){ showToast("Nessun dato da copiare."); return; }
+  const lines = DATI_FISCALI_FIELDS
+    .filter(f => datiFiscali[f])
+    .map(f => `${DATI_FISCALI_LABELS[f]}: ${datiFiscali[f]}`);
+  if(lines.length === 0){ showToast("Nessun dato da copiare."); return; }
+  navigator.clipboard?.writeText(lines.join("\n")).then(() => showToast("Dati copiati negli appunti!"));
 }
 
 /* ---------- APP SHELL ---------- */
