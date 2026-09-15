@@ -525,7 +525,7 @@ textarea.input{resize:vertical}
               <h3 style="margin-top:0">Team (<span id="team-count">0</span>)</h3>
               <div class="table-wrap">
                 <table>
-                  <thead><tr><th>Nome</th><th>Ruolo</th><th></th></tr></thead>
+                  <thead><tr><th>Nome</th><th>Ruolo</th><th>Livello</th><th></th></tr></thead>
                   <tbody id="team-table-body"></tbody>
                 </table>
               </div>
@@ -538,7 +538,7 @@ textarea.input{resize:vertical}
           <div class="card" style="margin-top:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
               <h3 style="margin:0">Contatti utili (<span id="contatti-count">0</span>)</h3>
-              <button class="btn btn-outline btn-sm" onclick="openContattoForm()"><i class="fa-solid fa-plus"></i> Aggiungi contatto</button>
+              <button class="btn btn-outline btn-sm" id="btn-aggiungi-contatto" onclick="openContattoForm()"><i class="fa-solid fa-plus"></i> Aggiungi contatto</button>
             </div>
             <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Persone che collaborano con la struttura ma non usano l'app: commercialista, giardiniere, veterinario esterno, ecc.</p>
             <div class="table-wrap">
@@ -573,6 +573,30 @@ textarea.input{resize:vertical}
               <div class="field"><label>Cellulare</label><div id="df-view-cellulare" style="color:var(--muted)">—</div></div>
             </div>
           </div>
+
+          <div class="card" id="card-hard-reset" style="margin-top:16px;display:none;border:1px solid #ef4444">
+            <h3 style="margin-top:0;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> Hard Reset</h3>
+            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Operazioni riservate al Livello Admin. Cancellano definitivamente i dati del centro — non sono reversibili.</p>
+            <div class="field">
+              <label>Reset parziale — svuota un singolo modulo</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <select class="input" id="reset-modulo-select" style="flex:1;min-width:200px">
+                  <option value="cavalli">Cavalli (e storico sanitario collegato)</option>
+                  <option value="eventi">Solo eventi sanitari</option>
+                  <option value="lezioni">Lezioni</option>
+                  <option value="pacchetti">Pacchetti/abbonamenti</option>
+                  <option value="messaggi">Messaggi</option>
+                  <option value="note">Post-it</option>
+                </select>
+                <button class="btn btn-danger btn-sm" onclick="askHardReset('parziale')">Svuota modulo</button>
+              </div>
+            </div>
+            <div class="field" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <label>Reset totale — azzera tutti i dati operativi</label>
+              <p style="margin:0 0 10px;color:var(--muted);font-size:12px">Cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti e dati societari. Centro e team restano intatti.</p>
+              <button class="btn btn-danger btn-block" onclick="askHardReset('totale')"><i class="fa-solid fa-radiation"></i> Reset totale del sistema</button>
+            </div>
+          </div>
         </div>
 
         <!-- MODULI GESTIONE -->
@@ -584,7 +608,7 @@ textarea.input{resize:vertical}
                 <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli &amp; Salute</h1>
                 <p>Anagrafica cavalli del centro e scadenzario sanitario.</p>
               </div>
-              <button class="btn btn-primary" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+              <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
             </div>
             <div class="grid grid-3" id="cavalli-grid"></div>
             <div class="empty-state" id="cavalli-empty" style="display:none">
@@ -601,7 +625,7 @@ textarea.input{resize:vertical}
                 <p id="detail-cavallo-sub">—</p>
               </div>
               <div style="display:flex;gap:8px">
-                <button class="btn btn-outline btn-sm" onclick="openCavalloForm(currentCavalloId)"><i class="fa-solid fa-pen"></i> Modifica</button>
+                <button class="btn btn-outline btn-sm" id="btn-modifica-cavallo" onclick="openCavalloForm(currentCavalloId)"><i class="fa-solid fa-pen"></i> Modifica</button>
                 <button class="btn btn-danger btn-sm" onclick="askDeleteCavallo()"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>
@@ -612,7 +636,7 @@ textarea.input{resize:vertical}
             <div class="card">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
                 <h3 style="margin:0">Storico eventi</h3>
-                <button class="btn btn-outline btn-sm" onclick="openEventoForm()"><i class="fa-solid fa-plus"></i> Registra evento</button>
+                <button class="btn btn-outline btn-sm" id="btn-registra-evento" onclick="openEventoForm()"><i class="fa-solid fa-plus"></i> Registra evento</button>
               </div>
               <div class="table-wrap">
                 <table>
@@ -632,7 +656,7 @@ textarea.input{resize:vertical}
               <h1><span class="page-icon"><i class="fa-solid fa-calendar-days"></i></span> Lezioni &amp; Prenotazioni</h1>
               <p>Calendario delle lezioni del centro.</p>
             </div>
-            <button class="btn btn-primary" onclick="openLezioneForm()"><i class="fa-solid fa-plus"></i> Nuova lezione</button>
+            <button class="btn btn-primary" id="btn-nuova-lezione" onclick="openLezioneForm()"><i class="fa-solid fa-plus"></i> Nuova lezione</button>
           </div>
           <div class="card" style="margin-bottom:16px;padding:12px 16px">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -659,7 +683,7 @@ textarea.input{resize:vertical}
               <h1><span class="page-icon"><i class="fa-solid fa-ticket"></i></span> Pacchetti &amp; Abbonamenti</h1>
               <p>Carnet, abbonamenti e cruscotto scadenze del centro.</p>
             </div>
-            <button class="btn btn-primary" onclick="openPacchettoForm()"><i class="fa-solid fa-plus"></i> Nuovo pacchetto</button>
+            <button class="btn btn-primary" id="btn-nuovo-pacchetto" onclick="openPacchettoForm()"><i class="fa-solid fa-plus"></i> Nuovo pacchetto</button>
           </div>
 
           <h3 style="margin:0 0 10px">Cruscotto scadenze</h3>
@@ -684,7 +708,7 @@ textarea.input{resize:vertical}
               <h1><span class="page-icon"><i class="fa-solid fa-comments"></i></span> Comunicazioni</h1>
               <p>Messaggi a tutto il centro, per ruolo o a un singolo membro.</p>
             </div>
-            <button class="btn btn-primary" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
+            <button class="btn btn-primary" id="btn-nuovo-messaggio" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
           </div>
           <div class="card">
             <div id="messaggi-list"></div>
@@ -735,13 +759,35 @@ textarea.input{resize:vertical}
     <div class="field"><label>Nome visualizzato</label><input class="input" id="member-nome" placeholder="Nome e cognome"></div>
     <div class="field">
       <label>Ruolo</label>
-      <select class="input" id="member-ruolo">
+      <select class="input" id="member-ruolo" onchange="onMemberRuoloChange()">
         <option value="istruttore">Istruttore</option>
         <option value="veterinario">Veterinario</option>
         <option value="maniscalco">Maniscalco</option>
         <option value="allievo">Allievo/Genitore</option>
+        <option value="collaboratore">Collaboratore (segreteria)</option>
         <option value="admin">Amministratore</option>
       </select>
+    </div>
+    <div class="field" id="member-livello-field">
+      <label>Livello permessi</label>
+      <select class="input" id="member-livello" onchange="onMemberLivelloChange()">
+        <option value="1">Livello 1 — Sola lettura + post-it</option>
+        <option value="2">Livello 2 — Modifica dati base</option>
+        <option value="3">Livello 3 — Personalizzato</option>
+      </select>
+    </div>
+    <p id="member-livello-admin-note" style="display:none;color:var(--muted);font-size:12.5px;margin:-6px 0 14px">Il ruolo Amministratore ha sempre tutti i permessi (Livello Admin), incluso l'Hard Reset.</p>
+    <div class="field" id="member-permessi-field" style="display:none">
+      <label>Permessi personalizzati</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-cavalli"> Modifica/cancellazione cavalli</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-eventi"> Modifica/cancellazione eventi sanitari</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-lezioni"> Gestione lezioni</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-pacchetti"> Gestione pacchetti</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-messaggi"> Invio messaggi broadcast</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-contatti"> Gestione contatti utili</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-fiscali"> Visualizza dati societari</label>
+      </div>
     </div>
     <div class="auth-error" id="member-error"></div>
     <button class="btn btn-primary btn-block" onclick="saveMember()">Salva</button>
@@ -813,6 +859,23 @@ textarea.input{resize:vertical}
     </div>
     <div class="auth-error" id="dati-fiscali-error"></div>
     <button class="btn btn-primary btn-block" onclick="saveDatiFiscali()">Salva dati</button>
+  </div>
+</div>
+
+<!-- MODAL: conferma Hard Reset -->
+<div class="modal-overlay" id="modal-hard-reset" onclick="closeOut(event,'modal-hard-reset')">
+  <div class="modal">
+    <div class="modal-title">Conferma Hard Reset <span class="x" onclick="closeModal('modal-hard-reset')">✕</span></div>
+    <p id="hard-reset-desc" style="color:var(--muted);font-size:13.5px"></p>
+    <div class="field">
+      <label>Digita <strong id="hard-reset-keyword-display"></strong> per confermare</label>
+      <input class="input" id="hard-reset-confirm-input">
+    </div>
+    <div class="auth-error" id="hard-reset-error"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-hard-reset')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmHardReset()">Conferma reset</button>
+    </div>
   </div>
 </div>
 
@@ -1045,7 +1108,9 @@ const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore" };
+const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore", collaboratore:"Collaboratore" };
+const LIVELLO_LABELS = { "1":"Livello 1", "2":"Livello 2", "3":"Livello 3", admin:"Admin" };
+const PERMESSI_FLAGS = ["cavalli","eventi","lezioni","pacchetti","messaggi","contatti","fiscali"];
 const CONTATTO_TIPO_LABELS = {
   istruttore_esterno:"Istruttore esterno", veterinario:"Veterinario", maniscalco:"Maniscalco",
   commercialista:"Commercialista", giardiniere:"Giardiniere / Manutenzione verde", manutenzione:"Manutenzione struttura",
@@ -1115,9 +1180,9 @@ function isoDaysFromNow(n){
 let demoState = {
   centro: { id:"demo-centro", nome:"Centro Ippico Demo", indirizzo:"Via delle Scuderie 12, Colleferro (RM)", telefono:"+39 06 1234567", join_code:"EQUO-DEMO1", owner_id:"demo-user" },
   membri: [
-    { id:"m1", user_id:"demo-user", ruolo:"admin", nome_visualizzato:"Tu (admin)" },
-    { id:"m2", user_id:"u2", ruolo:"istruttore", nome_visualizzato:"Marco Bianchi" },
-    { id:"m3", user_id:"u3", ruolo:"allievo", nome_visualizzato:"Giulia Verdi" },
+    { id:"m1", user_id:"demo-user", ruolo:"admin", nome_visualizzato:"Tu (admin)", livello:"admin", permessi:{} },
+    { id:"m2", user_id:"u2", ruolo:"istruttore", nome_visualizzato:"Marco Bianchi", livello:"3", permessi:{ eventi:true, lezioni:true } },
+    { id:"m3", user_id:"u3", ruolo:"allievo", nome_visualizzato:"Giulia Verdi", livello:"1", permessi:{} },
   ],
   cavalli: [
     { id:"c1", centro_id:"demo-centro", nome:"Ares", razza:"Maremmano", mantello:"Baio", data_nascita:"2015-04-10", microchip:"380271000123456", proprietario:"Giulia Verdi", note:"" },
@@ -1237,7 +1302,7 @@ async function afterLogin(){
 
   const { data: membri, error } = await sb
     .from("scuderia_membri")
-    .select("id, centro_id, ruolo, nome_visualizzato, centri(id, nome, indirizzo, telefono, join_code, owner_id)")
+    .select("id, centro_id, ruolo, nome_visualizzato, livello, permessi, centri(id, nome, indirizzo, telefono, join_code, owner_id)")
     .eq("user_id", currentUser.id);
 
   if(error){ showToast("Errore nel caricamento del profilo."); return; }
@@ -1249,7 +1314,7 @@ async function afterLogin(){
 
   const m = membri[0];
   currentCentro = m.centri;
-  currentMembro = { ruolo: m.ruolo, nome_visualizzato: m.nome_visualizzato };
+  currentMembro = { ruolo: m.ruolo, nome_visualizzato: m.nome_visualizzato, livello: m.livello, permessi: m.permessi || {} };
 
   if(m.ruolo === "allievo"){
     document.getElementById("allievo-centro-name").textContent = currentCentro.nome;
@@ -1286,7 +1351,7 @@ async function createCentro(){
     }).select().single();
     if(error) throw error;
     currentCentro = data;
-    currentMembro = { ruolo:"admin", nome_visualizzato:null };
+    currentMembro = { ruolo:"admin", nome_visualizzato:null, livello:"admin", permessi:{} };
     await loadTeam();
     enterAppShell();
     showToast("Centro creato! Sei l'amministratore.");
@@ -1320,7 +1385,7 @@ async function joinCentro(){
 async function loadTeam(){
   if(DEMO_MODE){ teamList = demoState.membri; return; }
   const { data, error } = await sb.from("scuderia_membri")
-    .select("id, user_id, ruolo, nome_visualizzato")
+    .select("id, user_id, ruolo, nome_visualizzato, livello, permessi")
     .eq("centro_id", currentCentro.id)
     .order("created_at", { ascending: true });
   if(!error) teamList = data || [];
@@ -1338,10 +1403,12 @@ function renderTeam(){
     const isAdminUser = currentMembro.ruolo === "admin";
     const canRemove = isAdminUser && !isMe && m.ruolo !== "admin";
     const canEdit = isAdminUser && !isMe;
+    const livelloLabel = m.ruolo === "admin" ? "Admin" : (LIVELLO_LABELS[m.livello] || "—");
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${escapeHtml(m.nome_visualizzato || (isMe ? "Tu" : "Membro"))}</td>
       <td><span class="badge-pill badge-gray">${RUOLO_LABELS[m.ruolo] || m.ruolo}</span></td>
+      <td><span class="badge-pill badge-gray">${livelloLabel}</span></td>
       <td style="text-align:right;white-space:nowrap">
         ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openMemberForm('${m.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
         ${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember('${m.id}','${escapeHtml(m.nome_visualizzato || 'questo membro')}')"><i class="fa-solid fa-trash"></i></button>` : ""}
@@ -1351,6 +1418,22 @@ function renderTeam(){
   });
 }
 
+function onMemberRuoloChange(){
+  const ruolo = document.getElementById("member-ruolo").value;
+  const isAdminRole = ruolo === "admin";
+  document.getElementById("member-livello-field").style.display = isAdminRole ? "none" : "block";
+  document.getElementById("member-livello-admin-note").style.display = isAdminRole ? "block" : "none";
+  if(isAdminRole){
+    document.getElementById("member-permessi-field").style.display = "none";
+  } else {
+    onMemberLivelloChange();
+  }
+}
+function onMemberLivelloChange(){
+  const livello = document.getElementById("member-livello").value;
+  document.getElementById("member-permessi-field").style.display = livello === "3" ? "block" : "none";
+}
+
 function openMemberForm(id){
   const m = teamList.find(x => x.id === id);
   if(!m) return;
@@ -1358,6 +1441,11 @@ function openMemberForm(id){
   document.getElementById("member-error").style.display = "none";
   document.getElementById("member-nome").value = m.nome_visualizzato || "";
   document.getElementById("member-ruolo").value = m.ruolo;
+  document.getElementById("member-livello").value = (m.livello && m.livello !== "admin") ? m.livello : "1";
+  PERMESSI_FLAGS.forEach(f => {
+    document.getElementById("perm-" + f).checked = !!(m.permessi && m.permessi[f]);
+  });
+  onMemberRuoloChange();
   openModal("modal-member");
 }
 
@@ -1368,13 +1456,24 @@ async function saveMember(){
   const errBox = document.getElementById("member-error");
   errBox.style.display = "none";
 
+  let livello, permessi;
+  if(ruolo === "admin"){
+    livello = "admin"; permessi = {};
+  } else {
+    livello = document.getElementById("member-livello").value;
+    permessi = {};
+    if(livello === "3"){
+      PERMESSI_FLAGS.forEach(f => { permessi[f] = document.getElementById("perm-" + f).checked; });
+    }
+  }
+
   try{
     if(DEMO_MODE){
       const idx = demoState.membri.findIndex(x => x.id === editingMemberId);
-      if(idx >= 0) demoState.membri[idx] = { ...demoState.membri[idx], nome_visualizzato, ruolo };
+      if(idx >= 0) demoState.membri[idx] = { ...demoState.membri[idx], nome_visualizzato, ruolo, livello, permessi };
       teamList = demoState.membri;
     } else {
-      const { error } = await sb.from("scuderia_membri").update({ nome_visualizzato, ruolo }).eq("id", editingMemberId);
+      const { error } = await sb.from("scuderia_membri").update({ nome_visualizzato, ruolo, livello, permessi }).eq("id", editingMemberId);
       if(error) throw error;
       await loadTeam();
     }
@@ -1413,6 +1512,7 @@ async function refreshContattiModule(){
   await loadContatti();
   renderContatti();
   await refreshDatiFiscaliCard();
+  refreshHardResetCard();
 }
 
 async function loadContatti(){
@@ -1435,6 +1535,7 @@ function renderContatti(){
   body.innerHTML = "";
   empty.style.display = contattiList.length === 0 ? "block" : "none";
   const isAdminUser = currentMembro?.ruolo === "admin";
+  const canEditContatti = isAdminUser || memberCanUI("contatti");
 
   contattiList.forEach(c => {
     const tr = document.createElement("tr");
@@ -1444,9 +1545,9 @@ function renderContatti(){
       <td>${c.telefono ? escapeHtml(c.telefono) : "—"}</td>
       <td>${c.email ? escapeHtml(c.email) : "—"}</td>
       <td style="text-align:right;white-space:nowrap">
-        ${isAdminUser ? `
+        ${canEditContatti ? `
           <button class="btn btn-ghost btn-sm" onclick="openContattoForm('${c.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn btn-ghost btn-sm" onclick="askDeleteContatto('${c.id}')"><i class="fa-solid fa-trash"></i></button>
+          ${isAdminUser ? `<button class="btn btn-ghost btn-sm" onclick="askDeleteContatto('${c.id}')"><i class="fa-solid fa-trash"></i></button>` : ""}
         ` : ""}
       </td>`;
     body.appendChild(tr);
@@ -1618,6 +1719,84 @@ function copyDatiFiscali(){
   navigator.clipboard?.writeText(lines.join("\n")).then(() => showToast("Dati copiati negli appunti!"));
 }
 
+/* ---------- HARD RESET (solo Livello Admin) ---------- */
+let pendingHardReset = null;
+
+const RESET_MODULO_TABLES = {
+  cavalli: ["scuderia_cavalli"],
+  eventi: ["scuderia_eventi_sanitari"],
+  lezioni: ["scuderia_lezioni"],
+  pacchetti: ["scuderia_pacchetti"],
+  messaggi: ["scuderia_messaggi"],
+  note: ["scuderia_note"],
+};
+const RESET_MODULO_LABELS = { cavalli:"Cavalli", eventi:"Eventi sanitari", lezioni:"Lezioni", pacchetti:"Pacchetti", messaggi:"Messaggi", note:"Post-it" };
+const RESET_TOTALE_TABLES = ["scuderia_note","scuderia_messaggi","scuderia_pacchetti","scuderia_lezioni","scuderia_eventi_sanitari","scuderia_cavalli","scuderia_contatti","scuderia_dati_fiscali"];
+
+function refreshHardResetCard(){
+  const isAdminUser = currentMembro?.ruolo === "admin";
+  const card = document.getElementById("card-hard-reset");
+  if(card) card.style.display = isAdminUser ? "block" : "none";
+}
+
+function askHardReset(tipo){
+  const modulo = tipo === "parziale" ? document.getElementById("reset-modulo-select").value : null;
+  pendingHardReset = { tipo, modulo };
+  const keyword = tipo === "totale" ? "RESET TOTALE" : "RESET";
+  document.getElementById("hard-reset-keyword-display").textContent = keyword;
+  document.getElementById("hard-reset-confirm-input").value = "";
+  document.getElementById("hard-reset-error").style.display = "none";
+  document.getElementById("hard-reset-desc").textContent = tipo === "totale"
+    ? "Stai per cancellare definitivamente TUTTI i dati operativi del centro (cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti, dati societari). Centro e team resteranno."
+    : `Stai per cancellare definitivamente tutti i dati del modulo "${RESET_MODULO_LABELS[modulo]}". Operazione irreversibile.`;
+  openModal("modal-hard-reset");
+}
+
+async function confirmHardReset(){
+  if(!pendingHardReset) return;
+  const keyword = pendingHardReset.tipo === "totale" ? "RESET TOTALE" : "RESET";
+  const typed = document.getElementById("hard-reset-confirm-input").value.trim();
+  const errBox = document.getElementById("hard-reset-error");
+  errBox.style.display = "none";
+  if(typed !== keyword){
+    errBox.textContent = `Devi digitare esattamente "${keyword}" per confermare.`;
+    errBox.style.display = "block";
+    return;
+  }
+  try{
+    const tables = pendingHardReset.tipo === "totale" ? RESET_TOTALE_TABLES : RESET_MODULO_TABLES[pendingHardReset.modulo];
+    await hardResetTables(tables);
+    closeModal("modal-hard-reset");
+    showToast("Reset eseguito.");
+    pendingHardReset = null;
+    await refreshHomeModule();
+    await refreshContattiModule();
+    await refreshCavalliModule();
+    await refreshLezioniModule();
+    await refreshPacchettiModule();
+    await refreshComunicazioniModule();
+  } catch(err){
+    errBox.textContent = err.message || "Errore durante il reset.";
+    errBox.style.display = "block";
+  }
+}
+
+async function hardResetTables(tables){
+  if(DEMO_MODE){
+    const stateKeyMap = { scuderia_cavalli:"cavalli", scuderia_eventi_sanitari:"eventi", scuderia_lezioni:"lezioni", scuderia_pacchetti:"pacchetti", scuderia_messaggi:"messaggi", scuderia_note:"note", scuderia_contatti:"contatti" };
+    tables.forEach(t => {
+      if(t === "scuderia_dati_fiscali"){ demoState.datiFiscali = null; datiFiscali = null; return; }
+      const key = stateKeyMap[t];
+      if(key) demoState[key] = [];
+    });
+    return;
+  }
+  for(const table of tables){
+    const { error } = await sb.from(table).delete().eq("centro_id", currentCentro.id);
+    if(error) throw error;
+  }
+}
+
 /* ---------- APP SHELL ---------- */
 function enterAppShell(){
   document.getElementById("sidebar-centro-name").textContent = currentCentro?.nome || "—";
@@ -1639,8 +1818,35 @@ function enterAppShell(){
   renderPlaceholderModules();
   applySavedSidebarState();
   applySavedTheme();
+  applyPermissionGating();
   showModule("home");
   showScreen("screen-app");
+}
+
+/* ---------- LIVELLI & PERMESSI ---------- */
+function memberCanUI(azione){
+  if(!currentMembro) return false;
+  if(currentMembro.ruolo === "admin") return true;
+  const livello = currentMembro.livello;
+  if(livello === "2") return ["cavalli","lezioni","pacchetti","messaggi","contatti"].includes(azione);
+  if(livello === "3") return !!(currentMembro.permessi && currentMembro.permessi[azione]);
+  return false;
+}
+
+function applyPermissionGating(){
+  const map = {
+    "btn-nuovo-cavallo": "cavalli",
+    "btn-modifica-cavallo": "cavalli",
+    "btn-registra-evento": "eventi",
+    "btn-nuova-lezione": "lezioni",
+    "btn-nuovo-pacchetto": "pacchetti",
+    "btn-nuovo-messaggio": "messaggi",
+    "btn-aggiungi-contatto": "contatti",
+  };
+  Object.entries(map).forEach(([id, azione]) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = memberCanUI(azione) ? "" : "none";
+  });
 }
 
 /* ---------- TEMA GIORNO/NOTTE ---------- */
@@ -1840,7 +2046,7 @@ function renderEventiTable(cavalloId){
       <td>${e.data_scadenza ? formatDate(e.data_scadenza) : "—"}</td>
       <td style="color:var(--muted)">${escapeHtml(e.note || "—")}</td>
       <td style="text-align:right;white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="openEventoForm('${e.id}')"><i class="fa-solid fa-pen"></i></button>
+        ${memberCanUI("eventi") ? `<button class="btn btn-ghost btn-sm" onclick="openEventoForm('${e.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
         ${canDeleteEvento(e) ? `<button class="btn btn-ghost btn-sm" onclick="askDeleteEvento('${e.id}')"><i class="fa-solid fa-trash"></i></button>` : ""}
       </td>`;
     body.appendChild(tr);
@@ -2068,7 +2274,7 @@ function renderLezioni(){
       <td>${escapeHtml(membroNome(l.allievo_id))}</td>
       <td><span class="badge-pill badge-${STATO_LEZIONE_BADGE[l.stato] || "gray"}">${STATO_LEZIONE_LABELS[l.stato] || l.stato}</span></td>
       <td style="text-align:right">
-        ${l.stato !== "annullata" ? `<button class="btn btn-ghost btn-sm" onclick="setLezioneStato('${l.id}','completata')" title="Segna completata"><i class="fa-solid fa-check"></i></button>` : ""}
+        ${(l.stato !== "annullata" && memberCanUI("lezioni")) ? `<button class="btn btn-ghost btn-sm" onclick="setLezioneStato('${l.id}','completata')" title="Segna completata"><i class="fa-solid fa-check"></i></button>` : ""}
         <button class="btn btn-ghost btn-sm" onclick="askDeleteLezione('${l.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>`;
     body.appendChild(tr);
