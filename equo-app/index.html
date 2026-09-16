@@ -80,6 +80,20 @@ select.input{cursor:pointer}
 .auth-error{background:rgba(226,104,95,.1);border:1px solid rgba(226,104,95,.3);
   color:var(--red);padding:10px 14px;border-radius:10px;font-size:13px}
 
+/* ONBOARDING (bivio ruolo) */
+#screen-onboarding{align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;
+  background:radial-gradient(ellipse at top left,rgba(232,176,75,.15),transparent 60%),
+              radial-gradient(ellipse at bottom right,rgba(92,200,143,.12),transparent 60%),var(--bg)}
+.role-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px}
+.role-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:14px;cursor:pointer;transition:border-color .2s;width:100%;text-align:left}
+.role-card:hover{border-color:var(--accent)}
+.role-card.disabled{opacity:.45;cursor:not-allowed}
+.role-card-icon{width:44px;height:44px;border-radius:12px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);font-size:19px}
+.role-card-title{font-weight:700;font-size:14.5px}
+.role-card-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
 /* APP SHELL */
 #screen-app{background:var(--bg)}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
@@ -301,10 +315,60 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<!-- ═══ ONBOARDING (bivio ruolo) ═══ -->
+<div class="screen" id="screen-onboarding">
+  <div id="onb-step-1" style="width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center">
+    <img src="assets/logo-equo.png" alt="Equo" class="auth-logo-img">
+    <div class="section-title" style="text-align:center;margin-bottom:6px">Cosa ti porta su Equo?</div>
+    <div class="muted" style="text-align:center;font-size:13.5px;margin-bottom:24px">Scegli il profilo più adatto a te — potrai sempre cambiarlo dal menu.</div>
+    <div class="role-list">
+      <button class="role-card" onclick="chooseMainRole('proprietario')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span></div>
+        <div><div class="role-card-title">🐴 Ho un cavallo</div><div class="role-card-desc">Libretto sanitario, spese e scadenze</div></div>
+      </button>
+      <button class="role-card" onclick="showOnboardingStep(2)">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-wrench"></i></span></div>
+        <div><div class="role-card-title">🔧 Sono un professionista</div><div class="role-card-desc">Maniscalco, veterinario, istruttore</div></div>
+      </button>
+      <button class="role-card" onclick="chooseMainRole('gestore_struttura')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-building"></i></span></div>
+        <div><div class="role-card-title">🏇 Gestisco un centro/scuderia</div><div class="role-card-desc">Ti serve Equo Scuderia, il gestionale dedicato</div></div>
+      </button>
+    </div>
+  </div>
+
+  <div id="onb-step-2" style="display:none;width:100%;max-width:360px;flex-direction:column;align-items:center">
+    <div class="detail-header" style="width:100%">
+      <button class="back-btn" onclick="showOnboardingStep(1)"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="section-title" style="margin-bottom:0;font-size:17px">Che tipo di professionista sei?</div>
+    </div>
+    <div class="role-list" style="margin-top:16px">
+      <button class="role-card" onclick="chooseMainRole('maniscalco')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
+        <div><div class="role-card-title">Maniscalco</div><div class="role-card-desc">Ferrature, interventi e clienti</div></div>
+      </button>
+      <button class="role-card" onclick="chooseMainRole('veterinario')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">Visite e clienti</div></div>
+      </button>
+      <button class="role-card" onclick="chooseMainRole('istruttore')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Lezioni e allievi</div></div>
+      </button>
+      <button class="role-card disabled" disabled>
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-shop"></i></span></div>
+        <div><div class="role-card-title">Selleria</div><div class="role-card-desc">Presto disponibile</div></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="auth-error" id="onb-error" style="display:none;max-width:360px;margin-top:14px"></div>
+</div>
+
 <!-- ═══ APP ═══ -->
 <div class="screen" id="screen-app">
   <div class="topbar">
-    <img src="assets/icona-equo.png" alt="Equo" class="topbar-logo-img" onclick="showPage('home')">
+    <img src="assets/icona-equo.png" alt="Equo" class="topbar-logo-img" onclick="goHome()">
     <div class="topbar-context" id="topbar-context">Nessun cavallo</div>
     <div class="topbar-avatar" id="topbar-avatar" onclick="openMenu()">?</div>
   </div>
@@ -440,12 +504,56 @@ select.input{cursor:pointer}
     <div id="expenses-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
   </div>
 
+  <!-- PROFESSIONISTA: HOME (AGENDA) -->
+  <div class="page-content" id="page-pro-home">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="role-card-icon"><span class="icon"><svg><use href="#i-link"/></svg></span></div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">Invita i tuoi clienti su Equo</div>
+          <div class="muted" style="font-size:12.5px;margin-top:2px">Condividi il link per collegarli al tuo profilo</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px" onclick="copyInviteLink()">Copia link invito</button>
+    </div>
+
+    <div class="section-title" style="font-size:16px" id="pro-home-title">Agenda di oggi</div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:8px">Appuntamenti di oggi</div>
+      <div class="empty-state" style="padding:18px 10px">
+        <div class="icon" style="width:26px;height:26px;margin:0 auto 8px;color:var(--muted)"><svg><use href="#i-calendar"/></svg></div>
+        <div style="font-size:13px">Nessun appuntamento in agenda per oggi.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700;font-size:14px">Richieste da confermare</div>
+        <span class="badge badge-accent" id="pro-requests-count">0</span>
+      </div>
+      <div class="muted" style="font-size:13px">Nessuna richiesta in attesa.</div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="showProActionComingSoon()">Segna intervento fatto</button>
+  </div>
+
+  <!-- PROFESSIONISTA: CLIENTI -->
+  <div class="page-content" id="page-pro-clienti">
+    <div class="section-title">I tuoi clienti</div>
+    <div class="empty-state">
+      <div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px;color:var(--muted)"><i class="fa-solid fa-users"></i></div>
+      <div style="font-size:13.5px;line-height:1.6">Non hai ancora clienti collegati.<br>Appariranno qui non appena registrerai il primo intervento.</div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
+  <div class="bottom-nav" id="bottom-nav-owner">
     <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
     <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><small>Cavalli</small></button>
     <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Calendario</small></button>
     <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
+  </div>
+  <div class="bottom-nav" id="bottom-nav-pro" style="display:none">
+    <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
+    <button class="nav-btn" data-page="pro-clienti" onclick="showPage('pro-clienti')"><span class="fa-icon"><i class="fa-solid fa-users"></i></span><small>Clienti</small></button>
   </div>
 
   <!-- AI FAB -->
@@ -597,6 +705,15 @@ select.input{cursor:pointer}
       </div>
     </div>
 
+    <div class="menu-section-label">Il tuo profilo</div>
+    <div class="menu-row">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-id-badge"></i></span>
+        <span id="menu-role-label">—</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="padding:6px 10px" onclick="closeModal('modal-menu');reopenOnboarding()">Cambia</button>
+    </div>
+
     <div class="menu-section-label">Aspetto</div>
     <div class="menu-row">
       <div class="menu-row-label">
@@ -689,7 +806,7 @@ select.input{cursor:pointer}
    EQUO APP — v1 skeleton
    Sostituisci SUPABASE_URL / SUPABASE_ANON_KEY con i valori reali.
    Schema Supabase atteso (da creare):
-   - profiles(id, email, full_name)
+   - profiles(id, email, full_name, ruolo)
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
@@ -810,6 +927,119 @@ const DB = {
   },
 };
 
+/* ---------- ONBOARDING (bivio ruolo) ---------- */
+const ROLE_LABELS = {
+  proprietario: "Proprietario",
+  maniscalco: "Maniscalco",
+  veterinario: "Veterinario",
+  istruttore: "Istruttore/Trainer",
+  gestore_struttura: "Gestore struttura",
+};
+const PRO_ROLES = ["maniscalco", "veterinario", "istruttore"];
+const PRO_ACTION_LABELS = {
+  maniscalco: "Ferratura completata",
+  veterinario: "Visita completata",
+  istruttore: "Lezione completata",
+};
+
+function showOnboardingStep(step){
+  document.getElementById("onb-step-1").style.display = step === 1 ? "flex" : "none";
+  document.getElementById("onb-step-2").style.display = step === 2 ? "flex" : "none";
+  document.getElementById("onb-error").style.display = "none";
+}
+
+async function chooseMainRole(ruolo){
+  const errBox = document.getElementById("onb-error");
+  errBox.style.display = "none";
+  if(DEMO_MODE){
+    currentUser.ruolo = ruolo;
+    document.getElementById("screen-onboarding").classList.remove("active");
+    await enterApp(ruolo);
+    return;
+  }
+  try{
+    // upsert (non update): un utente arrivato via Google potrebbe non avere
+    // ancora una riga in profiles, quindi va creata qui se manca.
+    const { error } = await sb.from("profiles").upsert({ id: currentUser.id, email: currentUser.email, ruolo });
+    if(error) throw error;
+    currentUser.ruolo = ruolo;
+    document.getElementById("screen-onboarding").classList.remove("active");
+    await enterApp(ruolo);
+  } catch(e){
+    errBox.textContent = "Non sono riuscito a salvare la scelta, riprova.";
+    errBox.style.display = "block";
+  }
+}
+
+function reopenOnboarding(){
+  document.getElementById("screen-app").classList.remove("active");
+  document.getElementById("screen-onboarding").classList.add("active");
+  showOnboardingStep(currentUser && PRO_ROLES.includes(currentUser.ruolo) ? 2 : 1);
+}
+
+function goHome(){
+  showPage(currentUser && PRO_ROLES.includes(currentUser.ruolo) ? "pro-home" : "home");
+}
+
+function updateRoleBadgeUI(ruolo){
+  const el = document.getElementById("menu-role-label");
+  if(el) el.textContent = ROLE_LABELS[ruolo] || "—";
+}
+
+async function enterApp(ruolo){
+  document.getElementById("screen-onboarding").classList.remove("active");
+  document.getElementById("screen-app").classList.add("active");
+  updateRoleBadgeUI(ruolo);
+  if(PRO_ROLES.includes(ruolo)){
+    setupProNav(ruolo);
+  } else {
+    setupOwnerNav();
+    await loadHorses();
+    renderPaymentMethods();
+    startPromoRotation();
+    if(ruolo === "gestore_struttura") showStableManagerBanner();
+  }
+}
+
+function setupOwnerNav(){
+  document.getElementById("bottom-nav-owner").style.display = "flex";
+  document.getElementById("bottom-nav-pro").style.display = "none";
+  showPage("home");
+}
+
+function setupProNav(ruolo){
+  document.getElementById("bottom-nav-owner").style.display = "none";
+  document.getElementById("bottom-nav-pro").style.display = "flex";
+  document.getElementById("topbar-context").textContent = ROLE_LABELS[ruolo] || "";
+  renderProHome(ruolo);
+  showPage("pro-home");
+}
+
+function renderProHome(ruolo){
+  document.getElementById("pro-home-title").textContent =
+    ruolo === "veterinario" ? "Agenda visite di oggi" :
+    ruolo === "istruttore" ? "Agenda lezioni di oggi" : "Agenda di oggi";
+  document.getElementById("pro-action-btn").textContent = PRO_ACTION_LABELS[ruolo] || "Segna intervento fatto";
+}
+
+function showProActionComingSoon(){
+  showToast("Disponibile a breve, insieme all'agenda interventi.");
+}
+
+function copyInviteLink(){
+  const text = "Ciao! Uso Equo per gestire interventi e appuntamenti — scarica l'app su https://app.equohub.com e collegati al mio profilo.";
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(() => showToast("Link copiato negli appunti!"))
+      .catch(() => showToast("Non sono riuscito a copiare, riprova."));
+  } else {
+    showToast("Copia manualmente: " + text);
+  }
+}
+
+function showStableManagerBanner(){
+  showToast("Per gestire la tua struttura usa Equo Scuderia su scuderia.equohub.com");
+}
+
 /* ---------- AUTH ---------- */
 function setAuthTab(mode){
   authMode = mode;
@@ -888,20 +1118,25 @@ async function boot(){
   if(!user){
     document.getElementById("screen-auth").classList.add("active");
     document.getElementById("screen-app").classList.remove("active");
+    document.getElementById("screen-onboarding").classList.remove("active");
     return;
   }
   currentUser = user;
   document.getElementById("screen-auth").classList.remove("active");
-  document.getElementById("screen-app").classList.add("active");
 
   setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
   document.getElementById("profile-email").textContent = user.email || "";
-  const { data: profile } = await sb.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const { data: profile } = await sb.from("profiles").select("full_name, ruolo").eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
+  currentUser.ruolo = profile?.ruolo || null;
 
-  await loadHorses();
-  renderPaymentMethods();
-  startPromoRotation();
+  if(!currentUser.ruolo){
+    document.getElementById("screen-app").classList.remove("active");
+    document.getElementById("screen-onboarding").classList.add("active");
+    showOnboardingStep(1);
+    return;
+  }
+  await enterApp(currentUser.ruolo);
 }
 
 /* ---------- GOOGLE SIGN-IN ---------- */
