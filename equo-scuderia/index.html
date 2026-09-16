@@ -279,7 +279,7 @@ textarea.input{resize:vertical}
 .detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:10px 0;border-bottom:1px solid var(--border)}
 .detail-row:last-child{border-bottom:none}
-.detail-row .main{font-size:13.5px;font-weight:600}
+.detail-row .dr-main{font-size:13.5px;font-weight:600}
 .detail-row .sub{font-size:12px;color:var(--muted);margin-top:1px}
 
 /* ---------- POST-IT ---------- */
@@ -2823,12 +2823,12 @@ function renderCruscotto(){
   });
 
   const tiles = [
-    { label:"Cavalli con scadenze sanitarie scadute", value: countByStatus.red, tone: countByStatus.red > 0 ? "red" : "green", icon:"fa-triangle-exclamation" },
-    { label:"Cavalli in scadenza (30 gg)", value: countByStatus.yellow, tone: countByStatus.yellow > 0 ? "yellow" : "green", icon:"fa-clock" },
-    { label:"Pacchetti scaduti / esauriti", value: pacchettiScaduti, tone: pacchettiScaduti > 0 ? "red" : "green", icon:"fa-ticket" },
+    { label:"Cavalli con scadenze sanitarie scadute", value: countByStatus.red, tone: countByStatus.red > 0 ? "red" : "green", icon:"fa-triangle-exclamation", type:"sanitarie" },
+    { label:"Cavalli in scadenza (30 gg)", value: countByStatus.yellow, tone: countByStatus.yellow > 0 ? "yellow" : "green", icon:"fa-clock", type:"sanitarie" },
+    { label:"Pacchetti scaduti / esauriti", value: pacchettiScaduti, tone: pacchettiScaduti > 0 ? "red" : "green", icon:"fa-ticket", type:"pacchetti" },
   ];
   document.getElementById("cruscotto-grid").innerHTML = tiles.map(t => `
-    <div class="stat-tile">
+    <div class="stat-tile stat-tile-clickable" onclick="openHomeDetail('${t.type}')">
       <div class="label"><i class="fa-solid ${t.icon}" style="margin-right:6px"></i>${t.label}</div>
       <div class="value" style="color:${t.tone === 'red' ? 'var(--danger)' : t.tone === 'yellow' ? '#8a6a12' : 'var(--text)'}">${t.value}</div>
     </div>`).join("");
@@ -3318,7 +3318,7 @@ function openHomeDetail(type){
     ? `<div class="empty-state" style="padding:20px 0"><i class="fa-solid fa-circle-check"></i><div>Nessuna voce da segnalare.</div></div>`
     : rows.map(r => `
       <div class="detail-row">
-        <div><div class="main">${escapeHtml(r.main)}</div><div class="sub">${escapeHtml(r.sub)}</div></div>
+        <div><div class="dr-main">${escapeHtml(r.main)}</div><div class="sub">${escapeHtml(r.sub)}</div></div>
         <span class="badge-pill badge-${r.badge}">${STATUS_LABELS[r.badge] || ""}</span>
       </div>`).join("");
 
