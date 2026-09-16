@@ -132,10 +132,11 @@ select.input{cursor:pointer}
 .bottom-nav{background:var(--surface);border-top:1px solid var(--border);
   display:flex;position:fixed;bottom:0;left:0;right:0;
   padding-bottom:env(safe-area-inset-bottom);z-index:50}
-.nav-btn{flex:1;background:none;border:none;padding:10px 4px 8px;display:flex;
+.nav-btn{flex:1;background:none;border:none;padding:10px 4px 8px;display:flex;position:relative;
   flex-direction:column;align-items:center;gap:3px;color:var(--muted);cursor:pointer;font-size:10px}
 .nav-btn .icon{width:22px;height:22px}
 .nav-btn.active{color:var(--accent)}
+.inbox-nav-badge{position:absolute;top:6px;right:calc(50% - 20px);width:8px;height:8px;border-radius:50%;background:var(--red)}
 
 /* HOME */
 .promo-banner{border-radius:16px;overflow:hidden;background:linear-gradient(135deg,rgba(232,176,75,.2),rgba(92,200,143,.12));
@@ -173,6 +174,11 @@ select.input{cursor:pointer}
 .event-item + .event-item{border-top:1px solid var(--border)}
 .qr-box{background:#fff;border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;margin:0 auto}
 .invite-code{font-family:monospace;font-weight:700;letter-spacing:1px;font-size:15px;text-align:center;margin-top:10px}
+.inbox-item{display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 0}
+.inbox-item + .inbox-item{border-top:1px solid var(--border)}
+.inbox-item.unread .inbox-name{font-weight:700}
+.inbox-item.unread .inbox-preview{color:var(--text)}
+.inbox-unread-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0}
 
 /* MENU */
 .menu-profile{display:flex;align-items:center;gap:12px;margin-bottom:18px}
@@ -279,6 +285,7 @@ select.input{cursor:pointer}
   <symbol id="i-paypal" viewBox="0 0 24 24"><path d="M7 4h6.5a4 4 0 0 1 0 8H9.5l-1 5H5z"/><path d="M9.5 8h6a4 4 0 0 1 0 8H10l-.7 3.5"/></symbol>
   <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 10h16"/><path d="M6 10v9M10 10v9M14 10v9M18 10v9"/><path d="M3 10l9-6 9 6"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.4 5h13.2a2 2 0 0 1 1.9 1.4L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6l1.5-5.6A2 2 0 0 1 5.4 5z"/></symbol>
 </svg>
 
 <!-- ═══ AUTH ═══ -->
@@ -567,7 +574,18 @@ select.input{cursor:pointer}
         <div id="cliente-interventi-list"><div class="muted" style="font-size:13px">Nessun intervento registrato.</div></div>
       </div>
 
+      <button class="btn btn-outline" style="width:100%;margin-bottom:10px" id="cliente-chat-btn" onclick="showChatComingSoon()">
+        <span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi
+      </button>
       <button class="btn btn-danger" style="width:100%" onclick="deleteCurrentCliente()">Elimina cliente</button>
+    </div>
+  </div>
+
+  <!-- PROFESSIONISTA: INBOX -->
+  <div class="page-content" id="page-pro-inbox">
+    <div class="section-title">Messaggi</div>
+    <div class="card" id="inbox-card" style="margin-bottom:14px">
+      <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
   </div>
 
@@ -580,6 +598,7 @@ select.input{cursor:pointer}
   </div>
   <div class="bottom-nav" id="bottom-nav-pro" style="display:none">
     <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
+    <button class="nav-btn" data-page="pro-inbox" onclick="showPage('pro-inbox')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>
     <button class="nav-btn" data-page="pro-clienti" onclick="showPage('pro-clienti')"><span class="fa-icon"><i class="fa-solid fa-users"></i></span><small>Clienti</small></button>
   </div>
 
@@ -909,6 +928,7 @@ select.input{cursor:pointer}
    - stables(id, name, join_code)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note, created_at, updated_at)
+   - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, testo, letto, created_at)
    ══════════════════════════════════════════════════════ */
 
 const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
@@ -947,6 +967,10 @@ const demoState = {
   ],
   interventiMascalcia: [
     { id: "di-1", cliente_mascalcia_id: "dc-1", tipo_ferratura: "ferro", tipo_altro: null, data_intervento: "2026-08-10", prossima_scadenza: "2026-09-21", stato_pagamento: "saldato", note: "", created_at: "2026-08-10" },
+  ],
+  messaggiMascalcia: [
+    { id: "dm-1", cliente_mascalcia_id: "dc-1", mittente_tipo: "cliente", testo: "Ciao! Quando puoi passare per Aurora?", letto: false, created_at: "2026-09-15T09:00:00" },
+    { id: "dm-2", cliente_mascalcia_id: "dc-1", mittente_tipo: "maniscalco", testo: "Ciao Marco, ti confermo per venerdì mattina.", letto: true, created_at: "2026-09-14T18:20:00" },
   ],
 };
 
@@ -1078,6 +1102,15 @@ const DB = {
       .order("prossima_scadenza", { ascending: true }).limit(limit);
     return error ? [] : (data || []);
   },
+  async listInboxMascalcia(){
+    if(DEMO_MODE){
+      return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+        .map(m => ({ ...m, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome, nome_cavallo: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome_cavallo } }));
+    }
+    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo)")
+      .eq("maniscalco_id", currentUser.id).order("created_at", { ascending: false }).limit(200);
+    return error ? [] : (data || []);
+  },
 };
 
 /* ---------- ONBOARDING (bivio ruolo) ---------- */
@@ -1167,6 +1200,7 @@ async function setupProNav(ruolo){
   renderProHome(ruolo);
   showPage("pro-home");
   await loadClientiMascalcia();
+  await loadInboxMascalcia();
 }
 
 function renderProHome(ruolo){
@@ -1776,6 +1810,59 @@ async function createInterventoMascalcia(){
   showToast("Intervento registrato!");
   await renderProDeadlines();
   if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
+}
+
+function showChatComingSoon(){
+  showToast("La chat si apre nel prossimo step.");
+}
+
+async function loadInboxMascalcia(){
+  const box = document.getElementById("inbox-list");
+  if(!box) return;
+  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const data = await DB.listInboxMascalcia();
+
+  // Un conteggio non letti per cliente (calcolato su tutti i messaggi, non solo sull'ultimo)
+  const unreadByCliente = {};
+  data.forEach(m => {
+    if(m.mittente_tipo === "cliente" && !m.letto){
+      unreadByCliente[m.cliente_mascalcia_id] = (unreadByCliente[m.cliente_mascalcia_id] || 0) + 1;
+    }
+  });
+
+  // Tiene solo il messaggio più recente per cliente come anteprima (i dati arrivano già ordinati per data desc)
+  const seen = new Set();
+  const conversazioni = [];
+  data.forEach(m => {
+    if(seen.has(m.cliente_mascalcia_id)) return;
+    seen.add(m.cliente_mascalcia_id);
+    conversazioni.push(m);
+  });
+
+  const totalUnread = Object.values(unreadByCliente).reduce((a,b) => a+b, 0);
+  const navBadge = document.getElementById("inbox-nav-badge");
+  if(navBadge) navBadge.style.display = totalUnread > 0 ? "block" : "none";
+
+  if(conversazioni.length === 0){
+    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessun messaggio.<br>Le conversazioni con i clienti collegati appariranno qui.</div></div>';
+    return;
+  }
+
+  box.innerHTML = conversazioni.map(m => {
+    const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
+    const nome = m.clienti_mascalcia?.nome || "Cliente";
+    const cavallo = m.clienti_mascalcia?.nome_cavallo;
+    const preview = (m.mittente_tipo === "maniscalco" ? "Tu: " : "") + m.testo;
+    return `
+    <div class="inbox-item ${unread > 0 ? "unread" : ""}" onclick="showChatComingSoon()">
+      <div class="horse-avatar"><i class="fa-solid fa-user" style="font-size:20px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(nome)}${cavallo ? " · " + escapeHtml(cavallo) : ""}</div>
+        <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
+      </div>
+      ${unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
+    </div>`;
+  }).join("");
 }
 
 /* ---------- EXPENSES ---------- */
