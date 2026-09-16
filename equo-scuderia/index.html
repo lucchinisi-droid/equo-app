@@ -912,6 +912,18 @@ textarea.input{resize:vertical}
   </div>
 </div>
 
+<!-- MODAL: chat interna con un membro -->
+<div class="modal-overlay" id="modal-chat" onclick="closeOut(event,'modal-chat')">
+  <div class="modal" style="max-width:420px;display:flex;flex-direction:column;max-height:82vh">
+    <div class="modal-title"><span id="chat-membro-nome">Chat</span> <span class="x" onclick="closeChatModal()">✕</span></div>
+    <div id="chat-messages" style="flex:1;overflow-y:auto;min-height:220px;max-height:340px;display:flex;flex-direction:column;gap:8px;padding:6px 2px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaChatMessaggio()}">
+      <button class="btn btn-primary btn-sm" onclick="inviaChatMessaggio()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: nuovo/modifica cavallo -->
 <div class="modal-overlay" id="modal-cavallo" onclick="closeOut(event,'modal-cavallo')">
   <div class="modal">
@@ -1030,8 +1042,12 @@ textarea.input{resize:vertical}
 <!-- MODAL: nuovo pacchetto/abbonamento -->
 <div class="modal-overlay" id="modal-pacchetto" onclick="closeOut(event,'modal-pacchetto')">
   <div class="modal">
-    <div class="modal-title">Nuovo pacchetto <span class="x" onclick="closeModal('modal-pacchetto')">✕</span></div>
+    <div class="modal-title"><span id="modal-pacchetto-title">Nuovo pacchetto</span> <span class="x" onclick="closeModal('modal-pacchetto')">✕</span></div>
     <div class="field"><label>Cliente</label><input class="input" id="pac-cliente" placeholder="Nome allievo / proprietario"></div>
+    <div class="field">
+      <label>Collega a un membro del team (opzionale, per Chatta)</label>
+      <select class="input" id="pac-membro"><option value="">— nessuno (solo testo libero) —</option></select>
+    </div>
     <div class="field">
       <label>Tipo</label>
       <select class="input" id="pac-tipo" onchange="toggleTipoPacchetto()">
@@ -1213,6 +1229,7 @@ let lezioneToDelete = null;
 
 let pacchettiList = [];
 let pacchettoToDelete = null;
+let editingPacchettoId = null;
 
 let messaggiList = [];
 
@@ -1254,8 +1271,8 @@ let demoState = {
     { id:"l3", centro_id:"demo-centro", data: isoDaysFromNow(5), ora_inizio:"18:00", istruttore_id:"m2", cavallo_id:null, allievo_id:"m3", stato:"prenotata", note:"Prima lezione di prova" },
   ],
   pacchetti: [
-    { id:"p1", centro_id:"demo-centro", cliente:"Giulia Verdi", tipo:"carnet", unita_totali:10, unita_usate:7, data_inizio: isoDaysFromNow(-40), data_scadenza: isoDaysFromNow(20), prezzo:250, note:"" },
-    { id:"p2", centro_id:"demo-centro", cliente:"Marco Bianchi", tipo:"abbonamento", unita_totali:null, unita_usate:null, data_inizio: isoDaysFromNow(-10), data_scadenza: isoDaysFromNow(-2), prezzo:80, note:"Mensile" },
+    { id:"p1", centro_id:"demo-centro", cliente:"Giulia Verdi", membro_id:"m3", tipo:"carnet", unita_totali:10, unita_usate:7, data_inizio: isoDaysFromNow(-40), data_scadenza: isoDaysFromNow(20), prezzo:250, note:"" },
+    { id:"p2", centro_id:"demo-centro", cliente:"Marco Bianchi", membro_id:"m2", tipo:"abbonamento", unita_totali:null, unita_usate:null, data_inizio: isoDaysFromNow(-10), data_scadenza: isoDaysFromNow(-2), prezzo:80, note:"Mensile" },
   ],
   messaggi: [
     { id:"msg1", centro_id:"demo-centro", mittente_id:"m1", mittente_nome:"Tu (admin)", destinatario_tipo:"tutti", destinatario_ruolo:null, destinatario_nome:null, testo:"Ricordo a tutti che sabato il maneggio chiude alle 18:00 per manutenzione.", priorita:"normale", created_at: isoDaysFromNow(-2) },
@@ -1275,6 +1292,12 @@ let demoState = {
     denominazione:"Centro Ippico Demo S.r.l.", piva:"01234567890", cod_rea:"RM-1234567",
     iban:"IT60X0542811101000000123456", pec:"centroippicodemo@pec.it", sdi:"ABC1234",
     indirizzo:"Via delle Scuderie 12, Colleferro (RM)", telefono_fisso:"+39 06 1234567", cellulare:"+39 333 0001122",
+  },
+  chat: {
+    m3: [
+      { id:"chat1", mittente_user_id:"u3", testo:"Ciao! Mi resta ancora qualche lezione nel carnet?", created_at: isoDaysFromNow(-1) },
+      { id:"chat2", mittente_user_id:"demo-user", testo:"Ciao Giulia, sì te ne restano 3! Vuoi rinnovare il carnet?", created_at: isoDaysFromNow(-1) },
+    ],
   },
 };
 
@@ -1847,6 +1870,116 @@ async function hardResetTables(tables){
   for(const table of tables){
     const { error } = await sb.from(table).delete().eq("centro_id", currentCentro.id);
     if(error) throw error;
+  }
+}
+
+/* ---------- CHAT INTERNA (membro Equo App <-> struttura) ---------- */
+// TODO: verifica/aggiorna con il dominio reale di produzione di Equo App.
+const EQUO_APP_URL = "https://equo-app.netlify.app";
+
+let currentChatMembro = null; // { id, user_id, nome_visualizzato }
+let chatPollTimer = null;
+const appProfileCache = {};
+
+async function hasAppProfile(userId){
+  if(!userId) return false;
+  if(DEMO_MODE) return userId === "u3"; // in demo, solo Giulia Verdi "ha l'app"
+  if(userId in appProfileCache) return appProfileCache[userId];
+  const { data, error } = await sb.rpc("has_equo_app_profile", { check_user_id: userId });
+  const result = !error && !!data;
+  appProfileCache[userId] = result;
+  return result;
+}
+
+async function chattaConMembro(membroId){
+  const m = teamList.find(x => x.id === membroId);
+  if(!m){ showToast("Membro non trovato."); return; }
+  const haApp = await hasAppProfile(m.user_id);
+  if(haApp){
+    openChatModal(m);
+  } else {
+    copyInviteText(m);
+  }
+}
+
+function copyInviteText(m){
+  const nome = m.nome_visualizzato || "";
+  const testo = `Ciao${nome ? " " + nome : ""}! Scarica Equo per gestire il tuo cavallo e chattare direttamente con ${currentCentro?.nome || "la struttura"}: ${EQUO_APP_URL}`;
+  navigator.clipboard?.writeText(testo).then(() => {
+    showToast(`${nome || "Questo membro"} non ha ancora Equo App — messaggio di invito copiato, incollalo dove preferisci (WhatsApp, email, SMS).`);
+  }).catch(() => {
+    showToast("Impossibile copiare automaticamente. Testo invito: " + testo);
+  });
+}
+
+function openChatModal(m){
+  currentChatMembro = m;
+  document.getElementById("chat-membro-nome").textContent = "Chat con " + (m.nome_visualizzato || RUOLO_LABELS[m.ruolo] || "membro");
+  openModal("modal-chat");
+  loadAndRenderChat();
+  clearInterval(chatPollTimer);
+  chatPollTimer = setInterval(loadAndRenderChat, 4000);
+  setTimeout(() => document.getElementById("chat-input")?.focus(), 100);
+}
+
+function closeChatModal(){
+  closeModal("modal-chat");
+  clearInterval(chatPollTimer);
+  chatPollTimer = null;
+  currentChatMembro = null;
+}
+
+async function loadAndRenderChat(){
+  if(!currentChatMembro) return;
+  let messaggi;
+  if(DEMO_MODE){
+    demoState.chat = demoState.chat || {};
+    messaggi = demoState.chat[currentChatMembro.id] || [];
+  } else {
+    const { data, error } = await sb.from("chat_messaggi")
+      .select("id, mittente_user_id, testo, created_at")
+      .eq("centro_id", currentCentro.id)
+      .eq("membro_id", currentChatMembro.id)
+      .order("created_at", { ascending: true });
+    messaggi = error ? [] : (data || []);
+  }
+  renderChatMessaggi(messaggi);
+}
+
+function renderChatMessaggi(messaggi){
+  const box = document.getElementById("chat-messages");
+  if(!box) return;
+  const wasAtBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+  box.innerHTML = messaggi.map(msg => {
+    const mine = msg.mittente_user_id === currentUser.id;
+    return `<div style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%;background:${mine ? "var(--primary)" : "var(--muted-bg)"};color:${mine ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">
+      ${escapeHtml(msg.testo)}
+      <div style="font-size:10px;opacity:.7;margin-top:3px">${new Date(msg.created_at).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>
+    </div>`;
+  }).join("") || `<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Nessun messaggio ancora. Scrivi il primo!</p>`;
+  if(wasAtBottom || messaggi.length <= 1) box.scrollTop = box.scrollHeight;
+}
+
+async function inviaChatMessaggio(){
+  const input = document.getElementById("chat-input");
+  const testo = input.value.trim();
+  if(!testo || !currentChatMembro) return;
+  input.value = "";
+  try{
+    if(DEMO_MODE){
+      demoState.chat = demoState.chat || {};
+      if(!demoState.chat[currentChatMembro.id]) demoState.chat[currentChatMembro.id] = [];
+      demoState.chat[currentChatMembro.id].push({ id:"chat" + (demoIdCounter++ + 900), mittente_user_id: currentUser.id, testo, created_at: new Date().toISOString() });
+    } else {
+      const { error } = await sb.from("chat_messaggi").insert({
+        centro_id: currentCentro.id, membro_id: currentChatMembro.id, mittente_user_id: currentUser.id, testo,
+      });
+      if(error) throw error;
+    }
+    await loadAndRenderChat();
+  } catch(err){
+    showToast("Errore nell'invio del messaggio.");
+    input.value = testo;
   }
 }
 
@@ -2550,6 +2683,7 @@ function renderLezioni(){
       <td>${escapeHtml(membroNome(l.allievo_id))}</td>
       <td><span class="badge-pill badge-${STATO_LEZIONE_BADGE[l.stato] || "gray"}">${STATO_LEZIONE_LABELS[l.stato] || l.stato}</span></td>
       <td style="text-align:right">
+        ${l.allievo_id ? `<button class="btn btn-ghost btn-sm" onclick="chattaConMembro('${l.allievo_id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
         ${(l.stato !== "annullata" && memberCanUI("lezioni")) ? `<button class="btn btn-ghost btn-sm" onclick="setLezioneStato('${l.id}','completata')" title="Segna completata"><i class="fa-solid fa-check"></i></button>` : ""}
         <button class="btn btn-ghost btn-sm" onclick="askDeleteLezione('${l.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>`;
@@ -2642,14 +2776,22 @@ async function refreshPacchettiModule(){
   if(cavalliList.length === 0) await loadCavalli();
   await loadEventiAll();
   await loadPacchetti();
+  populatePacchettoMembroSelect();
   renderCruscotto();
   renderPacchetti();
+}
+
+function populatePacchettoMembroSelect(){
+  const sel = document.getElementById("pac-membro");
+  if(!sel) return;
+  sel.innerHTML = `<option value="">— nessuno (solo testo libero) —</option>` +
+    teamList.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])} (${RUOLO_LABELS[m.ruolo] || m.ruolo})</option>`).join("");
 }
 
 async function loadPacchetti(){
   if(DEMO_MODE){ pacchettiList = demoState.pacchetti; return; }
   const { data, error } = await sb.from("scuderia_pacchetti")
-    .select("id, centro_id, cliente, tipo, unita_totali, unita_usate, data_inizio, data_scadenza, prezzo, note")
+    .select("id, centro_id, cliente, tipo, unita_totali, unita_usate, data_inizio, data_scadenza, prezzo, note, membro_id")
     .eq("centro_id", currentCentro.id)
     .order("data_scadenza", { ascending: true });
   if(!error) pacchettiList = data || [];
@@ -2710,7 +2852,11 @@ function renderPacchetti(){
       <td>${dettaglio}</td>
       <td>${p.data_scadenza ? formatDate(p.data_scadenza) : "—"}</td>
       <td><span class="badge-pill badge-${s}">${s === "red" ? "Scaduto" : s === "yellow" ? "In scadenza" : "Attivo"}</span></td>
-      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="askDeletePacchetto('${p.id}')"><i class="fa-solid fa-trash"></i></button></td>`;
+      <td style="text-align:right;white-space:nowrap">
+        ${p.membro_id ? `<button class="btn btn-ghost btn-sm" onclick="chattaConMembro('${p.membro_id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
+        ${memberCanUI("pacchetti") ? `<button class="btn btn-ghost btn-sm" onclick="openPacchettoForm('${p.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
+        <button class="btn btn-ghost btn-sm" onclick="askDeletePacchetto('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+      </td>`;
     body.appendChild(tr);
   });
 }
@@ -2720,16 +2866,33 @@ function toggleTipoPacchetto(){
   document.getElementById("pac-carnet-fields").style.display = tipo === "carnet" ? "grid" : "none";
 }
 
-function openPacchettoForm(){
+function openPacchettoForm(id){
+  editingPacchettoId = id || null;
   document.getElementById("pacchetto-error").style.display = "none";
-  document.getElementById("pac-cliente").value = "";
-  document.getElementById("pac-tipo").value = "carnet";
-  document.getElementById("pac-unita-totali").value = "";
-  document.getElementById("pac-unita-usate").value = "0";
-  document.getElementById("pac-inizio").value = new Date().toISOString().slice(0,10);
-  document.getElementById("pac-scadenza").value = "";
-  document.getElementById("pac-prezzo").value = "";
-  document.getElementById("pac-note").value = "";
+  document.getElementById("modal-pacchetto-title").textContent = editingPacchettoId ? "Modifica pacchetto" : "Nuovo pacchetto";
+  populatePacchettoMembroSelect();
+  if(editingPacchettoId){
+    const p = pacchettiList.find(x => x.id === editingPacchettoId);
+    document.getElementById("pac-cliente").value = p?.cliente || "";
+    document.getElementById("pac-membro").value = p?.membro_id || "";
+    document.getElementById("pac-tipo").value = p?.tipo || "carnet";
+    document.getElementById("pac-unita-totali").value = p?.unita_totali ?? "";
+    document.getElementById("pac-unita-usate").value = p?.unita_usate ?? "0";
+    document.getElementById("pac-inizio").value = p?.data_inizio || "";
+    document.getElementById("pac-scadenza").value = p?.data_scadenza || "";
+    document.getElementById("pac-prezzo").value = p?.prezzo ?? "";
+    document.getElementById("pac-note").value = p?.note || "";
+  } else {
+    document.getElementById("pac-cliente").value = "";
+    document.getElementById("pac-membro").value = "";
+    document.getElementById("pac-tipo").value = "carnet";
+    document.getElementById("pac-unita-totali").value = "";
+    document.getElementById("pac-unita-usate").value = "0";
+    document.getElementById("pac-inizio").value = new Date().toISOString().slice(0,10);
+    document.getElementById("pac-scadenza").value = "";
+    document.getElementById("pac-prezzo").value = "";
+    document.getElementById("pac-note").value = "";
+  }
   toggleTipoPacchetto();
   openModal("modal-pacchetto");
 }
@@ -2743,6 +2906,7 @@ async function savePacchetto(){
 
   const payload = {
     cliente, tipo,
+    membro_id: document.getElementById("pac-membro").value || null,
     unita_totali: tipo === "carnet" ? (parseInt(document.getElementById("pac-unita-totali").value) || null) : null,
     unita_usate: tipo === "carnet" ? (parseInt(document.getElementById("pac-unita-usate").value) || 0) : null,
     data_inizio: document.getElementById("pac-inizio").value || null,
@@ -2753,7 +2917,15 @@ async function savePacchetto(){
 
   try{
     if(DEMO_MODE){
-      demoState.pacchetti.push({ id:"p" + (demoIdCounter++ + 300), centro_id: demoState.centro.id, ...payload });
+      if(editingPacchettoId){
+        const idx = demoState.pacchetti.findIndex(p => p.id === editingPacchettoId);
+        if(idx >= 0) demoState.pacchetti[idx] = { ...demoState.pacchetti[idx], ...payload };
+      } else {
+        demoState.pacchetti.push({ id:"p" + (demoIdCounter++ + 300), centro_id: demoState.centro.id, ...payload });
+      }
+    } else if(editingPacchettoId){
+      const { error } = await sb.from("scuderia_pacchetti").update(payload).eq("id", editingPacchettoId);
+      if(error) throw error;
     } else {
       const { error } = await sb.from("scuderia_pacchetti").insert({ centro_id: currentCentro.id, ...payload });
       if(error) throw error;
@@ -2957,9 +3129,11 @@ let notaDragState = null;
 function onPostitPointerDown(e){
   if(e.target.closest(".close-x")) return;
   const el = e.currentTarget;
-  notaDragState = { id: el.dataset.id, el, overId: null, moved: false };
+  notaDragState = { id: el.dataset.id, el, overId: null, moved: false, startX: e.clientX, startY: e.clientY };
   el.setPointerCapture(e.pointerId);
   el.classList.add("dragging");
+  el.style.zIndex = "50";
+  el.style.pointerEvents = "none";
   el.addEventListener("pointermove", onPostitPointerMove);
   el.addEventListener("pointerup", onPostitPointerUp);
   el.addEventListener("pointercancel", onPostitPointerUp);
@@ -2968,6 +3142,10 @@ function onPostitPointerDown(e){
 function onPostitPointerMove(e){
   if(!notaDragState) return;
   notaDragState.moved = true;
+  const dx = e.clientX - notaDragState.startX;
+  const dy = e.clientY - notaDragState.startY;
+  notaDragState.el.style.transform = `translate(${dx}px, ${dy}px)`;
+
   const target = document.elementFromPoint(e.clientX, e.clientY);
   const postitEl = target ? target.closest(".postit") : null;
   document.querySelectorAll(".postit.drag-over").forEach(p => p.classList.remove("drag-over"));
@@ -2986,6 +3164,9 @@ async function onPostitPointerUp(){
   el.removeEventListener("pointerup", onPostitPointerUp);
   el.removeEventListener("pointercancel", onPostitPointerUp);
   el.classList.remove("dragging");
+  el.style.transform = "";
+  el.style.zIndex = "";
+  el.style.pointerEvents = "";
   document.querySelectorAll(".postit.drag-over").forEach(p => p.classList.remove("drag-over"));
   notaDragState = null;
 
