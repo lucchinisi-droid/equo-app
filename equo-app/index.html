@@ -290,6 +290,23 @@ select.input{cursor:pointer}
 .mchat-input-bar .input{flex:1;border-radius:22px}
 .mchat-send-btn{width:42px;height:42px;border-radius:50%;flex-shrink:0;padding:0;
   display:flex;align-items:center;justify-content:center}
+.mchat-mic-btn{width:40px;height:40px;border-radius:50%;border:none;background:none;
+  color:var(--muted);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mchat-mic-btn .icon{width:22px;height:22px}
+.mchat-mic-btn.recording{color:var(--red)}
+.mchat-recording-bar{display:none;align-items:center;gap:10px;padding:10px 14px;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);
+  background:var(--surface);flex-shrink:0}
+.mchat-recording-bar.active{display:flex}
+.mchat-rec-dot{width:11px;height:11px;border-radius:50%;background:var(--red);flex-shrink:0;
+  animation:mchat-pulse 1.1s infinite}
+@keyframes mchat-pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.mchat-rec-timer{font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px}
+.mchat-cancel-rec-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--surface2);
+  color:var(--muted);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mchat-cancel-rec-btn .icon{width:18px;height:18px}
+.mchat-audio-bubble audio{width:220px;height:36px;max-width:100%}
+.mchat-audio-bubble audio::-webkit-media-controls-panel{background:transparent}
 .mchat-emoji-picker{display:none;grid-template-columns:repeat(8,1fr);gap:4px;padding:10px 12px;
   border-top:1px solid var(--border);background:var(--surface);max-height:150px;overflow-y:auto;flex-shrink:0}
 .mchat-emoji-picker.active{display:grid}
@@ -323,6 +340,7 @@ select.input{cursor:pointer}
   <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 10h16"/><path d="M6 10v9M10 10v9M14 10v9M18 10v9"/><path d="M3 10l9-6 9 6"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.4 5h13.2a2 2 0 0 1 1.9 1.4L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6l1.5-5.6A2 2 0 0 1 5.4 5z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></symbol>
 </svg>
 
 <!-- ═══ AUTH ═══ -->
@@ -685,10 +703,18 @@ select.input{cursor:pointer}
     </div>
     <div class="mchat-messages" id="mchat-messages"></div>
     <div class="mchat-emoji-picker" id="mchat-emoji-picker"></div>
-    <div class="mchat-input-bar">
+    <div class="mchat-input-bar" id="mchat-input-bar">
       <button class="mchat-emoji-btn" onclick="toggleEmojiPicker()" aria-label="Emoji">🙂</button>
       <input class="input" id="mchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMascalciaMessage()">
+      <button class="mchat-mic-btn" id="mchat-mic-btn" onclick="startVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
       <button class="mchat-send-btn btn btn-primary" onclick="sendMascalciaMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+    <div class="mchat-recording-bar" id="mchat-recording-bar">
+      <button class="mchat-cancel-rec-btn" onclick="cancelVoiceRecording()" aria-label="Annulla"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+      <div class="mchat-rec-dot"></div>
+      <div class="mchat-rec-timer" id="mchat-rec-timer">0:00</div>
+      <div class="muted" style="flex:1;font-size:12.5px">Registrazione in corso...</div>
+      <button class="mchat-send-btn btn btn-primary" onclick="stopAndSendVoiceRecording()" aria-label="Invia nota vocale"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
   </div>
 </div>
@@ -988,7 +1014,8 @@ select.input{cursor:pointer}
    - stables(id, name, join_code)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note, created_at, updated_at)
-   - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, testo, letto, created_at)
+   - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo, testo, audio_url, letto, created_at)
+   - storage bucket pubblico "mascalcia-note-vocali" (note vocali)
    ══════════════════════════════════════════════════════ */
 
 const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
@@ -1176,12 +1203,13 @@ const DB = {
     const { data, error } = await sb.from("messaggi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("created_at", { ascending: true });
     return error ? [] : (data || []);
   },
-  async insertMessaggioMascalcia({ cliente_mascalcia_id, testo }){
+  async insertMessaggioMascalcia({ cliente_mascalcia_id, tipo, testo, audio_url }){
+    tipo = tipo || "testo";
     if(DEMO_MODE){
-      demoState.messaggiMascalcia.push({ id: "dm-" + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", testo, letto: true, created_at: new Date().toISOString() });
+      demoState.messaggiMascalcia.push({ id: "dm-" + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, letto: true, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", testo, letto: true });
+    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, letto: true });
     return { error };
   },
   async markLettiMascalcia(clienteId){
@@ -1190,6 +1218,16 @@ const DB = {
       return;
     }
     await sb.from("messaggi_mascalcia").update({ letto: true }).eq("cliente_mascalcia_id", clienteId).eq("mittente_tipo", "cliente").eq("letto", false);
+  },
+  async uploadNotaVocaleMascalcia(blob, clienteId){
+    if(DEMO_MODE){
+      return { url: URL.createObjectURL(blob), error: null };
+    }
+    const path = `${currentUser.id}/${clienteId}/${Date.now()}.webm`;
+    const { error } = await sb.storage.from("mascalcia-note-vocali").upload(path, blob, { contentType: blob.type || "audio/webm" });
+    if(error) return { url: null, error };
+    const { data } = sb.storage.from("mascalcia-note-vocali").getPublicUrl(path);
+    return { url: data?.publicUrl || null, error: null };
   },
 };
 
@@ -1928,6 +1966,7 @@ async function openChatThread(clienteId){
 }
 
 function closeChatThread(){
+  if(mediaRecorder && mediaRecorder.state !== "inactive") cancelVoiceRecording();
   document.getElementById("mchat-overlay").classList.remove("active");
 }
 
@@ -1961,9 +2000,12 @@ async function renderChatThread(clienteId){
       lastDay = day;
     }
     const out = m.mittente_tipo === "maniscalco";
+    const body = m.tipo === "audio"
+      ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
+      : `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
-        <div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>
+        ${body}
         <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
       </div>`;
   });
@@ -1976,10 +2018,92 @@ async function sendMascalciaMessage(){
   const testo = input.value.trim();
   if(!testo || !currentClienteId) return;
   input.value = "";
-  const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: currentClienteId, testo });
+  const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: currentClienteId, tipo: "testo", testo });
   if(error){ showToast("Errore: " + error.message); return; }
   await renderChatThread(currentClienteId);
   await loadInboxMascalcia();
+}
+
+/* ---------- NOTE VOCALI ---------- */
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingTimer = null;
+let recordingSeconds = 0;
+let recordingStream = null;
+
+function formatRecTimer(sec){
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+async function startVoiceRecording(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined"){
+    showToast("Il tuo browser non supporta la registrazione vocale.");
+    return;
+  }
+  try{
+    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e){
+    showToast("Permesso microfono negato. Abilitalo dalle impostazioni del browser.");
+    return;
+  }
+  recordedChunks = [];
+  try{
+    mediaRecorder = new MediaRecorder(recordingStream);
+  } catch(e){
+    showToast("Impossibile avviare la registrazione su questo dispositivo.");
+    recordingStream.getTracks().forEach(t => t.stop());
+    return;
+  }
+  mediaRecorder.ondataavailable = e => { if(e.data && e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.start();
+  recordingSeconds = 0;
+  document.getElementById("mchat-rec-timer").textContent = "0:00";
+  document.getElementById("mchat-input-bar").style.display = "none";
+  document.getElementById("mchat-recording-bar").classList.add("active");
+  document.getElementById("mchat-emoji-picker").classList.remove("active");
+  recordingTimer = setInterval(() => {
+    recordingSeconds++;
+    document.getElementById("mchat-rec-timer").textContent = formatRecTimer(recordingSeconds);
+  }, 1000);
+}
+
+function stopRecordingInternal(){
+  clearInterval(recordingTimer);
+  recordingTimer = null;
+  document.getElementById("mchat-input-bar").style.display = "flex";
+  document.getElementById("mchat-recording-bar").classList.remove("active");
+  if(recordingStream){ recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
+}
+
+function cancelVoiceRecording(){
+  if(mediaRecorder && mediaRecorder.state !== "inactive"){
+    mediaRecorder.onstop = null;
+    mediaRecorder.stop();
+  }
+  recordedChunks = [];
+  mediaRecorder = null;
+  stopRecordingInternal();
+}
+
+async function stopAndSendVoiceRecording(){
+  if(!mediaRecorder || mediaRecorder.state === "inactive") return;
+  const clienteId = currentClienteId;
+  mediaRecorder.onstop = async () => {
+    stopRecordingInternal();
+    if(recordedChunks.length === 0){ showToast("Registrazione troppo breve, riprova."); return; }
+    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+    recordedChunks = [];
+    mediaRecorder = null;
+    const { url, error } = await DB.uploadNotaVocaleMascalcia(blob, clienteId);
+    if(error || !url){ showToast("Errore nel caricamento della nota vocale."); return; }
+    const { error: insertError } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: clienteId, tipo: "audio", audio_url: url });
+    if(insertError){ showToast("Errore: " + insertError.message); return; }
+    await renderChatThread(clienteId);
+    await loadInboxMascalcia();
+  };
+  mediaRecorder.stop();
 }
 
 function shareInviteCodeFromChat(){
@@ -2030,7 +2154,8 @@ async function loadInboxMascalcia(){
     const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
     const nome = m.clienti_mascalcia?.nome || "Cliente";
     const cavallo = m.clienti_mascalcia?.nome_cavallo;
-    const preview = (m.mittente_tipo === "maniscalco" ? "Tu: " : "") + m.testo;
+    const previewBody = m.tipo === "audio" ? "🎙️ Nota vocale" : (m.testo || "");
+    const preview = (m.mittente_tipo === "maniscalco" ? "Tu: " : "") + previewBody;
     return `
     <div class="inbox-item ${unread > 0 ? "unread" : ""}" onclick="openChatThread('${m.cliente_mascalcia_id}')">
       <div class="horse-avatar"><i class="fa-solid fa-user" style="font-size:20px"></i></div>
