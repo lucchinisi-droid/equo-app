@@ -61,6 +61,16 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Gestione/controllo email raccolte dalla waitlist (to-do aperto)
 - [ ] Auto-renew dominio: verificare se attivarlo su Namecheap prima della scadenza
 
+## 4bis. AI — agenti verticali e voce (idea da sviluppare, non ancora pianificata in dettaglio)
+- [ ] Agenti AI con competenze verticali via tool-use Claude (stessa infrastruttura già in piedi per le proposte AI con conferma utente):
+  - Proprietario: 1 agente esperto equestre + esecuzione procedure (allenamenti, appuntamenti, ecc.)
+  - App professionisti: 1 agente specializzato per categoria (maniscalco/veterinario/istruttore) + procedure della sua categoria
+  - Equo Scuderia: più agenti a scelta (Segretaria, Commercialista, Esperto Equestre...) — 1 incluso nel pack scelto alla prima configurazione, altri ADD-ON a pagamento → serve un modello "moduli/add-on acquistabili" per scuderia, non basta il flag free/premium binario attuale
+- [ ] Conversazione vocale in tempo reale: Claude non ha (ad oggi, 18/09/2026) una Live API vocale pubblica per sviluppatori paragonabile a Gemini — solo Voice Mode nelle sue app consumer, non integrabile in Equo
+  - Se si vuole voce nativa: valutare Gemini Live API (audio bidirezionale + function calling nella stessa sessione) come provider AI separato solo per quella funzione, oppure dettatura di sistema (STT del telefono) come alternativa a costo zero mantenendo tutto su Claude
+  - Gemini Live/TTS usa lo stesso pacchetto di ~30 voci native (maschili/femminili) dell'app Gemini — nessuna differenza di qualità tra API e app
+  - Nodo economico: audio in tempo reale costa molto più del testo — da gatare dietro Premium se implementato
+
 ## 5. Feature innovative (wow factor) — in ordine di priorità
 - [ ] **1. QR Code passaporto emergenza** — richiede ampliare la scheda cavallo: genera QR univoco per cavallo, pagina pubblica read-only (senza login) con allergie, vaccinazioni, gruppo sanguigno, contatti proprietario, scansionabile da un veterinario in emergenza
 - [ ] **2. Voice logging** — richiede creare nuova sezione "Diario Sanitario": nota vocale trascritta e strutturata via AI (Whisper/Claude), utile per loggare osservazioni a mani libere in scuderia
