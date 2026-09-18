@@ -191,6 +191,11 @@ select.input{cursor:pointer}
 .menu-row + .menu-row{margin-top:8px}
 .menu-row-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
 
+.role-chip-row{display:flex;gap:8px;margin-top:8px}
+.role-chip{flex:1;text-align:center;padding:9px 8px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text)}
+.role-chip.active{background:var(--accent);color:#14231b;border-color:var(--accent)}
+
 .switch{position:relative;width:42px;height:24px;flex-shrink:0}
 .switch input{opacity:0;width:0;height:0}
 .switch-track{position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:background .2s}
@@ -914,6 +919,11 @@ select.input{cursor:pointer}
       </div>
       <button class="btn btn-ghost btn-sm" style="padding:6px 10px" onclick="closeModal('modal-menu');reopenOnboarding()">Cambia</button>
     </div>
+    <div class="role-chip-row" id="menu-dual-role-switcher" style="display:none">
+      <button class="role-chip" id="chip-vista-a"></button>
+      <button class="role-chip" id="chip-vista-b"></button>
+    </div>
+    <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
 
     <div class="menu-section-label">Aspetto</div>
     <div class="menu-row">
@@ -937,6 +947,27 @@ select.input{cursor:pointer}
 
     <div style="height:8px"></div>
     <button class="btn btn-outline" style="width:100%" onclick="openModal('modal-confirm-logout')">Esci</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-pro-role" onclick="closeOut(event,'modal-add-pro-role')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Che tipo di professionista sei?</div>
+    <div class="role-list" style="margin-top:8px">
+      <button class="role-card" onclick="confirmAddSecondaryRole('maniscalco')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
+        <div><div class="role-card-title">Maniscalco</div><div class="role-card-desc">Ferrature, interventi e clienti</div></div>
+      </button>
+      <button class="role-card" onclick="confirmAddSecondaryRole('veterinario')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">Visite e clienti</div></div>
+      </button>
+      <button class="role-card" onclick="confirmAddSecondaryRole('istruttore')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Lezioni e allievi</div></div>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1290,10 +1321,70 @@ function updateRoleBadgeUI(ruolo){
   if(el) el.textContent = ROLE_LABELS[ruolo] || "—";
 }
 
+/* ---------- DOPPIO RUOLO (pro <-> proprietario sullo stesso account) ---------- */
+// currentUser.ruolo = ruolo primario (quello scelto nell'onboarding, salvato in DB)
+// currentUser.ruoloSecondario = eventuale secondo profilo configurato (salvato in DB)
+// currentUser.vistaAttiva = quale dei due profili è mostrato ORA (solo di sessione, non salvato:
+// ad ogni riapertura dell'app si riparte sempre dal ruolo primario)
+function renderMenuDualRole(){
+  const chipRow = document.getElementById("menu-dual-role-switcher");
+  const addBtn = document.getElementById("btn-add-secondary-role");
+  const primario = currentUser?.ruolo;
+  const secondario = currentUser?.ruoloSecondario;
+  const attiva = currentUser?.vistaAttiva || primario;
+
+  // il gestore struttura non partecipa al doppio ruolo (usa Equo Scuderia)
+  if(!primario || primario === "gestore_struttura"){
+    chipRow.style.display = "none";
+    addBtn.style.display = "none";
+    return;
+  }
+
+  if(secondario){
+    chipRow.style.display = "flex";
+    addBtn.style.display = "none";
+    const a = document.getElementById("chip-vista-a");
+    const b = document.getElementById("chip-vista-b");
+    a.textContent = ROLE_LABELS[primario] || primario;
+    b.textContent = ROLE_LABELS[secondario] || secondario;
+    a.className = "role-chip" + (attiva === primario ? " active" : "");
+    b.className = "role-chip" + (attiva === secondario ? " active" : "");
+    a.onclick = () => switchVista(primario);
+    b.onclick = () => switchVista(secondario);
+  } else {
+    chipRow.style.display = "none";
+    const isPro = PRO_ROLES.includes(primario);
+    addBtn.style.display = "block";
+    addBtn.textContent = isPro ? "+ Aggiungi profilo Proprietario" : "+ Aggiungi profilo Professionista";
+    addBtn.onclick = isPro ? () => confirmAddSecondaryRole("proprietario") : () => openModal("modal-add-pro-role");
+  }
+}
+
+async function switchVista(ruolo){
+  closeModal("modal-menu");
+  if(ruolo === currentUser.vistaAttiva) return;
+  await enterApp(ruolo);
+}
+
+async function confirmAddSecondaryRole(ruolo){
+  closeModal("modal-add-pro-role");
+  if(DEMO_MODE){
+    currentUser.ruoloSecondario = ruolo;
+  } else {
+    const { error } = await sb.from("profiles").update({ ruolo_secondario: ruolo }).eq("id", currentUser.id);
+    if(error){ showToast("Non sono riuscito a salvare, riprova."); return; }
+    currentUser.ruoloSecondario = ruolo;
+  }
+  closeModal("modal-menu");
+  await enterApp(ruolo);
+}
+
 async function enterApp(ruolo){
   document.getElementById("screen-onboarding").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
+  currentUser.vistaAttiva = ruolo;
   updateRoleBadgeUI(ruolo);
+  renderMenuDualRole();
   if(PRO_ROLES.includes(ruolo)){
     await setupProNav(ruolo);
   } else {
@@ -1399,12 +1490,14 @@ function setAvatarInitial(letter){
 
 async function startDemo(){
   DEMO_MODE = true;
-  currentUser = { id: "demo-user", email: "demo@equo.app" };
+  currentUser = { id: "demo-user", email: "demo@equo.app", ruolo: "proprietario", ruoloSecondario: null };
   document.getElementById("screen-auth").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
   setAvatarInitial("D");
   document.getElementById("profile-email").textContent = currentUser.email;
   document.getElementById("profile-name").textContent = "Modalità demo";
+  updateRoleBadgeUI("proprietario");
+  renderMenuDualRole();
   await loadHorses();
   renderPaymentMethods();
   startPromoRotation();
@@ -1432,9 +1525,10 @@ async function boot(){
 
   setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
   document.getElementById("profile-email").textContent = user.email || "";
-  const { data: profile } = await sb.from("profiles").select("full_name, ruolo").eq("id", user.id).maybeSingle();
+  const { data: profile } = await sb.from("profiles").select("full_name, ruolo, ruolo_secondario").eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
+  currentUser.ruoloSecondario = profile?.ruolo_secondario || null;
 
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
