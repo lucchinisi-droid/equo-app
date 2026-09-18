@@ -153,6 +153,9 @@ select.input{cursor:pointer}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .stat-value{font-family:'Fraunces',serif;font-size:22px;font-weight:700}
+.note-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.section-divider{height:1px;background:var(--border);margin:16px 0}
 
 .deadline-item{display:flex;align-items:center;gap:12px;padding:10px 0}
 .deadline-item + .deadline-item{border-top:1px solid var(--border)}
@@ -574,8 +577,36 @@ select.input{cursor:pointer}
     <div id="expenses-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
   </div>
 
-  <!-- PROFESSIONISTA: HOME (AGENDA) -->
+  <!-- PROFESSIONISTA: HOME (dashboard) -->
   <div class="page-content" id="page-pro-home">
+    <div class="section-title" style="font-size:18px;margin-bottom:2px" id="pro-home-greeting">Ciao</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="pro-home-date"></div>
+
+    <div class="card" style="margin-bottom:14px;cursor:pointer" onclick="showPage('pro-incassi')">
+      <div style="font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Incassi questo mese</div>
+      <div class="stat-value" id="home-pro-incassi-mese" style="margin-top:4px">€ 0 incassati</div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;cursor:pointer" onclick="showPage('pro-inbox')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="icon"><svg><use href="#i-inbox"/></svg></span>
+        <div id="home-pro-unread" style="font-size:13.5px;font-weight:600">Nessun messaggio non letto</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:8px">Prossime scadenze</div>
+      <div id="home-pro-deadlines"><div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div></div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="openInterventoModal(null)">+ Nuovo intervento</button>
+      <button class="btn btn-outline" style="flex:1" onclick="openModal('modal-add-cliente')">+ Aggiungi cliente</button>
+    </div>
+  </div>
+
+  <!-- PROFESSIONISTA: AGENDA -->
+  <div class="page-content" id="page-pro-agenda">
     <div class="card" style="margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:12px">
         <div class="role-card-icon"><span class="icon"><svg><use href="#i-link"/></svg></span></div>
@@ -587,7 +618,7 @@ select.input{cursor:pointer}
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px" onclick="copyInviteLink()">Copia link invito</button>
     </div>
 
-    <div class="section-title" style="font-size:16px" id="pro-home-title">Prossime scadenze</div>
+    <div class="section-title" style="font-size:16px" id="pro-agenda-title">Prossime scadenze</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-weight:700;font-size:14px;margin-bottom:8px">Interventi da fare a breve</div>
       <div id="pro-deadlines-list"><div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div></div>
@@ -600,6 +631,43 @@ select.input{cursor:pointer}
       <div class="muted" style="font-size:13px">Nessuna richiesta in attesa.</div>
     </div>
     <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">Segna intervento fatto</button>
+  </div>
+
+  <!-- PROFESSIONISTA: INCASSI -->
+  <div class="page-content" id="page-pro-incassi">
+    <div class="section-title">Incassi</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Incassato questo mese</div>
+        <div class="stat-value" id="incassi-mese-incassato">€ 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Da incassare</div>
+        <div class="stat-value" id="incassi-mese-da-incassare">€ 0</div>
+      </div>
+    </div>
+    <div class="muted" style="font-size:12.5px;margin:8px 0 14px" id="incassi-mese-numero-wrap">
+      <span id="incassi-mese-numero">0</span> interventi questo mese
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:8px">Da saldare</div>
+      <div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div>
+    </div>
+
+    <div id="incassi-premium-box" style="display:none">
+      <div class="section-divider"></div>
+      <div class="section-title" style="font-size:15px">Ultimi 6 mesi</div>
+      <div class="card" style="margin-bottom:14px">
+        <div id="incassi-storico-list"><div class="muted" style="font-size:13px">Nessuno storico disponibile.</div></div>
+      </div>
+      <button class="btn btn-outline" style="width:100%" onclick="showToast('Disponibile a breve.')">Esporta ricevute PDF</button>
+    </div>
+
+    <div id="incassi-upsell-box" class="note-box" style="display:none">
+      Con <strong>Premium</strong> sblocchi lo storico completo degli incassi e l'export PDF delle ricevute per ogni cliente.
+      <button class="btn btn-primary btn-sm" style="width:100%;margin-top:10px" onclick="openMenu()">Passa a Premium</button>
+    </div>
   </div>
 
   <!-- PROFESSIONISTA: CLIENTI -->
@@ -657,9 +725,11 @@ select.input{cursor:pointer}
     <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
   </div>
   <div class="bottom-nav" id="bottom-nav-pro" style="display:none">
-    <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
+    <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
+    <button class="nav-btn" data-page="pro-agenda" onclick="showPage('pro-agenda')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
     <button class="nav-btn" data-page="pro-inbox" onclick="showPage('pro-inbox')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>
     <button class="nav-btn" data-page="pro-clienti" onclick="showPage('pro-clienti')"><span class="fa-icon"><i class="fa-solid fa-users"></i></span><small>Clienti</small></button>
+    <button class="nav-btn" data-page="pro-incassi" onclick="showPage('pro-incassi')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Incassi</small></button>
   </div>
 
   <!-- AI FAB -->
@@ -817,6 +887,10 @@ select.input{cursor:pointer}
       <div class="input-group">
         <label class="input-label">Data intervento</label>
         <input class="input" id="intervento-data" type="date">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Importo (€)</label>
+        <input class="input" id="intervento-importo" type="number" step="0.01" placeholder="0.00">
       </div>
       <div class="input-group">
         <label class="input-label">Pagamento</label>
@@ -1038,13 +1112,13 @@ select.input{cursor:pointer}
    EQUO APP — v1 skeleton
    Sostituisci SUPABASE_URL / SUPABASE_ANON_KEY con i valori reali.
    Schema Supabase atteso (da creare):
-   - profiles(id, email, full_name, ruolo)
+   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano)
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
    - stables(id, name, join_code)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
-   - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note, created_at, updated_at)
+   - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
    - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo, testo, audio_url, letto, created_at)
    - storage bucket pubblico "mascalcia-note-vocali" (note vocali)
    ══════════════════════════════════════════════════════ */
@@ -1084,7 +1158,9 @@ const demoState = {
     { id: "dc-1", nome: "Marco Bianchi", nome_cavallo: "Aurora", telefono: "333 1112222", note: "", cliente_user_id: null, codice_invito: "EQUO-DC1AB", created_at: "2026-08-01" },
   ],
   interventiMascalcia: [
-    { id: "di-1", cliente_mascalcia_id: "dc-1", tipo_ferratura: "ferro", tipo_altro: null, data_intervento: "2026-08-10", prossima_scadenza: "2026-09-21", stato_pagamento: "saldato", note: "", created_at: "2026-08-10" },
+    { id: "di-1", cliente_mascalcia_id: "dc-1", tipo_ferratura: "ferro", tipo_altro: null, data_intervento: "2026-08-10", prossima_scadenza: "2026-09-21", importo: 90, stato_pagamento: "saldato", note: "", created_at: "2026-08-10" },
+    { id: "di-2", cliente_mascalcia_id: "dc-1", tipo_ferratura: "scalzatura", tipo_altro: null, data_intervento: "2026-09-05", prossima_scadenza: "2026-10-31", importo: 60, stato_pagamento: "saldato", note: "", created_at: "2026-09-05" },
+    { id: "di-3", cliente_mascalcia_id: "dc-1", tipo_ferratura: "ferro", tipo_altro: null, data_intervento: "2026-09-16", prossima_scadenza: "2026-10-28", importo: 95, stato_pagamento: "da_saldare", note: "", created_at: "2026-09-16" },
   ],
   messaggiMascalcia: [
     { id: "dm-1", cliente_mascalcia_id: "dc-1", mittente_tipo: "cliente", testo: "Ciao! Quando puoi passare per Aurora?", letto: false, created_at: "2026-09-15T09:00:00" },
@@ -1200,13 +1276,23 @@ const DB = {
     const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
-  async insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note }){
+  async insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note }){
     if(DEMO_MODE){
-      demoState.interventiMascalcia.push({ id: "di-" + (++demoIdCounter), cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note, created_at: new Date().toISOString() });
+      demoState.interventiMascalcia.push({ id: "di-" + (++demoIdCounter), cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note });
+    const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
     return { error };
+  },
+  async listInterventiMascalciaTutti(){
+    if(DEMO_MODE){
+      return demoState.interventiMascalcia.slice()
+        .map(i => ({ ...i, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === i.cliente_mascalcia_id)?.nome } }))
+        .sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
+    }
+    const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).order("data_intervento", { ascending: false });
+    return error ? [] : (data || []);
   },
   async listProssimeScadenzeMascalcia(limit){
     if(DEMO_MODE){
@@ -1406,17 +1492,26 @@ async function setupProNav(ruolo){
   document.getElementById("bottom-nav-owner").style.display = "none";
   document.getElementById("bottom-nav-pro").style.display = "flex";
   document.getElementById("topbar-context").textContent = ROLE_LABELS[ruolo] || "";
-  renderProHome(ruolo);
+  renderProAgendaHeader(ruolo);
+  renderProHomeGreeting();
   showPage("pro-home");
   await loadClientiMascalcia();
   await loadInboxMascalcia();
+  await renderIncassi();
 }
 
-function renderProHome(ruolo){
-  document.getElementById("pro-home-title").textContent =
+function renderProAgendaHeader(ruolo){
+  document.getElementById("pro-agenda-title").textContent =
     ruolo === "veterinario" ? "Agenda visite di oggi" :
     ruolo === "istruttore" ? "Agenda lezioni di oggi" : "Agenda di oggi";
   document.getElementById("pro-action-btn").textContent = PRO_ACTION_LABELS[ruolo] || "Segna intervento fatto";
+}
+
+function renderProHomeGreeting(){
+  const h = new Date().getHours();
+  const saluto = h < 12 ? "Buongiorno" : h < 18 ? "Buon pomeriggio" : "Buonasera";
+  document.getElementById("pro-home-greeting").textContent = saluto;
+  document.getElementById("pro-home-date").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 }
 
 function showProActionComingSoon(){
@@ -1490,7 +1585,8 @@ function setAvatarInitial(letter){
 
 async function startDemo(){
   DEMO_MODE = true;
-  currentUser = { id: "demo-user", email: "demo@equo.app", ruolo: "proprietario", ruoloSecondario: null };
+  // In demo il piano è Premium di default: il team prova subito tutto sbloccato (pattern "opzione C" del gating).
+  currentUser = { id: "demo-user", email: "demo@equo.app", ruolo: "proprietario", ruoloSecondario: null, piano: "premium" };
   document.getElementById("screen-auth").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
   setAvatarInitial("D");
@@ -1525,10 +1621,11 @@ async function boot(){
 
   setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
   document.getElementById("profile-email").textContent = user.email || "";
-  const { data: profile } = await sb.from("profiles").select("full_name, ruolo, ruolo_secondario").eq("id", user.id).maybeSingle();
+  const { data: profile } = await sb.from("profiles").select("full_name, ruolo, ruolo_secondario, piano").eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
   currentUser.ruoloSecondario = profile?.ruolo_secondario || null;
+  currentUser.piano = profile?.piano || "free";
 
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
@@ -1842,6 +1939,7 @@ async function joinStable(){
 
 /* ---------- MASCALCIA (clienti + interventi del professionista) ---------- */
 let clientiMascalcia = [];
+let proUnreadTotal = 0;
 let currentClienteId = null;
 const TIPO_FERRATURA_LABELS = { ferro: "Ferratura a ferro", scalzatura: "Scalzatura", ortopedica: "Ferratura ortopedica", altro: "Altro" };
 const TIPO_FERRATURA_INTERVALLI = { ferro: 42, scalzatura: 56, ortopedica: 35 }; // giorni alla prossima scadenza
@@ -1942,7 +2040,8 @@ async function loadClienteInterventi(clienteId){
 
 async function renderProDeadlines(){
   const box = document.getElementById("pro-deadlines-list");
-  if(!box) return;
+  const homeBox = document.getElementById("home-pro-deadlines");
+  if(!box && !homeBox) return;
   const data = await DB.listProssimeScadenzeMascalcia(20);
   // Tiene solo la scadenza più recente per cliente (evita righe superate da un nuovo intervento)
   const latestByCliente = {};
@@ -1950,12 +2049,9 @@ async function renderProDeadlines(){
     const key = i.cliente_mascalcia_id;
     if(!latestByCliente[key] || new Date(i.data_intervento) > new Date(latestByCliente[key].data_intervento)) latestByCliente[key] = i;
   });
-  const list = Object.values(latestByCliente).sort((a,b) => new Date(a.prossima_scadenza) - new Date(b.prossima_scadenza)).slice(0, 5);
-  if(list.length === 0){
-    box.innerHTML = '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>';
-    return;
-  }
-  box.innerHTML = list.map(i => `
+  const ordinate = Object.values(latestByCliente).sort((a,b) => new Date(a.prossima_scadenza) - new Date(b.prossima_scadenza));
+
+  const renderList = (items) => items.map(i => `
     <div class="deadline-item">
       <div class="deadline-dot ${deadlineBadgeClass(i.prossima_scadenza) === 'badge-red' ? 'late' : deadlineBadgeClass(i.prossima_scadenza) === 'badge-accent' ? 'soon' : 'ok'}"></div>
       <div style="flex:1">
@@ -1964,6 +2060,82 @@ async function renderProDeadlines(){
       </div>
     </div>
   `).join("");
+
+  if(box) box.innerHTML = ordinate.length === 0 ? '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>' : renderList(ordinate.slice(0, 5));
+  if(homeBox) homeBox.innerHTML = ordinate.length === 0 ? '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>' : renderList(ordinate.slice(0, 3));
+}
+
+/* ---------- INCASSI (pro) ---------- */
+function isPremium(){
+  return !!(currentUser && currentUser.piano === "premium");
+}
+function formatEuro(n){
+  return "€ " + (Number(n) || 0).toFixed(2);
+}
+function formatMeseLabel(yyyyMm){
+  const [y, m] = yyyyMm.split("-");
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+}
+
+async function renderIncassi(){
+  const box = document.getElementById("incassi-mese-incassato");
+  if(!box) return;
+  const interventi = await DB.listInterventiMascalciaTutti();
+  const meseCorrente = new Date().toISOString().slice(0, 7); // "2026-09"
+  const delMese = interventi.filter(i => (i.data_intervento || "").startsWith(meseCorrente));
+  const incassatoMese = delMese.filter(i => i.stato_pagamento === "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
+  const daIncassareMese = delMese.filter(i => i.stato_pagamento !== "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
+
+  document.getElementById("incassi-mese-incassato").textContent = formatEuro(incassatoMese);
+  document.getElementById("incassi-mese-da-incassare").textContent = formatEuro(daIncassareMese);
+  document.getElementById("incassi-mese-numero").textContent = delMese.length;
+
+  const homeTeaser = document.getElementById("home-pro-incassi-mese");
+  if(homeTeaser) homeTeaser.textContent = formatEuro(incassatoMese) + " incassati";
+
+  const totalUnread = proUnreadTotal;
+  const homeUnread = document.getElementById("home-pro-unread");
+  if(homeUnread) homeUnread.textContent = totalUnread > 0 ? `${totalUnread} messagg${totalUnread === 1 ? "io" : "i"} non lett${totalUnread === 1 ? "o" : "i"}` : "Nessun messaggio non letto";
+
+  const daSaldare = interventi.filter(i => i.stato_pagamento !== "saldato").sort((a, b) => new Date(b.data_intervento) - new Date(a.data_intervento));
+  const daSaldareBox = document.getElementById("incassi-da-saldare-list");
+  daSaldareBox.innerHTML = daSaldare.length === 0
+    ? '<div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div>'
+    : daSaldare.map(i => `
+      <div class="deadline-item">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${escapeHtml(i.clienti_mascalcia?.nome || "")}</div>
+          <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}</div>
+        </div>
+        <div style="font-weight:700;font-size:14px">${formatEuro(i.importo)}</div>
+      </div>
+    `).join("");
+
+  const premiumBox = document.getElementById("incassi-premium-box");
+  const upsellBox = document.getElementById("incassi-upsell-box");
+  if(isPremium()){
+    premiumBox.style.display = "block";
+    upsellBox.style.display = "none";
+    const mesi = {};
+    interventi.forEach(i => {
+      const key = (i.data_intervento || "").slice(0, 7);
+      if(!key) return;
+      if(!mesi[key]) mesi[key] = { saldato: 0 };
+      if(i.stato_pagamento === "saldato") mesi[key].saldato += Number(i.importo) || 0;
+    });
+    const ultimiMesi = Object.keys(mesi).sort().reverse().slice(0, 6);
+    document.getElementById("incassi-storico-list").innerHTML = ultimiMesi.length === 0
+      ? '<div class="muted" style="font-size:13px">Nessuno storico disponibile.</div>'
+      : ultimiMesi.map(key => `
+        <div class="deadline-item">
+          <div style="flex:1;font-size:13px;font-weight:600;text-transform:capitalize">${formatMeseLabel(key)}</div>
+          <div style="font-size:13px">${formatEuro(mesi[key].saldato)} incassati</div>
+        </div>
+      `).join("");
+  } else {
+    premiumBox.style.display = "none";
+    upsellBox.style.display = "block";
+  }
 }
 
 function openInterventoModal(clienteId){
@@ -1986,6 +2158,7 @@ function openInterventoModal(clienteId){
   document.getElementById("intervento-tipo-altro-group").style.display = "none";
   document.getElementById("intervento-tipo-altro").value = "";
   document.getElementById("intervento-data").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("intervento-importo").value = "";
   document.getElementById("intervento-pagamento").value = "da_saldare";
   document.getElementById("intervento-note").value = "";
   document.getElementById("intervento-error").style.display = "none";
@@ -1999,6 +2172,8 @@ async function createInterventoMascalcia(){
   const tipo_ferratura = document.getElementById("intervento-tipo").value;
   const tipo_altro = tipo_ferratura === "altro" ? document.getElementById("intervento-tipo-altro").value.trim() : null;
   const data_intervento = document.getElementById("intervento-data").value;
+  const importoRaw = document.getElementById("intervento-importo").value;
+  const importo = importoRaw === "" ? null : Number(importoRaw);
   const stato_pagamento = document.getElementById("intervento-pagamento").value;
   const note = document.getElementById("intervento-note").value.trim();
   if(!cliente_mascalcia_id || !data_intervento){
@@ -2012,7 +2187,7 @@ async function createInterventoMascalcia(){
     d.setDate(d.getDate() + TIPO_FERRATURA_INTERVALLI[tipo_ferratura]);
     prossima_scadenza = d.toISOString().slice(0, 10);
   }
-  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, stato_pagamento, note });
+  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
   if(error){
     errBox.textContent = "Errore: " + error.message;
     errBox.style.display = "block";
@@ -2021,6 +2196,7 @@ async function createInterventoMascalcia(){
   closeModal("modal-add-intervento");
   showToast("Intervento registrato!");
   await renderProDeadlines();
+  await renderIncassi();
   if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
 }
 
@@ -2236,6 +2412,7 @@ async function loadInboxMascalcia(){
   });
 
   const totalUnread = Object.values(unreadByCliente).reduce((a,b) => a+b, 0);
+  proUnreadTotal = totalUnread;
   const navBadge = document.getElementById("inbox-nav-badge");
   if(navBadge) navBadge.style.display = totalUnread > 0 ? "block" : "none";
 
