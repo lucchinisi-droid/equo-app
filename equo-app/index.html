@@ -382,6 +382,10 @@ select.input{cursor:pointer}
       <label class="input-label">Password</label>
       <input class="input" id="auth-password" type="password" placeholder="••••••••">
     </div>
+    <div class="input-group" id="signup-referral-group" style="display:none">
+      <label class="input-label">Codice referral (opzionale)</label>
+      <input class="input" id="auth-referral" placeholder="es. MARCO10">
+    </div>
     <div class="auth-error" id="auth-error" style="display:none"></div>
     <button class="btn btn-primary" id="auth-submit" onclick="submitAuth()">Accedi</button>
     <button class="btn btn-ghost" onclick="startDemo()" style="width:100%">Prova la demo (senza account)</button>
@@ -1112,7 +1116,7 @@ select.input{cursor:pointer}
    EQUO APP — v1 skeleton
    Sostituisci SUPABASE_URL / SUPABASE_ANON_KEY con i valori reali.
    Schema Supabase atteso (da creare):
-   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano)
+   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code)
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
@@ -1538,6 +1542,7 @@ function setAuthTab(mode){
   document.getElementById("tab-login").classList.toggle("active", mode === "login");
   document.getElementById("tab-signup").classList.toggle("active", mode === "signup");
   document.getElementById("signup-name-group").style.display = mode === "signup" ? "flex" : "none";
+  document.getElementById("signup-referral-group").style.display = mode === "signup" ? "flex" : "none";
   document.getElementById("auth-submit").textContent = mode === "signup" ? "Registrati" : "Accedi";
   document.getElementById("auth-error").style.display = "none";
 }
@@ -1555,9 +1560,12 @@ async function submitAuth(){
   try{
     if(authMode === "signup"){
       const name = document.getElementById("auth-name").value.trim();
+      const referral_code = document.getElementById("auth-referral").value.trim() || null;
       const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name } } });
       if(error) throw error;
-      if(data.user) await sb.from("profiles").upsert({ id: data.user.id, email, full_name: name });
+      // Nessuna validazione o logica di sconto qui: il codice viene solo salvato,
+      // la gestione della commissione al referrer resta manuale (vedi doc pricing).
+      if(data.user) await sb.from("profiles").upsert({ id: data.user.id, email, full_name: name, referral_code });
     } else {
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if(error) throw error;
