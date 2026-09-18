@@ -104,7 +104,7 @@ select.input{cursor:pointer}
   text-overflow:ellipsis;white-space:nowrap;padding:0 10px}
 .topbar-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);
   color:#14231b;display:flex;align-items:center;justify-content:center;font-weight:700;
-  cursor:pointer;flex-shrink:0}
+  cursor:pointer;flex-shrink:0;background-size:cover;background-position:center}
 
 .page-content{display:none;flex:1;overflow-y:auto;padding:16px;padding-bottom:100px;
   -webkit-overflow-scrolling:touch}
@@ -185,8 +185,12 @@ select.input{cursor:pointer}
 
 /* MENU */
 .menu-profile{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.menu-profile-avatar-wrap{position:relative;flex-shrink:0;cursor:pointer}
 .menu-profile-avatar{width:48px;height:48px;border-radius:50%;background:var(--accent);
-  color:#14231b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0}
+  color:#14231b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;
+  background-size:cover;background-position:center}
+.avatar-edit-badge{position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted)}
 .menu-section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
   letter-spacing:.5px;margin:18px 0 8px}
 .menu-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -338,6 +342,7 @@ select.input{cursor:pointer}
   <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M21 12.5V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3.5h-4a2 2 0 0 1 0-3.5z"/></symbol>
   <symbol id="i-mappin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
   <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="4" rx="1"/><path d="M9 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h6"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
@@ -982,7 +987,11 @@ select.input{cursor:pointer}
     <div class="modal-handle"></div>
 
     <div class="menu-profile">
-      <div class="menu-profile-avatar" id="menu-avatar">?</div>
+      <div class="menu-profile-avatar-wrap" onclick="document.getElementById('avatar-file-input').click()">
+        <div class="menu-profile-avatar" id="menu-avatar">?</div>
+        <div class="avatar-edit-badge"><span class="fa-icon"><i class="fa-solid fa-camera"></i></span></div>
+      </div>
+      <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarFileChange(event)">
       <div>
         <div style="font-weight:700" id="profile-name">—</div>
         <div class="muted" style="font-size:13px" id="profile-email">—</div>
@@ -1002,6 +1011,24 @@ select.input{cursor:pointer}
       <button class="role-chip" id="chip-vista-b"></button>
     </div>
     <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
+
+    <div id="menu-pro-section" style="display:none">
+      <div class="menu-section-label">Attività professionale</div>
+      <div class="menu-row" style="cursor:pointer" onclick="openDatiPagamentoModal()">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-money-check-dollar"></i></span>
+          <span>Dati per i pagamenti</span>
+        </div>
+        <span class="icon"><svg><use href="#i-chevron"/></svg></span>
+      </div>
+      <div class="menu-row" style="cursor:pointer;margin-top:8px" onclick="openCodicePersonaleModal()">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>
+          <span>Il tuo codice personale</span>
+        </div>
+        <span class="icon"><svg><use href="#i-chevron"/></svg></span>
+      </div>
+    </div>
 
     <div class="menu-section-label">Aspetto</div>
     <div class="menu-row">
@@ -1061,6 +1088,69 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-dati-pagamento" onclick="closeOut(event,'modal-dati-pagamento')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Dati per i pagamenti</div>
+    <div class="muted" style="font-size:12px;line-height:1.6;margin-bottom:14px">
+      Solo informativi: li mostriamo ai tuoi clienti così puoi farti pagare più facilmente. Nessun pagamento passa da qui.
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Tipo soggetto</label>
+        <select class="input" id="dp-tipo">
+          <option value="persona_fisica">Persona fisica</option>
+          <option value="ditta_individuale">Ditta individuale</option>
+          <option value="partita_iva">Partita IVA</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nome / Ragione sociale</label>
+        <input class="input" id="dp-nome" placeholder="es. Mario Rossi">
+      </div>
+      <div class="input-group">
+        <label class="input-label">P.IVA / Codice fiscale (opzionale)</label>
+        <input class="input" id="dp-piva-cf" placeholder="es. RSSMRA80A01H501U">
+      </div>
+      <div class="input-group">
+        <label class="input-label">IBAN</label>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="dp-iban" placeholder="IT00 X000 0000 0000 0000 0000 000" style="text-transform:uppercase;flex:1">
+          <button class="btn btn-outline btn-sm" onclick="copyDatiPagamentoField('dp-iban')">Copia</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email PayPal</label>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="dp-paypal" type="email" placeholder="tuaemail@paypal.it" style="flex:1">
+          <button class="btn btn-outline btn-sm" onclick="copyDatiPagamentoField('dp-paypal')">Copia</button>
+        </div>
+      </div>
+      <div class="auth-error" id="dp-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="saveDatiPagamento()" style="width:100%;margin-top:6px">Salva</button>
+      <button class="btn btn-outline" onclick="shareDatiPagamento()" style="width:100%;margin-top:8px">Condividi con un cliente (WhatsApp/Email)</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-codice-personale" onclick="closeOut(event,'modal-codice-personale')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Il tuo codice personale</div>
+    <div class="muted" style="font-size:12px;line-height:1.6;margin-bottom:14px">
+      Condividilo con chi non è ancora tuo cliente su Equo — chi lo usa entra subito in contatto con te.
+    </div>
+    <div style="display:flex;justify-content:center;margin-bottom:14px">
+      <div id="codice-personale-qr" style="background:#fff;padding:10px;border-radius:12px"></div>
+    </div>
+    <div style="text-align:center;font-weight:700;font-size:20px;letter-spacing:1px;margin-bottom:16px" id="codice-personale-testo">—</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="copyCodicePersonale()">Copia</button>
+      <button class="btn btn-primary" style="flex:1" onclick="shareCodicePersonale()">Condividi</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1116,7 +1206,8 @@ select.input{cursor:pointer}
    EQUO APP — v1 skeleton
    Sostituisci SUPABASE_URL / SUPABASE_ANON_KEY con i valori reali.
    Schema Supabase atteso (da creare):
-   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code)
+   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code, avatar_url, codice_professionista, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal)
+   - storage bucket pubblico "avatar-utenti" (foto profilo)
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
@@ -1350,6 +1441,43 @@ const DB = {
     const { data } = sb.storage.from("mascalcia-note-vocali").getPublicUrl(path);
     return { url: data?.publicUrl || null, error: null };
   },
+
+  /* -- Profilo: avatar, dati di pagamento, codice personale -- */
+  async uploadAvatar(file){
+    if(DEMO_MODE){
+      return { url: URL.createObjectURL(file), error: null };
+    }
+    const ext = (file.name || "").split(".").pop() || "jpg";
+    const path = `${currentUser.id}/avatar.${ext}`;
+    const { error } = await sb.storage.from("avatar-utenti").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+    if(error) return { url: null, error };
+    const { data } = sb.storage.from("avatar-utenti").getPublicUrl(path);
+    const url = data?.publicUrl ? data.publicUrl + "?t=" + Date.now() : null; // cache-bust dopo un re-upload
+    if(url) await sb.from("profiles").update({ avatar_url: url }).eq("id", currentUser.id);
+    return { url, error: null };
+  },
+  async updateDatiPagamento({ tipo, nome, piva_cf, iban, paypal }){
+    if(DEMO_MODE){
+      Object.assign(currentUser, { datiPagamentoTipo: tipo, datiPagamentoNome: nome, datiPagamentoPivaCf: piva_cf, datiPagamentoIban: iban, datiPagamentoPaypal: paypal });
+      return { error: null };
+    }
+    const { error } = await sb.from("profiles").update({
+      dati_pagamento_tipo: tipo, dati_pagamento_nome: nome, dati_pagamento_piva_cf: piva_cf,
+      dati_pagamento_iban: iban, dati_pagamento_paypal: paypal,
+    }).eq("id", currentUser.id);
+    return { error };
+  },
+  async ensureCodiceProfessionista(){
+    if(currentUser.codiceProfessionista) return currentUser.codiceProfessionista;
+    const codice = "EQUO-PRO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    if(DEMO_MODE){
+      currentUser.codiceProfessionista = codice;
+      return codice;
+    }
+    const { error } = await sb.from("profiles").update({ codice_professionista: codice }).eq("id", currentUser.id);
+    if(!error) currentUser.codiceProfessionista = codice;
+    return currentUser.codiceProfessionista;
+  },
 };
 
 /* ---------- ONBOARDING (bivio ruolo) ---------- */
@@ -1422,6 +1550,10 @@ function renderMenuDualRole(){
   const primario = currentUser?.ruolo;
   const secondario = currentUser?.ruoloSecondario;
   const attiva = currentUser?.vistaAttiva || primario;
+
+  // la sezione "Attività professionale" (dati pagamento, codice personale) si vede solo in vista pro
+  const proSection = document.getElementById("menu-pro-section");
+  if(proSection) proSection.style.display = PRO_ROLES.includes(attiva) ? "block" : "none";
 
   // il gestore struttura non partecipa al doppio ruolo (usa Equo Scuderia)
   if(!primario || primario === "gestore_struttura"){
@@ -1536,6 +1668,111 @@ function showStableManagerBanner(){
   showToast("Per gestire la tua struttura usa Equo Scuderia su scuderia.equohub.com");
 }
 
+/* ---------- DATI PER I PAGAMENTI (profilo professionista) ---------- */
+function openDatiPagamentoModal(){
+  document.getElementById("dp-tipo").value = currentUser.datiPagamentoTipo || "persona_fisica";
+  document.getElementById("dp-nome").value = currentUser.datiPagamentoNome || "";
+  document.getElementById("dp-piva-cf").value = currentUser.datiPagamentoPivaCf || "";
+  document.getElementById("dp-iban").value = currentUser.datiPagamentoIban || "";
+  document.getElementById("dp-paypal").value = currentUser.datiPagamentoPaypal || "";
+  document.getElementById("dp-error").style.display = "none";
+  closeModal("modal-menu");
+  openModal("modal-dati-pagamento");
+}
+
+async function saveDatiPagamento(){
+  const errBox = document.getElementById("dp-error");
+  errBox.style.display = "none";
+  const tipo = document.getElementById("dp-tipo").value;
+  const nome = document.getElementById("dp-nome").value.trim();
+  const piva_cf = document.getElementById("dp-piva-cf").value.trim();
+  const iban = document.getElementById("dp-iban").value.trim();
+  const paypal = document.getElementById("dp-paypal").value.trim();
+  if(!nome){
+    errBox.textContent = "Inserisci almeno il nome o la ragione sociale.";
+    errBox.style.display = "block";
+    return;
+  }
+  const { error } = await DB.updateDatiPagamento({ tipo, nome, piva_cf, iban, paypal });
+  if(error){
+    errBox.textContent = "Errore: " + error.message;
+    errBox.style.display = "block";
+    return;
+  }
+  Object.assign(currentUser, { datiPagamentoTipo: tipo, datiPagamentoNome: nome, datiPagamentoPivaCf: piva_cf, datiPagamentoIban: iban, datiPagamentoPaypal: paypal });
+  closeModal("modal-dati-pagamento");
+  showToast("Dati di pagamento salvati!");
+}
+
+function copyDatiPagamentoField(inputId){
+  const value = document.getElementById(inputId).value.trim();
+  if(!value){ showToast("Campo vuoto."); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(value).then(() => showToast("Copiato negli appunti!"))
+      .catch(() => showToast("Non sono riuscito a copiare, riprova."));
+  } else {
+    showToast("Copia manualmente: " + value);
+  }
+}
+
+function buildDatiPagamentoText(){
+  const nome = document.getElementById("dp-nome").value.trim();
+  const iban = document.getElementById("dp-iban").value.trim();
+  const paypal = document.getElementById("dp-paypal").value.trim();
+  let text = "Ecco i miei dati per il pagamento:\n";
+  if(nome) text += `Beneficiario: ${nome}\n`;
+  if(iban) text += `IBAN: ${iban}\n`;
+  if(paypal) text += `PayPal: ${paypal}\n`;
+  return text.trim();
+}
+
+function shareDatiPagamento(){
+  const text = buildDatiPagamentoText();
+  if(text === "Ecco i miei dati per il pagamento:"){
+    showToast("Compila almeno un metodo di pagamento prima di condividere.");
+    return;
+  }
+  if(navigator.share){
+    navigator.share({ text }).catch(() => {}); // l'utente può annullare la share sheet, non è un errore
+    return;
+  }
+  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+}
+
+/* ---------- CODICE PERSONALE PROFESSIONISTA ---------- */
+async function openCodicePersonaleModal(){
+  const codice = await DB.ensureCodiceProfessionista();
+  document.getElementById("codice-personale-testo").textContent = codice;
+  const qrBox = document.getElementById("codice-personale-qr");
+  qrBox.innerHTML = "";
+  if(window.QRCode){ new QRCode(qrBox, { text: codice, width: 160, height: 160 }); }
+  closeModal("modal-menu");
+  openModal("modal-codice-personale");
+}
+
+function copyCodicePersonale(){
+  const codice = currentUser.codiceProfessionista;
+  if(!codice) return;
+  const text = `Contattami su Equo con il codice ${codice} — scarica l'app su https://app.equohub.com`;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
+      .catch(() => showToast("Non sono riuscito a copiare, riprova."));
+  } else {
+    showToast("Codice: " + codice);
+  }
+}
+
+function shareCodicePersonale(){
+  const codice = currentUser.codiceProfessionista;
+  if(!codice) return;
+  const text = `Contattami su Equo con il codice ${codice} — scarica l'app su https://app.equohub.com`;
+  if(navigator.share){
+    navigator.share({ text }).catch(() => {});
+    return;
+  }
+  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+}
+
 /* ---------- AUTH ---------- */
 function setAuthTab(mode){
   authMode = mode;
@@ -1587,8 +1824,39 @@ async function logout(){
 }
 
 function setAvatarInitial(letter){
-  document.getElementById("topbar-avatar").textContent = letter;
-  document.getElementById("menu-avatar").textContent = letter;
+  const topbar = document.getElementById("topbar-avatar");
+  const menu = document.getElementById("menu-avatar");
+  topbar.style.backgroundImage = "";
+  menu.style.backgroundImage = "";
+  topbar.textContent = letter;
+  menu.textContent = letter;
+}
+
+function setAvatarImage(url){
+  const topbar = document.getElementById("topbar-avatar");
+  const menu = document.getElementById("menu-avatar");
+  topbar.textContent = "";
+  menu.textContent = "";
+  topbar.style.backgroundImage = `url('${url}')`;
+  menu.style.backgroundImage = `url('${url}')`;
+}
+
+async function handleAvatarFileChange(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = ""; // permette di riselezionare lo stesso file in seguito
+  if(!file) return;
+  if(!file.type.startsWith("image/")){
+    showToast("Seleziona un'immagine.");
+    return;
+  }
+  const { url, error } = await DB.uploadAvatar(file);
+  if(error || !url){
+    showToast("Non sono riuscito a caricare la foto, riprova.");
+    return;
+  }
+  currentUser.avatarUrl = url;
+  setAvatarImage(url);
+  showToast("Foto profilo aggiornata!");
 }
 
 async function startDemo(){
@@ -1627,13 +1895,23 @@ async function boot(){
   currentUser = user;
   document.getElementById("screen-auth").classList.remove("active");
 
-  setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
   document.getElementById("profile-email").textContent = user.email || "";
-  const { data: profile } = await sb.from("profiles").select("full_name, ruolo, ruolo_secondario, piano").eq("id", user.id).maybeSingle();
+  const { data: profile } = await sb.from("profiles").select(
+    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal"
+  ).eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
   currentUser.ruoloSecondario = profile?.ruolo_secondario || null;
   currentUser.piano = profile?.piano || "free";
+  currentUser.avatarUrl = profile?.avatar_url || null;
+  currentUser.codiceProfessionista = profile?.codice_professionista || null;
+  currentUser.datiPagamentoTipo = profile?.dati_pagamento_tipo || null;
+  currentUser.datiPagamentoNome = profile?.dati_pagamento_nome || null;
+  currentUser.datiPagamentoPivaCf = profile?.dati_pagamento_piva_cf || null;
+  currentUser.datiPagamentoIban = profile?.dati_pagamento_iban || null;
+  currentUser.datiPagamentoPaypal = profile?.dati_pagamento_paypal || null;
+  if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
+  else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
