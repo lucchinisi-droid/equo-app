@@ -29,6 +29,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Upload foto cavallo + documenti sanitari (Supabase Storage) — non ancora implementato
 - [ ] Pagina profilo utente / impostazioni scuderia
 - [ ] Playlist Spotify Equo: creare playlist pubblica (account gestione.equo@gmail.com), integrare via embed ufficiale Spotify (iframe) — salvataggio/condivisione gestiti nativamente da Spotify, no OAuth/backend necessario
+- [ ] Modulo Mascalcia (equo-app): Step 1-6 completati (doppio ruolo, nav pro/proprietario a 5 voci, profilo pro, calendario lezioni manuale, chat proprietario testo/vocali/foto/video, condivisione esterna con watermark) — **Step 7: Community in Equo Scuderia** (bacheca pubblica dei contenuti condivisi, tocca equo-scuderia non equo-app) ancora da fare, dettagli in claude/equo-app-mascalcia.md
 
 ## 3. Infrastruttura
 - [x] Account dedicati creati con gestione.equo@gmail.com (Supabase + Netlify, separati dagli altri progetti)
