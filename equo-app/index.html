@@ -526,6 +526,15 @@ select.input{cursor:pointer}
     </div>
   </div>
 
+  <!-- CHAT (proprietario) -->
+  <div class="page-content" id="page-chat">
+    <div class="section-title">Chat</div>
+    <div class="empty-state">
+      <div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-inbox"/></svg></div>
+      Presto potrai scrivere qui ai tuoi professionisti (maniscalco, veterinario) e condividere foto e video dei tuoi cavalli.
+    </div>
+  </div>
+
   <!-- CAVALLI -->
   <div class="page-content" id="page-cavalli">
     <div id="cavalli-list-view">
@@ -554,23 +563,20 @@ select.input{cursor:pointer}
     </div>
   </div>
 
-  <!-- PRENOTAZIONI -->
+  <!-- PRENOTAZIONI / CALENDARIO -->
   <div class="page-content" id="page-prenotazioni">
-    <div class="section-title">Prenotazioni</div>
-    <div id="prenotazioni-locked" class="card" style="text-align:center;padding:28px">
-      <div class="icon" style="width:36px;height:36px;color:var(--accent);margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>
-      <div style="font-weight:700;margin-bottom:6px">Collega la tua scuderia</div>
-      <div class="muted" style="font-size:13px;line-height:1.6;margin-bottom:18px">
-        Le prenotazioni si sbloccano quando colleghi il cavallo a una scuderia che usa Equo Scuderia.
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="openModal('modal-join-stable')">Collega scuderia</button>
+    <div class="section-title">Calendario</div>
+
+    <div class="note-box" style="margin-bottom:14px">
+      <strong>Con Equo Scuderia sarebbe automatico.</strong> Se la tua scuderia usa Equo Scuderia, le lezioni prenotate appariranno qui da sole. Per ora le aggiungi tu a mano.
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px" onclick="openModal('modal-join-stable')">Collega la tua scuderia</button>
     </div>
-    <div id="prenotazioni-unlocked" style="display:none">
-      <div class="empty-state">
-        <div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>
-        Calendario lezioni in arrivo — la tua scuderia potrà pubblicare gli slot disponibili.
-      </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="section-title" style="margin-bottom:0;font-size:15px">Le tue lezioni</div>
+      <button class="btn btn-primary btn-sm" onclick="openAddLezioneModal()">+ Lezione</button>
     </div>
+    <div id="lezioni-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
   </div>
 
   <!-- SPESE -->
@@ -729,6 +735,7 @@ select.input{cursor:pointer}
   <!-- BOTTOM NAV -->
   <div class="bottom-nav" id="bottom-nav-owner">
     <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
+    <button class="nav-btn" data-page="chat" onclick="showPage('chat')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Chat</small></button>
     <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><small>Cavalli</small></button>
     <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Calendario</small></button>
     <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
@@ -982,6 +989,37 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-add-lezione" onclick="closeOut(event,'modal-add-lezione')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span>Nuova lezione</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Cavallo</label>
+        <select class="input" id="lezione-cavallo"></select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Tipo</label>
+        <select class="input" id="lezione-tipo">
+          <option value="lezione">Lezione</option>
+          <option value="allenamento">Allenamento libero</option>
+          <option value="gara">Gara</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Data</label>
+        <input class="input" id="lezione-data" type="date">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note (opzionale)</label>
+        <input class="input" id="lezione-note" placeholder="es. con l'istruttore Luca">
+      </div>
+      <button class="btn btn-primary" onclick="createLezione()" style="width:100%;margin-top:6px">Salva lezione</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-menu" onclick="closeOut(event,'modal-menu')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1211,6 +1249,7 @@ select.input{cursor:pointer}
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
+   - lezioni_manuali(id, owner_id, horse_id, data, tipo, note, created_at)
    - stables(id, name, join_code)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
@@ -1248,6 +1287,9 @@ const demoState = {
     { id: "dx-2", horse_id: "demo-1", horse_name: "Aurora", category: "maniscalco", amount: 60, date: "2026-08-10", notes: "" },
   ],
   stables: [{ id: "demo-stable-1", name: "Scuderia Le Querce", join_code: "EQUO-DEMO" }],
+  lezioniManuali: [
+    { id: "dl-1", horse_id: "demo-1", data: "2026-09-24", tipo: "lezione", note: "Con l'istruttore Luca", created_at: "2026-09-16" },
+  ],
   paymentMethods: [],
   clientiMascalcia: [
     { id: "dc-1", nome: "Marco Bianchi", nome_cavallo: "Aurora", telefono: "333 1112222", note: "", cliente_user_id: null, codice_invito: "EQUO-DC1AB", created_at: "2026-08-01" },
@@ -1327,6 +1369,19 @@ const DB = {
       return { error: null };
     }
     const { error } = await sb.from("expenses").insert({ owner_id: currentUser.id, horse_id, category, amount, date, notes });
+    return { error };
+  },
+  async listLezioni(){
+    if(DEMO_MODE) return demoState.lezioniManuali.slice().sort((a,b) => new Date(b.data) - new Date(a.data)).map(l => ({ ...l, horses: { name: (demoState.horses.find(h => h.id === l.horse_id) || {}).name } }));
+    const { data, error } = await sb.from("lezioni_manuali").select("*, horses(name)").eq("owner_id", currentUser.id).order("data", { ascending: false });
+    return error ? [] : (data || []);
+  },
+  async insertLezione({ horse_id, data, tipo, note }){
+    if(DEMO_MODE){
+      demoState.lezioniManuali.push({ id: "dl-" + (++demoIdCounter), horse_id, data, tipo, note, created_at: new Date().toISOString() });
+      return { error: null };
+    }
+    const { error } = await sb.from("lezioni_manuali").insert({ owner_id: currentUser.id, horse_id, data, tipo, note });
     return { error };
   },
   async findStableByCode(code){
@@ -2218,9 +2273,53 @@ async function joinStable(){
     await DB.linkHorseToStable(horseId, stable.id);
   }
   closeModal("modal-join-stable");
-  document.getElementById("prenotazioni-locked").style.display = "none";
-  document.getElementById("prenotazioni-unlocked").style.display = "block";
   alert("Collegato a " + stable.name + "!");
+}
+
+/* ---------- LEZIONI MANUALI (calendario proprietario) ---------- */
+const LEZIONE_TIPO_LABELS = { lezione: "Lezione", allenamento: "Allenamento libero", gara: "Gara", altro: "Altro" };
+
+async function loadLezioni(){
+  const box = document.getElementById("lezioni-list");
+  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const data = await DB.listLezioni();
+  if(!data || data.length === 0){
+    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>Nessuna lezione registrata. Aggiungine una per iniziare.</div>';
+    return;
+  }
+  box.innerHTML = data.map(l => `
+    <div class="event-item">
+      <div>
+        <div style="font-weight:600;font-size:14px">${LEZIONE_TIPO_LABELS[l.tipo] || l.tipo}${l.horses?.name ? " · " + escapeHtml(l.horses.name) : ""}</div>
+        <div class="muted" style="font-size:12px">${formatDate(l.data)}${l.note ? " · " + escapeHtml(l.note) : ""}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openAddLezioneModal(){
+  const sel = document.getElementById("lezione-cavallo");
+  if(horses.length === 0){
+    sel.innerHTML = '<option value="">Nessun cavallo</option>';
+  } else {
+    sel.innerHTML = horses.map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join("");
+  }
+  document.getElementById("lezione-tipo").value = "lezione";
+  document.getElementById("lezione-data").value = "";
+  document.getElementById("lezione-note").value = "";
+  openModal("modal-add-lezione");
+}
+
+async function createLezione(){
+  const horse_id = document.getElementById("lezione-cavallo").value || null;
+  const tipo = document.getElementById("lezione-tipo").value;
+  const data = document.getElementById("lezione-data").value;
+  const note = document.getElementById("lezione-note").value.trim();
+  if(!data) return;
+  const { error } = await DB.insertLezione({ horse_id, data, tipo, note });
+  if(error){ alert("Errore: " + error.message); return; }
+  closeModal("modal-add-lezione");
+  await loadLezioni();
 }
 
 /* ---------- MASCALCIA (clienti + interventi del professionista) ---------- */
@@ -2920,6 +3019,9 @@ function startPromoRotation(){
 
 /* Carica la lista spese quando si apre la pagina */
 document.querySelector('[data-page="spese"]').addEventListener("click", loadExpenses);
+
+/* Carica la lista lezioni quando si apre il calendario */
+document.querySelector('[data-page="prenotazioni"]').addEventListener("click", loadLezioni);
 
 /* ---------- INIT ---------- */
 boot();
