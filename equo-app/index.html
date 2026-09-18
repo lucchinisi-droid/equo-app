@@ -3151,8 +3151,12 @@ async function renderOwnerChatThread(conversazioneId){
     const out = m.mittente_id === currentUser.id;
     let body;
     if(m.tipo === "audio") body = `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.media_url)}"></audio></div>`;
-    else if(m.tipo === "foto") body = `<img src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block">`;
-    else if(m.tipo === "video") body = `<video controls src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block"></video>`;
+    else if(m.tipo === "foto") body = `<img src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block">
+      <button class="btn btn-outline btn-sm" style="margin-top:6px;width:100%" onclick="shareContentExternally('${escapeHtml(m.media_url)}')">
+        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-share-nodes"></i></span> Condividi fuori da Equo
+      </button>`;
+    else if(m.tipo === "video") body = `<video controls src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block"></video>
+      <div class="muted" style="font-size:11px;margin-top:4px">I video si condividono solo dentro Equo per ora.</div>`;
     else body = `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
@@ -3265,6 +3269,70 @@ async function stopAndSendOwnerVoiceRecording(){
     await loadOwnerChatList();
   };
   ownerMediaRecorder.stop();
+}
+
+/* ---------- CONDIVISIONE ESTERNA (watermark + share sheet nativo) ----------
+   Si sblocca solo su contenuti già condivisi dentro Equo (foto nella chat proprietario↔proprietario).
+   Solo foto in questa fase: il watermark su video richiederebbe elaborazione pesante, rimandato. */
+function drawRoundedRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+async function shareContentExternally(mediaUrl){
+  showToast("Preparazione condivisione...");
+  try{
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    const loaded = new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+    img.src = mediaUrl;
+    await loaded;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth || 800;
+    canvas.height = img.naturalHeight || 600;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Watermark piccolo e non invasivo in basso a destra
+    const label = "Condiviso con Equo";
+    const fontSize = Math.max(14, Math.round(canvas.width * 0.028));
+    ctx.font = `600 ${fontSize}px sans-serif`;
+    const textWidth = ctx.measureText(label).width;
+    const padX = fontSize * 0.6, padY = fontSize * 0.45;
+    const boxW = textWidth + padX * 2, boxH = fontSize + padY * 2;
+    const margin = fontSize * 0.6;
+    const x = canvas.width - boxW - margin;
+    const y = canvas.height - boxH - margin;
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    drawRoundedRect(ctx, x, y, boxW, boxH, boxH / 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, x + padX, y + boxH / 2 + 1);
+
+    canvas.toBlob(async (blob) => {
+      if(!blob){ showToast("Non sono riuscito a preparare l'immagine."); return; }
+      const file = new File([blob], "equo-condiviso.jpg", { type: "image/jpeg" });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        try{ await navigator.share({ files: [file], text: "Guarda questa foto su Equo!" }); }
+        catch(e){ /* l'utente ha annullato la share sheet, non è un errore */ }
+      } else {
+        const objUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objUrl; a.download = "equo-condiviso.jpg";
+        document.body.appendChild(a); a.click(); a.remove();
+        showToast("Immagine scaricata — condividila dal tuo rullino.");
+      }
+    }, "image/jpeg", 0.92);
+  } catch(e){
+    showToast("Non sono riuscito a preparare la condivisione. Riprova.");
+  }
 }
 
 /* ---------- EXPENSES ---------- */
