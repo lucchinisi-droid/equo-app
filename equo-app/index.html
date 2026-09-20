@@ -247,6 +247,7 @@ select.input{cursor:pointer}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:60}
 .ai-fab .icon{width:24px;height:24px}
+.ai-usage-full{color:var(--danger,#e5484d);font-weight:600}
 .ai-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
   z-index:70;align-items:flex-end;justify-content:center}
 .ai-sheet-overlay.active{display:flex}
@@ -789,7 +790,7 @@ select.input{cursor:pointer}
   </div>
 
   <!-- AI FAB -->
-  <button class="ai-fab" onclick="showAiComingSoon()" aria-label="Assistente AI">
+  <button class="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
     <span class="icon"><svg><use href="#i-sparkles"/></svg></span>
   </button>
 
@@ -811,6 +812,7 @@ select.input{cursor:pointer}
           <div class="chat-bubble ai">Ciao! Sono l'assistente equestre di Equo. Chiedimi pure di alimentazione, comportamento o gestione del tuo cavallo.</div>
         </div>
         <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 6px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
+        <div class="muted" id="ai-usage-note" style="font-size:10.5px;text-align:center;padding:0 14px 6px"></div>
         <div class="chat-input-row">
           <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
           <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
@@ -1867,6 +1869,11 @@ const DB = {
     if(!error) currentUser.codiceProfessionista = codice;
     return currentUser.codiceProfessionista;
   },
+  async updateAiUsage({ count, month }){
+    if(DEMO_MODE) return { error: null };
+    const { error } = await sb.from("profiles").update({ ai_msg_count: count, ai_msg_month: month }).eq("id", currentUser.id);
+    return { error };
+  },
 };
 
 /* ---------- ONBOARDING (bivio ruolo) ---------- */
@@ -2390,7 +2397,7 @@ async function boot(){
 
   document.getElementById("profile-email").textContent = user.email || "";
   const { data: profile } = await sb.from("profiles").select(
-    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, cancellazione_richiesta_at"
+    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, cancellazione_richiesta_at, ai_msg_count, ai_msg_month"
   ).eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
@@ -2406,6 +2413,8 @@ async function boot(){
   currentUser.datiPagamentoPaypal = profile?.dati_pagamento_paypal || null;
   currentUser.consensoTerminiPrivacy = profile?.consenso_termini_privacy || null;
   currentUser.cancellazioneRichiestaAt = profile?.cancellazione_richiesta_at || null;
+  currentUser.aiMsgCount = profile?.ai_msg_count || 0;
+  currentUser.aiMsgMonth = profile?.ai_msg_month || null;
   if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
   else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
@@ -2540,7 +2549,7 @@ function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
-function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); }
+function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); updateAiUsageNote(); }
 
 let toastTimer = null;
 function showToast(message){
@@ -3831,6 +3840,35 @@ function detectDemoEvent(text){
   return { horse_name: horse.name, type, date, next_due_date: null, notes: null };
 }
 
+function aiMonthKey(){ return new Date().toISOString().slice(0, 7); }
+
+function aiLimit(){ return isPremium() ? 500 : 5; }
+
+function aiUsageThisMonth(){
+  if(!currentUser) return 0;
+  const nowMonth = aiMonthKey();
+  if(currentUser.aiMsgMonth !== nowMonth) return 0; // mese cambiato, contatore azzerato
+  return currentUser.aiMsgCount || 0;
+}
+
+function updateAiUsageNote(){
+  const el = document.getElementById("ai-usage-note");
+  if(!el || DEMO_MODE) return;
+  const used = aiUsageThisMonth();
+  const limit = aiLimit();
+  el.textContent = `Messaggi AI questo mese: ${used}/${limit}${isPremium() ? " (Premium)" : " (Free)"}`;
+  el.classList.toggle("ai-usage-full", used >= limit);
+}
+
+async function registerAiUsage(){
+  const nowMonth = aiMonthKey();
+  const used = aiUsageThisMonth() + 1;
+  currentUser.aiMsgCount = used;
+  currentUser.aiMsgMonth = nowMonth;
+  await DB.updateAiUsage({ count: used, month: nowMonth });
+  updateAiUsageNote();
+}
+
 async function sendChatMessage(){
   const input = document.getElementById("chat-input");
   const text = input.value.trim();
@@ -3858,6 +3896,13 @@ async function sendChatMessage(){
     }, 500);
     return;
   }
+  if(aiUsageThisMonth() >= aiLimit()){
+    const el = document.getElementById(thinkingId);
+    el.innerHTML = `Hai raggiunto il limite di ${aiLimit()} messaggi AI di questo mese` +
+      (isPremium() ? "." : ` del piano Free. <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="closeAiSheet();togglePiano()">Passa a Premium (500/mese)</button>`);
+    box.scrollTop = box.scrollHeight;
+    return;
+  }
   try{
     const res = await fetch("/.netlify/functions/ai-proxy", {
       method: "POST",
@@ -3865,9 +3910,14 @@ async function sendChatMessage(){
       body: JSON.stringify({ message: text, horses: horses.map(h => ({ id: h.id, name: h.name })) })
     });
     const data = await res.json();
-    document.getElementById(thinkingId).textContent = data.reply || "Non sono riuscito a rispondere, riprova.";
-    if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
-      renderEventProposal(box, data.proposedEvent);
+    if(res.ok){
+      document.getElementById(thinkingId).textContent = data.reply || "Non sono riuscito a rispondere, riprova.";
+      if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
+        renderEventProposal(box, data.proposedEvent);
+      }
+      await registerAiUsage();
+    } else {
+      document.getElementById(thinkingId).textContent = "Assistente AI non disponibile al momento, riprova più tardi.";
     }
   } catch(e){
     document.getElementById(thinkingId).textContent = "Errore di connessione, riprova.";
