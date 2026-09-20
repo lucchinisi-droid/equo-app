@@ -52,7 +52,8 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] Visitor access impostato su Public per entrambi i siti (di default era privato sul nuovo team)
 - [x] `ANTHROPIC_API_KEY` configurata su Netlify (sito equo-app) — v. sezione 2
 - [x] `GEMINI_API_KEY` configurata su Netlify (sito equo-app) — in vista della voce Gemini Live (v. sezione 4bis), non ancora usata dal codice
-- [ ] `RESEND_API_KEY` da configurare (per email transazionali equo-app, se serve oltre alla landing)
+- [x] `RESEND_API_KEY` configurata su Netlify (sito equo-app) — chiave dedicata `equo-prod` (scope "Sending access", non Full access), dominio email non ancora verificato (si usa `onboarding@resend.dev` finché non si aggiunge un dominio custom su Resend) — confermato 20/09/2026
+  - [ ] **Idea da implementare**: email automatica di recupero carrello — intercettare l'evento webhook Stripe `checkout.session.expired` (sessione di checkout aperta ma non completata entro 24h) e mandare via Resend una mail con link diretto al checkout a chi ha cliccato "Passa a Premium" ma non ha concluso l'acquisto
 - [ ] Configurare Supabase Storage (bucket foto cavalli e documenti PDF)
 - [ ] Dominio custom (opzionale, per ora *.netlify.app)
 - [ ] Quando si acquista equohub.com: aggiornare dominio custom su Netlify (equo-land + equo-app), redirect URI OAuth Google, Authorized JavaScript origins, e URL di callback Supabase con il nuovo dominio
