@@ -23,8 +23,9 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] AI spostata da tab a pulsante flottante (chat a mezzo schermo)
 - [x] Bottom nav: Home - Cavalli - Calendario - Spese
 - [x] AI può PROPORRE eventi sanitari (vaccino/coggins/ferratura/sverminazione) via tool-use Claude, con conferma utente obbligatoria prima del salvataggio — implementato anche in demo mode
+- [x] **AI collegata davvero** (era dietro un pulsante "presto disponibile"): FAB ora apre la chat reale per proprietari e professionisti, con limite mensile 5 msg Free / 500 msg Premium (contatore in chat, reset automatico a fine mese, CTA upgrade al limite) — commit 412f5f0
 - [x] Deploy su Netlify (secondo sito, base directory `equo-app`) — **equo-app.netlify.app** live, reso pubblico
-- [ ] **Manca `ANTHROPIC_API_KEY` su Netlify (env var del sito equo-app)** → senza questa l'AI reale non risponde fuori da demo mode
+- [x] `ANTHROPIC_API_KEY` configurata su Netlify (sito equo-app) — chiave dedicata a Equo (organizzazione Anthropic separata). **Resta da fare**: aggiungere credito sulla console Anthropic (piano Free non esegue chiamate reali), poi verificare con un test end-to-end
 - [ ] Test navigazione completa con un utente reale end-to-end (login vero, non demo)
 - [ ] Upload foto cavallo + documenti sanitari (Supabase Storage) — non ancora implementato
 - [ ] Pagina profilo utente / impostazioni scuderia
@@ -32,6 +33,11 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Modulo Mascalcia (equo-app): Step 1-6 completati (doppio ruolo, nav pro/proprietario a 5 voci, profilo pro, calendario lezioni manuale, chat proprietario testo/vocali/foto/video, condivisione esterna con watermark) — **Step 7: Community in Equo Scuderia** (bacheca pubblica dei contenuti condivisi, tocca equo-scuderia non equo-app) ancora da fare, dettagli in claude/equo-app-mascalcia.md
 - [x] Onboarding legale minimo (equo-app): checkbox unica Termini+Privacy+dichiarazione eta in onboarding (una sola volta per account), pagina in-app "Legale" (Privacy/Cookie/Termini), banner cookie Accetta/Rifiuta con Google Analytics gated dietro consenso, bottone Premium/Free finalmente collegato in UI (mancava), disclaimer AI sotto la chat — vedi commit 7cee147.
 - [x] Migrazione SQL eseguita su Supabase (progetto equo-prod): colonne `consenso_termini_privacy`, `dichiarazione_eta`, `cancellazione_richiesta_at` su `profiles` — confermato 20/09/2026
+- [ ] **SQL da eseguire su Supabase** per il limite messaggi AI (colonne nuove, non ancora applicate):
+  ```sql
+  alter table profiles add column if not exists ai_msg_count integer not null default 0;
+  alter table profiles add column if not exists ai_msg_month text;
+  ```
 - [x] Replicato su Equo Scuderia (checkbox onboarding condivisa via `profiles`, pagina Legale, cookie banner) — commit 75ecefc. Non replicati: bottone Premium/Free (Scuderia non ha ancora un campo piano/gating in UI) e disclaimer AI (la chat AI è ancora "SOON", nulla da disclaimare finché non è live)
 - [x] **Blocco auto-Premium gratis**: "Passa a Premium" non scrive più `piano=premium` da solo — apre un'email precompilata per richiesta manuale (Stripe non ancora collegato). "Torna a Free" resta self-service. Commit ec7f2a7
 - [x] **Eliminazione account (GDPR)**: bottone nel menu, richiesta salvata con 30gg di grazia, modale di riattivazione al login. La cancellazione DEFINITIVA dei dati dopo i 30gg **non è automatica** (nessun cron/Edge Function collegato) — per ora va fatta a mano da chi gestisce Equo quando arriva una richiesta scaduta. Solo su Equo App per ora, non ancora su Equo Scuderia. Commit ec7f2a7
@@ -47,7 +53,8 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] Repo Git remoto — github.com/lucchinisi-droid/equo-app (root = landing, `equo-app/` = PWA)
 - [x] Deploy automatico su Netlify ad ogni push su master (due siti separati)
 - [x] Visitor access impostato su Public per entrambi i siti (di default era privato sul nuovo team)
-- [ ] `ANTHROPIC_API_KEY` da configurare su Netlify (sito equo-app)
+- [x] `ANTHROPIC_API_KEY` configurata su Netlify (sito equo-app) — v. sezione 2
+- [x] `GEMINI_API_KEY` configurata su Netlify (sito equo-app) — in vista della voce Gemini Live (v. sezione 4bis), non ancora usata dal codice
 - [ ] `RESEND_API_KEY` da configurare (per email transazionali equo-app, se serve oltre alla landing)
 - [ ] Configurare Supabase Storage (bucket foto cavalli e documenti PDF)
 - [ ] Dominio custom (opzionale, per ora *.netlify.app)
@@ -81,4 +88,4 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] **3. Body Condition Score via foto** — carichi foto del cavallo, l'AI (Claude vision) stima il punteggio di condizione corporea (scala 1-9) e segnala sovrappeso/sottopeso
 
 ---
-**Prossimo step**: aggiungere `ANTHROPIC_API_KEY` su Netlify per rendere l'AI di equo-app pienamente funzionante (blocco più urgente rimasto: senza questa, l'AI reale non risponde fuori dalla demo).
+**Prossimo step**: eseguire l'SQL del contatore messaggi AI (sezione 3) su Supabase, aggiungere credito sulla console Anthropic (piano Free non fa chiamate reali), fare `git push origin master` per deployare, poi test end-to-end reale della chat AI (Free e Premium).
