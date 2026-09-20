@@ -233,6 +233,12 @@ tr:last-child td{border-bottom:none}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(25,22,11,.45);z-index:100;
   align-items:center;justify-content:center;padding:20px}
 .modal-overlay.active{display:flex}
+.legal-tab-active{background:var(--primary)!important;color:var(--primary-fg)!important}
+.legal-body h3{font-size:14px;margin:16px 0 6px}
+.legal-body h3:first-child{margin-top:0}
+.legal-body p,.legal-body li{font-size:12.5px;line-height:1.6}
+.legal-body ul{padding-left:18px;margin:6px 0}
+.legal-body .legal-note{font-size:11.5px;color:var(--muted);font-style:italic;margin-bottom:12px}
 .modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:440px;
   max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
 .modal-title{font-size:17px;font-weight:700;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between}
@@ -344,6 +350,9 @@ textarea.input{resize:vertical}
       <div class="auth-demo">
         <a onclick="startDemo()">Prova la demo (senza account)</a>
       </div>
+      <div class="muted" style="font-size:11px;line-height:1.5;text-align:center;margin-top:12px;color:var(--muted)">
+        Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')">Informativa Privacy</a>.
+      </div>
     </div>
   </div>
 </div>
@@ -354,7 +363,15 @@ textarea.input{resize:vertical}
     <div class="onboard-card">
       <div class="auth-logo"><img src="assets/logo-equo.png" alt="Equo"></div>
       <div class="t" style="font-weight:700;font-size:18px;margin:8px 0 0">Benvenuto su Equo Scuderia</div>
-      <p class="auth-tag" style="margin-bottom:24px">Per iniziare, dicci come vuoi usare il gestionale.</p>
+      <p class="auth-tag" style="margin-bottom:16px">Per iniziare, dicci come vuoi usare il gestionale.</p>
+
+      <div class="card" id="onb-consent-group" style="margin-bottom:18px;display:none">
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.55;cursor:pointer">
+          <input type="checkbox" id="onb-consent" style="margin-top:3px;flex-shrink:0">
+          <span>Accetto, anche per conto del centro/attività che rappresento, i <a href="#" onclick="event.preventDefault();openLegalPage('termini')">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')">Informativa Privacy</a> di Equo Scuderia.</span>
+        </label>
+      </div>
+      <div class="auth-error" id="onb-consent-error" style="display:none;margin-bottom:14px"></div>
 
       <div class="onboard-choice" onclick="showOnboardCreate()">
         <div class="ic"><i class="fa-solid fa-house-chimney"></i></div>
@@ -924,6 +941,31 @@ textarea.input{resize:vertical}
   </div>
 </div>
 
+<!-- MODAL: Legale (Privacy / Cookie / Termini) -->
+<div class="modal-overlay" id="modal-legal" onclick="closeOut(event,'modal-legal')">
+  <div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh">
+    <div class="modal-title">Informazioni legali <span class="x" onclick="closeModal('modal-legal')">✕</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <div class="btn btn-outline btn-sm" id="legal-tab-privacy" style="flex:1" onclick="openLegalPage('privacy')">Privacy</div>
+      <div class="btn btn-outline btn-sm" id="legal-tab-cookie" style="flex:1" onclick="openLegalPage('cookie')">Cookie</div>
+      <div class="btn btn-outline btn-sm" id="legal-tab-termini" style="flex:1" onclick="openLegalPage('termini')">Termini</div>
+    </div>
+    <div id="legal-body" class="legal-body" style="flex:1;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div id="cookie-banner" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:200;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:460px;margin:0 auto">
+  <p style="font-size:12.5px;line-height:1.55;margin-bottom:12px">Usiamo cookie tecnici (necessari) e, solo con il tuo consenso, Google Analytics per capire come viene usato Equo Scuderia.
+    <a href="#" onclick="event.preventDefault();openLegalPage('cookie')">Maggiori info</a>.</p>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-outline btn-sm" style="flex:1" onclick="rejectCookies()">Rifiuta</button>
+    <button class="btn btn-primary btn-sm" style="flex:1" onclick="acceptCookies()">Accetta</button>
+  </div>
+</div>
+
 <!-- MODAL: nuovo/modifica cavallo -->
 <div class="modal-overlay" id="modal-cavallo" onclick="closeOut(event,'modal-cavallo')">
   <div class="modal">
@@ -1094,6 +1136,9 @@ textarea.input{resize:vertical}
         <div class="theme-opt" id="theme-opt-dark" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> Notte</div>
       </div>
     </div>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeModal('modal-user-menu');openLegalPage('privacy')">
+      <i class="fa-solid fa-scale-balanced"></i> Privacy, Cookie e Termini
+    </button>
     <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeModal('modal-user-menu');logout()">
       <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
     </button>
@@ -1384,6 +1429,11 @@ async function afterLogin(){
   if(error){ showToast("Errore nel caricamento del profilo."); return; }
 
   if(!membri || membri.length === 0){
+    // profiles è condivisa con Equo App: se l'utente ha già accettato Termini/Privacy
+    // lì (o in un onboarding precedente qui), non richiediamo di nuovo il consenso.
+    const { data: profile } = await sb.from("profiles").select("consenso_termini_privacy").eq("id", currentUser.id).maybeSingle();
+    currentUser.consensoTerminiPrivacy = profile?.consenso_termini_privacy || null;
+    document.getElementById("onb-consent-group").style.display = currentUser.consensoTerminiPrivacy ? "none" : "block";
     showScreen("screen-onboarding");
     return;
   }
@@ -1411,6 +1461,30 @@ function showOnboardJoin(){
   document.getElementById("onboard-create").style.display = "none";
 }
 
+/* ---------- CONSENSO TERMINI/PRIVACY (onboarding, una sola volta per account) ----------
+   profiles è condivisa con Equo App: se l'utente ha già accettato lì, non lo richiediamo di nuovo. */
+function consentStillNeeded(){
+  const group = document.getElementById("onb-consent-group");
+  return group && group.style.display !== "none";
+}
+function checkConsentOrBlock(){
+  if(!consentStillNeeded()) return true;
+  const errBox = document.getElementById("onb-consent-error");
+  if(!document.getElementById("onb-consent").checked){
+    errBox.textContent = "Devi accettare i Termini e l'Informativa Privacy per continuare.";
+    errBox.style.display = "block";
+    return false;
+  }
+  errBox.style.display = "none";
+  return true;
+}
+async function saveConsentIfNeeded(){
+  if(!consentStillNeeded() || DEMO_MODE) return;
+  const consenso_termini_privacy = new Date().toISOString();
+  await sb.from("profiles").upsert({ id: currentUser.id, email: currentUser.email, consenso_termini_privacy });
+  currentUser.consensoTerminiPrivacy = consenso_termini_privacy;
+}
+
 async function createCentro(){
   const nome = document.getElementById("centro-nome").value.trim();
   const indirizzo = document.getElementById("centro-indirizzo").value.trim();
@@ -1418,6 +1492,7 @@ async function createCentro(){
   const errBox = document.getElementById("create-centro-error");
   errBox.style.display = "none";
   if(!nome){ errBox.textContent = "Inserisci il nome del centro."; errBox.style.display = "block"; return; }
+  if(!checkConsentOrBlock()) return;
 
   const join_code = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
   try{
@@ -1426,6 +1501,7 @@ async function createCentro(){
       join_code, owner_id: currentUser.id,
     }).select().single();
     if(error) throw error;
+    await saveConsentIfNeeded();
     currentCentro = data;
     currentMembro = { ruolo:"admin", nome_visualizzato:null, livello:"admin", permessi:{} };
     await loadTeam();
@@ -1443,12 +1519,14 @@ async function joinCentro(){
   const errBox = document.getElementById("join-centro-error");
   errBox.style.display = "none";
   if(!code){ errBox.textContent = "Inserisci un codice invito."; errBox.style.display = "block"; return; }
+  if(!checkConsentOrBlock()) return;
 
   try{
     const { data, error } = await sb.rpc("join_centro_by_code", {
       p_join_code: code, p_ruolo: ruolo, p_nome_visualizzato: null,
     });
     if(error) throw error;
+    await saveConsentIfNeeded();
     await afterLogin();
     showToast("Ti sei unito al centro!");
   } catch(err){
@@ -3374,6 +3452,117 @@ function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
+/* ---------- LEGALE (Privacy / Cookie / Termini) ----------
+   Testi completi in claude/equo-informativa-privacy.md, equo-cookie-policy.md,
+   equo-termini-condizioni.md nel progetto Equo — qui la versione per il gestionale. */
+const LEGAL_CONTENT = {
+  privacy: `
+    <h3>Informativa Privacy (artt. 13-14 GDPR)</h3>
+    <p><strong>Titolare</strong>: Lo Sportivo di Lucchini Simone — Via Rocco Dolce 4, 00034 Colleferro (RM) — P.IVA IT17742111002 — PEC simone.lucchini@pec.it — gestione.equo@gmail.com</p>
+    <h3>Quali dati raccogliamo</h3>
+    <ul>
+      <li>Dati account: nome, email, password (Supabase Auth)</li>
+      <li>Dati del centro: nome, indirizzo, telefono, membri del team, dati societari/pagamento se inseriti</li>
+      <li>Dati dei clienti del centro: proprietari, cavalli, lezioni, pacchetti, comunicazioni interne</li>
+      <li>Dati tecnici e cookie (vedi tab Cookie)</li>
+    </ul>
+    <h3>Perché li trattiamo</h3>
+    <p>Per erogarti il servizio richiesto ed eseguire il contratto (gestione centro, team, clienti), per obblighi di legge (fatturazione), con il tuo consenso per marketing/newsletter.</p>
+    <h3>Ruolo del centro come titolare dei dati dei propri clienti</h3>
+    <p>Equo fornisce lo strumento; i dati di proprietari/allievi/cavalli inseriti nel gestionale restano sotto la responsabilità del centro che li inserisce, che ne è titolare nei confronti dei propri clienti. Equo agisce come responsabile del trattamento (art. 28 GDPR) per questi dati.</p>
+    <h3>Con chi condividiamo i dati</h3>
+    <p>Fornitori che trattano dati per nostro conto: Supabase (database, UE-Frankfurt), Resend (email), Netlify (hosting), Stripe (pagamenti abbonamento). Non vendiamo i tuoi dati a terzi.</p>
+    <h3>Conservazione</h3>
+    <p>I dati restano attivi finché mantieni l'account. Se lo cancelli, restano recuperabili per 30 giorni, poi vengono eliminati definitivamente, salvo obblighi fiscali (10 anni).</p>
+    <h3>I tuoi diritti</h3>
+    <p>Accesso, rettifica, cancellazione, limitazione, portabilità, opposizione, revoca del consenso: scrivi a gestione.equo@gmail.com. Hai diritto di reclamo al Garante Privacy (garanteprivacy.it).</p>
+    <p class="legal-note">Versione completa: doc "Informativa Privacy" nel progetto Equo.</p>
+  `,
+  cookie: `
+    <h3>Cookie Policy</h3>
+    <h3>Cookie tecnici (nessun consenso richiesto)</h3>
+    <ul>
+      <li>Sessione di autenticazione (Supabase Auth)</li>
+      <li>Preferenza di consenso cookie</li>
+      <li>Cookie di sicurezza/anti-frode</li>
+    </ul>
+    <h3>Cookie di analytics — Google Analytics (richiede consenso)</h3>
+    <p>Usiamo Google Analytics per statistiche d'uso aggregate. Non è un cookie tecnico: richiede il tuo consenso esplicito e preventivo (linee guida Garante Privacy 2021). Lo script si carica solo se scegli "Accetta". Dati trattati anche da Google Ireland Ltd, con trasferimento extra-UE su base Clausole Contrattuali Standard.</p>
+    <h3>Come gestire il consenso</h3>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="reopenCookieBanner()">Rivedi la scelta sui cookie</button>
+    </div>
+    <p class="legal-note" style="margin-top:14px">Versione completa: doc "Cookie Policy" nel progetto Equo.</p>
+  `,
+  termini: `
+    <h3>Termini e Condizioni di Servizio</h3>
+    <p><strong>Fornitore</strong>: Lo Sportivo di Lucchini Simone — P.IVA IT17742111002 — gestione.equo@gmail.com</p>
+    <h3>Il servizio</h3>
+    <p>Equo Scuderia è il gestionale per centri ippici, maneggi e scuderie: cavalli, lezioni, pacchetti/abbonamenti, team e comunicazioni. Il servizio è fornito "così com'è" ed è in evoluzione continua.</p>
+    <h3>Account, centro e team</h3>
+    <p>Chi crea un centro ne è amministratore ed è responsabile dei dati inseriti e della gestione del team (istruttori, veterinari, maniscalchi, allievi) invitato tramite codice. L'amministratore può rimuovere membri e gestire i permessi.</p>
+    <h3>Piani, pagamento e disdetta</h3>
+    <p>I pagamenti sono gestiti da Stripe. Gli abbonamenti si rinnovano automaticamente salvo disdetta. Se sei un consumatore o comunque hai diritto di recesso, questo è di 14 giorni dal primo acquisto (salvo utilizzo immediato del servizio digitale già iniziato).</p>
+    <h3>Cancellazione account</h3>
+    <p>Puoi chiedere la cancellazione in ogni momento. I dati restano recuperabili 30 giorni, poi vengono eliminati definitivamente.</p>
+    <h3>Uso corretto</h3>
+    <p>Non usare Equo Scuderia per contenuti illeciti, spam, o per accedere senza autorizzazione a dati di altri centri o utenti. L'amministratore è responsabile della liceità dei dati che inserisce sui propri clienti (vedi Informativa Privacy).</p>
+    <h3>Legge applicabile</h3>
+    <p>Legge italiana. Per i consumatori, foro competente quello di residenza/domicilio; altrimenti Foro di Roma.</p>
+    <p class="legal-note">Versione completa: doc "Termini e Condizioni" nel progetto Equo.</p>
+  `,
+};
+
+function openLegalPage(tab){
+  document.getElementById("legal-body").innerHTML = LEGAL_CONTENT[tab] || "";
+  ["privacy","cookie","termini"].forEach(t => {
+    document.getElementById("legal-tab-" + t).classList.toggle("legal-tab-active", t === tab);
+  });
+  openModal("modal-legal");
+  document.getElementById("legal-body").scrollTop = 0;
+}
+
+/* ---------- COOKIE CONSENT + GOOGLE ANALYTICS ----------
+   Nessuno script di tracciamento viene caricato finché l'utente non clicca "Accetta".
+   GA_MEASUREMENT_ID è un placeholder da sostituire con l'ID reale prima che il
+   tracciamento sia effettivo (condiviso concettualmente con Equo App, ID separato
+   se si vogliono statistiche distinte per i due prodotti). */
+const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
+
+function initCookieConsent(){
+  const consent = localStorage.getItem("equo-cookie-consent");
+  if(consent === "accepted") loadGoogleAnalytics();
+  else if(consent !== "rejected") document.getElementById("cookie-banner").style.display = "block";
+}
+function acceptCookies(){
+  localStorage.setItem("equo-cookie-consent", "accepted");
+  document.getElementById("cookie-banner").style.display = "none";
+  loadGoogleAnalytics();
+}
+function rejectCookies(){
+  localStorage.setItem("equo-cookie-consent", "rejected");
+  document.getElementById("cookie-banner").style.display = "none";
+}
+function reopenCookieBanner(){
+  closeModal("modal-legal");
+  localStorage.removeItem("equo-cookie-consent");
+  document.getElementById("cookie-banner").style.display = "block";
+}
+let gaLoaded = false;
+function loadGoogleAnalytics(){
+  if(gaLoaded || !GA_MEASUREMENT_ID || GA_MEASUREMENT_ID.includes("XXXXXXXXXX")) return;
+  gaLoaded = true;
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_MEASUREMENT_ID;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag("js", new Date());
+  gtag("config", GA_MEASUREMENT_ID);
+}
+
 /* ---------- HELPERS ---------- */
 function escapeHtml(str){
   return (str || "").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -3381,6 +3570,7 @@ function escapeHtml(str){
 
 /* ---------- BOOT ---------- */
 async function boot(){
+  initCookieConsent();
   try{
     const { data } = await sb.auth.getSession();
     if(data?.session?.user){
