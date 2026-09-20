@@ -37,8 +37,11 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 ```sql
 alter table profiles
   add column if not exists consenso_termini_privacy timestamptz,
-  add column if not exists dichiarazione_eta boolean;
+  add column if not exists dichiarazione_eta boolean,
+  add column if not exists cancellazione_richiesta_at timestamptz;
 ```
+- [x] **Blocco auto-Premium gratis**: "Passa a Premium" non scrive più `piano=premium` da solo — apre un'email precompilata per richiesta manuale (Stripe non ancora collegato). "Torna a Free" resta self-service. Commit ec7f2a7
+- [x] **Eliminazione account (GDPR)**: bottone nel menu, richiesta salvata con 30gg di grazia, modale di riattivazione al login. La cancellazione DEFINITIVA dei dati dopo i 30gg **non è automatica** (nessun cron/Edge Function collegato) — per ora va fatta a mano da chi gestisce Equo quando arriva una richiesta scaduta. Solo su Equo App per ora, non ancora su Equo Scuderia. Commit ec7f2a7
 
 ## 3. Infrastruttura
 - [x] Account dedicati creati con gestione.equo@gmail.com (Supabase + Netlify, separati dagli altri progetti)
