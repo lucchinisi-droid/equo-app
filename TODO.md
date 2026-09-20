@@ -33,7 +33,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] Onboarding legale minimo (equo-app): checkbox unica Termini+Privacy+dichiarazione eta in onboarding (una sola volta per account), pagina in-app "Legale" (Privacy/Cookie/Termini), banner cookie Accetta/Rifiuta con Google Analytics gated dietro consenso, bottone Premium/Free finalmente collegato in UI (mancava), disclaimer AI sotto la chat — vedi commit 7cee147. **Da fare prima che sia davvero live**:
   - [ ] Eseguire su Supabase (SQL editor, progetto equo-prod) la migrazione qui sotto, per le nuove colonne di consenso
   - [ ] Sostituire `GA_MEASUREMENT_ID` (placeholder "G-XXXXXXXXXX") con l'ID reale di Google Analytics 4, altrimenti GA non traccia nulla anche dopo consenso
-  - [ ] Replicare lo stesso lavoro (checkbox onboarding, pagina Legale, cookie banner, bottone Premium/Free, disclaimer AI) su Equo Scuderia — non ancora iniziato
+  - [x] Replicato su Equo Scuderia (checkbox onboarding condivisa via `profiles`, pagina Legale, cookie banner) — commit 75ecefc. Non replicati: bottone Premium/Free (Scuderia non ha ancora un campo piano/gating in UI) e disclaimer AI (la chat AI è ancora "SOON", nulla da disclaimare finché non è live)
 ```sql
 alter table profiles
   add column if not exists consenso_termini_privacy timestamptz,
