@@ -1190,6 +1190,36 @@ select.input{cursor:pointer}
 
     <div style="height:8px"></div>
     <button class="btn btn-outline" style="width:100%" onclick="openModal('modal-confirm-logout')">Esci</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px;color:var(--red)" onclick="closeModal('modal-menu');openModal('modal-delete-account')">Elimina account</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-delete-account" onclick="closeOut(event,'modal-delete-account')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Elimina account</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">
+      Il tuo account e i tuoi dati resteranno recuperabili per <strong>30 giorni</strong>: puoi annullare in qualsiasi momento rientrando in Equo entro quella data. Trascorsi i 30 giorni, la cancellazione diventa definitiva.
+    </p>
+    <div class="auth-error" id="delete-account-error" style="display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-account')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteAccount()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-reactivate-account" onclick="closeOut(event,'modal-reactivate-account')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Cancellazione in corso</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:18px" id="reactivate-account-text">
+      Hai chiesto di eliminare questo account. I dati verranno cancellati definitivamente il —.
+    </p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-reactivate-account');logout()">Esci</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmReactivateAccount()">Annulla cancellazione</button>
+    </div>
   </div>
 </div>
 
@@ -1395,12 +1425,12 @@ select.input{cursor:pointer}
       Sblocchi cavalli/clienti illimitati, reminder automatici, AI con più messaggi e le altre funzioni Premium.
       Puoi tornare a Free in qualsiasi momento dal menu, con lo stesso numero di passaggi.
     </p>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px">
-      Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')" style="color:var(--accent)">Termini di Servizio</a> (rinnovo automatico, disdetta libera, diritto di recesso 14gg dove applicabile).
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
+      Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.
     </div>
     <div style="display:flex;gap:10px">
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
-      <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()">Conferma</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Richiedi l'attivazione</button>
     </div>
   </div>
 </div>
@@ -1434,10 +1464,15 @@ select.input{cursor:pointer}
    EQUO APP — v1 skeleton
    Sostituisci SUPABASE_URL / SUPABASE_ANON_KEY con i valori reali.
    Schema Supabase atteso (da creare):
-   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, dichiarazione_eta)
+   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, dichiarazione_eta, cancellazione_richiesta_at)
    -- consenso_termini_privacy: timestamptz, valorizzato la prima volta che l'utente completa l'onboarding
    --   (accetta Termini+Privacy e dichiara l'età) — non richiesto di nuovo ai login successivi.
    -- dichiarazione_eta: boolean, true = "ho almeno 14 anni o l'autorizzazione di un genitore/tutore".
+   -- cancellazione_richiesta_at: timestamptz, valorizzato quando l'utente chiede la cancellazione
+   --   account dal menu. Periodo di grazia 30gg (coerente con l'Informativa Privacy): entro quella
+   --   data l'utente può annullare rientrando; la cancellazione DEFINITIVA dei dati dopo i 30gg non è
+   --   automatica (nessun cron server-side collegato) — va fatta a mano da chi gestisce Equo finché
+   --   non si aggiunge una Supabase Edge Function schedulata.
    - storage bucket pubblico "avatar-utenti" (foto profilo)
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
@@ -2232,6 +2267,55 @@ async function logout(){
   document.getElementById("screen-auth").classList.add("active");
 }
 
+/* ---------- ELIMINAZIONE ACCOUNT (periodo di grazia 30gg) ----------
+   Nessun cron server-side collegato: la cancellazione DEFINITIVA dei dati dopo i
+   30 giorni non è automatica, va fatta a mano finché non si aggiunge una Supabase
+   Edge Function schedulata (vedi commento schema profiles.cancellazione_richiesta_at). */
+async function confirmDeleteAccount(){
+  const errBox = document.getElementById("delete-account-error");
+  errBox.style.display = "none";
+  if(DEMO_MODE){
+    closeModal("modal-delete-account");
+    showToast("In modalità demo non c'è un account reale da eliminare.");
+    return;
+  }
+  try{
+    const cancellazione_richiesta_at = new Date().toISOString();
+    const { error } = await sb.from("profiles").update({ cancellazione_richiesta_at }).eq("id", currentUser.id);
+    if(error) throw error;
+    closeModal("modal-delete-account");
+    showToast("Richiesta registrata. Hai 30 giorni per annullare rientrando in Equo.");
+    await logout();
+  } catch(e){
+    errBox.textContent = "Non sono riuscito a registrare la richiesta, riprova.";
+    errBox.style.display = "block";
+  }
+}
+
+function checkPendingDeletion(){
+  if(!currentUser || !currentUser.cancellazioneRichiestaAt) return;
+  const richiesta = new Date(currentUser.cancellazioneRichiestaAt);
+  const scadenza = new Date(richiesta.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const giorniRimasti = Math.max(0, Math.ceil((scadenza - new Date()) / (24 * 60 * 60 * 1000)));
+  const testo = giorniRimasti > 0
+    ? `Hai chiesto di eliminare questo account il ${richiesta.toLocaleDateString("it-IT")}. Se non annulli, i dati verranno cancellati definitivamente il ${scadenza.toLocaleDateString("it-IT")} (tra ${giorniRimasti} giorni).`
+    : `Il periodo di 30 giorni per annullare la cancellazione è scaduto. Scrivi a gestione.equo@gmail.com se hai cambiato idea: la cancellazione definitiva non è ancora stata completata.`;
+  document.getElementById("reactivate-account-text").textContent = testo;
+  openModal("modal-reactivate-account");
+}
+
+async function confirmReactivateAccount(){
+  try{
+    const { error } = await sb.from("profiles").update({ cancellazione_richiesta_at: null }).eq("id", currentUser.id);
+    if(error) throw error;
+    currentUser.cancellazioneRichiestaAt = null;
+    closeModal("modal-reactivate-account");
+    showToast("Cancellazione annullata, bentornato!");
+  } catch(e){
+    showToast("Non sono riuscito ad annullare la richiesta, riprova.");
+  }
+}
+
 function setAvatarInitial(letter){
   const topbar = document.getElementById("topbar-avatar");
   const menu = document.getElementById("menu-avatar");
@@ -2306,7 +2390,7 @@ async function boot(){
 
   document.getElementById("profile-email").textContent = user.email || "";
   const { data: profile } = await sb.from("profiles").select(
-    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy"
+    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, cancellazione_richiesta_at"
   ).eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
@@ -2321,6 +2405,7 @@ async function boot(){
   currentUser.datiPagamentoIban = profile?.dati_pagamento_iban || null;
   currentUser.datiPagamentoPaypal = profile?.dati_pagamento_paypal || null;
   currentUser.consensoTerminiPrivacy = profile?.consenso_termini_privacy || null;
+  currentUser.cancellazioneRichiestaAt = profile?.cancellazione_richiesta_at || null;
   if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
   else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
@@ -2331,6 +2416,7 @@ async function boot(){
     return;
   }
   await enterApp(currentUser.ruolo);
+  checkPendingDeletion();
 }
 
 /* ---------- GOOGLE SIGN-IN ---------- */
@@ -2837,14 +2923,36 @@ function updatePianoUI(){
 }
 
 function togglePiano(){
-  if(isPremium()) openModal("modal-downgrade-free");
-  else openModal("modal-upgrade-premium");
+  if(isPremium()){
+    openModal("modal-downgrade-free");
+    return;
+  }
+  // In demo il piano è solo per mostrare la UI: nessun rischio, si può attivare all'istante.
+  // Fuori demo Stripe non è ancora collegato, quindi non lasciamo che chiunque si scriva
+  // "premium" da solo sul database — l'attivazione passa da una richiesta manuale.
+  const note = document.getElementById("upgrade-premium-note");
+  const btn = document.getElementById("upgrade-premium-confirm-btn");
+  if(DEMO_MODE){
+    note.textContent = "Attivazione istantanea in modalità demo — nessun pagamento reale.";
+    btn.textContent = "Conferma";
+  } else {
+    note.textContent = "Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.";
+    btn.textContent = "Richiedi l'attivazione";
+  }
+  openModal("modal-upgrade-premium");
 }
 
 async function confirmUpgradePremium(){
   closeModal("modal-upgrade-premium");
-  await setPiano("premium");
-  showToast("Sei passato a Premium!");
+  if(DEMO_MODE){
+    await setPiano("premium");
+    showToast("Sei passato a Premium! (demo)");
+    return;
+  }
+  const subject = encodeURIComponent("Richiesta attivazione Premium - Equo");
+  const body = encodeURIComponent("Ciao,\nvorrei attivare il piano Premium sul mio account Equo.\nEmail account: " + (currentUser?.email || ""));
+  window.location.href = "mailto:gestione.equo@gmail.com?subject=" + subject + "&body=" + body;
+  showToast("Ti abbiamo aperto l'email per la richiesta — ti rispondiamo il prima possibile.");
 }
 
 async function confirmDowngradeFree(){
