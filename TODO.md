@@ -56,7 +56,11 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Configurare Supabase Storage (bucket foto cavalli e documenti PDF)
 - [ ] Dominio custom (opzionale, per ora *.netlify.app)
 - [ ] Quando si acquista equohub.com: aggiornare dominio custom su Netlify (equo-land + equo-app), redirect URI OAuth Google, Authorized JavaScript origins, e URL di callback Supabase con il nuovo dominio
-- [ ] Stripe: skeleton pronto (check-plan, create-checkout, stripe-webhook) ma NON collegato alla UI — da attivare solo quando si decide il piano Pro
+- [x] **Stripe collegato davvero** (era skeleton non collegato): checkout reale mensile/annuale (proprietari + professionisti), Payment Link dedicati per i lifetime (150 posti prop, 50 posti pro, limite gestito nativamente da Stripe), webhook che attiva Premium, "Torna a Free" annulla davvero l'abbonamento su Stripe — commit 0be6ff1
+  - [ ] **SQL da eseguire su Supabase**: `alter table profiles add column if not exists stripe_customer_id text; alter table profiles add column if not exists stripe_subscription_id text;`
+  - [ ] **Webhook Stripe da configurare**: Dashboard Stripe → Developers → Webhooks → aggiungi endpoint `https://app.equohub.com/.netlify/functions/stripe-webhook`, eventi `checkout.session.completed` e `customer.subscription.deleted` → copiare il Signing secret e impostarlo su Netlify come `STRIPE_WEBHOOK_SECRET`
+  - [ ] Account Stripe attualmente in modalità **Live** (non Test) — primi test di pagamento saranno reali, fare un acquisto di prova con importo minimo e poi rimborsarlo dalla dashboard Stripe
+  - [ ] Verificare "Riscuoti le imposte automaticamente" (Stripe Tax) sui prodotti creati — se non configurato in Impostazioni → Tax potrebbe non calcolare l'IVA correttamente
 
 ## 4. Altro fondamentale prima del lancio
 - [ ] **Monetizzazione**: definire piano free vs pro (limite cavalli? assistente AI limitato? export PDF a pagamento?) — nessuna feature senza logica di business
