@@ -30,18 +30,14 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Pagina profilo utente / impostazioni scuderia
 - [ ] Playlist Spotify Equo: creare playlist pubblica (account gestione.equo@gmail.com), integrare via embed ufficiale Spotify (iframe) — salvataggio/condivisione gestiti nativamente da Spotify, no OAuth/backend necessario
 - [ ] Modulo Mascalcia (equo-app): Step 1-6 completati (doppio ruolo, nav pro/proprietario a 5 voci, profilo pro, calendario lezioni manuale, chat proprietario testo/vocali/foto/video, condivisione esterna con watermark) — **Step 7: Community in Equo Scuderia** (bacheca pubblica dei contenuti condivisi, tocca equo-scuderia non equo-app) ancora da fare, dettagli in claude/equo-app-mascalcia.md
-- [x] Onboarding legale minimo (equo-app): checkbox unica Termini+Privacy+dichiarazione eta in onboarding (una sola volta per account), pagina in-app "Legale" (Privacy/Cookie/Termini), banner cookie Accetta/Rifiuta con Google Analytics gated dietro consenso, bottone Premium/Free finalmente collegato in UI (mancava), disclaimer AI sotto la chat — vedi commit 7cee147. **Da fare prima che sia davvero live**:
-  - [ ] Eseguire su Supabase (SQL editor, progetto equo-prod) la migrazione qui sotto, per le nuove colonne di consenso
-  - [ ] Sostituire `GA_MEASUREMENT_ID` (placeholder "G-XXXXXXXXXX") con l'ID reale di Google Analytics 4, altrimenti GA non traccia nulla anche dopo consenso
-  - [x] Replicato su Equo Scuderia (checkbox onboarding condivisa via `profiles`, pagina Legale, cookie banner) — commit 75ecefc. Non replicati: bottone Premium/Free (Scuderia non ha ancora un campo piano/gating in UI) e disclaimer AI (la chat AI è ancora "SOON", nulla da disclaimare finché non è live)
-```sql
-alter table profiles
-  add column if not exists consenso_termini_privacy timestamptz,
-  add column if not exists dichiarazione_eta boolean,
-  add column if not exists cancellazione_richiesta_at timestamptz;
-```
+- [x] Onboarding legale minimo (equo-app): checkbox unica Termini+Privacy+dichiarazione eta in onboarding (una sola volta per account), pagina in-app "Legale" (Privacy/Cookie/Termini), banner cookie Accetta/Rifiuta con Google Analytics gated dietro consenso, bottone Premium/Free finalmente collegato in UI (mancava), disclaimer AI sotto la chat — vedi commit 7cee147.
+- [x] Migrazione SQL eseguita su Supabase (progetto equo-prod): colonne `consenso_termini_privacy`, `dichiarazione_eta`, `cancellazione_richiesta_at` su `profiles` — confermato 20/09/2026
+- [x] Replicato su Equo Scuderia (checkbox onboarding condivisa via `profiles`, pagina Legale, cookie banner) — commit 75ecefc. Non replicati: bottone Premium/Free (Scuderia non ha ancora un campo piano/gating in UI) e disclaimer AI (la chat AI è ancora "SOON", nulla da disclaimare finché non è live)
 - [x] **Blocco auto-Premium gratis**: "Passa a Premium" non scrive più `piano=premium` da solo — apre un'email precompilata per richiesta manuale (Stripe non ancora collegato). "Torna a Free" resta self-service. Commit ec7f2a7
 - [x] **Eliminazione account (GDPR)**: bottone nel menu, richiesta salvata con 30gg di grazia, modale di riattivazione al login. La cancellazione DEFINITIVA dei dati dopo i 30gg **non è automatica** (nessun cron/Edge Function collegato) — per ora va fatta a mano da chi gestisce Equo quando arriva una richiesta scaduta. Solo su Equo App per ora, non ancora su Equo Scuderia. Commit ec7f2a7
+- [x] **Deploy in produzione confermato** (equo-app.netlify.app + equo-scuderia) — push del 20/09/2026, tutti i commit sopra live
+- [ ] Sostituire `GA_MEASUREMENT_ID` (placeholder "G-XXXXXXXXXX", in equo-app e equo-scuderia) con l'ID reale di Google Analytics 4, altrimenti GA non traccia nulla anche dopo consenso
+- [ ] Replicare "Eliminazione account" (GDPR) anche su Equo Scuderia — al momento solo su Equo App
 
 ## 3. Infrastruttura
 - [x] Account dedicati creati con gestione.equo@gmail.com (Supabase + Netlify, separati dagli altri progetti)
@@ -60,12 +56,8 @@ alter table profiles
 
 ## 4. Altro fondamentale prima del lancio
 - [ ] **Monetizzazione**: definire piano free vs pro (limite cavalli? assistente AI limitato? export PDF a pagamento?) — nessuna feature senza logica di business
-- [ ] **Privacy & Cookie**: gestione completa su landing e app —
-  - [ ] Privacy Policy + Termini di Servizio (obbligatori per dati sanitari/email)
-  - [ ] Cookie banner (accetta/rifiuta/personalizza) su equo-land
-  - [ ] Cookie banner su equo-app (se si aggiungono analytics/tracking)
-  - [ ] Pagina/consenso trattamento dati sanitari cavallo (dato sensibile-adiacente)
-  - [ ] Diritto di cancellazione account e dati (GDPR) da impostazioni profilo
+- [x] **Privacy & Cookie (equo-app + equo-scuderia)**: Privacy Policy, Cookie Policy, Termini di Servizio, cookie banner, diritto di cancellazione account — vedi sezione 2 sopra e doc `claude/equo-normativa-privacy.md`
+  - [ ] Cookie banner su equo-land (landing) — non ancora fatto, solo su equo-app/equo-scuderia finora
 - [ ] Analytics base (Plausible o simile)
 - [ ] Seed iniziale tabella `services`/mappa (cliniche 24h, maneggi) — almeno la tua zona
 - [ ] Onboarding primo utente
@@ -89,4 +81,4 @@ alter table profiles
 - [ ] **3. Body Condition Score via foto** — carichi foto del cavallo, l'AI (Claude vision) stima il punteggio di condizione corporea (scala 1-9) e segnala sovrappeso/sottopeso
 
 ---
-**Prossimo step**: aggiungere `ANTHROPIC_API_KEY` su Netlify per rendere l'AI di equo-app pienamente funzionante.
+**Prossimo step**: aggiungere `ANTHROPIC_API_KEY` su Netlify per rendere l'AI di equo-app pienamente funzionante (blocco più urgente rimasto: senza questa, l'AI reale non risponde fuori dalla demo).
