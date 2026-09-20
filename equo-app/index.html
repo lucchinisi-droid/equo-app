@@ -297,6 +297,32 @@ select.input{cursor:pointer}
 .mchat-input-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;
   padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);
   background:var(--surface);flex-shrink:0}
+/* LEGALE (Privacy/Cookie/Termini) — riusa il layout a schermo intero della chat */
+.legal-overlay{display:none;position:fixed;inset:0;z-index:80;flex-direction:column;background:var(--bg)}
+.legal-overlay.active{display:flex}
+.legal-tabs{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+.legal-tab{flex:1;padding:8px 4px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);
+  color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;text-align:center}
+.legal-tab.active{background:var(--accent);color:#14231b;border-color:var(--accent)}
+.legal-body{flex:1;overflow-y:auto;padding:18px 18px calc(24px + env(safe-area-inset-bottom))}
+.legal-body h3{font-size:15px;margin:18px 0 6px}
+.legal-body h3:first-child{margin-top:0}
+.legal-body p,.legal-body li{font-size:13px;line-height:1.6;color:var(--text)}
+.legal-body ul{padding-left:18px;margin:6px 0}
+.legal-body .legal-note{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:14px}
+.legal-body table{width:100%;border-collapse:collapse;font-size:11.5px;margin:8px 0 14px}
+.legal-body th,.legal-body td{border:1px solid var(--border);padding:5px 6px;text-align:left}
+.legal-body th{background:var(--surface2)}
+
+/* COOKIE BANNER */
+.cookie-banner{display:none;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));
+  z-index:90;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:456px;margin:0 auto}
+.cookie-banner.active{display:block}
+.cookie-banner p{font-size:12.5px;line-height:1.55;color:var(--text);margin-bottom:12px}
+.cookie-banner-actions{display:flex;gap:8px}
+.cookie-banner-actions .btn{flex:1}
+
 .mchat-emoji-btn{width:40px;height:40px;border-radius:50%;border:none;background:none;
   font-size:20px;flex-shrink:0;cursor:pointer}
 .mchat-input-bar .input{flex:1;border-radius:22px}
@@ -394,6 +420,9 @@ select.input{cursor:pointer}
     <div class="auth-error" id="auth-error" style="display:none"></div>
     <button class="btn btn-primary" id="auth-submit" onclick="submitAuth()">Accedi</button>
     <button class="btn btn-ghost" onclick="startDemo()" style="width:100%">Prova la demo (senza account)</button>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;text-align:center;margin-top:10px">
+      Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')" style="color:var(--accent)">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.
+    </div>
   </div>
 </div>
 
@@ -402,7 +431,13 @@ select.input{cursor:pointer}
   <div id="onb-step-1" style="width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center">
     <img src="assets/logo-equo.png" alt="Equo" class="auth-logo-img">
     <div class="section-title" style="text-align:center;margin-bottom:6px">Cosa ti porta su Equo?</div>
-    <div class="muted" style="text-align:center;font-size:13.5px;margin-bottom:24px">Scegli il profilo più adatto a te — potrai sempre cambiarlo dal menu.</div>
+    <div class="muted" style="text-align:center;font-size:13.5px;margin-bottom:16px">Scegli il profilo più adatto a te — potrai sempre cambiarlo dal menu.</div>
+    <div class="card" id="onb-consent-group" style="width:100%;margin-bottom:20px;display:none">
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.55;cursor:pointer">
+        <input type="checkbox" id="onb-consent" style="margin-top:3px;flex-shrink:0">
+        <span>Dichiaro di avere almeno 14 anni, o di avere l'autorizzazione di un genitore/tutore, e di accettare i <a href="#" onclick="event.preventDefault();openLegalPage('termini')" style="color:var(--accent)">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.</span>
+      </label>
+    </div>
     <div class="role-list">
       <button class="role-card" onclick="chooseMainRole('proprietario')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span></div>
@@ -775,6 +810,7 @@ select.input{cursor:pointer}
         <div class="chat-messages" id="chat-messages">
           <div class="chat-bubble ai">Ciao! Sono l'assistente equestre di Equo. Chiedimi pure di alimentazione, comportamento o gestione del tuo cavallo.</div>
         </div>
+        <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 6px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
         <div class="chat-input-row">
           <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
           <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
@@ -1124,12 +1160,32 @@ select.input{cursor:pointer}
       </label>
     </div>
 
+    <div class="menu-section-label">Piano</div>
+    <div class="card" id="piano-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <div style="font-weight:700" id="piano-label">Free</div>
+          <div class="muted" style="font-size:12px" id="piano-desc">Funzioni base</div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="piano-btn" onclick="togglePiano()">Passa a Premium</button>
+      </div>
+    </div>
+
     <div class="menu-section-label">Metodo di pagamento</div>
     <div class="card" id="payment-methods-card">
       <div id="payment-methods-list" class="muted" style="font-size:13px">Nessun metodo salvato.</div>
       <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-payment')" style="width:100%;margin-top:12px">
         + Aggiungi metodo di pagamento
       </button>
+    </div>
+
+    <div class="menu-section-label">Legale</div>
+    <div class="menu-row" style="cursor:pointer" onclick="closeModal('modal-menu');openLegalPage('privacy')">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-scale-balanced"></i></span>
+        <span>Privacy, Cookie e Termini</span>
+      </div>
+      <span class="icon"><svg><use href="#i-chevron"/></svg></span>
     </div>
 
     <div style="height:8px"></div>
@@ -1316,12 +1372,72 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<!-- LEGALE: Privacy / Cookie / Termini -->
+<div class="legal-overlay" id="legal-overlay">
+  <div class="mchat-header">
+    <button class="back-btn" onclick="closeLegalPage()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+    <div style="flex:1;min-width:0"><div class="mchat-header-name">Informazioni legali</div></div>
+  </div>
+  <div class="legal-tabs">
+    <button class="legal-tab" id="legal-tab-privacy" onclick="openLegalPage('privacy')">Privacy</button>
+    <button class="legal-tab" id="legal-tab-cookie" onclick="openLegalPage('cookie')">Cookie</button>
+    <button class="legal-tab" id="legal-tab-termini" onclick="openLegalPage('termini')">Termini</button>
+  </div>
+  <div class="legal-body" id="legal-body"></div>
+</div>
+
+<!-- PIANO: Passa a Premium / Torna a Free -->
+<div class="modal-overlay" id="modal-upgrade-premium" onclick="closeOut(event,'modal-upgrade-premium')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Passa a Premium</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">
+      Sblocchi cavalli/clienti illimitati, reminder automatici, AI con più messaggi e le altre funzioni Premium.
+      Puoi tornare a Free in qualsiasi momento dal menu, con lo stesso numero di passaggi.
+    </p>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px">
+      Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')" style="color:var(--accent)">Termini di Servizio</a> (rinnovo automatico, disdetta libera, diritto di recesso 14gg dove applicabile).
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-downgrade-free" onclick="closeOut(event,'modal-downgrade-free')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Torna a Free</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:18px">
+      Tornerai al piano Free: i tuoi dati restano tutti al loro posto, ma le funzioni Premium (illimitati, reminder automatici, AI estesa) si disattivano.
+    </p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-downgrade-free')">Annulla</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmDowngradeFree()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookie-banner">
+  <p>Usiamo cookie tecnici (necessari) e, solo con il tuo consenso, Google Analytics per capire come viene usato Equo.
+    <a href="#" onclick="event.preventDefault();openLegalPage('cookie')" style="color:var(--accent)">Maggiori info</a>.</p>
+  <div class="cookie-banner-actions">
+    <button class="btn btn-outline btn-sm" onclick="rejectCookies()">Rifiuta</button>
+    <button class="btn btn-primary btn-sm" onclick="acceptCookies()">Accetta</button>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════════
    EQUO APP — v1 skeleton
    Sostituisci SUPABASE_URL / SUPABASE_ANON_KEY con i valori reali.
    Schema Supabase atteso (da creare):
-   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal)
+   - profiles(id, email, full_name, ruolo, ruolo_secondario, piano, referral_code, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, dichiarazione_eta)
+   -- consenso_termini_privacy: timestamptz, valorizzato la prima volta che l'utente completa l'onboarding
+   --   (accetta Termini+Privacy e dichiara l'età) — non richiesto di nuovo ai login successivi.
+   -- dichiarazione_eta: boolean, true = "ho almeno 14 anni o l'autorizzazione di un genitore/tutore".
    - storage bucket pubblico "avatar-utenti" (foto profilo)
    - horses(id, owner_id, name, breed, birth_date, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
@@ -1737,6 +1853,11 @@ function showOnboardingStep(step){
   document.getElementById("onb-step-1").style.display = step === 1 ? "flex" : "none";
   document.getElementById("onb-step-2").style.display = step === 2 ? "flex" : "none";
   document.getElementById("onb-error").style.display = "none";
+  // la dichiarazione età + accettazione Termini/Privacy si chiede una sola volta,
+  // al primo onboarding: chi ha già consenso salvato (currentUser.consensoTerminiPrivacy)
+  // non la rivede più quando cambia semplicemente ruolo in seguito.
+  const consentGroup = document.getElementById("onb-consent-group");
+  if(consentGroup) consentGroup.style.display = (DEMO_MODE || (currentUser && currentUser.consensoTerminiPrivacy)) ? "none" : "block";
 }
 
 async function chooseMainRole(ruolo){
@@ -1748,12 +1869,25 @@ async function chooseMainRole(ruolo){
     await enterApp(ruolo);
     return;
   }
+  const consentGroup = document.getElementById("onb-consent-group");
+  const needsConsent = consentGroup && consentGroup.style.display !== "none";
+  if(needsConsent && !document.getElementById("onb-consent").checked){
+    errBox.textContent = "Devi accettare i Termini e l'Informativa Privacy per continuare.";
+    errBox.style.display = "block";
+    return;
+  }
   try{
     // upsert (non update): un utente arrivato via Google potrebbe non avere
     // ancora una riga in profiles, quindi va creata qui se manca.
-    const { error } = await sb.from("profiles").upsert({ id: currentUser.id, email: currentUser.email, ruolo });
+    const payload = { id: currentUser.id, email: currentUser.email, ruolo };
+    if(needsConsent){
+      payload.consenso_termini_privacy = new Date().toISOString();
+      payload.dichiarazione_eta = true;
+    }
+    const { error } = await sb.from("profiles").upsert(payload);
     if(error) throw error;
     currentUser.ruolo = ruolo;
+    if(needsConsent) currentUser.consensoTerminiPrivacy = payload.consenso_termini_privacy;
     document.getElementById("screen-onboarding").classList.remove("active");
     await enterApp(ruolo);
   } catch(e){
@@ -2172,7 +2306,7 @@ async function boot(){
 
   document.getElementById("profile-email").textContent = user.email || "";
   const { data: profile } = await sb.from("profiles").select(
-    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal"
+    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy"
   ).eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
@@ -2186,6 +2320,7 @@ async function boot(){
   currentUser.datiPagamentoPivaCf = profile?.dati_pagamento_piva_cf || null;
   currentUser.datiPagamentoIban = profile?.dati_pagamento_iban || null;
   currentUser.datiPagamentoPaypal = profile?.dati_pagamento_paypal || null;
+  currentUser.consensoTerminiPrivacy = profile?.consenso_termini_privacy || null;
   if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
   else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
@@ -2218,6 +2353,7 @@ async function signInWithGoogle(){
 function openMenu(){
   document.getElementById("theme-switch").checked = document.documentElement.getAttribute("data-theme") === "light" ? false : true;
   updateThemeMenuUI();
+  updatePianoUI();
   openModal("modal-menu");
 }
 
@@ -2225,6 +2361,7 @@ function initTheme(){
   const saved = localStorage.getItem("equo-theme");
   if(saved) document.documentElement.setAttribute("data-theme", saved);
   updateThemeMenuUI();
+  initCookieConsent();
 }
 
 function toggleTheme(){
@@ -2675,6 +2812,183 @@ async function renderProDeadlines(){
 function isPremium(){
   return !!(currentUser && currentUser.piano === "premium");
 }
+
+/* ---------- PIANO (Passa a Premium / Torna a Free) ----------
+   Stripe non è ancora collegato (vedi modal-add-payment): il pulsante aggiorna
+   direttamente profiles.piano, con lo stesso numero di passaggi in entrambe le
+   direzioni (un solo modale di conferma), come richiesto dall'art. 54-bis
+   Codice del Consumo su recesso/disdetta facile quanto la sottoscrizione. */
+function updatePianoUI(){
+  const label = document.getElementById("piano-label");
+  const desc = document.getElementById("piano-desc");
+  const btn = document.getElementById("piano-btn");
+  if(!label || !btn) return;
+  if(isPremium()){
+    label.textContent = "Premium";
+    desc.textContent = "Tutte le funzioni sbloccate";
+    btn.textContent = "Torna a Free";
+    btn.className = "btn btn-outline btn-sm";
+  } else {
+    label.textContent = "Free";
+    desc.textContent = "Funzioni base";
+    btn.textContent = "Passa a Premium";
+    btn.className = "btn btn-primary btn-sm";
+  }
+}
+
+function togglePiano(){
+  if(isPremium()) openModal("modal-downgrade-free");
+  else openModal("modal-upgrade-premium");
+}
+
+async function confirmUpgradePremium(){
+  closeModal("modal-upgrade-premium");
+  await setPiano("premium");
+  showToast("Sei passato a Premium!");
+}
+
+async function confirmDowngradeFree(){
+  closeModal("modal-downgrade-free");
+  await setPiano("free");
+  showToast("Sei tornato al piano Free.");
+}
+
+async function setPiano(piano){
+  currentUser.piano = piano;
+  if(!DEMO_MODE){
+    const { error } = await sb.from("profiles").update({ piano }).eq("id", currentUser.id);
+    if(error){ showToast("Non sono riuscito a salvare, riprova."); return; }
+  }
+  updatePianoUI();
+  // riaggiorna gli sblocchi legati al piano già presenti in pagina (es. incassi-premium-box)
+  if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
+}
+
+/* ---------- LEGALE (Privacy / Cookie / Termini) ----------
+   Testi completi anche in claude/equo-informativa-privacy.md, equo-cookie-policy.md,
+   equo-termini-condizioni.md nel progetto — qui la versione mobile, adattata per lo schermo. */
+const LEGAL_CONTENT = {
+  privacy: `
+    <h3>Informativa Privacy (artt. 13-14 GDPR)</h3>
+    <p><strong>Titolare</strong>: Lo Sportivo di Lucchini Simone — Via Rocco Dolce 4, 00034 Colleferro (RM) — P.IVA IT17742111002 — PEC simone.lucchini@pec.it — gestione.equo@gmail.com</p>
+    <h3>Quali dati raccogliamo</h3>
+    <ul>
+      <li>Dati account: nome, email, password (Supabase Auth), foto profilo</li>
+      <li>Dati del cavallo: nome, razza, eventi sanitari (vaccini, Coggins, ferrature, sverminazioni) — riguardano l'animale, non sono "dati particolari" ex art. 9 GDPR</li>
+      <li>Spese di mantenimento e dati per ricevere pagamenti (mai numeri di carta in chiaro)</li>
+      <li>Dati professionali (categoria, clienti) per maniscalchi/veterinari/istruttori</li>
+      <li>Messaggi di chat (testo, note vocali, foto, video)</li>
+      <li>Dati di pagamento abbonamento, gestiti da Stripe</li>
+      <li>Dati tecnici e cookie (vedi tab Cookie)</li>
+    </ul>
+    <h3>Perché li trattiamo</h3>
+    <p>Per erogarti il servizio richiesto ed eseguire il contratto (account, reminder, assistente AI, pagamenti), per obblighi di legge (fatturazione), con il tuo consenso per marketing/newsletter, e per legittimo interesse nella prevenzione di abusi.</p>
+    <h3>Con chi condividiamo i dati</h3>
+    <p>Fornitori che trattano dati per nostro conto (responsabili ex art. 28 GDPR): Supabase (database, UE-Frankfurt), Resend (email), Anthropic/Claude API (assistente AI), Stripe (pagamenti), Netlify (hosting). Non vendiamo i tuoi dati a terzi.</p>
+    <h3>Conservazione</h3>
+    <p>I dati restano attivi finché mantieni l'account. Se lo cancelli, restano recuperabili per 30 giorni (periodo di grazia), poi vengono eliminati definitivamente, salvo obblighi fiscali (10 anni).</p>
+    <h3>I tuoi diritti</h3>
+    <p>Accesso, rettifica, cancellazione, limitazione, portabilità, opposizione, revoca del consenso: scrivi a gestione.equo@gmail.com. Hai diritto di reclamo al Garante Privacy (garanteprivacy.it).</p>
+    <h3>Minori</h3>
+    <p>Sotto i 14 anni serve l'autorizzazione di un genitore/tutore, dichiarata in fase di registrazione.</p>
+    <p class="legal-note">Versione completa: doc "Informativa Privacy" nel progetto Equo.</p>
+  `,
+  cookie: `
+    <h3>Cookie Policy</h3>
+    <h3>Cookie tecnici (nessun consenso richiesto)</h3>
+    <ul>
+      <li>Sessione di autenticazione (Supabase Auth)</li>
+      <li>Preferenza di consenso cookie (12 mesi)</li>
+      <li>Cookie di sicurezza/anti-frode</li>
+    </ul>
+    <h3>Cookie di analytics — Google Analytics (richiede consenso)</h3>
+    <p>Usiamo Google Analytics per statistiche d'uso aggregate. Non è un cookie tecnico: rientra tra i cookie di misurazione che richiedono il tuo consenso esplicito e preventivo (linee guida Garante Privacy 2021). Lo script si carica solo se scegli "Accetta" nel banner. Dati trattati anche da Google Ireland Ltd, con trasferimento extra-UE su base Clausole Contrattuali Standard. Durata: fino a 14 mesi.</p>
+    <h3>Come gestire il consenso</h3>
+    <p>Puoi cambiare scelta in qualsiasi momento da qui sotto.</p>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="reopenCookieBanner()">Rivedi la scelta sui cookie</button>
+    </div>
+    <p class="legal-note" style="margin-top:14px">Versione completa: doc "Cookie Policy" nel progetto Equo.</p>
+  `,
+  termini: `
+    <h3>Termini e Condizioni di Servizio</h3>
+    <p><strong>Fornitore</strong>: Lo Sportivo di Lucchini Simone — P.IVA IT17742111002 — gestione.equo@gmail.com</p>
+    <h3>Il servizio</h3>
+    <p>Equo comprende l'app proprietari (libretto sanitario, spese, chat, assistente AI), l'app professionisti e Equo Scuderia. Il servizio è fornito "così com'è" ed è in evoluzione continua.</p>
+    <h3>Account e minori</h3>
+    <p>Sei responsabile della riservatezza delle tue credenziali. Sotto i 14 anni serve l'autorizzazione di un genitore/tutore, dichiarata in registrazione.</p>
+    <h3>Piani, pagamento e disdetta</h3>
+    <p>I pagamenti sono gestiti da Stripe. Gli abbonamenti si rinnovano automaticamente salvo disdetta, sempre disponibile con un click dal menu ("Torna a Free"), con effetto dal rinnovo successivo. Se sei un consumatore, hai diritto di recesso entro 14 giorni dal primo acquisto (salvo utilizzo immediato del servizio digitale già iniziato).</p>
+    <h3>Cancellazione account</h3>
+    <p>Puoi chiedere la cancellazione in ogni momento. I dati restano recuperabili 30 giorni, poi vengono eliminati definitivamente.</p>
+    <h3>Assistente AI — limiti</h3>
+    <p>L'assistente (Claude API) fornisce supporto informativo e gestionale. Può commettere errori e <strong>non sostituisce il parere di un veterinario, maniscalco o altro professionista qualificato</strong>. Le operazioni sull'app richiedono sempre la tua conferma.</p>
+    <h3>Uso corretto</h3>
+    <p>Non usare Equo per contenuti illeciti, spam, o per accedere senza autorizzazione a dati di altri utenti.</p>
+    <h3>Legge applicabile</h3>
+    <p>Legge italiana. Per i consumatori, foro competente quello di residenza/domicilio; altrimenti Foro di Roma.</p>
+    <p class="legal-note">Versione completa: doc "Termini e Condizioni" nel progetto Equo.</p>
+  `,
+};
+
+function openLegalPage(tab){
+  document.getElementById("legal-body").innerHTML = LEGAL_CONTENT[tab] || "";
+  ["privacy","cookie","termini"].forEach(t => {
+    document.getElementById("legal-tab-" + t).classList.toggle("active", t === tab);
+  });
+  document.getElementById("legal-overlay").classList.add("active");
+  document.getElementById("legal-body").scrollTop = 0;
+}
+
+function closeLegalPage(){
+  document.getElementById("legal-overlay").classList.remove("active");
+}
+
+/* ---------- COOKIE CONSENT + GOOGLE ANALYTICS ----------
+   Nessuno script di tracciamento viene caricato finché l'utente non clicca "Accetta".
+   GA_MEASUREMENT_ID è un placeholder: va sostituito con l'ID reale (G-XXXXXXX) prima
+   che il tracciamento sia effettivo — finché resta un placeholder, acceptCookies()
+   salva comunque la preferenza ma non carica nulla. */
+const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
+
+function initCookieConsent(){
+  const consent = localStorage.getItem("equo-cookie-consent");
+  if(consent === "accepted") loadGoogleAnalytics();
+  else if(consent !== "rejected") document.getElementById("cookie-banner").classList.add("active");
+}
+
+function acceptCookies(){
+  localStorage.setItem("equo-cookie-consent", "accepted");
+  document.getElementById("cookie-banner").classList.remove("active");
+  loadGoogleAnalytics();
+}
+
+function rejectCookies(){
+  localStorage.setItem("equo-cookie-consent", "rejected");
+  document.getElementById("cookie-banner").classList.remove("active");
+}
+
+function reopenCookieBanner(){
+  closeLegalPage();
+  localStorage.removeItem("equo-cookie-consent");
+  document.getElementById("cookie-banner").classList.add("active");
+}
+
+let gaLoaded = false;
+function loadGoogleAnalytics(){
+  if(gaLoaded || !GA_MEASUREMENT_ID || GA_MEASUREMENT_ID.includes("XXXXXXXXXX")) return;
+  gaLoaded = true;
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_MEASUREMENT_ID;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag("js", new Date());
+  gtag("config", GA_MEASUREMENT_ID);
+}
+
 function formatEuro(n){
   return "€ " + (Number(n) || 0).toFixed(2);
 }
