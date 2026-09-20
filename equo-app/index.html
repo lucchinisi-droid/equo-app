@@ -1427,12 +1427,20 @@ select.input{cursor:pointer}
       Sblocchi cavalli/clienti illimitati, reminder automatici, AI con più messaggi e le altre funzioni Premium.
       Puoi tornare a Free in qualsiasi momento dal menu, con lo stesso numero di passaggi.
     </p>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
-      Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.
+    <div id="upgrade-demo-actions" style="display:none">
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
+        Attivazione istantanea in modalità demo — nessun pagamento reale.
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+        <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Conferma</button>
+      </div>
     </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
-      <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Richiedi l'attivazione</button>
+    <div id="upgrade-real-options" style="display:none;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" style="width:100%" onclick="startCheckout('mensile')" id="upgrade-btn-mensile">Mensile</button>
+      <button class="btn btn-outline" style="width:100%" onclick="startCheckout('annuale')" id="upgrade-btn-annuale">Annuale</button>
+      <button class="btn btn-outline" style="width:100%" onclick="startLifetimeCheckout()" id="upgrade-btn-lifetime">Lifetime</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
     </div>
   </div>
 </div>
@@ -2426,6 +2434,34 @@ async function boot(){
   }
   await enterApp(currentUser.ruolo);
   checkPendingDeletion();
+  await handleCheckoutReturn();
+}
+
+/* Al ritorno da Stripe Checkout (?checkout=success in URL) il webhook potrebbe
+   impiegare qualche istante ad aggiornare profiles.piano: aspettiamo un attimo e
+   ricontrolliamo, poi ripuliamo l'URL per non ritriggerare al refresh. */
+async function handleCheckoutReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get("checkout");
+  if(!checkout) return;
+  window.history.replaceState({}, "", window.location.pathname);
+  if(checkout === "cancel"){
+    showToast("Pagamento annullato.");
+    return;
+  }
+  if(checkout === "success"){
+    showToast("Pagamento ricevuto, aggiorniamo il tuo piano...");
+    await new Promise(r => setTimeout(r, 2000));
+    const { data: profile } = await sb.from("profiles").select("piano").eq("id", currentUser.id).maybeSingle();
+    if(profile?.piano === "premium"){
+      currentUser.piano = "premium";
+      updatePianoUI();
+      if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
+      showToast("Sei passato a Premium!");
+    } else {
+      showToast("Pagamento ricevuto, l'attivazione arriva a momenti — riapri l'app tra poco se non la vedi subito.");
+    }
+  }
 }
 
 /* ---------- GOOGLE SIGN-IN ---------- */
@@ -2909,10 +2945,25 @@ function isPremium(){
 }
 
 /* ---------- PIANO (Passa a Premium / Torna a Free) ----------
-   Stripe non è ancora collegato (vedi modal-add-payment): il pulsante aggiorna
-   direttamente profiles.piano, con lo stesso numero di passaggi in entrambe le
-   direzioni (un solo modale di conferma), come richiesto dall'art. 54-bis
-   Codice del Consumo su recesso/disdetta facile quanto la sottoscrizione. */
+   Stripe collegato: mensile/annuale passano da una vera Checkout Session, i lifetime
+   da un Payment Link diretto (con limite posti impostato su Stripe). "Torna a Free"
+   annulla davvero l'abbonamento su Stripe (cancel-subscription.js), non solo il flag
+   in app — obbligo di fatto per l'art. 54-bis Codice del Consumo su recesso/disdetta
+   facile quanto la sottoscrizione: altrimenti l'utente continuerebbe a pagare da Free. */
+const LIFETIME_LINKS = {
+  proprietario: "https://buy.stripe.com/00w4gB64fgRu0cbcrD6Na01",
+  professionista: "https://buy.stripe.com/9B6dRbgIT58Mf7577j6Na00",
+};
+const PREZZI_PREMIUM = {
+  proprietario: { mensile: "Mensile — 2,99€/mese", annuale: "Annuale — 19€/anno", lifetime: "Lifetime — 49€ una tantum" },
+  professionista: { mensile: "Mensile — 7,99€/mese", annuale: "Annuale — 59€/anno", lifetime: "Lifetime — 99€ una tantum" },
+};
+
+function currentPianoRuolo(){
+  const attiva = currentUser?.vistaAttiva || currentUser?.ruolo;
+  return PRO_ROLES.includes(attiva) ? "professionista" : "proprietario";
+}
+
 function updatePianoUI(){
   const label = document.getElementById("piano-label");
   const desc = document.getElementById("piano-desc");
@@ -2936,38 +2987,68 @@ function togglePiano(){
     openModal("modal-downgrade-free");
     return;
   }
-  // In demo il piano è solo per mostrare la UI: nessun rischio, si può attivare all'istante.
-  // Fuori demo Stripe non è ancora collegato, quindi non lasciamo che chiunque si scriva
-  // "premium" da solo sul database — l'attivazione passa da una richiesta manuale.
-  const note = document.getElementById("upgrade-premium-note");
-  const btn = document.getElementById("upgrade-premium-confirm-btn");
+  const demoBox = document.getElementById("upgrade-demo-actions");
+  const realBox = document.getElementById("upgrade-real-options");
   if(DEMO_MODE){
-    note.textContent = "Attivazione istantanea in modalità demo — nessun pagamento reale.";
-    btn.textContent = "Conferma";
+    demoBox.style.display = "block";
+    realBox.style.display = "none";
   } else {
-    note.textContent = "Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.";
-    btn.textContent = "Richiedi l'attivazione";
+    demoBox.style.display = "none";
+    realBox.style.display = "flex";
+    const prezzi = PREZZI_PREMIUM[currentPianoRuolo()];
+    document.getElementById("upgrade-btn-mensile").textContent = prezzi.mensile;
+    document.getElementById("upgrade-btn-annuale").textContent = prezzi.annuale;
+    document.getElementById("upgrade-btn-lifetime").textContent = prezzi.lifetime;
   }
   openModal("modal-upgrade-premium");
 }
 
+async function startCheckout(periodo){
+  try{
+    const res = await fetch("/.netlify/functions/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: currentUser.id, email: currentUser.email, piano: currentPianoRuolo(), periodo })
+    });
+    const data = await res.json();
+    if(data.url){ window.location.href = data.url; }
+    else { showToast("Non sono riuscito ad aprire il pagamento, riprova."); }
+  } catch(e){
+    showToast("Errore di connessione, riprova.");
+  }
+}
+
+function startLifetimeCheckout(){
+  window.location.href = LIFETIME_LINKS[currentPianoRuolo()];
+}
+
 async function confirmUpgradePremium(){
   closeModal("modal-upgrade-premium");
-  if(DEMO_MODE){
-    await setPiano("premium");
-    showToast("Sei passato a Premium! (demo)");
-    return;
-  }
-  const subject = encodeURIComponent("Richiesta attivazione Premium - Equo");
-  const body = encodeURIComponent("Ciao,\nvorrei attivare il piano Premium sul mio account Equo.\nEmail account: " + (currentUser?.email || ""));
-  window.location.href = "mailto:gestione.equo@gmail.com?subject=" + subject + "&body=" + body;
-  showToast("Ti abbiamo aperto l'email per la richiesta — ti rispondiamo il prima possibile.");
+  await setPiano("premium");
+  showToast("Sei passato a Premium! (demo)");
 }
 
 async function confirmDowngradeFree(){
   closeModal("modal-downgrade-free");
-  await setPiano("free");
-  showToast("Sei tornato al piano Free.");
+  if(DEMO_MODE){
+    await setPiano("free");
+    showToast("Sei tornato al piano Free.");
+    return;
+  }
+  try{
+    const res = await fetch("/.netlify/functions/cancel-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: currentUser.id })
+    });
+    if(!res.ok) throw new Error("cancel-subscription fallita");
+    currentUser.piano = "free";
+    updatePianoUI();
+    if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
+    showToast("Sei tornato al piano Free, abbonamento annullato.");
+  } catch(e){
+    showToast("Non sono riuscito ad annullare l'abbonamento, riprova o scrivici.");
+  }
 }
 
 async function setPiano(piano){

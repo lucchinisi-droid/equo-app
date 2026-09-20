@@ -1,7 +1,22 @@
-// SCHELETRO — non ancora collegato alla UI, price ID da definire quando decidiamo il piano Equo Pro.
-// Env richiesta: STRIPE_SECRET_KEY
+// Crea una Stripe Checkout Session per l'abbonamento Premium (mensile o annuale).
+// I lifetime NON passano da qui: hanno un Payment Link diretto con limite posti,
+// collegato lato client.
+//
+// Env richieste su Netlify: STRIPE_SECRET_KEY, STRIPE_PRICE_PROP_MENSILE,
+// STRIPE_PRICE_PROP_ANNUALE, STRIPE_PRICE_PRO_MENSILE, STRIPE_PRICE_PRO_ANNUALE
 
 const Stripe = require("stripe");
+
+const PRICE_MAP = {
+  proprietario: {
+    mensile: process.env.STRIPE_PRICE_PROP_MENSILE,
+    annuale: process.env.STRIPE_PRICE_PROP_ANNUALE,
+  },
+  professionista: {
+    mensile: process.env.STRIPE_PRICE_PRO_MENSILE,
+    annuale: process.env.STRIPE_PRICE_PRO_ANNUALE,
+  },
+};
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -9,17 +24,22 @@ exports.handler = async (event) => {
   }
 
   try {
-    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-    const { priceId, customerEmail } = JSON.parse(event.body || "{}");
-
+    const { userId, email, piano, periodo } = JSON.parse(event.body || "{}");
+    if (!userId || !email) {
+      return { statusCode: 400, body: JSON.stringify({ error: "userId o email mancanti" }) };
+    }
+    const priceId = PRICE_MAP[piano] && PRICE_MAP[piano][periodo];
     if (!priceId) {
-      return { statusCode: 400, body: JSON.stringify({ error: "priceId mancante" }) };
+      return { statusCode: 400, body: JSON.stringify({ error: "Combinazione piano/periodo non valida" }) };
     }
 
+    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: customerEmail,
+      customer_email: email,
+      client_reference_id: userId,
+      allow_promotion_codes: true,
       success_url: `${process.env.URL}/?checkout=success`,
       cancel_url: `${process.env.URL}/?checkout=cancel`,
     });

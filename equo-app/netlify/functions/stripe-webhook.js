@@ -1,5 +1,5 @@
-// SCHELETRO — non ancora collegato alla UI.
-// Env richiesta: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+// Riceve gli eventi Stripe e aggiorna profiles.piano di conseguenza.
+// Env richieste: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
 const Stripe = require("stripe");
 const { createClient } = require("@supabase/supabase-js");
@@ -20,18 +20,35 @@ exports.handler = async (event) => {
 
   try {
     switch (stripeEvent.type) {
-      case "checkout.session.completed":
-      case "customer.subscription.updated": {
+      // Checkout completato per un abbonamento mensile/annuale (i lifetime non passano
+      // da Checkout Session, sono Payment Link a parte, quindi non generano questo evento
+      // per Equo: se in futuro venissero mossi qui, mode sarebbe "payment" non "subscription").
+      case "checkout.session.completed": {
         const session = stripeEvent.data.object;
-        const email = session.customer_email || session.customer_details?.email;
-        if (email) {
-          await supabase.from("profiles").update({ plan: "pro" }).eq("email", email);
+        if (session.mode === "subscription") {
+          const userId = session.client_reference_id;
+          if (userId) {
+            await supabase
+              .from("profiles")
+              .update({
+                piano: "premium",
+                stripe_customer_id: session.customer || null,
+                stripe_subscription_id: session.subscription || null,
+              })
+              .eq("id", userId);
+          }
         }
         break;
       }
+      // Rete di sicurezza: se un abbonamento viene cancellato da Stripe (mancato pagamento
+      // dopo i retry, cancellazione fatta a mano dal Dashboard, ecc.) e non è passato dal
+      // nostro cancel-subscription.js, riportiamo comunque l'utente a Free.
       case "customer.subscription.deleted": {
         const sub = stripeEvent.data.object;
-        // TODO: risalire all'utente da sub.customer e riportarlo a plan "free".
+        await supabase
+          .from("profiles")
+          .update({ piano: "free", stripe_subscription_id: null })
+          .eq("stripe_subscription_id", sub.id);
         break;
       }
       default:
