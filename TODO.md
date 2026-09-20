@@ -58,7 +58,8 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Quando si acquista equohub.com: aggiornare dominio custom su Netlify (equo-land + equo-app), redirect URI OAuth Google, Authorized JavaScript origins, e URL di callback Supabase con il nuovo dominio
 - [x] **Stripe collegato davvero** (era skeleton non collegato): checkout reale mensile/annuale (proprietari + professionisti), Payment Link dedicati per i lifetime (150 posti prop, 50 posti pro, limite gestito nativamente da Stripe), webhook che attiva Premium, "Torna a Free" annulla davvero l'abbonamento su Stripe — commit 0be6ff1
   - [ ] **SQL da eseguire su Supabase**: `alter table profiles add column if not exists stripe_customer_id text; alter table profiles add column if not exists stripe_subscription_id text;`
-  - [ ] **Webhook Stripe da configurare**: Dashboard Stripe → Developers → Webhooks → aggiungi endpoint `https://app.equohub.com/.netlify/functions/stripe-webhook`, eventi `checkout.session.completed` e `customer.subscription.deleted` → copiare il Signing secret e impostarlo su Netlify come `STRIPE_WEBHOOK_SECRET`
+  - [x] Webhook Stripe configurato (`equo-app`, endpoint `https://app.equohub.com/.netlify/functions/stripe-webhook`, eventi `checkout.session.completed` + `customer.subscription.deleted`) e `STRIPE_WEBHOOK_SECRET` impostata su Netlify — confermato 20/09/2026
+  - [x] Verificato: nessuna imposta automatica su nessuno dei 6 prezzi/link — il cliente paga sempre esattamente il prezzo mostrato, IVA (se dovuta) già considerata inclusa
   - [ ] Account Stripe attualmente in modalità **Live** (non Test) — primi test di pagamento saranno reali, fare un acquisto di prova con importo minimo e poi rimborsarlo dalla dashboard Stripe
   - [ ] Verificare "Riscuoti le imposte automaticamente" (Stripe Tax) sui prodotti creati — se non configurato in Impostazioni → Tax potrebbe non calcolare l'IVA correttamente
 
