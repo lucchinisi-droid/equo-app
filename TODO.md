@@ -86,6 +86,18 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
   - Gemini Live/TTS usa lo stesso pacchetto di ~30 voci native (maschili/femminili) dell'app Gemini — nessuna differenza di qualità tra API e app
   - Nodo economico: audio in tempo reale costa molto più del testo — da gatare dietro Premium se implementato
 
+## 4ter. Gamification — percorso a punti e badge (idea definita, da sviluppare — non ora, richiede tempo)
+
+- [ ] **Percorso a 5 livelli con nome dal mondo equestre**, punti guadagnati con azioni reali nell'app (scheda cavallo completa, evento sanitario registrato in anticipo sulla scadenza, segnalazione maneggio, referral andato a buon fine, collegamento chat con un professionista, streak accessi settimanali):
+  1. **Puledro** — 50 pt — badge profilo (costo zero, ripetibile)
+  2. **Scudiero** — 120 pt — 50 messaggi AI extra (ripetibile)
+  3. **Cavaliere** — 250 pt — 200 messaggi AI extra oppure 15% sconto sul prossimo rinnovo mensile (ripetibile)
+  4. **Fantino** — 500 pt — 1 mese Premium gratis (**una tantum**, o max 1 volta ogni 6 mesi — NON ripetibile a piacere, altrimenti cannibalizza il ricavo abbonamenti)
+  5. **Purosangue** — 1000 pt — 1 mese Premium gratis + badge permanente visibile pubblicamente (chat/profilo) + 20% sconto a vita sul rinnovo annuale (**una tantum**)
+- [ ] Meccanica di riscatto: il badge raggiunto resta per sempre (bacheca trofei), al riscatto del premio l'utente sceglie tra "riparti da 0" (rifà lo stesso livello, solo per i livelli ripetibili 1-3) o "mantieni i punti e vai avanti" verso il livello successivo
+- [ ] Schema dati da definire: tabella livelli (statica), progresso utente (punti correnti + livello max raggiunto), storico riscatti (per audit/anti-abuso sui livelli una tantum)
+- [ ] **Non è priorità immediata** — rimandato a dopo il lancio, richiede tempo per essere sviluppato bene
+
 ## 5. Feature innovative (wow factor) — in ordine di priorità
 - [ ] **1. QR Code passaporto emergenza** — richiede ampliare la scheda cavallo: genera QR univoco per cavallo, pagina pubblica read-only (senza login) con allergie, vaccinazioni, gruppo sanguigno, contatti proprietario, scansionabile da un veterinario in emergenza
 - [ ] **2. Voice logging** — richiede creare nuova sezione "Diario Sanitario": nota vocale trascritta e strutturata via AI (Whisper/Claude), utile per loggare osservazioni a mani libere in scuderia
