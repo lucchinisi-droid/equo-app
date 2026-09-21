@@ -14,6 +14,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root {
   --bg:#0e2019; --surface:#14312a; --surface2:#1c3f35;
@@ -74,6 +76,8 @@ select.input{cursor:pointer}
 .btn-primary:hover{opacity:.85;transform:translateY(-1px)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.chip{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.active{background:var(--primary,#03491d);border-color:var(--primary,#03491d);color:#fff}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 .btn-ghost{background:transparent;color:var(--muted);font-size:13px}
 .btn-danger{background:rgba(226,104,95,.15);color:var(--red);border:1px solid rgba(226,104,95,.3)}
@@ -1378,6 +1382,21 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-services-map" onclick="closeOut(event,'modal-services-map')">
+  <div class="modal" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-map-location-dot"></i></span>Servizi vicino a te</div>
+    <div id="services-map-chips" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px">
+      <button class="chip active" data-tipo="tutti" onclick="filterServices('tutti')">Tutti</button>
+      <button class="chip" data-tipo="veterinario" onclick="filterServices('veterinario')">Veterinari</button>
+      <button class="chip" data-tipo="centro_ippico" onclick="filterServices('centro_ippico')">Centri ippici</button>
+      <button class="chip" data-tipo="negozio" onclick="filterServices('negozio')">Negozi</button>
+    </div>
+    <div id="services-map-canvas" style="height:220px;border-radius:14px;overflow:hidden;margin-bottom:12px"></div>
+    <div id="services-list"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1557,6 +1576,9 @@ const demoState = {
   ],
   altriProprietari: [
     { id: "demo-owner-2", full_name: "Giulia Verdi", avatar_url: null, codice_proprietario: "EQUO-OWN-DEMO" },
+  ],
+  services: [
+    { id: "ds-1", tipo: "veterinario", nome: "Clinica Veterinaria Equina Demo", indirizzo: "Via delle Scuderie 1", telefono: "0212345678", lat: 45.4642, lng: 9.19, note: "H24", fonte: "curato" },
   ],
   conversazioniProprietari: [
     { id: "co-1", proprietario_a_id: "demo-user", proprietario_b_id: "demo-owner-2", created_at: "2026-09-10T10:00:00" },
@@ -1905,6 +1927,11 @@ const DB = {
     if(DEMO_MODE) return { error: null };
     const { error } = await sb.from("profiles").update({ ai_msg_count: count, ai_msg_month: month }).eq("id", currentUser.id);
     return { error };
+  },
+  async listServices(){
+    if(DEMO_MODE) return demoState.services;
+    const { data, error } = await sb.from("services").select("*");
+    return error ? [] : (data || []);
   },
 };
 
@@ -4135,9 +4162,138 @@ async function confirmEventProposal(id, proposed){
   await loadDeadlines();
 }
 
-/* ---------- SERVICES MAP (placeholder) ---------- */
+/* ---------- SERVICES MAP ---------- */
+let servicesMapInstance = null;
+let servicesMapMarkers = [];
+let servicesAllData = [];
+let servicesUserPos = null;
+let servicesActiveFilter = "tutti";
+
+function haversineKm(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const SERVICE_TYPE_LABELS = { veterinario: "Veterinario", centro_ippico: "Centro ippico", negozio: "Negozio" };
+const SERVICE_TYPE_ICONS = { veterinario: "fa-stethoscope", centro_ippico: "fa-horse-head", negozio: "fa-store" };
+
+async function fetchOsmServices(lat, lng){
+  const query = `[out:json][timeout:15];(node["amenity"="veterinary"](around:15000,${lat},${lng});node["leisure"="horse_riding"](around:15000,${lat},${lng});node["sport"="equestrian"](around:15000,${lat},${lng});node["shop"="equestrian"](around:15000,${lat},${lng}););out center;`;
+  try{
+    const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(query) });
+    if(!res.ok) return [];
+    const json = await res.json();
+    return (json.elements || []).map(el => {
+      const tags = el.tags || {};
+      let tipo = "negozio";
+      if(tags.amenity === "veterinary") tipo = "veterinario";
+      else if(tags.leisure === "horse_riding" || tags.sport === "equestrian") tipo = "centro_ippico";
+      else if(tags.shop === "equestrian") tipo = "negozio";
+      return {
+        id: "osm-" + el.id,
+        tipo,
+        nome: tags.name || SERVICE_TYPE_LABELS[tipo],
+        indirizzo: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || null,
+        telefono: tags.phone || tags["contact:phone"] || null,
+        lat: el.lat, lng: el.lon,
+        fonte: "osm",
+      };
+    });
+  }catch(e){
+    return [];
+  }
+}
+
 function openServicesMap(){
-  alert("Mappa servizi in arrivo — cliniche 24h e maniscalchi vicino a te.");
+  openModal("modal-services-map");
+  servicesActiveFilter = "tutti";
+  document.getElementById("services-list").innerHTML = '<div class="loading"><div class="spinner"></div> Cerco i servizi vicino a te...</div>';
+  if(!navigator.geolocation){
+    document.getElementById("services-list").innerHTML = '<div class="empty-state">Il tuo browser non supporta la geolocalizzazione.</div>';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    servicesUserPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    await loadServicesData();
+  }, () => {
+    document.getElementById("services-list").innerHTML = '<div class="empty-state">Attiva la posizione per vedere i servizi vicino a te.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openServicesMap()">Riprova</button></div>';
+  }, { enableHighAccuracy: false, timeout: 8000 });
+}
+
+async function loadServicesData(){
+  const [osmData, curatedData] = await Promise.all([
+    fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng),
+    DB.listServices(),
+  ]);
+  const curated = (curatedData || []).map(s => ({ ...s, fonte: "curato" }));
+  servicesAllData = [...curated, ...osmData]
+    .map(s => ({ ...s, distanza: haversineKm(servicesUserPos.lat, servicesUserPos.lng, s.lat, s.lng) }))
+    .sort((a, b) => a.distanza - b.distanza);
+  initServicesMapView();
+  renderServicesList();
+}
+
+function initServicesMapView(){
+  const el = document.getElementById("services-map-canvas");
+  if(!el) return;
+  if(servicesMapInstance){ servicesMapInstance.remove(); servicesMapInstance = null; }
+  servicesMapInstance = L.map(el).setView([servicesUserPos.lat, servicesUserPos.lng], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(servicesMapInstance);
+  L.circleMarker([servicesUserPos.lat, servicesUserPos.lng], { radius: 7, color: "#03491d", fillColor: "#03491d", fillOpacity: 1 }).addTo(servicesMapInstance).bindPopup("Tu sei qui");
+  renderServicesMarkers();
+}
+
+function renderServicesMarkers(){
+  if(!servicesMapInstance) return;
+  servicesMapMarkers.forEach(m => servicesMapInstance.removeLayer(m));
+  servicesMapMarkers = [];
+  const filtered = servicesActiveFilter === "tutti" ? servicesAllData : servicesAllData.filter(s => s.tipo === servicesActiveFilter);
+  filtered.forEach(s => {
+    const marker = L.marker([s.lat, s.lng]).addTo(servicesMapInstance).bindPopup(`<b>${escapeHtml(s.nome)}</b><br>${SERVICE_TYPE_LABELS[s.tipo]}`);
+    marker.on("click", () => focusServiceOnMap(s.id));
+    servicesMapMarkers.push(marker);
+  });
+}
+
+function filterServices(tipo){
+  servicesActiveFilter = tipo;
+  document.querySelectorAll("#services-map-chips .chip").forEach(c => c.classList.toggle("active", c.dataset.tipo === tipo));
+  renderServicesMarkers();
+  renderServicesList();
+}
+
+function renderServicesList(){
+  const box = document.getElementById("services-list");
+  const filtered = servicesActiveFilter === "tutti" ? servicesAllData : servicesAllData.filter(s => s.tipo === servicesActiveFilter);
+  if(filtered.length === 0){
+    box.innerHTML = '<div class="empty-state">Nessun servizio trovato nella zona.</div>';
+    return;
+  }
+  box.innerHTML = filtered.map(s => `
+    <div class="inbox-item" id="service-item-${s.id}" onclick="focusServiceOnMap('${s.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div style="font-weight:600"><span class="fa-icon"><i class="fa-solid ${SERVICE_TYPE_ICONS[s.tipo]}"></i></span> ${escapeHtml(s.nome)}${s.fonte === "curato" ? ' <span title="Verificato da Equo">★</span>' : ""}</div>
+          <div class="muted" style="font-size:12px">${SERVICE_TYPE_LABELS[s.tipo]} · ${s.distanza.toFixed(1)} km${s.indirizzo ? " · " + escapeHtml(s.indirizzo) : ""}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
+        ${s.telefono ? `<a class="btn btn-outline btn-sm" href="tel:${s.telefono}"><span class="fa-icon"><i class="fa-solid fa-phone"></i></span> Chiama</a>` : ""}
+        <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener"><span class="fa-icon"><i class="fa-solid fa-diamond-turn-right"></i></span> Indicazioni</a>
+      </div>
+    </div>
+  `).join("");
+}
+
+function focusServiceOnMap(id){
+  const s = servicesAllData.find(x => x.id === id);
+  if(!s || !servicesMapInstance) return;
+  servicesMapInstance.setView([s.lat, s.lng], 15);
+  const marker = servicesMapMarkers.find(m => m.getLatLng().lat === s.lat && m.getLatLng().lng === s.lng);
+  if(marker) marker.openPopup();
 }
 
 /* ---------- HELPERS ---------- */
