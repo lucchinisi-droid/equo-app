@@ -162,6 +162,8 @@ select.input{cursor:pointer}
 
 .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.stat-card.gold{background:rgba(255,189,89,.14);border-color:rgba(255,189,89,.4)}
+.stat-card.gold .stat-label{color:var(--gold,#ffbd59)}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .stat-value{font-family:'Fraunces',serif;font-size:22px;font-weight:700}
 .note-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);
@@ -565,17 +567,17 @@ select.input{cursor:pointer}
       </div>
 
       <div class="stat-row">
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer" onclick="showPage('spese')">
           <div class="stat-label">Spese questo mese</div>
           <div class="stat-value" id="stat-expenses">€ 0</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Scadenze in arrivo</div>
-          <div class="stat-value" id="stat-deadlines">0</div>
+        <div class="stat-card gold" style="cursor:pointer" onclick="showPage('chat')">
+          <div class="stat-label">Ultimo messaggio</div>
+          <div class="stat-value" id="stat-last-message" style="font-size:13.5px;line-height:1.35;font-weight:600">Nessun messaggio</div>
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:14px">
+      <div class="card" style="margin-bottom:14px;cursor:pointer" onclick="showPage('cavalli')">
         <div class="section-title" style="font-size:16px;margin-bottom:8px">Prossime scadenze</div>
         <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
       </div>
@@ -619,7 +621,7 @@ select.input{cursor:pointer}
       <div class="card" style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-weight:700;font-size:14px">Libretto sanitario</div>
-          <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-event')">+ Evento</button>
+          <button class="btn btn-outline btn-sm" onclick="openAddEventModal()">+ Evento</button>
         </div>
         <div id="horse-events-list"><div class="muted" style="font-size:13px">Nessun evento registrato.</div></div>
       </div>
@@ -648,7 +650,7 @@ select.input{cursor:pointer}
   <div class="page-content" id="page-spese">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div class="section-title" style="margin-bottom:0">Registro spese</div>
-      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-expense')">+ Spesa</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddExpenseModal()">+ Spesa</button>
     </div>
     <div class="card" style="margin-bottom:14px">
       <div class="stat-label">Totale questo mese</div>
@@ -1014,7 +1016,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-intervento" onclick="closeOut(event,'modal-add-intervento')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Segna intervento fatto</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="modal-add-intervento-title">Segna intervento fatto</span></div>
     <div class="auth-form">
       <div class="input-group" id="intervento-cliente-group">
         <label class="input-label">Cliente</label>
@@ -1053,7 +1055,8 @@ select.input{cursor:pointer}
         <input class="input" id="intervento-note" placeholder="es. dettagli lavoro">
       </div>
       <div class="auth-error" id="intervento-error" style="display:none"></div>
-      <button class="btn btn-primary" onclick="createInterventoMascalcia()" style="width:100%;margin-top:6px">Salva intervento</button>
+      <button class="btn btn-primary" onclick="saveInterventoMascalcia()" style="width:100%;margin-top:6px">Salva intervento</button>
+      <button class="btn btn-danger" id="intervento-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteInterventoFromModal()">Elimina intervento</button>
     </div>
   </div>
 </div>
@@ -1061,7 +1064,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-event" onclick="closeOut(event,'modal-add-event')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Nuovo evento sanitario</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="modal-add-event-title">Nuovo evento sanitario</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Tipo</label>
@@ -1084,7 +1087,8 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="event-notes" placeholder="es. Dr. Rossi">
       </div>
-      <button class="btn btn-primary" onclick="createHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
+      <button class="btn btn-primary" onclick="saveHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
+      <button class="btn btn-danger" id="event-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteHorseEventFromModal()">Elimina evento</button>
     </div>
   </div>
 </div>
@@ -1092,7 +1096,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-expense" onclick="closeOut(event,'modal-add-expense')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span>Nuova spesa</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span><span id="modal-add-expense-title">Nuova spesa</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Categoria</label>
@@ -1117,7 +1121,8 @@ select.input{cursor:pointer}
         <label class="input-label">Nota (opzionale)</label>
         <input class="input" id="expense-notes" placeholder="es. Mangime mensile">
       </div>
-      <button class="btn btn-primary" onclick="createExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
+      <button class="btn btn-primary" onclick="saveExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
+      <button class="btn btn-danger" id="expense-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteExpenseFromModal()">Elimina spesa</button>
     </div>
   </div>
 </div>
@@ -1125,7 +1130,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-lezione" onclick="closeOut(event,'modal-add-lezione')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span>Nuova lezione</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span><span id="modal-add-lezione-title">Nuova lezione</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Cavallo</label>
@@ -1148,7 +1153,8 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="lezione-note" placeholder="es. con l'istruttore Luca">
       </div>
-      <button class="btn btn-primary" onclick="createLezione()" style="width:100%;margin-top:6px">Salva lezione</button>
+      <button class="btn btn-primary" onclick="saveLezione()" style="width:100%;margin-top:6px">Salva lezione</button>
+      <button class="btn btn-danger" id="lezione-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteLezioneFromModal()">Elimina lezione</button>
     </div>
   </div>
 </div>
@@ -1156,6 +1162,9 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-menu" onclick="closeOut(event,'modal-menu')">
   <div class="modal">
     <div class="modal-handle"></div>
+    <button class="btn btn-outline btn-sm" onclick="closeModal('modal-menu')" style="position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:14px;padding:6px 10px;z-index:50;background:var(--bg)">
+      <span class="fa-icon"><i class="fa-solid fa-xmark"></i></span>
+    </button>
 
     <div class="menu-profile">
       <div class="menu-profile-avatar-wrap" onclick="document.getElementById('avatar-file-input').click()">
@@ -1598,6 +1607,12 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let horses = [];
 let currentHorseId = null;
+let editingEventId = null;
+let editingExpenseId = null;
+let editingLezioneId = null;
+let currentHorseEventsData = [];
+let currentExpensesData = [];
+let currentLezioniData = [];
 let authMode = "login";
 
 /* ---------- DEMO MODE ----------
@@ -1688,6 +1703,23 @@ const DB = {
     const { error } = await sb.from("health_events").insert({ horse_id, type, date, next_due_date, notes });
     return { error };
   },
+  async updateEvent(id, { horse_id, type, date, next_due_date, notes }){
+    if(DEMO_MODE){
+      const list = demoState.events[horse_id] || [];
+      const ev = list.find(e => e.id === id);
+      if(ev){ Object.assign(ev, { type, date, next_due_date, notes }); }
+      return { error: null };
+    }
+    const { error } = await sb.from("health_events").update({ type, date, next_due_date, notes }).eq("id", id);
+    return { error };
+  },
+  async deleteEvent(id, horse_id){
+    if(DEMO_MODE){
+      demoState.events[horse_id] = (demoState.events[horse_id] || []).filter(e => e.id !== id);
+      return;
+    }
+    await sb.from("health_events").delete().eq("id", id);
+  },
   async listUpcomingDeadlines(horseIds, limit){
     if(DEMO_MODE){
       const all = [];
@@ -1718,6 +1750,25 @@ const DB = {
     const { error } = await sb.from("expenses").insert({ owner_id: currentUser.id, horse_id, category, amount, date, notes });
     return { error };
   },
+  async updateExpense(id, { horse_id, category, amount, date, notes }){
+    if(DEMO_MODE){
+      const exp = demoState.expenses.find(e => e.id === id);
+      if(exp){
+        const horse = demoState.horses.find(h => h.id === horse_id);
+        Object.assign(exp, { horse_id, horse_name: horse?.name || "", category, amount, date, notes });
+      }
+      return { error: null };
+    }
+    const { error } = await sb.from("expenses").update({ horse_id, category, amount, date, notes }).eq("id", id);
+    return { error };
+  },
+  async deleteExpense(id){
+    if(DEMO_MODE){
+      demoState.expenses = demoState.expenses.filter(e => e.id !== id);
+      return;
+    }
+    await sb.from("expenses").delete().eq("id", id);
+  },
   async listLezioni(){
     if(DEMO_MODE) return demoState.lezioniManuali.slice().sort((a,b) => new Date(b.data) - new Date(a.data)).map(l => ({ ...l, horses: { name: (demoState.horses.find(h => h.id === l.horse_id) || {}).name } }));
     const { data, error } = await sb.from("lezioni_manuali").select("*, horses(name)").eq("owner_id", currentUser.id).order("data", { ascending: false });
@@ -1730,6 +1781,22 @@ const DB = {
     }
     const { error } = await sb.from("lezioni_manuali").insert({ owner_id: currentUser.id, horse_id, data, tipo, note });
     return { error };
+  },
+  async updateLezione(id, { horse_id, data, tipo, note }){
+    if(DEMO_MODE){
+      const l = demoState.lezioniManuali.find(x => x.id === id);
+      if(l) Object.assign(l, { horse_id, data, tipo, note });
+      return { error: null };
+    }
+    const { error } = await sb.from("lezioni_manuali").update({ horse_id, data, tipo, note }).eq("id", id);
+    return { error };
+  },
+  async deleteLezione(id){
+    if(DEMO_MODE){
+      demoState.lezioniManuali = demoState.lezioniManuali.filter(l => l.id !== id);
+      return;
+    }
+    await sb.from("lezioni_manuali").delete().eq("id", id);
   },
   /* -- Chat tra proprietari -- */
   async findProprietarioByCodice(codice){
@@ -1873,6 +1940,22 @@ const DB = {
     }
     const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
     return { error };
+  },
+  async updateInterventoMascalcia(id, { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note }){
+    if(DEMO_MODE){
+      const i = demoState.interventiMascalcia.find(x => x.id === id);
+      if(i) Object.assign(i, { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
+      return { error: null };
+    }
+    const { error } = await sb.from("interventi_mascalcia").update({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note }).eq("id", id);
+    return { error };
+  },
+  async deleteInterventoMascalcia(id){
+    if(DEMO_MODE){
+      demoState.interventiMascalcia = demoState.interventiMascalcia.filter(i => i.id !== id);
+      return;
+    }
+    await sb.from("interventi_mascalcia").delete().eq("id", id);
   },
   async listInterventiMascalciaTutti(){
     if(DEMO_MODE){
@@ -2730,6 +2813,23 @@ function renderHome(){
   document.getElementById("topbar-context").textContent = horses.length === 1 ? horses[0].name : horses.length + " cavalli";
   loadDeadlines();
   loadExpensesSummary();
+  loadUltimoMessaggio();
+}
+
+async function loadUltimoMessaggio(){
+  const el = document.getElementById("stat-last-message");
+  if(!el) return;
+  const conversazioni = await DB.listConversazioniProprietario();
+  const c = conversazioni && conversazioni[0];
+  if(!c || !c.ultimoMessaggio){
+    el.textContent = "Nessun messaggio";
+    return;
+  }
+  const m = c.ultimoMessaggio;
+  const nome = c.altro?.full_name || "Utente";
+  let body = m.tipo === "audio" ? "Nota vocale" : m.tipo === "foto" ? "Foto" : m.tipo === "video" ? "Video" : (m.testo || "");
+  if(body.length > 34) body = body.slice(0, 34) + "…";
+  el.textContent = nome + ": " + body;
 }
 
 function renderHorsesList(){
@@ -2794,12 +2894,13 @@ async function loadHorseEvents(horseId){
   const box = document.getElementById("horse-events-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listEvents(horseId);
+  currentHorseEventsData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun evento registrato.</div>';
     return;
   }
   box.innerHTML = data.map(ev => `
-    <div class="event-item">
+    <div class="event-item" style="cursor:pointer" onclick="openEditEventModal('${ev.id}')">
       <div>
         <div style="font-weight:600;font-size:14px">${EVENT_LABELS[ev.type] || ev.type}</div>
         <div class="muted" style="font-size:12px">${formatDate(ev.date)}${ev.notes ? " · " + escapeHtml(ev.notes) : ""}</div>
@@ -2809,18 +2910,50 @@ async function loadHorseEvents(horseId){
   `).join("");
 }
 
-async function createHorseEvent(){
+function openAddEventModal(){
+  editingEventId = null;
+  document.getElementById("modal-add-event-title").textContent = "Nuovo evento sanitario";
+  document.getElementById("event-type").value = "vaccino";
+  document.getElementById("event-date").value = "";
+  document.getElementById("event-next-date").value = "";
+  document.getElementById("event-notes").value = "";
+  document.getElementById("event-delete-btn").style.display = "none";
+  openModal("modal-add-event");
+}
+function openEditEventModal(id){
+  const ev = currentHorseEventsData.find(e => e.id === id);
+  if(!ev) return;
+  editingEventId = id;
+  document.getElementById("modal-add-event-title").textContent = "Modifica evento";
+  document.getElementById("event-type").value = ev.type;
+  document.getElementById("event-date").value = ev.date;
+  document.getElementById("event-next-date").value = ev.next_due_date || "";
+  document.getElementById("event-notes").value = ev.notes || "";
+  document.getElementById("event-delete-btn").style.display = "block";
+  openModal("modal-add-event");
+}
+async function deleteHorseEventFromModal(){
+  if(!editingEventId) return;
+  if(!confirm("Eliminare questo evento?")) return;
+  await DB.deleteEvent(editingEventId, currentHorseId);
+  editingEventId = null;
+  closeModal("modal-add-event");
+  await loadHorseEvents(currentHorseId);
+}
+async function saveHorseEvent(){
   if(!currentHorseId) return;
   const type = document.getElementById("event-type").value;
   const date = document.getElementById("event-date").value;
   const next_due_date = document.getElementById("event-next-date").value || null;
   const notes = document.getElementById("event-notes").value.trim();
   if(!date) return;
-  const { error } = await DB.insertEvent({ horse_id: currentHorseId, type, date, next_due_date, notes });
+  const payload = { horse_id: currentHorseId, type, date, next_due_date, notes };
+  const { error } = editingEventId ? await DB.updateEvent(editingEventId, payload) : await DB.insertEvent(payload);
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("event-date").value = "";
   document.getElementById("event-next-date").value = "";
   document.getElementById("event-notes").value = "";
+  editingEventId = null;
   closeModal("modal-add-event");
   await loadHorseEvents(currentHorseId);
 }
@@ -2839,10 +2972,8 @@ async function loadDeadlines(){
   const data = await DB.listUpcomingDeadlines(horseIds, 5);
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>';
-    document.getElementById("stat-deadlines").textContent = "0";
     return;
   }
-  document.getElementById("stat-deadlines").textContent = data.filter(d => (new Date(d.next_due_date) - new Date())/86400000 < 30).length;
   box.innerHTML = data.map(d => `
     <div class="deadline-item">
       <div class="deadline-dot ${deadlineBadgeClass(d.next_due_date) === 'badge-red' ? 'late' : deadlineBadgeClass(d.next_due_date) === 'badge-accent' ? 'soon' : 'ok'}"></div>
@@ -2881,12 +3012,13 @@ async function loadLezioni(){
   const box = document.getElementById("lezioni-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listLezioni();
+  currentLezioniData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>Nessuna lezione registrata. Aggiungine una per iniziare.</div>';
     return;
   }
   box.innerHTML = data.map(l => `
-    <div class="event-item">
+    <div class="event-item" style="cursor:pointer" onclick="openEditLezioneModal('${l.id}')">
       <div>
         <div style="font-weight:600;font-size:14px">${LEZIONE_TIPO_LABELS[l.tipo] || l.tipo}${l.horses?.name ? " · " + escapeHtml(l.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(l.data)}${l.note ? " · " + escapeHtml(l.note) : ""}</div>
@@ -2895,27 +3027,55 @@ async function loadLezioni(){
   `).join("");
 }
 
-function openAddLezioneModal(){
+function fillLezioneCavalloSelect(){
   const sel = document.getElementById("lezione-cavallo");
   if(horses.length === 0){
     sel.innerHTML = '<option value="">Nessun cavallo</option>';
   } else {
     sel.innerHTML = horses.map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join("");
   }
+}
+function openAddLezioneModal(){
+  editingLezioneId = null;
+  document.getElementById("modal-add-lezione-title").textContent = "Nuova lezione";
+  fillLezioneCavalloSelect();
   document.getElementById("lezione-tipo").value = "lezione";
   document.getElementById("lezione-data").value = "";
   document.getElementById("lezione-note").value = "";
+  document.getElementById("lezione-delete-btn").style.display = "none";
   openModal("modal-add-lezione");
 }
-
-async function createLezione(){
+function openEditLezioneModal(id){
+  const l = currentLezioniData.find(x => x.id === id);
+  if(!l) return;
+  editingLezioneId = id;
+  document.getElementById("modal-add-lezione-title").textContent = "Modifica lezione";
+  fillLezioneCavalloSelect();
+  document.getElementById("lezione-cavallo").value = l.horse_id || "";
+  document.getElementById("lezione-tipo").value = l.tipo;
+  document.getElementById("lezione-data").value = l.data;
+  document.getElementById("lezione-note").value = l.note || "";
+  document.getElementById("lezione-delete-btn").style.display = "block";
+  openModal("modal-add-lezione");
+}
+async function deleteLezioneFromModal(){
+  if(!editingLezioneId) return;
+  if(!confirm("Eliminare questa lezione?")) return;
+  await DB.deleteLezione(editingLezioneId);
+  editingLezioneId = null;
+  closeModal("modal-add-lezione");
+  await loadLezioni();
+}
+async function saveLezione(){
   const horse_id = document.getElementById("lezione-cavallo").value || null;
   const tipo = document.getElementById("lezione-tipo").value;
   const data = document.getElementById("lezione-data").value;
   const note = document.getElementById("lezione-note").value.trim();
   if(!data) return;
-  const { error } = await DB.insertLezione({ horse_id, data, tipo, note });
+  const payload = { horse_id, data, tipo, note };
+  const { error } = editingLezioneId ? await DB.updateLezione(editingLezioneId, payload) : await DB.insertLezione(payload);
   if(error){ alert("Errore: " + error.message); return; }
+  editingLezioneId = null;
   closeModal("modal-add-lezione");
   await loadLezioni();
 }
@@ -2924,6 +3084,8 @@ async function createLezione(){
 let clientiMascalcia = [];
 let proUnreadTotal = 0;
 let currentClienteId = null;
+let editingInterventoId = null;
+let currentClienteInterventiData = [];
 const TIPO_FERRATURA_LABELS = { ferro: "Ferratura a ferro", scalzatura: "Scalzatura", ortopedica: "Ferratura ortopedica", altro: "Altro" };
 const TIPO_FERRATURA_INTERVALLI = { ferro: 42, scalzatura: 56, ortopedica: 35 }; // giorni alla prossima scadenza
 
@@ -3006,12 +3168,13 @@ async function loadClienteInterventi(clienteId){
   const box = document.getElementById("cliente-interventi-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listInterventiMascalcia(clienteId);
+  currentClienteInterventiData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun intervento registrato.</div>';
     return;
   }
   box.innerHTML = data.map(i => `
-    <div class="event-item">
+    <div class="event-item" style="cursor:pointer" onclick="openEditInterventoModal('${i.id}')">
       <div>
         <div style="font-weight:600;font-size:14px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
@@ -3019,6 +3182,36 @@ async function loadClienteInterventi(clienteId){
       <span class="badge ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
     </div>
   `).join("");
+}
+function openEditInterventoModal(id){
+  const i = currentClienteInterventiData.find(x => x.id === id);
+  if(!i) return;
+  editingInterventoId = id;
+  document.getElementById("modal-add-intervento-title").textContent = "Modifica intervento";
+  const select = document.getElementById("intervento-cliente-select");
+  select.innerHTML = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
+  select.value = i.cliente_mascalcia_id;
+  document.getElementById("intervento-cliente-group").style.display = "none";
+  document.getElementById("intervento-tipo").value = i.tipo_ferratura;
+  document.getElementById("intervento-tipo-altro-group").style.display = i.tipo_ferratura === "altro" ? "flex" : "none";
+  document.getElementById("intervento-tipo-altro").value = i.tipo_altro || "";
+  document.getElementById("intervento-data").value = i.data_intervento;
+  document.getElementById("intervento-importo").value = i.importo || "";
+  document.getElementById("intervento-pagamento").value = i.stato_pagamento;
+  document.getElementById("intervento-note").value = i.note || "";
+  document.getElementById("intervento-error").style.display = "none";
+  document.getElementById("intervento-delete-btn").style.display = "block";
+  openModal("modal-add-intervento");
+}
+async function deleteInterventoFromModal(){
+  if(!editingInterventoId) return;
+  if(!confirm("Eliminare questo intervento?")) return;
+  await DB.deleteInterventoMascalcia(editingInterventoId);
+  editingInterventoId = null;
+  closeModal("modal-add-intervento");
+  if(currentClienteId) await loadClienteInterventi(currentClienteId);
+  await renderProDeadlines();
+  await renderIncassi();
 }
 
 async function renderProDeadlines(){
@@ -3372,6 +3565,9 @@ function openInterventoModal(clienteId){
     showPage("pro-clienti");
     return;
   }
+  editingInterventoId = null;
+  document.getElementById("modal-add-intervento-title").textContent = "Segna intervento fatto";
+  document.getElementById("intervento-delete-btn").style.display = "none";
   const select = document.getElementById("intervento-cliente-select");
   select.innerHTML = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
   const group = document.getElementById("intervento-cliente-group");
@@ -3392,7 +3588,7 @@ function openInterventoModal(clienteId){
   openModal("modal-add-intervento");
 }
 
-async function createInterventoMascalcia(){
+async function saveInterventoMascalcia(){
   const errBox = document.getElementById("intervento-error");
   errBox.style.display = "none";
   const cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
@@ -3414,14 +3610,16 @@ async function createInterventoMascalcia(){
     d.setDate(d.getDate() + TIPO_FERRATURA_INTERVALLI[tipo_ferratura]);
     prossima_scadenza = d.toISOString().slice(0, 10);
   }
-  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
+  const payload = { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note };
+  const { error } = editingInterventoId ? await DB.updateInterventoMascalcia(editingInterventoId, payload) : await DB.insertInterventoMascalcia(payload);
   if(error){
     errBox.textContent = "Errore: " + error.message;
     errBox.style.display = "block";
     return;
   }
+  editingInterventoId = null;
   closeModal("modal-add-intervento");
-  showToast("Intervento registrato!");
+  showToast("Intervento salvato!");
   await renderProDeadlines();
   await renderIncassi();
   if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
@@ -4023,6 +4221,7 @@ async function loadExpenses(){
   const box = document.getElementById("expenses-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listExpenses();
+  currentExpensesData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-wallet"/></svg></div>Nessuna spesa registrata.</div>';
     document.getElementById("expenses-month-total").textContent = "€ 0";
@@ -4032,7 +4231,7 @@ async function loadExpenses(){
   const monthTotal = data.filter(e => new Date(e.date) >= startOfMonth).reduce((s,e)=>s+Number(e.amount||0),0);
   document.getElementById("expenses-month-total").textContent = "€ " + monthTotal.toFixed(2);
   box.innerHTML = data.map(e => `
-    <div class="event-item">
+    <div class="event-item" style="cursor:pointer" onclick="openEditExpenseModal('${e.id}')">
       <div>
         <div style="font-weight:600;font-size:14px;text-transform:capitalize">${escapeHtml(e.category)}${e.horses?.name ? " · " + escapeHtml(e.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(e.date)}${e.notes ? " · " + escapeHtml(e.notes) : ""}</div>
@@ -4042,18 +4241,52 @@ async function loadExpenses(){
   `).join("");
 }
 
-async function createExpense(){
+function openAddExpenseModal(){
+  editingExpenseId = null;
+  document.getElementById("modal-add-expense-title").textContent = "Nuova spesa";
+  document.getElementById("expense-category").value = "pensione";
+  document.getElementById("expense-amount").value = "";
+  document.getElementById("expense-date").value = "";
+  document.getElementById("expense-notes").value = "";
+  document.getElementById("expense-delete-btn").style.display = "none";
+  openModal("modal-add-expense");
+}
+function openEditExpenseModal(id){
+  const e = currentExpensesData.find(x => x.id === id);
+  if(!e) return;
+  editingExpenseId = id;
+  document.getElementById("modal-add-expense-title").textContent = "Modifica spesa";
+  document.getElementById("expense-category").value = e.category;
+  document.getElementById("expense-amount").value = e.amount;
+  document.getElementById("expense-date").value = e.date;
+  document.getElementById("expense-notes").value = e.notes || "";
+  document.getElementById("expense-delete-btn").style.display = "block";
+  openModal("modal-add-expense");
+}
+async function deleteExpenseFromModal(){
+  if(!editingExpenseId) return;
+  if(!confirm("Eliminare questa spesa?")) return;
+  await DB.deleteExpense(editingExpenseId);
+  editingExpenseId = null;
+  closeModal("modal-add-expense");
+  await loadExpenses();
+  await loadExpensesSummary();
+}
+async function saveExpense(){
   const category = document.getElementById("expense-category").value;
   const amount = parseFloat(document.getElementById("expense-amount").value);
   const date = document.getElementById("expense-date").value;
   const notes = document.getElementById("expense-notes").value.trim();
   if(!amount || !date) return;
-  const horse_id = currentHorseId || (horses[0] ? horses[0].id : null);
-  const { error } = await DB.insertExpense({ horse_id, category, amount, date, notes });
+  const existing = editingExpenseId ? currentExpensesData.find(x => x.id === editingExpenseId) : null;
+  const horse_id = existing ? existing.horse_id : (currentHorseId || (horses[0] ? horses[0].id : null));
+  const payload = { horse_id, category, amount, date, notes };
+  const { error } = editingExpenseId ? await DB.updateExpense(editingExpenseId, payload) : await DB.insertExpense(payload);
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("expense-amount").value = "";
   document.getElementById("expense-date").value = "";
   document.getElementById("expense-notes").value = "";
+  editingExpenseId = null;
   closeModal("modal-add-expense");
   await loadExpenses();
   await loadExpensesSummary();
@@ -4237,31 +4470,27 @@ function haversineKm(lat1, lng1, lat2, lng2){
 const SERVICE_TYPE_LABELS = { veterinario: "Veterinario", centro_ippico: "Centro ippico", negozio: "Negozio" };
 const SERVICE_TYPE_ICONS = { veterinario: "fa-stethoscope", centro_ippico: "fa-horse-head", negozio: "fa-store" };
 
-async function fetchOsmServices(lat, lng){
-  const query = `[out:json][timeout:15];(node["amenity"="veterinary"](around:15000,${lat},${lng});node["leisure"="horse_riding"](around:15000,${lat},${lng});node["sport"="equestrian"](around:15000,${lat},${lng});node["shop"="equestrian"](around:15000,${lat},${lng}););out center;`;
-  try{
-    const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(query) });
-    if(!res.ok) return [];
-    const json = await res.json();
-    return (json.elements || []).map(el => {
-      const tags = el.tags || {};
-      let tipo = "negozio";
-      if(tags.amenity === "veterinary") tipo = "veterinario";
-      else if(tags.leisure === "horse_riding" || tags.sport === "equestrian") tipo = "centro_ippico";
-      else if(tags.shop === "equestrian") tipo = "negozio";
-      return {
-        id: "osm-" + el.id,
-        tipo,
-        nome: tags.name || SERVICE_TYPE_LABELS[tipo],
-        indirizzo: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || null,
-        telefono: tags.phone || tags["contact:phone"] || null,
-        lat: el.lat, lng: el.lon,
-        fonte: "osm",
-      };
-    });
-  }catch(e){
-    return [];
-  }
+async function fetchOsmServices(lat, lng, radiusM){
+  const query = `[out:json][timeout:20];(node["amenity"="veterinary"](around:${radiusM},${lat},${lng});node["leisure"="horse_riding"](around:${radiusM},${lat},${lng});node["sport"="equestrian"](around:${radiusM},${lat},${lng});node["shop"="equestrian"](around:${radiusM},${lat},${lng}););out center;`;
+  const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(query) });
+  if(!res.ok) throw new Error("overpass_http_" + res.status);
+  const json = await res.json();
+  return (json.elements || []).map(el => {
+    const tags = el.tags || {};
+    let tipo = "negozio";
+    if(tags.amenity === "veterinary") tipo = "veterinario";
+    else if(tags.leisure === "horse_riding" || tags.sport === "equestrian") tipo = "centro_ippico";
+    else if(tags.shop === "equestrian") tipo = "negozio";
+    return {
+      id: "osm-" + el.id,
+      tipo,
+      nome: tags.name || SERVICE_TYPE_LABELS[tipo],
+      indirizzo: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || null,
+      telefono: tags.phone || tags["contact:phone"] || null,
+      lat: el.lat, lng: el.lon,
+      fonte: "osm",
+    };
+  });
 }
 
 function openServicesMap(){
@@ -4281,15 +4510,32 @@ function openServicesMap(){
 }
 
 async function loadServicesData(){
-  const [osmData, curatedData] = await Promise.all([
-    fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng),
-    DB.listServices(),
-  ]);
+  document.getElementById("services-list").innerHTML = '<div class="loading"><div class="spinner"></div> Cerco i servizi vicino a te...</div>';
+  let osmData = [];
+  let curatedData = [];
+  let osmError = false;
+  try{
+    [osmData, curatedData] = await Promise.all([
+      fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng, 15000),
+      DB.listServices(),
+    ]);
+    if(osmData.length === 0){
+      // niente entro 15km: prova un raggio più ampio prima di arrenderti
+      osmData = await fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng, 40000);
+    }
+  }catch(e){
+    osmError = true;
+    curatedData = await DB.listServices().catch(() => []);
+  }
   const curated = (curatedData || []).map(s => ({ ...s, fonte: "curato" }));
   servicesAllData = [...curated, ...osmData]
     .map(s => ({ ...s, distanza: haversineKm(servicesUserPos.lat, servicesUserPos.lng, s.lat, s.lng) }))
     .sort((a, b) => a.distanza - b.distanza);
   initServicesMapView();
+  if(servicesAllData.length === 0 && osmError){
+    document.getElementById("services-list").innerHTML = '<div class="empty-state">Errore di connessione durante la ricerca. Riprova.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="loadServicesData()">Riprova</button></div>';
+    return;
+  }
   renderServicesList();
 }
 

@@ -71,6 +71,7 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [ ] Analytics base (Plausible o simile)
 - [x] Mappa servizi vicino a te implementata (OSM live + tabella `services` curata) — manca solo il seed iniziale, vedi SQL da eseguire su Supabase
 - [ ] Seed iniziale tabella `services` (cliniche 24h, maneggi, negozi) — almeno la tua zona, inserimento manuale via Supabase dashboard
+- [ ] **Idea futura — fallback Google Places API** se OSM continua a dare pochi risultati in molte zone: chiamare Google Places (Nearby Search) SOLO quando OSM restituisce zero risultati anche a raggio ampio, per non far scalare il costo con gli utenti free. A settembre 2026 il pricing è: 5.000 chiamate gratuite/mese, poi 32$/1.000 chiamate — richiede API key + fatturazione attiva su Google Cloud + chiamata via Netlify Function (mai client-side). Non prioritario ora, valutare se il fallback raggio-ampio su OSM non basta.
 - [ ] Onboarding primo utente
 - [ ] Test su dispositivi reali (iPad e Mac mini)
 - [ ] Gestione/controllo email raccolte dalla waitlist (to-do aperto)
