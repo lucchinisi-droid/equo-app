@@ -69,7 +69,8 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
 - [x] **Privacy & Cookie (equo-app + equo-scuderia)**: Privacy Policy, Cookie Policy, Termini di Servizio, cookie banner, diritto di cancellazione account — vedi sezione 2 sopra e doc `claude/equo-normativa-privacy.md`
   - [ ] Cookie banner su equo-land (landing) — non ancora fatto, solo su equo-app/equo-scuderia finora
 - [ ] Analytics base (Plausible o simile)
-- [ ] Seed iniziale tabella `services`/mappa (cliniche 24h, maneggi) — almeno la tua zona
+- [x] Mappa servizi vicino a te implementata (OSM live + tabella `services` curata) — manca solo il seed iniziale, vedi SQL da eseguire su Supabase
+- [ ] Seed iniziale tabella `services` (cliniche 24h, maneggi, negozi) — almeno la tua zona, inserimento manuale via Supabase dashboard
 - [ ] Onboarding primo utente
 - [ ] Test su dispositivi reali (iPad e Mac mini)
 - [ ] Gestione/controllo email raccolte dalla waitlist (to-do aperto)
