@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
 <style>
 :root {
   --bg:#0e2019; --surface:#14312a; --surface2:#1c3f35;
@@ -572,7 +573,7 @@ select.input{cursor:pointer}
       <div id="owner-chat-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
     <div class="muted" style="font-size:12px;line-height:1.6;margin-top:14px;text-align:center">
-      Per chattare con un altro proprietario ti serve il suo codice — trovi il tuo in "Il tuo codice per la chat" nel menu profilo.
+      Per chattare con un altro utente ti serve il suo codice (o inquadra il suo QR) — trovi il tuo in "Il tuo codice per la chat" nel menu profilo.
     </div>
   </div>
 
@@ -767,7 +768,14 @@ select.input{cursor:pointer}
 
   <!-- PROFESSIONISTA: INBOX -->
   <div class="page-content" id="page-pro-inbox">
-    <div class="section-title">Messaggi</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">Connessioni</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-chat')">+ Nuova connessione</button>
+    </div>
+    <div class="card" id="pro-connessioni-card" style="margin-bottom:18px">
+      <div id="pro-connessioni-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+    </div>
+    <div class="section-title">Messaggi clienti</div>
     <div class="card" id="inbox-card" style="margin-bottom:14px">
       <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
@@ -1345,12 +1353,28 @@ select.input{cursor:pointer}
     <div class="modal-title"><span class="icon"><svg><use href="#i-inbox"/></svg></span>Nuova chat</div>
     <div class="auth-form">
       <div class="input-group">
-        <label class="input-label">Codice dell'altro proprietario</label>
+        <label class="input-label">Codice dell'altro utente (proprietario o professionista)</label>
         <input class="input" id="new-chat-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase">
       </div>
       <div class="auth-error" id="new-chat-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="startNewChat()" style="width:100%;margin-top:6px">Avvia chat</button>
+      <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
+        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
+      </button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-qr-scan" onclick="closeOut(event,'modal-qr-scan')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>Inquadra il QR</div>
+    <div style="position:relative;border-radius:14px;overflow:hidden;background:#000">
+      <video id="qr-scan-video" style="width:100%;display:block" muted playsinline></video>
+      <canvas id="qr-scan-canvas" style="display:none"></canvas>
+    </div>
+    <div class="muted" style="font-size:12px;text-align:center;margin-top:10px">Inquadra il codice QR dell'altra persona per collegarti subito.</div>
+    <button class="btn btn-outline" onclick="closeQrScanner()" style="width:100%;margin-top:10px">Annulla</button>
   </div>
 </div>
 
@@ -1489,9 +1513,9 @@ select.input{cursor:pointer}
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
    - lezioni_manuali(id, owner_id, horse_id, data, tipo, note, created_at)
    - stables(id, name, join_code)
-   - conversazioni_proprietari(id, proprietario_a_id, proprietario_b_id, created_at)
-   - messaggi_proprietari(id, conversazione_id, mittente_id, tipo, testo, media_url, letto, created_at)
-   - storage bucket pubblico "proprietari-chat-media" (foto/video/note vocali della chat tra proprietari)
+   - conversazioni_chat(id, proprietario_a_id, proprietario_b_id, created_at)
+   - messaggi_chat(id, conversazione_id, mittente_id, tipo, testo, media_url, letto, created_at)
+   - storage bucket pubblico "chat-media" (foto/video/note vocali della chat tra proprietari)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
    - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo, testo, audio_url, letto, created_at)
@@ -1638,7 +1662,7 @@ const DB = {
   /* -- Chat tra proprietari -- */
   async findProprietarioByCodice(codice){
     if(DEMO_MODE) return demoState.altriProprietari.find(p => p.codice_proprietario === codice.toUpperCase()) || null;
-    const { data } = await sb.from("profiles").select("id, full_name, avatar_url").eq("codice_proprietario", codice).neq("id", currentUser.id).maybeSingle();
+    const { data } = await sb.from("profiles").select("id, full_name, avatar_url, ruolo").or(`codice_proprietario.eq.${codice},codice_professionista.eq.${codice}`).neq("id", currentUser.id).maybeSingle();
     return data || null;
   },
   async getOrCreateConversazione(altroId){
@@ -1650,11 +1674,11 @@ const DB = {
       }
       return c.id;
     }
-    const { data: esistente } = await sb.from("conversazioni_proprietari").select("id")
+    const { data: esistente } = await sb.from("conversazioni_chat").select("id")
       .or(`and(proprietario_a_id.eq.${currentUser.id},proprietario_b_id.eq.${altroId}),and(proprietario_a_id.eq.${altroId},proprietario_b_id.eq.${currentUser.id})`)
       .maybeSingle();
     if(esistente) return esistente.id;
-    const { data, error } = await sb.from("conversazioni_proprietari").insert({ proprietario_a_id: currentUser.id, proprietario_b_id: altroId }).select("id").single();
+    const { data, error } = await sb.from("conversazioni_chat").insert({ proprietario_a_id: currentUser.id, proprietario_b_id: altroId }).select("id").single();
     if(error) return null;
     return data.id;
   },
@@ -1668,14 +1692,14 @@ const DB = {
         return { id: c.id, altro, ultimoMessaggio: msgs[0] || null, unread };
       }).sort((a,b) => new Date(b.ultimoMessaggio?.created_at || 0) - new Date(a.ultimoMessaggio?.created_at || 0));
     }
-    const { data: convos } = await sb.from("conversazioni_proprietari").select("*")
+    const { data: convos } = await sb.from("conversazioni_chat").select("*")
       .or(`proprietario_a_id.eq.${currentUser.id},proprietario_b_id.eq.${currentUser.id}`);
     if(!convos || convos.length === 0) return [];
     const ids = convos.map(c => c.id);
     const altriIds = convos.map(c => c.proprietario_a_id === currentUser.id ? c.proprietario_b_id : c.proprietario_a_id);
     const [{ data: profili }, { data: messaggi }] = await Promise.all([
       sb.from("profiles").select("id, full_name, avatar_url").in("id", altriIds),
-      sb.from("messaggi_proprietari").select("*").in("conversazione_id", ids).order("created_at", { ascending: false }).limit(300),
+      sb.from("messaggi_chat").select("*").in("conversazione_id", ids).order("created_at", { ascending: false }).limit(300),
     ]);
     return convos.map(c => {
       const altroId = c.proprietario_a_id === currentUser.id ? c.proprietario_b_id : c.proprietario_a_id;
@@ -1687,7 +1711,7 @@ const DB = {
   },
   async listThreadProprietario(conversazioneId){
     if(DEMO_MODE) return demoState.messaggiProprietari.filter(m => m.conversazione_id === conversazioneId).slice().sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-    const { data, error } = await sb.from("messaggi_proprietari").select("*").eq("conversazione_id", conversazioneId).order("created_at", { ascending: true });
+    const { data, error } = await sb.from("messaggi_chat").select("*").eq("conversazione_id", conversazioneId).order("created_at", { ascending: true });
     return error ? [] : (data || []);
   },
   async insertMessaggioProprietario({ conversazione_id, tipo, testo, media_url }){
@@ -1696,7 +1720,7 @@ const DB = {
       demoState.messaggiProprietari.push({ id: "mo-" + (++demoIdCounter), conversazione_id, mittente_id: "demo-user", tipo, testo: testo || null, media_url: media_url || null, letto: true, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_proprietari").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, letto: true });
+    const { error } = await sb.from("messaggi_chat").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, letto: true });
     return { error };
   },
   async markLettiProprietario(conversazioneId){
@@ -1704,16 +1728,16 @@ const DB = {
       demoState.messaggiProprietari.forEach(m => { if(m.conversazione_id === conversazioneId && m.mittente_id !== "demo-user") m.letto = true; });
       return;
     }
-    await sb.from("messaggi_proprietari").update({ letto: true }).eq("conversazione_id", conversazioneId).neq("mittente_id", currentUser.id).eq("letto", false);
+    await sb.from("messaggi_chat").update({ letto: true }).eq("conversazione_id", conversazioneId).neq("mittente_id", currentUser.id).eq("letto", false);
   },
   async uploadMediaProprietario(fileOrBlob, conversazioneId, tipo, ext){
     if(DEMO_MODE){
       return { url: URL.createObjectURL(fileOrBlob), error: null };
     }
     const path = `${currentUser.id}/${conversazioneId}/${Date.now()}.${ext}`;
-    const { error } = await sb.storage.from("proprietari-chat-media").upload(path, fileOrBlob, { contentType: fileOrBlob.type || undefined });
+    const { error } = await sb.storage.from("chat-media").upload(path, fileOrBlob, { contentType: fileOrBlob.type || undefined });
     if(error) return { url: null, error };
-    const { data } = sb.storage.from("proprietari-chat-media").getPublicUrl(path);
+    const { data } = sb.storage.from("chat-media").getPublicUrl(path);
     return { url: data?.publicUrl || null, error: null };
   },
   async ensureCodiceProprietario(){
@@ -2212,7 +2236,7 @@ async function openCodiceProprietarioModal(){
 function copyCodiceProprietario(){
   const codice = currentUser.codiceProprietario;
   if(!codice) return;
-  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat.`;
+  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat (o scansiona il QR). Non hai l'app? Scaricala su https://app.equohub.com`;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
       .catch(() => showToast("Non sono riuscito a copiare, riprova."));
@@ -2224,7 +2248,7 @@ function copyCodiceProprietario(){
 function shareCodiceProprietario(){
   const codice = currentUser.codiceProprietario;
   if(!codice) return;
-  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat.`;
+  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat (o scansiona il QR). Non hai l'app? Scaricala su https://app.equohub.com`;
   if(navigator.share){
     navigator.share({ text }).catch(() => {});
     return;
@@ -2579,6 +2603,7 @@ function showPage(page){
   document.querySelectorAll(".page-content").forEach(el => el.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
+  if(page === "chat" || page === "pro-inbox") loadOwnerChatList();
 }
 
 function openModal(id){ document.getElementById(id).classList.add("active"); }
@@ -3497,7 +3522,7 @@ async function stopAndSendVoiceRecording(){
 function shareInviteCodeFromChat(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
-  const text = `Il tuo codice per collegarti a me su Equo: ${c.codice_invito}`;
+  const text = `Il tuo codice per collegarti a me su Equo: ${c.codice_invito} — scarica l'app su https://app.equohub.com`;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
       .catch(() => showToast("Non sono riuscito a copiare, riprova."));
@@ -3577,16 +3602,17 @@ function insertOwnerEmoji(emoji){
 }
 
 async function loadOwnerChatList(){
-  const box = document.getElementById("owner-chat-list");
-  if(!box) return;
-  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const targets = ["owner-chat-list", "pro-connessioni-list"].map(id => document.getElementById(id)).filter(Boolean);
+  if(targets.length === 0) return;
+  targets.forEach(box => box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>');
   const conversazioni = await DB.listConversazioniProprietario();
   if(!conversazioni || conversazioni.length === 0){
-    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessuna chat ancora.<br>Usa "+ Nuova chat" e il codice di un altro proprietario per iniziare.</div></div>';
+    const empty = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessuna chat ancora.<br>Usa "+ Nuova chat" e il codice (o QR) di un altro utente per iniziare.</div></div>';
+    targets.forEach(box => box.innerHTML = empty);
     return;
   }
-  box.innerHTML = conversazioni.map(c => {
-    const nome = c.altro?.full_name || "Proprietario";
+  const html = conversazioni.map(c => {
+    const nome = c.altro?.full_name || "Utente";
     const m = c.ultimoMessaggio;
     let previewBody = "Inizia la conversazione";
     if(m){
@@ -3603,6 +3629,58 @@ async function loadOwnerChatList(){
       ${c.unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
     </div>`;
   }).join("");
+  targets.forEach(box => box.innerHTML = html);
+}
+
+let qrScanStream = null;
+let qrScanRAF = null;
+
+function openQrScanner(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showToast("Il tuo browser non supporta la fotocamera.");
+    return;
+  }
+  openModal("modal-qr-scan");
+  const video = document.getElementById("qr-scan-video");
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+    qrScanStream = stream;
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    video.play();
+    qrScanRAF = requestAnimationFrame(scanQrLoop);
+  }).catch(() => {
+    showToast("Non riesco ad accedere alla fotocamera.");
+    closeQrScanner();
+  });
+}
+
+function closeQrScanner(){
+  if(qrScanRAF) cancelAnimationFrame(qrScanRAF);
+  qrScanRAF = null;
+  if(qrScanStream){ qrScanStream.getTracks().forEach(t => t.stop()); qrScanStream = null; }
+  closeModal("modal-qr-scan");
+}
+
+function scanQrLoop(){
+  const video = document.getElementById("qr-scan-video");
+  const canvas = document.getElementById("qr-scan-canvas");
+  if(!video || video.readyState !== video.HAVE_ENOUGH_DATA){
+    qrScanRAF = requestAnimationFrame(scanQrLoop);
+    return;
+  }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
+  if(code && code.data){
+    closeQrScanner();
+    document.getElementById("new-chat-codice").value = code.data.trim().toUpperCase();
+    startNewChat();
+    return;
+  }
+  qrScanRAF = requestAnimationFrame(scanQrLoop);
 }
 
 async function startNewChat(){
