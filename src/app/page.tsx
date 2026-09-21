@@ -1,352 +1,72 @@
-import Link from "next/link";
-import Image from "next/image";
+import { MarketingNavbar } from "@/components/layout/marketing-navbar";
+import { MarketingFooter } from "@/components/layout/marketing-footer";
+import { HeroSection } from "@/components/home/hero-section";
+import { AppFeatures } from "@/components/home/app-features";
+import { ScuderiaFeatures } from "@/components/home/scuderia-features";
+import { PwaDownloadGuide } from "@/components/home/pwa-download-guide";
+import { PhotoGallery } from "@/components/home/photo-gallery";
 import { WaitlistForm } from "@/components/waitlist/waitlist-form";
+import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Wallet, Bot, MapPin, Sparkles, CalendarCheck, Building2 } from "lucide-react";
 
-const features = [
-  {
-    icon: ShieldCheck,
-    title: "Libretto sanitario digitale",
-    desc: "Vaccini, Coggins test, ferratura e sverminazioni con promemoria automatico via email. Niente più fogli persi in scuderia.",
-  },
-  {
-    icon: Wallet,
-    title: "Registro spese",
-    desc: "Pensione, mangimi, veterinario, maniscalco: sai sempre quanto ti costa davvero il tuo cavallo, mese per mese.",
-  },
-  {
-    icon: Bot,
-    title: "Assistente AI equestre",
-    desc: "Un esperto virtuale h24 per dubbi su alimentazione, comportamento e gestione — sempre nel telefono.",
-  },
-  {
-    icon: CalendarCheck,
-    title: "Prenotazione lezioni",
-    desc: "Prenota la tua lezione in un tap e tieni traccia del carnet. Richiede che la tua struttura usi Equo Scuderia.",
-  },
-  {
-    icon: MapPin,
-    title: "Servizi vicino a te",
-    desc: "Clinica 24h o maniscalco più vicini, un tap per chiamare o farti indicare la strada.",
-  },
-];
-
-const featureDetails = [
-  {
-    icon: ShieldCheck,
-    title: "Libretto sanitario digitale",
-    image: "/features/libretto-sanitario.jpg",
-    paragraphs: [
-      "Ogni cavallo ha una storia sanitaria fatta di vaccinazioni, test Coggins, sverminazioni e ferrature che si accumulano nel tempo — e che spesso finiscono su fogli sparsi, messaggi WhatsApp al maniscalco o promemoria mentali facili da dimenticare.",
-      "Con Equo tutto questo diventa un libretto digitale sempre a portata di telefono: carichi la data dell'ultimo intervento, il veterinario o il maniscalco di riferimento, ed Equo calcola da solo la prossima scadenza.",
-      "Quando una scadenza si avvicina ricevi un promemoria via email prima che diventi un problema — utile per la routine di tutti i giorni e indispensabile in caso di gare, trasferte o controlli.",
-    ],
-  },
-  {
-    icon: Wallet,
-    title: "Registro spese",
-    image: "/features/registro-spese.jpg",
-    paragraphs: [
-      "Pensione, mangime, integratori, visite veterinarie, ferratura, attrezzatura: mantenere un cavallo ha tanti costi ricorrenti, spesso pagati in momenti diversi e difficili da tenere a mente tutti insieme.",
-      "Equo ti permette di registrare ogni spesa in pochi secondi, categorizzarla e vedere subito quanto stai spendendo per il tuo cavallo mese per mese — senza fogli Excel o scontrini persi in macchina.",
-      "Nel tempo costruisci uno storico utile per pianificare il budget, confrontare i costi tra periodi diversi e, se gestisci più cavalli o una scuderia, capire dove intervenire per ottimizzare la spesa.",
-    ],
-  },
-  {
-    icon: Bot,
-    title: "Assistente AI equestre",
-    image: "/features/assistente-ai.jpg",
-    paragraphs: [
-      "Non sempre serve chiamare il veterinario per un dubbio: a volte basta un confronto rapido su alimentazione, comportamento, gestione quotidiana o su un piccolo campanello d'allarme da valutare.",
-      "L'assistente AI di Equo è un esperto equestre virtuale disponibile 24 ore su 24, direttamente nell'app: gli scrivi la tua domanda e ricevi una risposta chiara, basata su conoscenze etologiche e di gestione del cavallo.",
-      "Non sostituisce il tuo veterinario o il tuo istruttore, ma ti aiuta a capire quando serve il loro intervento e ti accompagna nelle mille piccole decisioni che si prendono ogni giorno prendendosi cura di un cavallo.",
-    ],
-  },
-  {
-    icon: CalendarCheck,
-    title: "Prenotazione lezioni",
-    image: "/features/prenotazione-lezioni.jpg",
-    badge: "Richiede Equo Scuderia",
-    paragraphs: [
-      "Niente più messaggi WhatsApp per fissare l'ora con l'istruttore o telefonate per sapere se un cavallo è libero: dall'app vedi gli slot disponibili e prenoti la tua lezione in un tap.",
-      "Il carnet lezioni si aggiorna da solo: ogni volta che prenoti, o dopo che l'istruttore segna la tua presenza, sai sempre quante lezioni ti restano sull'abbonamento senza doverlo chiedere in segreteria.",
-      "Questa funzione è collegata a Equo Scuderia, il gestionale per centri ippici e scuole di equitazione: è attiva solo se la struttura dove vai a cavallo lo utilizza — la trovi più avanti in questa pagina.",
-    ],
-  },
-  {
-    icon: MapPin,
-    title: "Servizi vicino a te",
-    image: "/features/servizi-vicino.jpg",
-    paragraphs: [
-      "Un'emergenza notturna, un ferro perso a pochi giorni da una gara, la necessità di trovare un nuovo maniscalco dopo un trasferimento: sapere a chi rivolgersi rapidamente fa la differenza.",
-      "Equo include una mappa dei servizi equestri vicino a te — cliniche veterinarie 24 ore su 24, maniscalchi, maneggi — così puoi trovare chi ti serve senza perdere tempo a cercare tra contatti sparsi o gruppi Facebook.",
-      "Con un tap chiami direttamente il contatto o apri le indicazioni stradali: pensato per i momenti in cui ogni minuto conta, ma utile anche solo per organizzare la routine di cura del tuo cavallo.",
-    ],
-  },
-];
-
-const scuderiaDetails = [
-  {
-    icon: CalendarCheck,
-    title: "Calendario lezioni condiviso",
-    image: "/features/scuderia-calendario.jpg",
-    paragraphs: [
-      "Basta gruppi WhatsApp per capire chi ha prenotato cosa, o telefonate in segreteria per sapere se un cavallo è libero: dalla dashboard di Equo Scuderia vedi il calendario lezioni in tempo reale e gestisci le prenotazioni dei tuoi allievi in pochi tap.",
-      "Ogni prenotazione fatta dagli allievi tramite l'app Equo arriva qui già organizzata per istruttore, cavallo e orario — niente più doppie prenotazioni o slot dimenticati su un quaderno.",
-      "Il calendario è collegato al carnet lezioni di ogni allievo: sai sempre chi ha lezioni residue e chi deve rinnovare l'abbonamento, senza doverlo controllare a mano.",
-    ],
-  },
-  {
-    icon: Bot,
-    title: "Assegnazione automatica dei cavalli",
-    image: "/features/scuderia-assegnazione.jpg",
-    paragraphs: [
-      "Decidere quale cavallo assegnare a ogni lezione tenendo conto di chi ha già lavorato troppe ore quel giorno è un compito che spesso finisce per affidarsi alla memoria dell'istruttore.",
-      "Equo Scuderia lo fa per te: propone l'assegnazione dei cavalli della scuola bilanciando automaticamente il carico di lavoro giornaliero e settimanale, riducendo il rischio di sovraccaricare sempre gli stessi cavalli.",
-      "Resta sempre possibile modificare l'assegnazione a mano quando serve — ma la proposta automatica toglie il pensiero nella maggior parte dei casi.",
-    ],
-  },
-  {
-    icon: ShieldCheck,
-    title: "Cruscotto a semaforo",
-    image: "/features/scuderia-certificati.jpg",
-    paragraphs: [
-      "Certificati medici scaduti, tesseramenti FISE/EPS da rinnovare, vaccinazioni in ritardo: in una scuderia con decine di cavalli e allievi, tenere tutto sotto controllo con fogli sparsi è quasi impossibile.",
-      "Il cruscotto di Equo Scuderia mostra a colpo d'occhio lo stato di ogni cavallo e ogni allievo con un semaforo verde, giallo o rosso: sai subito cosa è in regola, cosa sta per scadere e cosa richiede un intervento urgente.",
-      "Meno rischio di far scendere in campo un cavallo o un allievo non in regola, e meno tempo speso a rincorrere documenti all'ultimo momento.",
-    ],
-  },
-  {
-    icon: Wallet,
-    title: "Estratto conto spese automatico",
-    image: "/features/scuderia-spese.jpg",
-    paragraphs: [
-      "Mandare a ogni proprietario il conto di pensione, mangimi e servizi extra del mese è un lavoro amministrativo che si ripete ogni mese, spesso a mano su fogli Excel o WhatsApp.",
-      "Equo Scuderia genera automaticamente l'estratto conto di ogni proprietario a partire dalle spese registrate e lo invia via email, con lo storico sempre consultabile da entrambe le parti.",
-      "Meno tempo in segreteria, meno discussioni sui conteggi e proprietari sempre aggiornati su quanto stanno spendendo per il loro cavallo.",
-    ],
-  },
-];
-
-export default function LandingPage() {
+export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between px-6 py-4">
-        <Image src="/logo-equo.png" alt="Equo" width={280} height={83} priority className="h-14 w-auto sm:h-16" />
-        <div className="flex gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Accedi</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Registrati</Link>
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20 selection:text-primary">
+      {/* Global Marketing Navigation */}
+      <MarketingNavbar />
 
-      <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-16 text-center sm:py-24">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-          <Sparkles className="size-3.5" /> Solo per i primi 250 iscritti
-        </span>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-          Ricevi in anteprima la <span className="text-primary">versione beta</span> dell&apos;app
-        </h1>
-        <p className="max-w-xl text-lg text-muted-foreground">
-          I primi <strong className="text-foreground">250 iscritti</strong> avranno{" "}
-          <strong className="text-foreground">6 mesi della versione Pro gratis</strong>. Equo tiene traccia di
-          vaccini, spese e scadenze del tuo cavallo al posto tuo — e ti avvisa prima che sia troppo tardi.
-        </p>
-        <WaitlistForm role="proprietario" />
-        <p className="text-sm text-muted-foreground">Nessuna carta di credito richiesta · 5 minuti per iscriverti</p>
-      </section>
+      <main className="flex-1">
+        {/* 1. Hero Section with 14.png & CTAs */}
+        <HeroSection />
 
-      <section className="mx-auto grid max-w-5xl gap-6 px-6 pb-24 sm:grid-cols-2">
-        {features.map(({ icon: Icon, title, desc }) => (
-          <Card key={title}>
-            <CardContent className="flex items-start gap-4 pt-6">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                <Icon className="size-5 text-secondary-foreground" />
-              </div>
-              <div>
-                <p className="font-semibold">{title}</p>
-                <p className="text-sm text-muted-foreground">{desc}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
+        {/* 2. Equo App for Horse Owners (10.png, 5.png, 18.png) */}
+        <AppFeatures />
 
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="mx-auto mb-14 max-w-2xl text-center">
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Cosa puoi fare con Equo App</h2>
-          <p className="mt-3 text-muted-foreground">
-            Quattro strumenti pensati per la gestione quotidiana del tuo cavallo, tutti in un&apos;unica app.
-          </p>
-        </div>
+        {/* 3. Equo Scuderia (Gestionale) with 17.png */}
+        <ScuderiaFeatures />
 
-        <div className="flex flex-col gap-16 sm:gap-24">
-          {featureDetails.map(({ icon: Icon, title, image, paragraphs, badge }, index) => (
-            <div
-              key={title}
-              className={`flex flex-col items-center gap-8 sm:gap-12 md:flex-row ${
-                index % 2 === 1 ? "md:flex-row-reverse" : ""
-              }`}
-            >
-              <div className="w-full overflow-hidden rounded-2xl md:w-1/2">
-                <Image
-                  src={image}
-                  alt={title}
-                  width={1200}
-                  height={1200}
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              </div>
-              <div className="w-full md:w-1/2">
-                <div className="mb-4 flex size-11 items-center justify-center rounded-lg bg-secondary">
-                  <Icon className="size-5 text-secondary-foreground" />
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
-                  {badge && (
-                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                      {badge}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4 flex flex-col gap-3 text-muted-foreground">
-                  {paragraphs.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+        {/* 4. PWA Download & Installation Guide with 15.png */}
+        <PwaDownloadGuide />
 
-      <section className="mx-auto max-w-3xl px-6 pb-24 text-center">
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-10">
-            <p className="text-xl font-semibold">Pronto a prenderti cura del tuo cavallo con Equo?</p>
-            <p className="max-w-md text-muted-foreground">
-              Iscriviti alla waitlist: sarai tra i primi ad accedere alla versione beta.
+        {/* 5. Photographic Showcase (19.png, 6.png, 8.png, 7.png, 16.png, 12.png) */}
+        <PhotoGallery />
+
+        {/* 6. Waitlist & Early Bird Beta CTA */}
+        <section className="py-20 bg-gradient-to-b from-background via-primary/5 to-muted/50 border-t border-border">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-6">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3.5 py-1.5 text-xs font-bold text-secondary-foreground">
+              <Sparkles className="size-3.5 text-amber-500 fill-amber-500" />
+              Offerta di Lancio per i primi 250 iscritti
+            </span>
+
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              Entra subito nel programma Beta di Equo
+            </h2>
+
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              I primi <strong className="text-foreground">250 iscritti</strong> riceveranno{" "}
+              <strong className="text-foreground">6 mesi della versione Pro completamente gratuiti</strong>. Inserisci la tua email per riservare il tuo posto e accedere per primo alle novità.
             </p>
-            <WaitlistForm role="proprietario" />
-          </CardContent>
-        </Card>
-      </section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="overflow-hidden rounded-2xl border bg-secondary/30">
-          <div className="grid gap-0 md:grid-cols-2">
-            <div className="flex flex-col justify-center gap-4 p-8 sm:p-12">
-              <div className="flex size-11 items-center justify-center rounded-lg bg-primary/10">
-                <Building2 className="size-5 text-primary" />
-              </div>
-              <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                Per centri ippici e scuole di equitazione
-              </span>
-              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Equo Scuderia</h2>
-              <p className="text-muted-foreground">
-                Il gestionale che porta la tua struttura fuori da WhatsApp e dai registri cartacei — e che
-                sblocca la prenotazione lezioni per i tuoi allievi direttamente dall&apos;app Equo.
-              </p>
-              <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <CalendarCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-                  Calendario lezioni condiviso: addio caos di messaggi e telefonate per prenotare.
-                </li>
-                <li className="flex gap-2">
-                  <Bot className="mt-0.5 size-4 shrink-0 text-primary" />
-                  Assegnazione automatica dei cavalli della scuola, con bilanciamento delle ore di lavoro.
-                </li>
-                <li className="flex gap-2">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-                  Cruscotto a semaforo per certificati medici, tesseramenti FISE/EPS e scadenze sanitarie di scuderia.
-                </li>
-                <li className="flex gap-2">
-                  <Wallet className="mt-0.5 size-4 shrink-0 text-primary" />
-                  Estratto conto spese generato in automatico e inviato ai proprietari.
-                </li>
-              </ul>
-              <div className="pt-2">
-                <Button asChild>
-                  <Link href="#scuderia-dettagli">Scopri Equo Scuderia</Link>
-                </Button>
-              </div>
+            <div className="pt-2 max-w-xl mx-auto">
+              <WaitlistForm role="proprietario" />
             </div>
-            <div className="relative min-h-[280px] bg-primary/5 md:min-h-full">
-              <Image
-                src="/features/servizi-vicino.jpg"
-                alt="Equo Scuderia"
-                width={1200}
-                height={1200}
-                className="h-full w-full object-cover"
-              />
+
+            <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="size-4 text-primary" />
+                <span>Nessuna carta di credito richiesta</span>
+              </div>
+              <span className="hidden sm:inline">•</span>
+              <div>Disiscrizione in 1 click in qualsiasi momento</div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <section id="scuderia-dettagli" className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="mx-auto mb-14 max-w-2xl text-center">
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Come funziona Equo Scuderia</h2>
-          <p className="mt-3 text-muted-foreground">
-            Il gestionale pensato per chi dietro le quinte fa girare la scuderia ogni giorno.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-16 sm:gap-24">
-          {scuderiaDetails.map(({ icon: Icon, title, image, paragraphs }, index) => (
-            <div
-              key={title}
-              className={`flex flex-col items-center gap-8 sm:gap-12 md:flex-row ${
-                index % 2 === 1 ? "md:flex-row-reverse" : ""
-              }`}
-            >
-              <div className="w-full overflow-hidden rounded-2xl md:w-1/2">
-                <Image
-                  src={image}
-                  alt={title}
-                  width={1200}
-                  height={1200}
-                  className="aspect-[4/3] w-full object-cover"
-                />
-              </div>
-              <div className="w-full md:w-1/2">
-                <div className="mb-4 flex size-11 items-center justify-center rounded-lg bg-secondary">
-                  <Icon className="size-5 text-secondary-foreground" />
-                </div>
-                <h3 className="text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
-                <div className="mt-4 flex flex-col gap-3 text-muted-foreground">
-                  {paragraphs.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="scuderia-waitlist" className="mx-auto max-w-3xl px-6 pb-24 text-center">
-        <Card className="bg-secondary/40">
-          <CardContent className="flex flex-col items-center gap-4 py-10">
-            <p className="text-xl font-semibold">Gestisci una scuderia?</p>
-            <p className="max-w-md text-muted-foreground">
-              Equo funziona anche per gestori di scuderie con più cavalli e più proprietari da coordinare.
-              Scrivici per una demo dedicata.
-            </p>
-            <WaitlistForm role="scuderia" />
-          </CardContent>
-        </Card>
-      </section>
-
-      <footer className="flex flex-col items-center gap-3 border-t px-6 py-8 text-center text-sm text-muted-foreground">
-        <Image src="/icona-equo.png" alt="Equo" width={28} height={28} className="opacity-70" />
-        © {new Date().getFullYear()} Equo. Tutti i diritti riservati.
-      </footer>
+      {/* Global Marketing Footer */}
+      <MarketingFooter />
     </div>
   );
 }

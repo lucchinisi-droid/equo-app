@@ -40,3 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 FOTO/
+
+# asset grezzi non referenziati dal sito / output di lavoro, non da versionare
+VIDEO/
+Claude outputs/
