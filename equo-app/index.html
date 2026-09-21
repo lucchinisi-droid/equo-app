@@ -153,6 +153,12 @@ select.input{cursor:pointer}
   letter-spacing:.5px;margin-bottom:6px;background:rgba(232,176,75,.2);color:var(--accent)}
 .promo-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.25}
 .promo-desc{font-size:11px;color:var(--muted);margin-top:3px}
+.partner-banner{border-radius:16px;overflow:hidden;background:var(--card,#0e2417);border:1px dashed var(--border);position:relative;height:78px;margin-bottom:14px;cursor:pointer}
+.partner-slide{position:absolute;inset:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;opacity:0;transition:opacity .5s;pointer-events:none}
+.partner-slide.active{opacity:1;pointer-events:auto}
+.partner-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;margin-bottom:5px;background:rgba(255,189,89,.18);color:var(--gold,#ffbd59);width:fit-content}
+.partner-title{font-size:14px;font-weight:700;color:var(--text)}
+.partner-desc{font-size:11px;color:var(--muted);margin-top:2px}
 
 .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
@@ -545,6 +551,19 @@ select.input{cursor:pointer}
         </div>
       </div>
 
+      <div class="partner-banner" id="partner-banner">
+        <div class="partner-slide active" data-pslide="0" onclick="window.location.href='mailto:gestione.equo@gmail.com?subject=' + encodeURIComponent('Vorrei comparire come partner su Equo')">
+          <span class="partner-tag">PARTNER</span>
+          <div class="partner-title">Vuoi comparire qui?</div>
+          <div class="partner-desc">Scrivici</div>
+        </div>
+        <div class="partner-slide" data-pslide="1" onclick="openModal('modal-segnala-maneggio')">
+          <span class="partner-tag">SEGNALAZIONE</span>
+          <div class="partner-title">Segnalaci il tuo maneggio</div>
+          <div class="partner-desc">E ottieni 1 mese di Premium gratis</div>
+        </div>
+      </div>
+
       <div class="stat-row">
         <div class="stat-card">
           <div class="stat-label">Spese questo mese</div>
@@ -894,6 +913,37 @@ select.input{cursor:pointer}
 </div>
 
 <!-- ═══ MODALS ═══ -->
+
+<div class="modal-overlay" id="modal-segnala-maneggio" onclick="closeOut(event,'modal-segnala-maneggio')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-gift"></i></span>Segnala un maneggio</div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">Conosci un maneggio o un centro ippico non ancora su Equo? Segnalacelo: se si registra, tu ricevi 1 mese di Premium gratis.</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Nome struttura</label>
+        <input class="input" id="segnala-nome-struttura" placeholder="es. Centro Ippico Le Querce">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Città</label>
+        <input class="input" id="segnala-citta" placeholder="es. Colleferro (RM)">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Via (opzionale)</label>
+        <input class="input" id="segnala-via" placeholder="es. Via Roma 10">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Telefono struttura (opzionale)</label>
+        <input class="input" id="segnala-telefono-struttura" type="tel" placeholder="es. 06 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email o telefono tuo, per ricevere il codice</label>
+        <input class="input" id="segnala-contatto-premio" placeholder="dove ti mandiamo il codice">
+      </div>
+      <button class="btn btn-primary" onclick="submitSegnalazioneManeggio()" style="width:100%;margin-top:6px">Invia segnalazione</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-add-horse" onclick="closeOut(event,'modal-add-horse')">
   <div class="modal">
@@ -1933,6 +1983,11 @@ const DB = {
     const { data, error } = await sb.from("services").select("*");
     return error ? [] : (data || []);
   },
+  async insertSegnalazioneManeggio(payload){
+    if(DEMO_MODE) return { error: null };
+    const { error } = await sb.from("segnalazioni_maneggio").insert(payload);
+    return { error };
+  },
 };
 
 /* ---------- ONBOARDING (bivio ruolo) ---------- */
@@ -2090,6 +2145,7 @@ async function enterApp(ruolo){
     await loadHorses();
     renderPaymentMethods();
     startPromoRotation();
+    startPartnerBannerRotation();
     if(ruolo === "gestore_struttura") showStableManagerBanner();
   }
 }
@@ -2432,6 +2488,7 @@ async function startDemo(){
   await loadHorses();
   renderPaymentMethods();
   startPromoRotation();
+  startPartnerBannerRotation();
 }
 
 /* ---------- BOOT ---------- */
@@ -4313,6 +4370,52 @@ function startPromoRotation(){
     i = (i + 1) % slides.length;
     slides[i].classList.add("active");
   }, 5000);
+}
+function startPartnerBannerRotation(){
+  let i = 0;
+  const slides = document.querySelectorAll(".partner-slide");
+  if(slides.length < 2) return;
+  setInterval(() => {
+    slides[i].classList.remove("active");
+    i = (i + 1) % slides.length;
+    slides[i].classList.add("active");
+  }, 30000);
+}
+async function submitSegnalazioneManeggio(){
+  const nome_struttura = document.getElementById("segnala-nome-struttura").value.trim();
+  const citta = document.getElementById("segnala-citta").value.trim();
+  const via = document.getElementById("segnala-via").value.trim();
+  const telefono_struttura = document.getElementById("segnala-telefono-struttura").value.trim();
+  const contatto_premio = document.getElementById("segnala-contatto-premio").value.trim();
+  if(!nome_struttura || !citta || !contatto_premio){
+    showToast("Compila almeno nome struttura, città e il tuo contatto.");
+    return;
+  }
+  const payload = {
+    nome_struttura, citta,
+    via: via || null,
+    telefono_struttura: telefono_struttura || null,
+    contatto_premio,
+    segnalato_da: currentUser ? currentUser.id : null,
+  };
+  const { error } = await DB.insertSegnalazioneManeggio(payload);
+  if(error){ showToast("Errore, riprova tra poco."); return; }
+  fetch("/.netlify/functions/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: "gestione.equo@gmail.com",
+      subject: "Nuova segnalazione maneggio - Equo",
+      html: `<p>Nuova segnalazione:</p><ul><li>Struttura: ${escapeHtml(nome_struttura)}</li><li>Città: ${escapeHtml(citta)}</li><li>Via: ${escapeHtml(via || "-")}</li><li>Telefono struttura: ${escapeHtml(telefono_struttura || "-")}</li><li>Contatto per premio: ${escapeHtml(contatto_premio)}</li></ul>`,
+    }),
+  }).catch(() => {});
+  document.getElementById("segnala-nome-struttura").value = "";
+  document.getElementById("segnala-citta").value = "";
+  document.getElementById("segnala-via").value = "";
+  document.getElementById("segnala-telefono-struttura").value = "";
+  document.getElementById("segnala-contatto-premio").value = "";
+  closeModal("modal-segnala-maneggio");
+  showToast("Grazie! Ti contatteremo con il codice Premium.");
 }
 
 /* Carica la lista spese quando si apre la pagina */
