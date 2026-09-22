@@ -1801,8 +1801,12 @@ const DB = {
   /* -- Chat tra proprietari -- */
   async findProprietarioByCodice(codice){
     if(DEMO_MODE) return demoState.altriProprietari.find(p => p.codice_proprietario === codice.toUpperCase()) || null;
-    const { data } = await sb.from("profiles").select("id, full_name, avatar_url, ruolo").or(`codice_proprietario.eq.${codice},codice_professionista.eq.${codice}`).neq("id", currentUser.id).maybeSingle();
-    return data || null;
+    // NB: non si può leggere il profilo altrui con una select diretta (RLS lo impedisce
+    // di proposito, il profilo contiene anche dati di pagamento). Il match del codice
+    // avviene lato server con questa funzione, che restituisce solo i campi sicuri.
+    const { data, error } = await sb.rpc("find_profile_by_chat_code", { p_codice: codice });
+    if(error || !data || data.length === 0) return null;
+    return data[0];
   },
   async getOrCreateConversazione(altroId){
     if(DEMO_MODE){
