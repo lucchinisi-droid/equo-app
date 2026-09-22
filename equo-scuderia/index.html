@@ -414,8 +414,6 @@ textarea.input{resize:vertical}
             <option value="istruttore">Istruttore</option>
             <option value="veterinario">Veterinario</option>
             <option value="maniscalco">Maniscalco</option>
-            <option value="segretario">Segretario/a</option>
-            <option value="giardiniere">Giardiniere</option>
             <option value="allievo">Allievo / Genitore</option>
           </select>
         </div>
@@ -543,10 +541,7 @@ textarea.input{resize:vertical}
               </div>
             </div>
             <div class="card">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
-                <h3 style="margin-top:0">Team (<span id="team-count">0</span>)</h3>
-                <button class="btn btn-outline btn-sm" id="btn-aggiungi-membro" onclick="openNewMemberForm()"><i class="fa-solid fa-plus"></i> Aggiungi membro</button>
-              </div>
+              <h3 style="margin-top:0">Team (<span id="team-count">0</span>)</h3>
               <div class="table-wrap">
                 <table>
                   <thead><tr><th>Nome</th><th>Ruolo</th><th>Livello</th><th></th></tr></thead>
@@ -599,31 +594,26 @@ textarea.input{resize:vertical}
           </div>
 
           <div class="card" id="card-hard-reset" style="margin-top:16px;display:none;border:1px solid #ef4444">
-            <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleHardResetCard()">
-              <h3 style="margin:0;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> Hard Reset</h3>
-              <i class="fa-solid fa-chevron-down" id="hard-reset-toggle-icon" style="color:#ef4444"></i>
+            <h3 style="margin-top:0;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> Hard Reset</h3>
+            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Operazioni riservate al Livello Admin. Cancellano definitivamente i dati del centro — non sono reversibili.</p>
+            <div class="field">
+              <label>Reset parziale — svuota un singolo modulo</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <select class="input" id="reset-modulo-select" style="flex:1;min-width:200px">
+                  <option value="cavalli">Cavalli (e storico sanitario collegato)</option>
+                  <option value="eventi">Solo eventi sanitari</option>
+                  <option value="lezioni">Lezioni</option>
+                  <option value="pacchetti">Pacchetti/abbonamenti</option>
+                  <option value="messaggi">Messaggi</option>
+                  <option value="note">Post-it</option>
+                </select>
+                <button class="btn btn-danger btn-sm" onclick="askHardReset('parziale')">Svuota modulo</button>
+              </div>
             </div>
-            <div id="hard-reset-body" style="display:none;margin-top:14px">
-              <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Operazioni riservate al Livello Admin. Cancellano definitivamente i dati del centro — non sono reversibili.</p>
-              <div class="field">
-                <label>Reset parziale — svuota un singolo modulo</label>
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <select class="input" id="reset-modulo-select" style="flex:1;min-width:200px">
-                    <option value="cavalli">Cavalli (e storico sanitario collegato)</option>
-                    <option value="eventi">Solo eventi sanitari</option>
-                    <option value="lezioni">Lezioni</option>
-                    <option value="pacchetti">Pacchetti/abbonamenti</option>
-                    <option value="messaggi">Messaggi</option>
-                    <option value="note">Post-it</option>
-                  </select>
-                  <button class="btn btn-danger btn-sm" onclick="askHardReset('parziale')">Svuota modulo</button>
-                </div>
-              </div>
-              <div class="field" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-                <label>Reset totale — azzera tutti i dati operativi</label>
-                <p style="margin:0 0 10px;color:var(--muted);font-size:12px">Cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti e dati societari. Centro e team restano intatti.</p>
-                <button class="btn btn-danger btn-block" onclick="askHardReset('totale')"><i class="fa-solid fa-radiation"></i> Reset totale del sistema</button>
-              </div>
+            <div class="field" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <label>Reset totale — azzera tutti i dati operativi</label>
+              <p style="margin:0 0 10px;color:var(--muted);font-size:12px">Cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti e dati societari. Centro e team restano intatti.</p>
+              <button class="btn btn-danger btn-block" onclick="askHardReset('totale')"><i class="fa-solid fa-radiation"></i> Reset totale del sistema</button>
             </div>
           </div>
         </div>
@@ -648,11 +638,6 @@ textarea.input{resize:vertical}
               <div class="cavalli-sezione" data-sezione="pensione">
                 <h3 style="margin:18px 0 10px">Cavalli in pensione</h3>
                 <div class="grid grid-3" id="cavalli-grid-pensione"></div>
-                <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
-              </div>
-              <div class="cavalli-sezione" data-sezione="mezza_pensione">
-                <h3 style="margin:18px 0 10px">Cavalli in mezza pensione</h3>
-                <div class="grid grid-3" id="cavalli-grid-mezza_pensione"></div>
                 <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
               </div>
               <div class="cavalli-sezione" data-sezione="soci">
@@ -781,6 +766,20 @@ textarea.input{resize:vertical}
               <i class="fa-solid fa-comments"></i><div>Nessun messaggio ancora. Scrivi il primo al tuo team.</div>
             </div>
           </div>
+
+          <div class="card" style="margin-top:20px">
+            <div class="page-header" style="margin-bottom:14px">
+              <div>
+                <h2 style="font-size:16px;margin:0">Chatta con i tuoi clienti</h2>
+                <p style="margin:2px 0 0">Chat 1-a-1 con proprietari e professionisti collegati al centro che usano Equo App.</p>
+              </div>
+            </div>
+            <input class="input" id="clienti-chat-search" placeholder="Cerca per nome o cognome..." oninput="renderClientiChatList()" style="margin-bottom:12px">
+            <div id="clienti-chat-list"></div>
+            <div class="empty-state" id="clienti-chat-empty" style="display:none">
+              <i class="fa-solid fa-user-group"></i><div>Nessun cliente collegato ancora. Aggiungi il "Codice app proprietario" quando crei o modifichi un cavallo per collegarlo.</div>
+            </div>
+          </div>
         </div>
         <div class="module-page" id="module-mascalcia" style="display:none"></div>
         <div class="module-page" id="module-selleria" style="display:none"></div>
@@ -828,9 +827,6 @@ textarea.input{resize:vertical}
         <option value="istruttore">Istruttore</option>
         <option value="veterinario">Veterinario</option>
         <option value="maniscalco">Maniscalco</option>
-        <option value="segretario">Segretario/a</option>
-        <option value="giardiniere">Giardiniere</option>
-        <option value="altro">Altro</option>
         <option value="allievo">Allievo/Genitore</option>
         <option value="collaboratore">Collaboratore (segreteria)</option>
         <option value="admin">Amministratore</option>
@@ -859,52 +855,6 @@ textarea.input{resize:vertical}
     </div>
     <div class="auth-error" id="member-error"></div>
     <button class="btn btn-primary btn-block" onclick="saveMember()">Salva</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-nuovo-membro" onclick="closeOut(event,'modal-nuovo-membro')">
-  <div class="modal">
-    <div class="modal-title">Aggiungi membro <span class="x" onclick="closeModal('modal-nuovo-membro')">✕</span></div>
-    <p style="margin:-6px 0 14px;color:var(--muted);font-size:12.5px">Solo dipendenti della struttura. La persona comparirà come "In attesa" finché non si registra con il codice invito scegliendo lo stesso ruolo.</p>
-    <div class="field"><label>Nome e cognome</label><input class="input" id="nm-nome" placeholder="Nome e cognome"></div>
-    <div class="field">
-      <label>Ruolo</label>
-      <select class="input" id="nm-ruolo" onchange="onNewMemberRuoloChange()">
-        <option value="segretario">Segretario/a</option>
-        <option value="maniscalco">Maniscalco</option>
-        <option value="veterinario">Veterinario</option>
-        <option value="istruttore">Istruttore</option>
-        <option value="giardiniere">Giardiniere</option>
-        <option value="altro">Altro</option>
-      </select>
-    </div>
-    <div class="field" id="nm-ruolo-altro-field" style="display:none">
-      <label>Specifica mansione</label>
-      <input class="input" id="nm-ruolo-altro" placeholder="Es. Bagnino, Manutentore...">
-    </div>
-    <div class="field">
-      <label>Livello permessi</label>
-      <select class="input" id="nm-livello" onchange="onNewMemberLivelloChange()">
-        <option value="1">Livello 1 — Sola lettura + post-it</option>
-        <option value="2">Livello 2 — Modifica dati base</option>
-        <option value="3">Livello 3 — Personalizzato</option>
-      </select>
-      <p style="margin:6px 0 0;color:var(--muted);font-size:12px">Il livello si può cambiare in qualsiasi momento dalla riga del membro.</p>
-    </div>
-    <div class="field" id="nm-permessi-field" style="display:none">
-      <label>Permessi personalizzati</label>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-cavalli"> Modifica/cancellazione cavalli</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-eventi"> Modifica/cancellazione eventi sanitari</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-lezioni"> Gestione lezioni</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-pacchetti"> Gestione pacchetti</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-messaggi"> Invio messaggi broadcast</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-contatti"> Gestione contatti utili</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="nm-perm-fiscali"> Visualizza dati societari</label>
-      </div>
-    </div>
-    <div class="auth-error" id="nm-error"></div>
-    <button class="btn btn-primary btn-block" onclick="saveNewMember()">Aggiungi</button>
   </div>
 </div>
 
@@ -981,21 +931,9 @@ textarea.input{resize:vertical}
   <div class="modal">
     <div class="modal-title">Conferma Hard Reset <span class="x" onclick="closeModal('modal-hard-reset')">✕</span></div>
     <p id="hard-reset-desc" style="color:var(--muted);font-size:13.5px"></p>
-    <div class="field" id="hard-reset-keyword-field">
+    <div class="field">
       <label>Digita <strong id="hard-reset-keyword-display"></strong> per confermare</label>
       <input class="input" id="hard-reset-confirm-input">
-    </div>
-    <div class="field" id="hard-reset-code-field" style="display:none">
-      <label>Codice di sicurezza (6 cifre)</label>
-      <p style="margin:0 0 10px;color:var(--muted);font-size:12px">Per evitare cancellazioni involontarie, il reset totale richiede un codice che ti inviamo via email su richiesta. <a href="#" id="hard-reset-contact-link" target="_blank" style="color:#3f5d3a;font-weight:600">Non hai il codice? Contattaci</a></p>
-      <div style="display:flex;gap:8px;justify-content:center" id="hard-reset-code-boxes">
-        <input class="input hr-code-box" data-idx="0" maxlength="1" inputmode="numeric" pattern="[0-9]*" style="width:42px;text-align:center;font-size:18px;padding:10px 0">
-        <input class="input hr-code-box" data-idx="1" maxlength="1" inputmode="numeric" pattern="[0-9]*" style="width:42px;text-align:center;font-size:18px;padding:10px 0">
-        <input class="input hr-code-box" data-idx="2" maxlength="1" inputmode="numeric" pattern="[0-9]*" style="width:42px;text-align:center;font-size:18px;padding:10px 0">
-        <input class="input hr-code-box" data-idx="3" maxlength="1" inputmode="numeric" pattern="[0-9]*" style="width:42px;text-align:center;font-size:18px;padding:10px 0">
-        <input class="input hr-code-box" data-idx="4" maxlength="1" inputmode="numeric" pattern="[0-9]*" style="width:42px;text-align:center;font-size:18px;padding:10px 0">
-        <input class="input hr-code-box" data-idx="5" maxlength="1" inputmode="numeric" pattern="[0-9]*" style="width:42px;text-align:center;font-size:18px;padding:10px 0">
-      </div>
     </div>
     <div class="auth-error" id="hard-reset-error"></div>
     <div style="display:flex;gap:10px;margin-top:16px">
@@ -1013,6 +951,18 @@ textarea.input{resize:vertical}
     <div style="display:flex;gap:8px">
       <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaChatMessaggio()}">
       <button class="btn btn-primary btn-sm" onclick="inviaChatMessaggio()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: proprietario collegato, apri chat subito? -->
+<div class="modal-overlay" id="modal-chat-cliente-confirm" onclick="closeOut(event,'modal-chat-cliente-confirm')">
+  <div class="modal">
+    <div class="modal-title">Proprietario collegato <span class="x" onclick="closeModal('modal-chat-cliente-confirm')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px" id="chat-cliente-confirm-text">Vuoi subito aprire una chat?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-chat-cliente-confirm')">Non adesso</button>
+      <button class="btn btn-primary" style="flex:1" onclick="chattaConProprietarioAppenaCollegato()">Chatta ora</button>
     </div>
   </div>
 </div>
@@ -1052,7 +1002,6 @@ textarea.input{resize:vertical}
       <select class="input" id="cav-tipo-proprieta">
         <option value="proprieta">Cavallo di proprietà della struttura</option>
         <option value="pensione">Cavallo in pensione (privato)</option>
-        <option value="mezza_pensione">Cavallo in mezza pensione</option>
         <option value="soci">Cavallo di soci/istruttori</option>
       </select>
     </div>
@@ -1062,10 +1011,15 @@ textarea.input{resize:vertical}
     </div>
     <div class="grid grid-2">
       <div class="field"><label>Data di nascita</label><input class="input" id="cav-nascita" type="date"></div>
-      <div class="field"><label>Microchip</label><input class="input" id="cav-microchip" placeholder="15 cifre" maxlength="15" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,15)"></div>
+      <div class="field"><label>Microchip</label><input class="input" id="cav-microchip" placeholder="15 cifre"></div>
     </div>
     <div class="field"><label>Gruppo sanguigno</label><input class="input" id="cav-gruppo-sanguigno" placeholder="Facoltativo"></div>
     <div class="field"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario"></div>
+    <div class="field">
+      <label>Codice app proprietario <span style="color:var(--muted);font-weight:400">(facoltativo)</span></label>
+      <input class="input" id="cav-codice-proprietario" placeholder="Es. EQUO-OWN-1234" style="text-transform:uppercase">
+      <p style="color:var(--muted);font-size:12px;margin-top:4px">Se il proprietario ha Equo App, chiedigli il suo codice personale per collegarlo e poterci chattare direttamente.</p>
+    </div>
     <div class="field">
       <label>Foto</label>
       <input class="input" id="cav-foto-file" type="file" accept="image/*">
@@ -1132,26 +1086,17 @@ textarea.input{resize:vertical}
 <!-- MODAL: nuova lezione -->
 <div class="modal-overlay" id="modal-lezione" onclick="closeOut(event,'modal-lezione')">
   <div class="modal">
-    <div class="modal-title"><span id="modal-lezione-title">Nuova lezione</span> <span class="x" onclick="closeModal('modal-lezione')">✕</span></div>
+    <div class="modal-title">Nuova lezione <span class="x" onclick="closeModal('modal-lezione')">✕</span></div>
     <div class="grid grid-2">
       <div class="field"><label>Data</label><input class="input" id="lez-data" type="date"></div>
       <div class="field"><label>Ora inizio</label><input class="input" id="lez-ora" type="time"></div>
     </div>
     <div class="field"><label>Istruttore</label><select class="input" id="lez-istruttore"></select></div>
     <div class="field"><label>Cavallo</label><select class="input" id="lez-cavallo"><option value="">Nessuno / da definire</option></select></div>
-    <div class="field">
-      <label>Allievo</label>
-      <select class="input" id="lez-allievo" onchange="onLezAllievoChange()"></select>
-    </div>
-    <div class="field" id="lez-allievo-manuale-field" style="display:none">
-      <label>Nome allievo</label>
-      <input class="input" id="lez-allievo-manuale" placeholder="Nome e cognome">
-      <p style="margin:6px 0 0;color:var(--muted);font-size:12px">Non è collegato a un account: niente chat né notifiche automatiche finché non scarica Equo App e si registra col codice invito.</p>
-    </div>
+    <div class="field"><label>Allievo</label><select class="input" id="lez-allievo"></select></div>
     <div class="field"><label>Note</label><input class="input" id="lez-note" placeholder="Facoltativo"></div>
     <div class="auth-error" id="lezione-error"></div>
     <button class="btn btn-primary btn-block" onclick="saveLezione()">Salva lezione</button>
-    <button class="btn btn-outline btn-block" id="btn-elimina-lezione" style="display:none;margin-top:8px;color:#ef4444;border-color:#ef4444" onclick="deleteLezioneFromForm()"><i class="fa-solid fa-trash"></i> Elimina lezione</button>
   </div>
 </div>
 
@@ -1307,7 +1252,7 @@ const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore", collaboratore:"Collaboratore", segretario:"Segretario/a", giardiniere:"Giardiniere", altro:"Altro" };
+const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore", collaboratore:"Collaboratore", proprietario:"Proprietario", segretario:"Segretario", giardiniere:"Giardiniere", altro:"Altro" };
 const LIVELLO_LABELS = { "1":"Livello 1", "2":"Livello 2", "3":"Livello 3", admin:"Admin" };
 const PERMESSI_FLAGS = ["cavalli","eventi","lezioni","pacchetti","messaggi","contatti","fiscali"];
 const CONTATTO_TIPO_LABELS = {
@@ -1325,7 +1270,7 @@ const ACTIVE_PLACEHOLDER_COPY = {};
 
 const TIPO_LABELS = { vaccino:"Vaccino", coggins:"Coggins test", ferratura:"Ferratura", sverminazione:"Sverminazione", altro:"Altro" };
 const TIPO_ICONS = { vaccino:"fa-syringe", coggins:"fa-vial", ferratura:"svg:horseshoe", sverminazione:"fa-pills", altro:"fa-ellipsis" };
-const TIPO_PROPRIETA_LABELS = { proprieta:"Proprietà struttura", pensione:"Pensione privata", mezza_pensione:"Mezza pensione", soci:"Soci/istruttori" };
+const TIPO_PROPRIETA_LABELS = { proprieta:"Proprietà struttura", pensione:"Pensione privata", soci:"Soci/istruttori" };
 const TIPO_ORDER = ["vaccino","coggins","ferratura","sverminazione"];
 
 /* Icone custom (non presenti nel set gratuito di Font Awesome) */
@@ -1357,7 +1302,6 @@ let eventoToDelete = null;
 let lezioniList = [];
 let lezioniFilter = "prossime";
 let lezioneToDelete = null;
-let editingLezioneId = null;
 
 let pacchettiList = [];
 let pacchettoToDelete = null;
@@ -1640,8 +1584,7 @@ function renderTeam(){
   if(teamList.length <= 1){ empty.style.display = "block"; } else { empty.style.display = "none"; }
 
   teamList.forEach(m => {
-    const isPending = !m.user_id;
-    const isMe = !isPending && m.user_id === currentUser.id;
+    const isMe = m.user_id === currentUser.id;
     const isAdminUser = currentMembro.ruolo === "admin";
     const canRemove = isAdminUser && !isMe && m.ruolo !== "admin";
     const canEdit = isAdminUser && !isMe;
@@ -1649,92 +1592,14 @@ function renderTeam(){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${escapeHtml(m.nome_visualizzato || (isMe ? "Tu" : "Membro"))}</td>
-      <td>
-        <span class="badge-pill badge-gray">${RUOLO_LABELS[m.ruolo] || m.ruolo}</span>
-        ${isPending ? `<span class="badge-pill badge-yellow" style="margin-left:6px">In attesa</span>` : ""}
-      </td>
+      <td><span class="badge-pill badge-gray">${RUOLO_LABELS[m.ruolo] || m.ruolo}</span></td>
       <td><span class="badge-pill badge-gray">${livelloLabel}</span></td>
       <td style="text-align:right;white-space:nowrap">
-        ${isPending ? `<button class="btn btn-ghost btn-sm" onclick="copyPendingInviteText('${m.id}')" title="Copia messaggio di invito"><i class="fa-solid fa-copy"></i></button>` : ""}
         ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openMemberForm('${m.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
         ${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember('${m.id}','${escapeHtml(m.nome_visualizzato || 'questo membro')}')"><i class="fa-solid fa-trash"></i></button>` : ""}
       </td>
     `;
     body.appendChild(tr);
-  });
-}
-
-function openNewMemberForm(){
-  document.getElementById("nm-error").style.display = "none";
-  document.getElementById("nm-nome").value = "";
-  document.getElementById("nm-ruolo").value = "segretario";
-  document.getElementById("nm-ruolo-altro").value = "";
-  document.getElementById("nm-ruolo-altro-field").style.display = "none";
-  document.getElementById("nm-livello").value = "1";
-  PERMESSI_FLAGS.forEach(f => { const el = document.getElementById("nm-perm-" + f); if(el) el.checked = false; });
-  document.getElementById("nm-permessi-field").style.display = "none";
-  openModal("modal-nuovo-membro");
-}
-
-function onNewMemberRuoloChange(){
-  const isAltro = document.getElementById("nm-ruolo").value === "altro";
-  document.getElementById("nm-ruolo-altro-field").style.display = isAltro ? "block" : "none";
-}
-
-function onNewMemberLivelloChange(){
-  const livello = document.getElementById("nm-livello").value;
-  document.getElementById("nm-permessi-field").style.display = livello === "3" ? "block" : "none";
-}
-
-async function saveNewMember(){
-  const nome = document.getElementById("nm-nome").value.trim();
-  const ruolo = document.getElementById("nm-ruolo").value;
-  const ruoloAltro = document.getElementById("nm-ruolo-altro").value.trim();
-  const livello = document.getElementById("nm-livello").value;
-  const errBox = document.getElementById("nm-error");
-  errBox.style.display = "none";
-
-  if(!nome){ errBox.textContent = "Inserisci il nome."; errBox.style.display = "block"; return; }
-  if(ruolo === "altro" && !ruoloAltro){ errBox.textContent = "Specifica la mansione."; errBox.style.display = "block"; return; }
-
-  let permessi = {};
-  if(livello === "3"){
-    PERMESSI_FLAGS.forEach(f => { permessi[f] = document.getElementById("nm-perm-" + f).checked; });
-  }
-  const nomeFinale = ruolo === "altro" ? `${nome} (${ruoloAltro})` : nome;
-
-  try{
-    if(DEMO_MODE){
-      demoState.membri.push({ id:"pending-" + Date.now(), user_id:null, ruolo, nome_visualizzato:nomeFinale, livello, permessi });
-      teamList = demoState.membri;
-    } else {
-      const { error } = await sb.rpc("add_pending_member", {
-        p_centro_id: currentCentro.id, p_ruolo: ruolo, p_nome_visualizzato: nomeFinale,
-        p_livello: livello, p_permessi: permessi
-      });
-      if(error) throw error;
-      await loadTeam();
-    }
-    renderTeam();
-    closeModal("modal-nuovo-membro");
-    showToast("Dipendente aggiunto. In attesa che si registri con il codice invito.");
-  } catch(err){
-    errBox.textContent = err.message || "Errore nel salvataggio.";
-    errBox.style.display = "block";
-  }
-}
-
-function copyPendingInviteText(id){
-  const m = teamList.find(x => x.id === id);
-  if(!m) return;
-  const nome = m.nome_visualizzato || "";
-  const ruoloLabel = RUOLO_LABELS[m.ruolo] || m.ruolo;
-  const code = currentCentro?.join_code || "";
-  const testo = `Ciao${nome ? " " + nome : ""}! Registrati su Equo Scuderia con il codice invito ${code} e scegli il ruolo "${ruoloLabel}" per accedere ai dati di ${currentCentro?.nome || "la struttura"}.`;
-  navigator.clipboard?.writeText(testo).then(() => {
-    showToast("Messaggio di invito copiato.");
-  }).catch(() => {
-    showToast("Impossibile copiare automaticamente. Testo invito: " + testo);
   });
 }
 
@@ -2057,116 +1922,34 @@ function refreshHardResetCard(){
   const isAdminUser = currentMembro?.ruolo === "admin";
   const card = document.getElementById("card-hard-reset");
   if(card) card.style.display = isAdminUser ? "block" : "none";
-  const body = document.getElementById("hard-reset-body");
-  const icon = document.getElementById("hard-reset-toggle-icon");
-  if(body) body.style.display = "none";
-  if(icon) icon.className = "fa-solid fa-chevron-down";
-}
-
-function toggleHardResetCard(){
-  const body = document.getElementById("hard-reset-body");
-  const icon = document.getElementById("hard-reset-toggle-icon");
-  const isOpen = body.style.display !== "none";
-  body.style.display = isOpen ? "none" : "block";
-  icon.className = isOpen ? "fa-solid fa-chevron-down" : "fa-solid fa-chevron-up";
-}
-
-function setupHardResetCodeBoxes(){
-  const boxes = Array.from(document.querySelectorAll(".hr-code-box"));
-  boxes.forEach((box, i) => {
-    box.value = "";
-    box.oninput = () => {
-      box.value = box.value.replace(/[^0-9]/g, "").slice(0, 1);
-      if(box.value && boxes[i + 1]) boxes[i + 1].focus();
-    };
-    box.onkeydown = (e) => {
-      if(e.key === "Backspace" && !box.value && boxes[i - 1]) boxes[i - 1].focus();
-    };
-    box.onpaste = (e) => {
-      const text = (e.clipboardData || window.clipboardData).getData("text").replace(/[^0-9]/g, "");
-      if(text.length > 1){
-        e.preventDefault();
-        text.slice(0, 6).split("").forEach((ch, j) => { if(boxes[j]) boxes[j].value = ch; });
-        boxes[Math.min(text.length, 6) - 1]?.focus();
-      }
-    };
-  });
-}
-
-function getHardResetCode(){
-  return Array.from(document.querySelectorAll(".hr-code-box")).map(b => b.value).join("");
 }
 
 function askHardReset(tipo){
   const modulo = tipo === "parziale" ? document.getElementById("reset-modulo-select").value : null;
   pendingHardReset = { tipo, modulo };
+  const keyword = tipo === "totale" ? "RESET TOTALE" : "RESET";
+  document.getElementById("hard-reset-keyword-display").textContent = keyword;
+  document.getElementById("hard-reset-confirm-input").value = "";
   document.getElementById("hard-reset-error").style.display = "none";
   document.getElementById("hard-reset-desc").textContent = tipo === "totale"
     ? "Stai per cancellare definitivamente TUTTI i dati operativi del centro (cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti, dati societari). Centro e team resteranno."
     : `Stai per cancellare definitivamente tutti i dati del modulo "${RESET_MODULO_LABELS[modulo]}". Operazione irreversibile.`;
-
-  if(tipo === "totale"){
-    document.getElementById("hard-reset-keyword-field").style.display = "none";
-    document.getElementById("hard-reset-code-field").style.display = "block";
-    setupHardResetCodeBoxes();
-    const subject = encodeURIComponent("Richiesta codice Hard Reset - " + (currentCentro?.nome || ""));
-    const body = encodeURIComponent(`Centro: ${currentCentro?.nome || "-"}\nID centro: ${currentCentro?.id || "-"}\n\nRichiedo il codice a 6 cifre per il reset totale.`);
-    document.getElementById("hard-reset-contact-link").href = `mailto:gestione.equo@gmail.com?subject=${subject}&body=${body}`;
-    setTimeout(() => document.querySelector(".hr-code-box")?.focus(), 100);
-  } else {
-    const keyword = "RESET";
-    document.getElementById("hard-reset-keyword-display").textContent = keyword;
-    document.getElementById("hard-reset-confirm-input").value = "";
-    document.getElementById("hard-reset-keyword-field").style.display = "block";
-    document.getElementById("hard-reset-code-field").style.display = "none";
-  }
   openModal("modal-hard-reset");
 }
 
 async function confirmHardReset(){
   if(!pendingHardReset) return;
+  const keyword = pendingHardReset.tipo === "totale" ? "RESET TOTALE" : "RESET";
+  const typed = document.getElementById("hard-reset-confirm-input").value.trim();
   const errBox = document.getElementById("hard-reset-error");
   errBox.style.display = "none";
-
-  if(pendingHardReset.tipo === "totale"){
-    const code = getHardResetCode();
-    if(code.length !== 6){
-      errBox.textContent = "Inserisci le 6 cifre del codice ricevuto via email.";
-      errBox.style.display = "block";
-      return;
-    }
-    try{
-      if(DEMO_MODE){
-        await hardResetTables(RESET_TOTALE_TABLES);
-      } else {
-        const { error } = await sb.rpc("confirm_hard_reset_totale", { p_centro_id: currentCentro.id, p_code: code });
-        if(error) throw error;
-      }
-      closeModal("modal-hard-reset");
-      showToast("Reset eseguito.");
-      pendingHardReset = null;
-      await refreshHomeModule();
-      await refreshContattiModule();
-      await refreshCavalliModule();
-      await refreshLezioniModule();
-      await refreshPacchettiModule();
-      await refreshComunicazioniModule();
-    } catch(err){
-      errBox.textContent = err.message || "Codice non valido.";
-      errBox.style.display = "block";
-    }
-    return;
-  }
-
-  const keyword = "RESET";
-  const typed = document.getElementById("hard-reset-confirm-input").value.trim();
   if(typed !== keyword){
     errBox.textContent = `Devi digitare esattamente "${keyword}" per confermare.`;
     errBox.style.display = "block";
     return;
   }
   try{
-    const tables = RESET_MODULO_TABLES[pendingHardReset.modulo];
+    const tables = pendingHardReset.tipo === "totale" ? RESET_TOTALE_TABLES : RESET_MODULO_TABLES[pendingHardReset.modulo];
     await hardResetTables(tables);
     closeModal("modal-hard-reset");
     showToast("Reset eseguito.");
@@ -2476,7 +2259,7 @@ function renderCavalliList(){
   empty.style.display = cavalliList.length === 0 ? "block" : "none";
   document.getElementById("cavalli-sezioni").style.display = cavalliList.length === 0 ? "none" : "block";
 
-  ["proprieta","pensione","mezza_pensione","soci"].forEach(sezione => {
+  ["proprieta","pensione","soci"].forEach(sezione => {
     const grid = document.getElementById("cavalli-grid-" + sezione);
     const sezioneEl = document.querySelector(`.cavalli-sezione[data-sezione="${sezione}"]`);
     const emptySezione = sezioneEl.querySelector(".empty-state-sezione");
@@ -2760,12 +2543,13 @@ function openCavalloForm(id){
     document.getElementById("cav-microchip").value = c?.microchip || "";
     document.getElementById("cav-gruppo-sanguigno").value = c?.gruppo_sanguigno || "";
     document.getElementById("cav-proprietario").value = c?.proprietario || "";
+    document.getElementById("cav-codice-proprietario").value = "";
     document.getElementById("cav-note").value = c?.note || "";
     preview.innerHTML = c?.foto_url ? `<img src="${c.foto_url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
   } else {
     document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
     document.getElementById("cav-tipo-proprieta").value = "proprieta";
-    ["cav-nome","cav-razza","cav-mantello","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
+    ["cav-nome","cav-razza","cav-mantello","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
     preview.innerHTML = "";
   }
   openModal("modal-cavallo");
@@ -2786,13 +2570,6 @@ async function saveCavallo(){
   errBox.style.display = "none";
   if(!nome){ errBox.textContent = "Inserisci il nome del cavallo."; errBox.style.display = "block"; return; }
 
-  const microchipVal = document.getElementById("cav-microchip").value.trim();
-  if(microchipVal && microchipVal.length !== 15){
-    errBox.textContent = "Il microchip deve avere esattamente 15 cifre.";
-    errBox.style.display = "block";
-    return;
-  }
-
   const payload = {
     nome,
     tipo_proprieta: document.getElementById("cav-tipo-proprieta").value,
@@ -2805,10 +2582,12 @@ async function saveCavallo(){
     note: document.getElementById("cav-note").value.trim() || null,
   };
   const fotoFile = document.getElementById("cav-foto-file").files[0] || null;
+  const codiceProprietario = document.getElementById("cav-codice-proprietario").value.trim().toUpperCase();
   const saveBtn = document.getElementById("cavallo-save-btn");
 
   try{
     saveBtn.disabled = true;
+    let savedCavalloId = editingCavalloId;
     if(DEMO_MODE){
       if(fotoFile){
         payload.foto_url = await new Promise(res => {
@@ -2821,7 +2600,8 @@ async function saveCavallo(){
         const idx = demoState.cavalli.findIndex(c => c.id === editingCavalloId);
         if(idx >= 0) demoState.cavalli[idx] = { ...demoState.cavalli[idx], ...payload, updated_at: new Date().toISOString() };
       } else {
-        demoState.cavalli.push({ id:"c" + (demoIdCounter++ + 100), centro_id: demoState.centro.id, ...payload, updated_at: new Date().toISOString() });
+        savedCavalloId = "c" + (demoIdCounter++ + 100);
+        demoState.cavalli.push({ id: savedCavalloId, centro_id: demoState.centro.id, ...payload, updated_at: new Date().toISOString() });
       }
     } else if(editingCavalloId){
       if(fotoFile) payload.foto_url = await uploadCavalloFoto(fotoFile, editingCavalloId);
@@ -2830,6 +2610,7 @@ async function saveCavallo(){
     } else {
       const { data, error } = await sb.from("scuderia_cavalli").insert({ centro_id: currentCentro.id, ...payload }).select().single();
       if(error) throw error;
+      savedCavalloId = data.id;
       if(fotoFile){
         const foto_url = await uploadCavalloFoto(fotoFile, data.id);
         await sb.from("scuderia_cavalli").update({ foto_url }).eq("id", data.id);
@@ -2839,11 +2620,46 @@ async function saveCavallo(){
     if(currentCavalloId){ renderCavalloDetail(); } else { renderCavalliList(); }
     closeModal("modal-cavallo");
     showToast(editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto.");
+
+    if(codiceProprietario){
+      await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);
+    }
   } catch(err){
     errBox.textContent = err.message || "Errore nel salvataggio.";
     errBox.style.display = "block";
   } finally {
     saveBtn.disabled = false;
+  }
+}
+
+async function collegaProprietarioDaCodice(codice, cavalloId, nomeFallback){
+  try{
+    let membroId, nome;
+    if(DEMO_MODE){
+      if(codice !== "EQUO-OWN-DEMO"){ showToast("Codice non valido: il cavallo è stato salvato senza collegamento."); return; }
+      const esistente = teamList.find(m => m.user_id === "u3");
+      if(esistente){ membroId = esistente.id; nome = esistente.nome_visualizzato; }
+      else {
+        membroId = "m" + (demoIdCounter++ + 500);
+        nome = "Giulia Verdi";
+        const nuovo = { id: membroId, user_id:"u3", ruolo:"proprietario", nome_visualizzato: nome, livello:"1", permessi:{} };
+        demoState.membri.push(nuovo);
+        teamList.push(nuovo);
+      }
+    } else {
+      const { data, error } = await sb.rpc("link_proprietario_da_codice", {
+        p_centro_id: currentCentro.id, p_codice: codice, p_nome_fallback: nomeFallback || null,
+      });
+      if(error || !data){ showToast("Codice non valido: il cavallo è stato salvato senza collegamento."); return; }
+      const row = Array.isArray(data) ? data[0] : data;
+      membroId = row.membro_id; nome = row.nome;
+      if(cavalloId) await sb.from("scuderia_cavalli").update({ proprietario_membro_id: membroId, codice_app_proprietario: codice }).eq("id", cavalloId);
+      await loadTeam();
+    }
+    renderClientiChatList();
+    apriConfirmChatCliente(nome || "il proprietario", membroId);
+  } catch(err){
+    showToast("Codice non valido: il cavallo è stato salvato senza collegamento.");
   }
 }
 
@@ -2973,7 +2789,7 @@ async function refreshLezioniModule(){
 async function loadLezioni(){
   if(DEMO_MODE){ lezioniList = demoState.lezioni; return; }
   const { data, error } = await sb.from("scuderia_lezioni")
-    .select("id, centro_id, data, ora_inizio, istruttore_id, cavallo_id, allievo_id, allievo_nome, stato, note")
+    .select("id, centro_id, data, ora_inizio, istruttore_id, cavallo_id, allievo_id, stato, note")
     .eq("centro_id", currentCentro.id)
     .order("data", { ascending: true }).order("ora_inizio", { ascending: true });
   if(!error) lezioniList = data || [];
@@ -3008,19 +2824,17 @@ function renderLezioni(){
 
   list.forEach(l => {
     const tr = document.createElement("tr");
-    tr.style.cursor = "pointer";
-    tr.onclick = () => openLezioneForm(l.id);
     tr.innerHTML = `
       <td>${formatDate(l.data)}</td>
       <td>${l.ora_inizio || "—"}</td>
       <td>${escapeHtml(membroNome(l.istruttore_id))}</td>
       <td>${escapeHtml(cavalloNome(l.cavallo_id))}</td>
-      <td>${escapeHtml(allievoNomeLezione(l))}</td>
+      <td>${escapeHtml(membroNome(l.allievo_id))}</td>
       <td><span class="badge-pill badge-${STATO_LEZIONE_BADGE[l.stato] || "gray"}">${STATO_LEZIONE_LABELS[l.stato] || l.stato}</span></td>
       <td style="text-align:right">
-        ${l.allievo_id ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); chattaConMembro('${l.allievo_id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
-        ${(l.stato !== "annullata" && memberCanUI("lezioni")) ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); setLezioneStato('${l.id}','completata')" title="Segna completata"><i class="fa-solid fa-check"></i></button>` : ""}
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); askDeleteLezione('${l.id}')"><i class="fa-solid fa-trash"></i></button>
+        ${l.allievo_id ? `<button class="btn btn-ghost btn-sm" onclick="chattaConMembro('${l.allievo_id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
+        ${(l.stato !== "annullata" && memberCanUI("lezioni")) ? `<button class="btn btn-ghost btn-sm" onclick="setLezioneStato('${l.id}','completata')" title="Segna completata"><i class="fa-solid fa-check"></i></button>` : ""}
+        <button class="btn btn-ghost btn-sm" onclick="askDeleteLezione('${l.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>`;
     body.appendChild(tr);
   });
@@ -3033,64 +2847,17 @@ function populateLezioneSelects(){
   const selAll = document.getElementById("lez-allievo");
   const selCav = document.getElementById("lez-cavallo");
   selIst.innerHTML = istruttori.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])}</option>`).join("") || `<option value="">Nessun istruttore nel team</option>`;
-  selAll.innerHTML = `<option value="">Nessuno / da definire</option>`
-    + allievi.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || "Allievo")}</option>`).join("")
-    + `<option value="__manual__">+ Aggiungi manualmente (senza app)</option>`;
+  selAll.innerHTML = allievi.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || "Allievo")}</option>`).join("") || `<option value="">Nessun allievo nel team</option>`;
   selCav.innerHTML = `<option value="">Nessuno / da definire</option>` + cavalliList.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
 }
 
-function onLezAllievoChange(){
-  const isManual = document.getElementById("lez-allievo").value === "__manual__";
-  document.getElementById("lez-allievo-manuale-field").style.display = isManual ? "block" : "none";
-}
-
-function allievoNomeLezione(l){
-  if(l.allievo_id) return membroNome(l.allievo_id);
-  if(l.allievo_nome) return l.allievo_nome;
-  return "—";
-}
-
-function openLezioneForm(id){
-  editingLezioneId = id || null;
+function openLezioneForm(){
   document.getElementById("lezione-error").style.display = "none";
   populateLezioneSelects();
-  document.getElementById("modal-lezione-title").textContent = editingLezioneId ? "Modifica lezione" : "Nuova lezione";
-  document.getElementById("btn-elimina-lezione").style.display = editingLezioneId ? "block" : "none";
-  document.getElementById("lez-allievo-manuale-field").style.display = "none";
-  document.getElementById("lez-allievo-manuale").value = "";
-
-  const l = editingLezioneId ? lezioniList.find(x => x.id === editingLezioneId) : null;
-  if(l){
-    document.getElementById("lez-data").value = l.data;
-    document.getElementById("lez-ora").value = (l.ora_inizio || "").slice(0,5);
-    document.getElementById("lez-istruttore").value = l.istruttore_id || "";
-    document.getElementById("lez-cavallo").value = l.cavallo_id || "";
-    document.getElementById("lez-note").value = l.note || "";
-    if(l.allievo_id){
-      document.getElementById("lez-allievo").value = l.allievo_id;
-    } else if(l.allievo_nome){
-      document.getElementById("lez-allievo").value = "__manual__";
-      document.getElementById("lez-allievo-manuale-field").style.display = "block";
-      document.getElementById("lez-allievo-manuale").value = l.allievo_nome;
-    } else {
-      document.getElementById("lez-allievo").value = "";
-    }
-  } else {
-    document.getElementById("lez-data").value = new Date().toISOString().slice(0,10);
-    document.getElementById("lez-ora").value = "10:00";
-    document.getElementById("lez-note").value = "";
-    document.getElementById("lez-istruttore").value = "";
-    document.getElementById("lez-cavallo").value = "";
-    document.getElementById("lez-allievo").value = "";
-  }
+  document.getElementById("lez-data").value = new Date().toISOString().slice(0,10);
+  document.getElementById("lez-ora").value = "10:00";
+  document.getElementById("lez-note").value = "";
   openModal("modal-lezione");
-}
-
-function deleteLezioneFromForm(){
-  if(!editingLezioneId) return;
-  const id = editingLezioneId;
-  closeModal("modal-lezione");
-  askDeleteLezione(id);
 }
 
 async function saveLezione(){
@@ -3098,41 +2865,24 @@ async function saveLezione(){
   const ora_inizio = document.getElementById("lez-ora").value;
   const istruttore_id = document.getElementById("lez-istruttore").value || null;
   const cavallo_id = document.getElementById("lez-cavallo").value || null;
-  const allievoSel = document.getElementById("lez-allievo").value;
+  const allievo_id = document.getElementById("lez-allievo").value || null;
   const note = document.getElementById("lez-note").value.trim() || null;
   const errBox = document.getElementById("lezione-error");
   errBox.style.display = "none";
   if(!data || !ora_inizio){ errBox.textContent = "Inserisci data e orario."; errBox.style.display = "block"; return; }
 
-  let allievo_id = null, allievo_nome = null;
-  if(allievoSel === "__manual__"){
-    allievo_nome = document.getElementById("lez-allievo-manuale").value.trim();
-    if(!allievo_nome){ errBox.textContent = "Inserisci il nome dell'allievo."; errBox.style.display = "block"; return; }
-  } else if(allievoSel){
-    allievo_id = allievoSel;
-  }
-
-  const payload = { data, ora_inizio, istruttore_id, cavallo_id, allievo_id, allievo_nome, note };
+  const payload = { data, ora_inizio, istruttore_id, cavallo_id, allievo_id, note, stato:"prenotata" };
   try{
     if(DEMO_MODE){
-      if(editingLezioneId){
-        const idx = demoState.lezioni.findIndex(x => x.id === editingLezioneId);
-        if(idx >= 0) demoState.lezioni[idx] = { ...demoState.lezioni[idx], ...payload };
-      } else {
-        demoState.lezioni.push({ id:"l" + (demoIdCounter++ + 200), centro_id: demoState.centro.id, ...payload, stato:"prenotata" });
-      }
-    } else if(editingLezioneId){
-      const { error } = await sb.from("scuderia_lezioni").update(payload).eq("id", editingLezioneId);
-      if(error) throw error;
+      demoState.lezioni.push({ id:"l" + (demoIdCounter++ + 200), centro_id: demoState.centro.id, ...payload });
     } else {
-      const { error } = await sb.from("scuderia_lezioni").insert({ centro_id: currentCentro.id, ...payload, stato:"prenotata" });
+      const { error } = await sb.from("scuderia_lezioni").insert({ centro_id: currentCentro.id, ...payload });
       if(error) throw error;
     }
     await loadLezioni();
     renderLezioni();
     closeModal("modal-lezione");
-    showToast(editingLezioneId ? "Lezione aggiornata." : "Lezione aggiunta.");
-    editingLezioneId = null;
+    showToast("Lezione aggiunta.");
   } catch(err){
     errBox.textContent = err.message || "Errore nel salvataggio.";
     errBox.style.display = "block";
@@ -3361,6 +3111,49 @@ async function confirmDeletePacchetto(){
 async function refreshComunicazioniModule(){
   await loadMessaggi();
   renderMessaggi();
+  renderClientiChatList();
+}
+
+/* ---------- CHATTA CON I TUOI CLIENTI ---------- */
+function clientiChatCollegati(){
+  // Persone già collegate al centro con account Equo App: proprietari agganciati
+  // a un cavallo (ruolo "proprietario") + membri del team che hanno un account.
+  return teamList.filter(m => m.user_id && m.user_id !== currentUser.id && (m.ruolo === "proprietario" || m.ruolo !== "admin"));
+}
+
+function renderClientiChatList(){
+  const box = document.getElementById("clienti-chat-list");
+  const empty = document.getElementById("clienti-chat-empty");
+  if(!box) return;
+  const query = (document.getElementById("clienti-chat-search")?.value || "").trim().toLowerCase();
+  let list = clientiChatCollegati();
+  if(query) list = list.filter(m => (m.nome_visualizzato || "").toLowerCase().includes(query));
+  list = list.slice().sort((a,b) => (a.nome_visualizzato||"").localeCompare(b.nome_visualizzato||""));
+
+  empty.style.display = clientiChatCollegati().length === 0 ? "block" : "none";
+  box.innerHTML = list.map(m => `
+    <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <span class="who">${escapeHtml(m.nome_visualizzato || "Cliente")}</span>
+        <div style="color:var(--muted);font-size:12px">${m.ruolo === "proprietario" ? "Proprietario" : (RUOLO_LABELS[m.ruolo] || m.ruolo)}</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="chattaConMembro('${m.id}')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
+    </div>`).join("");
+  if(query && list.length === 0 && clientiChatCollegati().length > 0){
+    box.innerHTML = `<p style="color:var(--muted);font-size:12.5px;padding:8px 2px">Nessun cliente collegato trovato per "${escapeHtml(query)}".</p>`;
+  }
+}
+
+let clienteAppenaCollegato = null; // { membro_id, nome }
+function apriConfirmChatCliente(nome, membroId){
+  clienteAppenaCollegato = { membro_id: membroId, nome };
+  document.getElementById("chat-cliente-confirm-text").textContent = `Vuoi subito aprire una chat con ${nome}?`;
+  openModal("modal-chat-cliente-confirm");
+}
+function chattaConProprietarioAppenaCollegato(){
+  closeModal("modal-chat-cliente-confirm");
+  if(clienteAppenaCollegato) chattaConMembro(clienteAppenaCollegato.membro_id);
+  clienteAppenaCollegato = null;
 }
 
 async function loadMessaggi(){
@@ -3693,7 +3486,7 @@ function openHomeDetail(type){
       .sort((a,b) => (a.data + a.ora_inizio).localeCompare(b.data + b.ora_inizio))
       .forEach(l => {
         rows.push({
-          main: `${formatDate(l.data)} · ${l.ora_inizio} — ${allievoNomeLezione(l)}`,
+          main: `${formatDate(l.data)} · ${l.ora_inizio} — ${membroNome(l.allievo_id)}`,
           sub: `Istruttore: ${membroNome(l.istruttore_id)} · Cavallo: ${cavalloNome(l.cavallo_id)}`,
           badge: STATO_LEZIONE_BADGE[l.stato] || "gray",
         });
