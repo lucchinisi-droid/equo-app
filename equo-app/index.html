@@ -416,8 +416,8 @@ select.input{cursor:pointer}
 
   <div class="auth-form">
     <div class="input-group" id="signup-name-group" style="display:none">
-      <label class="input-label">Nome</label>
-      <input class="input" id="auth-name" placeholder="Il tuo nome">
+      <label class="input-label">Nome e cognome</label>
+      <input class="input" id="auth-name" placeholder="Es. Mario Rossi">
     </div>
     <div class="input-group">
       <label class="input-label">Email</label>
@@ -437,6 +437,20 @@ select.input{cursor:pointer}
     <div class="muted" style="font-size:11.5px;line-height:1.5;text-align:center;margin-top:10px">
       Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')" style="color:var(--accent)">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.
     </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: completa profilo (nome e cognome obbligatori) ═══ -->
+<div class="modal-overlay" id="modal-completa-profilo">
+  <div class="modal">
+    <div class="modal-title">Completa il tuo profilo</div>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Per il corretto funzionamento dell'app, e per farti riconoscere e connettere con amici e strutture, è indispensabile inserire il tuo nome e cognome corretti.</p>
+    <div class="field">
+      <label>Nome e cognome</label>
+      <input class="input" id="cp-nome-cognome" placeholder="Es. Mario Rossi">
+    </div>
+    <div class="auth-error" id="cp-nome-error" style="display:none"></div>
+    <button class="btn btn-primary btn-block" onclick="saveCompleteProfile()">Salva e continua</button>
   </div>
 </div>
 
@@ -2450,6 +2464,12 @@ async function submitAuth(){
   try{
     if(authMode === "signup"){
       const name = document.getElementById("auth-name").value.trim();
+      const nameParole = name.split(/\s+/).filter(Boolean);
+      if(nameParole.length < 2){
+        errBox.textContent = "Inserisci nome e cognome (almeno due parole).";
+        errBox.style.display = "block";
+        return;
+      }
       const referral_code = document.getElementById("auth-referral").value.trim() || null;
       const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name } } });
       if(error) throw error;
@@ -2621,6 +2641,20 @@ async function boot(){
   if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
   else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
+  const nomeParoleBoot = (profile?.full_name || "").trim().split(/\s+/).filter(Boolean);
+  if(nomeParoleBoot.length < 2){
+    document.getElementById("screen-app").classList.remove("active");
+    document.getElementById("screen-onboarding").classList.remove("active");
+    document.getElementById("cp-nome-error").style.display = "none";
+    document.getElementById("cp-nome-cognome").value = profile?.full_name || "";
+    openModal("modal-completa-profilo");
+    return;
+  }
+
+  await continueBootAfterProfile();
+}
+
+async function continueBootAfterProfile(){
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
     document.getElementById("screen-onboarding").classList.add("active");
@@ -2630,6 +2664,28 @@ async function boot(){
   await enterApp(currentUser.ruolo);
   checkPendingDeletion();
   await handleCheckoutReturn();
+}
+
+async function saveCompleteProfile(){
+  const nome = document.getElementById("cp-nome-cognome").value.trim();
+  const errBox = document.getElementById("cp-nome-error");
+  errBox.style.display = "none";
+  const parole = nome.split(/\s+/).filter(Boolean);
+  if(parole.length < 2){
+    errBox.textContent = "Inserisci nome e cognome (almeno due parole).";
+    errBox.style.display = "block";
+    return;
+  }
+  try{
+    const { error } = await sb.from("profiles").update({ full_name: nome }).eq("id", currentUser.id);
+    if(error) throw error;
+    document.getElementById("profile-name").textContent = nome;
+    closeModal("modal-completa-profilo");
+    await continueBootAfterProfile();
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
 }
 
 /* Al ritorno da Stripe Checkout (?checkout=success in URL) il webhook potrebbe
