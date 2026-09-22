@@ -458,7 +458,7 @@ textarea.input{resize:vertical}
           <i class="fa-solid fa-ticket"></i> <span class="nav-label">Pacchetti &amp; Abbonamenti</span>
         </button>
         <button class="nav-item" data-module="comunicazioni" onclick="showModule('comunicazioni')">
-          <i class="fa-solid fa-comments"></i> <span class="nav-label">Comunicazioni</span>
+          <i class="fa-solid fa-comments"></i> <span class="nav-label">Comunicazioni & Chat</span>
         </button>
 
         <div class="nav-divider">In arrivo</div>
@@ -755,7 +755,7 @@ textarea.input{resize:vertical}
         <div class="module-page" id="module-comunicazioni" style="display:none">
           <div class="page-header">
             <div>
-              <h1><span class="page-icon"><i class="fa-solid fa-comments"></i></span> Comunicazioni</h1>
+              <h1><span class="page-icon"><i class="fa-solid fa-comments"></i></span> Comunicazioni & Chat</h1>
               <p>Messaggi a tutto il centro, per ruolo o a un singolo membro.</p>
             </div>
             <button class="btn btn-primary" id="btn-nuovo-messaggio" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
@@ -773,6 +773,7 @@ textarea.input{resize:vertical}
                 <h2 style="font-size:16px;margin:0">Chatta con i tuoi clienti</h2>
                 <p style="margin:2px 0 0">Chat 1-a-1 con proprietari e professionisti collegati al centro che usano Equo App.</p>
               </div>
+              <button class="btn btn-primary" id="btn-nuova-chat-cliente" onclick="openNuovaChatClienteForm()"><i class="fa-solid fa-plus"></i> Nuova chat</button>
             </div>
             <input class="input" id="clienti-chat-search" placeholder="Cerca per nome o cognome..." oninput="renderClientiChatList()" style="margin-bottom:12px">
             <div id="clienti-chat-list"></div>
@@ -952,6 +953,20 @@ textarea.input{resize:vertical}
       <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaChatMessaggio()}">
       <button class="btn btn-primary btn-sm" onclick="inviaChatMessaggio()"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: nuova chat cliente (inserisci codice proprietario) -->
+<div class="modal-overlay" id="modal-nuova-chat-cliente" onclick="closeOut(event,'modal-nuova-chat-cliente')">
+  <div class="modal">
+    <div class="modal-title">Nuova chat con un cliente <span class="x" onclick="closeModal('modal-nuova-chat-cliente')">✕</span></div>
+    <div class="field">
+      <label>Codice app proprietario</label>
+      <input class="input" id="nuova-chat-codice" placeholder="Es. EQUO-OWN-1234" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')avviaNuovaChatCliente()">
+      <p style="color:var(--muted);font-size:12px;margin-top:4px">Chiedi al proprietario il suo codice personale (lo trova nel menu profilo di Equo App). Se ha già inserito il suo cavallo, verrà collegato automaticamente.</p>
+    </div>
+    <div class="auth-error" id="nuova-chat-cliente-error"></div>
+    <button class="btn btn-primary btn-block" id="nuova-chat-cliente-btn" onclick="avviaNuovaChatCliente()">Collega e apri chat</button>
   </div>
 </div>
 
@@ -2622,7 +2637,17 @@ async function saveCavallo(){
     showToast(editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto.");
 
     if(codiceProprietario){
-      await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);
+      const esito = await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);
+      if(esito.ok) apriConfirmChatCliente(esito.nome || "il proprietario", esito.membroId);
+      else showToast(esito.error + " Il cavallo è stato comunque salvato.");
+    } else if(payload.microchip && !DEMO_MODE){
+      // Nessun codice inserito manualmente: se il microchip combacia con un
+      // cavallo già presente su Equo App, il proprietario viene collegato in automatico.
+      const { data, error } = await sb.rpc("sync_microchip_link", { p_microchip: payload.microchip });
+      if(!error){
+        await loadTeam();
+        renderClientiChatList();
+      }
     }
   } catch(err){
     errBox.textContent = err.message || "Errore nel salvataggio.";
@@ -2632,11 +2657,14 @@ async function saveCavallo(){
   }
 }
 
+// Collega (o riusa) il proprietario Equo App corrispondente al codice personale.
+// cavalloId è facoltativo: se passato, il cavallo viene anche marcato come collegato a lui.
+// Ritorna { ok:true, membroId, nome } oppure { ok:false, error }.
 async function collegaProprietarioDaCodice(codice, cavalloId, nomeFallback){
   try{
     let membroId, nome;
     if(DEMO_MODE){
-      if(codice !== "EQUO-OWN-DEMO"){ showToast("Codice non valido: il cavallo è stato salvato senza collegamento."); return; }
+      if(codice !== "EQUO-OWN-DEMO") return { ok:false, error:"Codice non valido." };
       const esistente = teamList.find(m => m.user_id === "u3");
       if(esistente){ membroId = esistente.id; nome = esistente.nome_visualizzato; }
       else {
@@ -2650,16 +2678,42 @@ async function collegaProprietarioDaCodice(codice, cavalloId, nomeFallback){
       const { data, error } = await sb.rpc("link_proprietario_da_codice", {
         p_centro_id: currentCentro.id, p_codice: codice, p_nome_fallback: nomeFallback || null,
       });
-      if(error || !data){ showToast("Codice non valido: il cavallo è stato salvato senza collegamento."); return; }
+      if(error || !data) return { ok:false, error: "Codice non valido." };
       const row = Array.isArray(data) ? data[0] : data;
       membroId = row.membro_id; nome = row.nome;
       if(cavalloId) await sb.from("scuderia_cavalli").update({ proprietario_membro_id: membroId, codice_app_proprietario: codice }).eq("id", cavalloId);
       await loadTeam();
     }
     renderClientiChatList();
-    apriConfirmChatCliente(nome || "il proprietario", membroId);
+    return { ok:true, membroId, nome };
   } catch(err){
-    showToast("Codice non valido: il cavallo è stato salvato senza collegamento.");
+    return { ok:false, error: err.message || "Codice non valido." };
+  }
+}
+
+/* ---------- NUOVA CHAT CLIENTE (dal codice, senza passare da un cavallo) ---------- */
+function openNuovaChatClienteForm(){
+  document.getElementById("nuova-chat-cliente-error").style.display = "none";
+  document.getElementById("nuova-chat-codice").value = "";
+  openModal("modal-nuova-chat-cliente");
+  setTimeout(() => document.getElementById("nuova-chat-codice")?.focus(), 100);
+}
+
+async function avviaNuovaChatCliente(){
+  const codice = document.getElementById("nuova-chat-codice").value.trim().toUpperCase();
+  const errBox = document.getElementById("nuova-chat-cliente-error");
+  errBox.style.display = "none";
+  if(!codice){ errBox.textContent = "Inserisci il codice del proprietario."; errBox.style.display = "block"; return; }
+
+  const btn = document.getElementById("nuova-chat-cliente-btn");
+  btn.disabled = true;
+  try{
+    const esito = await collegaProprietarioDaCodice(codice, null, null);
+    if(!esito.ok){ errBox.textContent = esito.error; errBox.style.display = "block"; return; }
+    closeModal("modal-nuova-chat-cliente");
+    chattaConMembro(esito.membroId);
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -3267,7 +3321,7 @@ const QUICK_ACCESS_ITEMS = [
   { key:"cavalli", icon:"fa-horse-head", titolo:"Cavalli & Salute", testo:"Anagrafica cavalli e scadenzario sanitario." },
   { key:"lezioni", icon:"fa-calendar-days", titolo:"Lezioni & Prenotazioni", testo:"Calendario delle lezioni del centro." },
   { key:"pacchetti", icon:"fa-ticket", titolo:"Pacchetti & Abbonamenti", testo:"Carnet, abbonamenti e cruscotto scadenze." },
-  { key:"comunicazioni", icon:"fa-comments", titolo:"Comunicazioni", testo:"Messaggi al team e agli allievi." },
+  { key:"comunicazioni", icon:"fa-comments", titolo:"Comunicazioni & Chat", testo:"Messaggi al team e chat con i clienti." },
   { key:"mascalcia", icon:"svg:horseshoe", titolo:"Mascalcia", testo:"Ferrature e sferrature.", soon:true },
   { key:"selleria", icon:"fa-bag-shopping", titolo:"Selleria & Attrezzatura", testo:"Inventario selle e finimenti.", soon:true },
   { key:"fatturazione", icon:"fa-file-invoice", titolo:"Fatturazione SDI", testo:"Fatture elettroniche conformi SDI.", soon:true },
@@ -3541,7 +3595,7 @@ function comingSoonHtml(icon, titolo, testo, badgeText){
 
 const MODULE_TITLES = {
   home:"Home", centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
-  pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Comunicazioni",
+  pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Comunicazioni & Chat",
   mascalcia:"Mascalcia", selleria:"Selleria & Attrezzatura", fatturazione:"Fatturazione SDI", ai:"Assistente AI",
 };
 function showModule(key){
