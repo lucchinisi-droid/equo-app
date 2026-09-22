@@ -13,9 +13,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root {
   --bg:#0e2019; --surface:#14312a; --surface2:#1c3f35;
@@ -76,8 +73,6 @@ select.input{cursor:pointer}
 .btn-primary:hover{opacity:.85;transform:translateY(-1px)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.chip{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;white-space:nowrap}
-.chip.active{background:var(--primary,#03491d);border-color:var(--primary,#03491d);color:#fff}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 .btn-ghost{background:transparent;color:var(--muted);font-size:13px}
 .btn-danger{background:rgba(226,104,95,.15);color:var(--red);border:1px solid rgba(226,104,95,.3)}
@@ -153,17 +148,9 @@ select.input{cursor:pointer}
   letter-spacing:.5px;margin-bottom:6px;background:rgba(232,176,75,.2);color:var(--accent)}
 .promo-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.25}
 .promo-desc{font-size:11px;color:var(--muted);margin-top:3px}
-.partner-banner{border-radius:16px;overflow:hidden;background:var(--card,#0e2417);border:1px dashed var(--border);position:relative;height:78px;margin-bottom:14px;cursor:pointer}
-.partner-slide{position:absolute;inset:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;opacity:0;transition:opacity .5s;pointer-events:none}
-.partner-slide.active{opacity:1;pointer-events:auto}
-.partner-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;margin-bottom:5px;background:rgba(255,189,89,.18);color:var(--gold,#ffbd59);width:fit-content}
-.partner-title{font-size:14px;font-weight:700;color:var(--text)}
-.partner-desc{font-size:11px;color:var(--muted);margin-top:2px}
 
 .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
-.stat-card.gold{background:rgba(255,189,89,.14);border-color:rgba(255,189,89,.4)}
-.stat-card.gold .stat-label{color:var(--gold,#ffbd59)}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .stat-value{font-family:'Fraunces',serif;font-size:22px;font-weight:700}
 .note-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);
@@ -260,7 +247,6 @@ select.input{cursor:pointer}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:60}
 .ai-fab .icon{width:24px;height:24px}
-.ai-usage-full{color:var(--danger,#e5484d);font-weight:600}
 .ai-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
   z-index:70;align-items:flex-end;justify-content:center}
 .ai-sheet-overlay.active{display:flex}
@@ -416,8 +402,8 @@ select.input{cursor:pointer}
 
   <div class="auth-form">
     <div class="input-group" id="signup-name-group" style="display:none">
-      <label class="input-label">Nome e cognome</label>
-      <input class="input" id="auth-name" placeholder="Es. Mario Rossi">
+      <label class="input-label">Nome</label>
+      <input class="input" id="auth-name" placeholder="Il tuo nome">
     </div>
     <div class="input-group">
       <label class="input-label">Email</label>
@@ -437,20 +423,6 @@ select.input{cursor:pointer}
     <div class="muted" style="font-size:11.5px;line-height:1.5;text-align:center;margin-top:10px">
       Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')" style="color:var(--accent)">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.
     </div>
-  </div>
-</div>
-
-<!-- ═══ MODAL: completa profilo (nome e cognome obbligatori) ═══ -->
-<div class="modal-overlay" id="modal-completa-profilo">
-  <div class="modal">
-    <div class="modal-title">Completa il tuo profilo</div>
-    <p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Per il corretto funzionamento dell'app, e per farti riconoscere e connettere con amici e strutture, è indispensabile inserire il tuo nome e cognome corretti.</p>
-    <div class="field">
-      <label>Nome e cognome</label>
-      <input class="input" id="cp-nome-cognome" placeholder="Es. Mario Rossi">
-    </div>
-    <div class="auth-error" id="cp-nome-error" style="display:none"></div>
-    <button class="btn btn-primary btn-block" onclick="saveCompleteProfile()">Salva e continua</button>
   </div>
 </div>
 
@@ -527,7 +499,7 @@ select.input{cursor:pointer}
         <div class="muted" style="font-size:14px;line-height:1.6;margin-bottom:20px">
           Crea la scheda del tuo cavallo per iniziare a tracciare vaccini, spese e scadenze.
         </div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-horse')" style="width:100%;margin-bottom:10px">
+        <button class="btn btn-primary" onclick="openHorseForm()" style="width:100%;margin-bottom:10px">
           <span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span> Aggiungi cavallo
         </button>
         <button class="btn btn-outline" onclick="openModal('modal-join-stable')" style="width:100%">
@@ -567,31 +539,18 @@ select.input{cursor:pointer}
         </div>
       </div>
 
-      <div class="partner-banner" id="partner-banner">
-        <div class="partner-slide active" data-pslide="0" onclick="window.location.href='mailto:gestione.equo@gmail.com?subject=' + encodeURIComponent('Vorrei comparire come partner su Equo')">
-          <span class="partner-tag">PARTNER</span>
-          <div class="partner-title">Vuoi comparire qui?</div>
-          <div class="partner-desc">Scrivici</div>
-        </div>
-        <div class="partner-slide" data-pslide="1" onclick="openModal('modal-segnala-maneggio')">
-          <span class="partner-tag">SEGNALAZIONE</span>
-          <div class="partner-title">Segnalaci il tuo maneggio</div>
-          <div class="partner-desc">E ottieni 1 mese di Premium gratis</div>
-        </div>
-      </div>
-
       <div class="stat-row">
-        <div class="stat-card" style="cursor:pointer" onclick="showPage('spese')">
+        <div class="stat-card">
           <div class="stat-label">Spese questo mese</div>
           <div class="stat-value" id="stat-expenses">€ 0</div>
         </div>
-        <div class="stat-card gold" style="cursor:pointer" onclick="showPage('chat')">
-          <div class="stat-label">Ultimo messaggio</div>
-          <div class="stat-value" id="stat-last-message" style="font-size:13.5px;line-height:1.35;font-weight:600">Nessun messaggio</div>
+        <div class="stat-card">
+          <div class="stat-label">Scadenze in arrivo</div>
+          <div class="stat-value" id="stat-deadlines">0</div>
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:14px;cursor:pointer" onclick="showPage('cavalli')">
+      <div class="card" style="margin-bottom:14px">
         <div class="section-title" style="font-size:16px;margin-bottom:8px">Prossime scadenze</div>
         <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
       </div>
@@ -612,7 +571,7 @@ select.input{cursor:pointer}
       <div id="owner-chat-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
     <div class="muted" style="font-size:12px;line-height:1.6;margin-top:14px;text-align:center">
-      Per chattare con un altro utente ti serve il suo codice (o inquadra il suo QR) — trovi il tuo in "Il tuo codice per la chat" nel menu profilo.
+      Per chattare con un altro proprietario ti serve il suo codice — trovi il tuo in "Il tuo codice per la chat" nel menu profilo.
     </div>
   </div>
 
@@ -621,7 +580,7 @@ select.input{cursor:pointer}
     <div id="cavalli-list-view">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div class="section-title" style="margin-bottom:0">I miei cavalli</div>
-        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-horse')">+ Aggiungi</button>
+        <button class="btn btn-primary btn-sm" onclick="openHorseForm()">+ Aggiungi</button>
       </div>
       <div id="horses-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
@@ -634,13 +593,21 @@ select.input{cursor:pointer}
 
       <div class="card" style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:700;font-size:14px">Scheda cavallo</div>
+          <button class="btn btn-outline btn-sm" onclick="openHorseForm(currentHorseId)">Modifica</button>
+        </div>
+        <div id="horse-info-box" style="display:flex;flex-direction:column;gap:4px;font-size:13px"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-weight:700;font-size:14px">Libretto sanitario</div>
-          <button class="btn btn-outline btn-sm" onclick="openAddEventModal()">+ Evento</button>
+          <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-event')">+ Evento</button>
         </div>
         <div id="horse-events-list"><div class="muted" style="font-size:13px">Nessun evento registrato.</div></div>
       </div>
 
-      <button class="btn btn-danger" style="width:100%" onclick="deleteCurrentHorse()">Elimina cavallo</button>
+      <button class="btn btn-danger" style="width:100%" onclick="askDeleteHorse()">Elimina cavallo</button>
     </div>
   </div>
 
@@ -664,7 +631,7 @@ select.input{cursor:pointer}
   <div class="page-content" id="page-spese">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div class="section-title" style="margin-bottom:0">Registro spese</div>
-      <button class="btn btn-primary btn-sm" onclick="openAddExpenseModal()">+ Spesa</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-expense')">+ Spesa</button>
     </div>
     <div class="card" style="margin-bottom:14px">
       <div class="stat-label">Totale questo mese</div>
@@ -807,14 +774,7 @@ select.input{cursor:pointer}
 
   <!-- PROFESSIONISTA: INBOX -->
   <div class="page-content" id="page-pro-inbox">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="section-title" style="margin-bottom:0">Connessioni</div>
-      <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-chat')">+ Nuova connessione</button>
-    </div>
-    <div class="card" id="pro-connessioni-card" style="margin-bottom:18px">
-      <div id="pro-connessioni-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
-    </div>
-    <div class="section-title">Messaggi clienti</div>
+    <div class="section-title">Messaggi</div>
     <div class="card" id="inbox-card" style="margin-bottom:14px">
       <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
@@ -837,7 +797,7 @@ select.input{cursor:pointer}
   </div>
 
   <!-- AI FAB -->
-  <button class="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
+  <button class="ai-fab" onclick="showAiComingSoon()" aria-label="Assistente AI">
     <span class="icon"><svg><use href="#i-sparkles"/></svg></span>
   </button>
 
@@ -859,7 +819,6 @@ select.input{cursor:pointer}
           <div class="chat-bubble ai">Ciao! Sono l'assistente equestre di Equo. Chiedimi pure di alimentazione, comportamento o gestione del tuo cavallo.</div>
         </div>
         <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 6px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
-        <div class="muted" id="ai-usage-note" style="font-size:10.5px;text-align:center;padding:0 14px 6px"></div>
         <div class="chat-input-row">
           <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
           <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
@@ -930,55 +889,93 @@ select.input{cursor:pointer}
 
 <!-- ═══ MODALS ═══ -->
 
-<div class="modal-overlay" id="modal-segnala-maneggio" onclick="closeOut(event,'modal-segnala-maneggio')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-gift"></i></span>Segnala un maneggio</div>
-    <div class="muted" style="font-size:12px;margin-bottom:14px">Conosci un maneggio o un centro ippico non ancora su Equo? Segnalacelo: se si registra, tu ricevi 1 mese di Premium gratis.</div>
-    <div class="auth-form">
-      <div class="input-group">
-        <label class="input-label">Nome struttura</label>
-        <input class="input" id="segnala-nome-struttura" placeholder="es. Centro Ippico Le Querce">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Città</label>
-        <input class="input" id="segnala-citta" placeholder="es. Colleferro (RM)">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Via (opzionale)</label>
-        <input class="input" id="segnala-via" placeholder="es. Via Roma 10">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Telefono struttura (opzionale)</label>
-        <input class="input" id="segnala-telefono-struttura" type="tel" placeholder="es. 06 1234567">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Email o telefono tuo, per ricevere il codice</label>
-        <input class="input" id="segnala-contatto-premio" placeholder="dove ti mandiamo il codice">
-      </div>
-      <button class="btn btn-primary" onclick="submitSegnalazioneManeggio()" style="width:100%;margin-top:6px">Invia segnalazione</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="modal-add-horse" onclick="closeOut(event,'modal-add-horse')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span>Nuovo cavallo</div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span id="horse-form-title">Nuovo cavallo</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Nome</label>
         <input class="input" id="horse-name" placeholder="es. Aurora">
       </div>
       <div class="input-group">
+        <label class="input-label">Categoria</label>
+        <select class="input" id="horse-tipo-proprieta">
+          <option value="proprieta">Cavallo di proprietà</option>
+          <option value="noleggio">Cavallo a noleggio</option>
+        </select>
+      </div>
+      <div class="input-group">
         <label class="input-label">Razza (opzionale)</label>
         <input class="input" id="horse-breed" placeholder="es. Maremmano">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Mantello (opzionale)</label>
+        <input class="input" id="horse-mantello" placeholder="es. Baio">
       </div>
       <div class="input-group">
         <label class="input-label">Data di nascita (opzionale)</label>
         <input class="input" id="horse-birthdate" type="date">
       </div>
-      <button class="btn btn-primary" onclick="createHorse()" style="width:100%;margin-top:6px">Crea scheda</button>
+      <div class="input-group">
+        <label class="input-label">Microchip (opzionale)</label>
+        <input class="input" id="horse-microchip" placeholder="15 cifre">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Gruppo sanguigno (opzionale)</label>
+        <input class="input" id="horse-gruppo-sanguigno" placeholder="Facoltativo">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note (opzionale)</label>
+        <input class="input" id="horse-note" placeholder="Facoltativo">
+      </div>
+      <div class="auth-error" id="horse-error" style="display:none"></div>
+      <button class="btn btn-primary" id="horse-save-btn" onclick="saveHorse()" style="width:100%;margin-top:6px">Crea scheda</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: elimina cavallo, passo 1 -->
+<div class="modal-overlay" id="modal-delete-horse-1" onclick="closeOut(event,'modal-delete-horse-1')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Eliminare <span id="delete-horse-nome-1"></span>?</div>
+    <div class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.5">
+      Verranno cancellati anche il libretto sanitario e tutti gli eventi registrati per questo cavallo.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-danger" style="width:100%" onclick="askDeleteHorseStep2()">Continua</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-delete-horse-1')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: elimina cavallo, passo 2 (conferma definitiva) -->
+<div class="modal-overlay" id="modal-delete-horse-2" onclick="closeOut(event,'modal-delete-horse-2')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>Operazione irreversibile</div>
+    <div class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.5">
+      Questa azione è <strong>definitiva</strong> e non può essere annullata: <span id="delete-horse-nome-2"></span> e tutti i suoi dati verranno cancellati per sempre. Confermi?
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-danger" style="width:100%" onclick="confirmDeleteHorse()">Elimina definitivamente</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-delete-horse-2')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: avviso microchip mancante -->
+<div class="modal-overlay" id="modal-microchip-warning" onclick="closeOut(event,'modal-microchip-warning')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>Microchip non inserito</div>
+    <div class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.5">
+      Senza il microchip alcune funzioni di Equo App ed Equo Scuderia (come il collegamento automatico con la tua scuderia) non saranno utilizzabili.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" style="width:100%" onclick="tornaAInserireMicrochip()">Inserisco il microchip</button>
+      <button class="btn btn-outline" style="width:100%" onclick="confermaSalvaSenzaMicrochip()">Lo inserisco dopo</button>
     </div>
   </div>
 </div>
@@ -1030,7 +1027,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-intervento" onclick="closeOut(event,'modal-add-intervento')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="modal-add-intervento-title">Segna intervento fatto</span></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Segna intervento fatto</div>
     <div class="auth-form">
       <div class="input-group" id="intervento-cliente-group">
         <label class="input-label">Cliente</label>
@@ -1069,8 +1066,7 @@ select.input{cursor:pointer}
         <input class="input" id="intervento-note" placeholder="es. dettagli lavoro">
       </div>
       <div class="auth-error" id="intervento-error" style="display:none"></div>
-      <button class="btn btn-primary" onclick="saveInterventoMascalcia()" style="width:100%;margin-top:6px">Salva intervento</button>
-      <button class="btn btn-danger" id="intervento-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteInterventoFromModal()">Elimina intervento</button>
+      <button class="btn btn-primary" onclick="createInterventoMascalcia()" style="width:100%;margin-top:6px">Salva intervento</button>
     </div>
   </div>
 </div>
@@ -1078,7 +1074,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-event" onclick="closeOut(event,'modal-add-event')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="modal-add-event-title">Nuovo evento sanitario</span></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Nuovo evento sanitario</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Tipo</label>
@@ -1101,8 +1097,7 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="event-notes" placeholder="es. Dr. Rossi">
       </div>
-      <button class="btn btn-primary" onclick="saveHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
-      <button class="btn btn-danger" id="event-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteHorseEventFromModal()">Elimina evento</button>
+      <button class="btn btn-primary" onclick="createHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
     </div>
   </div>
 </div>
@@ -1110,7 +1105,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-expense" onclick="closeOut(event,'modal-add-expense')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span><span id="modal-add-expense-title">Nuova spesa</span></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span>Nuova spesa</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Categoria</label>
@@ -1135,8 +1130,7 @@ select.input{cursor:pointer}
         <label class="input-label">Nota (opzionale)</label>
         <input class="input" id="expense-notes" placeholder="es. Mangime mensile">
       </div>
-      <button class="btn btn-primary" onclick="saveExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
-      <button class="btn btn-danger" id="expense-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteExpenseFromModal()">Elimina spesa</button>
+      <button class="btn btn-primary" onclick="createExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
     </div>
   </div>
 </div>
@@ -1144,7 +1138,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-lezione" onclick="closeOut(event,'modal-add-lezione')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span><span id="modal-add-lezione-title">Nuova lezione</span></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span>Nuova lezione</div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Cavallo</label>
@@ -1167,8 +1161,7 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="lezione-note" placeholder="es. con l'istruttore Luca">
       </div>
-      <button class="btn btn-primary" onclick="saveLezione()" style="width:100%;margin-top:6px">Salva lezione</button>
-      <button class="btn btn-danger" id="lezione-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteLezioneFromModal()">Elimina lezione</button>
+      <button class="btn btn-primary" onclick="createLezione()" style="width:100%;margin-top:6px">Salva lezione</button>
     </div>
   </div>
 </div>
@@ -1176,9 +1169,6 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-menu" onclick="closeOut(event,'modal-menu')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <button class="btn btn-outline btn-sm" onclick="closeModal('modal-menu')" style="position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:14px;padding:6px 10px;z-index:50;background:var(--bg)">
-      <span class="fa-icon"><i class="fa-solid fa-xmark"></i></span>
-    </button>
 
     <div class="menu-profile">
       <div class="menu-profile-avatar-wrap" onclick="document.getElementById('avatar-file-input').click()">
@@ -1430,43 +1420,12 @@ select.input{cursor:pointer}
     <div class="modal-title"><span class="icon"><svg><use href="#i-inbox"/></svg></span>Nuova chat</div>
     <div class="auth-form">
       <div class="input-group">
-        <label class="input-label">Codice dell'altro utente (proprietario o professionista)</label>
+        <label class="input-label">Codice dell'altro proprietario</label>
         <input class="input" id="new-chat-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase">
       </div>
       <div class="auth-error" id="new-chat-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="startNewChat()" style="width:100%;margin-top:6px">Avvia chat</button>
-      <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
-        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
-      </button>
     </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-qr-scan" onclick="closeOut(event,'modal-qr-scan')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>Inquadra il QR</div>
-    <div style="position:relative;border-radius:14px;overflow:hidden;background:#000">
-      <video id="qr-scan-video" style="width:100%;display:block" muted playsinline></video>
-      <canvas id="qr-scan-canvas" style="display:none"></canvas>
-    </div>
-    <div class="muted" style="font-size:12px;text-align:center;margin-top:10px">Inquadra il codice QR dell'altra persona per collegarti subito.</div>
-    <button class="btn btn-outline" onclick="closeQrScanner()" style="width:100%;margin-top:10px">Annulla</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-services-map" onclick="closeOut(event,'modal-services-map')">
-  <div class="modal" style="max-height:85vh;overflow-y:auto">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-map-location-dot"></i></span>Servizi vicino a te</div>
-    <div id="services-map-chips" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px">
-      <button class="chip active" data-tipo="tutti" onclick="filterServices('tutti')">Tutti</button>
-      <button class="chip" data-tipo="veterinario" onclick="filterServices('veterinario')">Veterinari</button>
-      <button class="chip" data-tipo="centro_ippico" onclick="filterServices('centro_ippico')">Centri ippici</button>
-      <button class="chip" data-tipo="negozio" onclick="filterServices('negozio')">Negozi</button>
-    </div>
-    <div id="services-map-canvas" style="height:220px;border-radius:14px;overflow:hidden;margin-bottom:12px"></div>
-    <div id="services-list"></div>
   </div>
 </div>
 
@@ -1543,20 +1502,12 @@ select.input{cursor:pointer}
       Sblocchi cavalli/clienti illimitati, reminder automatici, AI con più messaggi e le altre funzioni Premium.
       Puoi tornare a Free in qualsiasi momento dal menu, con lo stesso numero di passaggi.
     </p>
-    <div id="upgrade-demo-actions" style="display:none">
-      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
-        Attivazione istantanea in modalità demo — nessun pagamento reale.
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
-        <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Conferma</button>
-      </div>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
+      Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.
     </div>
-    <div id="upgrade-real-options" style="display:none;flex-direction:column;gap:10px">
-      <button class="btn btn-primary" style="width:100%" onclick="startCheckout('mensile')" id="upgrade-btn-mensile">Mensile</button>
-      <button class="btn btn-outline" style="width:100%" onclick="startCheckout('annuale')" id="upgrade-btn-annuale">Annuale</button>
-      <button class="btn btn-outline" style="width:100%" onclick="startLifetimeCheckout()" id="upgrade-btn-lifetime">Lifetime</button>
-      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Richiedi l'attivazione</button>
     </div>
   </div>
 </div>
@@ -1600,14 +1551,14 @@ select.input{cursor:pointer}
    --   automatica (nessun cron server-side collegato) — va fatta a mano da chi gestisce Equo finché
    --   non si aggiunge una Supabase Edge Function schedulata.
    - storage bucket pubblico "avatar-utenti" (foto profilo)
-   - horses(id, owner_id, name, breed, birth_date, stable_id)
+   - horses(id, owner_id, name, tipo_proprieta, breed, mantello, birth_date, microchip, gruppo_sanguigno, note, stable_id)
    - health_events(id, horse_id, type, date, next_due_date, notes)
    - expenses(id, horse_id, owner_id, category, amount, date, notes)
    - lezioni_manuali(id, owner_id, horse_id, data, tipo, note, created_at)
    - stables(id, name, join_code)
-   - conversazioni_chat(id, proprietario_a_id, proprietario_b_id, created_at)
-   - messaggi_chat(id, conversazione_id, mittente_id, tipo, testo, media_url, letto, created_at)
-   - storage bucket pubblico "chat-media" (foto/video/note vocali della chat tra proprietari)
+   - conversazioni_proprietari(id, proprietario_a_id, proprietario_b_id, created_at)
+   - messaggi_proprietari(id, conversazione_id, mittente_id, tipo, testo, media_url, letto, created_at)
+   - storage bucket pubblico "proprietari-chat-media" (foto/video/note vocali della chat tra proprietari)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
    - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo, testo, audio_url, letto, created_at)
@@ -1621,12 +1572,6 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let horses = [];
 let currentHorseId = null;
-let editingEventId = null;
-let editingExpenseId = null;
-let editingLezioneId = null;
-let currentHorseEventsData = [];
-let currentExpensesData = [];
-let currentLezioniData = [];
 let authMode = "login";
 
 /* ---------- DEMO MODE ----------
@@ -1637,7 +1582,7 @@ let DEMO_MODE = false;
 let demoIdCounter = 1;
 const demoState = {
   horses: [
-    { id: "demo-1", name: "Aurora", breed: "Maremmano", birth_date: "2018-04-12", stable_id: null },
+    { id: "demo-1", name: "Aurora", breed: "Maremmano", birth_date: "2018-04-12", stable_id: null, tipo_proprieta: "proprieta", mantello: "Baio", microchip: "", gruppo_sanguigno: "", note: "" },
   ],
   events: {
     "demo-1": [
@@ -1655,9 +1600,6 @@ const demoState = {
   ],
   altriProprietari: [
     { id: "demo-owner-2", full_name: "Giulia Verdi", avatar_url: null, codice_proprietario: "EQUO-OWN-DEMO" },
-  ],
-  services: [
-    { id: "ds-1", tipo: "veterinario", nome: "Clinica Veterinaria Equina Demo", indirizzo: "Via delle Scuderie 1", telefono: "0212345678", lat: 45.4642, lng: 9.19, note: "H24", fonte: "curato" },
   ],
   conversazioniProprietari: [
     { id: "co-1", proprietario_a_id: "demo-user", proprietario_b_id: "demo-owner-2", created_at: "2026-09-10T10:00:00" },
@@ -1687,12 +1629,22 @@ const DB = {
     const { data, error } = await sb.from("horses").select("*").eq("owner_id", currentUser.id).order("created_at", { ascending: true });
     return error ? [] : (data || []);
   },
-  async insertHorse({ name, breed, birth_date }){
+  async insertHorse(payload){
     if(DEMO_MODE){
-      demoState.horses.push({ id: "demo-" + (++demoIdCounter), name, breed, birth_date, stable_id: null });
+      const id = "demo-" + (++demoIdCounter);
+      demoState.horses.push({ id, stable_id: null, ...payload });
+      return { error: null, data: { id } };
+    }
+    const { data, error } = await sb.from("horses").insert({ owner_id: currentUser.id, ...payload }).select().single();
+    return { error, data };
+  },
+  async updateHorse(id, payload){
+    if(DEMO_MODE){
+      const idx = demoState.horses.findIndex(h => h.id === id);
+      if(idx >= 0) demoState.horses[idx] = { ...demoState.horses[idx], ...payload };
       return { error: null };
     }
-    const { error } = await sb.from("horses").insert({ owner_id: currentUser.id, name, breed, birth_date });
+    const { error } = await sb.from("horses").update(payload).eq("id", id);
     return { error };
   },
   async deleteHorse(id){
@@ -1716,23 +1668,6 @@ const DB = {
     }
     const { error } = await sb.from("health_events").insert({ horse_id, type, date, next_due_date, notes });
     return { error };
-  },
-  async updateEvent(id, { horse_id, type, date, next_due_date, notes }){
-    if(DEMO_MODE){
-      const list = demoState.events[horse_id] || [];
-      const ev = list.find(e => e.id === id);
-      if(ev){ Object.assign(ev, { type, date, next_due_date, notes }); }
-      return { error: null };
-    }
-    const { error } = await sb.from("health_events").update({ type, date, next_due_date, notes }).eq("id", id);
-    return { error };
-  },
-  async deleteEvent(id, horse_id){
-    if(DEMO_MODE){
-      demoState.events[horse_id] = (demoState.events[horse_id] || []).filter(e => e.id !== id);
-      return;
-    }
-    await sb.from("health_events").delete().eq("id", id);
   },
   async listUpcomingDeadlines(horseIds, limit){
     if(DEMO_MODE){
@@ -1764,25 +1699,6 @@ const DB = {
     const { error } = await sb.from("expenses").insert({ owner_id: currentUser.id, horse_id, category, amount, date, notes });
     return { error };
   },
-  async updateExpense(id, { horse_id, category, amount, date, notes }){
-    if(DEMO_MODE){
-      const exp = demoState.expenses.find(e => e.id === id);
-      if(exp){
-        const horse = demoState.horses.find(h => h.id === horse_id);
-        Object.assign(exp, { horse_id, horse_name: horse?.name || "", category, amount, date, notes });
-      }
-      return { error: null };
-    }
-    const { error } = await sb.from("expenses").update({ horse_id, category, amount, date, notes }).eq("id", id);
-    return { error };
-  },
-  async deleteExpense(id){
-    if(DEMO_MODE){
-      demoState.expenses = demoState.expenses.filter(e => e.id !== id);
-      return;
-    }
-    await sb.from("expenses").delete().eq("id", id);
-  },
   async listLezioni(){
     if(DEMO_MODE) return demoState.lezioniManuali.slice().sort((a,b) => new Date(b.data) - new Date(a.data)).map(l => ({ ...l, horses: { name: (demoState.horses.find(h => h.id === l.horse_id) || {}).name } }));
     const { data, error } = await sb.from("lezioni_manuali").select("*, horses(name)").eq("owner_id", currentUser.id).order("data", { ascending: false });
@@ -1796,31 +1712,15 @@ const DB = {
     const { error } = await sb.from("lezioni_manuali").insert({ owner_id: currentUser.id, horse_id, data, tipo, note });
     return { error };
   },
-  async updateLezione(id, { horse_id, data, tipo, note }){
-    if(DEMO_MODE){
-      const l = demoState.lezioniManuali.find(x => x.id === id);
-      if(l) Object.assign(l, { horse_id, data, tipo, note });
-      return { error: null };
-    }
-    const { error } = await sb.from("lezioni_manuali").update({ horse_id, data, tipo, note }).eq("id", id);
-    return { error };
-  },
-  async deleteLezione(id){
-    if(DEMO_MODE){
-      demoState.lezioniManuali = demoState.lezioniManuali.filter(l => l.id !== id);
-      return;
-    }
-    await sb.from("lezioni_manuali").delete().eq("id", id);
-  },
   /* -- Chat tra proprietari -- */
   async findProprietarioByCodice(codice){
     if(DEMO_MODE) return demoState.altriProprietari.find(p => p.codice_proprietario === codice.toUpperCase()) || null;
-    // NB: non si può leggere il profilo altrui con una select diretta (RLS lo impedisce
-    // di proposito, il profilo contiene anche dati di pagamento). Il match del codice
-    // avviene lato server con questa funzione, che restituisce solo i campi sicuri.
-    const { data, error } = await sb.rpc("find_profile_by_chat_code", { p_codice: codice });
-    if(error || !data || data.length === 0) return null;
-    return data[0];
+    // Via RPC sicura: il client non può leggere profiles di altri utenti per via
+    // dell'RLS, quindi la ricerca per codice passa da una funzione lato server.
+    const { data, error } = await sb.rpc("lookup_profilo_da_codice_app", { p_codice: codice });
+    if(error || !data) return null;
+    const row = Array.isArray(data) ? data[0] : data;
+    return row || null;
   },
   async getOrCreateConversazione(altroId){
     if(DEMO_MODE){
@@ -1831,11 +1731,11 @@ const DB = {
       }
       return c.id;
     }
-    const { data: esistente } = await sb.from("conversazioni_chat").select("id")
+    const { data: esistente } = await sb.from("conversazioni_proprietari").select("id")
       .or(`and(proprietario_a_id.eq.${currentUser.id},proprietario_b_id.eq.${altroId}),and(proprietario_a_id.eq.${altroId},proprietario_b_id.eq.${currentUser.id})`)
       .maybeSingle();
     if(esistente) return esistente.id;
-    const { data, error } = await sb.from("conversazioni_chat").insert({ proprietario_a_id: currentUser.id, proprietario_b_id: altroId }).select("id").single();
+    const { data, error } = await sb.from("conversazioni_proprietari").insert({ proprietario_a_id: currentUser.id, proprietario_b_id: altroId }).select("id").single();
     if(error) return null;
     return data.id;
   },
@@ -1849,18 +1749,21 @@ const DB = {
         return { id: c.id, altro, ultimoMessaggio: msgs[0] || null, unread };
       }).sort((a,b) => new Date(b.ultimoMessaggio?.created_at || 0) - new Date(a.ultimoMessaggio?.created_at || 0));
     }
-    const { data: convos } = await sb.from("conversazioni_chat").select("*")
+    const { data: convos } = await sb.from("conversazioni_proprietari").select("*")
       .or(`proprietario_a_id.eq.${currentUser.id},proprietario_b_id.eq.${currentUser.id}`);
     if(!convos || convos.length === 0) return [];
     const ids = convos.map(c => c.id);
-    const altriIds = convos.map(c => c.proprietario_a_id === currentUser.id ? c.proprietario_b_id : c.proprietario_a_id);
+    // Via RPC sicura: il client non può leggere profiles di altri utenti per via
+    // dell'RLS, quindi i nomi arrivano da una funzione lato server che restituisce
+    // solo i profili delle persone con cui si ha già una conversazione.
     const [{ data: profili }, { data: messaggi }] = await Promise.all([
-      sb.from("profiles").select("id, full_name, avatar_url").in("id", altriIds),
-      sb.from("messaggi_chat").select("*").in("conversazione_id", ids).order("created_at", { ascending: false }).limit(300),
+      sb.rpc("get_nomi_conversazioni_proprietario"),
+      sb.from("messaggi_proprietari").select("*").in("conversazione_id", ids).order("created_at", { ascending: false }).limit(300),
     ]);
     return convos.map(c => {
       const altroId = c.proprietario_a_id === currentUser.id ? c.proprietario_b_id : c.proprietario_a_id;
-      const altro = (profili || []).find(p => p.id === altroId) || { full_name: "Proprietario" };
+      const p = (profili || []).find(p => p.altro_id === altroId);
+      const altro = p ? { id: p.altro_id, full_name: p.full_name, avatar_url: p.avatar_url } : { full_name: "Proprietario" };
       const msgsConvo = (messaggi || []).filter(m => m.conversazione_id === c.id);
       const unread = msgsConvo.filter(m => m.mittente_id !== currentUser.id && !m.letto).length;
       return { id: c.id, altro, ultimoMessaggio: msgsConvo[0] || null, unread };
@@ -1868,7 +1771,7 @@ const DB = {
   },
   async listThreadProprietario(conversazioneId){
     if(DEMO_MODE) return demoState.messaggiProprietari.filter(m => m.conversazione_id === conversazioneId).slice().sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-    const { data, error } = await sb.from("messaggi_chat").select("*").eq("conversazione_id", conversazioneId).order("created_at", { ascending: true });
+    const { data, error } = await sb.from("messaggi_proprietari").select("*").eq("conversazione_id", conversazioneId).order("created_at", { ascending: true });
     return error ? [] : (data || []);
   },
   async insertMessaggioProprietario({ conversazione_id, tipo, testo, media_url }){
@@ -1877,7 +1780,7 @@ const DB = {
       demoState.messaggiProprietari.push({ id: "mo-" + (++demoIdCounter), conversazione_id, mittente_id: "demo-user", tipo, testo: testo || null, media_url: media_url || null, letto: true, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_chat").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, letto: true });
+    const { error } = await sb.from("messaggi_proprietari").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, letto: true });
     return { error };
   },
   async markLettiProprietario(conversazioneId){
@@ -1885,16 +1788,16 @@ const DB = {
       demoState.messaggiProprietari.forEach(m => { if(m.conversazione_id === conversazioneId && m.mittente_id !== "demo-user") m.letto = true; });
       return;
     }
-    await sb.from("messaggi_chat").update({ letto: true }).eq("conversazione_id", conversazioneId).neq("mittente_id", currentUser.id).eq("letto", false);
+    await sb.from("messaggi_proprietari").update({ letto: true }).eq("conversazione_id", conversazioneId).neq("mittente_id", currentUser.id).eq("letto", false);
   },
   async uploadMediaProprietario(fileOrBlob, conversazioneId, tipo, ext){
     if(DEMO_MODE){
       return { url: URL.createObjectURL(fileOrBlob), error: null };
     }
     const path = `${currentUser.id}/${conversazioneId}/${Date.now()}.${ext}`;
-    const { error } = await sb.storage.from("chat-media").upload(path, fileOrBlob, { contentType: fileOrBlob.type || undefined });
+    const { error } = await sb.storage.from("proprietari-chat-media").upload(path, fileOrBlob, { contentType: fileOrBlob.type || undefined });
     if(error) return { url: null, error };
-    const { data } = sb.storage.from("chat-media").getPublicUrl(path);
+    const { data } = sb.storage.from("proprietari-chat-media").getPublicUrl(path);
     return { url: data?.publicUrl || null, error: null };
   },
   async ensureCodiceProprietario(){
@@ -1958,22 +1861,6 @@ const DB = {
     }
     const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
     return { error };
-  },
-  async updateInterventoMascalcia(id, { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note }){
-    if(DEMO_MODE){
-      const i = demoState.interventiMascalcia.find(x => x.id === id);
-      if(i) Object.assign(i, { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
-      return { error: null };
-    }
-    const { error } = await sb.from("interventi_mascalcia").update({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note }).eq("id", id);
-    return { error };
-  },
-  async deleteInterventoMascalcia(id){
-    if(DEMO_MODE){
-      demoState.interventiMascalcia = demoState.interventiMascalcia.filter(i => i.id !== id);
-      return;
-    }
-    await sb.from("interventi_mascalcia").delete().eq("id", id);
   },
   async listInterventiMascalciaTutti(){
     if(DEMO_MODE){
@@ -2073,21 +1960,6 @@ const DB = {
     const { error } = await sb.from("profiles").update({ codice_professionista: codice }).eq("id", currentUser.id);
     if(!error) currentUser.codiceProfessionista = codice;
     return currentUser.codiceProfessionista;
-  },
-  async updateAiUsage({ count, month }){
-    if(DEMO_MODE) return { error: null };
-    const { error } = await sb.from("profiles").update({ ai_msg_count: count, ai_msg_month: month }).eq("id", currentUser.id);
-    return { error };
-  },
-  async listServices(){
-    if(DEMO_MODE) return demoState.services;
-    const { data, error } = await sb.from("services").select("*");
-    return error ? [] : (data || []);
-  },
-  async insertSegnalazioneManeggio(payload){
-    if(DEMO_MODE) return { error: null };
-    const { error } = await sb.from("segnalazioni_maneggio").insert(payload);
-    return { error };
   },
 };
 
@@ -2246,7 +2118,6 @@ async function enterApp(ruolo){
     await loadHorses();
     renderPaymentMethods();
     startPromoRotation();
-    startPartnerBannerRotation();
     if(ruolo === "gestore_struttura") showStableManagerBanner();
   }
 }
@@ -2420,7 +2291,7 @@ async function openCodiceProprietarioModal(){
 function copyCodiceProprietario(){
   const codice = currentUser.codiceProprietario;
   if(!codice) return;
-  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat (o scansiona il QR). Non hai l'app? Scaricala su https://app.equohub.com`;
+  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat.`;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
       .catch(() => showToast("Non sono riuscito a copiare, riprova."));
@@ -2432,7 +2303,7 @@ function copyCodiceProprietario(){
 function shareCodiceProprietario(){
   const codice = currentUser.codiceProprietario;
   if(!codice) return;
-  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat (o scansiona il QR). Non hai l'app? Scaricala su https://app.equohub.com`;
+  const text = `Iniziamo a chattare su Equo — usa il mio codice ${codice} nella tab Chat.`;
   if(navigator.share){
     navigator.share({ text }).catch(() => {});
     return;
@@ -2464,12 +2335,6 @@ async function submitAuth(){
   try{
     if(authMode === "signup"){
       const name = document.getElementById("auth-name").value.trim();
-      const nameParole = name.split(/\s+/).filter(Boolean);
-      if(nameParole.length < 2){
-        errBox.textContent = "Inserisci nome e cognome (almeno due parole).";
-        errBox.style.display = "block";
-        return;
-      }
       const referral_code = document.getElementById("auth-referral").value.trim() || null;
       const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name } } });
       if(error) throw error;
@@ -2595,7 +2460,6 @@ async function startDemo(){
   await loadHorses();
   renderPaymentMethods();
   startPromoRotation();
-  startPartnerBannerRotation();
 }
 
 /* ---------- BOOT ---------- */
@@ -2620,7 +2484,7 @@ async function boot(){
 
   document.getElementById("profile-email").textContent = user.email || "";
   const { data: profile } = await sb.from("profiles").select(
-    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, cancellazione_richiesta_at, ai_msg_count, ai_msg_month"
+    "full_name, ruolo, ruolo_secondario, piano, avatar_url, codice_professionista, codice_proprietario, dati_pagamento_tipo, dati_pagamento_nome, dati_pagamento_piva_cf, dati_pagamento_iban, dati_pagamento_paypal, consenso_termini_privacy, cancellazione_richiesta_at"
   ).eq("id", user.id).maybeSingle();
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
@@ -2636,25 +2500,9 @@ async function boot(){
   currentUser.datiPagamentoPaypal = profile?.dati_pagamento_paypal || null;
   currentUser.consensoTerminiPrivacy = profile?.consenso_termini_privacy || null;
   currentUser.cancellazioneRichiestaAt = profile?.cancellazione_richiesta_at || null;
-  currentUser.aiMsgCount = profile?.ai_msg_count || 0;
-  currentUser.aiMsgMonth = profile?.ai_msg_month || null;
   if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
   else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
-  const nomeParoleBoot = (profile?.full_name || "").trim().split(/\s+/).filter(Boolean);
-  if(nomeParoleBoot.length < 2){
-    document.getElementById("screen-app").classList.remove("active");
-    document.getElementById("screen-onboarding").classList.remove("active");
-    document.getElementById("cp-nome-error").style.display = "none";
-    document.getElementById("cp-nome-cognome").value = profile?.full_name || "";
-    openModal("modal-completa-profilo");
-    return;
-  }
-
-  await continueBootAfterProfile();
-}
-
-async function continueBootAfterProfile(){
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
     document.getElementById("screen-onboarding").classList.add("active");
@@ -2663,56 +2511,6 @@ async function continueBootAfterProfile(){
   }
   await enterApp(currentUser.ruolo);
   checkPendingDeletion();
-  await handleCheckoutReturn();
-}
-
-async function saveCompleteProfile(){
-  const nome = document.getElementById("cp-nome-cognome").value.trim();
-  const errBox = document.getElementById("cp-nome-error");
-  errBox.style.display = "none";
-  const parole = nome.split(/\s+/).filter(Boolean);
-  if(parole.length < 2){
-    errBox.textContent = "Inserisci nome e cognome (almeno due parole).";
-    errBox.style.display = "block";
-    return;
-  }
-  try{
-    const { error } = await sb.from("profiles").update({ full_name: nome }).eq("id", currentUser.id);
-    if(error) throw error;
-    document.getElementById("profile-name").textContent = nome;
-    closeModal("modal-completa-profilo");
-    await continueBootAfterProfile();
-  } catch(err){
-    errBox.textContent = err.message || "Errore nel salvataggio.";
-    errBox.style.display = "block";
-  }
-}
-
-/* Al ritorno da Stripe Checkout (?checkout=success in URL) il webhook potrebbe
-   impiegare qualche istante ad aggiornare profiles.piano: aspettiamo un attimo e
-   ricontrolliamo, poi ripuliamo l'URL per non ritriggerare al refresh. */
-async function handleCheckoutReturn(){
-  const params = new URLSearchParams(window.location.search);
-  const checkout = params.get("checkout");
-  if(!checkout) return;
-  window.history.replaceState({}, "", window.location.pathname);
-  if(checkout === "cancel"){
-    showToast("Pagamento annullato.");
-    return;
-  }
-  if(checkout === "success"){
-    showToast("Pagamento ricevuto, aggiorniamo il tuo piano...");
-    await new Promise(r => setTimeout(r, 2000));
-    const { data: profile } = await sb.from("profiles").select("piano").eq("id", currentUser.id).maybeSingle();
-    if(profile?.piano === "premium"){
-      currentUser.piano = "premium";
-      updatePianoUI();
-      if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
-      showToast("Sei passato a Premium!");
-    } else {
-      showToast("Pagamento ricevuto, l'attivazione arriva a momenti — riapri l'app tra poco se non la vedi subito.");
-    }
-  }
 }
 
 /* ---------- GOOGLE SIGN-IN ---------- */
@@ -2830,14 +2628,13 @@ function showPage(page){
   document.querySelectorAll(".page-content").forEach(el => el.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
-  if(page === "chat" || page === "pro-inbox") loadOwnerChatList();
 }
 
 function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
-function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); updateAiUsageNote(); }
+function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); }
 
 let toastTimer = null;
 function showToast(message){
@@ -2873,23 +2670,6 @@ function renderHome(){
   document.getElementById("topbar-context").textContent = horses.length === 1 ? horses[0].name : horses.length + " cavalli";
   loadDeadlines();
   loadExpensesSummary();
-  loadUltimoMessaggio();
-}
-
-async function loadUltimoMessaggio(){
-  const el = document.getElementById("stat-last-message");
-  if(!el) return;
-  const conversazioni = await DB.listConversazioniProprietario();
-  const c = conversazioni && conversazioni[0];
-  if(!c || !c.ultimoMessaggio){
-    el.textContent = "Nessun messaggio";
-    return;
-  }
-  const m = c.ultimoMessaggio;
-  const nome = c.altro?.full_name || "Utente";
-  let body = m.tipo === "audio" ? "Nota vocale" : m.tipo === "foto" ? "Foto" : m.tipo === "video" ? "Video" : (m.testo || "");
-  if(body.length > 34) body = body.slice(0, 34) + "…";
-  el.textContent = nome + ": " + body;
 }
 
 function renderHorsesList(){
@@ -2898,29 +2678,124 @@ function renderHorsesList(){
     box.innerHTML = '<div class="empty-state"><div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px"><i class="fa-solid fa-horse-head"></i></div>Nessun cavallo ancora. Aggiungine uno per iniziare.</div>';
     return;
   }
-  box.innerHTML = horses.map(h => `
+  const TIPO_LABELS = { proprieta: "Di proprietà", noleggio: "A noleggio" };
+  box.innerHTML = horses.map(h => {
+    const sub = [h.breed, TIPO_LABELS[h.tipo_proprieta] || null].filter(Boolean).join(" · ") || "Razza non specificata";
+    return `
     <div class="card horse-card" onclick="openHorseDetail('${h.id}')">
       <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:22px"></i></div>
       <div>
         <div style="font-weight:700">${escapeHtml(h.name)}</div>
-        <div class="muted" style="font-size:13px">${escapeHtml(h.breed || "Razza non specificata")}</div>
+        <div class="muted" style="font-size:13px">${escapeHtml(sub)}</div>
       </div>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
 }
 
-async function createHorse(){
-  const name = document.getElementById("horse-name").value.trim();
-  if(!name) return;
-  const breed = document.getElementById("horse-breed").value.trim();
-  const birth_date = document.getElementById("horse-birthdate").value || null;
-  const { error } = await DB.insertHorse({ name, breed, birth_date });
-  if(error){ alert("Errore: " + error.message); return; }
-  document.getElementById("horse-name").value = "";
-  document.getElementById("horse-breed").value = "";
-  document.getElementById("horse-birthdate").value = "";
-  closeModal("modal-add-horse");
-  await loadHorses();
+let editingHorseId = null;
+const TIPO_PROPRIETA_LABELS = { proprieta: "Cavallo di proprietà", noleggio: "Cavallo a noleggio" };
+
+function openHorseForm(id){
+  editingHorseId = id || null;
+  document.getElementById("horse-error").style.display = "none";
+  document.getElementById("horse-form-title").textContent = editingHorseId ? "Modifica cavallo" : "Nuovo cavallo";
+  if(editingHorseId){
+    const h = horses.find(x => x.id === editingHorseId);
+    document.getElementById("horse-name").value = h?.name || "";
+    document.getElementById("horse-tipo-proprieta").value = h?.tipo_proprieta || "proprieta";
+    document.getElementById("horse-breed").value = h?.breed || "";
+    document.getElementById("horse-mantello").value = h?.mantello || "";
+    document.getElementById("horse-birthdate").value = h?.birth_date || "";
+    document.getElementById("horse-microchip").value = h?.microchip || "";
+    document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
+    document.getElementById("horse-note").value = h?.note || "";
+  } else {
+    ["horse-name","horse-breed","horse-mantello","horse-birthdate","horse-microchip","horse-gruppo-sanguigno","horse-note"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("horse-tipo-proprieta").value = "proprieta";
+  }
+  openModal("modal-add-horse");
+}
+
+function raccogliDatiHorseForm(){
+  return {
+    name: document.getElementById("horse-name").value.trim(),
+    tipo_proprieta: document.getElementById("horse-tipo-proprieta").value,
+    breed: document.getElementById("horse-breed").value.trim() || null,
+    mantello: document.getElementById("horse-mantello").value.trim() || null,
+    birth_date: document.getElementById("horse-birthdate").value || null,
+    microchip: document.getElementById("horse-microchip").value.trim() || null,
+    gruppo_sanguigno: document.getElementById("horse-gruppo-sanguigno").value.trim() || null,
+    note: document.getElementById("horse-note").value.trim() || null,
+  };
+}
+
+async function saveHorse(){
+  const errBox = document.getElementById("horse-error");
+  errBox.style.display = "none";
+  const payload = raccogliDatiHorseForm();
+  if(!payload.name){ errBox.textContent = "Inserisci il nome del cavallo."; errBox.style.display = "block"; return; }
+
+  if(!payload.microchip){
+    openModal("modal-microchip-warning");
+    return;
+  }
+  await eseguiSalvataggioHorse(payload);
+}
+
+function tornaAInserireMicrochip(){
+  closeModal("modal-microchip-warning");
+  setTimeout(() => document.getElementById("horse-microchip")?.focus(), 150);
+}
+
+async function confermaSalvaSenzaMicrochip(){
+  closeModal("modal-microchip-warning");
+  await eseguiSalvataggioHorse(raccogliDatiHorseForm());
+}
+
+async function eseguiSalvataggioHorse(payload){
+  const errBox = document.getElementById("horse-error");
+  const btn = document.getElementById("horse-save-btn");
+  btn.disabled = true;
+  try{
+    let horseId = editingHorseId;
+    if(editingHorseId){
+      const { error } = await DB.updateHorse(editingHorseId, payload);
+      if(error) throw error;
+    } else {
+      const { error, data } = await DB.insertHorse(payload);
+      if(error) throw error;
+      horseId = data?.id || null;
+    }
+    closeModal("modal-add-horse");
+    await loadHorses();
+    if(currentHorseId) await openHorseDetail(currentHorseId);
+    if(payload.microchip && !DEMO_MODE){
+      await sb.rpc("sync_microchip_link", { p_microchip: payload.microchip });
+    }
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderHorseInfoBox(h){
+  const box = document.getElementById("horse-info-box");
+  if(!box) return;
+  const righe = [
+    ["Categoria", TIPO_PROPRIETA_LABELS[h.tipo_proprieta] || "—"],
+    ["Razza", h.breed || "—"],
+    ["Mantello", h.mantello || "—"],
+    ["Data di nascita", h.birth_date ? formatDate(h.birth_date) : "—"],
+    ["Microchip", h.microchip || "Non inserito"],
+    ["Gruppo sanguigno", h.gruppo_sanguigno || "—"],
+    ["Note", h.note || "—"],
+  ];
+  box.innerHTML = righe.map(([label, val]) => `
+    <div style="display:flex;justify-content:space-between;gap:10px">
+      <span class="muted">${label}</span><span style="text-align:right">${escapeHtml(String(val))}</span>
+    </div>`).join("");
 }
 
 async function openHorseDetail(id){
@@ -2930,6 +2805,7 @@ async function openHorseDetail(id){
   document.getElementById("cavalli-list-view").style.display = "none";
   document.getElementById("cavalli-detail-view").style.display = "block";
   document.getElementById("detail-horse-name").textContent = horse.name;
+  renderHorseInfoBox(horse);
   await loadHorseEvents(id);
 }
 
@@ -2939,10 +2815,24 @@ function closeHorseDetail(){
   document.getElementById("cavalli-detail-view").style.display = "none";
 }
 
-async function deleteCurrentHorse(){
+function askDeleteHorse(){
   if(!currentHorseId) return;
-  if(!confirm("Eliminare questo cavallo e tutti i suoi dati?")) return;
+  const h = horses.find(x => x.id === currentHorseId);
+  document.getElementById("delete-horse-nome-1").textContent = h?.name || "questo cavallo";
+  openModal("modal-delete-horse-1");
+}
+
+function askDeleteHorseStep2(){
+  const h = horses.find(x => x.id === currentHorseId);
+  closeModal("modal-delete-horse-1");
+  document.getElementById("delete-horse-nome-2").textContent = h?.name || "il cavallo";
+  openModal("modal-delete-horse-2");
+}
+
+async function confirmDeleteHorse(){
+  if(!currentHorseId) return;
   await DB.deleteHorse(currentHorseId);
+  closeModal("modal-delete-horse-2");
   closeHorseDetail();
   await loadHorses();
 }
@@ -2954,13 +2844,12 @@ async function loadHorseEvents(horseId){
   const box = document.getElementById("horse-events-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listEvents(horseId);
-  currentHorseEventsData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun evento registrato.</div>';
     return;
   }
   box.innerHTML = data.map(ev => `
-    <div class="event-item" style="cursor:pointer" onclick="openEditEventModal('${ev.id}')">
+    <div class="event-item">
       <div>
         <div style="font-weight:600;font-size:14px">${EVENT_LABELS[ev.type] || ev.type}</div>
         <div class="muted" style="font-size:12px">${formatDate(ev.date)}${ev.notes ? " · " + escapeHtml(ev.notes) : ""}</div>
@@ -2970,50 +2859,18 @@ async function loadHorseEvents(horseId){
   `).join("");
 }
 
-function openAddEventModal(){
-  editingEventId = null;
-  document.getElementById("modal-add-event-title").textContent = "Nuovo evento sanitario";
-  document.getElementById("event-type").value = "vaccino";
-  document.getElementById("event-date").value = "";
-  document.getElementById("event-next-date").value = "";
-  document.getElementById("event-notes").value = "";
-  document.getElementById("event-delete-btn").style.display = "none";
-  openModal("modal-add-event");
-}
-function openEditEventModal(id){
-  const ev = currentHorseEventsData.find(e => e.id === id);
-  if(!ev) return;
-  editingEventId = id;
-  document.getElementById("modal-add-event-title").textContent = "Modifica evento";
-  document.getElementById("event-type").value = ev.type;
-  document.getElementById("event-date").value = ev.date;
-  document.getElementById("event-next-date").value = ev.next_due_date || "";
-  document.getElementById("event-notes").value = ev.notes || "";
-  document.getElementById("event-delete-btn").style.display = "block";
-  openModal("modal-add-event");
-}
-async function deleteHorseEventFromModal(){
-  if(!editingEventId) return;
-  if(!confirm("Eliminare questo evento?")) return;
-  await DB.deleteEvent(editingEventId, currentHorseId);
-  editingEventId = null;
-  closeModal("modal-add-event");
-  await loadHorseEvents(currentHorseId);
-}
-async function saveHorseEvent(){
+async function createHorseEvent(){
   if(!currentHorseId) return;
   const type = document.getElementById("event-type").value;
   const date = document.getElementById("event-date").value;
   const next_due_date = document.getElementById("event-next-date").value || null;
   const notes = document.getElementById("event-notes").value.trim();
   if(!date) return;
-  const payload = { horse_id: currentHorseId, type, date, next_due_date, notes };
-  const { error } = editingEventId ? await DB.updateEvent(editingEventId, payload) : await DB.insertEvent(payload);
+  const { error } = await DB.insertEvent({ horse_id: currentHorseId, type, date, next_due_date, notes });
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("event-date").value = "";
   document.getElementById("event-next-date").value = "";
   document.getElementById("event-notes").value = "";
-  editingEventId = null;
   closeModal("modal-add-event");
   await loadHorseEvents(currentHorseId);
 }
@@ -3032,8 +2889,10 @@ async function loadDeadlines(){
   const data = await DB.listUpcomingDeadlines(horseIds, 5);
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>';
+    document.getElementById("stat-deadlines").textContent = "0";
     return;
   }
+  document.getElementById("stat-deadlines").textContent = data.filter(d => (new Date(d.next_due_date) - new Date())/86400000 < 30).length;
   box.innerHTML = data.map(d => `
     <div class="deadline-item">
       <div class="deadline-dot ${deadlineBadgeClass(d.next_due_date) === 'badge-red' ? 'late' : deadlineBadgeClass(d.next_due_date) === 'badge-accent' ? 'soon' : 'ok'}"></div>
@@ -3072,13 +2931,12 @@ async function loadLezioni(){
   const box = document.getElementById("lezioni-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listLezioni();
-  currentLezioniData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>Nessuna lezione registrata. Aggiungine una per iniziare.</div>';
     return;
   }
   box.innerHTML = data.map(l => `
-    <div class="event-item" style="cursor:pointer" onclick="openEditLezioneModal('${l.id}')">
+    <div class="event-item">
       <div>
         <div style="font-weight:600;font-size:14px">${LEZIONE_TIPO_LABELS[l.tipo] || l.tipo}${l.horses?.name ? " · " + escapeHtml(l.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(l.data)}${l.note ? " · " + escapeHtml(l.note) : ""}</div>
@@ -3087,55 +2945,27 @@ async function loadLezioni(){
   `).join("");
 }
 
-function fillLezioneCavalloSelect(){
+function openAddLezioneModal(){
   const sel = document.getElementById("lezione-cavallo");
   if(horses.length === 0){
     sel.innerHTML = '<option value="">Nessun cavallo</option>';
   } else {
     sel.innerHTML = horses.map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join("");
   }
-}
-function openAddLezioneModal(){
-  editingLezioneId = null;
-  document.getElementById("modal-add-lezione-title").textContent = "Nuova lezione";
-  fillLezioneCavalloSelect();
   document.getElementById("lezione-tipo").value = "lezione";
   document.getElementById("lezione-data").value = "";
   document.getElementById("lezione-note").value = "";
-  document.getElementById("lezione-delete-btn").style.display = "none";
   openModal("modal-add-lezione");
 }
-function openEditLezioneModal(id){
-  const l = currentLezioniData.find(x => x.id === id);
-  if(!l) return;
-  editingLezioneId = id;
-  document.getElementById("modal-add-lezione-title").textContent = "Modifica lezione";
-  fillLezioneCavalloSelect();
-  document.getElementById("lezione-cavallo").value = l.horse_id || "";
-  document.getElementById("lezione-tipo").value = l.tipo;
-  document.getElementById("lezione-data").value = l.data;
-  document.getElementById("lezione-note").value = l.note || "";
-  document.getElementById("lezione-delete-btn").style.display = "block";
-  openModal("modal-add-lezione");
-}
-async function deleteLezioneFromModal(){
-  if(!editingLezioneId) return;
-  if(!confirm("Eliminare questa lezione?")) return;
-  await DB.deleteLezione(editingLezioneId);
-  editingLezioneId = null;
-  closeModal("modal-add-lezione");
-  await loadLezioni();
-}
-async function saveLezione(){
+
+async function createLezione(){
   const horse_id = document.getElementById("lezione-cavallo").value || null;
   const tipo = document.getElementById("lezione-tipo").value;
   const data = document.getElementById("lezione-data").value;
   const note = document.getElementById("lezione-note").value.trim();
   if(!data) return;
-  const payload = { horse_id, data, tipo, note };
-  const { error } = editingLezioneId ? await DB.updateLezione(editingLezioneId, payload) : await DB.insertLezione(payload);
+  const { error } = await DB.insertLezione({ horse_id, data, tipo, note });
   if(error){ alert("Errore: " + error.message); return; }
-  editingLezioneId = null;
   closeModal("modal-add-lezione");
   await loadLezioni();
 }
@@ -3144,8 +2974,6 @@ async function saveLezione(){
 let clientiMascalcia = [];
 let proUnreadTotal = 0;
 let currentClienteId = null;
-let editingInterventoId = null;
-let currentClienteInterventiData = [];
 const TIPO_FERRATURA_LABELS = { ferro: "Ferratura a ferro", scalzatura: "Scalzatura", ortopedica: "Ferratura ortopedica", altro: "Altro" };
 const TIPO_FERRATURA_INTERVALLI = { ferro: 42, scalzatura: 56, ortopedica: 35 }; // giorni alla prossima scadenza
 
@@ -3228,13 +3056,12 @@ async function loadClienteInterventi(clienteId){
   const box = document.getElementById("cliente-interventi-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listInterventiMascalcia(clienteId);
-  currentClienteInterventiData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun intervento registrato.</div>';
     return;
   }
   box.innerHTML = data.map(i => `
-    <div class="event-item" style="cursor:pointer" onclick="openEditInterventoModal('${i.id}')">
+    <div class="event-item">
       <div>
         <div style="font-weight:600;font-size:14px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
@@ -3242,36 +3069,6 @@ async function loadClienteInterventi(clienteId){
       <span class="badge ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
     </div>
   `).join("");
-}
-function openEditInterventoModal(id){
-  const i = currentClienteInterventiData.find(x => x.id === id);
-  if(!i) return;
-  editingInterventoId = id;
-  document.getElementById("modal-add-intervento-title").textContent = "Modifica intervento";
-  const select = document.getElementById("intervento-cliente-select");
-  select.innerHTML = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
-  select.value = i.cliente_mascalcia_id;
-  document.getElementById("intervento-cliente-group").style.display = "none";
-  document.getElementById("intervento-tipo").value = i.tipo_ferratura;
-  document.getElementById("intervento-tipo-altro-group").style.display = i.tipo_ferratura === "altro" ? "flex" : "none";
-  document.getElementById("intervento-tipo-altro").value = i.tipo_altro || "";
-  document.getElementById("intervento-data").value = i.data_intervento;
-  document.getElementById("intervento-importo").value = i.importo || "";
-  document.getElementById("intervento-pagamento").value = i.stato_pagamento;
-  document.getElementById("intervento-note").value = i.note || "";
-  document.getElementById("intervento-error").style.display = "none";
-  document.getElementById("intervento-delete-btn").style.display = "block";
-  openModal("modal-add-intervento");
-}
-async function deleteInterventoFromModal(){
-  if(!editingInterventoId) return;
-  if(!confirm("Eliminare questo intervento?")) return;
-  await DB.deleteInterventoMascalcia(editingInterventoId);
-  editingInterventoId = null;
-  closeModal("modal-add-intervento");
-  if(currentClienteId) await loadClienteInterventi(currentClienteId);
-  await renderProDeadlines();
-  await renderIncassi();
 }
 
 async function renderProDeadlines(){
@@ -3307,25 +3104,10 @@ function isPremium(){
 }
 
 /* ---------- PIANO (Passa a Premium / Torna a Free) ----------
-   Stripe collegato: mensile/annuale passano da una vera Checkout Session, i lifetime
-   da un Payment Link diretto (con limite posti impostato su Stripe). "Torna a Free"
-   annulla davvero l'abbonamento su Stripe (cancel-subscription.js), non solo il flag
-   in app — obbligo di fatto per l'art. 54-bis Codice del Consumo su recesso/disdetta
-   facile quanto la sottoscrizione: altrimenti l'utente continuerebbe a pagare da Free. */
-const LIFETIME_LINKS = {
-  proprietario: "https://buy.stripe.com/00w4gB64fgRu0cbcrD6Na01",
-  professionista: "https://buy.stripe.com/9B6dRbgIT58Mf7577j6Na00",
-};
-const PREZZI_PREMIUM = {
-  proprietario: { mensile: "Mensile — 2,99€/mese", annuale: "Annuale — 19€/anno", lifetime: "Lifetime — 49€ una tantum" },
-  professionista: { mensile: "Mensile — 7,99€/mese", annuale: "Annuale — 59€/anno", lifetime: "Lifetime — 99€ una tantum" },
-};
-
-function currentPianoRuolo(){
-  const attiva = currentUser?.vistaAttiva || currentUser?.ruolo;
-  return PRO_ROLES.includes(attiva) ? "professionista" : "proprietario";
-}
-
+   Stripe non è ancora collegato (vedi modal-add-payment): il pulsante aggiorna
+   direttamente profiles.piano, con lo stesso numero di passaggi in entrambe le
+   direzioni (un solo modale di conferma), come richiesto dall'art. 54-bis
+   Codice del Consumo su recesso/disdetta facile quanto la sottoscrizione. */
 function updatePianoUI(){
   const label = document.getElementById("piano-label");
   const desc = document.getElementById("piano-desc");
@@ -3349,68 +3131,38 @@ function togglePiano(){
     openModal("modal-downgrade-free");
     return;
   }
-  const demoBox = document.getElementById("upgrade-demo-actions");
-  const realBox = document.getElementById("upgrade-real-options");
+  // In demo il piano è solo per mostrare la UI: nessun rischio, si può attivare all'istante.
+  // Fuori demo Stripe non è ancora collegato, quindi non lasciamo che chiunque si scriva
+  // "premium" da solo sul database — l'attivazione passa da una richiesta manuale.
+  const note = document.getElementById("upgrade-premium-note");
+  const btn = document.getElementById("upgrade-premium-confirm-btn");
   if(DEMO_MODE){
-    demoBox.style.display = "block";
-    realBox.style.display = "none";
+    note.textContent = "Attivazione istantanea in modalità demo — nessun pagamento reale.";
+    btn.textContent = "Conferma";
   } else {
-    demoBox.style.display = "none";
-    realBox.style.display = "flex";
-    const prezzi = PREZZI_PREMIUM[currentPianoRuolo()];
-    document.getElementById("upgrade-btn-mensile").textContent = prezzi.mensile;
-    document.getElementById("upgrade-btn-annuale").textContent = prezzi.annuale;
-    document.getElementById("upgrade-btn-lifetime").textContent = prezzi.lifetime;
+    note.textContent = "Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.";
+    btn.textContent = "Richiedi l'attivazione";
   }
   openModal("modal-upgrade-premium");
 }
 
-async function startCheckout(periodo){
-  try{
-    const res = await fetch("/.netlify/functions/create-checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUser.id, email: currentUser.email, piano: currentPianoRuolo(), periodo })
-    });
-    const data = await res.json();
-    if(data.url){ window.location.href = data.url; }
-    else { showToast("Non sono riuscito ad aprire il pagamento, riprova."); }
-  } catch(e){
-    showToast("Errore di connessione, riprova.");
-  }
-}
-
-function startLifetimeCheckout(){
-  window.location.href = LIFETIME_LINKS[currentPianoRuolo()];
-}
-
 async function confirmUpgradePremium(){
   closeModal("modal-upgrade-premium");
-  await setPiano("premium");
-  showToast("Sei passato a Premium! (demo)");
+  if(DEMO_MODE){
+    await setPiano("premium");
+    showToast("Sei passato a Premium! (demo)");
+    return;
+  }
+  const subject = encodeURIComponent("Richiesta attivazione Premium - Equo");
+  const body = encodeURIComponent("Ciao,\nvorrei attivare il piano Premium sul mio account Equo.\nEmail account: " + (currentUser?.email || ""));
+  window.location.href = "mailto:gestione.equo@gmail.com?subject=" + subject + "&body=" + body;
+  showToast("Ti abbiamo aperto l'email per la richiesta — ti rispondiamo il prima possibile.");
 }
 
 async function confirmDowngradeFree(){
   closeModal("modal-downgrade-free");
-  if(DEMO_MODE){
-    await setPiano("free");
-    showToast("Sei tornato al piano Free.");
-    return;
-  }
-  try{
-    const res = await fetch("/.netlify/functions/cancel-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUser.id })
-    });
-    if(!res.ok) throw new Error("cancel-subscription fallita");
-    currentUser.piano = "free";
-    updatePianoUI();
-    if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
-    showToast("Sei tornato al piano Free, abbonamento annullato.");
-  } catch(e){
-    showToast("Non sono riuscito ad annullare l'abbonamento, riprova o scrivici.");
-  }
+  await setPiano("free");
+  showToast("Sei tornato al piano Free.");
 }
 
 async function setPiano(piano){
@@ -3625,9 +3377,6 @@ function openInterventoModal(clienteId){
     showPage("pro-clienti");
     return;
   }
-  editingInterventoId = null;
-  document.getElementById("modal-add-intervento-title").textContent = "Segna intervento fatto";
-  document.getElementById("intervento-delete-btn").style.display = "none";
   const select = document.getElementById("intervento-cliente-select");
   select.innerHTML = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
   const group = document.getElementById("intervento-cliente-group");
@@ -3648,7 +3397,7 @@ function openInterventoModal(clienteId){
   openModal("modal-add-intervento");
 }
 
-async function saveInterventoMascalcia(){
+async function createInterventoMascalcia(){
   const errBox = document.getElementById("intervento-error");
   errBox.style.display = "none";
   const cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
@@ -3670,16 +3419,14 @@ async function saveInterventoMascalcia(){
     d.setDate(d.getDate() + TIPO_FERRATURA_INTERVALLI[tipo_ferratura]);
     prossima_scadenza = d.toISOString().slice(0, 10);
   }
-  const payload = { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note };
-  const { error } = editingInterventoId ? await DB.updateInterventoMascalcia(editingInterventoId, payload) : await DB.insertInterventoMascalcia(payload);
+  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
   if(error){
     errBox.textContent = "Errore: " + error.message;
     errBox.style.display = "block";
     return;
   }
-  editingInterventoId = null;
   closeModal("modal-add-intervento");
-  showToast("Intervento salvato!");
+  showToast("Intervento registrato!");
   await renderProDeadlines();
   await renderIncassi();
   if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
@@ -3864,7 +3611,7 @@ async function stopAndSendVoiceRecording(){
 function shareInviteCodeFromChat(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
-  const text = `Il tuo codice per collegarti a me su Equo: ${c.codice_invito} — scarica l'app su https://app.equohub.com`;
+  const text = `Il tuo codice per collegarti a me su Equo: ${c.codice_invito}`;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
       .catch(() => showToast("Non sono riuscito a copiare, riprova."));
@@ -3944,17 +3691,16 @@ function insertOwnerEmoji(emoji){
 }
 
 async function loadOwnerChatList(){
-  const targets = ["owner-chat-list", "pro-connessioni-list"].map(id => document.getElementById(id)).filter(Boolean);
-  if(targets.length === 0) return;
-  targets.forEach(box => box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>');
+  const box = document.getElementById("owner-chat-list");
+  if(!box) return;
+  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const conversazioni = await DB.listConversazioniProprietario();
   if(!conversazioni || conversazioni.length === 0){
-    const empty = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessuna chat ancora.<br>Usa "+ Nuova chat" e il codice (o QR) di un altro utente per iniziare.</div></div>';
-    targets.forEach(box => box.innerHTML = empty);
+    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessuna chat ancora.<br>Usa "+ Nuova chat" e il codice di un altro proprietario per iniziare.</div></div>';
     return;
   }
-  const html = conversazioni.map(c => {
-    const nome = c.altro?.full_name || "Utente";
+  box.innerHTML = conversazioni.map(c => {
+    const nome = c.altro?.full_name || "Proprietario";
     const m = c.ultimoMessaggio;
     let previewBody = "Inizia la conversazione";
     if(m){
@@ -3971,58 +3717,6 @@ async function loadOwnerChatList(){
       ${c.unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
     </div>`;
   }).join("");
-  targets.forEach(box => box.innerHTML = html);
-}
-
-let qrScanStream = null;
-let qrScanRAF = null;
-
-function openQrScanner(){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    showToast("Il tuo browser non supporta la fotocamera.");
-    return;
-  }
-  openModal("modal-qr-scan");
-  const video = document.getElementById("qr-scan-video");
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
-    qrScanStream = stream;
-    video.srcObject = stream;
-    video.setAttribute("playsinline", true);
-    video.play();
-    qrScanRAF = requestAnimationFrame(scanQrLoop);
-  }).catch(() => {
-    showToast("Non riesco ad accedere alla fotocamera.");
-    closeQrScanner();
-  });
-}
-
-function closeQrScanner(){
-  if(qrScanRAF) cancelAnimationFrame(qrScanRAF);
-  qrScanRAF = null;
-  if(qrScanStream){ qrScanStream.getTracks().forEach(t => t.stop()); qrScanStream = null; }
-  closeModal("modal-qr-scan");
-}
-
-function scanQrLoop(){
-  const video = document.getElementById("qr-scan-video");
-  const canvas = document.getElementById("qr-scan-canvas");
-  if(!video || video.readyState !== video.HAVE_ENOUGH_DATA){
-    qrScanRAF = requestAnimationFrame(scanQrLoop);
-    return;
-  }
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
-  if(code && code.data){
-    closeQrScanner();
-    document.getElementById("new-chat-codice").value = code.data.trim().toUpperCase();
-    startNewChat();
-    return;
-  }
-  qrScanRAF = requestAnimationFrame(scanQrLoop);
 }
 
 async function startNewChat(){
@@ -4281,7 +3975,6 @@ async function loadExpenses(){
   const box = document.getElementById("expenses-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listExpenses();
-  currentExpensesData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-wallet"/></svg></div>Nessuna spesa registrata.</div>';
     document.getElementById("expenses-month-total").textContent = "€ 0";
@@ -4291,7 +3984,7 @@ async function loadExpenses(){
   const monthTotal = data.filter(e => new Date(e.date) >= startOfMonth).reduce((s,e)=>s+Number(e.amount||0),0);
   document.getElementById("expenses-month-total").textContent = "€ " + monthTotal.toFixed(2);
   box.innerHTML = data.map(e => `
-    <div class="event-item" style="cursor:pointer" onclick="openEditExpenseModal('${e.id}')">
+    <div class="event-item">
       <div>
         <div style="font-weight:600;font-size:14px;text-transform:capitalize">${escapeHtml(e.category)}${e.horses?.name ? " · " + escapeHtml(e.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(e.date)}${e.notes ? " · " + escapeHtml(e.notes) : ""}</div>
@@ -4301,52 +3994,18 @@ async function loadExpenses(){
   `).join("");
 }
 
-function openAddExpenseModal(){
-  editingExpenseId = null;
-  document.getElementById("modal-add-expense-title").textContent = "Nuova spesa";
-  document.getElementById("expense-category").value = "pensione";
-  document.getElementById("expense-amount").value = "";
-  document.getElementById("expense-date").value = "";
-  document.getElementById("expense-notes").value = "";
-  document.getElementById("expense-delete-btn").style.display = "none";
-  openModal("modal-add-expense");
-}
-function openEditExpenseModal(id){
-  const e = currentExpensesData.find(x => x.id === id);
-  if(!e) return;
-  editingExpenseId = id;
-  document.getElementById("modal-add-expense-title").textContent = "Modifica spesa";
-  document.getElementById("expense-category").value = e.category;
-  document.getElementById("expense-amount").value = e.amount;
-  document.getElementById("expense-date").value = e.date;
-  document.getElementById("expense-notes").value = e.notes || "";
-  document.getElementById("expense-delete-btn").style.display = "block";
-  openModal("modal-add-expense");
-}
-async function deleteExpenseFromModal(){
-  if(!editingExpenseId) return;
-  if(!confirm("Eliminare questa spesa?")) return;
-  await DB.deleteExpense(editingExpenseId);
-  editingExpenseId = null;
-  closeModal("modal-add-expense");
-  await loadExpenses();
-  await loadExpensesSummary();
-}
-async function saveExpense(){
+async function createExpense(){
   const category = document.getElementById("expense-category").value;
   const amount = parseFloat(document.getElementById("expense-amount").value);
   const date = document.getElementById("expense-date").value;
   const notes = document.getElementById("expense-notes").value.trim();
   if(!amount || !date) return;
-  const existing = editingExpenseId ? currentExpensesData.find(x => x.id === editingExpenseId) : null;
-  const horse_id = existing ? existing.horse_id : (currentHorseId || (horses[0] ? horses[0].id : null));
-  const payload = { horse_id, category, amount, date, notes };
-  const { error } = editingExpenseId ? await DB.updateExpense(editingExpenseId, payload) : await DB.insertExpense(payload);
+  const horse_id = currentHorseId || (horses[0] ? horses[0].id : null);
+  const { error } = await DB.insertExpense({ horse_id, category, amount, date, notes });
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("expense-amount").value = "";
   document.getElementById("expense-date").value = "";
   document.getElementById("expense-notes").value = "";
-  editingExpenseId = null;
   closeModal("modal-add-expense");
   await loadExpenses();
   await loadExpensesSummary();
@@ -4376,35 +4035,6 @@ function detectDemoEvent(text){
   return { horse_name: horse.name, type, date, next_due_date: null, notes: null };
 }
 
-function aiMonthKey(){ return new Date().toISOString().slice(0, 7); }
-
-function aiLimit(){ return isPremium() ? 500 : 5; }
-
-function aiUsageThisMonth(){
-  if(!currentUser) return 0;
-  const nowMonth = aiMonthKey();
-  if(currentUser.aiMsgMonth !== nowMonth) return 0; // mese cambiato, contatore azzerato
-  return currentUser.aiMsgCount || 0;
-}
-
-function updateAiUsageNote(){
-  const el = document.getElementById("ai-usage-note");
-  if(!el || DEMO_MODE) return;
-  const used = aiUsageThisMonth();
-  const limit = aiLimit();
-  el.textContent = `Messaggi AI questo mese: ${used}/${limit}${isPremium() ? " (Premium)" : " (Free)"}`;
-  el.classList.toggle("ai-usage-full", used >= limit);
-}
-
-async function registerAiUsage(){
-  const nowMonth = aiMonthKey();
-  const used = aiUsageThisMonth() + 1;
-  currentUser.aiMsgCount = used;
-  currentUser.aiMsgMonth = nowMonth;
-  await DB.updateAiUsage({ count: used, month: nowMonth });
-  updateAiUsageNote();
-}
-
 async function sendChatMessage(){
   const input = document.getElementById("chat-input");
   const text = input.value.trim();
@@ -4432,13 +4062,6 @@ async function sendChatMessage(){
     }, 500);
     return;
   }
-  if(aiUsageThisMonth() >= aiLimit()){
-    const el = document.getElementById(thinkingId);
-    el.innerHTML = `Hai raggiunto il limite di ${aiLimit()} messaggi AI di questo mese` +
-      (isPremium() ? "." : ` del piano Free. <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="closeAiSheet();togglePiano()">Passa a Premium (500/mese)</button>`);
-    box.scrollTop = box.scrollHeight;
-    return;
-  }
   try{
     const res = await fetch("/.netlify/functions/ai-proxy", {
       method: "POST",
@@ -4446,14 +4069,9 @@ async function sendChatMessage(){
       body: JSON.stringify({ message: text, horses: horses.map(h => ({ id: h.id, name: h.name })) })
     });
     const data = await res.json();
-    if(res.ok){
-      document.getElementById(thinkingId).textContent = data.reply || "Non sono riuscito a rispondere, riprova.";
-      if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
-        renderEventProposal(box, data.proposedEvent);
-      }
-      await registerAiUsage();
-    } else {
-      document.getElementById(thinkingId).textContent = "Assistente AI non disponibile al momento, riprova più tardi.";
+    document.getElementById(thinkingId).textContent = data.reply || "Non sono riuscito a rispondere, riprova.";
+    if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
+      renderEventProposal(box, data.proposedEvent);
     }
   } catch(e){
     document.getElementById(thinkingId).textContent = "Errore di connessione, riprova.";
@@ -4512,151 +4130,9 @@ async function confirmEventProposal(id, proposed){
   await loadDeadlines();
 }
 
-/* ---------- SERVICES MAP ---------- */
-let servicesMapInstance = null;
-let servicesMapMarkers = [];
-let servicesAllData = [];
-let servicesUserPos = null;
-let servicesActiveFilter = "tutti";
-
-function haversineKm(lat1, lng1, lat2, lng2){
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-const SERVICE_TYPE_LABELS = { veterinario: "Veterinario", centro_ippico: "Centro ippico", negozio: "Negozio" };
-const SERVICE_TYPE_ICONS = { veterinario: "fa-stethoscope", centro_ippico: "fa-horse-head", negozio: "fa-store" };
-
-async function fetchOsmServices(lat, lng, radiusM){
-  const query = `[out:json][timeout:20];(node["amenity"="veterinary"](around:${radiusM},${lat},${lng});node["leisure"="horse_riding"](around:${radiusM},${lat},${lng});node["sport"="equestrian"](around:${radiusM},${lat},${lng});node["shop"="equestrian"](around:${radiusM},${lat},${lng}););out center;`;
-  const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(query) });
-  if(!res.ok) throw new Error("overpass_http_" + res.status);
-  const json = await res.json();
-  return (json.elements || []).map(el => {
-    const tags = el.tags || {};
-    let tipo = "negozio";
-    if(tags.amenity === "veterinary") tipo = "veterinario";
-    else if(tags.leisure === "horse_riding" || tags.sport === "equestrian") tipo = "centro_ippico";
-    else if(tags.shop === "equestrian") tipo = "negozio";
-    return {
-      id: "osm-" + el.id,
-      tipo,
-      nome: tags.name || SERVICE_TYPE_LABELS[tipo],
-      indirizzo: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || null,
-      telefono: tags.phone || tags["contact:phone"] || null,
-      lat: el.lat, lng: el.lon,
-      fonte: "osm",
-    };
-  });
-}
-
+/* ---------- SERVICES MAP (placeholder) ---------- */
 function openServicesMap(){
-  openModal("modal-services-map");
-  servicesActiveFilter = "tutti";
-  document.getElementById("services-list").innerHTML = '<div class="loading"><div class="spinner"></div> Cerco i servizi vicino a te...</div>';
-  if(!navigator.geolocation){
-    document.getElementById("services-list").innerHTML = '<div class="empty-state">Il tuo browser non supporta la geolocalizzazione.</div>';
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(async pos => {
-    servicesUserPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    await loadServicesData();
-  }, () => {
-    document.getElementById("services-list").innerHTML = '<div class="empty-state">Attiva la posizione per vedere i servizi vicino a te.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openServicesMap()">Riprova</button></div>';
-  }, { enableHighAccuracy: false, timeout: 8000 });
-}
-
-async function loadServicesData(){
-  document.getElementById("services-list").innerHTML = '<div class="loading"><div class="spinner"></div> Cerco i servizi vicino a te...</div>';
-  let osmData = [];
-  let curatedData = [];
-  let osmError = false;
-  try{
-    [osmData, curatedData] = await Promise.all([
-      fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng, 15000),
-      DB.listServices(),
-    ]);
-    if(osmData.length === 0){
-      // niente entro 15km: prova un raggio più ampio prima di arrenderti
-      osmData = await fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng, 40000);
-    }
-  }catch(e){
-    osmError = true;
-    curatedData = await DB.listServices().catch(() => []);
-  }
-  const curated = (curatedData || []).map(s => ({ ...s, fonte: "curato" }));
-  servicesAllData = [...curated, ...osmData]
-    .map(s => ({ ...s, distanza: haversineKm(servicesUserPos.lat, servicesUserPos.lng, s.lat, s.lng) }))
-    .sort((a, b) => a.distanza - b.distanza);
-  initServicesMapView();
-  if(servicesAllData.length === 0 && osmError){
-    document.getElementById("services-list").innerHTML = '<div class="empty-state">Errore di connessione durante la ricerca. Riprova.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="loadServicesData()">Riprova</button></div>';
-    return;
-  }
-  renderServicesList();
-}
-
-function initServicesMapView(){
-  const el = document.getElementById("services-map-canvas");
-  if(!el) return;
-  if(servicesMapInstance){ servicesMapInstance.remove(); servicesMapInstance = null; }
-  servicesMapInstance = L.map(el).setView([servicesUserPos.lat, servicesUserPos.lng], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(servicesMapInstance);
-  L.circleMarker([servicesUserPos.lat, servicesUserPos.lng], { radius: 7, color: "#03491d", fillColor: "#03491d", fillOpacity: 1 }).addTo(servicesMapInstance).bindPopup("Tu sei qui");
-  renderServicesMarkers();
-}
-
-function renderServicesMarkers(){
-  if(!servicesMapInstance) return;
-  servicesMapMarkers.forEach(m => servicesMapInstance.removeLayer(m));
-  servicesMapMarkers = [];
-  const filtered = servicesActiveFilter === "tutti" ? servicesAllData : servicesAllData.filter(s => s.tipo === servicesActiveFilter);
-  filtered.forEach(s => {
-    const marker = L.marker([s.lat, s.lng]).addTo(servicesMapInstance).bindPopup(`<b>${escapeHtml(s.nome)}</b><br>${SERVICE_TYPE_LABELS[s.tipo]}`);
-    marker.on("click", () => focusServiceOnMap(s.id));
-    servicesMapMarkers.push(marker);
-  });
-}
-
-function filterServices(tipo){
-  servicesActiveFilter = tipo;
-  document.querySelectorAll("#services-map-chips .chip").forEach(c => c.classList.toggle("active", c.dataset.tipo === tipo));
-  renderServicesMarkers();
-  renderServicesList();
-}
-
-function renderServicesList(){
-  const box = document.getElementById("services-list");
-  const filtered = servicesActiveFilter === "tutti" ? servicesAllData : servicesAllData.filter(s => s.tipo === servicesActiveFilter);
-  if(filtered.length === 0){
-    box.innerHTML = '<div class="empty-state">Nessun servizio trovato nella zona.</div>';
-    return;
-  }
-  box.innerHTML = filtered.map(s => `
-    <div class="inbox-item" id="service-item-${s.id}" onclick="focusServiceOnMap('${s.id}')">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <div>
-          <div style="font-weight:600"><span class="fa-icon"><i class="fa-solid ${SERVICE_TYPE_ICONS[s.tipo]}"></i></span> ${escapeHtml(s.nome)}${s.fonte === "curato" ? ' <span title="Verificato da Equo">★</span>' : ""}</div>
-          <div class="muted" style="font-size:12px">${SERVICE_TYPE_LABELS[s.tipo]} · ${s.distanza.toFixed(1)} km${s.indirizzo ? " · " + escapeHtml(s.indirizzo) : ""}</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
-        ${s.telefono ? `<a class="btn btn-outline btn-sm" href="tel:${s.telefono}"><span class="fa-icon"><i class="fa-solid fa-phone"></i></span> Chiama</a>` : ""}
-        <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener"><span class="fa-icon"><i class="fa-solid fa-diamond-turn-right"></i></span> Indicazioni</a>
-      </div>
-    </div>
-  `).join("");
-}
-
-function focusServiceOnMap(id){
-  const s = servicesAllData.find(x => x.id === id);
-  if(!s || !servicesMapInstance) return;
-  servicesMapInstance.setView([s.lat, s.lng], 15);
-  const marker = servicesMapMarkers.find(m => m.getLatLng().lat === s.lat && m.getLatLng().lng === s.lng);
-  if(marker) marker.openPopup();
+  alert("Mappa servizi in arrivo — cliniche 24h e maniscalchi vicino a te.");
 }
 
 /* ---------- HELPERS ---------- */
@@ -4676,52 +4152,6 @@ function startPromoRotation(){
     i = (i + 1) % slides.length;
     slides[i].classList.add("active");
   }, 5000);
-}
-function startPartnerBannerRotation(){
-  let i = 0;
-  const slides = document.querySelectorAll(".partner-slide");
-  if(slides.length < 2) return;
-  setInterval(() => {
-    slides[i].classList.remove("active");
-    i = (i + 1) % slides.length;
-    slides[i].classList.add("active");
-  }, 30000);
-}
-async function submitSegnalazioneManeggio(){
-  const nome_struttura = document.getElementById("segnala-nome-struttura").value.trim();
-  const citta = document.getElementById("segnala-citta").value.trim();
-  const via = document.getElementById("segnala-via").value.trim();
-  const telefono_struttura = document.getElementById("segnala-telefono-struttura").value.trim();
-  const contatto_premio = document.getElementById("segnala-contatto-premio").value.trim();
-  if(!nome_struttura || !citta || !contatto_premio){
-    showToast("Compila almeno nome struttura, città e il tuo contatto.");
-    return;
-  }
-  const payload = {
-    nome_struttura, citta,
-    via: via || null,
-    telefono_struttura: telefono_struttura || null,
-    contatto_premio,
-    segnalato_da: currentUser ? currentUser.id : null,
-  };
-  const { error } = await DB.insertSegnalazioneManeggio(payload);
-  if(error){ showToast("Errore, riprova tra poco."); return; }
-  fetch("/.netlify/functions/send-email", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      to: "gestione.equo@gmail.com",
-      subject: "Nuova segnalazione maneggio - Equo",
-      html: `<p>Nuova segnalazione:</p><ul><li>Struttura: ${escapeHtml(nome_struttura)}</li><li>Città: ${escapeHtml(citta)}</li><li>Via: ${escapeHtml(via || "-")}</li><li>Telefono struttura: ${escapeHtml(telefono_struttura || "-")}</li><li>Contatto per premio: ${escapeHtml(contatto_premio)}</li></ul>`,
-    }),
-  }).catch(() => {});
-  document.getElementById("segnala-nome-struttura").value = "";
-  document.getElementById("segnala-citta").value = "";
-  document.getElementById("segnala-via").value = "";
-  document.getElementById("segnala-telefono-struttura").value = "";
-  document.getElementById("segnala-contatto-premio").value = "";
-  closeModal("modal-segnala-maneggio");
-  showToast("Grazie! Ti contatteremo con il codice Premium.");
 }
 
 /* Carica la lista spese quando si apre la pagina */
