@@ -44,3 +44,6 @@ FOTO/
 # asset grezzi non referenziati dal sito / output di lavoro, non da versionare
 VIDEO/
 Claude outputs/
+
+# Local Netlify folder
+.netlify
