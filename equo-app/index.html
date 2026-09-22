@@ -550,6 +550,12 @@ select.input{cursor:pointer}
         </div>
       </div>
 
+      <div class="card" id="home-last-message-card" style="margin-bottom:14px;display:none;cursor:pointer" onclick="goToLastMessage()">
+        <span class="badge badge-accent" style="background:var(--accent);color:#14231b">ULTIMO MESSAGGIO</span>
+        <div style="font-weight:700;font-size:14px;margin-top:8px" id="home-last-message-from"></div>
+        <div class="muted" style="font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="home-last-message-preview"></div>
+      </div>
+
       <div class="card" style="margin-bottom:14px">
         <div class="section-title" style="font-size:16px;margin-bottom:8px">Prossime scadenze</div>
         <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
@@ -563,8 +569,15 @@ select.input{cursor:pointer}
 
   <!-- CHAT (proprietario) -->
   <div class="page-content" id="page-chat">
+    <div id="stable-chat-section" style="display:none;margin-bottom:20px">
+      <div class="section-title" style="font-size:15px">La tua scuderia</div>
+      <div class="card" id="stable-chat-list-card">
+        <div id="stable-chat-list"></div>
+      </div>
+    </div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="section-title" style="margin-bottom:0">Chat</div>
+      <div class="section-title" style="margin-bottom:0">Chat tra proprietari</div>
       <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-chat')">+ Nuova chat</button>
     </div>
     <div class="card" id="owner-chat-list-card">
@@ -855,6 +868,22 @@ select.input{cursor:pointer}
       <div class="mchat-rec-timer" id="mchat-rec-timer">0:00</div>
       <div class="muted" style="flex:1;font-size:12.5px">Registrazione in corso...</div>
       <button class="mchat-send-btn btn btn-primary" onclick="stopAndSendVoiceRecording()" aria-label="Invia nota vocale"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- CHAT CON LA SCUDERIA (solo testo, riusa le classi mchat-*) -->
+  <div class="mchat-overlay" id="schat-overlay">
+    <div class="mchat-header">
+      <button class="back-btn" onclick="closeStableChatThread()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="horse-avatar" style="width:38px;height:38px;border-radius:50%"><i class="fa-solid fa-horse-head" style="font-size:16px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="mchat-header-name" id="schat-nome">Scuderia</div>
+      </div>
+    </div>
+    <div class="mchat-messages" id="schat-messages"></div>
+    <div class="mchat-input-bar">
+      <input class="input" id="schat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendStableChatMessage()">
+      <button class="mchat-send-btn btn btn-primary" onclick="sendStableChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
   </div>
 
@@ -1812,6 +1841,24 @@ const DB = {
     return currentUser.codiceProprietario;
   },
 
+  /* -- Chat con la/le scuderie collegate (riusa chat_messaggi già usata da Equo Scuderia) -- */
+  async listScuderieCollegate(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.from("scuderia_membri").select("id, centro_id, centri(nome)").eq("user_id", currentUser.id);
+    if(error || !data) return [];
+    return data.map(m => ({ membro_id: m.id, centro_id: m.centro_id, nome: m.centri?.nome || "La tua scuderia" }));
+  },
+  async listMessaggiScuderia(membroId){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.from("chat_messaggi").select("*").eq("membro_id", membroId).order("created_at", { ascending: true });
+    return error ? [] : (data || []);
+  },
+  async inviaMessaggioScuderia({ centro_id, membro_id, testo }){
+    if(DEMO_MODE) return { error: null };
+    const { error } = await sb.from("chat_messaggi").insert({ centro_id, membro_id, mittente_user_id: currentUser.id, testo });
+    return { error };
+  },
+
   async findStableByCode(code){
     if(DEMO_MODE) return demoState.stables.find(s => s.join_code === code) || null;
     const { data } = await sb.from("stables").select("id, name").eq("join_code", code).maybeSingle();
@@ -2670,6 +2717,52 @@ function renderHome(){
   document.getElementById("topbar-context").textContent = horses.length === 1 ? horses[0].name : horses.length + " cavalli";
   loadDeadlines();
   loadExpensesSummary();
+  loadHomeLastMessage();
+}
+
+/* ---------- ULTIMO MESSAGGIO (home) ---------- */
+let homeLastMessageTarget = null;
+async function loadHomeLastMessage(){
+  const card = document.getElementById("home-last-message-card");
+  if(!card) return;
+  card.style.display = "none";
+  homeLastMessageTarget = null;
+  if(DEMO_MODE) return;
+
+  const candidates = [];
+  const scuderie = await DB.listScuderieCollegate();
+  for(const s of scuderie){
+    const msgs = await DB.listMessaggiScuderia(s.membro_id);
+    const ultimo = msgs[msgs.length - 1];
+    if(ultimo) candidates.push({ tipo: "scuderia", nome: s.nome, testo: ultimo.testo || "", data: ultimo.created_at, target: s });
+  }
+  const conversazioni = await DB.listConversazioniProprietario();
+  (conversazioni || []).forEach(c => {
+    const m = c.ultimoMessaggio;
+    if(!m) return;
+    const testo = m.tipo && m.tipo !== "testo" ? (m.tipo === "audio" ? "🎙️ Nota vocale" : m.tipo === "foto" ? "📷 Foto" : "🎬 Video") : (m.testo || "");
+    candidates.push({ tipo: "proprietario", nome: c.altro?.full_name || "Proprietario", testo, data: m.created_at, target: c });
+  });
+
+  if(candidates.length === 0) return;
+  candidates.sort((a, b) => new Date(b.data) - new Date(a.data));
+  const top = candidates[0];
+  homeLastMessageTarget = top;
+  document.getElementById("home-last-message-from").textContent = top.nome;
+  document.getElementById("home-last-message-preview").textContent = top.testo;
+  card.style.display = "block";
+}
+
+function goToLastMessage(){
+  if(!homeLastMessageTarget) return;
+  showPage("chat");
+  if(homeLastMessageTarget.tipo === "scuderia"){
+    const s = homeLastMessageTarget.target;
+    loadStableChatSection().then(() => openStableChatThread(s.membro_id, s.centro_id, s.nome));
+  } else {
+    const c = homeLastMessageTarget.target;
+    loadOwnerChatList().then(() => openOwnerChatThread(c.id, c.altro?.full_name || "Proprietario"));
+  }
 }
 
 function renderHorsesList(){
@@ -3719,6 +3812,82 @@ async function loadOwnerChatList(){
   }).join("");
 }
 
+let currentStableMembro = null; // { membro_id, centro_id, nome }
+
+async function loadStableChatSection(){
+  const section = document.getElementById("stable-chat-section");
+  const box = document.getElementById("stable-chat-list");
+  if(!section || !box) return;
+  const scuderie = await DB.listScuderieCollegate();
+  if(!scuderie || scuderie.length === 0){ section.style.display = "none"; return; }
+  section.style.display = "block";
+  const conMessaggi = await Promise.all(scuderie.map(async s => ({ ...s, messaggi: await DB.listMessaggiScuderia(s.membro_id) })));
+  box.innerHTML = conMessaggi.map(s => {
+    const ultimo = s.messaggi[s.messaggi.length - 1];
+    let preview = "Inizia la conversazione con la scuderia";
+    if(ultimo) preview = (ultimo.mittente_user_id === currentUser.id ? "Tu: " : "") + (ultimo.testo || "");
+    return `
+    <div class="inbox-item" onclick='openStableChatThread(${JSON.stringify(s.membro_id)}, ${JSON.stringify(s.centro_id)}, ${JSON.stringify(s.nome)})'>
+      <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:20px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(s.nome)}</div>
+        <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function openStableChatThread(membroId, centroId, nome){
+  currentStableMembro = { membro_id: membroId, centro_id: centroId, nome };
+  document.getElementById("schat-nome").textContent = nome || "Scuderia";
+  document.getElementById("schat-input").value = "";
+  document.getElementById("schat-overlay").classList.add("active");
+  await renderStableChatThread();
+}
+
+function closeStableChatThread(){
+  document.getElementById("schat-overlay").classList.remove("active");
+  currentStableMembro = null;
+}
+
+async function renderStableChatThread(){
+  const box = document.getElementById("schat-messages");
+  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const data = await DB.listMessaggiScuderia(currentStableMembro.membro_id);
+  if(!data || data.length === 0){
+    box.innerHTML = '<div class="muted" style="font-size:13px;text-align:center;margin-top:20px">Nessun messaggio ancora.<br>Scrivi il primo messaggio qui sotto.</div>';
+    return;
+  }
+  let lastDay = null;
+  let html = "";
+  data.forEach(m => {
+    const day = formatChatDay(m.created_at);
+    if(day !== lastDay){
+      html += `<div class="mchat-day-sep">${day}</div>`;
+      lastDay = day;
+    }
+    const out = m.mittente_user_id === currentUser.id;
+    html += `
+      <div class="mchat-bubble ${out ? "out" : "in"}">
+        <div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>
+        <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
+      </div>`;
+  });
+  box.innerHTML = html;
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendStableChatMessage(){
+  const input = document.getElementById("schat-input");
+  const testo = input.value.trim();
+  if(!testo || !currentStableMembro) return;
+  input.value = "";
+  const { error } = await DB.inviaMessaggioScuderia({ centro_id: currentStableMembro.centro_id, membro_id: currentStableMembro.membro_id, testo });
+  if(error){ showToast("Errore: " + error.message); return; }
+  await renderStableChatThread();
+  await loadStableChatSection();
+}
+
 async function startNewChat(){
   const codice = document.getElementById("new-chat-codice").value.trim().toUpperCase();
   const errBox = document.getElementById("new-chat-error");
@@ -4161,7 +4330,7 @@ document.querySelector('[data-page="spese"]').addEventListener("click", loadExpe
 document.querySelector('[data-page="prenotazioni"]').addEventListener("click", loadLezioni);
 
 /* Carica la lista chat quando si apre la tab Chat */
-document.querySelector('[data-page="chat"]').addEventListener("click", loadOwnerChatList);
+document.querySelector('[data-page="chat"]').addEventListener("click", () => { loadOwnerChatList(); loadStableChatSection(); });
 
 /* ---------- INIT ---------- */
 boot();
