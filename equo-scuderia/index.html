@@ -982,6 +982,19 @@ textarea.input{resize:vertical}
   </div>
 </div>
 
+<!-- MODAL: proprietario collegato, importa i suoi cavalli già in Equo App? -->
+<div class="modal-overlay" id="modal-import-cavalli" onclick="closeOut(event,'modal-import-cavalli')">
+  <div class="modal">
+    <div class="modal-title">Importa cavalli <span class="x" onclick="saltaImportCavalli()">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px" id="import-cavalli-title"></p>
+    <div id="import-cavalli-list" style="max-height:300px;overflow:auto;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="saltaImportCavalli()">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confermaImportCavalli()">Importa selezionati</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Legale (Privacy / Cookie / Termini) -->
 <div class="modal-overlay" id="modal-legal" onclick="closeOut(event,'modal-legal')">
   <div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh">
@@ -2638,8 +2651,10 @@ async function saveCavallo(){
 
     if(codiceProprietario){
       const esito = await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);
-      if(esito.ok) apriConfirmChatCliente(esito.nome || "il proprietario", esito.membroId);
-      else showToast(esito.error + " Il cavallo è stato comunque salvato.");
+      if(esito.ok){
+        const nomeProprietario = esito.nome || "il proprietario";
+        await proponiImportCavalli(esito.membroId, nomeProprietario, () => apriConfirmChatCliente(nomeProprietario, esito.membroId));
+      } else showToast(esito.error + " Il cavallo è stato comunque salvato.");
     } else if(payload.microchip && !DEMO_MODE){
       // Nessun codice inserito manualmente: se il microchip combacia con un
       // cavallo già presente su Equo App, il proprietario viene collegato in automatico.
@@ -2711,7 +2726,7 @@ async function avviaNuovaChatCliente(){
     const esito = await collegaProprietarioDaCodice(codice, null, null);
     if(!esito.ok){ errBox.textContent = esito.error; errBox.style.display = "block"; return; }
     closeModal("modal-nuova-chat-cliente");
-    chattaConMembro(esito.membroId);
+    await proponiImportCavalli(esito.membroId, esito.nome || "il proprietario", () => chattaConMembro(esito.membroId));
   } finally {
     btn.disabled = false;
   }
@@ -3208,6 +3223,70 @@ function chattaConProprietarioAppenaCollegato(){
   closeModal("modal-chat-cliente-confirm");
   if(clienteAppenaCollegato) chattaConMembro(clienteAppenaCollegato.membro_id);
   clienteAppenaCollegato = null;
+}
+
+/* ---------- IMPORT CAVALLI dopo collegamento proprietario (chat/codice) ---------- */
+let importCavalliPendenti = [];
+let importCavalliMembroId = null;
+let importCavalliOnDone = null;
+
+// Dopo aver collegato un proprietario, controlla se ha cavalli su Equo App non
+// ancora presenti in questa scuderia; se sì mostra un popup con checkbox per
+// sceglierne l'import, altrimenti prosegue subito con onDone().
+async function proponiImportCavalli(membroId, nome, onDone){
+  if(DEMO_MODE){ onDone(); return; }
+  try{
+    const { data, error } = await sb.rpc("cavalli_da_importare", { p_membro_id: membroId });
+    if(error || !data || data.length === 0){ onDone(); return; }
+    importCavalliMembroId = membroId;
+    importCavalliOnDone = onDone;
+    importCavalliPendenti = data;
+    renderImportCavalliList(nome);
+    openModal("modal-import-cavalli");
+  } catch(err){
+    onDone();
+  }
+}
+
+function renderImportCavalliList(nome){
+  const n = importCavalliPendenti.length;
+  document.getElementById("import-cavalli-title").textContent =
+    `${nome} ha ${n === 1 ? "un cavallo" : n + " cavalli"} sul suo profilo Equo App non ancora in scheda qui. Vuoi importarli?`;
+  document.getElementById("import-cavalli-list").innerHTML = importCavalliPendenti.map(h => `
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="import-cavallo-check" value="${h.id}" checked style="width:18px;height:18px;flex-shrink:0">
+      <div>
+        <div style="font-weight:600">${escapeHtml(h.name || "Cavallo")}</div>
+        <div style="color:var(--muted);font-size:12px">${escapeHtml([h.breed, h.microchip ? "Microchip " + h.microchip : null].filter(Boolean).join(" · ") || "—")}</div>
+      </div>
+    </label>`).join("");
+}
+
+async function confermaImportCavalli(){
+  const ids = Array.from(document.querySelectorAll(".import-cavallo-check:checked")).map(el => el.value);
+  closeModal("modal-import-cavalli");
+  if(ids.length > 0){
+    let ok = 0;
+    for(const horseId of ids){
+      const { error } = await sb.rpc("importa_cavallo_scuderia", { p_horse_id: horseId, p_membro_id: importCavalliMembroId });
+      if(!error) ok++;
+    }
+    if(ok > 0){
+      await loadCavalli();
+      renderCavalliList();
+      showToast(ok === 1 ? "Cavallo importato." : `${ok} cavalli importati.`);
+    }
+  }
+  importCavalliPendenti = [];
+  const onDone = importCavalliOnDone; importCavalliOnDone = null;
+  if(onDone) onDone();
+}
+
+function saltaImportCavalli(){
+  closeModal("modal-import-cavalli");
+  importCavalliPendenti = [];
+  const onDone = importCavalliOnDone; importCavalliOnDone = null;
+  if(onDone) onDone();
 }
 
 async function loadMessaggi(){
