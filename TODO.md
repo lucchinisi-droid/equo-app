@@ -64,6 +64,17 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
   - [ ] Account Stripe attualmente in modalità **Live** (non Test) — primi test di pagamento saranno reali, fare un acquisto di prova con importo minimo e poi rimborsarlo dalla dashboard Stripe
   - [ ] Verificare "Riscuoti le imposte automaticamente" (Stripe Tax) sui prodotti creati — se non configurato in Impostazioni → Tax potrebbe non calcolare l'IVA correttamente
 
+## 3bis. Chat & notifiche push (sessione 23/09)
+- [x] Non letti chat basati su database (non più localStorage): colonna `chat_messaggi.letto` + RPC `segna_letti_chat`; contatore + pallini non letti lato Equo Scuderia (sidebar "Comunicazioni & Chat" + lista "Chatta con i tuoi clienti"), badge lato Equo App aggiornato dalla vecchia versione localStorage alla nuova basata su DB — così il conteggio è identico su qualsiasi dispositivo/utente
+- [x] Import cavalli con conferma dopo collegamento proprietario via chat/codice: RPC `cavalli_da_importare` + `importa_cavallo_scuderia`, popup con checkbox lato Equo Scuderia prima del popup "Chatta ora?"
+- [x] **Notifiche push reali (OneSignal)**: SDK integrato in Equo App ed Equo Scuderia (banner "Attiva le notifiche" nella pagina Chat/Comunicazioni, mostrato solo se il permesso non è già stato concesso), utente collegato con `OneSignal.login(user.id)` all'ingresso in app
+- [x] Function Netlify `notify-chat-message.js` (sito equo-app) che riceve i webhook Supabase a ogni nuovo messaggio e invia la push al destinatario giusto via API OneSignal — copre `chat_messaggi` (scuderia↔proprietari/professionisti collegati), `messaggi_proprietari` (chat diretta tra utenti app) e `messaggi_mascalcia` (maniscalco↔cliente, solo se il cliente ha collegato l'account app)
+- [x] 3 Database Webhook configurati su Supabase (Integrations → Database Webhooks): `notify-chat-scuderia` (chat_messaggi), `notify-chat-proprietari` (messaggi_proprietari), `notify-chat-mascalcia` (messaggi_mascalcia) — tutti Insert-only, header `X-Webhook-Secret` condiviso
+- [x] Variabili d'ambiente impostate su Netlify (sito equo-app): `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY`, `CHAT_WEBHOOK_SECRET`
+- [x] **Bug corretto**: `SUPABASE_URL` su Netlify (sito equo-app) aveva `/rest/v1/` di troppo in fondo, il che rompeva silenziosamente OGNI chiamata delle Netlify Function al database (404 su tutte le query) — probabilmente affliggeva anche `stripe-webhook.js` da tempo (verificare se qualche abbonamento pagato di recente non ha ricevuto `piano=premium`). Corretta il 23/09.
+- [ ] **Push per i messaggi broadcast** (`scuderia_messaggi`, il "Nuovo messaggio" a tutto il centro/per ruolo in Equo Scuderia): non è una chat 1-a-1, oggi non ha nessuna push collegata — da valutare come intervento a parte se serve
+- [ ] Test end-to-end reale con app chiusa/telefono bloccato, sia Android che iPhone (su iPhone la push funziona solo se l'app è stata aggiunta alla schermata Home, richiede iOS 16.4+)
+
 ## 4. Altro fondamentale prima del lancio
 - [ ] **Monetizzazione**: definire piano free vs pro (limite cavalli? assistente AI limitato? export PDF a pagamento?) — nessuna feature senza logica di business
 - [x] **Privacy & Cookie (equo-app + equo-scuderia)**: Privacy Policy, Cookie Policy, Termini di Servizio, cookie banner, diritto di cancellazione account — vedi sezione 2 sopra e doc `claude/equo-normativa-privacy.md`
