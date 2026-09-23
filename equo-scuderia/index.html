@@ -319,6 +319,14 @@ textarea.input{resize:vertical}
   font-size:13px;font-weight:600;color:var(--muted)}
 .theme-opt.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
 </style>
+<!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa). -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal){
+    await OneSignal.init({ appId: "440aeba3-69c9-4dc8-ad3d-9bf6f23ae7f0" });
+  });
+</script>
 </head>
 <body>
 
@@ -763,6 +771,10 @@ textarea.input{resize:vertical}
               <p>Messaggi a tutto il centro, per ruolo o a un singolo membro.</p>
             </div>
             <button class="btn btn-primary" id="btn-nuovo-messaggio" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
+          </div>
+          <div class="card" id="push-permission-banner" style="display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">
+            <div style="font-size:13px">Attiva le notifiche per non perdere i messaggi dei clienti, anche a schermo bloccato.</div>
+            <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="attivaNotifichePush()">Attiva</button>
           </div>
           <div class="card">
             <div id="messaggi-list"></div>
@@ -2159,6 +2171,46 @@ function enterAppShell(){
   showModule("home");
   showScreen("screen-app");
   startChatUnreadPolling();
+  collegaOneSignal();
+}
+
+/* ---------- NOTIFICHE PUSH (OneSignal) ---------- */
+// Collega lo staff loggato a OneSignal con external_id = id utente Supabase,
+// così il server può inviargli notifiche mirate senza gestire noi i token.
+async function collegaOneSignal(){
+  if(DEMO_MODE || !currentUser?.id) return;
+  try{
+    if(typeof OneSignal === "undefined"){
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async (OS) => { await OS.login(currentUser.id); aggiornaBannerPush(); });
+      return;
+    }
+    await OneSignal.login(currentUser.id);
+    aggiornaBannerPush();
+  } catch(err){
+    console.error("collegaOneSignal:", err);
+  }
+}
+
+function aggiornaBannerPush(){
+  const banner = document.getElementById("push-permission-banner");
+  if(!banner) return;
+  try{
+    const giaConcesso = typeof OneSignal !== "undefined" && OneSignal.Notifications?.permission;
+    banner.style.display = giaConcesso ? "none" : "flex";
+  } catch(err){ /* SDK non ancora pronto */ }
+}
+
+async function attivaNotifichePush(){
+  try{
+    if(typeof OneSignal === "undefined"){ showToast("Notifiche non disponibili al momento, riprova tra poco."); return; }
+    await OneSignal.Notifications.requestPermission();
+    aggiornaBannerPush();
+    showToast(OneSignal.Notifications.permission ? "Notifiche attivate." : "Permesso non concesso.");
+  } catch(err){
+    console.error("attivaNotifichePush:", err);
+    showToast("Non è stato possibile attivare le notifiche.");
+  }
 }
 
 /* ---------- LIVELLI & PERMESSI ---------- */
@@ -3238,6 +3290,7 @@ async function refreshChatUnread(){
     badge.style.display = totale > 0 ? "flex" : "none";
   }
   renderClientiChatList();
+  aggiornaBannerPush();
 }
 
 function startChatUnreadPolling(){

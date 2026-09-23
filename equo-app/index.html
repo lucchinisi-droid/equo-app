@@ -358,6 +358,15 @@ select.input{cursor:pointer}
   .ai-fab{right:calc(50% - 240px + 16px)}
 }
 </style>
+<!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
+     su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal){
+    await OneSignal.init({ appId: "440aeba3-69c9-4dc8-ad3d-9bf6f23ae7f0" });
+  });
+</script>
 </head>
 <body>
 
@@ -569,6 +578,10 @@ select.input{cursor:pointer}
 
   <!-- CHAT (proprietario) -->
   <div class="page-content" id="page-chat">
+    <div class="card" id="push-permission-banner" style="display:none;margin-bottom:14px;align-items:center;justify-content:space-between;gap:10px">
+      <div style="font-size:13px">Attiva le notifiche per non perdere i messaggi, anche a telefono bloccato.</div>
+      <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="attivaNotifichePush()">Attiva</button>
+    </div>
     <div id="stable-chat-section" style="display:none;margin-bottom:20px">
       <div class="section-title" style="font-size:15px">La tua scuderia</div>
       <div class="card" id="stable-chat-list-card">
@@ -2155,6 +2168,7 @@ async function confirmAddSecondaryRole(ruolo){
 async function enterApp(ruolo){
   document.getElementById("screen-onboarding").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
+  collegaOneSignal();
   currentUser.vistaAttiva = ruolo;
   updateRoleBadgeUI(ruolo);
   renderMenuDualRole();
@@ -3880,6 +3894,46 @@ async function refreshChatBadge(){
   const badge = document.getElementById("owner-chat-nav-badge");
   if(badge) badge.style.display = total > 0 ? "block" : "none";
 }
+
+/* ---------- NOTIFICHE PUSH (OneSignal) ---------- */
+// Collega l'utente loggato a OneSignal con un id stabile (external_id = id
+// utente Supabase), così il server può inviargli notifiche mirate senza
+// dover gestire noi i token dei singoli dispositivi.
+async function collegaOneSignal(){
+  if(DEMO_MODE || !currentUser?.id) return;
+  try{
+    if(typeof OneSignal === "undefined"){
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async (OS) => { await OS.login(currentUser.id); aggiornaBannerPush(); });
+      return;
+    }
+    await OneSignal.login(currentUser.id);
+    aggiornaBannerPush();
+  } catch(err){
+    console.error("collegaOneSignal:", err);
+  }
+}
+
+function aggiornaBannerPush(){
+  const banner = document.getElementById("push-permission-banner");
+  if(!banner) return;
+  try{
+    const giaConcesso = typeof OneSignal !== "undefined" && OneSignal.Notifications?.permission;
+    banner.style.display = giaConcesso ? "none" : "flex";
+  } catch(err){ /* SDK non ancora pronto: banner resta nascosto, si aggiorna al prossimo giro */ }
+}
+
+async function attivaNotifichePush(){
+  try{
+    if(typeof OneSignal === "undefined"){ showToast("Notifiche non disponibili al momento, riprova tra poco."); return; }
+    await OneSignal.Notifications.requestPermission();
+    aggiornaBannerPush();
+    showToast(OneSignal.Notifications.permission ? "Notifiche attivate." : "Permesso non concesso.");
+  } catch(err){
+    console.error("attivaNotifichePush:", err);
+    showToast("Non è stato possibile attivare le notifiche.");
+  }
+}
 function startChatBadgePolling(){
   refreshChatBadge();
   clearInterval(chatBadgePollTimer);
@@ -4372,7 +4426,7 @@ document.querySelector('[data-page="spese"]').addEventListener("click", loadExpe
 document.querySelector('[data-page="prenotazioni"]').addEventListener("click", loadLezioni);
 
 /* Carica la lista chat quando si apre la tab Chat */
-document.querySelector('[data-page="chat"]').addEventListener("click", () => { loadOwnerChatList(); loadStableChatSection(); refreshChatBadge(); });
+document.querySelector('[data-page="chat"]').addEventListener("click", () => { loadOwnerChatList(); loadStableChatSection(); refreshChatBadge(); aggiornaBannerPush(); });
 
 /* ---------- INIT ---------- */
 boot();
