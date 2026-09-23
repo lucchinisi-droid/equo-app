@@ -44,6 +44,8 @@ exports.handler = async (event) => {
       await gestisciChatScuderia(supabase, record);
     } else if (table === "messaggi_proprietari") {
       await gestisciChatProprietari(supabase, record);
+    } else if (table === "messaggi_mascalcia") {
+      await gestisciChatMascalcia(supabase, record);
     } else {
       return { statusCode: 200, body: "Tabella non gestita." };
     }
@@ -106,6 +108,31 @@ async function gestisciChatProprietari(supabase, record) {
   const { data: mittente } = await supabase.from("profiles").select("full_name").eq("id", mittente_id).maybeSingle();
   const corpo = tipo === "testo" ? testo : media_url ? "Ha inviato un allegato" : (testo || "Nuovo messaggio");
   await inviaPush([destinatarioId], `Nuovo messaggio da ${mittente?.full_name || "un utente Equo"}`, corpo);
+}
+
+// Chat maniscalco <-> suo cliente (tabella messaggi_mascalcia, modulo Mascalcia).
+// Il cliente ha una chat solo se ha collegato il suo account Equo App
+// (clienti_mascalcia.cliente_user_id valorizzato); altrimenti non riceve push
+// (non ha un account a cui inviarle).
+async function gestisciChatMascalcia(supabase, record) {
+  const { cliente_mascalcia_id, maniscalco_id, mittente_tipo, tipo, testo, audio_url } = record;
+  if (!cliente_mascalcia_id || !maniscalco_id) return;
+
+  const { data: cliente } = await supabase
+    .from("clienti_mascalcia")
+    .select("nome, cliente_user_id")
+    .eq("id", cliente_mascalcia_id)
+    .maybeSingle();
+  if (!cliente) return;
+
+  const corpo = tipo === "testo" ? testo : audio_url ? "Ha inviato un vocale" : (testo || "Nuovo messaggio");
+
+  if (mittente_tipo === "maniscalco") {
+    if (!cliente.cliente_user_id) return; // il cliente non usa Equo App: nessuna push possibile
+    await inviaPush([cliente.cliente_user_id], "Nuovo messaggio dal tuo maniscalco", corpo);
+  } else {
+    await inviaPush([maniscalco_id], `Nuovo messaggio da ${cliente.nome || "un cliente"}`, corpo);
+  }
 }
 
 async function inviaPush(externalIds, titolo, corpo) {
