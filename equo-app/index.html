@@ -3846,23 +3846,20 @@ async function openStableChatThread(membroId, centroId, nome){
   document.getElementById("schat-input").value = "";
   document.getElementById("schat-overlay").classList.add("active");
   await renderStableChatThread();
-  setStableSeenNow(membroId);
+  await segnaLettiChatApp(membroId);
   refreshChatBadge();
 }
 
 /* ---------- NOTIFICHE / BADGE MESSAGGI NON LETTI ---------- */
-// chat_messaggi non ha una colonna "letto": teniamo "ultimo visto" per
-// thread in localStorage (semplice, nessuna migrazione SQL necessaria).
-function getStableSeenTs(membroId){
-  try { return localStorage.getItem("equo_seen_stable_" + membroId) || "1970-01-01T00:00:00Z"; }
-  catch(e){ return "1970-01-01T00:00:00Z"; }
-}
-function setStableSeenNow(membroId){
-  try { localStorage.setItem("equo_seen_stable_" + membroId, new Date().toISOString()); } catch(e){}
+// "Letto" vive nel database (colonna chat_messaggi.letto), non nel browser:
+// così il contatore è identico su qualsiasi dispositivo del proprietario.
+async function segnaLettiChatApp(membroId){
+  if(DEMO_MODE) return;
+  const { error } = await sb.rpc("segna_letti_chat", { p_membro_id: membroId });
+  if(error) console.error("segnaLettiChatApp:", error);
 }
 function contaNonLettiScuderia(membroId, messaggi){
-  const seenTs = new Date(getStableSeenTs(membroId));
-  return (messaggi || []).filter(m => m.mittente_user_id !== currentUser.id && new Date(m.created_at) > seenTs).length;
+  return (messaggi || []).filter(m => m.mittente_user_id !== currentUser.id && !m.letto).length;
 }
 
 let chatBadgePollTimer = null;

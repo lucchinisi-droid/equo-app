@@ -95,8 +95,12 @@ a{color:inherit}
 .nav-item.active{background:var(--secondary);color:var(--primary-hover);font-weight:600}
 .nav-item .badge{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.03em;
   background:var(--accent);color:var(--accent-fg);padding:2px 6px;border-radius:var(--radius-full)}
+.nav-item .nav-unread-badge{margin-left:auto;font-size:10.5px;font-weight:700;
+  background:var(--danger);color:#fff;min-width:18px;height:18px;padding:0 5px;
+  border-radius:var(--radius-full);display:none;align-items:center;justify-content:center}
 .sidebar.collapsed .nav-item{justify-content:center;padding:10px 0;gap:0}
-.sidebar.collapsed .nav-item .nav-label,.sidebar.collapsed .nav-item .badge{display:none}
+.sidebar.collapsed .nav-item .nav-label,.sidebar.collapsed .nav-item .badge,.sidebar.collapsed .nav-item .nav-unread-badge{display:none}
+.unread-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--danger);margin-left:8px;flex-shrink:0}
 .nav-divider{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);
   text-transform:uppercase;padding:14px 12px 6px;white-space:nowrap;overflow:hidden}
 .sidebar.collapsed .nav-divider{text-align:center;padding:14px 4px 6px;font-size:0}
@@ -458,7 +462,7 @@ textarea.input{resize:vertical}
           <i class="fa-solid fa-ticket"></i> <span class="nav-label">Pacchetti &amp; Abbonamenti</span>
         </button>
         <button class="nav-item" data-module="comunicazioni" onclick="showModule('comunicazioni')">
-          <i class="fa-solid fa-comments"></i> <span class="nav-label">Comunicazioni & Chat</span>
+          <i class="fa-solid fa-comments"></i> <span class="nav-label">Comunicazioni & Chat</span> <span class="nav-unread-badge" id="chat-nav-unread-badge">0</span>
         </button>
 
         <div class="nav-divider">In arrivo</div>
@@ -2054,9 +2058,19 @@ function openChatModal(m){
   document.getElementById("chat-membro-nome").textContent = "Chat con " + (m.nome_visualizzato || RUOLO_LABELS[m.ruolo] || "membro");
   openModal("modal-chat");
   loadAndRenderChat();
+  segnaLettiChat(m.id);
   clearInterval(chatPollTimer);
   chatPollTimer = setInterval(loadAndRenderChat, 4000);
   setTimeout(() => document.getElementById("chat-input")?.focus(), 100);
+}
+
+// Segna come letti i messaggi ricevuti in questo thread (lato database, non
+// localStorage: così il "letto" è uguale su qualsiasi dispositivo/utente).
+async function segnaLettiChat(membroId){
+  if(DEMO_MODE) return;
+  const { error } = await sb.rpc("segna_letti_chat", { p_membro_id: membroId });
+  if(error){ console.error("segnaLettiChat:", error); return; }
+  await refreshChatUnread();
 }
 
 function closeChatModal(){
@@ -2144,6 +2158,7 @@ function enterAppShell(){
   applyPermissionGating();
   showModule("home");
   showScreen("screen-app");
+  startChatUnreadPolling();
 }
 
 /* ---------- LIVELLI & PERMESSI ---------- */
@@ -3190,6 +3205,47 @@ function clientiChatCollegati(){
   return teamList.filter(m => m.user_id && m.user_id !== currentUser.id && (m.ruolo === "proprietario" || m.ruolo !== "admin"));
 }
 
+/* ---------- NON LETTI CHAT (basati su chat_messaggi.letto, sul database:
+   così il contatore è uguale su qualsiasi dispositivo/utente dello staff) ---------- */
+let chatNonLettiPerMembro = {};
+let chatUnreadPollTimer = null;
+
+async function refreshChatUnread(){
+  if(DEMO_MODE || !currentCentro){
+    const badge = document.getElementById("chat-nav-unread-badge");
+    if(badge) badge.style.display = "none";
+    return;
+  }
+  const { data, error } = await sb.from("chat_messaggi")
+    .select("membro_id, mittente_user_id")
+    .eq("centro_id", currentCentro.id)
+    .eq("letto", false);
+  if(error){ console.error("refreshChatUnread:", error); return; }
+  const map = {};
+  (data || []).forEach(row => {
+    const m = teamList.find(x => x.id === row.membro_id);
+    // Conta solo i messaggi scritti dal cliente (non quelli scritti dallo staff
+    // stesso, che non devono generare un "non letto" per lo staff).
+    if(m && row.mittente_user_id === m.user_id){
+      map[row.membro_id] = (map[row.membro_id] || 0) + 1;
+    }
+  });
+  chatNonLettiPerMembro = map;
+  const totale = Object.values(map).reduce((a, b) => a + b, 0);
+  const badge = document.getElementById("chat-nav-unread-badge");
+  if(badge){
+    badge.textContent = totale > 99 ? "99+" : String(totale);
+    badge.style.display = totale > 0 ? "flex" : "none";
+  }
+  renderClientiChatList();
+}
+
+function startChatUnreadPolling(){
+  clearInterval(chatUnreadPollTimer);
+  refreshChatUnread();
+  chatUnreadPollTimer = setInterval(refreshChatUnread, 20000);
+}
+
 function renderClientiChatList(){
   const box = document.getElementById("clienti-chat-list");
   const empty = document.getElementById("clienti-chat-empty");
@@ -3202,9 +3258,12 @@ function renderClientiChatList(){
   empty.style.display = clientiChatCollegati().length === 0 ? "block" : "none";
   box.innerHTML = list.map(m => `
     <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div>
-        <span class="who">${escapeHtml(m.nome_visualizzato || "Cliente")}</span>
-        <div style="color:var(--muted);font-size:12px">${m.ruolo === "proprietario" ? "Proprietario" : (RUOLO_LABELS[m.ruolo] || m.ruolo)}</div>
+      <div style="display:flex;align-items:center">
+        <div>
+          <span class="who">${escapeHtml(m.nome_visualizzato || "Cliente")}</span>
+          <div style="color:var(--muted);font-size:12px">${m.ruolo === "proprietario" ? "Proprietario" : (RUOLO_LABELS[m.ruolo] || m.ruolo)}</div>
+        </div>
+        ${chatNonLettiPerMembro[m.id] ? '<span class="unread-dot" title="Messaggi non letti"></span>' : ""}
       </div>
       <button class="btn btn-outline btn-sm" onclick="chattaConMembro('${m.id}')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
     </div>`).join("");
