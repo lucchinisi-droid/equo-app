@@ -230,6 +230,7 @@ select.input{cursor:pointer}
 .modal{background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;
   max-height:85vh;overflow-y:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.modal-close-x{position:sticky;top:0;margin:-6px -6px 10px auto;width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);z-index:5;cursor:pointer}
 .modal-title{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-bottom:16px;
   display:flex;align-items:center;gap:8px}
 .modal-title .icon{color:var(--accent);width:20px;height:20px}
@@ -1211,6 +1212,7 @@ select.input{cursor:pointer}
 
 <div class="modal-overlay" id="modal-menu" onclick="closeOut(event,'modal-menu')">
   <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-menu')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
 
     <div class="menu-profile">
@@ -2602,7 +2604,7 @@ function openMenu(){
 
 function initTheme(){
   const saved = localStorage.getItem("equo-theme");
-  if(saved) document.documentElement.setAttribute("data-theme", saved);
+  document.documentElement.setAttribute("data-theme", saved || "light");
   updateThemeMenuUI();
   initCookieConsent();
 }
