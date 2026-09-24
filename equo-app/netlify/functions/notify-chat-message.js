@@ -2,6 +2,7 @@
 // messaggi_proprietari) e invia una notifica push OneSignal al destinatario
 // giusto. La REST API Key OneSignal resta solo qui, mai nel codice client.
 //
+// Redeploy forzato 24/09 per rinnovare CHAT_WEBHOOK_SECRET nelle functions.
 // Env richieste su Netlify (Site settings → Environment variables):
 // - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   (già usate da stripe-webhook.js)
 // - ONESIGNAL_APP_ID
