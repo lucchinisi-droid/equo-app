@@ -1071,21 +1071,37 @@ select.input{cursor:pointer}
 
 <div class="modal-overlay" id="modal-add-intervento" onclick="closeOut(event,'modal-add-intervento')">
   <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-add-intervento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Segna intervento fatto</div>
     <div class="auth-form">
       <div class="input-group" id="intervento-cliente-group">
         <label class="input-label">Cliente</label>
-        <select class="input" id="intervento-cliente-select"></select>
+        <select class="input" id="intervento-cliente-select" onchange="toggleInterventoNuovoCliente()"></select>
+      </div>
+      <div class="input-group" id="intervento-nuovo-cliente-group" style="display:none">
+        <label class="input-label">Nome cliente</label>
+        <input class="input" id="intervento-nuovo-cliente-nome" placeholder="es. Marco Rossi">
+      </div>
+      <div class="input-group" id="intervento-nuovo-cavallo-group" style="display:none">
+        <label class="input-label">Nome cavallo (opzionale)</label>
+        <input class="input" id="intervento-nuovo-cliente-cavallo" placeholder="es. Aurora">
       </div>
       <div class="input-group">
         <label class="input-label">Tipo</label>
-        <select class="input" id="intervento-tipo" onchange="document.getElementById('intervento-tipo-altro-group').style.display = this.value === 'altro' ? 'flex' : 'none'">
-          <option value="ferro">Ferratura a ferro</option>
-          <option value="scalzatura">Scalzatura</option>
-          <option value="ortopedica">Ferratura ortopedica</option>
+        <select class="input" id="intervento-tipo" onchange="toggleInterventoTipoFields()">
+          <option value="ferratura">Ferratura</option>
+          <option value="pareggio">Pareggio</option>
           <option value="altro">Altro</option>
         </select>
+      </div>
+      <div class="input-group" id="intervento-ferro-group" style="display:none">
+        <label class="input-label">Numero ferro utilizzato</label>
+        <input class="input" id="intervento-ferro-numero" placeholder="es. n. 2">
+      </div>
+      <div class="input-group" id="intervento-quantita-group" style="display:none">
+        <label class="input-label">Quantità</label>
+        <input class="input" id="intervento-ferro-quantita" type="number" min="1" placeholder="es. 4">
       </div>
       <div class="input-group" id="intervento-tipo-altro-group" style="display:none">
         <label class="input-label">Specifica</label>
@@ -1919,11 +1935,12 @@ const DB = {
   async insertClienteMascalcia({ nome, nome_cavallo, telefono, note }){
     const codice_invito = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
     if(DEMO_MODE){
-      demoState.clientiMascalcia.push({ id: "dc-" + (++demoIdCounter), nome, nome_cavallo, telefono, note, cliente_user_id: null, codice_invito, created_at: new Date().toISOString() });
-      return { error: null };
+      const nuovo = { id: "dc-" + (++demoIdCounter), nome, nome_cavallo, telefono, note, cliente_user_id: null, codice_invito, created_at: new Date().toISOString() };
+      demoState.clientiMascalcia.push(nuovo);
+      return { error: null, data: nuovo };
     }
-    const { error } = await sb.from("clienti_mascalcia").insert({ maniscalco_id: currentUser.id, nome, nome_cavallo, telefono, note, codice_invito });
-    return { error };
+    const { data, error } = await sb.from("clienti_mascalcia").insert({ maniscalco_id: currentUser.id, nome, nome_cavallo, telefono, note, codice_invito }).select().single();
+    return { error, data };
   },
   async deleteClienteMascalcia(id){
     if(DEMO_MODE){
@@ -1938,12 +1955,12 @@ const DB = {
     const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
-  async insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note }){
+  async insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note }){
     if(DEMO_MODE){
-      demoState.interventiMascalcia.push({ id: "di-" + (++demoIdCounter), cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at: new Date().toISOString() });
+      demoState.interventiMascalcia.push({ id: "di-" + (++demoIdCounter), cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
+    const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
     return { error };
   },
   async listInterventiMascalciaTutti(){
@@ -3135,8 +3152,8 @@ async function deleteLezioneCorrente(){
 let clientiMascalcia = [];
 let proUnreadTotal = 0;
 let currentClienteId = null;
-const TIPO_FERRATURA_LABELS = { ferro: "Ferratura a ferro", scalzatura: "Scalzatura", ortopedica: "Ferratura ortopedica", altro: "Altro" };
-const TIPO_FERRATURA_INTERVALLI = { ferro: 42, scalzatura: 56, ortopedica: 35 }; // giorni alla prossima scadenza
+const TIPO_FERRATURA_LABELS = { ferratura: "Ferratura", pareggio: "Pareggio", altro: "Altro", ferro: "Ferratura a ferro", scalzatura: "Scalzatura", ortopedica: "Ferratura ortopedica" };
+const TIPO_FERRATURA_INTERVALLI = { ferratura: 42, pareggio: 56, ferro: 42, scalzatura: 56, ortopedica: 35 }; // giorni alla prossima scadenza
 
 async function loadClientiMascalcia(){
   clientiMascalcia = await DB.listClientiMascalcia();
@@ -3221,15 +3238,20 @@ async function loadClienteInterventi(clienteId){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun intervento registrato.</div>';
     return;
   }
-  box.innerHTML = data.map(i => `
+  box.innerHTML = data.map(i => {
+    const ferroInfo = i.tipo_ferratura === "ferratura" && (i.numero_ferro || i.quantita_ferri)
+      ? " · " + [i.numero_ferro ? "n. " + escapeHtml(i.numero_ferro) : null, i.quantita_ferri ? i.quantita_ferri + " ferri" : null].filter(Boolean).join(", ")
+      : "";
+    return `
     <div class="event-item">
       <div>
-        <div style="font-weight:600;font-size:14px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}</div>
+        <div style="font-weight:600;font-size:14px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}${ferroInfo}</div>
         <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
       </div>
       <span class="badge ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 async function renderProDeadlines(){
@@ -3532,24 +3554,26 @@ async function renderIncassi(){
 }
 
 function openInterventoModal(clienteId){
-  if(clientiMascalcia.length === 0){
-    closeModal("modal-add-intervento");
-    showToast("Aggiungi prima un cliente.");
-    showPage("pro-clienti");
-    return;
-  }
   const select = document.getElementById("intervento-cliente-select");
-  select.innerHTML = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
+  const opzioniClienti = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
+  select.innerHTML = opzioniClienti + '<option value="__nuovo__">+ Cliente non ancora salvato</option>';
   const group = document.getElementById("intervento-cliente-group");
+  group.style.display = "flex";
   if(clienteId){
     select.value = clienteId;
-    group.style.display = "none";
+  } else if(clientiMascalcia.length === 0){
+    select.value = "__nuovo__";
   } else {
-    group.style.display = "flex";
+    select.value = clientiMascalcia[0].id;
   }
-  document.getElementById("intervento-tipo").value = "ferro";
-  document.getElementById("intervento-tipo-altro-group").style.display = "none";
+  document.getElementById("intervento-nuovo-cliente-nome").value = "";
+  document.getElementById("intervento-nuovo-cliente-cavallo").value = "";
+  toggleInterventoNuovoCliente();
+  document.getElementById("intervento-tipo").value = "ferratura";
+  document.getElementById("intervento-ferro-numero").value = "";
+  document.getElementById("intervento-ferro-quantita").value = "";
   document.getElementById("intervento-tipo-altro").value = "";
+  toggleInterventoTipoFields();
   document.getElementById("intervento-data").value = new Date().toISOString().slice(0, 10);
   document.getElementById("intervento-importo").value = "";
   document.getElementById("intervento-pagamento").value = "da_saldare";
@@ -3558,12 +3582,29 @@ function openInterventoModal(clienteId){
   openModal("modal-add-intervento");
 }
 
+function toggleInterventoNuovoCliente(){
+  const isNuovo = document.getElementById("intervento-cliente-select").value === "__nuovo__";
+  document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
+  document.getElementById("intervento-nuovo-cavallo-group").style.display = isNuovo ? "flex" : "none";
+}
+
+function toggleInterventoTipoFields(){
+  const tipo = document.getElementById("intervento-tipo").value;
+  document.getElementById("intervento-tipo-altro-group").style.display = tipo === "altro" ? "flex" : "none";
+  const isFerratura = tipo === "ferratura";
+  document.getElementById("intervento-ferro-group").style.display = isFerratura ? "flex" : "none";
+  document.getElementById("intervento-quantita-group").style.display = isFerratura ? "flex" : "none";
+}
+
 async function createInterventoMascalcia(){
   const errBox = document.getElementById("intervento-error");
   errBox.style.display = "none";
-  const cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
+  let cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
   const tipo_ferratura = document.getElementById("intervento-tipo").value;
   const tipo_altro = tipo_ferratura === "altro" ? document.getElementById("intervento-tipo-altro").value.trim() : null;
+  const numero_ferro = tipo_ferratura === "ferratura" ? (document.getElementById("intervento-ferro-numero").value.trim() || null) : null;
+  const quantitaRaw = tipo_ferratura === "ferratura" ? document.getElementById("intervento-ferro-quantita").value : "";
+  const quantita_ferri = quantitaRaw === "" ? null : Number(quantitaRaw);
   const data_intervento = document.getElementById("intervento-data").value;
   const importoRaw = document.getElementById("intervento-importo").value;
   const importo = importoRaw === "" ? null : Number(importoRaw);
@@ -3574,13 +3615,33 @@ async function createInterventoMascalcia(){
     errBox.style.display = "block";
     return;
   }
+
+  let clienteCreatoOra = false;
+  if(cliente_mascalcia_id === "__nuovo__"){
+    const nome = document.getElementById("intervento-nuovo-cliente-nome").value.trim();
+    if(!nome){
+      errBox.textContent = "Inserisci il nome del cliente.";
+      errBox.style.display = "block";
+      return;
+    }
+    const nome_cavallo = document.getElementById("intervento-nuovo-cliente-cavallo").value.trim();
+    const { error: clienteError, data: nuovoCliente } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono: "", note: "" });
+    if(clienteError || !nuovoCliente){
+      errBox.textContent = "Errore nel creare il cliente: " + (clienteError?.message || "");
+      errBox.style.display = "block";
+      return;
+    }
+    cliente_mascalcia_id = nuovoCliente.id;
+    clienteCreatoOra = true;
+  }
+
   let prossima_scadenza = null;
   if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]){
     const d = new Date(data_intervento);
     d.setDate(d.getDate() + TIPO_FERRATURA_INTERVALLI[tipo_ferratura]);
     prossima_scadenza = d.toISOString().slice(0, 10);
   }
-  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
+  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
   if(error){
     errBox.textContent = "Errore: " + error.message;
     errBox.style.display = "block";
@@ -3588,6 +3649,7 @@ async function createInterventoMascalcia(){
   }
   closeModal("modal-add-intervento");
   showToast("Intervento registrato!");
+  if(clienteCreatoOra) await loadClientiMascalcia();
   await renderProDeadlines();
   await renderIncassi();
   if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
