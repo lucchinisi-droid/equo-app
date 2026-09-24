@@ -572,8 +572,8 @@ select.input{cursor:pointer}
         <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
       </div>
 
-      <button class="btn btn-outline" onclick="openServicesMap()" style="width:100%">
-        <span class="icon"><svg><use href="#i-mappin"/></svg></span> Servizi vicino a te
+      <button class="btn btn-outline" disabled style="width:100%;opacity:.55;cursor:not-allowed">
+        <span class="icon"><svg><use href="#i-mappin"/></svg></span> PRESTO DISPONIBILE
       </button>
     </div>
   </div>
@@ -935,6 +935,7 @@ select.input{cursor:pointer}
 
 <div class="modal-overlay" id="modal-add-horse" onclick="closeOut(event,'modal-add-horse')">
   <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-add-horse')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span id="horse-form-title">Nuovo cavallo</span></div>
     <div class="auth-form">
@@ -1181,8 +1182,9 @@ select.input{cursor:pointer}
 
 <div class="modal-overlay" id="modal-add-lezione" onclick="closeOut(event,'modal-add-lezione')">
   <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-add-lezione')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span>Nuova lezione</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-calendar"/></svg></span><span id="lezione-form-title">Nuova lezione</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Cavallo</label>
@@ -1205,7 +1207,9 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="lezione-note" placeholder="es. con l'istruttore Luca">
       </div>
+      <div class="auth-error" id="lezione-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="createLezione()" style="width:100%;margin-top:6px">Salva lezione</button>
+      <button class="btn btn-ghost" id="lezione-delete-btn" style="width:100%;margin-top:6px;color:var(--red);display:none" onclick="deleteLezioneCorrente()">Elimina lezione</button>
     </div>
   </div>
 </div>
@@ -1755,6 +1759,23 @@ const DB = {
       return { error: null };
     }
     const { error } = await sb.from("lezioni_manuali").insert({ owner_id: currentUser.id, horse_id, data, tipo, note });
+    return { error };
+  },
+  async updateLezione(id, { horse_id, data, tipo, note }){
+    if(DEMO_MODE){
+      const idx = demoState.lezioniManuali.findIndex(l => l.id === id);
+      if(idx >= 0) demoState.lezioniManuali[idx] = { ...demoState.lezioniManuali[idx], horse_id, data, tipo, note };
+      return { error: null };
+    }
+    const { error } = await sb.from("lezioni_manuali").update({ horse_id, data, tipo, note }).eq("id", id);
+    return { error };
+  },
+  async deleteLezione(id){
+    if(DEMO_MODE){
+      demoState.lezioniManuali = demoState.lezioniManuali.filter(l => l.id !== id);
+      return { error: null };
+    }
+    const { error } = await sb.from("lezioni_manuali").delete().eq("id", id);
     return { error };
   },
   /* -- Chat tra proprietari -- */
@@ -3037,45 +3058,74 @@ async function joinStable(){
 
 /* ---------- LEZIONI MANUALI (calendario proprietario) ---------- */
 const LEZIONE_TIPO_LABELS = { lezione: "Lezione", allenamento: "Allenamento libero", gara: "Gara", altro: "Altro" };
+let lezioniCache = [];
+let editingLezioneId = null;
 
 async function loadLezioni(){
   const box = document.getElementById("lezioni-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listLezioni();
-  if(!data || data.length === 0){
+  lezioniCache = data || [];
+  if(lezioniCache.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-calendar"/></svg></div>Nessuna lezione registrata. Aggiungine una per iniziare.</div>';
     return;
   }
-  box.innerHTML = data.map(l => `
-    <div class="event-item">
+  box.innerHTML = lezioniCache.map(l => `
+    <div class="event-item" style="cursor:pointer" onclick="openAddLezioneModal('${l.id}')">
       <div>
         <div style="font-weight:600;font-size:14px">${LEZIONE_TIPO_LABELS[l.tipo] || l.tipo}${l.horses?.name ? " · " + escapeHtml(l.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(l.data)}${l.note ? " · " + escapeHtml(l.note) : ""}</div>
       </div>
+      <span class="icon"><svg><use href="#i-chevron"/></svg></span>
     </div>
   `).join("");
 }
 
-function openAddLezioneModal(){
+function openAddLezioneModal(id){
+  editingLezioneId = id || null;
+  document.getElementById("lezione-error").style.display = "none";
+  document.getElementById("lezione-form-title").textContent = editingLezioneId ? "Modifica lezione" : "Nuova lezione";
+  document.getElementById("lezione-delete-btn").style.display = editingLezioneId ? "block" : "none";
   const sel = document.getElementById("lezione-cavallo");
   if(horses.length === 0){
     sel.innerHTML = '<option value="">Nessun cavallo</option>';
   } else {
     sel.innerHTML = horses.map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join("");
   }
-  document.getElementById("lezione-tipo").value = "lezione";
-  document.getElementById("lezione-data").value = "";
-  document.getElementById("lezione-note").value = "";
+  if(editingLezioneId){
+    const l = lezioniCache.find(x => x.id === editingLezioneId);
+    sel.value = l?.horse_id || "";
+    document.getElementById("lezione-tipo").value = l?.tipo || "lezione";
+    document.getElementById("lezione-data").value = l?.data || "";
+    document.getElementById("lezione-note").value = l?.note || "";
+  } else {
+    document.getElementById("lezione-tipo").value = "lezione";
+    document.getElementById("lezione-data").value = "";
+    document.getElementById("lezione-note").value = "";
+  }
   openModal("modal-add-lezione");
 }
 
 async function createLezione(){
+  const errBox = document.getElementById("lezione-error");
+  errBox.style.display = "none";
   const horse_id = document.getElementById("lezione-cavallo").value || null;
   const tipo = document.getElementById("lezione-tipo").value;
   const data = document.getElementById("lezione-data").value;
   const note = document.getElementById("lezione-note").value.trim();
   if(!data) return;
-  const { error } = await DB.insertLezione({ horse_id, data, tipo, note });
+  const { error } = editingLezioneId
+    ? await DB.updateLezione(editingLezioneId, { horse_id, data, tipo, note })
+    : await DB.insertLezione({ horse_id, data, tipo, note });
+  if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }
+  closeModal("modal-add-lezione");
+  await loadLezioni();
+}
+
+async function deleteLezioneCorrente(){
+  if(!editingLezioneId) return;
+  if(!confirm("Eliminare questa lezione?")) return;
+  const { error } = await DB.deleteLezione(editingLezioneId);
   if(error){ alert("Errore: " + error.message); return; }
   closeModal("modal-add-lezione");
   await loadLezioni();
