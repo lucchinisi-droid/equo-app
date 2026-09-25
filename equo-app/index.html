@@ -969,6 +969,7 @@ select.input{cursor:pointer}
       <div style="flex:1;min-width:0">
         <div class="mchat-header-name" id="fchat-nome">Il tuo maniscalco</div>
       </div>
+      <button class="btn btn-outline btn-sm" onclick="apriAbbinamentoDaChat()" aria-label="Abbina cavalli"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli</button>
     </div>
     <div class="mchat-messages" id="fchat-messages"></div>
     <div class="mchat-input-bar">
@@ -1693,6 +1694,20 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-abbina-cavalli" onclick="closeOut(event,'modal-abbina-cavalli')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span>Abbina i tuoi cavalli</div>
+    <div class="muted" style="font-size:13px;margin-bottom:10px;line-height:1.5" id="abbina-cavalli-intro"></div>
+    <div id="abbina-cavalli-list" style="max-height:52vh;overflow:auto"></div>
+    <div class="auth-error" id="abbina-cavalli-error" style="display:none;margin-top:8px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-outline" style="flex:1" onclick="saltaAbbinamentoCavalli()">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" id="abbina-cavalli-btn" onclick="confermaAbbinamentoCavalli()">Conferma</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -2376,6 +2391,35 @@ const DB = {
     }
     const { error } = await sb.rpc("segna_letti_mascalcia_cliente", { p_cliente_id: clienteId });
     if(error) console.error("segnaLettiDalManiscalco:", error);
+  },
+  // Cavalli inseriti a mano dal maniscalco per questo cliente, non ancora legati a un cavallo vero,
+  // con proposta di abbinamento (1. stesso microchip, 2. stesso nome).
+  async listCavalliDaAbbinare(clienteId){
+    if(DEMO_MODE){
+      const norm = x => (x || "").trim().toUpperCase();
+      return demoState.cavalliClientiMascalcia.filter(cv => cv.cliente_mascalcia_id === clienteId && !cv.horse_id).map(cv => {
+        const mc = norm(cv.microchip) ? demoState.horses.find(h => norm(h.microchip) === norm(cv.microchip)) : null;
+        const mn = demoState.horses.find(h => norm(h.name) === norm(cv.nome));
+        return { id: cv.id, nome: cv.nome, microchip: cv.microchip, proposto_horse_id: (mc || mn)?.id || null, match_tipo: mc ? "microchip" : mn ? "nome" : null };
+      });
+    }
+    const { data, error } = await sb.rpc("cavalli_maniscalco_da_abbinare", { p_cliente_id: clienteId });
+    if(error){ console.error("listCavalliDaAbbinare:", error); return []; }
+    return Array.isArray(data) ? data : [];
+  },
+  async abbinaCavalloManiscalco(cavalloClienteId, horseId){
+    if(DEMO_MODE){
+      const cv = demoState.cavalliClientiMascalcia.find(x => x.id === cavalloClienteId);
+      if(!cv) return { error: { message: "cavallo_non_trovato" } };
+      if(demoState.cavalliClientiMascalcia.some(x => x.cliente_mascalcia_id === cv.cliente_mascalcia_id && x.horse_id === horseId && x.id !== cv.id)) return { error: { message: "gia_abbinato" } };
+      cv.horse_id = horseId;
+      demoState.interventiMascalcia.forEach(i => { if(i.cavallo_cliente_id === cavalloClienteId) i.horse_id = horseId; });
+      return { error: null };
+    }
+    const { data, error } = await sb.rpc("abbina_cavallo_maniscalco", { p_cavallo_cliente_id: cavalloClienteId, p_horse_id: horseId });
+    if(error){ console.error("abbinaCavalloManiscalco:", error); return { error }; }
+    if(data && data.ok === false){ console.error("abbinaCavalloManiscalco:", data); return { error: { message: data.errore } }; }
+    return { error: null };
   },
   async listInboxMascalcia(){
     if(DEMO_MODE){
@@ -5185,7 +5229,99 @@ async function collegaManiscalco(){
   closeModal("modal-collega-maniscalco");
   showToast("Collegato a " + (res.nome_maniscalco || "il tuo maniscalco") + "!");
   await loadFarrierChatSection();
-  await openFarrierChatThread(res.cliente_mascalcia_id, res.nome_maniscalco || "Il tuo maniscalco");
+  const nomeMan = res.nome_maniscalco || "Il tuo maniscalco";
+  await proponiAbbinamentoCavalli(res.cliente_mascalcia_id, nomeMan, () => openFarrierChatThread(res.cliente_mascalcia_id, nomeMan));
+}
+
+/* ---------- ABBINAMENTO CAVALLI DEL MANISCALCO -> CAVALLI VERI (lato proprietario) ---------- */
+let abbinaPendenti = [];
+let abbinaOnDone = null;
+
+// Se il maniscalco ha registrato a mano cavalli di questo cliente e il proprietario ha cavalli su Equo,
+// mostra il popup di conferma; altrimenti prosegue subito con onDone(). Ritorna true se il popup è stato aperto.
+async function proponiAbbinamentoCavalli(clienteId, nomeManiscalco, onDone){
+  try{
+    if(!horses || horses.length === 0) horses = await DB.listHorses();
+    const pendenti = (horses && horses.length) ? await DB.listCavalliDaAbbinare(clienteId) : [];
+    if(!pendenti.length){ if(onDone) onDone(); return false; }
+    abbinaPendenti = pendenti;
+    abbinaOnDone = onDone || null;
+    renderAbbinamentoCavalli(nomeManiscalco);
+    openModal("modal-abbina-cavalli");
+    return true;
+  } catch(err){
+    console.error("proponiAbbinamentoCavalli:", err);
+    if(onDone) onDone();
+    return false;
+  }
+}
+
+function renderAbbinamentoCavalli(nomeManiscalco){
+  const n = abbinaPendenti.length;
+  document.getElementById("abbina-cavalli-error").style.display = "none";
+  document.getElementById("abbina-cavalli-intro").textContent =
+    `${nomeManiscalco} ha registrato ${n === 1 ? "questo cavallo" : "questi cavalli"}. Abbinali ai tuoi: gli interventi di mascalcia finiranno sul cavallo giusto.`;
+  const opzioni = sel => ['<option value="">— non abbinare —</option>'].concat(horses.map(h =>
+    `<option value="${escapeHtml(h.id)}" ${h.id === sel ? "selected" : ""}>${escapeHtml(h.name || "Cavallo")}${h.microchip ? " · " + escapeHtml(h.microchip) : ""}</option>`)).join("");
+  document.getElementById("abbina-cavalli-list").innerHTML = abbinaPendenti.map((cv, i) => {
+    const badge = cv.match_tipo === "microchip" ? '<span class="badge badge-green" style="font-size:10.5px">stesso microchip</span>'
+      : cv.match_tipo === "nome" ? '<span class="badge badge-accent" style="font-size:10.5px">stesso nome</span>' : "";
+    return `
+    <div style="padding:10px 2px;border-bottom:1px solid var(--border)">
+      <label style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" class="abbina-check" data-i="${i}" ${cv.match_tipo === "microchip" ? "checked" : ""} style="width:18px;height:18px;flex-shrink:0">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${escapeHtml(cv.nome || "Cavallo")} ${badge}</div>
+          <div class="muted" style="font-size:12px">${cv.microchip ? "Microchip " + escapeHtml(cv.microchip) : "Senza microchip"}</div>
+        </div>
+      </label>
+      <select class="input abbina-select" data-i="${i}" style="margin-top:8px" onchange="document.querySelector('.abbina-check[data-i=&quot;${i}&quot;]').checked = !!this.value">${opzioni(cv.proposto_horse_id)}</select>
+    </div>`;
+  }).join("");
+}
+
+async function confermaAbbinamentoCavalli(){
+  const errBox = document.getElementById("abbina-cavalli-error");
+  errBox.style.display = "none";
+  const scelte = [];
+  document.querySelectorAll(".abbina-check").forEach(chk => {
+    if(!chk.checked) return;
+    const i = chk.dataset.i;
+    const horseId = document.querySelector(`.abbina-select[data-i="${i}"]`).value;
+    if(horseId) scelte.push({ cv: abbinaPendenti[i], horseId });
+  });
+  const usati = scelte.map(x => x.horseId);
+  if(new Set(usati).size !== usati.length){
+    errBox.textContent = "Hai scelto lo stesso cavallo per due righe: correggi e riprova.";
+    errBox.style.display = "block";
+    return;
+  }
+  const btn = document.getElementById("abbina-cavalli-btn");
+  btn.disabled = true;
+  let ok = 0, falliti = 0;
+  for(const x of scelte){
+    const { error } = await DB.abbinaCavalloManiscalco(x.cv.id, x.horseId);
+    if(error) falliti++; else ok++;
+  }
+  btn.disabled = false;
+  if(falliti > 0) showToast(`${falliti} abbinament${falliti === 1 ? "o non riuscito" : "i non riusciti"}, riprova da "Cavalli" nella chat.`);
+  else if(ok > 0) showToast(ok === 1 ? "Cavallo abbinato." : `${ok} cavalli abbinati.`);
+  chiudiAbbinamento();
+}
+
+function saltaAbbinamentoCavalli(){ chiudiAbbinamento(); }
+
+function chiudiAbbinamento(){
+  closeModal("modal-abbina-cavalli");
+  abbinaPendenti = [];
+  const onDone = abbinaOnDone; abbinaOnDone = null;
+  if(onDone) onDone();
+}
+
+async function apriAbbinamentoDaChat(){
+  if(!currentFarrier) return;
+  const aperto = await proponiAbbinamentoCavalli(currentFarrier.cliente_mascalcia_id, currentFarrier.nome || "Il tuo maniscalco", null);
+  if(!aperto) showToast(horses && horses.length ? "Nessun cavallo da abbinare." : "Aggiungi prima i tuoi cavalli in Equo.");
 }
 
 async function openFarrierChatThread(clienteId, nome){
