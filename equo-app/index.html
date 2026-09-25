@@ -1091,6 +1091,7 @@ select.input{cursor:pointer}
         <label class="input-label">Tipo</label>
         <select class="input" id="intervento-tipo" onchange="toggleInterventoTipoFields()">
           <option value="ferratura">Ferratura</option>
+          <option value="mezza_ferratura">Mezza ferratura</option>
           <option value="pareggio">Pareggio</option>
           <option value="altro">Altro</option>
         </select>
@@ -3152,8 +3153,8 @@ async function deleteLezioneCorrente(){
 let clientiMascalcia = [];
 let proUnreadTotal = 0;
 let currentClienteId = null;
-const TIPO_FERRATURA_LABELS = { ferratura: "Ferratura", pareggio: "Pareggio", altro: "Altro", ferro: "Ferratura a ferro", scalzatura: "Scalzatura", ortopedica: "Ferratura ortopedica" };
-const TIPO_FERRATURA_INTERVALLI = { ferratura: 42, pareggio: 56, ferro: 42, scalzatura: 56, ortopedica: 35 }; // giorni alla prossima scadenza
+const TIPO_FERRATURA_LABELS = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
+const TIPO_FERRATURA_INTERVALLI = { ferratura: 42, mezza_ferratura: 42, pareggio: 56 }; // giorni alla prossima scadenza
 
 async function loadClientiMascalcia(){
   clientiMascalcia = await DB.listClientiMascalcia();
@@ -3239,7 +3240,7 @@ async function loadClienteInterventi(clienteId){
     return;
   }
   box.innerHTML = data.map(i => {
-    const ferroInfo = i.tipo_ferratura === "ferratura" && (i.numero_ferro || i.quantita_ferri)
+    const ferroInfo = (i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura") && (i.numero_ferro || i.quantita_ferri)
       ? " · " + [i.numero_ferro ? "n. " + escapeHtml(i.numero_ferro) : null, i.quantita_ferri ? i.quantita_ferri + " ferri" : null].filter(Boolean).join(", ")
       : "";
     return `
@@ -3591,7 +3592,7 @@ function toggleInterventoNuovoCliente(){
 function toggleInterventoTipoFields(){
   const tipo = document.getElementById("intervento-tipo").value;
   document.getElementById("intervento-tipo-altro-group").style.display = tipo === "altro" ? "flex" : "none";
-  const isFerratura = tipo === "ferratura";
+  const isFerratura = tipo === "ferratura" || tipo === "mezza_ferratura";
   document.getElementById("intervento-ferro-group").style.display = isFerratura ? "flex" : "none";
   document.getElementById("intervento-quantita-group").style.display = isFerratura ? "flex" : "none";
 }
@@ -3602,8 +3603,9 @@ async function createInterventoMascalcia(){
   let cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
   const tipo_ferratura = document.getElementById("intervento-tipo").value;
   const tipo_altro = tipo_ferratura === "altro" ? document.getElementById("intervento-tipo-altro").value.trim() : null;
-  const numero_ferro = tipo_ferratura === "ferratura" ? (document.getElementById("intervento-ferro-numero").value.trim() || null) : null;
-  const quantitaRaw = tipo_ferratura === "ferratura" ? document.getElementById("intervento-ferro-quantita").value : "";
+  const isFerraturaTipo = tipo_ferratura === "ferratura" || tipo_ferratura === "mezza_ferratura";
+  const numero_ferro = isFerraturaTipo ? (document.getElementById("intervento-ferro-numero").value.trim() || null) : null;
+  const quantitaRaw = isFerraturaTipo ? document.getElementById("intervento-ferro-quantita").value : "";
   const quantita_ferri = quantitaRaw === "" ? null : Number(quantitaRaw);
   const data_intervento = document.getElementById("intervento-data").value;
   const importoRaw = document.getElementById("intervento-importo").value;
