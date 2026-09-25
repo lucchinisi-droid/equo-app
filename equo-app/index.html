@@ -403,6 +403,11 @@ select.input{cursor:pointer}
 .ag-ev{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:var(--surface2);margin-bottom:6px}
 .ag-ev.fatto{opacity:.62}
 .ag-ev.promemoria{background:transparent;border:1px dashed var(--border)}
+.ag-ev.richiesta{background:transparent;border:1.5px solid var(--accent)}
+.ag-ev-pill{font-size:11px;font-weight:800;color:var(--accent);flex-shrink:0;padding:0 2px}
+.rich-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
+.rich-item:last-child{border-bottom:none}
+.app-man-stato{font-size:11px;font-weight:800;border-radius:8px;padding:3px 7px;flex-shrink:0}
 .ag-ev-time{width:42px;font-weight:700;font-size:12.5px;flex-shrink:0}
 .ag-ev-main{flex:1;min-width:0;cursor:pointer}
 .ag-ev-title{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -783,6 +788,8 @@ select.input{cursor:pointer}
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px" onclick="copyInviteLink()">Copia link invito</button>
     </div>
 
+    <div class="card" id="ag-richieste" style="display:none;margin-bottom:14px;border:1.5px solid var(--accent)"></div>
+
     <div class="ag-head"><div class="section-title" id="pro-agenda-title">Agenda della settimana</div></div>
     <div class="ag-nav">
       <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(-1)" aria-label="Settimana precedente">‹</button>
@@ -969,7 +976,8 @@ select.input{cursor:pointer}
       <div style="flex:1;min-width:0">
         <div class="mchat-header-name" id="fchat-nome">Il tuo maniscalco</div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="apriAbbinamentoDaChat()" aria-label="Abbina cavalli"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli</button>
+      <button class="btn btn-primary btn-sm" onclick="apriAppuntamentiManiscalco()" aria-label="Appuntamenti"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span> Prenota</button>
+      <button class="btn btn-outline btn-sm" onclick="apriAbbinamentoDaChat()" aria-label="Abbina cavalli"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span></button>
     </div>
     <div class="mchat-messages" id="fchat-messages"></div>
     <div class="mchat-input-bar">
@@ -1715,6 +1723,56 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-appuntamenti-maniscalco" onclick="closeOut(event,'modal-appuntamenti-maniscalco')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-appuntamenti-maniscalco')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Appuntamenti</div>
+    <div id="app-man-list" style="margin-bottom:14px"></div>
+    <div style="font-weight:700;font-size:14px;margin-bottom:8px">Richiedi un appuntamento</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Cavallo</label>
+        <select class="input" id="rich-cavallo" onchange="toggleRichiestaCampi()"></select>
+      </div>
+      <div class="input-group" id="rich-cavallo-nome-group" style="display:none">
+        <label class="input-label">Nome del cavallo</label>
+        <input class="input" id="rich-cavallo-nome" placeholder="es. Aurora">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Tipo</label>
+        <select class="input" id="rich-tipo" onchange="toggleRichiestaCampi()">
+          <option value="ferratura">Ferratura</option>
+          <option value="mezza_ferratura">Mezza ferratura</option>
+          <option value="pareggio">Pareggio</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="input-group" id="rich-tipo-altro-group" style="display:none">
+        <label class="input-label">Specifica</label>
+        <input class="input" id="rich-tipo-altro" placeholder="es. controllo zoccolo">
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="input-group" style="flex:1">
+          <label class="input-label">Data preferita</label>
+          <input class="input" id="rich-data" type="date">
+        </div>
+        <div class="input-group" style="flex:1">
+          <label class="input-label">Ora (opzionale)</label>
+          <input class="input" id="rich-ora" type="time">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note (opzionale)</label>
+        <input class="input" id="rich-note" placeholder="es. perde un ferro anteriore">
+      </div>
+      <div class="auth-error" id="rich-error" style="display:none"></div>
+      <button class="btn btn-primary" id="rich-btn" onclick="inviaRichiestaAppuntamento()" style="width:100%;margin-top:6px">Invia richiesta</button>
+      <div class="muted" style="font-size:12px;text-align:center;line-height:1.5">Il maniscalco la riceve in agenda e ti conferma qui in chat.</div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -2197,8 +2255,8 @@ const DB = {
     await sb.from("clienti_mascalcia").delete().eq("id", id);
   },
   async listInterventiMascalcia(clienteId){
-    if(DEMO_MODE) return demoState.interventiMascalcia.filter(i => i.cliente_mascalcia_id === clienteId).slice().sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
-    const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("data_intervento", { ascending: false });
+    if(DEMO_MODE) return demoState.interventiMascalcia.filter(i => i.cliente_mascalcia_id === clienteId && i.stato !== "rifiutato").slice().sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
+    const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).neq("stato", "rifiutato").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
   async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
@@ -2238,7 +2296,7 @@ const DB = {
   async listInterventiPeriodo(daIso, aIso){
     if(DEMO_MODE){
       return demoState.interventiMascalcia
-        .filter(i => i.data_intervento >= daIso && i.data_intervento <= aIso)
+        .filter(i => i.data_intervento >= daIso && i.data_intervento <= aIso && i.stato !== "rifiutato")
         .map(i => {
           const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
           const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
@@ -2248,7 +2306,7 @@ const DB = {
     }
     const { data, error } = await sb.from("interventi_mascalcia")
       .select("*, clienti_mascalcia(nome, nome_cavallo, cliente_user_id), cavalli_clienti_mascalcia(nome)")
-      .eq("maniscalco_id", currentUser.id)
+      .eq("maniscalco_id", currentUser.id).neq("stato", "rifiutato")
       .gte("data_intervento", daIso).lte("data_intervento", aIso)
       .order("data_intervento", { ascending: true }).order("ora", { ascending: true, nullsFirst: false });
     if(error){ console.error("listInterventiPeriodo:", error); return []; }
@@ -2266,7 +2324,7 @@ const DB = {
           const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
           return { ...i, clienti_mascalcia: { nome: c?.nome, nome_cavallo: c?.nome_cavallo }, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null };
         });
-      successivi = tutti;
+      successivi = tutti.filter(i => !STATI_NON_CONFERMATI.includes(i.stato));
     } else {
       const { data, error } = await sb.from("interventi_mascalcia")
         .select("*, clienti_mascalcia(nome, nome_cavallo), cavalli_clienti_mascalcia(nome)")
@@ -2278,7 +2336,8 @@ const DB = {
       const minData = righe.map(r => r.data_intervento).sort()[0];
       const clienti = [...new Set(righe.map(r => r.cliente_mascalcia_id))];
       const res = await sb.from("interventi_mascalcia").select("id, cliente_mascalcia_id, cavallo_cliente_id, data_intervento")
-        .eq("maniscalco_id", currentUser.id).in("cliente_mascalcia_id", clienti).gt("data_intervento", minData);
+        .eq("maniscalco_id", currentUser.id).in("cliente_mascalcia_id", clienti).gt("data_intervento", minData)
+        .not("stato", "in", "(richiesto,rifiutato)");
       if(res.error) console.error("listScadenzePeriodo (successivi):", res.error);
       successivi = res.data || [];
     }
@@ -2334,12 +2393,12 @@ const DB = {
   },
   async listInterventiMascalciaTutti(){
     if(DEMO_MODE){
-      return demoState.interventiMascalcia.slice()
+      return demoState.interventiMascalcia.filter(i => !STATI_NON_CONFERMATI.includes(i.stato))
         .map(i => ({ ...i, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === i.cliente_mascalcia_id)?.nome } }))
         .sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
     }
     const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome)")
-      .eq("maniscalco_id", currentUser.id).order("data_intervento", { ascending: false });
+      .eq("maniscalco_id", currentUser.id).not("stato", "in", "(richiesto,rifiutato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
   async listProssimeScadenzeMascalcia(limit){
@@ -2426,6 +2485,75 @@ const DB = {
     const { data, error } = await sb.rpc("abbina_cavallo_maniscalco", { p_cavallo_cliente_id: cavalloClienteId, p_horse_id: horseId });
     if(error){ console.error("abbinaCavalloManiscalco:", error); return { error }; }
     if(data && data.ok === false){ console.error("abbinaCavalloManiscalco:", data); return { error: { message: data.errore } }; }
+    return { error: null };
+  },
+  /* --- Richieste di appuntamento (Step 5d) --- */
+  // Maniscalco: tutte le richieste ancora da confermare
+  async listRichiestePendenti(){
+    if(DEMO_MODE){
+      return demoState.interventiMascalcia.filter(i => i.stato === "richiesto").map(i => {
+        const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
+        const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
+        return { ...i, clienti_mascalcia: { nome: c?.nome, nome_cavallo: c?.nome_cavallo, cliente_user_id: c?.cliente_user_id }, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null };
+      }).sort((a,b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+    }
+    const { data, error } = await sb.from("interventi_mascalcia")
+      .select("*, clienti_mascalcia(nome, nome_cavallo, cliente_user_id), cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).eq("stato", "richiesto")
+      .order("data_intervento", { ascending: true });
+    if(error){ console.error("listRichiestePendenti:", error); return []; }
+    return data || [];
+  },
+  // Proprietario: appuntamenti (richiesti, confermati, rifiutati) col suo maniscalco
+  async listAppuntamentiCliente(clienteId){
+    if(DEMO_MODE){
+      const limite = aggiungiGiorniIso(isoLocale(new Date()), -7);
+      return demoState.interventiMascalcia.filter(i => i.cliente_mascalcia_id === clienteId && ["richiesto","programmato","rifiutato"].includes(i.stato) && i.data_intervento >= limite)
+        .map(i => ({ ...i, nome_cavallo: demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id)?.nome || null }))
+        .sort((a,b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+    }
+    const { data, error } = await sb.rpc("appuntamenti_maniscalco_cliente", { p_cliente_id: clienteId });
+    if(error){ console.error("listAppuntamentiCliente:", error); return []; }
+    return Array.isArray(data) ? data : [];
+  },
+  async richiediAppuntamento({ cliente_mascalcia_id, horse_id, nome_cavallo, tipo, tipo_altro, data, ora, note }){
+    if(DEMO_MODE){
+      let cv = horse_id ? demoState.cavalliClientiMascalcia.find(x => x.cliente_mascalcia_id === cliente_mascalcia_id && x.horse_id === horse_id) : null;
+      const hz = horse_id ? demoState.horses.find(h => h.id === horse_id) : null;
+      const nomeCv = hz ? hz.name : nome_cavallo;
+      if(!cv && hz && (hz.microchip || "").trim()){
+        cv = demoState.cavalliClientiMascalcia.find(x => x.cliente_mascalcia_id === cliente_mascalcia_id && !x.horse_id && (x.microchip || "").trim().toUpperCase() === hz.microchip.trim().toUpperCase());
+        if(cv) cv.horse_id = horse_id;
+      }
+      if(!cv && nomeCv){
+        cv = demoState.cavalliClientiMascalcia.find(x => x.cliente_mascalcia_id === cliente_mascalcia_id && !x.horse_id && (x.nome || "").toLowerCase() === nomeCv.toLowerCase());
+        if(!cv){ cv = { id: "dcv-" + (++demoIdCounter), cliente_mascalcia_id, nome: nomeCv, microchip: null, horse_id: horse_id || null }; demoState.cavalliClientiMascalcia.push(cv); }
+      }
+      demoState.interventiMascalcia.push({ id: "di-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id, cavallo_cliente_id: cv?.id || null, horse_id: horse_id || null,
+        tipo_ferratura: tipo, tipo_altro: tipo === "altro" ? tipo_altro : null, data_intervento: data, ora: ora || null, stato: "richiesto", stato_pagamento: "da_saldare", note: note || null, created_at: new Date().toISOString() });
+      demoState.messaggiMascalcia.push({ id: "dm-" + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "cliente", tipo: "testo",
+        testo: testoRichiesta("📅 Richiesta appuntamento", { tipo_ferratura: tipo, tipo_altro, data_intervento: data, ora, note }, nomeCv), letto: false, created_at: new Date().toISOString() });
+      return { error: null };
+    }
+    const { data: res, error } = await sb.rpc("richiedi_appuntamento_maniscalco", {
+      p_cliente_id: cliente_mascalcia_id, p_horse_id: horse_id || null, p_nome_cavallo: nome_cavallo || null,
+      p_tipo: tipo, p_tipo_altro: tipo_altro || null, p_data: data, p_ora: ora || null, p_note: note || null });
+    if(error){ console.error("richiediAppuntamento:", error); return { error }; }
+    if(res && res.ok === false){ console.error("richiediAppuntamento:", res); return { error: { message: res.errore } }; }
+    return { error: null };
+  },
+  async annullaRichiesta(interventoId){
+    if(DEMO_MODE){
+      const i = demoState.interventiMascalcia.find(x => x.id === interventoId && x.stato === "richiesto");
+      if(!i) return { error: { message: "non_trovata" } };
+      demoState.interventiMascalcia = demoState.interventiMascalcia.filter(x => x.id !== interventoId);
+      demoState.messaggiMascalcia.push({ id: "dm-" + (++demoIdCounter), cliente_mascalcia_id: i.cliente_mascalcia_id, mittente_tipo: "cliente", tipo: "testo",
+        testo: "Richiesta annullata: appuntamento del " + formatDataBreve(i.data_intervento) + ".", letto: false, created_at: new Date().toISOString() });
+      return { error: null };
+    }
+    const { data: res, error } = await sb.rpc("annulla_richiesta_maniscalco", { p_intervento_id: interventoId });
+    if(error){ console.error("annullaRichiesta:", error); return { error }; }
+    if(res && res.ok === false) return { error: { message: res.errore } };
     return { error: null };
   },
   async listInboxMascalcia(){
@@ -3795,7 +3923,7 @@ async function loadClienteInterventi(clienteId){
     <div class="event-item" style="cursor:pointer" onclick="openInterventoModal(null, clienteInterventiCache.find(x => x.id === '${i.id}'))">
       <div>
         <div style="font-weight:600;font-size:14px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}${ferroInfo}</div>
-        <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.ora ? " · " + String(i.ora).slice(0,5) : ""}${i.stato === "programmato" ? " · da fare" : ""}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
+        <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.ora ? " · " + String(i.ora).slice(0,5) : ""}${i.stato === "programmato" ? " · da fare" : i.stato === "richiesto" ? " · richiesta da confermare" : ""}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
       </div>
       <span class="badge ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
     </div>
@@ -4160,8 +4288,9 @@ async function openInterventoModal(clienteId, intervento, preset){
   interventoInModifica = intervento || null;
   interventoPreset = intervento ? null : (preset || null);
   const inModifica = !!interventoInModifica;
-  document.getElementById("intervento-modal-title").textContent = inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
-  document.getElementById("intervento-save-btn").textContent = inModifica ? "Salva modifiche" : "Salva appuntamento";
+  const daConfermare = inModifica && interventoInModifica.stato === "richiesto";
+  document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
+  document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : "Salva appuntamento";
   document.getElementById("intervento-delete-btn").style.display = inModifica ? "block" : "none";
 
   const select = document.getElementById("intervento-cliente-select");
@@ -4297,7 +4426,11 @@ async function salvaInterventoMascalcia(){
     // stato: data/ora nel futuro = programmato; altrimenti fatto (in modifica non si "chiude" da solo un programmato)
     const quando = new Date(data_intervento + "T" + (ora || "00:00")); // senza ora: oggi = fatto
     const futuro = quando.getTime() > Date.now();
-    const stato = futuro ? "programmato" : (interventoInModifica ? interventoInModifica.stato || "fatto" : "fatto");
+    const statoPrec = interventoInModifica ? (interventoInModifica.stato || "fatto") : null;
+    const eraRichiesta = STATI_NON_CONFERMATI.includes(statoPrec);
+    // una richiesta confermata per oggi o per il futuro diventa "programmato", mai "fatto" da sola
+    const stato = eraRichiesta ? (data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto")
+      : futuro ? "programmato" : (statoPrec || "fatto");
 
     const payload = { cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
     const { error } = interventoInModifica
@@ -4307,7 +4440,14 @@ async function salvaInterventoMascalcia(){
     salvato = true;
 
     closeModal("modal-add-intervento");
-    showToast(interventoInModifica ? "Appuntamento aggiornato" : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
+    if(eraRichiesta){
+      const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
+      await DB.insertMessaggioMascalcia({ cliente_mascalcia_id, tipo: "testo",
+        testo: testoRichiesta("✅ Appuntamento confermato", { tipo_ferratura, tipo_altro, data_intervento, ora }, nomeCv) });
+      showToast("Richiesta confermata: il cliente riceve un messaggio in chat");
+    } else {
+      showToast(interventoInModifica ? "Appuntamento aggiornato" : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
+    }
     interventoInModifica = null;
     if(clienteCreatoOra) await loadClientiMascalcia();
     await renderProDeadlines();
@@ -4387,6 +4527,7 @@ async function renderAgendaSettimana(direzione){
   document.getElementById("ag-oggi-btn").style.display = agSettimanaOffset === 0 ? "none" : "inline-block";
   if(!agGiorniAperti) agGiorniAperti = new Set([oggiIso]);
 
+  renderRichiestePendenti();
   const [eventi, scadenze] = await Promise.all([
     DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
     DB.listScadenzePeriodo(isoGiorni[0], isoGiorni[6])
@@ -4402,15 +4543,17 @@ async function renderAgendaSettimana(direzione){
     const tot = evGiorno.length + promGiorno.length;
     const aperto = agGiorniAperti.has(iso);
     const righe = evGiorno.map(e => `
-      <div class="ag-ev${e.stato === "fatto" ? " fatto" : ""}">
+      <div class="ag-ev${e.stato === "fatto" ? " fatto" : e.stato === "richiesto" ? " richiesta" : ""}">
         <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
         <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
           <div class="ag-ev-title">${escapeHtml(e.clienti_mascalcia?.nome || "")}${agNomeCavallo(e) ? " · " + escapeHtml(agNomeCavallo(e)) : ""}</div>
-          <div class="ag-ev-sub">${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : ""}${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
         </div>
         ${e.stato === "fatto"
           ? '<span class="ag-ev-done">✓ Fatto</span>'
-          : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
+          : e.stato === "richiesto"
+            ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>`
+            : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
         <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
       </div>`).join("") + promGiorno.map(sc => `
       <div class="ag-ev promemoria">
@@ -4441,6 +4584,74 @@ async function renderAgendaSettimana(direzione){
   box.classList.remove("slide-l", "slide-r");
   if(direzione){ void box.offsetWidth; box.classList.add(direzione > 0 ? "slide-l" : "slide-r"); }
   agAttivaSwipe(box);
+}
+
+/* ---------- RICHIESTE DI APPUNTAMENTO (Step 5d) ---------- */
+const STATI_NON_CONFERMATI = ["richiesto", "rifiutato"];
+let richiesteCache = {};
+
+function formatDataBreve(iso){
+  if(!iso) return "";
+  const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  return `${AG_GIORNI[(dt.getDay() + 6) % 7].toLowerCase()} ${d} ${AG_MESI[m - 1]}`;
+}
+// Testo del messaggio automatico in chat (richiesta / conferma / rifiuto)
+function testoRichiesta(prefisso, i, nomeCavallo){
+  let tipo = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
+  if(i.tipo_ferratura === "altro" && i.tipo_altro) tipo = i.tipo_altro;
+  return `${prefisso}: ${tipo}${nomeCavallo ? " per " + nomeCavallo : ""}, ${formatDataBreve(i.data_intervento)}${i.ora ? " ore " + String(i.ora).slice(0, 5) : ""}.${i.note ? " Note: " + i.note : ""}`;
+}
+
+async function renderRichiestePendenti(){
+  const box = document.getElementById("ag-richieste");
+  if(!box) return;
+  const lista = await DB.listRichiestePendenti();
+  richiesteCache = {};
+  lista.forEach(r => { richiesteCache[r.id] = r; });
+  if(!lista.length){ box.style.display = "none"; box.innerHTML = ""; return; }
+  box.style.display = "block";
+  box.innerHTML = `
+    <div style="font-weight:800;font-size:14px;margin-bottom:4px">📅 ${lista.length === 1 ? "1 richiesta da confermare" : lista.length + " richieste da confermare"}</div>
+    ${lista.map(r => `
+      <div class="rich-item">
+        <div style="flex:1;min-width:0;cursor:pointer" onclick="vaiAllaDataAgenda('${r.data_intervento}')">
+          <div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(r.clienti_mascalcia?.nome || "")}${agNomeCavallo(r) ? " · " + escapeHtml(agNomeCavallo(r)) : ""}</div>
+          <div class="muted" style="font-size:12px">${formatDataBreve(r.data_intervento)}${r.ora ? " · " + String(r.ora).slice(0, 5) : ""} · ${escapeHtml(agDescrizioneTipo(r))}${r.note ? " · " + escapeHtml(r.note) : ""}</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="rifiutaRichiesta('${r.id}')">Rifiuta</button>
+        <button class="btn btn-primary btn-sm" onclick="accettaRichiesta('${r.id}')">Accetta</button>
+      </div>`).join("")}`;
+}
+
+function vaiAllaDataAgenda(iso){
+  const lunCorrente = agLunedi(0);
+  const [y, m, d] = iso.split("-").map(Number);
+  const target = new Date(y, m - 1, d);
+  const diffGiorni = Math.round((target - lunCorrente) / 86400000);
+  agSettimanaOffset = Math.floor(diffGiorni / 7);
+  agGiorniAperti = new Set([iso]);
+  renderAgendaSettimana();
+}
+
+function accettaRichiesta(id){
+  const r = richiesteCache[id] || agEventiCache[id];
+  if(!r) return;
+  // apre il form già compilato: il maniscalco aggiunge importo/misura e conferma
+  openInterventoModal(null, r);
+}
+
+async function rifiutaRichiesta(id){
+  const r = richiesteCache[id] || agEventiCache[id];
+  if(!r) return;
+  if(!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
+  const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
+  if(error){ showToast("Errore: " + error.message); return; }
+  await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: r.cliente_mascalcia_id, tipo: "testo",
+    testo: testoRichiesta("❌ Non riesco per questa richiesta", r, agNomeCavallo(r)) + " Scrivimi qui per trovare un'altra data." });
+  showToast("Richiesta rifiutata");
+  await renderAgendaSettimana();
+  if(currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
 }
 
 function toggleGiornoAgenda(iso){
@@ -4511,11 +4722,11 @@ function apriAzioniEvento(id){
     `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
     escapeHtml(agDescrizioneTipo(e)),
     (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"),
-    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : "Da fare",
+    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : "Da fare",
     e.note ? escapeHtml(e.note) : ""
   ].filter(Boolean).join("<br>");
   const btnFatto = document.getElementById("azioni-evento-fatto");
-  btnFatto.textContent = e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
+  btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
   openModal("modal-azioni-evento");
 }
 
@@ -4525,6 +4736,9 @@ async function azioneEvento(tipo){
   if(tipo === "modifica"){
     closeModal("modal-azioni-evento");
     openInterventoModal(null, e);
+  } else if(tipo === "fatto" && e.stato === "richiesto"){
+    closeModal("modal-azioni-evento");
+    accettaRichiesta(e.id);
   } else if(tipo === "fatto"){
     const nuovo = e.stato === "fatto" ? "programmato" : "fatto";
     const { error } = await DB.updateInterventoMascalcia(e.id, { stato: nuovo });
@@ -5390,6 +5604,98 @@ async function sendFarrierChatMessage(){
   if(error){ input.value = testo; showToast("Errore: " + error.message); return; }
   await renderFarrierChatThread();
   loadFarrierChatSection();
+}
+
+/* ---------- APPUNTAMENTI COL MANISCALCO (lato proprietario, Step 5d) ---------- */
+const STATO_APP_LABEL = {
+  richiesto: ['In attesa', 'background:rgba(232,176,75,.18);color:var(--accent)'],
+  programmato: ['Confermato', 'background:rgba(92,200,143,.18);color:var(--green)'],
+  rifiutato: ['Non disponibile', 'background:rgba(0,0,0,.07);color:var(--muted)'],
+};
+
+async function apriAppuntamentiManiscalco(){
+  if(!currentFarrier) return;
+  if(!horses || horses.length === 0) horses = await DB.listHorses();
+  const sel = document.getElementById("rich-cavallo");
+  sel.innerHTML = (horses || []).map(h => `<option value="${escapeHtml(h.id)}">${escapeHtml(h.name || "Cavallo")}</option>`).join("")
+    + '<option value="__altro__">Altro cavallo…</option>';
+  sel.value = horses && horses.length ? horses[0].id : "__altro__";
+  document.getElementById("rich-tipo").value = "ferratura";
+  ["rich-cavallo-nome", "rich-tipo-altro", "rich-ora", "rich-note"].forEach(id => document.getElementById(id).value = "");
+  const domani = aggiungiGiorniIso(isoLocale(new Date()), 1);
+  document.getElementById("rich-data").value = domani;
+  document.getElementById("rich-data").min = isoLocale(new Date());
+  document.getElementById("rich-error").style.display = "none";
+  toggleRichiestaCampi();
+  openModal("modal-appuntamenti-maniscalco");
+  await renderAppuntamentiManiscalco();
+}
+
+function toggleRichiestaCampi(){
+  document.getElementById("rich-cavallo-nome-group").style.display = document.getElementById("rich-cavallo").value === "__altro__" ? "flex" : "none";
+  document.getElementById("rich-tipo-altro-group").style.display = document.getElementById("rich-tipo").value === "altro" ? "flex" : "none";
+}
+
+async function renderAppuntamentiManiscalco(){
+  const box = document.getElementById("app-man-list");
+  if(!currentFarrier){ box.innerHTML = ""; return; }
+  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const lista = await DB.listAppuntamentiCliente(currentFarrier.cliente_mascalcia_id);
+  if(!lista.length){
+    box.innerHTML = '<div class="muted" style="font-size:13px">Nessun appuntamento in programma.</div>';
+    return;
+  }
+  box.innerHTML = lista.map(a => {
+    const [lbl, stile] = STATO_APP_LABEL[a.stato] || [a.stato, ""];
+    let tipo = TIPO_FERRATURA_LABELS[a.tipo_ferratura] || a.tipo_ferratura || "";
+    if(a.tipo_ferratura === "altro" && a.tipo_altro) tipo = a.tipo_altro;
+    return `
+    <div class="rich-item">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:600">${formatDataBreve(a.data_intervento)}${a.ora ? " · " + String(a.ora).slice(0, 5) : ""}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml(tipo)}${a.nome_cavallo ? " · " + escapeHtml(a.nome_cavallo) : ""}</div>
+      </div>
+      <span class="app-man-stato" style="${stile}">${lbl}</span>
+      ${a.stato === "richiesto" ? `<button class="btn btn-outline btn-sm" onclick="annullaRichiestaAppuntamento('${a.id}')">Annulla</button>` : ""}
+    </div>`;
+  }).join("");
+}
+
+async function inviaRichiestaAppuntamento(){
+  if(!currentFarrier) return;
+  const errBox = document.getElementById("rich-error");
+  const errore = msg => { errBox.textContent = msg; errBox.style.display = "block"; };
+  errBox.style.display = "none";
+  const cav = document.getElementById("rich-cavallo").value;
+  const horse_id = cav && cav !== "__altro__" ? cav : null;
+  const nome_cavallo = cav === "__altro__" ? document.getElementById("rich-cavallo-nome").value.trim() : null;
+  const tipo = document.getElementById("rich-tipo").value;
+  const tipo_altro = tipo === "altro" ? document.getElementById("rich-tipo-altro").value.trim() : null;
+  const data = document.getElementById("rich-data").value;
+  const ora = document.getElementById("rich-ora").value || null;
+  const note = document.getElementById("rich-note").value.trim() || null;
+  if(cav === "__altro__" && !nome_cavallo) return errore("Scrivi il nome del cavallo.");
+  if(tipo === "altro" && !tipo_altro) return errore("Specifica il tipo di intervento.");
+  if(!data || data < isoLocale(new Date())) return errore("Scegli una data da oggi in poi.");
+  const btn = document.getElementById("rich-btn");
+  btn.disabled = true;
+  const { error } = await DB.richiediAppuntamento({ cliente_mascalcia_id: currentFarrier.cliente_mascalcia_id, horse_id, nome_cavallo, tipo, tipo_altro, data, ora, note });
+  btn.disabled = false;
+  if(error) return errore("Invio non riuscito: " + (error.message || "riprova"));
+  showToast("Richiesta inviata al maniscalco");
+  document.getElementById("rich-note").value = "";
+  await renderAppuntamentiManiscalco();
+  await renderFarrierChatThread();
+  loadFarrierChatSection();
+}
+
+async function annullaRichiestaAppuntamento(id){
+  if(!confirm("Annullare questa richiesta?")) return;
+  const { error } = await DB.annullaRichiesta(id);
+  if(error){ showToast("Errore: " + (error.message || "")); return; }
+  showToast("Richiesta annullata");
+  await renderAppuntamentiManiscalco();
+  await renderFarrierChatThread();
 }
 
 async function startNewChat(){
