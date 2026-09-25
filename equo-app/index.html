@@ -1066,6 +1066,13 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="horse-note" placeholder="Facoltativo">
       </div>
+      <label style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-top:4px;cursor:pointer">
+        <input type="checkbox" id="horse-condiviso" checked style="width:18px;height:18px;flex-shrink:0;margin-top:2px">
+        <span>
+          <span style="font-weight:600;font-size:13.5px">Condividi con i professionisti collegati</span><br>
+          <span class="muted" style="font-size:12px;line-height:1.5">Il maniscalco a cui ti sei collegato vede solo nome, razza e microchip per registrare gli interventi sul cavallo giusto.</span>
+        </span>
+      </label>
       <div class="auth-error" id="horse-error" style="display:none"></div>
       <button class="btn btn-primary" id="horse-save-btn" onclick="saveHorse()" style="width:100%;margin-top:6px">Crea scheda</button>
     </div>
@@ -3313,9 +3320,11 @@ function openHorseForm(id){
     document.getElementById("horse-microchip").value = h?.microchip || "";
     document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
     document.getElementById("horse-note").value = h?.note || "";
+    document.getElementById("horse-condiviso").checked = h?.condiviso_ecosistema !== false;
   } else {
     ["horse-name","horse-breed","horse-mantello","horse-birthdate","horse-microchip","horse-gruppo-sanguigno","horse-note"].forEach(id => document.getElementById(id).value = "");
     document.getElementById("horse-tipo-proprieta").value = "proprieta";
+    document.getElementById("horse-condiviso").checked = true;
   }
   openModal("modal-add-horse");
 }
@@ -3330,6 +3339,7 @@ function raccogliDatiHorseForm(){
     microchip: document.getElementById("horse-microchip").value.trim() || null,
     gruppo_sanguigno: document.getElementById("horse-gruppo-sanguigno").value.trim() || null,
     note: document.getElementById("horse-note").value.trim() || null,
+    condiviso_ecosistema: document.getElementById("horse-condiviso").checked,
   };
 }
 
@@ -3395,6 +3405,7 @@ function renderHorseInfoBox(h){
     ["Microchip", h.microchip || "Non inserito"],
     ["Gruppo sanguigno", h.gruppo_sanguigno || "—"],
     ["Note", h.note || "—"],
+    ["Condiviso con i professionisti", h.condiviso_ecosistema === false ? "No" : "Sì"],
   ];
   box.innerHTML = righe.map(([label, val]) => `
     <div style="display:flex;justify-content:space-between;gap:10px">
