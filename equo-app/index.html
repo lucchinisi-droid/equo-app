@@ -405,6 +405,9 @@ select.input{cursor:pointer}
 .ag-ev.promemoria{background:transparent;border:1px dashed var(--border)}
 .ag-ev.richiesta{background:transparent;border:1.5px solid var(--accent)}
 .ag-ev-pill{font-size:11px;font-weight:800;color:var(--accent);flex-shrink:0;padding:0 2px}
+.clienti-sez-head{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
+.clienti-sez-head:first-child{margin-top:0}
+.clienti-sez-title{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
 .rich-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
 .rich-item:last-child{border-bottom:none}
 .app-man-stato{font-size:11px;font-weight:800;border-radius:8px;padding:3px 7px;flex-shrink:0}
@@ -842,7 +845,6 @@ select.input{cursor:pointer}
     <div id="clienti-list-view">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div class="section-title" style="margin-bottom:0">I tuoi clienti</div>
-        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-cliente')">+ Aggiungi</button>
       </div>
       <div id="clienti-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
@@ -1156,7 +1158,14 @@ select.input{cursor:pointer}
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-users"></i></span>Nuovo cliente</div>
     <div class="auth-form">
       <div class="input-group">
-        <label class="input-label">Nome cliente</label>
+        <label class="input-label">Tipo di cliente</label>
+        <select class="input" id="cliente-tipo" onchange="aggiornaEtichetteNuovoCliente()">
+          <option value="proprietario">Proprietario</option>
+          <option value="struttura">Struttura (scuderia, maneggio, centro)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label" id="cliente-nome-label">Nome cliente</label>
         <input class="input" id="cliente-nome" placeholder="es. Marco Bianchi">
       </div>
       <div class="input-group">
@@ -1198,6 +1207,13 @@ select.input{cursor:pointer}
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span>Modifica cliente</div>
     <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Tipo di cliente</label>
+        <select class="input" id="edit-cliente-tipo">
+          <option value="proprietario">Proprietario</option>
+          <option value="struttura">Struttura (scuderia, maneggio, centro)</option>
+        </select>
+      </div>
       <div class="input-group">
         <label class="input-label">Nome cliente</label>
         <input class="input" id="edit-cliente-nome" placeholder="es. Marco Rossi">
@@ -1241,6 +1257,10 @@ select.input{cursor:pointer}
       <div class="input-group" id="intervento-nuovo-cliente-group" style="display:none">
         <label class="input-label">Nome cliente</label>
         <input class="input" id="intervento-nuovo-cliente-nome" placeholder="es. Marco Rossi">
+        <select class="input" id="intervento-nuovo-cliente-tipo" style="margin-top:8px">
+          <option value="proprietario">Proprietario</option>
+          <option value="struttura">Struttura (scuderia, maneggio, centro)</option>
+        </select>
       </div>
       <!-- 3. Cavallo -->
       <div class="input-group" id="intervento-cavallo-group">
@@ -1903,7 +1923,7 @@ select.input{cursor:pointer}
    - conversazioni_proprietari(id, proprietario_a_id, proprietario_b_id, created_at)
    - messaggi_proprietari(id, conversazione_id, mittente_id, tipo, testo, media_url, letto, created_at)
    - storage bucket pubblico "proprietari-chat-media" (foto/video/note vocali della chat tra proprietari)
-   - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
+   - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, tipo_cliente[proprietario|struttura], created_at)
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato[programmato|fatto], prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
    - cavalli_clienti_mascalcia(id, maniscalco_id, cliente_mascalcia_id, nome, microchip, horse_id, created_at)
    - horses.condiviso_ecosistema (bool) + RPC cavalli_condivisi_cliente(p_cliente_id)
@@ -1957,7 +1977,8 @@ const demoState = {
   ],
   paymentMethods: [],
   clientiMascalcia: [
-    { id: "dc-1", nome: "Marco Bianchi", nome_cavallo: "Aurora", telefono: "333 1112222", note: "", cliente_user_id: null, codice_invito: "EQUO-DC1AB", created_at: "2026-08-01" },
+    { id: "dc-1", nome: "Marco Bianchi", nome_cavallo: "Aurora", telefono: "333 1112222", note: "", cliente_user_id: null, codice_invito: "EQUO-DC1AB", tipo_cliente: "proprietario", created_at: "2026-08-01" },
+    { id: "dc-s1", nome: "Scuderia Le Querce", nome_cavallo: "", telefono: "06 1234567", note: "", cliente_user_id: null, codice_invito: "EQUO-DC2QR", tipo_cliente: "struttura", created_at: "2026-08-05" },
   ],
   cavalliClientiMascalcia: [
     { id: "dcv-1", cliente_mascalcia_id: "dc-1", nome: "Aurora", microchip: null, horse_id: null, created_at: "2026-08-01" },
@@ -2217,14 +2238,14 @@ const DB = {
     const { data, error } = await sb.from("clienti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
     return error ? [] : (data || []);
   },
-  async insertClienteMascalcia({ nome, nome_cavallo, telefono, note }){
+  async insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente = "proprietario" }){
     const codice_invito = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
     if(DEMO_MODE){
-      const nuovo = { id: "dc-" + (++demoIdCounter), nome, nome_cavallo, telefono, note, cliente_user_id: null, codice_invito, created_at: new Date().toISOString() };
+      const nuovo = { id: "dc-" + (++demoIdCounter), nome, nome_cavallo, telefono, note, cliente_user_id: null, codice_invito, tipo_cliente, created_at: new Date().toISOString() };
       demoState.clientiMascalcia.push(nuovo);
       return { error: null, data: nuovo };
     }
-    const { data, error } = await sb.from("clienti_mascalcia").insert({ maniscalco_id: currentUser.id, nome, nome_cavallo, telefono, note, codice_invito }).select().single();
+    const { data, error } = await sb.from("clienti_mascalcia").insert({ maniscalco_id: currentUser.id, nome, nome_cavallo, telefono, note, codice_invito, tipo_cliente }).select().single();
     return { error, data };
   },
   async updateClienteMascalcia(id, payload){
@@ -3762,15 +3783,42 @@ function renderClientiList(){
     box.innerHTML = '<div class="empty-state"><div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px;color:var(--muted)"><i class="fa-solid fa-users"></i></div><div style="font-size:13.5px;line-height:1.6">Non hai ancora clienti.<br>Aggiungine uno per iniziare a registrare gli interventi.</div></div>';
     return;
   }
-  box.innerHTML = clientiMascalcia.map(c => `
+  const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
+  const card = c => `
     <div class="card horse-card" onclick="openClienteDetail('${c.id}')">
-      <div class="horse-avatar"><i class="fa-solid fa-user" style="font-size:20px"></i></div>
-      <div>
+      <div class="horse-avatar"><i class="fa-solid ${isStruttura(c) ? "fa-building" : "fa-user"}" style="font-size:20px"></i></div>
+      <div style="flex:1;min-width:0">
         <div style="font-weight:700">${escapeHtml(c.nome)}</div>
-        <div class="muted" style="font-size:13px">${escapeHtml(c.nome_cavallo || "Cavallo non indicato")}</div>
+        <div class="muted" style="font-size:13px">${escapeHtml(c.nome_cavallo || (isStruttura(c) ? "Nessun cavallo indicato" : "Cavallo non indicato"))}</div>
       </div>
-    </div>
-  `).join("");
+      ${c.cliente_user_id ? '<span class="badge badge-green" style="font-size:10.5px;flex-shrink:0">su Equo</span>' : ""}
+    </div>`;
+  const sezione = (tipo, titolo, vuoto) => {
+    const lista = clientiMascalcia.filter(c => (isStruttura(c) ? "struttura" : "proprietario") === tipo).sort(alfabetico);
+    return `
+      <div class="clienti-sez-head">
+        <div class="clienti-sez-title">${titolo} (${lista.length})</div>
+        <button class="btn btn-outline btn-sm" onclick="apriNuovoCliente('${tipo}')">+ Aggiungi</button>
+      </div>
+      ${lista.length ? lista.map(card).join("") : `<div class="muted" style="font-size:13px;margin-bottom:6px">${vuoto}</div>`}`;
+  };
+  box.innerHTML = sezione("proprietario", "PROPRIETARI", "Nessun proprietario ancora.")
+    + sezione("struttura", "STRUTTURE", "Nessuna struttura ancora. Aggiungi scuderie, maneggi e centri in cui lavori.");
+}
+
+function isStruttura(c){ return c && c.tipo_cliente === "struttura"; }
+
+function apriNuovoCliente(tipo){
+  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("cliente-tipo").value = tipo === "struttura" ? "struttura" : "proprietario";
+  aggiornaEtichetteNuovoCliente();
+  openModal("modal-add-cliente");
+}
+
+function aggiornaEtichetteNuovoCliente(){
+  const struttura = document.getElementById("cliente-tipo").value === "struttura";
+  document.getElementById("cliente-nome-label").textContent = struttura ? "Nome struttura" : "Nome cliente";
+  document.getElementById("cliente-nome").placeholder = struttura ? "es. Scuderia Le Querce" : "es. Marco Bianchi";
 }
 
 async function createClienteMascalcia(){
@@ -3779,7 +3827,8 @@ async function createClienteMascalcia(){
   const nome_cavallo = document.getElementById("cliente-cavallo").value.trim();
   const telefono = document.getElementById("cliente-telefono").value.trim();
   const note = document.getElementById("cliente-note").value.trim();
-  const { error } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note });
+  const tipo_cliente = document.getElementById("cliente-tipo").value;
+  const { error } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("cliente-nome").value = "";
   document.getElementById("cliente-cavallo").value = "";
@@ -3798,6 +3847,7 @@ async function openClienteDetail(id){
   document.getElementById("detail-cliente-nome").textContent = c.nome;
   document.getElementById("detail-cliente-info").innerHTML = `
     <div style="font-size:13.5px;line-height:1.8">
+      <div><strong>Tipo:</strong> ${isStruttura(c) ? "Struttura" : "Proprietario"}</div>
       <div id="detail-cliente-cavalli"><strong>Cavalli:</strong> <span class="muted">…</span></div>
       ${c.telefono ? `<div><strong>Telefono:</strong> <a href="tel:${escapeHtml(c.telefono)}" style="color:inherit">${escapeHtml(c.telefono)}</a></div>` : ""}
       ${c.note ? `<div><strong>Note:</strong> ${escapeHtml(c.note)}</div>` : ""}
@@ -3813,7 +3863,9 @@ async function openClienteDetail(id){
   if(linkHint){
     linkHint.innerHTML = c.cliente_user_id
       ? '<strong style="color:var(--primary)">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell\'app.'
-      : 'Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.';
+      : isStruttura(c)
+        ? 'Dai questo codice alla struttura: può collegarsi da Equo App (Chat → "Il tuo maniscalco" → Collega), presto anche da Equo Scuderia.'
+        : 'Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.';
   }
   const qrBox = document.getElementById("detail-cliente-qr");
   qrBox.innerHTML = "";
@@ -3826,6 +3878,7 @@ let clienteInterventiCache = [];
 async function openEditCliente(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
+  document.getElementById("edit-cliente-tipo").value = isStruttura(c) ? "struttura" : "proprietario";
   document.getElementById("edit-cliente-nome").value = c.nome || "";
   document.getElementById("edit-cliente-telefono").value = c.telefono || "";
   document.getElementById("edit-cliente-note").value = c.note || "";
@@ -3882,7 +3935,8 @@ async function salvaEditCliente(){
   const telefono = document.getElementById("edit-cliente-telefono").value.trim();
   const note = document.getElementById("edit-cliente-note").value.trim();
   if(!nome){ errBox.textContent = "Il nome del cliente è obbligatorio."; errBox.style.display = "block"; return; }
-  const { error } = await DB.updateClienteMascalcia(currentClienteId, { nome, telefono, note });
+  const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
+  const { error } = await DB.updateClienteMascalcia(currentClienteId, { nome, telefono, note, tipo_cliente });
   if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }
   closeModal("modal-edit-cliente");
   showToast("Cliente aggiornato");
@@ -4294,7 +4348,12 @@ async function openInterventoModal(clienteId, intervento, preset){
   document.getElementById("intervento-delete-btn").style.display = inModifica ? "block" : "none";
 
   const select = document.getElementById("intervento-cliente-select");
-  const opzioniClienti = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+  const opzCli = lista => lista.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }))
+    .map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+  const propr = clientiMascalcia.filter(c => !isStruttura(c)), strutt = clientiMascalcia.filter(isStruttura);
+  const opzioniClienti = strutt.length
+    ? `<optgroup label="Proprietari">${opzCli(propr)}</optgroup><optgroup label="Strutture">${opzCli(strutt)}</optgroup>`
+    : opzCli(propr);
   select.innerHTML = opzioniClienti + (inModifica ? "" : '<option value="__nuovo__">+ Nuovo cliente</option>');
   select.disabled = inModifica;
   if(inModifica) select.value = interventoInModifica.cliente_mascalcia_id;
@@ -4304,6 +4363,7 @@ async function openInterventoModal(clienteId, intervento, preset){
 
   const i = interventoInModifica || preset || {};
   document.getElementById("intervento-nuovo-cliente-nome").value = "";
+  document.getElementById("intervento-nuovo-cliente-tipo").value = "proprietario";
   document.getElementById("intervento-nuovo-cavallo-nome").value = "";
   document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
   document.getElementById("intervento-tipo").value = i.tipo_ferratura || "ferratura";
@@ -4405,7 +4465,8 @@ async function salvaInterventoMascalcia(){
     if(cliente_mascalcia_id === "__nuovo__"){
       const nome = document.getElementById("intervento-nuovo-cliente-nome").value.trim();
       if(!nome) return errore("Inserisci il nome del cliente.");
-      const { error: clienteError, data: nuovoCliente } = await DB.insertClienteMascalcia({ nome, nome_cavallo: nuovoCavalloNome, telefono: "", note: "" });
+      const tipo_cliente = document.getElementById("intervento-nuovo-cliente-tipo").value;
+      const { error: clienteError, data: nuovoCliente } = await DB.insertClienteMascalcia({ nome, nome_cavallo: nuovoCavalloNome, telefono: "", note: "", tipo_cliente });
       if(clienteError || !nuovoCliente) return errore("Errore nel creare il cliente: " + (clienteError?.message || ""));
       cliente_mascalcia_id = nuovoCliente.id;
       clienteCreatoOra = true;
