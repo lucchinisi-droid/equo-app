@@ -124,7 +124,7 @@ async function gestisciChatProprietari(supabase, record) {
 // (clienti_mascalcia.cliente_user_id valorizzato); altrimenti non riceve push
 // (non ha un account a cui inviarle).
 async function gestisciChatMascalcia(supabase, record) {
-  const { cliente_mascalcia_id, maniscalco_id, mittente_tipo, tipo, testo, audio_url } = record;
+  const { cliente_mascalcia_id, maniscalco_id, mittente_tipo, tipo, testo, audio_url, file_nome } = record;
   if (!cliente_mascalcia_id || !maniscalco_id) return "dati_mancanti_nel_record";
 
   const { data: cliente } = await supabase
@@ -134,7 +134,9 @@ async function gestisciChatMascalcia(supabase, record) {
     .maybeSingle();
   if (!cliente) return "cliente_non_trovato";
 
-  const corpo = tipo === "testo" ? testo : audio_url ? "Ha inviato un vocale" : (testo || "Nuovo messaggio");
+  const corpo = tipo === "testo" ? testo
+    : tipo === "documento" ? "📄 " + (file_nome || "Documento PDF")
+    : audio_url ? "Ha inviato un vocale" : (testo || "Nuovo messaggio");
 
   if (mittente_tipo === "maniscalco") {
     if (!cliente.cliente_user_id) return "maniscalco_a_cliente_non_collegato"; // il cliente non usa Equo App: nessuna push possibile

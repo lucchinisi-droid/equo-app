@@ -648,6 +648,16 @@ select.input{cursor:pointer}
       <div style="font-size:13px">Attiva le notifiche per non perdere i messaggi, anche a telefono bloccato.</div>
       <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="attivaNotifichePush()">Attiva</button>
     </div>
+    <div id="farrier-chat-section" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="section-title" style="font-size:15px;margin-bottom:0">Il tuo maniscalco</div>
+        <button class="btn btn-outline btn-sm" onclick="openCollegaManiscalco()">+ Collega</button>
+      </div>
+      <div class="card" id="farrier-chat-list-card">
+        <div id="farrier-chat-list"></div>
+      </div>
+    </div>
+
     <div id="stable-chat-section" style="display:none;margin-bottom:20px">
       <div class="section-title" style="font-size:15px">La tua scuderia</div>
       <div class="card" id="stable-chat-list-card">
@@ -842,7 +852,7 @@ select.input{cursor:pointer}
       <div class="card" style="margin-bottom:14px">
         <div class="qr-box" id="detail-cliente-qr"></div>
         <div class="invite-code" id="detail-cliente-code">—</div>
-        <div class="muted" style="font-size:12px;text-align:center;margin-top:6px">Fai scansionare questo QR al cliente quando scarica Equo per collegarvi (a breve).</div>
+        <div class="muted" style="font-size:12px;text-align:center;margin-top:6px;line-height:1.5" id="detail-cliente-link-hint">Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.</div>
       </div>
 
       <div class="card" style="margin-bottom:14px">
@@ -948,6 +958,22 @@ select.input{cursor:pointer}
       <div class="mchat-rec-timer" id="mchat-rec-timer">0:00</div>
       <div class="muted" style="flex:1;font-size:12.5px">Registrazione in corso...</div>
       <button class="mchat-send-btn btn btn-primary" onclick="stopAndSendVoiceRecording()" aria-label="Invia nota vocale"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- CHAT PROPRIETARIO -> SUO MANISCALCO (messaggi_mascalcia, lato cliente; riusa le classi mchat-*) -->
+  <div class="mchat-overlay" id="fchat-overlay">
+    <div class="mchat-header">
+      <button class="back-btn" onclick="closeFarrierChatThread()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="horse-avatar" style="width:38px;height:38px;border-radius:50%"><i class="fa-solid fa-hammer" style="font-size:16px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="mchat-header-name" id="fchat-nome">Il tuo maniscalco</div>
+      </div>
+    </div>
+    <div class="mchat-messages" id="fchat-messages"></div>
+    <div class="mchat-input-bar">
+      <input class="input" id="fchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendFarrierChatMessage()">
+      <button class="mchat-send-btn btn btn-primary" onclick="sendFarrierChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
   </div>
 
@@ -1649,6 +1675,24 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-collega-maniscalco" onclick="closeOut(event,'modal-collega-maniscalco')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span>Collega il tuo maniscalco</div>
+    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+      Inserisci il codice che ti ha dato il tuo maniscalco: potrai scrivergli in chat e ricevere qui appuntamenti e riepiloghi in PDF.
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice maniscalco</label>
+        <input class="input" id="collega-maniscalco-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')collegaManiscalco()">
+      </div>
+      <div class="auth-error" id="collega-maniscalco-error" style="display:none"></div>
+      <button class="btn btn-primary" id="collega-maniscalco-btn" onclick="collegaManiscalco()" style="width:100%;margin-top:6px">Collega</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -2288,6 +2332,51 @@ const DB = {
       .order("prossima_scadenza", { ascending: true }).limit(limit);
     return error ? [] : (data || []);
   },
+  /* --- Lato CLIENTE del maniscalco (proprietario su Equo App) --- */
+  async riscattaCodiceManiscalco(codice){
+    if(DEMO_MODE){
+      const c = demoState.clientiMascalcia.find(x => (x.codice_invito || "").toUpperCase() === codice);
+      if(!c) return { ok: false, errore: "codice_non_valido" };
+      if(c.cliente_user_id && c.cliente_user_id !== currentUser.id) return { ok: false, errore: "codice_gia_usato" };
+      c.cliente_user_id = currentUser.id;
+      return { ok: true, cliente_mascalcia_id: c.id, nome_maniscalco: "Luca Ferri (demo)" };
+    }
+    const { data, error } = await sb.rpc("riscatta_codice_maniscalco", { p_codice: codice });
+    if(error){ console.error("riscattaCodiceManiscalco:", error); return { ok: false, errore: "errore", messaggio: error.message }; }
+    return data || { ok: false, errore: "errore" };
+  },
+  async listManiscalchiCollegati(){
+    if(DEMO_MODE){
+      return demoState.clientiMascalcia.filter(c => c.cliente_user_id === currentUser.id).map(c => {
+        const msgs = demoState.messaggiMascalcia.filter(m => m.cliente_mascalcia_id === c.id).sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+        const u = msgs[msgs.length - 1];
+        return { cliente_mascalcia_id: c.id, maniscalco_id: "demo-farrier", nome_maniscalco: "Luca Ferri (demo)",
+          non_letti: msgs.filter(m => m.mittente_tipo === "maniscalco" && !m.letto).length,
+          ultimo_testo: u?.testo || null, ultimo_tipo: u?.tipo || null, ultimo_mittente: u?.mittente_tipo || null, ultimo_file_nome: u?.file_nome || null, ultimo_at: u?.created_at || null };
+      });
+    }
+    const { data, error } = await sb.rpc("lista_maniscalchi_collegati");
+    if(error){ console.error("listManiscalchiCollegati:", error); return []; }
+    return Array.isArray(data) ? data : [];
+  },
+  async inviaMessaggioAlManiscalco(clienteId, testo){
+    if(DEMO_MODE){
+      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id: clienteId, mittente_tipo: "cliente", tipo: "testo", testo, letto: false, created_at: new Date().toISOString() });
+      return { error: null };
+    }
+    const { data, error } = await sb.rpc("invia_messaggio_mascalcia_cliente", { p_cliente_id: clienteId, p_testo: testo });
+    if(error){ console.error("inviaMessaggioAlManiscalco:", error); return { error }; }
+    if(data && data.ok === false){ console.error("inviaMessaggioAlManiscalco:", data); return { error: { message: data.errore || "invio non riuscito" } }; }
+    return { error: null };
+  },
+  async segnaLettiDalManiscalco(clienteId){
+    if(DEMO_MODE){
+      demoState.messaggiMascalcia.forEach(m => { if(m.cliente_mascalcia_id === clienteId && m.mittente_tipo === "maniscalco") m.letto = true; });
+      return;
+    }
+    const { error } = await sb.rpc("segna_letti_mascalcia_cliente", { p_cliente_id: clienteId });
+    if(error) console.error("segnaLettiDalManiscalco:", error);
+  },
   async listInboxMascalcia(){
     if(DEMO_MODE){
       return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
@@ -2306,10 +2395,10 @@ const DB = {
     tipo = tipo || "testo";
     const extra = file_url ? { file_url, file_nome: file_nome || null } : {};
     if(DEMO_MODE){
-      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: true, created_at: new Date().toISOString() });
+      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: false, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: true });
+    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: false });
     if(error) console.error("insertMessaggioMascalcia:", error);
     return { error };
   },
@@ -3106,6 +3195,11 @@ async function loadHomeLastMessage(){
     const ultimo = msgs[msgs.length - 1];
     if(ultimo) candidates.push({ tipo: "scuderia", nome: s.nome, testo: ultimo.testo || "", data: ultimo.created_at, target: s });
   }
+  const maniscalchi = await DB.listManiscalchiCollegati();
+  maniscalchi.forEach(f => {
+    if(!f.ultimo_at) return;
+    candidates.push({ tipo: "maniscalco", nome: f.nome_maniscalco || "Il tuo maniscalco", testo: previewMessaggioMascalcia(f.ultimo_tipo, f.ultimo_testo, f.ultimo_file_nome), data: f.ultimo_at, target: f });
+  });
   const conversazioni = await DB.listConversazioniProprietario();
   (conversazioni || []).forEach(c => {
     const m = c.ultimoMessaggio;
@@ -3129,6 +3223,9 @@ function goToLastMessage(){
   if(homeLastMessageTarget.tipo === "scuderia"){
     const s = homeLastMessageTarget.target;
     loadStableChatSection().then(() => openStableChatThread(s.membro_id, s.centro_id, s.nome));
+  } else if(homeLastMessageTarget.tipo === "maniscalco"){
+    const f = homeLastMessageTarget.target;
+    loadFarrierChatSection().then(() => openFarrierChatThread(f.cliente_mascalcia_id, f.nome_maniscalco || "Il tuo maniscalco"));
   } else {
     const c = homeLastMessageTarget.target;
     loadOwnerChatList().then(() => openOwnerChatThread(c.id, c.altro?.full_name || "Proprietario"));
@@ -3529,6 +3626,12 @@ async function openClienteDetail(id){
       (cav.length ? cav.map(x => escapeHtml(x.nome) + (x.tipo === "equo" ? ' <span class="muted" style="font-size:11.5px">(su Equo)</span>' : "")).join(", ") : '<span class="muted">nessuno</span>');
   });
   document.getElementById("detail-cliente-code").textContent = c.codice_invito;
+  const linkHint = document.getElementById("detail-cliente-link-hint");
+  if(linkHint){
+    linkHint.innerHTML = c.cliente_user_id
+      ? '<strong style="color:var(--primary)">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell\'app.'
+      : 'Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.';
+  }
   const qrBox = document.getElementById("detail-cliente-qr");
   qrBox.innerHTML = "";
   if(window.QRCode){ new QRCode(qrBox, { text: c.codice_invito, width: 140, height: 140 }); }
@@ -4751,7 +4854,7 @@ async function stopAndSendVoiceRecording(){
 function shareInviteCodeFromChat(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
-  const text = `Il tuo codice per collegarti a me su Equo: ${c.codice_invito}`;
+  const text = `Il tuo codice per collegarti a me su Equo: ${c.codice_invito}\nApri Equo App (app.equohub.com) → Chat → "Il tuo maniscalco" → Collega.`;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
       .catch(() => showToast("Non sono riuscito a copiare, riprova."));
@@ -4918,6 +5021,8 @@ async function computeChatUnreadTotal(){
     const msgs = await DB.listMessaggiScuderia(s.membro_id);
     total += contaNonLettiScuderia(s.membro_id, msgs);
   }
+  const maniscalchi = await DB.listManiscalchiCollegati();
+  maniscalchi.forEach(f => { total += Number(f.non_letti) || 0; });
   return total;
 }
 async function refreshChatBadge(){
@@ -5013,6 +5118,131 @@ async function sendStableChatMessage(){
   if(error){ showToast("Errore: " + error.message); return; }
   await renderStableChatThread();
   await loadStableChatSection();
+}
+
+/* ---------- CHAT COL PROPRIO MANISCALCO (lato proprietario) ---------- */
+let currentFarrier = null; // { cliente_mascalcia_id, nome }
+
+function previewMessaggioMascalcia(tipo, testo, fileNome){
+  if(tipo === "documento") return "📄 " + (fileNome || "Documento PDF");
+  if(tipo === "audio") return "🎙️ Nota vocale";
+  return testo || "";
+}
+
+async function loadFarrierChatSection(){
+  const box = document.getElementById("farrier-chat-list");
+  if(!box) return;
+  const lista = await DB.listManiscalchiCollegati();
+  if(!lista.length){
+    box.innerHTML = `<div class="muted" style="font-size:13px;line-height:1.6;text-align:center;padding:6px 4px">
+      Hai un codice dal tuo maniscalco?<br>Tocca "+ Collega" per scrivergli in chat e ricevere appuntamenti e PDF.</div>`;
+    return;
+  }
+  box.innerHTML = lista.map(f => {
+    let preview = "Inizia la conversazione col tuo maniscalco";
+    if(f.ultimo_at) preview = (f.ultimo_mittente === "cliente" ? "Tu: " : "") + previewMessaggioMascalcia(f.ultimo_tipo, f.ultimo_testo, f.ultimo_file_nome);
+    return `
+    <div class="inbox-item ${f.non_letti > 0 ? "unread" : ""}" onclick='openFarrierChatThread(${JSON.stringify(f.cliente_mascalcia_id)}, ${JSON.stringify(f.nome_maniscalco || "Il tuo maniscalco")})'>
+      <div class="horse-avatar"><i class="fa-solid fa-hammer" style="font-size:20px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(f.nome_maniscalco || "Il tuo maniscalco")}</div>
+        <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
+      </div>
+      ${f.non_letti > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function openCollegaManiscalco(){
+  document.getElementById("collega-maniscalco-codice").value = "";
+  document.getElementById("collega-maniscalco-error").style.display = "none";
+  openModal("modal-collega-maniscalco");
+}
+
+const ERRORI_CODICE_MANISCALCO = {
+  codice_non_valido: "Codice non valido. Controlla di averlo scritto bene.",
+  codice_gia_usato: "Questo codice è già stato usato da un altro account. Chiedi al tuo maniscalco di verificarlo.",
+  codice_tuo: "Questo è un codice creato da te: va dato al tuo cliente.",
+  non_autenticato: "Sessione scaduta: esci e rientra.",
+};
+
+async function collegaManiscalco(){
+  const input = document.getElementById("collega-maniscalco-codice");
+  const errBox = document.getElementById("collega-maniscalco-error");
+  const btn = document.getElementById("collega-maniscalco-btn");
+  errBox.style.display = "none";
+  const codice = input.value.trim().toUpperCase();
+  if(!codice) return;
+  btn.disabled = true;
+  const res = await DB.riscattaCodiceManiscalco(codice);
+  btn.disabled = false;
+  if(!res || !res.ok){
+    errBox.textContent = (ERRORI_CODICE_MANISCALCO[res?.errore] || ("Errore, riprova." + (res?.messaggio ? " (" + res.messaggio + ")" : "")))
+      + (DEMO_MODE && res?.errore === "codice_non_valido" ? " (in demo prova EQUO-DC1AB)" : "");
+    errBox.style.display = "block";
+    return;
+  }
+  closeModal("modal-collega-maniscalco");
+  showToast("Collegato a " + (res.nome_maniscalco || "il tuo maniscalco") + "!");
+  await loadFarrierChatSection();
+  await openFarrierChatThread(res.cliente_mascalcia_id, res.nome_maniscalco || "Il tuo maniscalco");
+}
+
+async function openFarrierChatThread(clienteId, nome){
+  currentFarrier = { cliente_mascalcia_id: clienteId, nome };
+  document.getElementById("fchat-nome").textContent = nome || "Il tuo maniscalco";
+  document.getElementById("fchat-input").value = "";
+  document.getElementById("fchat-overlay").classList.add("active");
+  await renderFarrierChatThread();
+  await DB.segnaLettiDalManiscalco(clienteId);
+  loadFarrierChatSection();
+  refreshChatBadge();
+}
+
+function closeFarrierChatThread(){
+  document.getElementById("fchat-overlay").classList.remove("active");
+  currentFarrier = null;
+}
+
+async function renderFarrierChatThread(){
+  if(!currentFarrier) return;
+  const box = document.getElementById("fchat-messages");
+  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const data = await DB.listThreadMascalcia(currentFarrier.cliente_mascalcia_id);
+  if(!data || data.length === 0){
+    box.innerHTML = '<div class="muted" style="font-size:13px;text-align:center;margin-top:20px">Nessun messaggio ancora.<br>Scrivi al tuo maniscalco qui sotto.</div>';
+    return;
+  }
+  let lastDay = null;
+  let html = "";
+  data.forEach(m => {
+    const day = formatChatDay(m.created_at);
+    if(day !== lastDay){ html += `<div class="mchat-day-sep">${day}</div>`; lastDay = day; }
+    const out = m.mittente_tipo === "cliente";
+    const body = m.tipo === "audio"
+      ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
+      : m.tipo === "documento"
+        ? `<a class="mchat-doc" href="${escapeHtml(m.file_url || "#")}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(m.file_nome || "Documento.pdf")}</span></a>${m.testo ? `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>` : ""}`
+        : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
+    html += `
+      <div class="mchat-bubble ${out ? "out" : "in"}">
+        ${body}
+        <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
+      </div>`;
+  });
+  box.innerHTML = html;
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendFarrierChatMessage(){
+  const input = document.getElementById("fchat-input");
+  const testo = input.value.trim();
+  if(!testo || !currentFarrier) return;
+  input.value = "";
+  const { error } = await DB.inviaMessaggioAlManiscalco(currentFarrier.cliente_mascalcia_id, testo);
+  if(error){ input.value = testo; showToast("Errore: " + error.message); return; }
+  await renderFarrierChatThread();
+  loadFarrierChatSection();
 }
 
 async function startNewChat(){
@@ -5458,7 +5688,7 @@ document.querySelector('[data-page="spese"]').addEventListener("click", loadExpe
 document.querySelector('[data-page="prenotazioni"]').addEventListener("click", loadLezioni);
 
 /* Carica la lista chat quando si apre la tab Chat */
-document.querySelector('[data-page="chat"]').addEventListener("click", () => { loadOwnerChatList(); loadStableChatSection(); refreshChatBadge(); aggiornaBannerPush(); });
+document.querySelector('[data-page="chat"]').addEventListener("click", () => { loadOwnerChatList(); loadFarrierChatSection(); loadStableChatSection(); refreshChatBadge(); aggiornaBannerPush(); });
 
 /* ---------- INIT ---------- */
 boot();
