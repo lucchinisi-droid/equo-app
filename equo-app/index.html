@@ -414,6 +414,15 @@ select.input{cursor:pointer}
 .ag-empty{font-size:12.5px;color:var(--muted);padding:0 4px 6px}
 .ag-add-day{margin-top:4px}
 .ag-azioni .btn{width:100%;margin-top:8px;justify-content:center}
+
+/* --- Allegato PDF in chat maniscalco --- */
+.mchat-allegato{display:none;align-items:center;gap:8px;margin:0 12px 6px;padding:8px 10px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-size:12.5px}
+.mchat-allegato.active{display:flex}
+.mchat-allegato-nome{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.mchat-allegato button{border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer}
+.mchat-doc{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.06);margin-bottom:6px;text-decoration:none;color:inherit}
+.mchat-doc-ico{width:34px;height:40px;border-radius:6px;background:#c0392b;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mchat-doc-nome{font-size:12.5px;font-weight:600;word-break:break-all}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
      su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
@@ -922,6 +931,11 @@ select.input{cursor:pointer}
     </div>
     <div class="mchat-messages" id="mchat-messages"></div>
     <div class="mchat-emoji-picker" id="mchat-emoji-picker"></div>
+    <div class="mchat-allegato" id="mchat-allegato">
+      <span class="mchat-doc-ico" style="width:26px;height:30px;font-size:8px">PDF</span>
+      <span class="mchat-allegato-nome" id="mchat-allegato-nome"></span>
+      <button onclick="rimuoviAllegatoChat()" aria-label="Rimuovi allegato">✕</button>
+    </div>
     <div class="mchat-input-bar" id="mchat-input-bar">
       <button class="mchat-emoji-btn" onclick="toggleEmojiPicker()" aria-label="Emoji">🙂</button>
       <input class="input" id="mchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMascalciaMessage()">
@@ -1769,7 +1783,8 @@ select.input{cursor:pointer}
    - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato[programmato|fatto], prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
    - cavalli_clienti_mascalcia(id, maniscalco_id, cliente_mascalcia_id, nome, microchip, horse_id, created_at)
    - horses.condiviso_ecosistema (bool) + RPC cavalli_condivisi_cliente(p_cliente_id)
-   - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo, testo, audio_url, letto, created_at)
+   - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo[testo|audio|documento], testo, audio_url, file_url, file_nome, letto, created_at)
+   - storage bucket pubblico "mascalcia-documenti" (PDF appuntamenti, path <uid>/<cliente>/<uuid>.pdf)
    - storage bucket pubblico "mascalcia-note-vocali" (note vocali)
    ══════════════════════════════════════════════════════ */
 
@@ -2287,14 +2302,25 @@ const DB = {
     const { data, error } = await sb.from("messaggi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("created_at", { ascending: true });
     return error ? [] : (data || []);
   },
-  async insertMessaggioMascalcia({ cliente_mascalcia_id, tipo, testo, audio_url }){
+  async insertMessaggioMascalcia({ cliente_mascalcia_id, tipo, testo, audio_url, file_url, file_nome }){
     tipo = tipo || "testo";
+    const extra = file_url ? { file_url, file_nome: file_nome || null } : {};
     if(DEMO_MODE){
-      demoState.messaggiMascalcia.push({ id: "dm-" + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, letto: true, created_at: new Date().toISOString() });
+      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: true, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, letto: true });
+    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: true });
+    if(error) console.error("insertMessaggioMascalcia:", error);
     return { error };
+  },
+  async uploadDocumentoMascalcia(blob, clienteId){
+    if(DEMO_MODE) return { url: URL.createObjectURL(blob), error: null };
+    const rnd = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2));
+    const path = `${currentUser.id}/${clienteId}/${rnd}.pdf`;
+    const { error } = await sb.storage.from("mascalcia-documenti").upload(path, blob, { contentType: "application/pdf" });
+    if(error){ console.error("uploadDocumentoMascalcia:", error); return { url: null, error }; }
+    const { data } = sb.storage.from("mascalcia-documenti").getPublicUrl(path);
+    return { url: data?.publicUrl || null, error: null };
   },
   async markLettiMascalcia(clienteId){
     if(DEMO_MODE){
@@ -2884,6 +2910,7 @@ async function boot(){
   currentUser.codiceProprietario = profile?.codice_proprietario || null;
   currentUser.datiPagamentoTipo = profile?.dati_pagamento_tipo || null;
   currentUser.datiPagamentoNome = profile?.dati_pagamento_nome || null;
+  currentUser.fullName = profile?.full_name || null;
   currentUser.datiPagamentoPivaCf = profile?.dati_pagamento_piva_cf || null;
   currentUser.datiPagamentoIban = profile?.dati_pagamento_iban || null;
   currentUser.datiPagamentoPaypal = profile?.dati_pagamento_paypal || null;
@@ -4367,6 +4394,160 @@ async function azioneEvento(tipo){
   }
 }
 
+/* ---------- PDF APPUNTAMENTO + INVIO IN CHAT (maniscalco) ---------- */
+let jsPdfPromise = null;
+function caricaJsPdf(){
+  if(window.jspdf?.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if(!jsPdfPromise){
+    jsPdfPromise = new Promise((resolve, reject) => {
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      sc.onload = () => window.jspdf?.jsPDF ? resolve(window.jspdf.jsPDF) : reject(new Error("jsPDF non disponibile"));
+      sc.onerror = () => { jsPdfPromise = null; reject(new Error("impossibile scaricare la libreria PDF (sei offline?)")); };
+      document.head.appendChild(sc);
+    });
+  }
+  return jsPdfPromise;
+}
+
+function pdfNomeFile(e){
+  const pulisci = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return ["Equo", pulisci(e.clienti_mascalcia?.nome), pulisci(agNomeCavallo(e)), e.data_intervento].filter(Boolean).join("_") + ".pdf";
+}
+
+function testoRiepilogoEvento(e){
+  const [y, m, d] = e.data_intervento.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  const quando = `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " ore " + String(e.ora).slice(0, 5) : ""}`;
+  const cav = agNomeCavallo(e);
+  const parti = [
+    (e.stato === "fatto" ? "Intervento del " : "Appuntamento: ") + quando,
+    (cav ? cav + " — " : "") + agDescrizioneTipo(e)
+  ];
+  if(e.importo != null) parti.push("€ " + Number(e.importo).toFixed(2).replace(".", ",") + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
+  return parti.join(" · ");
+}
+
+async function creaPdfEvento(e){
+  const JsPDF = await caricaJsPdf();
+  const doc = new JsPDF({ unit: "mm", format: "a4" });
+  const W = 210, M = 18;
+  const verde = [20, 49, 42], oro = [201, 143, 46], grigio = [95, 111, 103];
+  // intestazione
+  doc.setFillColor(...verde); doc.rect(0, 0, W, 32, "F");
+  doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+  doc.text("Equo", M, 20);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+  doc.text("Prenditi cura del tuo cavallo", M, 26);
+  doc.setFontSize(10);
+  doc.text(new Date().toLocaleDateString("it-IT"), W - M, 20, { align: "right" });
+  doc.setFillColor(...oro); doc.rect(0, 32, W, 1.5, "F");
+
+  let y = 48;
+  doc.setTextColor(...verde); doc.setFont("helvetica", "bold"); doc.setFontSize(17);
+  doc.text(e.stato === "fatto" ? "Riepilogo intervento" : "Conferma appuntamento", M, y);
+  y += 6;
+  const professionista = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "";
+  if(professionista){
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...grigio);
+    doc.text("Maniscalco: " + professionista, M, y + 2); y += 6;
+  }
+  y += 6;
+
+  const [yy, mm, dd] = e.data_intervento.split("-").map(Number);
+  const dt = new Date(yy, mm - 1, dd);
+  const dataTxt = `${["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"][(dt.getDay() + 6) % 7]} ${dd} ${AG_MESI_LUNGHI[mm - 1]} ${yy}`;
+  let tipoTxt = TIPO_FERRATURA_LABELS[e.tipo_ferratura] || e.tipo_ferratura || "";
+  if(e.tipo_ferratura === "altro" && e.tipo_altro) tipoTxt = "Altro — " + e.tipo_altro;
+  let misuraTxt = "";
+  if(e.numero_ferro){
+    const sis = e.misura_sistema || "italiana";
+    const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(String(e.numero_ferro)) : -1;
+    misuraTxt = e.numero_ferro + " (" + ({ italiana: "Italiana", olandese: "Olandese/Int.", tedesca: "Tedesca" }[sis]) + ")";
+    if(idx >= 0) misuraTxt += " — IT " + MISURE_FERRO.italiana[idx] + " · NL " + MISURE_FERRO.olandese[idx] + " · DE " + MISURE_FERRO.tedesca[idx];
+  }
+  const righe = [
+    ["Cliente", e.clienti_mascalcia?.nome || "—"],
+    ["Cavallo", agNomeCavallo(e) || "—"],
+    ["Data", dataTxt],
+    ["Ora", e.ora ? String(e.ora).slice(0, 5) : "—"],
+    ["Tipo intervento", tipoTxt],
+    misuraTxt ? ["Misura ferro", misuraTxt] : null,
+    e.quantita_ferri ? ["Quantità ferri", String(e.quantita_ferri)] : null,
+    ["Importo", e.importo != null ? "€ " + Number(e.importo).toFixed(2).replace(".", ",") : "—"],
+    ["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
+    ["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
+    e.prossima_scadenza && e.stato === "fatto" ? ["Prossimo intervento consigliato", new Date(e.prossima_scadenza + "T00:00").toLocaleDateString("it-IT")] : null,
+    e.note ? ["Note", e.note] : null
+  ].filter(Boolean);
+
+  doc.setFontSize(11);
+  righe.forEach(([k, v], idx) => {
+    const valore = doc.splitTextToSize(String(v), W - M * 2 - 62);
+    const h = Math.max(9, valore.length * 5.2 + 3.8);
+    if(idx % 2 === 0){ doc.setFillColor(248, 246, 240); doc.rect(M, y - 5.6, W - M * 2, h, "F"); }
+    doc.setFont("helvetica", "bold"); doc.setTextColor(...grigio); doc.text(k, M + 3, y);
+    doc.setFont("helvetica", "normal"); doc.setTextColor(...verde); doc.text(valore, M + 62, y);
+    y += h;
+  });
+
+  // dati di pagamento del professionista (se inseriti nel profilo e non saldato)
+  if(e.stato_pagamento !== "saldato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)){
+    y += 8;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...verde);
+    doc.text("Dati per il pagamento", M, y); y += 7;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...grigio);
+    if(currentUser.datiPagamentoNome){ doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y); y += 6; }
+    if(currentUser.datiPagamentoIban){ doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y); y += 6; }
+    if(currentUser.datiPagamentoPaypal){ doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y); y += 6; }
+  }
+
+  // piè di pagina
+  doc.setDrawColor(227, 221, 204); doc.line(M, 280, W - M, 280);
+  doc.setFontSize(8.5); doc.setTextColor(...grigio);
+  doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
+
+  const nome = pdfNomeFile(e);
+  return { blob: doc.output("blob"), nome };
+}
+
+// "Stampa PDF": genera il file vero e apre la condivisione di sistema (iPhone: Salva su File, Stampa, AirDrop...) o lo scarica
+async function generaPdfEvento(e){
+  closeModal("modal-azioni-evento");
+  showToast("Creo il PDF…");
+  try {
+    const { blob, nome } = await creaPdfEvento(e);
+    const file = new File([blob], nome, { type: "application/pdf" });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      try { await navigator.share({ files: [file], title: nome }); return; }
+      catch(err){ if(err?.name === "AbortError") return; }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  } catch(err){
+    console.error("generaPdfEvento:", err);
+    showToast("Impossibile creare il PDF: " + (err?.message || err));
+  }
+}
+
+// "Invia in chat": apre la chat Equo con quel cliente, riepilogo precompilato, PDF allegato (rimovibile)
+let chatAllegatoEvento = null;
+async function inviaEventoInChat(e){
+  closeModal("modal-azioni-evento");
+  await openChatThread(e.cliente_mascalcia_id);
+  document.getElementById("mchat-input").value = testoRiepilogoEvento(e);
+  chatAllegatoEvento = e;
+  document.getElementById("mchat-allegato-nome").textContent = pdfNomeFile(e);
+  document.getElementById("mchat-allegato").classList.add("active");
+}
+function rimuoviAllegatoChat(){
+  chatAllegatoEvento = null;
+  const el = document.getElementById("mchat-allegato");
+  if(el) el.classList.remove("active");
+}
+
 /* ---------- CHAT MASCALCIA (stile WhatsApp) ---------- */
 const EMOJI_LIST = ["😀","😂","😊","😉","😍","🙂","😅","😎","🤔","👍","🙏","👏","💪","🤝","❤️","🔥",
   "✅","⏰","📅","📍","🐴","🐎","🧑‍🌾","🔨","👢","🩺","💬","📞","🚗","☀️","🌧️","⚠️"];
@@ -4404,6 +4585,7 @@ async function openChatThread(clienteId){
 
 function closeChatThread(){
   if(mediaRecorder && mediaRecorder.state !== "inactive") cancelVoiceRecording();
+  rimuoviAllegatoChat();
   document.getElementById("mchat-overlay").classList.remove("active");
 }
 
@@ -4439,7 +4621,9 @@ async function renderChatThread(clienteId){
     const out = m.mittente_tipo === "maniscalco";
     const body = m.tipo === "audio"
       ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
-      : `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
+      : m.tipo === "documento"
+        ? `<a class="mchat-doc" href="${escapeHtml(m.file_url || "#")}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(m.file_nome || "Documento.pdf")}</span></a>${m.testo ? `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>` : ""}`
+        : `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
         ${body}
@@ -4453,7 +4637,28 @@ async function renderChatThread(clienteId){
 async function sendMascalciaMessage(){
   const input = document.getElementById("mchat-input");
   const testo = input.value.trim();
-  if(!testo || !currentClienteId) return;
+  if(!currentClienteId) return;
+  if(chatAllegatoEvento){
+    const ev = chatAllegatoEvento;
+    showToast("Invio PDF in corso…");
+    try {
+      const { blob, nome } = await creaPdfEvento(ev);
+      const { url, error: upErr } = await DB.uploadDocumentoMascalcia(blob, currentClienteId);
+      if(upErr || !url){ showToast("Errore caricamento PDF: " + (upErr?.message || "")); return; }
+      const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: currentClienteId, tipo: "documento", testo, file_url: url, file_nome: nome });
+      if(error){ showToast("Errore: " + error.message); return; }
+    } catch(err){
+      console.error("invio PDF:", err);
+      showToast("Impossibile creare il PDF: " + (err?.message || err));
+      return;
+    }
+    input.value = "";
+    rimuoviAllegatoChat();
+    await renderChatThread(currentClienteId);
+    await loadInboxMascalcia();
+    return;
+  }
+  if(!testo) return;
   input.value = "";
   const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: currentClienteId, tipo: "testo", testo });
   if(error){ showToast("Errore: " + error.message); return; }
