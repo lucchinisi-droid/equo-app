@@ -1626,7 +1626,9 @@ select.input{cursor:pointer}
    - messaggi_proprietari(id, conversazione_id, mittente_id, tipo, testo, media_url, letto, created_at)
    - storage bucket pubblico "proprietari-chat-media" (foto/video/note vocali della chat tra proprietari)
    - clienti_mascalcia(id, maniscalco_id, nome, nome_cavallo, telefono, note, cliente_user_id, codice_invito, created_at)
-   - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
+   - interventi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato[programmato|fatto], prossima_scadenza, importo, stato_pagamento, note, created_at, updated_at)
+   - cavalli_clienti_mascalcia(id, maniscalco_id, cliente_mascalcia_id, nome, microchip, horse_id, created_at)
+   - horses.condiviso_ecosistema (bool) + RPC cavalli_condivisi_cliente(p_cliente_id)
    - messaggi_mascalcia(id, maniscalco_id, cliente_mascalcia_id, mittente_tipo, tipo, testo, audio_url, letto, created_at)
    - storage bucket pubblico "mascalcia-note-vocali" (note vocali)
    ══════════════════════════════════════════════════════ */
@@ -1678,10 +1680,13 @@ const demoState = {
   clientiMascalcia: [
     { id: "dc-1", nome: "Marco Bianchi", nome_cavallo: "Aurora", telefono: "333 1112222", note: "", cliente_user_id: null, codice_invito: "EQUO-DC1AB", created_at: "2026-08-01" },
   ],
+  cavalliClientiMascalcia: [
+    { id: "dcv-1", cliente_mascalcia_id: "dc-1", nome: "Aurora", microchip: null, horse_id: null, created_at: "2026-08-01" },
+  ],
   interventiMascalcia: [
-    { id: "di-1", cliente_mascalcia_id: "dc-1", tipo_ferratura: "ferratura", tipo_altro: null, data_intervento: "2026-08-10", prossima_scadenza: "2026-09-21", importo: 90, stato_pagamento: "saldato", note: "", created_at: "2026-08-10" },
-    { id: "di-2", cliente_mascalcia_id: "dc-1", tipo_ferratura: "pareggio", tipo_altro: null, data_intervento: "2026-09-05", prossima_scadenza: "2026-10-31", importo: 60, stato_pagamento: "saldato", note: "", created_at: "2026-09-05" },
-    { id: "di-3", cliente_mascalcia_id: "dc-1", tipo_ferratura: "ferratura", tipo_altro: null, data_intervento: "2026-09-16", prossima_scadenza: "2026-10-28", importo: 95, stato_pagamento: "da_saldare", note: "", created_at: "2026-09-16" },
+    { id: "di-1", cliente_mascalcia_id: "dc-1", cavallo_cliente_id: "dcv-1", horse_id: null, tipo_ferratura: "ferratura", tipo_altro: null, misura_sistema: "italiana", numero_ferro: "4", quantita_ferri: 4, data_intervento: "2026-08-10", ora: "09:00", stato: "fatto", prossima_scadenza: "2026-09-14", importo: 90, stato_pagamento: "saldato", note: "", created_at: "2026-08-10" },
+    { id: "di-2", cliente_mascalcia_id: "dc-1", cavallo_cliente_id: "dcv-1", horse_id: null, tipo_ferratura: "pareggio", tipo_altro: null, misura_sistema: null, numero_ferro: null, quantita_ferri: null, data_intervento: "2026-09-05", ora: "10:30", stato: "fatto", prossima_scadenza: "2026-10-31", importo: 60, stato_pagamento: "saldato", note: "", created_at: "2026-09-05" },
+    { id: "di-3", cliente_mascalcia_id: "dc-1", cavallo_cliente_id: "dcv-1", horse_id: null, tipo_ferratura: "ferratura", tipo_altro: null, misura_sistema: "italiana", numero_ferro: "4", quantita_ferri: 4, data_intervento: "2026-09-16", ora: "15:00", stato: "fatto", prossima_scadenza: "2026-10-21", importo: 95, stato_pagamento: "da_saldare", note: "", created_at: "2026-09-16" },
   ],
   messaggiMascalcia: [
     { id: "dm-1", cliente_mascalcia_id: "dc-1", mittente_tipo: "cliente", testo: "Ciao! Quando puoi passare per Aurora?", letto: false, created_at: "2026-09-15T09:00:00" },
@@ -1956,13 +1961,106 @@ const DB = {
     const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
-  async insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note }){
+  async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
+    const row = { cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
     if(DEMO_MODE){
-      demoState.interventiMascalcia.push({ id: "di-" + (++demoIdCounter), cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note, created_at: new Date().toISOString() });
+      const nuovo = { id: "di-" + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
+      demoState.interventiMascalcia.push(nuovo);
+      return { error: null, data: nuovo };
+    }
+    const { data, error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, ...row }).select().single();
+    if(error) console.error("insertInterventoMascalcia:", error);
+    return { error, data };
+  },
+  async updateInterventoMascalcia(id, payload){
+    if(DEMO_MODE){
+      const i = demoState.interventiMascalcia.find(x => x.id === id);
+      if(i) Object.assign(i, payload);
       return { error: null };
     }
-    const { error } = await sb.from("interventi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
+    const { error } = await sb.from("interventi_mascalcia").update(payload).eq("id", id);
+    if(error) console.error("updateInterventoMascalcia:", error);
     return { error };
+  },
+  async deleteInterventoMascalcia(id){
+    if(DEMO_MODE){
+      demoState.interventiMascalcia = demoState.interventiMascalcia.filter(x => x.id !== id);
+      return { error: null };
+    }
+    const { error } = await sb.from("interventi_mascalcia").delete().eq("id", id);
+    if(error) console.error("deleteInterventoMascalcia:", error);
+    return { error };
+  },
+  async segnaInterventoFatto(id){
+    return DB.updateInterventoMascalcia(id, { stato: "fatto" });
+  },
+  // Appuntamenti/interventi tra due date (incluse), formato "YYYY-MM-DD", per l'agenda settimanale
+  async listInterventiPeriodo(daIso, aIso){
+    if(DEMO_MODE){
+      return demoState.interventiMascalcia
+        .filter(i => i.data_intervento >= daIso && i.data_intervento <= aIso)
+        .map(i => {
+          const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
+          const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
+          return { ...i, clienti_mascalcia: { nome: c?.nome, nome_cavallo: c?.nome_cavallo, cliente_user_id: c?.cliente_user_id }, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null };
+        })
+        .sort((a,b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+    }
+    const { data, error } = await sb.from("interventi_mascalcia")
+      .select("*, clienti_mascalcia(nome, nome_cavallo, cliente_user_id), cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id)
+      .gte("data_intervento", daIso).lte("data_intervento", aIso)
+      .order("data_intervento", { ascending: true }).order("ora", { ascending: true, nullsFirst: false });
+    if(error){ console.error("listInterventiPeriodo:", error); return []; }
+    return data || [];
+  },
+  /* -- Cavalli dei clienti del maniscalco (opzione B+C) -- */
+  // Ritorna i cavalli selezionabili per un cliente:
+  //  - "equo": cavalli veri del proprietario collegato (tabella horses, solo se condiviso_ecosistema)
+  //  - "manuale": cavalli inseriti a mano dal maniscalco (cavalli_clienti_mascalcia) non ancora abbinati a un cavallo vero
+  async listCavalliCliente(clienteId){
+    if(!clienteId) return [];
+    if(DEMO_MODE){
+      return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
+        .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id }));
+    }
+    const [manRes, eqRes] = await Promise.all([
+      sb.from("cavalli_clienti_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("nome", { ascending: true }),
+      sb.rpc("cavalli_condivisi_cliente", { p_cliente_id: clienteId })
+    ]);
+    if(manRes.error) console.error("listCavalliCliente (manuali):", manRes.error);
+    if(eqRes.error) console.error("listCavalliCliente (condivisi):", eqRes.error);
+    const manuali = manRes.data || [];
+    const condivisi = eqRes.data || [];
+    const idCondivisi = new Set(condivisi.map(h => h.id));
+    const out = condivisi.map(h => {
+      const mirror = manuali.find(m => m.horse_id === h.id);
+      return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id };
+    });
+    manuali.filter(m => !m.horse_id || !idCondivisi.has(m.horse_id)).forEach(m => {
+      out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id });
+    });
+    return out;
+  },
+  async insertCavalloCliente({ cliente_mascalcia_id, nome, microchip = null, horse_id = null }){
+    const row = { cliente_mascalcia_id, nome, microchip: microchip ? microchip.trim().toUpperCase() : null, horse_id };
+    if(DEMO_MODE){
+      const nuovo = { id: "dcv-" + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
+      demoState.cavalliClientiMascalcia.push(nuovo);
+      return { error: null, data: nuovo };
+    }
+    const { data, error } = await sb.from("cavalli_clienti_mascalcia").insert({ maniscalco_id: currentUser.id, ...row }).select().single();
+    if(error) console.error("insertCavalloCliente:", error);
+    return { error, data };
+  },
+  // Dato un cavallo scelto dal menù (listCavalliCliente), ritorna { cavallo_cliente_id, horse_id } da salvare sull'intervento.
+  // Per un cavallo "equo" senza riga locale ne crea una "specchio" (nome sempre leggibile dal maniscalco, RLS horses intatte).
+  async risolviCavalloPerIntervento(clienteId, cavallo){
+    if(!cavallo) return { cavallo_cliente_id: null, horse_id: null };
+    if(cavallo.id) return { cavallo_cliente_id: cavallo.id, horse_id: cavallo.horse_id || null };
+    const { data, error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome: cavallo.nome, microchip: cavallo.microchip, horse_id: cavallo.horse_id });
+    if(error || !data) return { cavallo_cliente_id: null, horse_id: cavallo.horse_id || null };
+    return { cavallo_cliente_id: data.id, horse_id: cavallo.horse_id || null };
   },
   async listInterventiMascalciaTutti(){
     if(DEMO_MODE){
