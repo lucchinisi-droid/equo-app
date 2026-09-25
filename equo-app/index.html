@@ -373,6 +373,47 @@ select.input{cursor:pointer}
 .misura-equivalenze{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
 .input-row-2{display:flex;gap:10px}
 .input-row-2 > .input-group{flex:1;min-width:0}
+
+/* --- Agenda settimanale maniscalco --- */
+.ag-head{display:flex;align-items:center;gap:8px;margin:4px 0 10px}
+.ag-head .section-title{margin:0;flex:1;font-size:18px}
+.ag-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ag-nav-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:18px;cursor:pointer;flex-shrink:0}
+.ag-week-label{flex:1;text-align:center;font-weight:700;font-size:14px}
+.ag-oggi-btn{font-size:11.5px;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer;padding:2px 6px}
+.ag-week{padding:6px 12px;touch-action:pan-y}
+.ag-week.slide-l{animation:agInL .22s ease}
+.ag-week.slide-r{animation:agInR .22s ease}
+@keyframes agInL{from{transform:translateX(40px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes agInR{from{transform:translateX(-40px);opacity:.3}to{transform:none;opacity:1}}
+.ag-day + .ag-day{border-top:1px solid var(--border)}
+.ag-day-head{display:flex;align-items:center;gap:10px;padding:11px 2px;cursor:pointer;user-select:none}
+.ag-day-name{width:34px;font-weight:800;font-size:13px;text-transform:uppercase;color:var(--muted)}
+.ag-day-date{flex:1;font-size:13.5px;font-weight:600}
+.ag-day.today .ag-day-name,.ag-day.today .ag-day-date{color:var(--accent)}
+.ag-count{min-width:22px;height:22px;border-radius:11px;background:var(--surface2);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.ag-count.zero{opacity:.45}
+.ag-chev{color:var(--muted);transition:transform .2s;font-size:12px}
+.ag-day.open .ag-chev{transform:rotate(180deg)}
+.ag-day-body{padding:0 0 10px}
+.ag-day.open .ag-day-body{max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ag-day:not(.open) .ag-ev:nth-child(n+3){display:none}
+.ag-day.open .ag-more{display:none}
+.ag-day:not(.open) .ag-add-day{display:none}
+.ag-ev{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:var(--surface2);margin-bottom:6px}
+.ag-ev.fatto{opacity:.62}
+.ag-ev.promemoria{background:transparent;border:1px dashed var(--border)}
+.ag-ev-time{width:42px;font-weight:700;font-size:12.5px;flex-shrink:0}
+.ag-ev-main{flex:1;min-width:0;cursor:pointer}
+.ag-ev-title{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-ev-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-ev-fatto{border:none;background:var(--accent);color:#14312a;font-weight:800;font-size:12px;border-radius:9px;padding:7px 10px;cursor:pointer;flex-shrink:0}
+.ag-ev-done{color:var(--green);font-weight:800;font-size:12px;flex-shrink:0;padding:0 4px}
+.ag-ev-menu{border:none;background:none;color:var(--muted);font-size:18px;width:28px;cursor:pointer;flex-shrink:0;line-height:1}
+.ag-more{font-size:12px;color:var(--muted);padding:0 4px 4px}
+.ag-empty{font-size:12.5px;color:var(--muted);padding:0 4px 6px}
+.ag-add-day{margin-top:4px}
+.ag-azioni .btn{width:100%;margin-top:8px;justify-content:center}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
      su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
@@ -723,19 +764,14 @@ select.input{cursor:pointer}
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px" onclick="copyInviteLink()">Copia link invito</button>
     </div>
 
-    <div class="section-title" style="font-size:16px" id="pro-agenda-title">Prossime scadenze</div>
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:14px;margin-bottom:8px">Interventi da fare a breve</div>
-      <div id="pro-deadlines-list"><div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div></div>
+    <div class="ag-head"><div class="section-title" id="pro-agenda-title">Agenda della settimana</div></div>
+    <div class="ag-nav">
+      <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(-1)" aria-label="Settimana precedente">‹</button>
+      <div class="ag-week-label"><div id="ag-week-label">—</div><button class="ag-oggi-btn" id="ag-oggi-btn" style="display:none" onclick="tornaSettimanaCorrente()">Torna a oggi</button></div>
+      <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(1)" aria-label="Settimana successiva">›</button>
     </div>
-    <div class="card" style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700;font-size:14px">Richieste da confermare</div>
-        <span class="badge badge-accent" id="pro-requests-count">0</span>
-      </div>
-      <div class="muted" style="font-size:13px">Nessuna richiesta in attesa.</div>
-    </div>
-    <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">Segna intervento fatto</button>
+    <div class="card ag-week" id="ag-week" style="margin-bottom:14px"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+    <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">+ Nuovo appuntamento</button>
   </div>
 
   <!-- PROFESSIONISTA: INCASSI -->
@@ -1080,6 +1116,22 @@ select.input{cursor:pointer}
         <input class="input" id="cliente-note" placeholder="es. scuderia, indicazioni">
       </div>
       <button class="btn btn-primary" onclick="createClienteMascalcia()" style="width:100%;margin-top:6px">Salva cliente</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-azioni-evento" onclick="closeOut(event,'modal-azioni-evento')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-azioni-evento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="azioni-evento-titolo">Appuntamento</div>
+    <div class="muted" style="font-size:13px;line-height:1.6" id="azioni-evento-dettaglio"></div>
+    <div class="ag-azioni">
+      <button class="btn btn-primary" id="azioni-evento-fatto" onclick="azioneEvento('fatto')">Segna come fatto</button>
+      <button class="btn btn-outline" onclick="azioneEvento('modifica')"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
+      <button class="btn btn-outline" onclick="azioneEvento('pdf')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Stampa PDF</button>
+      <button class="btn btn-outline" onclick="azioneEvento('chat')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat</button>
+      <button class="btn btn-danger" onclick="azioneEvento('elimina')"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span> Elimina</button>
     </div>
   </div>
 </div>
@@ -2121,6 +2173,36 @@ const DB = {
     if(error){ console.error("listInterventiPeriodo:", error); return []; }
     return data || [];
   },
+  // Promemoria: interventi fatti la cui prossima_scadenza cade nel periodo, solo se è l'ultimo intervento per quel cavallo/cliente
+  async listScadenzePeriodo(daIso, aIso){
+    const chiave = i => i.cavallo_cliente_id || ("c:" + i.cliente_mascalcia_id);
+    let righe, successivi;
+    if(DEMO_MODE){
+      const tutti = demoState.interventiMascalcia;
+      righe = tutti.filter(i => i.stato !== "programmato" && i.prossima_scadenza && i.prossima_scadenza >= daIso && i.prossima_scadenza <= aIso)
+        .map(i => {
+          const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
+          const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
+          return { ...i, clienti_mascalcia: { nome: c?.nome, nome_cavallo: c?.nome_cavallo }, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null };
+        });
+      successivi = tutti;
+    } else {
+      const { data, error } = await sb.from("interventi_mascalcia")
+        .select("*, clienti_mascalcia(nome, nome_cavallo), cavalli_clienti_mascalcia(nome)")
+        .eq("maniscalco_id", currentUser.id).eq("stato", "fatto")
+        .gte("prossima_scadenza", daIso).lte("prossima_scadenza", aIso);
+      if(error){ console.error("listScadenzePeriodo:", error); return []; }
+      righe = data || [];
+      if(!righe.length) return [];
+      const minData = righe.map(r => r.data_intervento).sort()[0];
+      const clienti = [...new Set(righe.map(r => r.cliente_mascalcia_id))];
+      const res = await sb.from("interventi_mascalcia").select("id, cliente_mascalcia_id, cavallo_cliente_id, data_intervento")
+        .eq("maniscalco_id", currentUser.id).in("cliente_mascalcia_id", clienti).gt("data_intervento", minData);
+      if(res.error) console.error("listScadenzePeriodo (successivi):", res.error);
+      successivi = res.data || [];
+    }
+    return righe.filter(r => !successivi.some(x => x.id !== r.id && chiave(x) === chiave(r) && x.data_intervento > r.data_intervento));
+  },
   /* -- Cavalli dei clienti del maniscalco (opzione B+C) -- */
   // Ritorna i cavalli selezionabili per un cliente:
   //  - "equo": cavalli veri del proprietario collegato (tabella horses, solo se condiviso_ecosistema)
@@ -2450,10 +2532,8 @@ async function setupProNav(ruolo){
 }
 
 function renderProAgendaHeader(ruolo){
-  document.getElementById("pro-agenda-title").textContent =
-    ruolo === "veterinario" ? "Agenda visite di oggi" :
-    ruolo === "istruttore" ? "Agenda lezioni di oggi" : "Agenda di oggi";
-  document.getElementById("pro-action-btn").textContent = PRO_ACTION_LABELS[ruolo] || "Segna intervento fatto";
+  document.getElementById("pro-agenda-title").textContent = "Agenda della settimana";
+  document.getElementById("pro-action-btn").textContent = "+ Nuovo appuntamento";
 }
 
 function renderProHomeGreeting(){
@@ -2937,6 +3017,7 @@ function showPage(page){
   document.querySelectorAll(".page-content").forEach(el => el.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
+  if(page === "pro-agenda" && typeof renderAgendaSettimana === "function") renderAgendaSettimana();
 }
 
 function openModal(id){ document.getElementById(id).classList.add("active"); }
@@ -3849,6 +3930,7 @@ let misuraIndiceCorrente = MISURA_INDICE_PARTENZA;
 let misuraScrollTimer = null;
 let cavalliClienteCorrente = [];
 let interventoInModifica = null; // oggetto intervento se stiamo modificando
+let interventoPreset = null;      // valori precompilati per un nuovo appuntamento (es. da scadenza)
 
 function isoLocale(d){
   const p = n => String(n).padStart(2, "0");
@@ -3889,8 +3971,9 @@ function aggiornaEquivalenzeMisura(){
 }
 function onMisuraSistemaChange(){ renderMisuraWheel(); } // mantiene la misura equivalente
 
-async function openInterventoModal(clienteId, intervento){
+async function openInterventoModal(clienteId, intervento, preset){
   interventoInModifica = intervento || null;
+  interventoPreset = intervento ? null : (preset || null);
   const inModifica = !!interventoInModifica;
   document.getElementById("intervento-modal-title").textContent = inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
   document.getElementById("intervento-save-btn").textContent = inModifica ? "Salva modifiche" : "Salva appuntamento";
@@ -3905,7 +3988,7 @@ async function openInterventoModal(clienteId, intervento){
   else if(clientiMascalcia.length === 0) select.value = "__nuovo__";
   else select.value = clientiMascalcia[0].id;
 
-  const i = interventoInModifica || {};
+  const i = interventoInModifica || preset || {};
   document.getElementById("intervento-nuovo-cliente-nome").value = "";
   document.getElementById("intervento-nuovo-cavallo-nome").value = "";
   document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
@@ -3941,11 +4024,12 @@ async function onInterventoClienteChange(){
   sel.innerHTML = (cavalliClienteCorrente.length ? "" : '<option value="">— nessun cavallo —</option>') + opzioni + '<option value="__nuovo_cavallo__">+ Aggiungi cavallo</option>';
   // preselezione: cavallo dell'intervento in modifica, altrimenti il primo (se c'è), altrimenti "aggiungi" per un cliente nuovo
   let valore = "";
-  if(interventoInModifica){
-    const m = cavalliClienteCorrente.find(c =>
-      (interventoInModifica.cavallo_cliente_id && c.id === interventoInModifica.cavallo_cliente_id) ||
-      (interventoInModifica.horse_id && c.horse_id === interventoInModifica.horse_id));
-    if(m) valore = m.key;
+  const rif = interventoInModifica || interventoPreset;
+  const mRif = rif && (rif.cavallo_cliente_id || rif.horse_id) ? cavalliClienteCorrente.find(c =>
+      (rif.cavallo_cliente_id && c.id === rif.cavallo_cliente_id) ||
+      (rif.horse_id && c.horse_id === rif.horse_id)) : null;
+  if(interventoInModifica || mRif){
+    if(mRif) valore = mRif.key;
   } else if(isNuovo){
     valore = "__nuovo_cavallo__";
   } else if(cavalliClienteCorrente.length){
@@ -4071,6 +4155,217 @@ async function eliminaInterventoInModifica(){
 }
 // nome vecchio, usato altrove
 const createInterventoMascalcia = salvaInterventoMascalcia;
+
+/* ---------- AGENDA SETTIMANALE (maniscalco) ---------- */
+const AG_GIORNI = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+const AG_MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+const AG_MESI_LUNGHI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+let agSettimanaOffset = 0;          // 0 = settimana corrente, +1 successiva, -1 precedente
+let agGiorniAperti = null;          // Set di date ISO espanse
+let agEventiCache = {};             // id -> intervento
+let agEventoAzioniId = null;
+let agRenderToken = 0;
+
+function agLunedi(offset){
+  const oggi = new Date();
+  const d = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  const dow = (d.getDay() + 6) % 7; // 0 = lunedì
+  d.setDate(d.getDate() - dow + offset * 7);
+  return d;
+}
+function agEtichettaSettimana(lun){
+  const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
+  if(lun.getMonth() === dom.getMonth()) return `${lun.getDate()} – ${dom.getDate()} ${AG_MESI_LUNGHI[dom.getMonth()]} ${dom.getFullYear()}`;
+  return `${lun.getDate()} ${AG_MESI[lun.getMonth()]} – ${dom.getDate()} ${AG_MESI[dom.getMonth()]} ${dom.getFullYear()}`;
+}
+function agNomeCavallo(i){
+  return i.cavalli_clienti_mascalcia?.nome || i.clienti_mascalcia?.nome_cavallo || "";
+}
+function agDescrizioneTipo(i){
+  let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
+  if(i.tipo_ferratura === "altro" && i.tipo_altro) t = i.tipo_altro;
+  const extra = [];
+  if(i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
+  if(i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
+  return [t, ...extra].join(" · ");
+}
+
+async function renderAgendaSettimana(direzione){
+  const box = document.getElementById("ag-week");
+  if(!box) return;
+  const token = ++agRenderToken;
+  const lun = agLunedi(agSettimanaOffset);
+  const giorni = Array.from({ length: 7 }, (_, k) => new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + k));
+  const isoGiorni = giorni.map(isoLocale);
+  const oggiIso = isoLocale(new Date());
+  document.getElementById("ag-week-label").textContent = agEtichettaSettimana(lun);
+  document.getElementById("ag-oggi-btn").style.display = agSettimanaOffset === 0 ? "none" : "inline-block";
+  if(!agGiorniAperti) agGiorniAperti = new Set([oggiIso]);
+
+  const [eventi, scadenze] = await Promise.all([
+    DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
+    DB.listScadenzePeriodo(isoGiorni[0], isoGiorni[6])
+  ]);
+  if(token !== agRenderToken) return; // un render più recente è già partito
+  agEventiCache = {};
+  eventi.forEach(e => { agEventiCache[e.id] = e; });
+
+  box.innerHTML = giorni.map((g, k) => {
+    const iso = isoGiorni[k];
+    const evGiorno = eventi.filter(e => e.data_intervento === iso);
+    const promGiorno = scadenze.filter(sc => sc.prossima_scadenza === iso);
+    const tot = evGiorno.length + promGiorno.length;
+    const aperto = agGiorniAperti.has(iso);
+    const righe = evGiorno.map(e => `
+      <div class="ag-ev${e.stato === "fatto" ? " fatto" : ""}">
+        <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
+        <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
+          <div class="ag-ev-title">${escapeHtml(e.clienti_mascalcia?.nome || "")}${agNomeCavallo(e) ? " · " + escapeHtml(agNomeCavallo(e)) : ""}</div>
+          <div class="ag-ev-sub">${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+        </div>
+        ${e.stato === "fatto"
+          ? '<span class="ag-ev-done">✓ Fatto</span>'
+          : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
+        <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
+      </div>`).join("") + promGiorno.map(sc => `
+      <div class="ag-ev promemoria">
+        <div class="ag-ev-time" style="font-size:11px;color:var(--muted)">scad.</div>
+        <div class="ag-ev-main" onclick="fissaDaScadenza('${sc.id}')">
+          <div class="ag-ev-title">${escapeHtml(sc.clienti_mascalcia?.nome || "")}${agNomeCavallo(sc) ? " · " + escapeHtml(agNomeCavallo(sc)) : ""}</div>
+          <div class="ag-ev-sub">Da ripetere: ${escapeHtml(TIPO_FERRATURA_LABELS[sc.tipo_ferratura] || sc.tipo_ferratura)} (ultimo ${formatDate(sc.data_intervento)})</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="fissaDaScadenza('${sc.id}')">Fissa</button>
+      </div>`).join("");
+    scadenze.forEach(sc => { agEventiCache["sc:" + sc.id] = sc; });
+    return `
+      <div class="ag-day${iso === oggiIso ? " today" : ""}${aperto ? " open" : ""}" data-iso="${iso}">
+        <div class="ag-day-head" onclick="toggleGiornoAgenda('${iso}')">
+          <div class="ag-day-name">${AG_GIORNI[k]}</div>
+          <div class="ag-day-date">${g.getDate()} ${AG_MESI[g.getMonth()]}${iso === oggiIso ? " · oggi" : ""}</div>
+          <span class="ag-count${tot ? "" : " zero"}">${tot}</span>
+          <span class="ag-chev">▾</span>
+        </div>
+        <div class="ag-day-body">
+          ${tot ? righe : '<div class="ag-empty">Nessun appuntamento</div>'}
+          ${tot > 2 ? `<div class="ag-more">+ altri ${tot - 2} · tocca per vedere tutto</div>` : ""}
+          <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${iso}')">+ Aggiungi in questo giorno</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  box.classList.remove("slide-l", "slide-r");
+  if(direzione){ void box.offsetWidth; box.classList.add(direzione > 0 ? "slide-l" : "slide-r"); }
+  agAttivaSwipe(box);
+}
+
+function toggleGiornoAgenda(iso){
+  if(agGiorniAperti.has(iso)) agGiorniAperti.delete(iso); else agGiorniAperti.add(iso);
+  const el = document.querySelector(`.ag-day[data-iso="${iso}"]`);
+  if(el) el.classList.toggle("open", agGiorniAperti.has(iso));
+}
+function cambiaSettimanaAgenda(delta){
+  agSettimanaOffset += delta;
+  agGiorniAperti = new Set();
+  renderAgendaSettimana(delta);
+}
+function tornaSettimanaCorrente(){
+  const delta = -agSettimanaOffset;
+  agSettimanaOffset = 0;
+  agGiorniAperti = null;
+  renderAgendaSettimana(delta || null);
+}
+
+// swipe: sinistra = settimana successiva, destra = precedente
+function agAttivaSwipe(box){
+  if(box.dataset.swipe) return;
+  box.dataset.swipe = "1";
+  let x0 = null, y0 = null, t0 = 0;
+  box.addEventListener("touchstart", e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); }, { passive: true });
+  box.addEventListener("touchend", e => {
+    if(x0 === null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0, dy = t.clientY - y0;
+    x0 = null;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && Date.now() - t0 < 800){
+      cambiaSettimanaAgenda(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+}
+
+function nuovoAppuntamentoGiorno(iso){
+  openInterventoModal(null, null, { data_intervento: iso });
+}
+function fissaDaScadenza(id){
+  const sc = agEventiCache["sc:" + id];
+  if(!sc) return;
+  openInterventoModal(sc.cliente_mascalcia_id, null, {
+    tipo_ferratura: sc.tipo_ferratura, tipo_altro: sc.tipo_altro,
+    misura_sistema: sc.misura_sistema, numero_ferro: sc.numero_ferro, quantita_ferri: sc.quantita_ferri,
+    data_intervento: sc.prossima_scadenza, cavallo_cliente_id: sc.cavallo_cliente_id, horse_id: sc.horse_id
+  });
+}
+
+async function segnaFattoAgenda(id){
+  const { error } = await DB.segnaInterventoFatto(id);
+  if(error){ showToast("Errore: " + error.message); return; }
+  showToast("Segnato come fatto");
+  await renderAgendaSettimana();
+  await renderIncassi();
+  await renderProDeadlines();
+}
+
+function apriAzioniEvento(id){
+  const e = agEventiCache[id];
+  if(!e) return;
+  agEventoAzioniId = id;
+  const [y, m, d] = e.data_intervento.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  document.getElementById("azioni-evento-titolo").textContent =
+    (e.clienti_mascalcia?.nome || "Appuntamento") + (agNomeCavallo(e) ? " · " + agNomeCavallo(e) : "");
+  document.getElementById("azioni-evento-dettaglio").innerHTML = [
+    `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
+    escapeHtml(agDescrizioneTipo(e)),
+    (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"),
+    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : "Da fare",
+    e.note ? escapeHtml(e.note) : ""
+  ].filter(Boolean).join("<br>");
+  const btnFatto = document.getElementById("azioni-evento-fatto");
+  btnFatto.textContent = e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
+  openModal("modal-azioni-evento");
+}
+
+async function azioneEvento(tipo){
+  const e = agEventiCache[agEventoAzioniId];
+  if(!e) return;
+  if(tipo === "modifica"){
+    closeModal("modal-azioni-evento");
+    openInterventoModal(null, e);
+  } else if(tipo === "fatto"){
+    const nuovo = e.stato === "fatto" ? "programmato" : "fatto";
+    const { error } = await DB.updateInterventoMascalcia(e.id, { stato: nuovo });
+    if(error){ showToast("Errore: " + error.message); return; }
+    closeModal("modal-azioni-evento");
+    showToast(nuovo === "fatto" ? "Segnato come fatto" : "Rimesso da fare");
+    await renderAgendaSettimana();
+    await renderIncassi();
+    await renderProDeadlines();
+  } else if(tipo === "elimina"){
+    if(!confirm("Eliminare questo appuntamento?")) return;
+    const { error } = await DB.deleteInterventoMascalcia(e.id);
+    if(error){ showToast("Errore: " + error.message); return; }
+    closeModal("modal-azioni-evento");
+    showToast("Appuntamento eliminato");
+    await renderAgendaSettimana();
+    await renderIncassi();
+    await renderProDeadlines();
+  } else if(tipo === "pdf"){
+    if(typeof generaPdfEvento === "function") return generaPdfEvento(e);
+    showToast("PDF disponibile a breve");
+  } else if(tipo === "chat"){
+    if(typeof inviaEventoInChat === "function") return inviaEventoInChat(e);
+    showToast("Invio in chat disponibile a breve");
+  }
+}
 
 /* ---------- CHAT MASCALCIA (stile WhatsApp) ---------- */
 const EMOJI_LIST = ["😀","😂","😊","😉","😍","🙂","😅","😎","🤔","👍","🙏","👏","💪","🤝","❤️","🔥",
