@@ -359,6 +359,20 @@ select.input{cursor:pointer}
   .bottom-nav{max-width:480px;left:50%;transform:translateX(-50%)}
   .ai-fab{right:calc(50% - 240px + 16px)}
 }
+
+/* --- Ruota misure ferro (modal appuntamento maniscalco) --- */
+.misura-wheel-wrap{position:relative;height:132px;border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
+.misura-wheel{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:44px 0}
+.misura-wheel::-webkit-scrollbar{display:none}
+.misura-wheel-item{height:44px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:17px;color:var(--muted);transition:color .15s,font-size .15s;cursor:pointer;user-select:none}
+.misura-wheel-item.sel{color:var(--text);font-weight:700;font-size:21px}
+.misura-wheel-band{position:absolute;left:10px;right:10px;top:44px;height:44px;border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);pointer-events:none;border-radius:6px;background:rgba(201,143,46,.08)}
+.misura-wheel-fade{position:absolute;left:0;right:0;height:40px;pointer-events:none}
+.misura-wheel-fade.top{top:0;background:linear-gradient(var(--surface),transparent)}
+.misura-wheel-fade.bot{bottom:0;background:linear-gradient(transparent,var(--surface))}
+.misura-equivalenze{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.input-row-2{display:flex;gap:10px}
+.input-row-2 > .input-group{flex:1;min-width:0}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
      su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
@@ -1073,20 +1087,34 @@ select.input{cursor:pointer}
   <div class="modal">
     <button class="modal-close-x" onclick="closeModal('modal-add-intervento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Segna intervento fatto</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="intervento-modal-title">Nuovo appuntamento</span></div>
     <div class="auth-form">
+      <!-- 1. Cliente -->
       <div class="input-group" id="intervento-cliente-group">
         <label class="input-label">Cliente</label>
-        <select class="input" id="intervento-cliente-select" onchange="toggleInterventoNuovoCliente()"></select>
+        <select class="input" id="intervento-cliente-select" onchange="onInterventoClienteChange()"></select>
       </div>
+      <!-- 2. Nome cliente (solo nuovo) -->
       <div class="input-group" id="intervento-nuovo-cliente-group" style="display:none">
         <label class="input-label">Nome cliente</label>
         <input class="input" id="intervento-nuovo-cliente-nome" placeholder="es. Marco Rossi">
       </div>
-      <div class="input-group" id="intervento-nuovo-cavallo-group" style="display:none">
-        <label class="input-label">Nome cavallo (opzionale)</label>
-        <input class="input" id="intervento-nuovo-cliente-cavallo" placeholder="es. Aurora">
+      <!-- 3. Cavallo -->
+      <div class="input-group" id="intervento-cavallo-group">
+        <label class="input-label">Cavallo</label>
+        <select class="input" id="intervento-cavallo-select" onchange="toggleInterventoNuovoCavallo()"></select>
       </div>
+      <div class="input-row-2" id="intervento-nuovo-cavallo-group" style="display:none">
+        <div class="input-group">
+          <label class="input-label">Nome cavallo</label>
+          <input class="input" id="intervento-nuovo-cavallo-nome" placeholder="es. Aurora">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Microchip (opz.)</label>
+          <input class="input" id="intervento-nuovo-cavallo-microchip" placeholder="15 cifre" autocapitalize="characters">
+        </div>
+      </div>
+      <!-- 4. Tipo -->
       <div class="input-group">
         <label class="input-label">Tipo</label>
         <select class="input" id="intervento-tipo" onchange="toggleInterventoTipoFields()">
@@ -1096,26 +1124,49 @@ select.input{cursor:pointer}
           <option value="altro">Altro</option>
         </select>
       </div>
-      <div class="input-group" id="intervento-ferro-group" style="display:none">
-        <label class="input-label">Numero ferro utilizzato</label>
-        <input class="input" id="intervento-ferro-numero" placeholder="es. n. 2">
-      </div>
-      <div class="input-group" id="intervento-quantita-group" style="display:none">
-        <label class="input-label">Quantità</label>
-        <input class="input" id="intervento-ferro-quantita" type="number" min="1" placeholder="es. 4">
-      </div>
+      <!-- 5. Specifica (solo Altro) -->
       <div class="input-group" id="intervento-tipo-altro-group" style="display:none">
         <label class="input-label">Specifica</label>
-        <input class="input" id="intervento-tipo-altro" placeholder="es. pareggio">
+        <input class="input" id="intervento-tipo-altro" placeholder="es. controllo zoccoli">
       </div>
-      <div class="input-group">
-        <label class="input-label">Data intervento</label>
-        <input class="input" id="intervento-data" type="date">
+      <!-- 6. Misura ferro (sistema + ruota) -->
+      <div class="input-group" id="intervento-ferro-group" style="display:none">
+        <label class="input-label">Misura ferro</label>
+        <select class="input" id="intervento-misura-sistema" onchange="onMisuraSistemaChange()" style="margin-bottom:8px">
+          <option value="olandese">Olandese / Internazionale</option>
+          <option value="italiana">Italiana</option>
+          <option value="tedesca">Tedesca</option>
+        </select>
+        <div class="misura-wheel-wrap">
+          <div class="misura-wheel-band"></div>
+          <div class="misura-wheel" id="intervento-misura-wheel"></div>
+          <div class="misura-wheel-fade top"></div>
+          <div class="misura-wheel-fade bot"></div>
+        </div>
+        <div class="misura-equivalenze" id="intervento-misura-equivalenze"></div>
       </div>
+      <!-- 7. Quantità -->
+      <div class="input-group" id="intervento-quantita-group" style="display:none">
+        <label class="input-label">Quantità ferri</label>
+        <input class="input" id="intervento-ferro-quantita" type="number" min="1" inputmode="numeric" placeholder="es. 4">
+      </div>
+      <!-- 8-9. Data + Ora -->
+      <div class="input-row-2">
+        <div class="input-group">
+          <label class="input-label">Data</label>
+          <input class="input" id="intervento-data" type="date">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Ora</label>
+          <input class="input" id="intervento-ora" type="time">
+        </div>
+      </div>
+      <!-- 10. Importo -->
       <div class="input-group">
         <label class="input-label">Importo (€)</label>
-        <input class="input" id="intervento-importo" type="number" step="0.01" placeholder="0.00">
+        <input class="input" id="intervento-importo" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
       </div>
+      <!-- 11. Pagamento -->
       <div class="input-group">
         <label class="input-label">Pagamento</label>
         <select class="input" id="intervento-pagamento">
@@ -1123,12 +1174,13 @@ select.input{cursor:pointer}
           <option value="saldato">Saldato</option>
         </select>
       </div>
+      <!-- 12. Note -->
       <div class="input-group">
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="intervento-note" placeholder="es. dettagli lavoro">
       </div>
       <div class="auth-error" id="intervento-error" style="display:none"></div>
-      <button class="btn btn-primary" onclick="createInterventoMascalcia()" style="width:100%;margin-top:6px">Salva intervento</button>
+      <button class="btn btn-primary" id="intervento-save-btn" onclick="salvaInterventoMascalcia()" style="width:100%;margin-top:6px">Salva appuntamento</button>
     </div>
   </div>
 </div>
@@ -1964,7 +2016,7 @@ const DB = {
   async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
     const row = { cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
     if(DEMO_MODE){
-      const nuovo = { id: "di-" + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
+      const nuovo = { id: "di-" + Date.now().toString(36) + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
       demoState.interventiMascalcia.push(nuovo);
       return { error: null, data: nuovo };
     }
@@ -2045,7 +2097,7 @@ const DB = {
   async insertCavalloCliente({ cliente_mascalcia_id, nome, microchip = null, horse_id = null }){
     const row = { cliente_mascalcia_id, nome, microchip: microchip ? microchip.trim().toUpperCase() : null, horse_id };
     if(DEMO_MODE){
-      const nuovo = { id: "dcv-" + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
+      const nuovo = { id: "dcv-" + Date.now().toString(36) + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
       demoState.cavalliClientiMascalcia.push(nuovo);
       return { error: null, data: nuovo };
     }
@@ -3652,40 +3704,130 @@ async function renderIncassi(){
   }
 }
 
-function openInterventoModal(clienteId){
-  const select = document.getElementById("intervento-cliente-select");
-  const opzioniClienti = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}${c.nome_cavallo ? " · " + escapeHtml(c.nome_cavallo) : ""}</option>`).join("");
-  select.innerHTML = opzioniClienti + '<option value="__nuovo__">+ Cliente non ancora salvato</option>';
-  const group = document.getElementById("intervento-cliente-group");
-  group.style.display = "flex";
-  if(clienteId){
-    select.value = clienteId;
-  } else if(clientiMascalcia.length === 0){
-    select.value = "__nuovo__";
-  } else {
-    select.value = clientiMascalcia[0].id;
-  }
-  document.getElementById("intervento-nuovo-cliente-nome").value = "";
-  document.getElementById("intervento-nuovo-cliente-cavallo").value = "";
-  toggleInterventoNuovoCliente();
-  document.getElementById("intervento-tipo").value = "ferratura";
-  document.getElementById("intervento-ferro-numero").value = "";
-  document.getElementById("intervento-ferro-quantita").value = "";
-  document.getElementById("intervento-tipo-altro").value = "";
-  toggleInterventoTipoFields();
-  document.getElementById("intervento-data").value = new Date().toISOString().slice(0, 10);
-  document.getElementById("intervento-importo").value = "";
-  document.getElementById("intervento-pagamento").value = "da_saldare";
-  document.getElementById("intervento-note").value = "";
-  document.getElementById("intervento-error").style.display = "none";
-  openModal("modal-add-intervento");
+/* ---------- MODAL APPUNTAMENTO MANISCALCO (nuovo + modifica) ---------- */
+// Tabella misure ferri: stessa riga = stessa misura nei 3 sistemi (IT 1-9)
+const MISURE_FERRO = {
+  italiana: ["1","2","3","4","5","6","7","8","9"],
+  olandese: ["4/0","3/0","2/0","0","1","2","3","4","5"],
+  tedesca:  ["2/0","0","1","2","3","4","5","6","7"]
+};
+const MISURA_INDICE_PARTENZA = 3; // riga IT 4 = NL 0 = DE 2
+const MISURA_SISTEMA_LABEL = { italiana: "IT", olandese: "NL", tedesca: "DE" };
+let misuraIndiceCorrente = MISURA_INDICE_PARTENZA;
+let misuraScrollTimer = null;
+let cavalliClienteCorrente = [];
+let interventoInModifica = null; // oggetto intervento se stiamo modificando
+
+function isoLocale(d){
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+function aggiungiGiorniIso(iso, giorni){
+  const [y, m, d] = iso.split("-").map(Number);
+  return isoLocale(new Date(y, m - 1, d + giorni));
 }
 
-function toggleInterventoNuovoCliente(){
-  const isNuovo = document.getElementById("intervento-cliente-select").value === "__nuovo__";
-  document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
-  document.getElementById("intervento-nuovo-cavallo-group").style.display = isNuovo ? "flex" : "none";
+function renderMisuraWheel(){
+  const sistema = document.getElementById("intervento-misura-sistema").value;
+  const wheel = document.getElementById("intervento-misura-wheel");
+  wheel.innerHTML = MISURE_FERRO[sistema].map((v, i) =>
+    `<div class="misura-wheel-item${i === misuraIndiceCorrente ? " sel" : ""}" data-i="${i}" onclick="selezionaMisura(${i}, true)">${v}</div>`).join("");
+  requestAnimationFrame(() => { wheel.scrollTop = misuraIndiceCorrente * 44; });
+  aggiornaEquivalenzeMisura();
+  wheel.onscroll = () => {
+    clearTimeout(misuraScrollTimer);
+    misuraScrollTimer = setTimeout(() => {
+      const i = Math.max(0, Math.min(8, Math.round(wheel.scrollTop / 44)));
+      selezionaMisura(i, false);
+    }, 80);
+  };
 }
+function selezionaMisura(i, scroll){
+  misuraIndiceCorrente = i;
+  const wheel = document.getElementById("intervento-misura-wheel");
+  wheel.querySelectorAll(".misura-wheel-item").forEach(el => el.classList.toggle("sel", Number(el.dataset.i) === i));
+  if(scroll) wheel.scrollTo({ top: i * 44, behavior: "smooth" });
+  aggiornaEquivalenzeMisura();
+}
+function aggiornaEquivalenzeMisura(){
+  const sistema = document.getElementById("intervento-misura-sistema").value;
+  const altri = Object.keys(MISURE_FERRO).filter(k => k !== sistema)
+    .map(k => MISURA_SISTEMA_LABEL[k] + " " + MISURE_FERRO[k][misuraIndiceCorrente]);
+  document.getElementById("intervento-misura-equivalenze").textContent = "Equivale a: " + altri.join(" · ");
+}
+function onMisuraSistemaChange(){ renderMisuraWheel(); } // mantiene la misura equivalente
+
+async function openInterventoModal(clienteId, intervento){
+  interventoInModifica = intervento || null;
+  const inModifica = !!interventoInModifica;
+  document.getElementById("intervento-modal-title").textContent = inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
+  document.getElementById("intervento-save-btn").textContent = inModifica ? "Salva modifiche" : "Salva appuntamento";
+
+  const select = document.getElementById("intervento-cliente-select");
+  const opzioniClienti = clientiMascalcia.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+  select.innerHTML = opzioniClienti + (inModifica ? "" : '<option value="__nuovo__">+ Nuovo cliente</option>');
+  select.disabled = inModifica;
+  if(inModifica) select.value = interventoInModifica.cliente_mascalcia_id;
+  else if(clienteId) select.value = clienteId;
+  else if(clientiMascalcia.length === 0) select.value = "__nuovo__";
+  else select.value = clientiMascalcia[0].id;
+
+  const i = interventoInModifica || {};
+  document.getElementById("intervento-nuovo-cliente-nome").value = "";
+  document.getElementById("intervento-nuovo-cavallo-nome").value = "";
+  document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
+  document.getElementById("intervento-tipo").value = i.tipo_ferratura || "ferratura";
+  document.getElementById("intervento-tipo-altro").value = i.tipo_altro || "";
+  document.getElementById("intervento-ferro-quantita").value = i.quantita_ferri ?? "";
+  // misura: sistema salvato (o olandese di default) + indice della riga
+  const sistema = i.misura_sistema || "olandese";
+  document.getElementById("intervento-misura-sistema").value = sistema;
+  const idx = i.numero_ferro ? MISURE_FERRO[sistema].indexOf(String(i.numero_ferro)) : -1;
+  misuraIndiceCorrente = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
+  document.getElementById("intervento-data").value = i.data_intervento || isoLocale(new Date());
+  document.getElementById("intervento-ora").value = i.ora ? String(i.ora).slice(0, 5) : "";
+  document.getElementById("intervento-importo").value = i.importo ?? "";
+  document.getElementById("intervento-pagamento").value = i.stato_pagamento || "da_saldare";
+  document.getElementById("intervento-note").value = i.note || "";
+  document.getElementById("intervento-error").style.display = "none";
+
+  openModal("modal-add-intervento");
+  toggleInterventoTipoFields();
+  await onInterventoClienteChange();
+}
+
+async function onInterventoClienteChange(){
+  const clienteId = document.getElementById("intervento-cliente-select").value;
+  const isNuovo = clienteId === "__nuovo__";
+  document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
+  const sel = document.getElementById("intervento-cavallo-select");
+  sel.innerHTML = '<option value="">Caricamento…</option>';
+  cavalliClienteCorrente = isNuovo ? [] : await DB.listCavalliCliente(clienteId);
+  const opzioni = cavalliClienteCorrente.map(c =>
+    `<option value="${c.key}">${escapeHtml(c.nome)}${c.tipo === "equo" ? " · su Equo" : ""}</option>`).join("");
+  sel.innerHTML = (cavalliClienteCorrente.length ? "" : '<option value="">— nessun cavallo —</option>') + opzioni + '<option value="__nuovo_cavallo__">+ Aggiungi cavallo</option>';
+  // preselezione: cavallo dell'intervento in modifica, altrimenti il primo (se c'è), altrimenti "aggiungi" per un cliente nuovo
+  let valore = "";
+  if(interventoInModifica){
+    const m = cavalliClienteCorrente.find(c =>
+      (interventoInModifica.cavallo_cliente_id && c.id === interventoInModifica.cavallo_cliente_id) ||
+      (interventoInModifica.horse_id && c.horse_id === interventoInModifica.horse_id));
+    if(m) valore = m.key;
+  } else if(isNuovo){
+    valore = "__nuovo_cavallo__";
+  } else if(cavalliClienteCorrente.length){
+    valore = cavalliClienteCorrente[0].key;
+  }
+  sel.value = valore;
+  toggleInterventoNuovoCavallo();
+}
+
+function toggleInterventoNuovoCavallo(){
+  const v = document.getElementById("intervento-cavallo-select").value;
+  document.getElementById("intervento-nuovo-cavallo-group").style.display = v === "__nuovo_cavallo__" ? "flex" : "none";
+}
+// compatibilità con eventuali vecchie chiamate
+function toggleInterventoNuovoCliente(){ onInterventoClienteChange(); }
 
 function toggleInterventoTipoFields(){
   const tipo = document.getElementById("intervento-tipo").value;
@@ -3693,67 +3835,87 @@ function toggleInterventoTipoFields(){
   const isFerratura = tipo === "ferratura" || tipo === "mezza_ferratura";
   document.getElementById("intervento-ferro-group").style.display = isFerratura ? "flex" : "none";
   document.getElementById("intervento-quantita-group").style.display = isFerratura ? "flex" : "none";
+  if(isFerratura) renderMisuraWheel();
 }
 
-async function createInterventoMascalcia(){
+async function salvaInterventoMascalcia(){
   const errBox = document.getElementById("intervento-error");
+  const errore = msg => { errBox.textContent = msg; errBox.style.display = "block"; };
   errBox.style.display = "none";
+  const saveBtn = document.getElementById("intervento-save-btn");
+
   let cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
   const tipo_ferratura = document.getElementById("intervento-tipo").value;
-  const tipo_altro = tipo_ferratura === "altro" ? document.getElementById("intervento-tipo-altro").value.trim() : null;
+  const tipo_altro = tipo_ferratura === "altro" ? (document.getElementById("intervento-tipo-altro").value.trim() || null) : null;
   const isFerraturaTipo = tipo_ferratura === "ferratura" || tipo_ferratura === "mezza_ferratura";
-  const numero_ferro = isFerraturaTipo ? (document.getElementById("intervento-ferro-numero").value.trim() || null) : null;
+  const misura_sistema = isFerraturaTipo ? document.getElementById("intervento-misura-sistema").value : null;
+  const numero_ferro = isFerraturaTipo ? MISURE_FERRO[misura_sistema][misuraIndiceCorrente] : null;
   const quantitaRaw = isFerraturaTipo ? document.getElementById("intervento-ferro-quantita").value : "";
   const quantita_ferri = quantitaRaw === "" ? null : Number(quantitaRaw);
   const data_intervento = document.getElementById("intervento-data").value;
+  const ora = document.getElementById("intervento-ora").value || null;
   const importoRaw = document.getElementById("intervento-importo").value;
   const importo = importoRaw === "" ? null : Number(importoRaw);
   const stato_pagamento = document.getElementById("intervento-pagamento").value;
   const note = document.getElementById("intervento-note").value.trim();
-  if(!cliente_mascalcia_id || !data_intervento){
-    errBox.textContent = "Seleziona cliente e data.";
-    errBox.style.display = "block";
-    return;
-  }
+  const cavalloVal = document.getElementById("intervento-cavallo-select").value;
 
-  let clienteCreatoOra = false;
-  if(cliente_mascalcia_id === "__nuovo__"){
-    const nome = document.getElementById("intervento-nuovo-cliente-nome").value.trim();
-    if(!nome){
-      errBox.textContent = "Inserisci il nome del cliente.";
-      errBox.style.display = "block";
-      return;
-    }
-    const nome_cavallo = document.getElementById("intervento-nuovo-cliente-cavallo").value.trim();
-    const { error: clienteError, data: nuovoCliente } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono: "", note: "" });
-    if(clienteError || !nuovoCliente){
-      errBox.textContent = "Errore nel creare il cliente: " + (clienteError?.message || "");
-      errBox.style.display = "block";
-      return;
-    }
-    cliente_mascalcia_id = nuovoCliente.id;
-    clienteCreatoOra = true;
-  }
+  if(!cliente_mascalcia_id || !data_intervento) return errore("Seleziona cliente e data.");
+  if(tipo_ferratura === "altro" && !tipo_altro) return errore("Specifica il tipo di intervento.");
+  const nuovoCavalloNome = document.getElementById("intervento-nuovo-cavallo-nome").value.trim();
+  const nuovoCavalloChip = document.getElementById("intervento-nuovo-cavallo-microchip").value.trim();
+  if(cavalloVal === "__nuovo_cavallo__" && !nuovoCavalloNome) return errore("Inserisci il nome del cavallo.");
 
-  let prossima_scadenza = null;
-  if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]){
-    const d = new Date(data_intervento);
-    d.setDate(d.getDate() + TIPO_FERRATURA_INTERVALLI[tipo_ferratura]);
-    prossima_scadenza = d.toISOString().slice(0, 10);
+  saveBtn.disabled = true;
+  try {
+    // cliente nuovo
+    let clienteCreatoOra = false;
+    if(cliente_mascalcia_id === "__nuovo__"){
+      const nome = document.getElementById("intervento-nuovo-cliente-nome").value.trim();
+      if(!nome) return errore("Inserisci il nome del cliente.");
+      const { error: clienteError, data: nuovoCliente } = await DB.insertClienteMascalcia({ nome, nome_cavallo: nuovoCavalloNome, telefono: "", note: "" });
+      if(clienteError || !nuovoCliente) return errore("Errore nel creare il cliente: " + (clienteError?.message || ""));
+      cliente_mascalcia_id = nuovoCliente.id;
+      clienteCreatoOra = true;
+    }
+
+    // cavallo: nuovo / esistente (manuale o "su Equo")
+    let cavallo_cliente_id = null, horse_id = null;
+    if(cavalloVal === "__nuovo_cavallo__"){
+      const { error: cvErr, data: cv } = await DB.insertCavalloCliente({ cliente_mascalcia_id, nome: nuovoCavalloNome, microchip: nuovoCavalloChip || null });
+      if(cvErr || !cv) return errore("Errore nel salvare il cavallo: " + (cvErr?.message || ""));
+      cavallo_cliente_id = cv.id;
+    } else if(cavalloVal){
+      const scelto = cavalliClienteCorrente.find(c => c.key === cavalloVal);
+      ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(cliente_mascalcia_id, scelto));
+    }
+
+    const prossima_scadenza = TIPO_FERRATURA_INTERVALLI[tipo_ferratura] ? aggiungiGiorniIso(data_intervento, TIPO_FERRATURA_INTERVALLI[tipo_ferratura]) : null;
+    // stato: data/ora nel futuro = programmato; altrimenti fatto (in modifica non si "chiude" da solo un programmato)
+    const quando = new Date(data_intervento + "T" + (ora || "00:00")); // senza ora: oggi = fatto
+    const futuro = quando.getTime() > Date.now();
+    const stato = futuro ? "programmato" : (interventoInModifica ? interventoInModifica.stato || "fatto" : "fatto");
+
+    const payload = { cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
+    const { error } = interventoInModifica
+      ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
+      : await DB.insertInterventoMascalcia({ cliente_mascalcia_id, ...payload });
+    if(error) return errore("Errore: " + error.message);
+
+    closeModal("modal-add-intervento");
+    showToast(interventoInModifica ? "Appuntamento aggiornato" : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
+    interventoInModifica = null;
+    if(clienteCreatoOra) await loadClientiMascalcia();
+    await renderProDeadlines();
+    await renderIncassi();
+    if(typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+    if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
+  } finally {
+    saveBtn.disabled = false;
   }
-  const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id, tipo_ferratura, tipo_altro, numero_ferro, quantita_ferri, data_intervento, prossima_scadenza, importo, stato_pagamento, note });
-  if(error){
-    errBox.textContent = "Errore: " + error.message;
-    errBox.style.display = "block";
-    return;
-  }
-  closeModal("modal-add-intervento");
-  showToast("Intervento registrato!");
-  if(clienteCreatoOra) await loadClientiMascalcia();
-  await renderProDeadlines();
-  await renderIncassi();
-  if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
 }
+// nome vecchio, usato altrove
+const createInterventoMascalcia = salvaInterventoMascalcia;
 
 /* ---------- CHAT MASCALCIA (stile WhatsApp) ---------- */
 const EMOJI_LIST = ["😀","😂","😊","😉","😍","🙂","😅","😎","🤔","👍","🙏","👏","💪","🤝","❤️","🔥",
