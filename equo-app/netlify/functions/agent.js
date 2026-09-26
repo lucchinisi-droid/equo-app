@@ -7,7 +7,9 @@
 //    appuntamenti col maniscalco, lezioni;
 //  - consulta le schede di conoscenza verificate (tabella ai_conoscenze) e ne cita la fonte;
 //  - ricorda: conversazione salvata (ai_messaggi) + note di memoria (ai_memoria);
-//  - può PROPORRE un evento sanitario, che l'utente conferma in app (non scrive da solo).
+//  - PROPONE azioni che l'utente conferma in app (non scrive mai da solo): evento sanitario,
+//    spesa, lezione/allenamento/gara, richiesta di appuntamento al maniscalco (Step 2);
+//  - legge FOTO e PDF allegati (fatture, certificati vaccinali, referti) e propone le azioni giuste.
 //
 // Env su Netlify: ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
 // SUPABASE_ANON_KEY (facoltativa: se manca si usa la chiave pubblica dell'app).
@@ -33,8 +35,16 @@ Parli in italiano, in modo caldo ma diretto, come un esperto di scuderia che con
 - Per QUALSIASI cosa che riguarda i dati dell'utente (i suoi cavalli, scadenze, vaccini, ferrature, spese, appuntamenti col maniscalco, lezioni) usa SEMPRE gli strumenti per leggerli: non indovinare e non inventare mai date, importi o nomi.
 - Per domande su salute, normative, vaccinazioni, Coggins/AIE, anagrafe equina, sverminazione, ferratura, alimentazione, emergenze: prima cerca nelle schede verificate con lo strumento cerca_conoscenze. Se trovi una scheda pertinente basati su quella e alla fine scrivi "Fonte: <titolo fonte>". Se non c'è una scheda, rispondi con conoscenze generali prudenti e dillo ("indicazione generale").
 - Se l'utente ti dice qualcosa di utile da ricordare in futuro (abitudini, allergie o sensibilità del cavallo, preferenze, nome del veterinario o della scuderia), salvalo con salva_memoria, senza chiedere il permesso per cose ovvie. Non salvare dati sensibili sulla salute delle PERSONE.
-- Se l'utente chiede di registrare un vaccino, un test Coggins, una ferratura o una sverminazione con una data chiara, usa proponi_evento_sanitario: l'app mostrerà una scheda che l'utente conferma. Se mancano cavallo o data, chiedili. Non dire mai che hai già salvato: di' che hai preparato la scheda da confermare.
-- Oggi puoi solo proporre eventi sanitari. Per spese, lezioni o appuntamenti col maniscalco spiega in una riga dove farlo nell'app (vedi "Dove si trovano le cose").
+- Puoi PROPORRE queste azioni, che l'app mostra come schede da confermare con un tocco: proponi_evento_sanitario (vaccino, Coggins, ferratura, sverminazione), proponi_spesa, proponi_lezione (lezione, allenamento, gara) e proponi_richiesta_maniscalco (chiede un appuntamento al maniscalco collegato). Usale quando l'utente chiede di registrare, segnare, aggiungere, prenotare o chiedere qualcosa, anche con parole semplici ("ho speso 60 euro di fieno oggi", "segna una gara domenica", "chiedi al maniscalco di venire venerdì").
+- Mai inventare dati: se manca qualcosa di essenziale (importo, data, cavallo quando ne ha più di uno) chiedilo in una domanda breve. Se ha un solo cavallo, usa quello. "Oggi", "ieri", "venerdì prossimo" convertili in data usando la data di oggi.
+- Puoi proporre più schede nella stessa risposta (es. una fattura con due voci, un certificato con due vaccini).
+- Non dire mai che hai già salvato o prenotato: di' che hai preparato la scheda da confermare qui sotto.
+
+## Foto e documenti allegati
+- Se l'utente allega una FATTURA, uno scontrino o una ricevuta: leggi data, fornitore e totale (IVA inclusa) e proponi la spesa con la categoria giusta (pensione, mangime, veterinario, maniscalco, attrezzatura, altro); nelle note metti fornitore e numero documento. Se ci sono voci di categorie diverse, una scheda per categoria.
+- Se allega un CERTIFICATO VACCINALE, il passaporto o un referto (es. Coggins/AIE): individua cavallo, tipo e data di ogni trattamento degli ultimi 12 mesi e proponi un evento sanitario per ciascuno, con la prossima scadenza se è scritta o deducibile dal documento (se non è scritta, lasciala vuota). Riassumi in 2-3 righe cosa hai trovato.
+- Se allega la FOTO del cavallo, di uno zoccolo, di una ferita o di un sintomo: descrivi con prudenza cosa si vede, NON fare diagnosi, applica le regole di salute e sicurezza e suggerisci il veterinario o il maniscalco quando serve.
+- Se l'immagine non è leggibile o non capisci cosa sia, dillo e chiedi una foto migliore (dritta, con buona luce, tutto il documento).
 - Quando elenchi scadenze, metti prima quelle scadute o più vicine, con la data in formato italiano (es. 12 ottobre 2026).
 
 ## Salute e sicurezza (regole non negoziabili)
@@ -82,12 +92,47 @@ const STRUMENTI = [
       },
       required: ["horse_name", "type", "date"],
     },
+  },
+  {
+    name: "proponi_spesa",
+    description: "Propone una spesa da registrare. L'app mostra una scheda che l'utente conferma.",
+    input_schema: { type: "object", properties: {
+      categoria: { type: "string", enum: ["pensione", "mangime", "veterinario", "maniscalco", "attrezzatura", "altro"] },
+      importo: { type: "number", description: "Importo in euro, IVA inclusa." },
+      data: { type: "string", description: "YYYY-MM-DD" },
+      cavallo: { type: "string", description: "Nome del cavallo a cui imputare la spesa (facoltativo se ne ha uno solo)." },
+      note: { type: "string", description: "Es. fornitore, numero fattura, descrizione." },
+    }, required: ["categoria", "importo", "data"] },
+  },
+  {
+    name: "proponi_lezione",
+    description: "Propone di aggiungere al calendario una lezione, un allenamento libero, una gara o altro.",
+    input_schema: { type: "object", properties: {
+      tipo: { type: "string", enum: ["lezione", "allenamento", "gara", "altro"] },
+      data: { type: "string", description: "YYYY-MM-DD" },
+      cavallo: { type: "string" },
+      note: { type: "string", description: "Es. istruttore, luogo, orario, categoria della gara." },
+    }, required: ["tipo", "data"] },
+  },
+  {
+    name: "proponi_richiesta_maniscalco",
+    description: "Propone di inviare al maniscalco collegato una richiesta di appuntamento (il maniscalco poi conferma o rifiuta).",
+    input_schema: { type: "object", properties: {
+      maniscalco: { type: "string", description: "Nome del maniscalco, se l'utente ne ha più di uno collegato." },
+      cavallo: { type: "string" },
+      tipo: { type: "string", enum: ["ferratura", "mezza_ferratura", "pareggio", "altro"] },
+      tipo_altro: { type: "string", description: "Descrizione se tipo = altro." },
+      data: { type: "string", description: "Data preferita YYYY-MM-DD, da oggi in poi." },
+      ora: { type: "string", description: "HH:MM facoltativa." },
+      note: { type: "string" },
+    }, required: ["tipo", "data"] },
     cache_control: { type: "ephemeral" },
   },
 ];
 
 // ---------------------------------------------------------------- utilità
-const oggiISO = () => new Date().toISOString().slice(0, 10);
+const oggiISO = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+const isoValida = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "") && !isNaN(new Date(v + "T12:00:00Z"));
 const aggiungiGiorni = (iso, g) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + g); return d.toISOString().slice(0, 10); };
 const risposta = (status, obj) => ({ statusCode: status, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) });
 
@@ -196,8 +241,50 @@ async function eseguiStrumento(nome, input, ctx) {
       const c = trovaCavallo(cavalli, input.horse_name);
       if (!c) return `Non trovo il cavallo "${input.horse_name}". Cavalli dell'utente: ${cavalli.map((x) => x.name).join(", ") || "nessuno"}.`;
       if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date || "")) return "Data non valida: chiedi la data all'utente.";
-      ctx.proposta = { horse_name: c.name, type: input.type, date: input.date, next_due_date: /^\d{4}-\d{2}-\d{2}$/.test(input.next_due_date || "") ? input.next_due_date : null, notes: input.notes || null };
+      const dati = { horse_name: c.name, type: input.type, date: input.date, next_due_date: /^\d{4}-\d{2}-\d{2}$/.test(input.next_due_date || "") ? input.next_due_date : null, notes: input.notes || null };
+      if (!ctx.proposta) ctx.proposta = dati;
+      ctx.azioni.push({ tipo: "evento", dati });
       return "Scheda mostrata all'utente: sarà salvata solo quando la conferma. Diglielo in una frase.";
+    }
+
+    case "proponi_spesa": {
+      const importo = Math.round(Number(input.importo) * 100) / 100;
+      if (!(importo > 0)) return "Importo non valido: chiedilo all'utente.";
+      if (!isoValida(input.data)) return "Data non valida: chiedila all'utente.";
+      const cat = ["pensione", "mangime", "veterinario", "maniscalco", "attrezzatura", "altro"].includes(input.categoria) ? input.categoria : "altro";
+      let c = trovaCavallo(cavalli, input.cavallo);
+      if (!c && input.cavallo) return `Non trovo il cavallo "${input.cavallo}". Cavalli: ${cavalli.map((x) => x.name).join(", ")}.`;
+      if (!c && cavalli.length === 1) c = cavalli[0];
+      ctx.azioni.push({ tipo: "spesa", dati: { horse_id: c?.id || null, horse_name: c?.name || null, category: cat, amount: importo, date: input.data, notes: (input.note || "").slice(0, 300) || null } });
+      return "Scheda spesa mostrata all'utente, da confermare.";
+    }
+
+    case "proponi_lezione": {
+      if (!isoValida(input.data)) return "Data non valida: chiedila all'utente.";
+      const tipo = ["lezione", "allenamento", "gara", "altro"].includes(input.tipo) ? input.tipo : "altro";
+      let c = trovaCavallo(cavalli, input.cavallo);
+      if (!c && input.cavallo) return `Non trovo il cavallo "${input.cavallo}". Cavalli: ${cavalli.map((x) => x.name).join(", ")}.`;
+      if (!c && cavalli.length === 1) c = cavalli[0];
+      ctx.azioni.push({ tipo: "lezione", dati: { horse_id: c?.id || null, horse_name: c?.name || null, tipo, data: input.data, note: (input.note || "").slice(0, 300) || null } });
+      return "Scheda calendario mostrata all'utente, da confermare.";
+    }
+
+    case "proponi_richiesta_maniscalco": {
+      if (!isoValida(input.data) || input.data < oggiISO()) return "La data deve essere da oggi in poi: chiedila all'utente.";
+      const { data: mani } = await db.rpc("lista_maniscalchi_collegati");
+      if (!Array.isArray(mani) || !mani.length) return "L'utente non ha maniscalchi collegati: spiegagli che si collega da Chat → 'Il tuo maniscalco' → '+ Collega' con il codice del maniscalco.";
+      let m = null;
+      if (input.maniscalco) { const n = input.maniscalco.toLowerCase(); m = mani.find((x) => (x.nome_maniscalco || "").toLowerCase().includes(n)); }
+      if (!m && mani.length === 1) m = mani[0];
+      if (!m) return `Più maniscalchi collegati: chiedi a quale inviare (${mani.map((x) => x.nome_maniscalco).join(", ")}).`;
+      const tipo = ["ferratura", "mezza_ferratura", "pareggio", "altro"].includes(input.tipo) ? input.tipo : "altro";
+      if (tipo === "altro" && !input.tipo_altro) return "Chiedi all'utente che tipo di intervento serve.";
+      let c = trovaCavallo(cavalli, input.cavallo);
+      if (!c && cavalli.length === 1) c = cavalli[0];
+      if (!c && !input.cavallo) return "Chiedi per quale cavallo è l'appuntamento.";
+      const ora = /^\d{1,2}:\d{2}$/.test(input.ora || "") ? input.ora.padStart(5, "0") : null;
+      ctx.azioni.push({ tipo: "richiesta_maniscalco", dati: { cliente_mascalcia_id: m.cliente_mascalcia_id, nome_maniscalco: m.nome_maniscalco, horse_id: c?.id || null, nome_cavallo: c ? null : input.cavallo, horse_name: c?.name || input.cavallo, tipo, tipo_altro: tipo === "altro" ? input.tipo_altro : null, data: input.data, ora, note: (input.note || "").slice(0, 300) || null } });
+      return `Scheda richiesta per ${m.nome_maniscalco} mostrata all'utente: partirà quando la conferma.`;
     }
 
     default:
@@ -216,7 +303,11 @@ exports.handler = async (event) => {
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch (e) { return risposta(400, { error: "Richiesta non valida" }); }
   const messaggio = String(body.message || "").trim().slice(0, 4000);
-  if (!messaggio) return risposta(400, { error: "Messaggio mancante" });
+  // allegati: max 3 immagini (jpeg/png/webp/gif) o PDF, già ridotti dall'app; ~5 MB totali in base64
+  const allegati = (Array.isArray(body.allegati) ? body.allegati : []).slice(0, 3).filter((a) =>
+    a && typeof a.data === "string" && ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"].includes(a.media_type));
+  if (allegati.reduce((n, a) => n + a.data.length, 0) > 5_500_000) return risposta(413, { error: "Allegati troppo grandi" });
+  if (!messaggio && !allegati.length) return risposta(400, { error: "Messaggio mancante" });
   const vista = body.vista === "professionista" ? "professionista" : "proprietario";
 
   // client con i permessi DELL'UTENTE: tutte le letture passano dalle regole RLS
@@ -249,9 +340,18 @@ exports.handler = async (event) => {
 
   const messages = (storia || []).reverse().map((m) => ({ role: m.ruolo === "assistant" ? "assistant" : "user", content: m.contenuto }));
   while (messages.length && messages[0].role !== "user") messages.shift();
-  messages.push({ role: "user", content: messaggio });
+  if (allegati.length) {
+    messages.push({ role: "user", content: [
+      ...allegati.map((a) => a.media_type === "application/pdf"
+        ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: a.data } }
+        : { type: "image", source: { type: "base64", media_type: a.media_type, data: a.data } }),
+      { type: "text", text: messaggio || "Ti ho allegato questo: dimmi cosa contiene e prepara le schede utili." },
+    ] });
+  } else {
+    messages.push({ role: "user", content: messaggio });
+  }
 
-  const ctx = { db, userId: user.id, cavalli: listaCavalli, proposta: null };
+  const ctx = { db, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [] };
   const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0 };
   let testoFinale = "";
 
@@ -262,7 +362,7 @@ exports.handler = async (event) => {
         headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
           model: MODELLO,
-          max_tokens: 1200,
+          max_tokens: allegati.length ? 2000 : 1200,
           system: [
             { type: "text", text: ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
@@ -296,18 +396,19 @@ exports.handler = async (event) => {
     return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano } });
   }
 
-  if (!testoFinale) testoFinale = ctx.proposta ? `Ho preparato la scheda per ${ctx.proposta.horse_name}: confermala qui sotto.` : "Non sono riuscito a rispondere, riprova.";
+  if (!testoFinale) testoFinale = ctx.azioni.length ? "Ho preparato le schede da confermare qui sotto." : "Non sono riuscito a rispondere, riprova.";
+  const testoUtenteSalvato = (allegati.length ? `📎 ${allegati.length === 1 ? "1 allegato" : allegati.length + " allegati"}${messaggio ? " — " : ""}` : "") + messaggio;
 
   // salva conversazione e consumo (service role: la tabella ai_utilizzo non è scrivibile dall'app)
   const p = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
   const costoUsd = (costo.in * p.in + costo.out * p.out + costo.cacheRead * p.cacheRead + costo.cacheWrite * p.cacheWrite) / 1e6;
   await admin.from("ai_messaggi").insert([
-    { user_id: user.id, vista, ruolo: "user", contenuto: messaggio },
+    { user_id: user.id, vista, ruolo: "user", contenuto: testoUtenteSalvato },
     { user_id: user.id, vista, ruolo: "assistant", contenuto: testoFinale },
   ]);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese, conteggio: usati + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
-  return risposta(200, { reply: testoFinale, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
+  return risposta(200, { reply: testoFinale, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
 };
 
 // esportati solo per i test

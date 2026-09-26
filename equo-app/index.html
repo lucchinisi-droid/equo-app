@@ -269,6 +269,14 @@ select.input{cursor:pointer}
 .chat-bubble.ai p{margin:0 0 6px}.chat-bubble.ai p:last-child{margin:0}
 .chat-bubble.ai ul{margin:4px 0 6px;padding-left:18px}.chat-bubble.ai li{margin:2px 0}
 .chat-bubble.ai a{color:var(--accent);text-decoration:underline}
+.ai-allegati{display:none;gap:8px;padding:6px 14px 0;overflow-x:auto}
+.ai-allegati.attivi{display:flex}
+.ai-allegato{position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted)}
+.ai-allegato img{width:100%;height:100%;object-fit:cover}
+.ai-allegato button{position:absolute;top:1px;right:1px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:11px;line-height:18px;padding:0;cursor:pointer}
+.ai-clip{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;width:42px;flex-shrink:0;cursor:pointer;font-size:16px}
+.chat-bubble.user .ai-thumbs{display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap}
+.chat-bubble.user .ai-thumbs img{width:56px;height:56px;object-fit:cover;border-radius:8px}
 .ai-usage-note{font-size:11px;text-align:center;color:var(--muted);padding:0 14px 4px}
 .ai-limit-cta{margin-top:8px}
 .chat-bubble.event-proposal{max-width:88%;border-color:var(--accent)}
@@ -972,12 +980,15 @@ select.input{cursor:pointer}
       </div>
       <div class="chat-wrap">
         <div class="chat-messages" id="chat-messages">
-          <div class="chat-bubble ai" id="ai-benvenuto">Ciao! Sono <strong>Equo AI</strong>. Conosco i tuoi cavalli, le scadenze, le spese e gli appuntamenti col maniscalco. Prova a chiedermi: <em>"Cosa scade questo mese?"</em> oppure <em>"Quanto ho speso in pensione quest'anno?"</em></div>
+          <div class="chat-bubble ai" id="ai-benvenuto">Ciao! Sono <strong>Equo AI</strong>. Conosco i tuoi cavalli, le scadenze, le spese e gli appuntamenti col maniscalco. Prova a chiedermi: <em>"Cosa scade questo mese?"</em> oppure <em>"Quanto ho speso in pensione quest'anno?"</em>. Con la 📎 puoi allegare la foto di una fattura o del certificato vaccinale: preparo io le schede da confermare.</div>
         </div>
         <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 2px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
         <div class="ai-usage-note" id="ai-usage-note"></div>
+        <div class="ai-allegati" id="ai-allegati"></div>
         <div class="chat-input-row">
-          <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+          <button class="ai-clip" onclick="document.getElementById('ai-file').click()" aria-label="Allega foto o PDF" title="Allega foto o PDF (fattura, certificato vaccinale…)"><i class="fa-solid fa-paperclip"></i></button>
+          <input type="file" id="ai-file" accept="image/*,application/pdf" multiple style="display:none" onchange="aggiungiAllegatiAi(event)">
+          <input class="input" id="chat-input" placeholder="Scrivi o allega una foto…" onkeydown="if(event.key==='Enter')sendChatMessage()">
           <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
         </div>
       </div>
@@ -6873,13 +6884,122 @@ function detectDemoEvent(text){
   return { horse_name: horse.name, type, date, next_due_date: null, notes: null };
 }
 
+/* ---------- EQUO AI — allegati (Step 2): foto ridotte a max 1600px JPEG, PDF fino a 4 MB ---------- */
+let aiAllegati = []; // { media_type, data (base64), anteprima (dataURL o null), nome }
+function leggiFileComeDataUrl(file){
+  return new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = ko; r.readAsDataURL(file); });
+}
+async function riduciImmagine(file){
+  const url = await leggiFileComeDataUrl(file);
+  const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = url; });
+  const lato = 1600, k = Math.min(1, lato / Math.max(img.width, img.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.82);
+}
+async function aggiungiAllegatiAi(event){
+  const files = Array.from(event.target.files || []);
+  event.target.value = "";
+  for(const f of files){
+    if(aiAllegati.length >= 3){ showToast("Massimo 3 allegati per messaggio."); break; }
+    try{
+      if(f.type === "application/pdf"){
+        if(f.size > 4 * 1024 * 1024){ showToast("PDF troppo grande (max 4 MB): prova con una foto."); continue; }
+        const url = await leggiFileComeDataUrl(f);
+        aiAllegati.push({ media_type: "application/pdf", data: url.split(",")[1], anteprima: null, nome: f.name });
+      } else if((f.type || "").startsWith("image/")){
+        const url = await riduciImmagine(f);
+        aiAllegati.push({ media_type: "image/jpeg", data: url.split(",")[1], anteprima: url, nome: f.name });
+      } else {
+        showToast("Puoi allegare foto o PDF.");
+      }
+    } catch(err){
+      console.error("allegato AI:", err);
+      showToast("Non riesco a leggere il file, riprova.");
+    }
+  }
+  renderAllegatiAi();
+}
+function renderAllegatiAi(){
+  const box = document.getElementById("ai-allegati");
+  if(!box) return;
+  box.classList.toggle("attivi", aiAllegati.length > 0);
+  box.innerHTML = aiAllegati.map((a, i) => `<div class="ai-allegato">${a.anteprima ? `<img src="${a.anteprima}" alt="">` : "PDF"}<button onclick="rimuoviAllegatoAi(${i})" aria-label="Rimuovi">×</button></div>`).join("");
+}
+function rimuoviAllegatoAi(i){ aiAllegati.splice(i, 1); renderAllegatiAi(); }
+
+/* Schede di conferma per le azioni proposte dall'AI (evento, spesa, lezione, richiesta al maniscalco) */
+const aiAzioniInAttesa = {};
+const CAT_SPESA_LABEL = { pensione: "Pensione", mangime: "Mangime", veterinario: "Veterinario", maniscalco: "Maniscalco", attrezzatura: "Attrezzatura", altro: "Altro" };
+const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
+function renderAzioneAi(box, azione){
+  if(azione.tipo === "evento") return renderEventProposal(box, azione.dati);
+  const id = "azione-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+  aiAzioniInAttesa[id] = azione;
+  const x = azione.dati;
+  let titolo = "", righe = [];
+  if(azione.tipo === "spesa"){
+    titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || x.category}`;
+    righe = [`Importo: € ${Number(x.amount).toFixed(2)}`, `Data: ${formatDate(x.date)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.notes ? escapeHtml(x.notes) : ""];
+  } else if(azione.tipo === "lezione"){
+    titolo = `Calendario · ${LEZIONE_TIPO_LABELS[x.tipo] || x.tipo}`;
+    righe = [`Data: ${formatDate(x.data)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.note ? escapeHtml(x.note) : ""];
+  } else if(azione.tipo === "richiesta_maniscalco"){
+    titolo = `Richiesta a ${escapeHtml(x.nome_maniscalco || "maniscalco")}`;
+    righe = [`${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}${x.horse_name ? " · " + escapeHtml(x.horse_name) : ""}`, `Data preferita: ${formatDate(x.data)}${x.ora ? " ore " + x.ora : ""}`, x.note ? escapeHtml(x.note) : ""];
+  } else return;
+  box.insertAdjacentHTML("beforeend", `
+    <div class="chat-bubble ai event-proposal" id="${id}">
+      <div class="event-proposal-title">${titolo}</div>
+      ${righe.filter(Boolean).map(r => `<div class="event-proposal-row">${r}</div>`).join("")}
+      <div class="event-proposal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="cancelEventProposal('${id}')">Annulla</button>
+        <button class="btn btn-primary btn-sm" onclick="confermaAzioneAi('${id}')">${azione.tipo === "richiesta_maniscalco" ? "Invia richiesta" : "Conferma"}</button>
+      </div>
+    </div>`);
+  box.scrollTop = box.scrollHeight;
+}
+async function confermaAzioneAi(id){
+  const azione = aiAzioniInAttesa[id];
+  const el = document.getElementById(id);
+  if(!azione || !el) return;
+  el.querySelectorAll("button").forEach(b => b.disabled = true);
+  const x = azione.dati;
+  let error = null, fatto = "";
+  if(azione.tipo === "spesa"){
+    const horse_id = x.horse_id || currentHorseId || (horses[0] ? horses[0].id : null);
+    ({ error } = await DB.insertExpense({ horse_id, category: x.category, amount: x.amount, date: x.date, notes: x.notes }));
+    fatto = "✓ Spesa registrata.";
+    if(!error){ if(typeof loadExpenses === "function" && document.getElementById("expenses-list")) loadExpenses(); if(typeof loadExpensesSummary === "function") loadExpensesSummary(); }
+  } else if(azione.tipo === "lezione"){
+    ({ error } = await DB.insertLezione({ horse_id: x.horse_id, data: x.data, tipo: x.tipo, note: x.note }));
+    fatto = "✓ Aggiunto al calendario.";
+    if(!error && typeof loadLezioni === "function" && document.getElementById("lezioni-list")) loadLezioni();
+  } else if(azione.tipo === "richiesta_maniscalco"){
+    ({ error } = await DB.richiediAppuntamento({ cliente_mascalcia_id: x.cliente_mascalcia_id, horse_id: x.horse_id, nome_cavallo: x.nome_cavallo, tipo: x.tipo, tipo_altro: x.tipo_altro, data: x.data, ora: x.ora, note: x.note }));
+    fatto = `✓ Richiesta inviata a ${escapeHtml(x.nome_maniscalco || "il maniscalco")}: ti risponde in chat.`;
+  }
+  if(error){
+    el.querySelectorAll("button").forEach(b => b.disabled = false);
+    showToast("Non sono riuscito a salvare: " + (error.message || "riprova"));
+    return;
+  }
+  delete aiAzioniInAttesa[id];
+  el.innerHTML = `<div class="event-proposal-title">${fatto}</div>`;
+  el.classList.remove("event-proposal");
+}
+
 async function sendChatMessage(){
   const input = document.getElementById("chat-input");
   const text = input.value.trim();
-  if(!text) return;
+  const allegati = aiAllegati.slice();
+  if(!text && !allegati.length) return;
   const box = document.getElementById("chat-messages");
-  box.insertAdjacentHTML("beforeend", `<div class="chat-bubble user">${escapeHtml(text)}</div>`);
+  const thumbs = allegati.length ? `<div class="ai-thumbs">${allegati.map(a => a.anteprima ? `<img src="${a.anteprima}" alt="">` : `<span class="ai-allegato" style="width:56px;height:56px">PDF</span>`).join("")}</div>` : "";
+  box.insertAdjacentHTML("beforeend", `<div class="chat-bubble user">${thumbs}${escapeHtml(text)}</div>`);
   input.value = "";
+  aiAllegati = []; renderAllegatiAi();
   box.scrollTop = box.scrollHeight;
   const thinkingId = "think-" + Date.now();
   box.insertAdjacentHTML("beforeend", `<div class="chat-bubble ai" id="${thinkingId}">…</div>`);
@@ -6904,11 +7024,13 @@ async function sendChatMessage(){
     const res = await fetch("/.netlify/functions/agent", {
       method: "POST",
       headers: await authHeaders(),
-      body: JSON.stringify({ message: text, vista: vistaAi() })
+      body: JSON.stringify({ message: text, vista: vistaAi(), allegati: allegati.map(a => ({ media_type: a.media_type, data: a.data })) })
     });
     const data = await res.json().catch(() => ({}));
     const bolla = document.getElementById(thinkingId);
-    if(res.status === 401){
+    if(res.status === 413){
+      bolla.textContent = "Allegati troppo pesanti: prova con meno foto o un PDF più leggero.";
+    } else if(res.status === 401){
       bolla.textContent = "Sessione scaduta: esci e rientra per usare Equo AI.";
     } else if(data.limite_raggiunto){
       bolla.innerHTML = `<p>Hai usato tutti i <strong>${data.uso.limite} messaggi AI</strong> di questo mese.</p>` +
@@ -6916,7 +7038,9 @@ async function sendChatMessage(){
           `<p>Con Premium ne hai 500 al mese, più cavalli illimitati e promemoria automatici.</p><button class="btn btn-primary btn-sm ai-limit-cta" onclick="closeAiSheet();togglePiano()">Passa a Premium</button>`);
     } else {
       bolla.innerHTML = formattaRispostaAi(data.reply || "Non sono riuscito a rispondere, riprova.");
-      if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
+      if(Array.isArray(data.azioni) && data.azioni.length){
+        data.azioni.forEach(a => renderAzioneAi(box, a));
+      } else if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
         renderEventProposal(box, data.proposedEvent);
       }
     }
