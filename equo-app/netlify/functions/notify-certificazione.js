@@ -45,7 +45,8 @@ exports.handler = async (event) => {
       if (p.certificazione_notificata_at && p.certificazione_richiesta_at && new Date(p.certificazione_notificata_at) >= new Date(p.certificazione_richiesta_at)) {
         return { statusCode: 200, body: JSON.stringify({ esito: "gia_notificata" }) };
       }
-      const esito = await inviaEmailAdmin(p);
+      const duplicati = await cercaStessaPiva(supabase, p);
+      const esito = await inviaEmailAdmin(p, duplicati);
       if (esito.ok) {
         await supabase.from("profiles").update({ certificazione_notificata_at: new Date().toISOString() }).eq("id", id);
       }
@@ -66,7 +67,22 @@ exports.handler = async (event) => {
   }
 };
 
-async function inviaEmailAdmin(p) {
+// Altri profili con la stessa P.IVA (normalizzata). Non blocca: segnala a Simone,
+// perché una P.IVA condivisa può essere legittima (studio associato, società).
+const normPiva = (v) => String(v || "").toUpperCase().replace(/\s+/g, "").replace(/^IT/, "");
+async function cercaStessaPiva(supabase, p) {
+  const piva = normPiva(p.dati_pagamento_piva_cf);
+  if (!/^\d{11}$/.test(piva)) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, dati_pagamento_nome, dati_pagamento_piva_cf, certificazione_stato")
+    .neq("id", p.id)
+    .ilike("dati_pagamento_piva_cf", `%${piva}%`)
+    .limit(10);
+  return (data || []).filter((x) => normPiva(x.dati_pagamento_piva_cf) === piva);
+}
+
+async function inviaEmailAdmin(p, duplicati = []) {
   const piva = String(p.dati_pagamento_piva_cf || "").toUpperCase().replace(/\s+/g, "").replace(/^IT/, "");
   const data = p.certificazione_richiesta_at ? new Date(p.certificazione_richiesta_at).toLocaleString("it-IT", { timeZone: "Europe/Rome" }) : "—";
   const riga = (k, v) => `<tr><td style="padding:6px 12px 6px 0;color:#667;white-space:nowrap">${k}</td><td style="padding:6px 0;font-weight:600">${v}</td></tr>`;
@@ -86,6 +102,14 @@ async function inviaEmailAdmin(p) {
       ${riga("P.IVA", `<span style="font-family:monospace;font-size:15px">${esc(piva || "—")}</span>`)}
       ${riga("ID utente", `<span style="font-family:monospace;font-size:12px">${esc(p.id)}</span>`)}
     </table>
+    ${duplicati.length ? `
+    <div style="margin-top:16px;padding:12px 14px;border:2px solid #c0392b;background:#fdecea;border-radius:10px;font-size:14px">
+      <b>⚠️ Questa P.IVA è già usata da ${duplicati.length === 1 ? "un altro profilo" : duplicati.length + " altri profili"}:</b>
+      <ul style="margin:6px 0 0;padding-left:18px">
+        ${duplicati.map((d) => `<li>${esc(d.dati_pagamento_nome || d.full_name || "—")} – ${esc(d.email || "—")} – badge: <b>${esc(d.certificazione_stato || "nessuno")}</b></li>`).join("")}
+      </ul>
+      <div style="margin-top:6px;color:#667">Se è uno studio associato/società può essere corretto; se no, respingi con il motivo "P.IVA già associata a un altro professionista".</div>
+    </div>` : ""}
     <h3 style="margin:22px 0 6px">Come verificare (30 secondi)</h3>
     <ol style="padding-left:18px;line-height:1.6;font-size:14px;margin:0">
       <li>Apri il <a href="${URL_VERIFICA_PIVA}">servizio Verifica Partita IVA dell'Agenzia delle Entrate</a> e inserisci <b>${esc(piva)}</b>.</li>
@@ -105,7 +129,7 @@ async function inviaEmailAdmin(p) {
     body: JSON.stringify({
       from: "Equo <onboarding@resend.dev>",
       to: EMAIL_ADMIN,
-      subject: `Equo Certified: ${p.dati_pagamento_nome || p.full_name || "nuovo professionista"} (${piva || "P.IVA"})`,
+      subject: `${duplicati.length ? "⚠️ P.IVA DUPLICATA — " : ""}Equo Certified: ${p.dati_pagamento_nome || p.full_name || "nuovo professionista"} (${piva || "P.IVA"})`,
       html,
     }),
   });
