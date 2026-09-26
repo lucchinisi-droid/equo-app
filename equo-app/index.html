@@ -408,6 +408,14 @@ select.input{cursor:pointer}
 .clienti-sez-head{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
 .clienti-sez-head:first-child{margin-top:0}
 .clienti-sez-title{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.share-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin-bottom:10px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:inherit;cursor:pointer;font:inherit}
+.share-opt.primary{border:1.5px solid var(--accent);background:rgba(232,176,75,.10)}
+.share-opt-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface2);font-size:17px;flex-shrink:0}
+.share-opt.primary .share-opt-ico{background:var(--accent);color:#14312a}
+.share-opt-txt{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.share-opt-txt small{font-size:12px;color:var(--muted)}
+.share-cli{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer}
+.share-cli.off{opacity:.55;cursor:default}
 .rich-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
 .rich-item:last-child{border-bottom:none}
 .app-man-stato{font-size:11px;font-weight:800;border-radius:8px;padding:3px 7px;flex-shrink:0}
@@ -1670,7 +1678,7 @@ select.input{cursor:pointer}
       </div>
       <div class="auth-error" id="dp-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="saveDatiPagamento()" style="width:100%;margin-top:6px">Salva</button>
-      <button class="btn btn-outline" onclick="shareDatiPagamento()" style="width:100%;margin-top:8px">Condividi con un cliente (WhatsApp/Email)</button>
+      <button class="btn btn-outline" onclick="shareDatiPagamento()" style="width:100%;margin-top:8px">Condividi con un cliente</button>
     </div>
   </div>
 </div>
@@ -1804,6 +1812,33 @@ select.input{cursor:pointer}
       <div class="auth-error" id="rich-error" style="display:none"></div>
       <button class="btn btn-primary" id="rich-btn" onclick="inviaRichiestaAppuntamento()" style="width:100%;margin-top:6px">Invia richiesta</button>
       <div class="muted" style="font-size:12px;text-align:center;line-height:1.5">Il maniscalco la riceve in agenda e ti conferma qui in chat.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-condividi-dati" onclick="closeOut(event,'modal-condividi-dati')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-condividi-dati')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span>Condividi i dati di pagamento</div>
+    <div id="condividi-scelta">
+      <button class="share-opt primary" onclick="condividiDatiVia('chat')">
+        <span class="share-opt-ico"><i class="fa-solid fa-comment"></i></span>
+        <span class="share-opt-txt"><strong>Chat Equo</strong><small>Arrivano nell'app del cliente, con notifica. Consigliato</small></span>
+      </button>
+      <button class="share-opt" onclick="condividiDatiVia('whatsapp')">
+        <span class="share-opt-ico"><i class="fa-brands fa-whatsapp"></i></span>
+        <span class="share-opt-txt"><strong>WhatsApp</strong><small>Per chi non usa ancora Equo</small></span>
+      </button>
+      <button class="share-opt" onclick="condividiDatiVia('email')">
+        <span class="share-opt-ico"><i class="fa-solid fa-envelope"></i></span>
+        <span class="share-opt-txt"><strong>Email</strong><small>Per chi non usa ancora Equo</small></span>
+      </button>
+    </div>
+    <div id="condividi-clienti" style="display:none">
+      <div class="muted" style="font-size:13px;margin-bottom:8px">A quale cliente?</div>
+      <div id="condividi-clienti-list" style="max-height:48vh;overflow:auto"></div>
+      <button class="btn btn-outline" style="width:100%;margin-top:12px" onclick="mostraSceltaCondivisione()">‹ Indietro</button>
     </div>
   </div>
 </div>
@@ -2967,17 +3002,71 @@ function buildDatiPagamentoText(){
   return text.trim();
 }
 
+// Mantra Equo: "puoi farlo anche fuori da Equo, ma con Equo è tutto più facile".
+// Chat Equo è l'opzione di default; WhatsApp/Email restano per chi non usa ancora l'app
+// e portano con sé un invito a Equo.
+const INVITO_EQUO_FIRMA = "\n\n— Inviato con Equo. Scrivimi e prenota i prossimi appuntamenti dall'app: https://app.equohub.com";
+
 function shareDatiPagamento(){
   const text = buildDatiPagamentoText();
   if(text === "Ecco i miei dati per il pagamento:"){
     showToast("Compila almeno un metodo di pagamento prima di condividere.");
     return;
   }
-  if(navigator.share){
-    navigator.share({ text }).catch(() => {}); // l'utente può annullare la share sheet, non è un errore
+  mostraSceltaCondivisione();
+  openModal("modal-condividi-dati");
+}
+
+function mostraSceltaCondivisione(){
+  document.getElementById("condividi-scelta").style.display = "block";
+  document.getElementById("condividi-clienti").style.display = "none";
+}
+
+async function condividiDatiVia(canale){
+  const text = buildDatiPagamentoText();
+  if(canale === "whatsapp"){
+    window.open("https://wa.me/?text=" + encodeURIComponent(text + INVITO_EQUO_FIRMA), "_blank");
+    closeModal("modal-condividi-dati");
     return;
   }
-  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+  if(canale === "email"){
+    window.location.href = "mailto:?subject=" + encodeURIComponent("Dati per il pagamento") + "&body=" + encodeURIComponent(text + INVITO_EQUO_FIRMA);
+    closeModal("modal-condividi-dati");
+    return;
+  }
+  // Chat Equo: scelta del cliente
+  if(!clientiMascalcia || !clientiMascalcia.length) clientiMascalcia = await DB.listClientiMascalcia();
+  const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
+  const collegati = clientiMascalcia.filter(c => c.cliente_user_id).sort(alf);
+  const nonCollegati = clientiMascalcia.filter(c => !c.cliente_user_id).sort(alf);
+  const box = document.getElementById("condividi-clienti-list");
+  if(!clientiMascalcia.length){
+    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6">Non hai ancora clienti. Aggiungili dalla pagina Clienti e invitali su Equo con il loro codice.</div>';
+  } else {
+    box.innerHTML = collegati.map(c => `
+      <div class="share-cli" onclick="inviaDatiPagamentoInChat('${c.id}')">
+        <div class="horse-avatar" style="width:36px;height:36px"><i class="fa-solid ${isStruttura(c) ? "fa-building" : "fa-user"}" style="font-size:15px"></i></div>
+        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${escapeHtml(c.nome)}</div><div class="muted" style="font-size:12px">su Equo</div></div>
+        <span style="color:var(--accent);font-weight:800">›</span>
+      </div>`).join("")
+    + (nonCollegati.length ? `<div class="muted" style="font-size:12px;margin:12px 0 4px">Non ancora su Equo — usa WhatsApp o Email, oppure invitali con il loro codice dalla scheda cliente:</div>` : "")
+    + nonCollegati.map(c => `
+      <div class="share-cli off">
+        <div class="horse-avatar" style="width:36px;height:36px"><i class="fa-solid ${isStruttura(c) ? "fa-building" : "fa-user"}" style="font-size:15px"></i></div>
+        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${escapeHtml(c.nome)}</div><div class="muted" style="font-size:12px">non su Equo</div></div>
+      </div>`).join("");
+  }
+  document.getElementById("condividi-scelta").style.display = "none";
+  document.getElementById("condividi-clienti").style.display = "block";
+}
+
+async function inviaDatiPagamentoInChat(clienteId){
+  const text = buildDatiPagamentoText();
+  closeModal("modal-condividi-dati");
+  closeModal("modal-dati-pagamento");
+  await openChatThread(clienteId);
+  // testo precompilato: il maniscalco lo rilegge e preme Invia
+  document.getElementById("mchat-input").value = text.replace(/\n/g, " · ").replace("pagamento: · ", "pagamento: ");
 }
 
 /* ---------- CODICE PERSONALE PROFESSIONISTA ---------- */
