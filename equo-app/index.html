@@ -1180,7 +1180,13 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="cliente-note" placeholder="es. scuderia, indicazioni">
       </div>
-      <button class="btn btn-primary" onclick="createClienteMascalcia()" style="width:100%;margin-top:6px">Salva cliente</button>
+      <div class="input-group" id="cliente-codice-group">
+        <label class="input-label">Codice Equo del cliente (opzionale)</label>
+        <input class="input" id="cliente-codice-equo" placeholder="EQUO-XXXXX" style="text-transform:uppercase" autocapitalize="characters">
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Il cliente lo trova in Equo App → menu profilo → "Il tuo codice per la chat". Così puoi scrivergli tu per primo.</div>
+      </div>
+      <div class="auth-error" id="cliente-error" style="display:none"></div>
+      <button class="btn btn-primary" id="cliente-save-btn" onclick="createClienteMascalcia()" style="width:100%;margin-top:6px">Salva cliente</button>
     </div>
   </div>
 </div>
@@ -1225,6 +1231,15 @@ select.input{cursor:pointer}
       <div class="input-group">
         <label class="input-label">Note</label>
         <input class="input" id="edit-cliente-note" placeholder="es. scuderia, indicazioni">
+      </div>
+      <div class="input-group" id="edit-cliente-codice-group">
+        <label class="input-label">Codice Equo del cliente (opzionale)</label>
+        <input class="input" id="edit-cliente-codice-equo" placeholder="EQUO-XXXXX" style="text-transform:uppercase" autocapitalize="characters">
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Il cliente lo trova in Equo App → menu profilo → "Il tuo codice per la chat". Così puoi scrivergli tu per primo.</div>
+      </div>
+      <div class="input-group" id="edit-cliente-collegato" style="display:none">
+        <label class="input-label">Equo App</label>
+        <div style="font-size:13.5px"><strong style="color:var(--green)">✓ Collegato a Equo</strong> — puoi scrivergli dalla chat.</div>
       </div>
       <div class="input-group">
         <label class="input-label">Cavalli</label>
@@ -2577,6 +2592,24 @@ const DB = {
     if(res && res.ok === false) return { error: { message: res.errore } };
     return { error: null };
   },
+  // Maniscalco: collega un suo cliente all'account Equo App del proprietario tramite codice_proprietario
+  async collegaClienteDaCodice(clienteId, codice){
+    if(DEMO_MODE){
+      const prof = demoState.altriProprietari.find(x => x.codice_proprietario === codice);
+      if(!prof) return { ok: false, errore: "codice_non_valido" };
+      const altro = demoState.clientiMascalcia.find(c => c.cliente_user_id === prof.id && c.id !== clienteId);
+      if(altro) return { ok: false, errore: "gia_tuo_cliente", nome_cliente: altro.nome };
+      const c = demoState.clientiMascalcia.find(x => x.id === clienteId);
+      if(c.cliente_user_id && c.cliente_user_id !== prof.id) return { ok: false, errore: "gia_collegato_altro" };
+      c.cliente_user_id = prof.id;
+      demoState.messaggiMascalcia.push({ id: "dm-" + (++demoIdCounter), cliente_mascalcia_id: clienteId, mittente_tipo: "maniscalco", tipo: "testo",
+        testo: "Ciao! Ti ho aggiunto come mio cliente su Equo: da qui puoi scrivermi e prenotare gli appuntamenti.", letto: false, created_at: new Date().toISOString() });
+      return { ok: true, nome_proprietario: prof.full_name };
+    }
+    const { data, error } = await sb.rpc("collega_cliente_mascalcia_da_codice", { p_cliente_id: clienteId, p_codice: codice });
+    if(error){ console.error("collegaClienteDaCodice:", error); return { ok: false, errore: "errore", messaggio: error.message }; }
+    return data || { ok: false, errore: "errore" };
+  },
   async listInboxMascalcia(){
     if(DEMO_MODE){
       return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
@@ -3808,8 +3841,21 @@ function renderClientiList(){
 
 function isStruttura(c){ return c && c.tipo_cliente === "struttura"; }
 
+const ERRORI_COLLEGA_CLIENTE = {
+  codice_non_valido: "Codice Equo non trovato. Controlla di averlo scritto bene.",
+  codice_tuo: "Questo è il tuo codice: serve quello del cliente.",
+  gia_collegato_altro: "Questo cliente è già collegato a un altro account Equo.",
+  cliente_non_trovato: "Cliente non trovato.",
+  non_autenticato: "Sessione scaduta: esci e rientra.",
+};
+function messaggioErroreCollegaCliente(res){
+  if(res?.errore === "gia_tuo_cliente") return `Questo account è già collegato al tuo cliente "${res.nome_cliente || ""}".`;
+  return ERRORI_COLLEGA_CLIENTE[res?.errore] || ("Collegamento non riuscito." + (res?.messaggio ? " (" + res.messaggio + ")" : ""));
+}
+
 function apriNuovoCliente(tipo){
-  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note"].forEach(id => document.getElementById(id).value = "");
+  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("cliente-error").style.display = "none";
   document.getElementById("cliente-tipo").value = tipo === "struttura" ? "struttura" : "proprietario";
   aggiornaEtichetteNuovoCliente();
   openModal("modal-add-cliente");
@@ -3828,14 +3874,26 @@ async function createClienteMascalcia(){
   const telefono = document.getElementById("cliente-telefono").value.trim();
   const note = document.getElementById("cliente-note").value.trim();
   const tipo_cliente = document.getElementById("cliente-tipo").value;
-  const { error } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
-  if(error){ alert("Errore: " + error.message); return; }
-  document.getElementById("cliente-nome").value = "";
-  document.getElementById("cliente-cavallo").value = "";
-  document.getElementById("cliente-telefono").value = "";
-  document.getElementById("cliente-note").value = "";
-  closeModal("modal-add-cliente");
-  await loadClientiMascalcia();
+  const codiceEquo = document.getElementById("cliente-codice-equo").value.trim().toUpperCase();
+  const errBox = document.getElementById("cliente-error");
+  errBox.style.display = "none";
+  const btn = document.getElementById("cliente-save-btn");
+  btn.disabled = true;
+  try {
+    const { error, data: nuovo } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
+    if(error || !nuovo){ errBox.textContent = "Errore: " + (error?.message || "salvataggio non riuscito"); errBox.style.display = "block"; return; }
+    let msgCollegamento = "";
+    if(codiceEquo){
+      const res = await DB.collegaClienteDaCodice(nuovo.id, codiceEquo);
+      msgCollegamento = res.ok ? " e collegato a Equo: gli è arrivato il tuo primo messaggio" : " — codice non collegato: " + messaggioErroreCollegaCliente(res);
+    }
+    ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+    closeModal("modal-add-cliente");
+    showToast("Cliente salvato" + msgCollegamento);
+    await loadClientiMascalcia();
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function openClienteDetail(id){
@@ -3879,6 +3937,9 @@ async function openEditCliente(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
   document.getElementById("edit-cliente-tipo").value = isStruttura(c) ? "struttura" : "proprietario";
+  document.getElementById("edit-cliente-codice-equo").value = "";
+  document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
+  document.getElementById("edit-cliente-collegato").style.display = c.cliente_user_id ? "flex" : "none";
   document.getElementById("edit-cliente-nome").value = c.nome || "";
   document.getElementById("edit-cliente-telefono").value = c.telefono || "";
   document.getElementById("edit-cliente-note").value = c.note || "";
@@ -3936,10 +3997,21 @@ async function salvaEditCliente(){
   const note = document.getElementById("edit-cliente-note").value.trim();
   if(!nome){ errBox.textContent = "Il nome del cliente è obbligatorio."; errBox.style.display = "block"; return; }
   const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
+  const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
   const { error } = await DB.updateClienteMascalcia(currentClienteId, { nome, telefono, note, tipo_cliente });
   if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }
+  if(codiceEquo){
+    const res = await DB.collegaClienteDaCodice(currentClienteId, codiceEquo);
+    if(!res.ok){
+      errBox.textContent = "Dati salvati, ma " + messaggioErroreCollegaCliente(res).replace(/^./, x => x.toLowerCase());
+      errBox.style.display = "block";
+      await loadClientiMascalcia();
+      return;
+    }
+    showToast("Collegato a Equo: gli è arrivato il tuo primo messaggio");
+  }
   closeModal("modal-edit-cliente");
-  showToast("Cliente aggiornato");
+  if(!codiceEquo) showToast("Cliente aggiornato");
   const id = currentClienteId;
   await loadClientiMascalcia();
   await openClienteDetail(id);
