@@ -266,6 +266,11 @@ select.input{cursor:pointer}
 .chat-bubble{max-width:80%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.45}
 .chat-bubble.user{align-self:flex-end;background:var(--accent);color:#14231b;border-bottom-right-radius:4px}
 .chat-bubble.ai{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-bubble.ai p{margin:0 0 6px}.chat-bubble.ai p:last-child{margin:0}
+.chat-bubble.ai ul{margin:4px 0 6px;padding-left:18px}.chat-bubble.ai li{margin:2px 0}
+.chat-bubble.ai a{color:var(--accent);text-decoration:underline}
+.ai-usage-note{font-size:11px;text-align:center;color:var(--muted);padding:0 14px 4px}
+.ai-limit-cta{margin-top:8px}
 .chat-bubble.event-proposal{max-width:88%;border-color:var(--accent)}
 .event-proposal-title{font-weight:600;font-size:13.5px;margin-bottom:4px}
 .event-proposal-row{font-size:12.5px;color:var(--muted);margin-bottom:2px}
@@ -945,7 +950,7 @@ select.input{cursor:pointer}
   </div>
 
   <!-- AI FAB -->
-  <button class="ai-fab" onclick="showAiComingSoon()" aria-label="Assistente AI">
+  <button class="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
     <span class="icon"><svg><use href="#i-sparkles"/></svg></span>
   </button>
 
@@ -960,13 +965,17 @@ select.input{cursor:pointer}
           <span class="icon" style="color:var(--accent)"><svg><use href="#i-sparkles"/></svg></span>
           Assistente AI
         </div>
-        <button class="back-btn" onclick="closeAiSheet()"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="nuovaConversazioneAi()" style="padding:6px 10px;font-size:12px">Nuova chat</button>
+          <button class="back-btn" onclick="closeAiSheet()"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+        </div>
       </div>
       <div class="chat-wrap">
         <div class="chat-messages" id="chat-messages">
-          <div class="chat-bubble ai">Ciao! Sono l'assistente equestre di Equo. Chiedimi pure di alimentazione, comportamento o gestione del tuo cavallo.</div>
+          <div class="chat-bubble ai" id="ai-benvenuto">Ciao! Sono <strong>Equo AI</strong>. Conosco i tuoi cavalli, le scadenze, le spese e gli appuntamenti col maniscalco. Prova a chiedermi: <em>"Cosa scade questo mese?"</em> oppure <em>"Quanto ho speso in pensione quest'anno?"</em></div>
         </div>
-        <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 6px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
+        <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 2px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
+        <div class="ai-usage-note" id="ai-usage-note"></div>
         <div class="chat-input-row">
           <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendChatMessage()">
           <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
@@ -3835,7 +3844,69 @@ function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
-function openAiSheet(){ document.getElementById("ai-sheet-overlay").classList.add("active"); }
+/* ---------- EQUO AI (agente, Step 1 — vedi claude/equo-agenti-ai.md) ---------- */
+let aiStoriaCaricata = false;
+function vistaAi(){
+  const v = currentUser?.vistaAttiva || currentUser?.ruolo;
+  return PRO_ROLES.includes(v) ? "professionista" : "proprietario";
+}
+async function openAiSheet(){
+  document.getElementById("ai-sheet-overlay").classList.add("active");
+  if(!aiStoriaCaricata && !DEMO_MODE && currentUser){
+    aiStoriaCaricata = true;
+    await caricaStoriaAi();
+    await aggiornaNotaUsoAi();
+  }
+}
+async function caricaStoriaAi(){
+  const { data, error } = await sb.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", currentUser.id).eq("vista", vistaAi()).order("created_at", { ascending: false }).limit(20);
+  if(error){ console.error("caricaStoriaAi:", error); return; }
+  const box = document.getElementById("chat-messages");
+  (data || []).reverse().forEach(m => {
+    box.insertAdjacentHTML("beforeend", m.ruolo === "user"
+      ? `<div class="chat-bubble user">${escapeHtml(m.contenuto)}</div>`
+      : `<div class="chat-bubble ai">${formattaRispostaAi(m.contenuto)}</div>`);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+async function aggiornaNotaUsoAi(uso){
+  const el = document.getElementById("ai-usage-note");
+  if(!el) return;
+  if(!uso && !DEMO_MODE && currentUser){
+    const { data } = await sb.from("ai_utilizzo").select("conteggio").eq("user_id", currentUser.id).eq("mese", new Date().toISOString().slice(0, 7)).maybeSingle();
+    uso = { usati: data?.conteggio || 0, limite: isPremium() ? 500 : 5 };
+  }
+  if(!uso){ el.textContent = ""; return; }
+  el.textContent = `${uso.usati} di ${uso.limite} messaggi AI questo mese` + (uso.limite <= 5 ? " · Premium: 500" : "");
+}
+async function nuovaConversazioneAi(){
+  if(!confirm("Cancellare la conversazione con Equo AI? Le note che ha memorizzato restano.")) return;
+  if(!DEMO_MODE && currentUser){
+    const { error } = await sb.from("ai_messaggi").delete().eq("user_id", currentUser.id).eq("vista", vistaAi());
+    if(error){ showToast("Non sono riuscito a cancellare, riprova."); return; }
+  }
+  const box = document.getElementById("chat-messages");
+  box.querySelectorAll(".chat-bubble:not(#ai-benvenuto)").forEach(el => el.remove());
+  showToast("Nuova conversazione");
+}
+// Markdown minimo e sicuro: prima si fa l'escape, poi grassetto, corsivo, link, elenchi e paragrafi.
+function formattaRispostaAi(testo){
+  const righe = escapeHtml(testo || "").split("\n");
+  let html = "", inLista = false;
+  const inline = s => s
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\*)/g, "$1<em>$2</em>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  righe.forEach(r => {
+    const m = r.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
+    if(m){ if(!inLista){ html += "<ul>"; inLista = true; } html += `<li>${inline(m[1])}</li>`; return; }
+    if(inLista){ html += "</ul>"; inLista = false; }
+    if(r.trim()) html += `<p>${inline(r.replace(/^#+\s*/, ""))}</p>`;
+  });
+  if(inLista) html += "</ul>";
+  return html || "<p></p>";
+}
 
 let toastTimer = null;
 function showToast(message){
@@ -3845,9 +3916,7 @@ function showToast(message){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("active"), 2600);
 }
-function showAiComingSoon(){
-  showToast("Equo AI sarà presto disponibile");
-}
+function showAiComingSoon(){ openAiSheet(); }
 function closeAiSheet(){ document.getElementById("ai-sheet-overlay").classList.remove("active"); }
 
 /* ---------- HORSES ---------- */
@@ -6832,16 +6901,26 @@ async function sendChatMessage(){
     return;
   }
   try{
-    const res = await fetch("/.netlify/functions/ai-proxy", {
+    const res = await fetch("/.netlify/functions/agent", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, horses: horses.map(h => ({ id: h.id, name: h.name })) })
+      headers: await authHeaders(),
+      body: JSON.stringify({ message: text, vista: vistaAi() })
     });
-    const data = await res.json();
-    document.getElementById(thinkingId).textContent = data.reply || "Non sono riuscito a rispondere, riprova.";
-    if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
-      renderEventProposal(box, data.proposedEvent);
+    const data = await res.json().catch(() => ({}));
+    const bolla = document.getElementById(thinkingId);
+    if(res.status === 401){
+      bolla.textContent = "Sessione scaduta: esci e rientra per usare Equo AI.";
+    } else if(data.limite_raggiunto){
+      bolla.innerHTML = `<p>Hai usato tutti i <strong>${data.uso.limite} messaggi AI</strong> di questo mese.</p>` +
+        (data.uso.piano === "premium" ? "<p>Il contatore riparte il 1° del mese.</p>" :
+          `<p>Con Premium ne hai 500 al mese, più cavalli illimitati e promemoria automatici.</p><button class="btn btn-primary btn-sm ai-limit-cta" onclick="closeAiSheet();togglePiano()">Passa a Premium</button>`);
+    } else {
+      bolla.innerHTML = formattaRispostaAi(data.reply || "Non sono riuscito a rispondere, riprova.");
+      if(data.proposedEvent && data.proposedEvent.horse_name && data.proposedEvent.type && data.proposedEvent.date){
+        renderEventProposal(box, data.proposedEvent);
+      }
     }
+    if(data.uso) aggiornaNotaUsoAi(data.uso);
   } catch(e){
     document.getElementById(thinkingId).textContent = "Errore di connessione, riprova.";
   }
@@ -6895,7 +6974,7 @@ async function confirmEventProposal(id, proposed){
     el.innerHTML = `<div class="event-proposal-title">✓ Evento salvato per ${escapeHtml(horse.name)}.</div>`;
     el.classList.remove("event-proposal");
   }
-  if(currentHorseId === horse.id) await loadHorseEvents();
+  if(currentHorseId === horse.id) await loadHorseEvents(horse.id);
   await loadDeadlines();
 }
 
