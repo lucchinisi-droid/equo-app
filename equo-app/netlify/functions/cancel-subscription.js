@@ -9,18 +9,26 @@
 const Stripe = require("stripe");
 const { createClient } = require("@supabase/supabase-js");
 
+// Verifica il login: l'utente arriva dal token Supabase, mai dal body della richiesta.
+async function utenteDaToken(event, supabase) {
+  const h = event.headers.authorization || event.headers.Authorization || "";
+  const token = h.replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return data.user;
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
   }
 
   try {
-    const { userId } = JSON.parse(event.body || "{}");
-    if (!userId) {
-      return { statusCode: 400, body: JSON.stringify({ error: "userId mancante" }) };
-    }
-
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const user = await utenteDaToken(event, supabase);
+    if (!user) return { statusCode: 401, body: JSON.stringify({ error: "Non autenticato" }) };
+    const userId = user.id;
     const { data: profile, error: readError } = await supabase
       .from("profiles")
       .select("stripe_subscription_id")

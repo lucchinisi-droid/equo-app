@@ -20,11 +20,18 @@ exports.handler = async (event) => {
 
   try {
     switch (stripeEvent.type) {
-      // Checkout completato per un abbonamento mensile/annuale (i lifetime non passano
-      // da Checkout Session, sono Payment Link a parte, quindi non generano questo evento
-      // per Equo: se in futuro venissero mossi qui, mode sarebbe "payment" non "subscription").
+      // Checkout completato: abbonamento mensile/annuale (mode "subscription") oppure
+      // lifetime pagato da Payment Link (mode "payment", utente da client_reference_id).
       case "checkout.session.completed": {
         const session = stripeEvent.data.object;
+        // Lifetime: Payment Link (mode "payment"); l'app aggiunge ?client_reference_id=<userId> al link.
+        if (session.mode === "payment" && session.client_reference_id && session.payment_status === "paid") {
+          await supabase
+            .from("profiles")
+            .update({ piano: "premium", stripe_customer_id: session.customer || null, stripe_subscription_id: null })
+            .eq("id", session.client_reference_id);
+          break;
+        }
         if (session.mode === "subscription") {
           const userId = session.client_reference_id;
           if (userId) {

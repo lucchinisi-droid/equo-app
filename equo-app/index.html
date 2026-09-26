@@ -14,6 +14,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root {
   --bg:#0e2019; --surface:#14312a; --surface2:#1c3f35;
@@ -445,6 +448,15 @@ select.input{cursor:pointer}
 .mchat-doc{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.06);margin-bottom:6px;text-decoration:none;color:inherit}
 .mchat-doc-ico{width:34px;height:40px;border-radius:6px;background:#c0392b;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .mchat-doc-nome{font-size:12.5px;font-weight:600;word-break:break-all}
+/* ripristinati 27/09 (chip mappa servizi, banner partner) */
+.chip{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.active{background:var(--primary,#03491d);border-color:var(--primary,#03491d);color:#fff}
+.partner-banner{border-radius:16px;overflow:hidden;background:var(--card,#0e2417);border:1px dashed var(--border);position:relative;height:78px;margin-bottom:14px;cursor:pointer}
+.partner-slide{position:absolute;inset:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;opacity:0;transition:opacity .5s;pointer-events:none}
+.partner-slide.active{opacity:1;pointer-events:auto}
+.partner-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;margin-bottom:5px;background:rgba(255,189,89,.18);color:var(--gold,#ffbd59);width:fit-content}
+.partner-title{font-size:14px;font-weight:700;color:var(--text)}
+.partner-desc{font-size:11px;color:var(--muted);margin-top:2px}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
      su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
@@ -636,6 +648,19 @@ select.input{cursor:pointer}
         </div>
       </div>
 
+      <div class="partner-banner" id="partner-banner">
+        <div class="partner-slide active" data-pslide="0" onclick="window.location.href='mailto:gestione.equo@gmail.com?subject=' + encodeURIComponent('Vorrei comparire come partner su Equo')">
+          <span class="partner-tag">PARTNER</span>
+          <div class="partner-title">Vuoi comparire qui?</div>
+          <div class="partner-desc">Scrivici</div>
+        </div>
+        <div class="partner-slide" data-pslide="1" onclick="openModal('modal-segnala-maneggio')">
+          <span class="partner-tag">SEGNALAZIONE</span>
+          <div class="partner-title">Segnalaci il tuo maneggio</div>
+          <div class="partner-desc">E ottieni 1 mese di Premium gratis</div>
+        </div>
+      </div>
+
       <div class="stat-row">
         <div class="stat-card">
           <div class="stat-label">Spese questo mese</div>
@@ -658,8 +683,8 @@ select.input{cursor:pointer}
         <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
       </div>
 
-      <button class="btn btn-outline" disabled style="width:100%;opacity:.55;cursor:not-allowed">
-        <span class="icon"><svg><use href="#i-mappin"/></svg></span> PRESTO DISPONIBILE
+      <button class="btn btn-outline" onclick="openServicesMap()" style="width:100%">
+        <span class="icon"><svg><use href="#i-mappin"/></svg></span> Servizi vicino a te
       </button>
     </div>
   </div>
@@ -726,7 +751,7 @@ select.input{cursor:pointer}
       <div class="card" style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-weight:700;font-size:14px">Libretto sanitario</div>
-          <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-event')">+ Evento</button>
+          <button class="btn btn-outline btn-sm" onclick="openAddEventModal()">+ Evento</button>
         </div>
         <div id="horse-events-list"><div class="muted" style="font-size:13px">Nessun evento registrato.</div></div>
       </div>
@@ -755,7 +780,7 @@ select.input{cursor:pointer}
   <div class="page-content" id="page-spese">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div class="section-title" style="margin-bottom:0">Registro spese</div>
-      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-expense')">+ Spesa</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddExpenseModal()">+ Spesa</button>
     </div>
     <div class="card" style="margin-bottom:14px">
       <div class="stat-label">Totale questo mese</div>
@@ -1383,7 +1408,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-event" onclick="closeOut(event,'modal-add-event')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span>Nuovo evento sanitario</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="modal-add-event-title">Nuovo evento sanitario</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Tipo</label>
@@ -1406,7 +1431,8 @@ select.input{cursor:pointer}
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="event-notes" placeholder="es. Dr. Rossi">
       </div>
-      <button class="btn btn-primary" onclick="createHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
+      <button class="btn btn-primary" onclick="saveHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
+      <button class="btn btn-danger" id="event-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteHorseEventFromModal()">Elimina evento</button>
     </div>
   </div>
 </div>
@@ -1414,7 +1440,7 @@ select.input{cursor:pointer}
 <div class="modal-overlay" id="modal-add-expense" onclick="closeOut(event,'modal-add-expense')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span>Nuova spesa</div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span><span id="modal-add-expense-title">Nuova spesa</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Categoria</label>
@@ -1439,7 +1465,8 @@ select.input{cursor:pointer}
         <label class="input-label">Nota (opzionale)</label>
         <input class="input" id="expense-notes" placeholder="es. Mangime mensile">
       </div>
-      <button class="btn btn-primary" onclick="createExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
+      <button class="btn btn-primary" onclick="saveExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
+      <button class="btn btn-danger" id="expense-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteExpenseFromModal()">Elimina spesa</button>
     </div>
   </div>
 </div>
@@ -1738,6 +1765,9 @@ select.input{cursor:pointer}
       </div>
       <div class="auth-error" id="new-chat-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="startNewChat()" style="width:100%;margin-top:6px">Avvia chat</button>
+      <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
+        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
+      </button>
     </div>
   </div>
 </div>
@@ -1851,6 +1881,79 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-segnala-maneggio" onclick="closeOut(event,'modal-segnala-maneggio')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-gift"></i></span>Segnala un maneggio</div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">Conosci un maneggio o un centro ippico non ancora su Equo? Segnalacelo: se si registra, tu ricevi 1 mese di Premium gratis.</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Nome struttura</label>
+        <input class="input" id="segnala-nome-struttura" placeholder="es. Centro Ippico Le Querce">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Città</label>
+        <input class="input" id="segnala-citta" placeholder="es. Colleferro (RM)">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Via (opzionale)</label>
+        <input class="input" id="segnala-via" placeholder="es. Via Roma 10">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Telefono struttura (opzionale)</label>
+        <input class="input" id="segnala-telefono-struttura" type="tel" placeholder="es. 06 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email o telefono tuo, per ricevere il codice</label>
+        <input class="input" id="segnala-contatto-premio" placeholder="dove ti mandiamo il codice">
+      </div>
+      <button class="btn btn-primary" onclick="submitSegnalazioneManeggio()" style="width:100%;margin-top:6px">Invia segnalazione</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-qr-scan" onclick="closeOut(event,'modal-qr-scan')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>Inquadra il QR</div>
+    <div style="position:relative;border-radius:14px;overflow:hidden;background:#000">
+      <video id="qr-scan-video" style="width:100%;display:block" muted playsinline></video>
+      <canvas id="qr-scan-canvas" style="display:none"></canvas>
+    </div>
+    <div class="muted" style="font-size:12px;text-align:center;margin-top:10px">Inquadra il codice QR dell'altra persona per collegarti subito.</div>
+    <button class="btn btn-outline" onclick="closeQrScanner()" style="width:100%;margin-top:10px">Annulla</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-services-map" onclick="closeOut(event,'modal-services-map')">
+  <div class="modal" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-map-location-dot"></i></span>Servizi vicino a te</div>
+    <div id="services-map-chips" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px">
+      <button class="chip active" data-tipo="tutti" onclick="filterServices('tutti')">Tutti</button>
+      <button class="chip" data-tipo="veterinario" onclick="filterServices('veterinario')">Veterinari</button>
+      <button class="chip" data-tipo="centro_ippico" onclick="filterServices('centro_ippico')">Centri ippici</button>
+      <button class="chip" data-tipo="negozio" onclick="filterServices('negozio')">Negozi</button>
+    </div>
+    <div id="services-map-canvas" style="height:220px;border-radius:14px;overflow:hidden;margin-bottom:12px"></div>
+    <div id="services-list"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: completa profilo (nome e cognome obbligatori) ═══ -->
+<div class="modal-overlay" id="modal-completa-profilo">
+  <div class="modal">
+    <div class="modal-title">Completa il tuo profilo</div>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Per il corretto funzionamento dell'app, e per farti riconoscere e connettere con amici e strutture, è indispensabile inserire il tuo nome e cognome corretti.</p>
+    <div class="field">
+      <label>Nome e cognome</label>
+      <input class="input" id="cp-nome-cognome" placeholder="Es. Mario Rossi">
+    </div>
+    <div class="auth-error" id="cp-nome-error" style="display:none"></div>
+    <button class="btn btn-primary btn-block" onclick="saveCompleteProfile()">Salva e continua</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1924,12 +2027,20 @@ select.input{cursor:pointer}
       Sblocchi cavalli/clienti illimitati, reminder automatici, AI con più messaggi e le altre funzioni Premium.
       Puoi tornare a Free in qualsiasi momento dal menu, con lo stesso numero di passaggi.
     </p>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
-      Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.
+    <div id="upgrade-demo-actions" style="display:none">
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
+        Attivazione istantanea in modalità demo — nessun pagamento reale.
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+        <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Conferma</button>
+      </div>
     </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
-      <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Richiedi l'attivazione</button>
+    <div id="upgrade-real-options" style="display:none;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" style="width:100%" onclick="startCheckout('mensile')" id="upgrade-btn-mensile">Mensile</button>
+      <button class="btn btn-outline" style="width:100%" onclick="startCheckout('annuale')" id="upgrade-btn-annuale">Annuale</button>
+      <button class="btn btn-outline" style="width:100%" onclick="startLifetimeCheckout()" id="upgrade-btn-lifetime">Lifetime</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
     </div>
   </div>
 </div>
@@ -2033,6 +2144,9 @@ const demoState = {
     { id: "mo-1", conversazione_id: "co-1", mittente_id: "demo-owner-2", tipo: "testo", testo: "Ciao! Portiamo i cavalli al maneggio sabato?", media_url: null, letto: false, created_at: "2026-09-17T09:00:00" },
     { id: "mo-2", conversazione_id: "co-1", mittente_id: "demo-user", tipo: "testo", testo: "Perfetto, ci sono!", media_url: null, letto: true, created_at: "2026-09-16T18:20:00" },
   ],
+  services: [
+    { id: "ds-1", tipo: "veterinario", nome: "Clinica Veterinaria Equina Demo", indirizzo: "Via delle Scuderie 1", telefono: "0212345678", lat: 45.4642, lng: 9.19, note: "H24", fonte: "curato" },
+  ],
   paymentMethods: [],
   clientiMascalcia: [
     { id: "dc-1", nome: "Marco Bianchi", nome_cavallo: "Aurora", telefono: "333 1112222", note: "", cliente_user_id: null, codice_invito: "EQUO-DC1AB", tipo_cliente: "proprietario", created_at: "2026-08-01" },
@@ -2098,6 +2212,23 @@ const DB = {
     const { error } = await sb.from("health_events").insert({ horse_id, type, date, next_due_date, notes });
     return { error };
   },
+    async updateEvent(id, { horse_id, type, date, next_due_date, notes }){
+    if(DEMO_MODE){
+      const list = demoState.events[horse_id] || [];
+      const ev = list.find(e => e.id === id);
+      if(ev){ Object.assign(ev, { type, date, next_due_date, notes }); }
+      return { error: null };
+    }
+    const { error } = await sb.from("health_events").update({ type, date, next_due_date, notes }).eq("id", id);
+    return { error };
+  },
+    async deleteEvent(id, horse_id){
+    if(DEMO_MODE){
+      demoState.events[horse_id] = (demoState.events[horse_id] || []).filter(e => e.id !== id);
+      return;
+    }
+    await sb.from("health_events").delete().eq("id", id);
+  },
   async listUpcomingDeadlines(horseIds, limit){
     if(DEMO_MODE){
       const all = [];
@@ -2127,6 +2258,25 @@ const DB = {
     }
     const { error } = await sb.from("expenses").insert({ owner_id: currentUser.id, horse_id, category, amount, date, notes });
     return { error };
+  },
+    async updateExpense(id, { horse_id, category, amount, date, notes }){
+    if(DEMO_MODE){
+      const exp = demoState.expenses.find(e => e.id === id);
+      if(exp){
+        const horse = demoState.horses.find(h => h.id === horse_id);
+        Object.assign(exp, { horse_id, horse_name: horse?.name || "", category, amount, date, notes });
+      }
+      return { error: null };
+    }
+    const { error } = await sb.from("expenses").update({ horse_id, category, amount, date, notes }).eq("id", id);
+    return { error };
+  },
+    async deleteExpense(id){
+    if(DEMO_MODE){
+      demoState.expenses = demoState.expenses.filter(e => e.id !== id);
+      return;
+    }
+    await sb.from("expenses").delete().eq("id", id);
   },
   async listLezioni(){
     if(DEMO_MODE) return demoState.lezioniManuali.slice().sort((a,b) => new Date(b.data) - new Date(a.data)).map(l => ({ ...l, horses: { name: (demoState.horses.find(h => h.id === l.horse_id) || {}).name } }));
@@ -2659,6 +2809,16 @@ const DB = {
     if(error) console.error("richiediCertificazione:", error);
     return { error };
   },
+  async listServices(){
+    if(DEMO_MODE) return demoState.services;
+    const { data, error } = await sb.from("services").select("*");
+    return error ? [] : (data || []);
+  },
+  async insertSegnalazioneManeggio(payload){
+    if(DEMO_MODE) return { error: null };
+    const { error } = await sb.from("segnalazioni_maneggio").insert(payload);
+    return { error };
+  },
   async listInboxMascalcia(){
     if(DEMO_MODE){
       return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
@@ -2905,6 +3065,7 @@ async function enterApp(ruolo){
     await loadHorses();
     renderPaymentMethods();
     startPromoRotation();
+    startPartnerBannerRotation();
     startChatBadgePolling();
     if(ruolo === "gestore_struttura") showStableManagerBanner();
   }
@@ -3032,6 +3193,45 @@ function copyInviteLink(){
   } else {
     showToast("Copia manualmente: " + text);
   }
+}
+
+function startPartnerBannerRotation(){
+  let i = 0;
+  const slides = document.querySelectorAll(".partner-slide");
+  if(slides.length < 2) return;
+  setInterval(() => {
+    slides[i].classList.remove("active");
+    i = (i + 1) % slides.length;
+    slides[i].classList.add("active");
+  }, 30000);
+}
+
+async function submitSegnalazioneManeggio(){
+  const nome_struttura = document.getElementById("segnala-nome-struttura").value.trim();
+  const citta = document.getElementById("segnala-citta").value.trim();
+  const via = document.getElementById("segnala-via").value.trim();
+  const telefono_struttura = document.getElementById("segnala-telefono-struttura").value.trim();
+  const contatto_premio = document.getElementById("segnala-contatto-premio").value.trim();
+  if(!nome_struttura || !citta || !contatto_premio){
+    showToast("Compila almeno nome struttura, città e il tuo contatto.");
+    return;
+  }
+  const payload = {
+    nome_struttura, citta,
+    via: via || null,
+    telefono_struttura: telefono_struttura || null,
+    contatto_premio,
+    segnalato_da: currentUser ? currentUser.id : null,
+  };
+  const { error } = await DB.insertSegnalazioneManeggio(payload);
+  if(error){ showToast("Errore, riprova tra poco."); return; }
+  document.getElementById("segnala-nome-struttura").value = "";
+  document.getElementById("segnala-citta").value = "";
+  document.getElementById("segnala-via").value = "";
+  document.getElementById("segnala-telefono-struttura").value = "";
+  document.getElementById("segnala-contatto-premio").value = "";
+  closeModal("modal-segnala-maneggio");
+  showToast("Grazie! Ti contatteremo con il codice Premium.");
 }
 
 function showStableManagerBanner(){
@@ -3439,6 +3639,20 @@ async function boot(){
   if(currentUser.avatarUrl) setAvatarImage(currentUser.avatarUrl);
   else setAvatarInitial((user.email || "?").charAt(0).toUpperCase());
 
+  const nomeParoleBoot = (profile?.full_name || "").trim().split(/\s+/).filter(Boolean);
+  if(nomeParoleBoot.length < 2){
+    document.getElementById("screen-app").classList.remove("active");
+    document.getElementById("screen-onboarding").classList.remove("active");
+    document.getElementById("cp-nome-error").style.display = "none";
+    document.getElementById("cp-nome-cognome").value = profile?.full_name || "";
+    openModal("modal-completa-profilo");
+    return;
+  }
+
+  await continueBootAfterProfile();
+}
+
+async function continueBootAfterProfile(){
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
     document.getElementById("screen-onboarding").classList.add("active");
@@ -3447,6 +3661,56 @@ async function boot(){
   }
   await enterApp(currentUser.ruolo);
   checkPendingDeletion();
+  await handleCheckoutReturn();
+}
+
+async function saveCompleteProfile(){
+  const nome = document.getElementById("cp-nome-cognome").value.trim();
+  const errBox = document.getElementById("cp-nome-error");
+  errBox.style.display = "none";
+  const parole = nome.split(/\s+/).filter(Boolean);
+  if(parole.length < 2){
+    errBox.textContent = "Inserisci nome e cognome (almeno due parole).";
+    errBox.style.display = "block";
+    return;
+  }
+  try{
+    const { error } = await sb.from("profiles").update({ full_name: nome }).eq("id", currentUser.id);
+    if(error) throw error;
+    document.getElementById("profile-name").textContent = nome;
+    closeModal("modal-completa-profilo");
+    await continueBootAfterProfile();
+  } catch(err){
+    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.style.display = "block";
+  }
+}
+
+/* Al ritorno da Stripe Checkout (?checkout=success in URL) il webhook potrebbe
+   impiegare qualche istante ad aggiornare profiles.piano: aspettiamo un attimo e
+   ricontrolliamo, poi ripuliamo l'URL per non ritriggerare al refresh. */
+async function handleCheckoutReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get("checkout");
+  if(!checkout) return;
+  window.history.replaceState({}, "", window.location.pathname);
+  if(checkout === "cancel"){
+    showToast("Pagamento annullato.");
+    return;
+  }
+  if(checkout === "success"){
+    showToast("Pagamento ricevuto, aggiorniamo il tuo piano...");
+    await new Promise(r => setTimeout(r, 2000));
+    const { data: profile } = await sb.from("profiles").select("piano").eq("id", currentUser.id).maybeSingle();
+    if(profile?.piano === "premium"){
+      currentUser.piano = "premium";
+      updatePianoUI();
+      if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
+      showToast("Sei passato a Premium!");
+    } else {
+      showToast("Pagamento ricevuto, l'attivazione arriva a momenti — riapri l'app tra poco se non la vedi subito.");
+    }
+  }
 }
 
 /* ---------- GOOGLE SIGN-IN ---------- */
@@ -3839,12 +4103,13 @@ async function loadHorseEvents(horseId){
   const box = document.getElementById("horse-events-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listEvents(horseId);
+  currentHorseEventsData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun evento registrato.</div>';
     return;
   }
   box.innerHTML = data.map(ev => `
-    <div class="event-item">
+    <div class="event-item" style="cursor:pointer" onclick="openEditEventModal('${ev.id}')">
       <div>
         <div style="font-weight:600;font-size:14px">${EVENT_LABELS[ev.type] || ev.type}</div>
         <div class="muted" style="font-size:12px">${formatDate(ev.date)}${ev.notes ? " · " + escapeHtml(ev.notes) : ""}</div>
@@ -3854,21 +4119,60 @@ async function loadHorseEvents(horseId){
   `).join("");
 }
 
-async function createHorseEvent(){
+let editingEventId = null;
+let currentHorseEventsData = [];
+function openAddEventModal(){
+  editingEventId = null;
+  document.getElementById("modal-add-event-title").textContent = "Nuovo evento sanitario";
+  document.getElementById("event-type").value = "vaccino";
+  document.getElementById("event-date").value = "";
+  document.getElementById("event-next-date").value = "";
+  document.getElementById("event-notes").value = "";
+  document.getElementById("event-delete-btn").style.display = "none";
+  openModal("modal-add-event");
+}
+
+function openEditEventModal(id){
+  const ev = currentHorseEventsData.find(e => e.id === id);
+  if(!ev) return;
+  editingEventId = id;
+  document.getElementById("modal-add-event-title").textContent = "Modifica evento";
+  document.getElementById("event-type").value = ev.type;
+  document.getElementById("event-date").value = ev.date;
+  document.getElementById("event-next-date").value = ev.next_due_date || "";
+  document.getElementById("event-notes").value = ev.notes || "";
+  document.getElementById("event-delete-btn").style.display = "block";
+  openModal("modal-add-event");
+}
+
+async function saveHorseEvent(){
   if(!currentHorseId) return;
   const type = document.getElementById("event-type").value;
   const date = document.getElementById("event-date").value;
   const next_due_date = document.getElementById("event-next-date").value || null;
   const notes = document.getElementById("event-notes").value.trim();
   if(!date) return;
-  const { error } = await DB.insertEvent({ horse_id: currentHorseId, type, date, next_due_date, notes });
+  const payload = { horse_id: currentHorseId, type, date, next_due_date, notes };
+  const { error } = editingEventId ? await DB.updateEvent(editingEventId, payload) : await DB.insertEvent(payload);
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("event-date").value = "";
   document.getElementById("event-next-date").value = "";
   document.getElementById("event-notes").value = "";
+  editingEventId = null;
   closeModal("modal-add-event");
   await loadHorseEvents(currentHorseId);
 }
+
+async function deleteHorseEventFromModal(){
+  if(!editingEventId) return;
+  if(!confirm("Eliminare questo evento?")) return;
+  await DB.deleteEvent(editingEventId, currentHorseId);
+  editingEventId = null;
+  closeModal("modal-add-event");
+  await loadHorseEvents(currentHorseId);
+}
+// nome vecchio
+const createHorseEvent = saveHorseEvent;
 
 function deadlineBadgeClass(dateStr){
   const days = (new Date(dateStr) - new Date()) / 86400000;
@@ -4288,10 +4592,25 @@ function isPremium(){
 }
 
 /* ---------- PIANO (Passa a Premium / Torna a Free) ----------
-   Stripe non è ancora collegato (vedi modal-add-payment): il pulsante aggiorna
-   direttamente profiles.piano, con lo stesso numero di passaggi in entrambe le
-   direzioni (un solo modale di conferma), come richiesto dall'art. 54-bis
-   Codice del Consumo su recesso/disdetta facile quanto la sottoscrizione. */
+   Stripe collegato: mensile/annuale passano da una vera Checkout Session, i lifetime
+   da un Payment Link diretto (con limite posti impostato su Stripe). "Torna a Free"
+   annulla davvero l'abbonamento su Stripe (cancel-subscription.js), non solo il flag
+   in app — obbligo di fatto per l'art. 54-bis Codice del Consumo su recesso/disdetta
+   facile quanto la sottoscrizione: altrimenti l'utente continuerebbe a pagare da Free. */
+const LIFETIME_LINKS = {
+  proprietario: "https://buy.stripe.com/00w4gB64fgRu0cbcrD6Na01",
+  professionista: "https://buy.stripe.com/9B6dRbgIT58Mf7577j6Na00",
+};
+const PREZZI_PREMIUM = {
+  proprietario: { mensile: "Mensile — 2,99€/mese", annuale: "Annuale — 19€/anno", lifetime: "Lifetime — 49€ una tantum" },
+  professionista: { mensile: "Mensile — 7,99€/mese", annuale: "Annuale — 59€/anno", lifetime: "Lifetime — 99€ una tantum" },
+};
+
+function currentPianoRuolo(){
+  const attiva = currentUser?.vistaAttiva || currentUser?.ruolo;
+  return PRO_ROLES.includes(attiva) ? "professionista" : "proprietario";
+}
+
 function updatePianoUI(){
   const label = document.getElementById("piano-label");
   const desc = document.getElementById("piano-desc");
@@ -4315,38 +4634,79 @@ function togglePiano(){
     openModal("modal-downgrade-free");
     return;
   }
-  // In demo il piano è solo per mostrare la UI: nessun rischio, si può attivare all'istante.
-  // Fuori demo Stripe non è ancora collegato, quindi non lasciamo che chiunque si scriva
-  // "premium" da solo sul database — l'attivazione passa da una richiesta manuale.
-  const note = document.getElementById("upgrade-premium-note");
-  const btn = document.getElementById("upgrade-premium-confirm-btn");
+  const demoBox = document.getElementById("upgrade-demo-actions");
+  const realBox = document.getElementById("upgrade-real-options");
   if(DEMO_MODE){
-    note.textContent = "Attivazione istantanea in modalità demo — nessun pagamento reale.";
-    btn.textContent = "Conferma";
+    demoBox.style.display = "block";
+    realBox.style.display = "none";
   } else {
-    note.textContent = "Il pagamento online arriva a breve. Per ora attiviamo Premium a mano: conferma per inviarci una richiesta via email, ti rispondiamo il prima possibile.";
-    btn.textContent = "Richiedi l'attivazione";
+    demoBox.style.display = "none";
+    realBox.style.display = "flex";
+    const prezzi = PREZZI_PREMIUM[currentPianoRuolo()];
+    document.getElementById("upgrade-btn-mensile").textContent = prezzi.mensile;
+    document.getElementById("upgrade-btn-annuale").textContent = prezzi.annuale;
+    document.getElementById("upgrade-btn-lifetime").textContent = prezzi.lifetime;
   }
   openModal("modal-upgrade-premium");
 }
 
+// Header con il token di login: le funzioni Netlify ricavano l'utente dal token, mai dal body.
+async function authHeaders(){
+  const { data } = await sb.auth.getSession();
+  const token = data?.session?.access_token;
+  return { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) };
+}
+
+async function startCheckout(periodo){
+  try{
+    const res = await fetch("/.netlify/functions/create-checkout", {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify({ piano: currentPianoRuolo(), periodo })
+    });
+    const data = await res.json();
+    if(data.url){ window.location.href = data.url; }
+    else { showToast("Non sono riuscito ad aprire il pagamento, riprova."); }
+  } catch(e){
+    showToast("Errore di connessione, riprova.");
+  }
+}
+
+function startLifetimeCheckout(){
+  // client_reference_id = utente Equo: il webhook Stripe lo usa per attivare Premium lifetime
+  const url = new URL(LIFETIME_LINKS[currentPianoRuolo()]);
+  url.searchParams.set("client_reference_id", currentUser.id);
+  if(currentUser.email) url.searchParams.set("prefilled_email", currentUser.email);
+  window.location.href = url.toString();
+}
+
 async function confirmUpgradePremium(){
   closeModal("modal-upgrade-premium");
-  if(DEMO_MODE){
-    await setPiano("premium");
-    showToast("Sei passato a Premium! (demo)");
-    return;
-  }
-  const subject = encodeURIComponent("Richiesta attivazione Premium - Equo");
-  const body = encodeURIComponent("Ciao,\nvorrei attivare il piano Premium sul mio account Equo.\nEmail account: " + (currentUser?.email || ""));
-  window.location.href = "mailto:gestione.equo@gmail.com?subject=" + subject + "&body=" + body;
-  showToast("Ti abbiamo aperto l'email per la richiesta — ti rispondiamo il prima possibile.");
+  await setPiano("premium");
+  showToast("Sei passato a Premium! (demo)");
 }
 
 async function confirmDowngradeFree(){
   closeModal("modal-downgrade-free");
-  await setPiano("free");
-  showToast("Sei tornato al piano Free.");
+  if(DEMO_MODE){
+    await setPiano("free");
+    showToast("Sei tornato al piano Free.");
+    return;
+  }
+  try{
+    const res = await fetch("/.netlify/functions/cancel-subscription", {
+      method: "POST",
+      headers: await authHeaders(),
+      body: "{}"
+    });
+    if(!res.ok) throw new Error("cancel-subscription fallita");
+    currentUser.piano = "free";
+    updatePianoUI();
+    if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
+    showToast("Sei tornato al piano Free, abbonamento annullato.");
+  } catch(e){
+    showToast("Non sono riuscito ad annullare l'abbonamento, riprova o scrivici.");
+  }
 }
 
 async function setPiano(piano){
@@ -6033,6 +6393,58 @@ async function annullaRichiestaAppuntamento(id){
   await renderFarrierChatThread();
 }
 
+/* ---------- SCANNER QR (ripristinato 27/09) ---------- */
+let qrScanStream = null;
+let qrScanRAF = null;
+
+function openQrScanner(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showToast("Il tuo browser non supporta la fotocamera.");
+    return;
+  }
+  openModal("modal-qr-scan");
+  const video = document.getElementById("qr-scan-video");
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+    qrScanStream = stream;
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    video.play();
+    qrScanRAF = requestAnimationFrame(scanQrLoop);
+  }).catch(() => {
+    showToast("Non riesco ad accedere alla fotocamera.");
+    closeQrScanner();
+  });
+}
+
+function closeQrScanner(){
+  if(qrScanRAF) cancelAnimationFrame(qrScanRAF);
+  qrScanRAF = null;
+  if(qrScanStream){ qrScanStream.getTracks().forEach(t => t.stop()); qrScanStream = null; }
+  closeModal("modal-qr-scan");
+}
+
+function scanQrLoop(){
+  const video = document.getElementById("qr-scan-video");
+  const canvas = document.getElementById("qr-scan-canvas");
+  if(!video || video.readyState !== video.HAVE_ENOUGH_DATA){
+    qrScanRAF = requestAnimationFrame(scanQrLoop);
+    return;
+  }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
+  if(code && code.data){
+    closeQrScanner();
+    document.getElementById("new-chat-codice").value = code.data.trim().toUpperCase();
+    startNewChat();
+    return;
+  }
+  qrScanRAF = requestAnimationFrame(scanQrLoop);
+}
+
 async function startNewChat(){
   const codice = document.getElementById("new-chat-codice").value.trim().toUpperCase();
   const errBox = document.getElementById("new-chat-error");
@@ -6290,6 +6702,7 @@ async function loadExpenses(){
   const box = document.getElementById("expenses-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listExpenses();
+  currentExpensesData = data || [];
   if(!data || data.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px"><svg><use href="#i-wallet"/></svg></div>Nessuna spesa registrata.</div>';
     document.getElementById("expenses-month-total").textContent = "€ 0";
@@ -6299,7 +6712,7 @@ async function loadExpenses(){
   const monthTotal = data.filter(e => new Date(e.date) >= startOfMonth).reduce((s,e)=>s+Number(e.amount||0),0);
   document.getElementById("expenses-month-total").textContent = "€ " + monthTotal.toFixed(2);
   box.innerHTML = data.map(e => `
-    <div class="event-item">
+    <div class="event-item" style="cursor:pointer" onclick="openEditExpenseModal('${e.id}')">
       <div>
         <div style="font-weight:600;font-size:14px;text-transform:capitalize">${escapeHtml(e.category)}${e.horses?.name ? " · " + escapeHtml(e.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(e.date)}${e.notes ? " · " + escapeHtml(e.notes) : ""}</div>
@@ -6309,22 +6722,63 @@ async function loadExpenses(){
   `).join("");
 }
 
-async function createExpense(){
+let editingExpenseId = null;
+let currentExpensesData = [];
+function openAddExpenseModal(){
+  editingExpenseId = null;
+  document.getElementById("modal-add-expense-title").textContent = "Nuova spesa";
+  document.getElementById("expense-category").value = "pensione";
+  document.getElementById("expense-amount").value = "";
+  document.getElementById("expense-date").value = "";
+  document.getElementById("expense-notes").value = "";
+  document.getElementById("expense-delete-btn").style.display = "none";
+  openModal("modal-add-expense");
+}
+
+function openEditExpenseModal(id){
+  const e = currentExpensesData.find(x => x.id === id);
+  if(!e) return;
+  editingExpenseId = id;
+  document.getElementById("modal-add-expense-title").textContent = "Modifica spesa";
+  document.getElementById("expense-category").value = e.category;
+  document.getElementById("expense-amount").value = e.amount;
+  document.getElementById("expense-date").value = e.date;
+  document.getElementById("expense-notes").value = e.notes || "";
+  document.getElementById("expense-delete-btn").style.display = "block";
+  openModal("modal-add-expense");
+}
+
+async function saveExpense(){
   const category = document.getElementById("expense-category").value;
   const amount = parseFloat(document.getElementById("expense-amount").value);
   const date = document.getElementById("expense-date").value;
   const notes = document.getElementById("expense-notes").value.trim();
   if(!amount || !date) return;
-  const horse_id = currentHorseId || (horses[0] ? horses[0].id : null);
-  const { error } = await DB.insertExpense({ horse_id, category, amount, date, notes });
+  const existing = editingExpenseId ? currentExpensesData.find(x => x.id === editingExpenseId) : null;
+  const horse_id = existing ? existing.horse_id : (currentHorseId || (horses[0] ? horses[0].id : null));
+  const payload = { horse_id, category, amount, date, notes };
+  const { error } = editingExpenseId ? await DB.updateExpense(editingExpenseId, payload) : await DB.insertExpense(payload);
   if(error){ alert("Errore: " + error.message); return; }
   document.getElementById("expense-amount").value = "";
   document.getElementById("expense-date").value = "";
   document.getElementById("expense-notes").value = "";
+  editingExpenseId = null;
   closeModal("modal-add-expense");
   await loadExpenses();
   await loadExpensesSummary();
 }
+
+async function deleteExpenseFromModal(){
+  if(!editingExpenseId) return;
+  if(!confirm("Eliminare questa spesa?")) return;
+  await DB.deleteExpense(editingExpenseId);
+  editingExpenseId = null;
+  closeModal("modal-add-expense");
+  await loadExpenses();
+  await loadExpensesSummary();
+}
+// nome vecchio
+const createExpense = saveExpense;
 
 /* ---------- AI CHAT ---------- */
 // Parole chiave molto semplici usate SOLO in DEMO_MODE per simulare la proposta
@@ -6445,9 +6899,151 @@ async function confirmEventProposal(id, proposed){
   await loadDeadlines();
 }
 
-/* ---------- SERVICES MAP (placeholder) ---------- */
+/* ---------- SERVICES MAP ---------- */
+let servicesMapInstance = null;
+let servicesMapMarkers = [];
+let servicesAllData = [];
+let servicesUserPos = null;
+let servicesActiveFilter = "tutti";
+
+function haversineKm(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const SERVICE_TYPE_LABELS = { veterinario: "Veterinario", centro_ippico: "Centro ippico", negozio: "Negozio" };
+const SERVICE_TYPE_ICONS = { veterinario: "fa-stethoscope", centro_ippico: "fa-horse-head", negozio: "fa-store" };
+
+async function fetchOsmServices(lat, lng, radiusM){
+  const query = `[out:json][timeout:20];(node["amenity"="veterinary"](around:${radiusM},${lat},${lng});node["leisure"="horse_riding"](around:${radiusM},${lat},${lng});node["sport"="equestrian"](around:${radiusM},${lat},${lng});node["shop"="equestrian"](around:${radiusM},${lat},${lng}););out center;`;
+  const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(query) });
+  if(!res.ok) throw new Error("overpass_http_" + res.status);
+  const json = await res.json();
+  return (json.elements || []).map(el => {
+    const tags = el.tags || {};
+    let tipo = "negozio";
+    if(tags.amenity === "veterinary") tipo = "veterinario";
+    else if(tags.leisure === "horse_riding" || tags.sport === "equestrian") tipo = "centro_ippico";
+    else if(tags.shop === "equestrian") tipo = "negozio";
+    return {
+      id: "osm-" + el.id,
+      tipo,
+      nome: tags.name || SERVICE_TYPE_LABELS[tipo],
+      indirizzo: [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ") || null,
+      telefono: tags.phone || tags["contact:phone"] || null,
+      lat: el.lat, lng: el.lon,
+      fonte: "osm",
+    };
+  });
+}
+
 function openServicesMap(){
-  alert("Mappa servizi in arrivo — cliniche 24h e maniscalchi vicino a te.");
+  openModal("modal-services-map");
+  servicesActiveFilter = "tutti";
+  document.getElementById("services-list").innerHTML = '<div class="loading"><div class="spinner"></div> Cerco i servizi vicino a te...</div>';
+  if(!navigator.geolocation){
+    document.getElementById("services-list").innerHTML = '<div class="empty-state">Il tuo browser non supporta la geolocalizzazione.</div>';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    servicesUserPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    await loadServicesData();
+  }, () => {
+    document.getElementById("services-list").innerHTML = '<div class="empty-state">Attiva la posizione per vedere i servizi vicino a te.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openServicesMap()">Riprova</button></div>';
+  }, { enableHighAccuracy: false, timeout: 8000 });
+}
+
+async function loadServicesData(){
+  document.getElementById("services-list").innerHTML = '<div class="loading"><div class="spinner"></div> Cerco i servizi vicino a te...</div>';
+  let osmData = [];
+  let curatedData = [];
+  let osmError = false;
+  try{
+    [osmData, curatedData] = await Promise.all([
+      fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng, 15000),
+      DB.listServices(),
+    ]);
+    if(osmData.length === 0){
+      // niente entro 15km: prova un raggio più ampio prima di arrenderti
+      osmData = await fetchOsmServices(servicesUserPos.lat, servicesUserPos.lng, 40000);
+    }
+  }catch(e){
+    osmError = true;
+    curatedData = await DB.listServices().catch(() => []);
+  }
+  const curated = (curatedData || []).map(s => ({ ...s, fonte: "curato" }));
+  servicesAllData = [...curated, ...osmData]
+    .map(s => ({ ...s, distanza: haversineKm(servicesUserPos.lat, servicesUserPos.lng, s.lat, s.lng) }))
+    .sort((a, b) => a.distanza - b.distanza);
+  initServicesMapView();
+  if(servicesAllData.length === 0 && osmError){
+    document.getElementById("services-list").innerHTML = '<div class="empty-state">Errore di connessione durante la ricerca. Riprova.<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="loadServicesData()">Riprova</button></div>';
+    return;
+  }
+  renderServicesList();
+}
+
+function initServicesMapView(){
+  const el = document.getElementById("services-map-canvas");
+  if(!el) return;
+  if(servicesMapInstance){ servicesMapInstance.remove(); servicesMapInstance = null; }
+  servicesMapInstance = L.map(el).setView([servicesUserPos.lat, servicesUserPos.lng], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(servicesMapInstance);
+  L.circleMarker([servicesUserPos.lat, servicesUserPos.lng], { radius: 7, color: "#03491d", fillColor: "#03491d", fillOpacity: 1 }).addTo(servicesMapInstance).bindPopup("Tu sei qui");
+  renderServicesMarkers();
+}
+
+function renderServicesMarkers(){
+  if(!servicesMapInstance) return;
+  servicesMapMarkers.forEach(m => servicesMapInstance.removeLayer(m));
+  servicesMapMarkers = [];
+  const filtered = servicesActiveFilter === "tutti" ? servicesAllData : servicesAllData.filter(s => s.tipo === servicesActiveFilter);
+  filtered.forEach(s => {
+    const marker = L.marker([s.lat, s.lng]).addTo(servicesMapInstance).bindPopup(`<b>${escapeHtml(s.nome)}</b><br>${SERVICE_TYPE_LABELS[s.tipo]}`);
+    marker.on("click", () => focusServiceOnMap(s.id));
+    servicesMapMarkers.push(marker);
+  });
+}
+
+function filterServices(tipo){
+  servicesActiveFilter = tipo;
+  document.querySelectorAll("#services-map-chips .chip").forEach(c => c.classList.toggle("active", c.dataset.tipo === tipo));
+  renderServicesMarkers();
+  renderServicesList();
+}
+
+function renderServicesList(){
+  const box = document.getElementById("services-list");
+  const filtered = servicesActiveFilter === "tutti" ? servicesAllData : servicesAllData.filter(s => s.tipo === servicesActiveFilter);
+  if(filtered.length === 0){
+    box.innerHTML = '<div class="empty-state">Nessun servizio trovato nella zona.</div>';
+    return;
+  }
+  box.innerHTML = filtered.map(s => `
+    <div class="inbox-item" id="service-item-${s.id}" onclick="focusServiceOnMap('${s.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div style="font-weight:600"><span class="fa-icon"><i class="fa-solid ${SERVICE_TYPE_ICONS[s.tipo]}"></i></span> ${escapeHtml(s.nome)}${s.fonte === "curato" ? ' <span title="Verificato da Equo">★</span>' : ""}</div>
+          <div class="muted" style="font-size:12px">${SERVICE_TYPE_LABELS[s.tipo]} · ${s.distanza.toFixed(1)} km${s.indirizzo ? " · " + escapeHtml(s.indirizzo) : ""}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
+        ${s.telefono ? `<a class="btn btn-outline btn-sm" href="tel:${s.telefono}"><span class="fa-icon"><i class="fa-solid fa-phone"></i></span> Chiama</a>` : ""}
+        <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener"><span class="fa-icon"><i class="fa-solid fa-diamond-turn-right"></i></span> Indicazioni</a>
+      </div>
+    </div>
+  `).join("");
+}
+
+function focusServiceOnMap(id){
+  const s = servicesAllData.find(x => x.id === id);
+  if(!s || !servicesMapInstance) return;
+  servicesMapInstance.setView([s.lat, s.lng], 15);
+  const marker = servicesMapMarkers.find(m => m.getLatLng().lat === s.lat && m.getLatLng().lng === s.lng);
+  if(marker) marker.openPopup();
 }
 
 /* ---------- HELPERS ---------- */

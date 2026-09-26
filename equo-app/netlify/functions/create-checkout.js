@@ -2,10 +2,21 @@
 // I lifetime NON passano da qui: hanno un Payment Link diretto con limite posti,
 // collegato lato client.
 //
-// Env richieste su Netlify: STRIPE_SECRET_KEY, STRIPE_PRICE_PROP_MENSILE,
+// Env richieste su Netlify: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, STRIPE_PRICE_PROP_MENSILE,
 // STRIPE_PRICE_PROP_ANNUALE, STRIPE_PRICE_PRO_MENSILE, STRIPE_PRICE_PRO_ANNUALE
 
 const Stripe = require("stripe");
+const { createClient } = require("@supabase/supabase-js");
+
+// Verifica il login: l'utente arriva dal token Supabase, mai dal body della richiesta.
+async function utenteDaToken(event, supabase) {
+  const h = event.headers.authorization || event.headers.Authorization || "";
+  const token = h.replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return data.user;
+}
 
 const PRICE_MAP = {
   proprietario: {
@@ -24,10 +35,12 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { userId, email, piano, periodo } = JSON.parse(event.body || "{}");
-    if (!userId || !email) {
-      return { statusCode: 400, body: JSON.stringify({ error: "userId o email mancanti" }) };
-    }
+    const { piano, periodo } = JSON.parse(event.body || "{}");
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const user = await utenteDaToken(event, supabase);
+    if (!user) return { statusCode: 401, body: JSON.stringify({ error: "Non autenticato" }) };
+    const userId = user.id;
+    const email = user.email;
     const priceId = PRICE_MAP[piano] && PRICE_MAP[piano][periodo];
     if (!priceId) {
       return { statusCode: 400, body: JSON.stringify({ error: "Combinazione piano/periodo non valida" }) };
