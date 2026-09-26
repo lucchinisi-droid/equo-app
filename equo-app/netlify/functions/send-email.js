@@ -1,9 +1,18 @@
 // Invio email transazionali/reminder via Resend.
-// Env richiesta su Netlify: RESEND_API_KEY
+// Env richiesta su Netlify: RESEND_API_KEY, INTERNAL_EMAIL_SECRET
+//
+// BLOCCATA il 27/09: prima accettava richieste da chiunque (chiunque poteva mandare
+// email a nome di Equo). Ora risponde solo se l'header "x-internal-secret" coincide con
+// la variabile INTERNAL_EMAIL_SECRET su Netlify; se la variabile non esiste, è disattivata.
+// Non è usata dall'app. Le email automatiche passano da funzioni dedicate (es. notify-certificazione.js).
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
+  }
+  const secret = event.headers["x-internal-secret"] || event.headers["X-Internal-Secret"];
+  if (!process.env.INTERNAL_EMAIL_SECRET || secret !== process.env.INTERNAL_EMAIL_SECRET) {
+    return { statusCode: 401, body: "Non autorizzato" };
   }
 
   try {
