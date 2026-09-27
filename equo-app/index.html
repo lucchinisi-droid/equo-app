@@ -971,7 +971,7 @@ select.input{cursor:pointer}
       <div class="ai-sheet-header">
         <div style="display:flex;align-items:center;gap:8px;font-weight:700">
           <span class="icon" style="color:var(--accent)"><svg><use href="#i-sparkles"/></svg></span>
-          Assistente AI
+          <span id="ai-sheet-titolo">Assistente AI</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <button class="btn btn-ghost btn-sm" onclick="nuovaConversazioneAi()" style="padding:6px 10px;font-size:12px">Nuova chat</button>
@@ -3861,10 +3861,34 @@ function vistaAi(){
   const v = currentUser?.vistaAttiva || currentUser?.ruolo;
   return PRO_ROLES.includes(v) ? "professionista" : "proprietario";
 }
+// Hammer = agente dei maniscalchi (vista professionista con ruolo maniscalco); tutti gli altri: Equo AI
+function agenteAiHammer(){
+  return vistaAi() === "professionista" && (currentUser?.vistaAttiva || currentUser?.ruolo) === "maniscalco";
+}
+const BENVENUTO_EQUO_AI = document.getElementById("ai-benvenuto")?.innerHTML || "";
+function aggiornaTestataAi(){
+  const hammer = agenteAiHammer();
+  const titolo = document.getElementById("ai-sheet-titolo");
+  if(titolo) titolo.textContent = hammer ? "Hammer · mascalcia" : "Assistente AI";
+  const benv = document.getElementById("ai-benvenuto");
+  if(benv) benv.innerHTML = hammer
+    ? 'Ciao, sono <strong>Hammer</strong> 🔨, l\'agente di mascalcia di Equo. Tecnica (pareggio, ferri ortopedici, setole, laminite), prodotti e link da Mustad, Kerckhaert e O\'Grady, e il tuo lavoro: prova <em>"cosa ho domani?"</em>, <em>"chi ha la ferratura scaduta?"</em>, <em>"quanto devo incassare?"</em>. Con la 📎 mandami la foto di uno zoccolo.'
+    : BENVENUTO_EQUO_AI;
+  const input = document.getElementById("chat-input");
+  if(input) input.placeholder = hammer ? "Chiedi a Hammer o allega una foto…" : "Scrivi o allega una foto…";
+}
+let aiStoriaVista = null;
 async function openAiSheet(){
   document.getElementById("ai-sheet-overlay").classList.add("active");
+  aggiornaTestataAi();
+  // se l'utente ha cambiato vista (proprietario ↔ professionista) si ricarica la conversazione giusta
+  if(aiStoriaCaricata && aiStoriaVista !== vistaAi()){
+    document.querySelectorAll("#chat-messages .chat-bubble:not(#ai-benvenuto)").forEach(el => el.remove());
+    aiStoriaCaricata = false;
+  }
   if(!aiStoriaCaricata && !DEMO_MODE && currentUser){
     aiStoriaCaricata = true;
+    aiStoriaVista = vistaAi();
     await caricaStoriaAi();
     await aggiornaNotaUsoAi();
   }
@@ -3891,7 +3915,7 @@ async function aggiornaNotaUsoAi(uso){
   el.textContent = `${uso.usati} di ${uso.limite} messaggi AI questo mese` + (uso.limite <= 5 ? " · Premium: 500" : "");
 }
 async function nuovaConversazioneAi(){
-  if(!confirm("Cancellare la conversazione con Equo AI? Le note che ha memorizzato restano.")) return;
+  if(!confirm(`Cancellare la conversazione con ${agenteAiHammer() ? "Hammer" : "Equo AI"}? Le note che ha memorizzato restano.`)) return;
   if(!DEMO_MODE && currentUser){
     const { error } = await sb.from("ai_messaggi").delete().eq("user_id", currentUser.id).eq("vista", vistaAi());
     if(error){ showToast("Non sono riuscito a cancellare, riprova."); return; }
@@ -6933,6 +6957,22 @@ function rimuoviAllegatoAi(i){ aiAllegati.splice(i, 1); renderAllegatiAi(); }
 const aiAzioniInAttesa = {};
 const CAT_SPESA_LABEL = { pensione: "Pensione", mangime: "Mangime", veterinario: "Veterinario", maniscalco: "Maniscalco", attrezzatura: "Attrezzatura", altro: "Altro" };
 const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
+const ETICHETTA_CONFERMA_AI = {
+  richiesta_maniscalco: () => "Invia richiesta",
+  accetta_richiesta: () => "Accetta",
+  rifiuta_richiesta: () => "Rifiuta",
+  promemoria: x => x.collegato ? "Invia in chat" : "Copia testo",
+  saldato: () => "Segna saldato",
+};
+// dopo un'azione di Hammer aggiorna le schermate del maniscalco già aperte
+async function aggiornaViteManiscalco(clienteId){
+  try{
+    if(typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+    if(typeof renderProDeadlines === "function") await renderProDeadlines();
+    if(typeof renderIncassi === "function") await renderIncassi();
+    if(clienteId && typeof currentClienteId !== "undefined" && currentClienteId === clienteId && typeof loadClienteInterventi === "function") await loadClienteInterventi(clienteId);
+  } catch(e){ console.error("aggiornaViteManiscalco:", e); }
+}
 function renderAzioneAi(box, azione){
   if(azione.tipo === "evento") return renderEventProposal(box, azione.dati);
   const id = "azione-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
@@ -6948,6 +6988,27 @@ function renderAzioneAi(box, azione){
   } else if(azione.tipo === "richiesta_maniscalco"){
     titolo = `Richiesta a ${escapeHtml(x.nome_maniscalco || "maniscalco")}`;
     righe = [`${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}${x.horse_name ? " · " + escapeHtml(x.horse_name) : ""}`, `Data preferita: ${formatDate(x.data)}${x.ora ? " ore " + x.ora : ""}`, x.note ? escapeHtml(x.note) : ""];
+  } else if(azione.tipo === "appuntamento"){
+    // --- Hammer (maniscalco) ---
+    const nomeCv = x.cavallo?.nome || x.nuovo_cavallo_nome;
+    titolo = `Agenda · ${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}`;
+    righe = [`${escapeHtml(x.nome_cliente || "")}${nomeCv ? " · " + escapeHtml(nomeCv) : ""}${x.nuovo_cavallo_nome ? " (nuovo cavallo)" : ""}`,
+      `${formatDataBreve(x.data)}${x.ora ? " ore " + x.ora : ""}`,
+      x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}` : "", x.note ? escapeHtml(x.note) : ""];
+  } else if(azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta"){
+    const acc = azione.tipo === "accetta_richiesta";
+    titolo = acc ? "Accetta richiesta" : "Rifiuta richiesta";
+    righe = [`${escapeHtml(x.nome_cliente || "")}${x.cavallo ? " · " + escapeHtml(x.cavallo) : ""}`,
+      `${escapeHtml(x.tipo_ferratura === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo_ferratura] || x.tipo_ferratura || ""))} · ${formatDataBreve(x.data_intervento)}${x.ora ? " ore " + x.ora : ""}`,
+      acc && x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)}` : "",
+      acc && x.invia_riepilogo ? "Poi apro la chat con il PDF di riepilogo" : "",
+      !acc ? "Il cliente riceve un messaggio per trovare un'altra data" : ""];
+  } else if(azione.tipo === "promemoria"){
+    titolo = `Messaggio a ${escapeHtml(x.nome_cliente || "")}`;
+    righe = [`<span style="white-space:pre-wrap">${escapeHtml(x.testo || "")}</span>`, x.collegato ? "" : "<span class=\"muted\">Cliente non su Equo: copia il testo e mandalo tu.</span>"];
+  } else if(azione.tipo === "saldato"){
+    titolo = `Segna come saldato · € ${Number(x.totale || 0).toFixed(2)}`;
+    righe = (x.righe || []).map(r => escapeHtml(r));
   } else return;
   box.insertAdjacentHTML("beforeend", `
     <div class="chat-bubble ai event-proposal" id="${id}">
@@ -6955,7 +7016,7 @@ function renderAzioneAi(box, azione){
       ${righe.filter(Boolean).map(r => `<div class="event-proposal-row">${r}</div>`).join("")}
       <div class="event-proposal-actions">
         <button class="btn btn-ghost btn-sm" onclick="cancelEventProposal('${id}')">Annulla</button>
-        <button class="btn btn-primary btn-sm" onclick="confermaAzioneAi('${id}')">${azione.tipo === "richiesta_maniscalco" ? "Invia richiesta" : "Conferma"}</button>
+        <button class="btn btn-primary btn-sm" onclick="confermaAzioneAi('${id}')">${ETICHETTA_CONFERMA_AI[azione.tipo] ? ETICHETTA_CONFERMA_AI[azione.tipo](x) : "Conferma"}</button>
       </div>
     </div>`);
   box.scrollTop = box.scrollHeight;
@@ -6979,6 +7040,62 @@ async function confermaAzioneAi(id){
   } else if(azione.tipo === "richiesta_maniscalco"){
     ({ error } = await DB.richiediAppuntamento({ cliente_mascalcia_id: x.cliente_mascalcia_id, horse_id: x.horse_id, nome_cavallo: x.nome_cavallo, tipo: x.tipo, tipo_altro: x.tipo_altro, data: x.data, ora: x.ora, note: x.note }));
     fatto = `✓ Richiesta inviata a ${escapeHtml(x.nome_maniscalco || "il maniscalco")}: ti risponde in chat.`;
+  } else if(azione.tipo === "appuntamento"){
+    let cavallo_cliente_id = null, horse_id = null;
+    if(x.nuovo_cavallo_nome){
+      const r = await DB.insertCavalloCliente({ cliente_mascalcia_id: x.cliente_mascalcia_id, nome: x.nuovo_cavallo_nome });
+      error = r.error; cavallo_cliente_id = r.data?.id || null;
+    } else if(x.cavallo){
+      ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(x.cliente_mascalcia_id, x.cavallo));
+    }
+    if(!error){
+      const futuro = new Date(x.data + "T" + (x.ora || "00:00")).getTime() > Date.now();
+      const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo];
+      ({ error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, cavallo_cliente_id, horse_id,
+        tipo_ferratura: x.tipo, tipo_altro: x.tipo_altro, misura_sistema: null, numero_ferro: null, quantita_ferri: null,
+        data_intervento: x.data, ora: x.ora, stato: futuro ? "programmato" : "fatto",
+        prossima_scadenza: giorni ? aggiungiGiorniIso(x.data, giorni) : null, importo: x.importo, stato_pagamento: x.stato_pagamento || "da_saldare", note: x.note }));
+    }
+    fatto = "✓ Salvato in agenda. Misura e numero di ferri li aggiungi aprendo l'appuntamento.";
+    if(!error) await aggiornaViteManiscalco(x.cliente_mascalcia_id);
+  } else if(azione.tipo === "accetta_richiesta"){
+    const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura];
+    const payload = { stato: x.data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto", prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null };
+    if(x.importo != null) payload.importo = x.importo;
+    ({ error } = await DB.updateInterventoMascalcia(x.id, payload));
+    if(!error){
+      await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, tipo: "testo",
+        testo: testoRichiesta("✅ Appuntamento confermato", { tipo_ferratura: x.tipo_ferratura, tipo_altro: x.tipo_altro, data_intervento: x.data_intervento, ora: x.ora }, x.cavallo || "") });
+      fatto = "✓ Richiesta accettata: il cliente riceve la conferma in chat.";
+      await aggiornaViteManiscalco(x.cliente_mascalcia_id);
+      if(x.invia_riepilogo){
+        const ev = (await DB.listInterventiPeriodo(x.data_intervento, x.data_intervento)).find(e => e.id === x.id);
+        if(ev){ closeAiSheet(); await inviaEventoInChat(ev); }
+      }
+    }
+  } else if(azione.tipo === "rifiuta_richiesta"){
+    ({ error } = await DB.updateInterventoMascalcia(x.id, { stato: "rifiutato" }));
+    if(!error){
+      await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, tipo: "testo",
+        testo: testoRichiesta("❌ Non riesco per questa richiesta", { tipo_ferratura: x.tipo_ferratura, tipo_altro: x.tipo_altro, data_intervento: x.data_intervento, ora: x.ora, note: x.note }, x.cavallo || "") + " Scrivimi qui per trovare un'altra data." });
+      fatto = "✓ Richiesta rifiutata: il cliente riceve un messaggio in chat.";
+      await aggiornaViteManiscalco(x.cliente_mascalcia_id);
+    }
+  } else if(azione.tipo === "promemoria"){
+    if(x.collegato){
+      ({ error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, tipo: "testo", testo: x.testo }));
+      fatto = `✓ Messaggio inviato a ${escapeHtml(x.nome_cliente || "")}.`;
+    } else {
+      try{ await navigator.clipboard.writeText(x.testo); fatto = `✓ Testo copiato: incollalo nel messaggio a ${escapeHtml(x.nome_cliente || "")}.`; }
+      catch(e){ error = { message: "copia non riuscita, tieni premuto sul testo per copiarlo" }; }
+    }
+  } else if(azione.tipo === "saldato"){
+    for(const idInt of (x.ids || [])){
+      const r = await DB.updateInterventoMascalcia(idInt, { stato_pagamento: "saldato" });
+      if(r.error){ error = r.error; break; }
+    }
+    fatto = `✓ Segnati come saldati (€ ${Number(x.totale || 0).toFixed(2)}).`;
+    if(!error) await aggiornaViteManiscalco(null);
   }
   if(error){
     el.querySelectorAll("button").forEach(b => b.disabled = false);

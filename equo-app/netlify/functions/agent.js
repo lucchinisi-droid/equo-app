@@ -1,4 +1,6 @@
-// Equo AI — agente per i proprietari (Step 1 del progetto agenti, vedi claude/equo-agenti-ai.md).
+// Equo AI (proprietari) + HAMMER (maniscalchi, vista professionista) — vedi claude/equo-agenti-ai.md.
+// Hammer: persona tecnica di mascalcia, schede ai_conoscenze ambito 'maniscalco', ricerca web
+// limitata ai siti di settore (Mustad, Kerckhaert, O'Grady, American Farriers Journal, Il Portale del Cavallo).
 //
 // Cosa fa:
 //  - verifica il LOGIN (token Supabase): niente token, niente risposta;
@@ -25,6 +27,10 @@ const PREZZI = {
 const LIMITI = { free: 5, premium: 500 };
 const MAX_GIRI_TOOL = 6;
 const CHIAVE_PUBBLICA = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
+// Hammer: ricerca web di Anthropic SOLO su questi siti ($10 ogni 1000 ricerche + token dei risultati)
+const HAMMER_SITI = ["mustad.com", "kerckhaert.com", "equipodiatry.com", "americanfarriers.com", "ilportaledelcavallo.it"];
+const HAMMER_MAX_RICERCHE = 3;
+const COSTO_RICERCA_USD = 0.01;
 const TIPI_EVENTO = { vaccino: "Vaccino", coggins: "Test Coggins (AIE)", ferratura: "Ferratura", sverminazione: "Sverminazione" };
 
 // ---------------------------------------------------------------- istruzioni fisse (in cache)
@@ -131,6 +137,140 @@ const STRUMENTI = [
   },
 ];
 
+// ---------------------------------------------------------------- HAMMER (maniscalchi)
+const ISTRUZIONI_HAMMER = `Sei **Hammer**, l'agente AI di Equo esperto in mascalcia e biomeccanica del piede equino. Parli con un MANISCALCO professionista, in italiano.
+Il tuo focus è l'anatomia dello zoccolo, il pareggio, le tipologie di ferri (tradizionali, ortopedici, sintetici), la gestione di patologie della parete (setole, tarlo, laminite) e il bilanciamento degli appoggi. Comunica in modo sintetico, concreto ed essenziale, usando termini tecnici precisi. Analizza i problemi di postura e appoggio partendo sempre dall'impatto meccanico sullo zoccolo.
+
+## Come lavori
+- Per ogni domanda tecnica (pareggio, appiombi, ferri, patologie, andature, materiali, laminite) cerca PRIMA nelle schede verificate con cerca_conoscenze. Se trovi una scheda pertinente basati su quella e chiudi con "Fonte: <fonte>". Se non c'è, rispondi con la tua competenza e dillo ("indicazione generale, non da scheda").
+- Ragiona da maniscalco: cosa succede meccanicamente allo zoccolo (carico, leve, stacco, talloni, asse), cosa fai col pareggio, che tipo di ferro o supporto, ogni quanto ricontrollare.
+- Se il maniscalco ti dice qualcosa di utile da ricordare (clienti, cavalli difficili, sue preferenze di lavoro o di materiali), salvalo con salva_memoria.
+
+## Prodotti, cataloghi e link (ricerca web)
+- Hai lo strumento web_search limitato ai siti di settore: mustad.com (Mustad), kerckhaert.com (Kerckhaert, Vettec, Diamond…), equipodiatry.com (Dr. O'Grady), americanfarriers.com (American Farriers Journal), ilportaledelcavallo.it.
+- Usalo quando il maniscalco chiede un prodotto, un catalogo, una scheda tecnica, un link, un articolo, o quando serve un dato aggiornato che non è nelle schede. Non usarlo per domande a cui rispondono già le schede. Al massimo 3 ricerche per risposta.
+- Consiglia prima il TIPO di prodotto (es. ferro in alluminio a tesa larga, soletta a cuneo 3°, silicone morbido per la suola, colla acrilica/poliuretanica). Le marche solo come esempio e, quando possibile, più di una (es. Mustad e Kerckhaert): Equo non ha accordi con i produttori.
+- I link: SOLO URL presi dai risultati della ricerca, mai inventati o ricostruiti. Scrivili come [nome prodotto o pagina](url), massimo 3-4 link.
+- Traduci in italiano i contenuti in inglese. Prezzi e disponibilità non sono sui siti dei produttori: rimanda ai rivenditori (Mustad: pagina "store locator"; Kerckhaert: "dealer network").
+- ATTENZIONE: mustad.it è un'altra azienda (viti), non c'entra con Mustad Hoofcare.
+
+## Foto
+- Se il maniscalco allega la foto di uno zoccolo, di un piede o di una radiografia: descrivi cosa vedi (asse zoccolo-pastorale, angoli, lunghezza punta, talloni, fettone, suola, linea bianca, crepe, slargature, ferro e chiodatura, bilanciamento latero-mediale), ipotesi, come interverresti (pareggio, ferro, supporti) e urgenza. Se la foto non basta chiedi la proiezione che serve (laterale a terra, frontale, suola). Chiudi con: "*⚠️ Valutazione orientativa da foto: la decisione resta tua sul cavallo, e per zoppie o infezioni coinvolgi il veterinario.*"
+
+## Regole non negoziabili
+- Mai farmaci, sedativi, antidolorifici o dosi: quello è del veterinario.
+- Laminite acuta, zoppia grave e improvvisa, ascesso con febbre o gonfiore che sale, perforazione profonda (soprattutto vicino al fettone), ferita che sanguina molto: la PRIMA frase è "Qui serve subito il veterinario", poi al massimo 3 cose pratiche di mascalcia da fare nell'attesa o da non fare.
+- Nel dubbio su una patologia, proponi la collaborazione con il veterinario (radiografie, diagnosi).
+
+## Stile
+- Breve e tecnico: di solito 3–8 righe, elenchi corti solo se servono. Niente tabelle (si legge sul telefono). Grassetto solo per la cosa chiave.
+- Niente frasi di rito. Chiudi, se utile, con una domanda tecnica mirata (es. "Che angolo ha il pastorale?").
+
+## Il lavoro del maniscalco (agenda, clienti, incassi)
+- Per qualsiasi domanda sul SUO lavoro usa gli strumenti e non inventare mai nomi, date, importi o id: agenda (appuntamenti in un periodo), richieste_da_confermare, ferrature_scadute, incassi, clienti_e_cavalli.
+- Puoi PROPORRE queste azioni, che l'app mostra come schede da confermare con un tocco (non dire mai che le hai già fatte):
+  · proponi_appuntamento: nuovo appuntamento o intervento in agenda ("segna ferratura ad Aurora di Marco giovedì alle 9"). Se il cliente non esiste, digli di crearlo dall'agenda (tasto +).
+  · proponi_accetta_richiesta / proponi_rifiuta_richiesta: prima leggi richieste_da_confermare e usa l'id giusto. Se chiede di mandare il PDF o il riepilogo, metti invia_riepilogo = true: dopo la conferma si apre la chat con il PDF allegato.
+  · proponi_promemoria: messaggio in chat a un cliente (es. ferratura scaduta). Testo breve, cordiale, in prima persona come se scrivesse il maniscalco, con cavallo, cosa è scaduto e da quando, e l'invito a prenotare con il tasto "Prenota" della chat. Una scheda per cliente, al massimo 8 per risposta. Se il cliente non è su Equo la scheda permette di copiare il testo.
+  · proponi_segna_saldato: segna come pagati uno o più interventi (leggi prima incassi per avere gli id).
+- "Oggi", "domani", "giovedì" convertili in data usando la data di oggi. Se manca qualcosa di essenziale (cliente, data, quale richiesta) chiedilo in una domanda breve. Se il cliente ha un solo cavallo, usa quello.
+- Quando elenchi agenda o scadenze: prima le più vicine o le più in ritardo, data in italiano (es. gio 2 ottobre, ore 9:00), una riga per voce.
+- Assistenza: gestione.equo@gmail.com.`;
+
+const clonaStrumento = (nome) => { const t = STRUMENTI.find((x) => x.name === nome); const { cache_control, ...resto } = t; return { ...resto }; };
+const TIPI_INTERVENTO = ["ferratura", "mezza_ferratura", "pareggio", "altro"];
+const TIPO_INTERVENTO_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
+const STRUMENTI_GESTIONE = [
+  { name: "clienti_e_cavalli", description: "Clienti del maniscalco con i loro cavalli (inseriti a mano o condivisi dal proprietario su Equo), telefono e se il cliente è collegato a Equo.", input_schema: { type: "object", properties: { cerca: { type: "string", description: "Nome (anche parziale) del cliente o del cavallo, facoltativo." } } } },
+  { name: "agenda", description: "Appuntamenti e interventi del maniscalco in un periodo (programmati, fatti e richieste da confermare), con id, cliente, cavallo, tipo, ora, importo e pagamento.", input_schema: { type: "object", properties: { da: { type: "string", description: "YYYY-MM-DD (default oggi)" }, a: { type: "string", description: "YYYY-MM-DD (default oggi + 7 giorni)" } } } },
+  { name: "richieste_da_confermare", description: "Richieste di appuntamento arrivate da proprietari o scuderie e ancora da accettare o rifiutare, con il loro id.", input_schema: { type: "object", properties: {} } },
+  { name: "ferrature_scadute", description: "Cavalli dei clienti con ferratura/pareggio scaduti o in scadenza (ultimo intervento fatto, prossima scadenza, giorni di ritardo), esclusi quelli che hanno già un appuntamento successivo.", input_schema: { type: "object", properties: { giorni_avanti: { type: "integer", description: "Includi anche quelle in scadenza entro N giorni (default 0 = solo già scadute)." } } } },
+  { name: "incassi", description: "Soldi da incassare (interventi fatti e non saldati, con id, per cliente) e incassato in un periodo; più il valore degli appuntamenti programmati.", input_schema: { type: "object", properties: { da: { type: "string", description: "Inizio periodo per l'incassato, YYYY-MM-DD (default: 1° del mese)." }, a: { type: "string", description: "Fine periodo, YYYY-MM-DD (default oggi)." } } } },
+  { name: "proponi_appuntamento", description: "Propone un nuovo appuntamento/intervento nell'agenda del maniscalco. L'app mostra una scheda da confermare.", input_schema: { type: "object", properties: {
+      cliente: { type: "string", description: "Nome del cliente (esistente)." }, cavallo: { type: "string", description: "Nome del cavallo." },
+      tipo: { type: "string", enum: TIPI_INTERVENTO }, tipo_altro: { type: "string", description: "Descrizione se tipo = altro." },
+      data: { type: "string", description: "YYYY-MM-DD" }, ora: { type: "string", description: "HH:MM facoltativa" },
+      importo: { type: "number", description: "Euro, facoltativo." }, pagato: { type: "boolean", description: "true se già saldato (default false)." }, note: { type: "string" } },
+    required: ["cliente", "tipo", "data"] } },
+  { name: "proponi_accetta_richiesta", description: "Propone di accettare una richiesta di appuntamento (id da richieste_da_confermare). Al cliente arriva la conferma in chat.", input_schema: { type: "object", properties: {
+      id: { type: "string" }, importo: { type: "number", description: "Euro, facoltativo." }, invia_riepilogo: { type: "boolean", description: "true per aprire poi la chat con il PDF di riepilogo allegato." } }, required: ["id"] } },
+  { name: "proponi_rifiuta_richiesta", description: "Propone di rifiutare una richiesta di appuntamento (id da richieste_da_confermare). Al cliente arriva un messaggio per trovare un'altra data.", input_schema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] } },
+  { name: "proponi_promemoria", description: "Propone un messaggio da inviare nella chat Equo a un cliente (es. promemoria di ferratura scaduta). Una chiamata per cliente.", input_schema: { type: "object", properties: {
+      cliente: { type: "string", description: "Nome del cliente." }, testo: { type: "string", description: "Testo del messaggio, max 600 caratteri." } }, required: ["cliente", "testo"] } },
+  { name: "proponi_segna_saldato", description: "Propone di segnare come saldati uno o più interventi (id da incassi).", input_schema: { type: "object", properties: {
+      ids: { type: "array", items: { type: "string" }, description: "Id degli interventi." } }, required: ["ids"] } },
+];
+
+const STRUMENTI_HAMMER = [
+  { type: "web_search_20250305", name: "web_search", max_uses: HAMMER_MAX_RICERCHE, allowed_domains: HAMMER_SITI,
+    user_location: { type: "approximate", country: "IT", timezone: "Europe/Rome" } },
+  { ...clonaStrumento("cerca_conoscenze"), description: "Cerca nelle schede verificate di mascalcia di Equo (esame, pareggio, appiombi, ferratura, ferri speciali, andature, patologie dello zoccolo, laminite, materiali). Restituisce testo e fonte." },
+  clonaStrumento("salva_memoria"),
+  ...STRUMENTI_GESTIONE.slice(0, -1),
+  { ...STRUMENTI_GESTIONE[STRUMENTI_GESTIONE.length - 1], cache_control: { type: "ephemeral" } },
+];
+
+// ---- supporto strumenti gestionali (sempre con il client dell'utente: RLS del maniscalco)
+const SEL_INTERVENTO = "id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note, clienti_mascalcia(nome, cliente_user_id), cavalli_clienti_mascalcia(nome)";
+const descrTipo = (i) => (i.tipo_ferratura === "altro" && i.tipo_altro) ? i.tipo_altro : (TIPO_INTERVENTO_LABEL[i.tipo_ferratura] || i.tipo_ferratura);
+const STATO_LABEL = { richiesto: "richiesta da confermare", programmato: "programmato", fatto: "fatto" };
+const rigaIntervento = (i) => ({ id: i.id, data: i.data_intervento, ora: i.ora ? String(i.ora).slice(0, 5) : null, cliente: i.clienti_mascalcia?.nome || null,
+  cavallo: i.cavalli_clienti_mascalcia?.nome || null, tipo: descrTipo(i), stato: STATO_LABEL[i.stato] || i.stato,
+  importo: i.importo != null ? Number(i.importo) : null, pagamento: i.stato_pagamento === "saldato" ? "saldato" : "da saldare", note: i.note || null });
+
+async function clientiManiscalco(ctx) {
+  if (ctx._clienti) return ctx._clienti;
+  const { data, error } = await ctx.db.from("clienti_mascalcia").select("id, nome, telefono, cliente_user_id, tipo_cliente").eq("maniscalco_id", ctx.userId).order("nome", { ascending: true });
+  if (error) throw error;
+  ctx._clienti = data || [];
+  return ctx._clienti;
+}
+function trovaPerNome(lista, nome, campo = "nome") {
+  const n = String(nome || "").trim().toLowerCase();
+  if (!n) return [];
+  const esatti = lista.filter((x) => (x[campo] || "").toLowerCase() === n);
+  return esatti.length ? esatti : lista.filter((x) => (x[campo] || "").toLowerCase().includes(n));
+}
+async function cavalliCliente(ctx, cliente) {
+  const { data: man } = await ctx.db.from("cavalli_clienti_mascalcia").select("id, nome, microchip, horse_id").eq("cliente_mascalcia_id", cliente.id).order("nome", { ascending: true });
+  const out = (man || []).map((c) => ({ id: c.id, horse_id: c.horse_id, nome: c.nome, microchip: c.microchip, su_equo: !!c.horse_id }));
+  if (cliente.cliente_user_id) {
+    const { data: cond } = await ctx.db.rpc("cavalli_condivisi_cliente", { p_cliente_id: cliente.id });
+    (cond || []).forEach((h) => { if (!out.some((c) => c.horse_id === h.id)) out.push({ id: null, horse_id: h.id, nome: h.name, microchip: h.microchip, su_equo: true }); });
+  }
+  return out;
+}
+async function interventoDelManiscalco(ctx, id) {
+  if (!/^[0-9a-f-]{36}$/i.test(String(id || ""))) return null;
+  const { data } = await ctx.db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("id", id).eq("maniscalco_id", ctx.userId).maybeSingle();
+  return data || null;
+}
+async function risolviCliente(ctx, nome) {
+  const trovati = trovaPerNome(await clientiManiscalco(ctx), nome);
+  if (!trovati.length) return { errore: `Nessun cliente "${nome}". Se è nuovo, il maniscalco lo crea dall'agenda (tasto +) e poi puoi segnare l'appuntamento.` };
+  if (trovati.length > 1) return { errore: `Più clienti corrispondono a "${nome}": ${trovati.map((c) => c.nome).join(", ")}. Chiedi quale.` };
+  return { cliente: trovati[0] };
+}
+
+// testo da mostrare: l'ultimo tratto di testo dopo l'ultimo strumento (con la ricerca web la risposta
+// arriva spezzata in più blocchi di testo con citazioni: i blocchi consecutivi si uniscono)
+function testoDaBlocchi(blocchi) {
+  const tratti = []; let cur = "";
+  for (const b of blocchi) {
+    if (b.type === "text") cur += b.text;
+    else { if (cur.trim()) tratti.push(cur); cur = ""; }
+  }
+  if (cur.trim()) tratti.push(cur);
+  return (tratti[tratti.length - 1] || "").trim();
+}
+function linkCitati(blocchi) {
+  const visti = new Map();
+  for (const b of blocchi) for (const c of (b.type === "text" && Array.isArray(b.citations) ? b.citations : [])) {
+    if (c.url && !visti.has(c.url)) visti.set(c.url, c.title || c.url);
+  }
+  return [...visti].slice(0, 4).map(([url, titolo]) => ({ url, titolo }));
+}
+
 // ---------------------------------------------------------------- utilità
 const oggiISO = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
 const isoValida = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "") && !isNaN(new Date(v + "T12:00:00Z"));
@@ -156,6 +296,7 @@ function trovaCavallo(cavalli, nome) {
 async function eseguiStrumento(nome, input, ctx) {
   const { db, userId, cavalli } = ctx;
   input = input || {};
+  if (STRUMENTI_GESTIONE.some((t) => t.name === nome) && ctx.ambito !== "maniscalco") return "Strumento riservato ai maniscalchi.";
   switch (nome) {
     case "elenco_cavalli":
       return cavalli.length ? cavalli.map((c) => ({ nome: c.name, razza: c.breed, nascita: c.birth_date, microchip: c.microchip, mantello: c.mantello, note: c.note, condiviso_con_professionisti: c.condiviso_ecosistema !== false })) : "Nessun cavallo registrato.";
@@ -224,7 +365,7 @@ async function eseguiStrumento(nome, input, ctx) {
     }
 
     case "cerca_conoscenze": {
-      const { data, error } = await db.rpc("cerca_conoscenze", { p_query: String(input.domanda || "").slice(0, 300), p_ambito: "proprietario", p_limite: 4 });
+      const { data, error } = await db.rpc("cerca_conoscenze", { p_query: String(input.domanda || "").slice(0, 300), p_ambito: ctx.ambito || "proprietario", p_limite: 4 });
       if (error) return "Ricerca non disponibile al momento.";
       if (!Array.isArray(data) || !data.length) return "Nessuna scheda verificata su questo argomento: rispondi con indicazioni generali prudenti e dillo.";
       return data.map((s) => ({ titolo: s.titolo, contenuto: s.contenuto, fonte: s.fonte_titolo, link_fonte: s.fonte_url, verificata_il: s.verificato_il }));
@@ -288,6 +429,134 @@ async function eseguiStrumento(nome, input, ctx) {
       return `Scheda richiesta per ${m.nome_maniscalco} mostrata all'utente: partirà quando la conferma.`;
     }
 
+    case "clienti_e_cavalli": {
+      let clienti = await clientiManiscalco(ctx);
+      if (!clienti.length) return "Nessun cliente registrato: si aggiungono dall'agenda o dalla sezione Clienti.";
+      const cerca = String(input.cerca || "").trim().toLowerCase();
+      const out = [];
+      for (const c of clienti) {
+        const cavalli = await cavalliCliente(ctx, c);
+        if (cerca && !(c.nome || "").toLowerCase().includes(cerca) && !cavalli.some((h) => (h.nome || "").toLowerCase().includes(cerca))) continue;
+        out.push({ cliente: c.nome, telefono: c.telefono || null, su_equo: !!c.cliente_user_id, tipo: c.tipo_cliente || null, cavalli: cavalli.map((h) => h.nome) });
+        if (out.length >= 40) break;
+      }
+      return out.length ? out : `Nessun cliente o cavallo corrisponde a "${input.cerca}".`;
+    }
+
+    case "agenda": {
+      const da = isoValida(input.da) ? input.da : oggiISO();
+      const a = isoValida(input.a) ? input.a : aggiungiGiorni(da, 7);
+      const { data, error } = await db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("maniscalco_id", userId).neq("stato", "rifiutato")
+        .gte("data_intervento", da).lte("data_intervento", a).order("data_intervento", { ascending: true }).order("ora", { ascending: true, nullsFirst: false }).limit(200);
+      if (error) return "Errore nel leggere l'agenda.";
+      return { periodo: { da, a }, appuntamenti: (data || []).map(rigaIntervento) };
+    }
+
+    case "richieste_da_confermare": {
+      const { data, error } = await db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("maniscalco_id", userId).eq("stato", "richiesto").order("data_intervento", { ascending: true }).limit(50);
+      if (error) return "Errore nel leggere le richieste.";
+      return (data || []).length ? data.map(rigaIntervento) : "Nessuna richiesta da confermare.";
+    }
+
+    case "ferrature_scadute": {
+      const fino = aggiungiGiorni(oggiISO(), Math.min(Math.max(Number(input.giorni_avanti) || 0, 0), 60));
+      const { data, error } = await db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("maniscalco_id", userId).eq("stato", "fatto")
+        .not("prossima_scadenza", "is", null).lte("prossima_scadenza", fino).order("data_intervento", { ascending: false }).limit(500);
+      if (error) return "Errore nel leggere le scadenze.";
+      if (!(data || []).length) return "Nessuna ferratura o pareggio scaduto.";
+      const chiave = (i) => i.cavallo_cliente_id || "c:" + i.cliente_mascalcia_id;
+      const clientiIds = [...new Set(data.map((i) => i.cliente_mascalcia_id))];
+      const { data: tutti } = await db.from("interventi_mascalcia").select("id, cliente_mascalcia_id, cavallo_cliente_id, data_intervento, stato")
+        .eq("maniscalco_id", userId).in("cliente_mascalcia_id", clientiIds).not("stato", "in", "(richiesto,rifiutato)");
+      const visti = new Set(); const out = [];
+      for (const i of data) {
+        const k = chiave(i);
+        if (visti.has(k)) continue; visti.add(k);
+        if ((tutti || []).some((x) => x.id !== i.id && chiave(x) === k && x.data_intervento > i.data_intervento)) continue;
+        const ritardo = Math.round((new Date(oggiISO() + "T12:00:00Z") - new Date(i.prossima_scadenza + "T12:00:00Z")) / 86400000);
+        out.push({ cliente: i.clienti_mascalcia?.nome, cliente_su_equo: !!i.clienti_mascalcia?.cliente_user_id, cavallo: i.cavalli_clienti_mascalcia?.nome || null,
+          ultimo_intervento: descrTipo(i), fatto_il: i.data_intervento, scadenza: i.prossima_scadenza, giorni_di_ritardo: ritardo > 0 ? ritardo : 0, stato: ritardo > 0 ? "SCADUTA" : "in scadenza" });
+      }
+      out.sort((x, y) => x.scadenza.localeCompare(y.scadenza));
+      return out.length ? { oggi: oggiISO(), scadenze: out } : "Nessuna scadenza aperta: i cavalli scaduti hanno già un appuntamento successivo.";
+    }
+
+    case "incassi": {
+      const da = isoValida(input.da) ? input.da : oggiISO().slice(0, 8) + "01";
+      const a = isoValida(input.a) ? input.a : oggiISO();
+      const { data, error } = await db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("maniscalco_id", userId).in("stato", ["fatto", "programmato"]).order("data_intervento", { ascending: false }).limit(2000);
+      if (error) return "Errore nel leggere gli incassi.";
+      const euro = (arr) => Math.round(arr.reduce((t, i) => t + Number(i.importo || 0), 0) * 100) / 100;
+      const daSaldare = (data || []).filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato");
+      const perCliente = {};
+      daSaldare.forEach((i) => { const n = i.clienti_mascalcia?.nome || "—"; (perCliente[n] = perCliente[n] || []).push(i); });
+      const incassati = (data || []).filter((i) => i.stato === "fatto" && i.stato_pagamento === "saldato" && i.data_intervento >= da && i.data_intervento <= a);
+      const programmati = (data || []).filter((i) => i.stato === "programmato");
+      return {
+        da_incassare_totale_euro: euro(daSaldare),
+        da_incassare_per_cliente: Object.entries(perCliente).map(([cliente, arr]) => ({ cliente, totale_euro: euro(arr), interventi: arr.slice(0, 10).map(rigaIntervento) })).sort((x, y) => y.totale_euro - x.totale_euro).slice(0, 25),
+        interventi_senza_importo: daSaldare.filter((i) => i.importo == null).length,
+        incassato_nel_periodo: { da, a, euro: euro(incassati), interventi: incassati.length },
+        programmati_previsti_euro: euro(programmati), programmati: programmati.length,
+      };
+    }
+
+    case "proponi_appuntamento": {
+      const { cliente, errore } = await risolviCliente(ctx, input.cliente);
+      if (errore) return errore;
+      if (!isoValida(input.data)) return "Data non valida: chiedila.";
+      const tipo = TIPI_INTERVENTO.includes(input.tipo) ? input.tipo : "altro";
+      if (tipo === "altro" && !input.tipo_altro) return "Chiedi che tipo di intervento è.";
+      const cavalli = await cavalliCliente(ctx, cliente);
+      let cavallo = null, nuovo_cavallo_nome = null;
+      if (input.cavallo) {
+        const t = trovaPerNome(cavalli, input.cavallo);
+        if (t.length > 1) return `Più cavalli di ${cliente.nome} corrispondono a "${input.cavallo}": ${t.map((c) => c.nome).join(", ")}. Chiedi quale.`;
+        if (t.length === 1) cavallo = t[0]; else nuovo_cavallo_nome = String(input.cavallo).trim().slice(0, 60);
+      } else if (cavalli.length === 1) cavallo = cavalli[0];
+      else if (cavalli.length > 1) return `${cliente.nome} ha più cavalli (${cavalli.map((c) => c.nome).join(", ")}): chiedi per quale.`;
+      const ora = /^\d{1,2}:\d{2}$/.test(input.ora || "") ? input.ora.padStart(5, "0") : null;
+      const importo = Number(input.importo) > 0 ? Math.round(Number(input.importo) * 100) / 100 : null;
+      ctx.azioni.push({ tipo: "appuntamento", dati: { cliente_mascalcia_id: cliente.id, nome_cliente: cliente.nome, cavallo, nuovo_cavallo_nome,
+        tipo, tipo_altro: tipo === "altro" ? String(input.tipo_altro).slice(0, 80) : null, data: input.data, ora, importo,
+        stato_pagamento: input.pagato ? "saldato" : "da_saldare", note: (input.note || "").slice(0, 300) || null } });
+      return `Scheda appuntamento per ${cliente.nome} mostrata, da confermare${nuovo_cavallo_nome ? ` (il cavallo "${nuovo_cavallo_nome}" non c'era: verrà aggiunto ai cavalli del cliente)` : ""}.`;
+    }
+
+    case "proponi_accetta_richiesta":
+    case "proponi_rifiuta_richiesta": {
+      const r = await interventoDelManiscalco(ctx, input.id);
+      if (!r || r.stato !== "richiesto") return "Richiesta non trovata o già gestita: rileggi richieste_da_confermare e usa l'id giusto.";
+      const dati = { id: r.id, cliente_mascalcia_id: r.cliente_mascalcia_id, nome_cliente: r.clienti_mascalcia?.nome || null, cliente_su_equo: !!r.clienti_mascalcia?.cliente_user_id,
+        cavallo: r.cavalli_clienti_mascalcia?.nome || null, tipo_ferratura: r.tipo_ferratura, tipo_altro: r.tipo_altro, data_intervento: r.data_intervento,
+        ora: r.ora ? String(r.ora).slice(0, 5) : null, note: r.note || null };
+      if (nome === "proponi_rifiuta_richiesta") { ctx.azioni.push({ tipo: "rifiuta_richiesta", dati }); return "Scheda di rifiuto mostrata, da confermare."; }
+      if (Number(input.importo) > 0) dati.importo = Math.round(Number(input.importo) * 100) / 100;
+      dati.invia_riepilogo = !!input.invia_riepilogo;
+      ctx.azioni.push({ tipo: "accetta_richiesta", dati });
+      return "Scheda di conferma mostrata" + (dati.invia_riepilogo ? ": dopo la conferma si apre la chat con il PDF di riepilogo." : ".");
+    }
+
+    case "proponi_promemoria": {
+      const { cliente, errore } = await risolviCliente(ctx, input.cliente);
+      if (errore) return errore;
+      const testo = String(input.testo || "").trim().slice(0, 600);
+      if (!testo) return "Scrivi il testo del messaggio.";
+      if (ctx.azioni.filter((x) => x.tipo === "promemoria").length >= 8) return "Già 8 promemoria in questa risposta: fermati qui e dì al maniscalco che può chiederne altri.";
+      ctx.azioni.push({ tipo: "promemoria", dati: { cliente_mascalcia_id: cliente.id, nome_cliente: cliente.nome, collegato: !!cliente.cliente_user_id, testo } });
+      return cliente.cliente_user_id ? `Promemoria per ${cliente.nome} pronto da inviare in chat.` : `${cliente.nome} non è su Equo: la scheda permette di copiare il testo (e conviene invitarlo con il suo codice).`;
+    }
+
+    case "proponi_segna_saldato": {
+      const ids = (Array.isArray(input.ids) ? input.ids : []).slice(0, 30);
+      const righe = [];
+      for (const id of ids) { const i = await interventoDelManiscalco(ctx, id); if (i && i.stato === "fatto" && i.stato_pagamento !== "saldato") righe.push(i); }
+      if (!righe.length) return "Nessun intervento da saldare con questi id: rileggi incassi.";
+      const totale = Math.round(righe.reduce((t, i) => t + Number(i.importo || 0), 0) * 100) / 100;
+      ctx.azioni.push({ tipo: "saldato", dati: { ids: righe.map((i) => i.id), totale, righe: righe.map((i) => `${i.clienti_mascalcia?.nome || ""} · ${descrTipo(i)} del ${i.data_intervento}${i.importo != null ? " · € " + Number(i.importo).toFixed(2) : ""}`) } });
+      return `Scheda "segna come saldato" (${righe.length} interventi, € ${totale.toFixed(2)}) mostrata, da confermare.`;
+    }
+
     default:
       return "Strumento sconosciuto.";
   }
@@ -318,8 +587,10 @@ exports.handler = async (event) => {
 
   // limite mensile lato server
   const mese = oggiISO().slice(0, 7);
-  const { data: profilo } = await admin.from("profiles").select("full_name, piano").eq("id", user.id).maybeSingle();
+  const { data: profilo } = await admin.from("profiles").select("full_name, piano, ruolo, ruolo_secondario").eq("id", user.id).maybeSingle();
   const piano = profilo?.piano === "premium" ? "premium" : "free";
+  // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
+  const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
   const limite = LIMITI[piano];
   const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", mese).maybeSingle();
   const usati = uso?.conteggio || 0;
@@ -336,7 +607,8 @@ exports.handler = async (event) => {
     `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati questo mese: ${usati + 1} di ${limite}.`,
     listaCavalli.length ? `Cavalli: ${listaCavalli.map((c) => c.name).join(", ")}.` : "L'utente non ha ancora registrato cavalli (si aggiungono dal tab Cavalli).",
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
-    vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
+    hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
+      vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
   ].filter(Boolean).join("\n");
 
   const messages = (storia || []).reverse().map((m) => ({ role: m.ruolo === "assistant" ? "assistant" : "user", content: m.contenuto }));
@@ -352,8 +624,9 @@ exports.handler = async (event) => {
     messages.push({ role: "user", content: messaggio });
   }
 
-  const ctx = { db, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [] };
-  const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0 };
+  const ctx = { db, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : "proprietario" };
+  const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0, ricerche: 0 };
+  let link = [];
   let testoFinale = "";
 
   try {
@@ -363,12 +636,12 @@ exports.handler = async (event) => {
         headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
           model: MODELLO,
-          max_tokens: allegati.length ? 2000 : 1200,
+          max_tokens: allegati.length ? 2000 : (hammer ? 1500 : 1200),
           system: [
-            { type: "text", text: ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: hammer ? ISTRUZIONI_HAMMER : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
-          tools: STRUMENTI,
+          tools: hammer ? STRUMENTI_HAMMER : STRUMENTI,
           messages,
         }),
       });
@@ -377,10 +650,13 @@ exports.handler = async (event) => {
       const u = data.usage || {};
       costo.in += u.input_tokens || 0; costo.out += u.output_tokens || 0;
       costo.cacheRead += u.cache_read_input_tokens || 0; costo.cacheWrite += u.cache_creation_input_tokens || 0;
+      costo.ricerche += u.server_tool_use?.web_search_requests || 0;
 
       const blocchi = Array.isArray(data.content) ? data.content : [];
-      const testo = blocchi.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-      if (testo) testoFinale = testo;
+      const testo = testoDaBlocchi(blocchi);
+      if (testo) { testoFinale = testo; link = linkCitati(blocchi); }
+      // ricerca web lunga: l'API mette in pausa il turno, si riprende rimandando la risposta così com'è
+      if (data.stop_reason === "pause_turn") { messages.push({ role: "assistant", content: blocchi }); continue; }
       const chiamate = blocchi.filter((b) => b.type === "tool_use");
       if (data.stop_reason !== "tool_use" || !chiamate.length) break;
 
@@ -397,20 +673,22 @@ exports.handler = async (event) => {
     return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano } });
   }
 
+  // se ha usato la ricerca web ma non ha scritto i link, aggiungiamo quelli citati
+  if (testoFinale && link.length && !/https?:\/\//.test(testoFinale)) testoFinale += "\n\nLink:\n" + link.map((l) => `- [${l.titolo}](${l.url})`).join("\n");
   if (!testoFinale) testoFinale = ctx.azioni.length ? "Ho preparato le schede da confermare qui sotto." : "Non sono riuscito a rispondere, riprova.";
   const testoUtenteSalvato = (allegati.length ? `📎 ${allegati.length === 1 ? "1 allegato" : allegati.length + " allegati"}${messaggio ? " — " : ""}` : "") + messaggio;
 
   // salva conversazione e consumo (service role: la tabella ai_utilizzo non è scrivibile dall'app)
   const p = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
-  const costoUsd = (costo.in * p.in + costo.out * p.out + costo.cacheRead * p.cacheRead + costo.cacheWrite * p.cacheWrite) / 1e6;
+  const costoUsd = (costo.in * p.in + costo.out * p.out + costo.cacheRead * p.cacheRead + costo.cacheWrite * p.cacheWrite) / 1e6 + costo.ricerche * COSTO_RICERCA_USD;
   await admin.from("ai_messaggi").insert([
     { user_id: user.id, vista, ruolo: "user", contenuto: testoUtenteSalvato },
     { user_id: user.id, vista, ruolo: "assistant", contenuto: testoFinale },
   ]);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese, conteggio: usati + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
-  return risposta(200, { reply: testoFinale, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
+  return risposta(200, { reply: testoFinale, agente: hammer ? "hammer" : "equo", azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
 };
 
 // esportati solo per i test
-exports._interni = { eseguiStrumento, ISTRUZIONI, STRUMENTI };
+exports._interni = { eseguiStrumento, ISTRUZIONI, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };
