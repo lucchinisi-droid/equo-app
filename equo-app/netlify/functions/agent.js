@@ -1,4 +1,4 @@
-// Equo AI (proprietari) + HAMMER (maniscalchi, vista professionista) — vedi claude/equo-agenti-ai.md.
+// PEGASUS (proprietari) + HAMMER (maniscalchi, vista professionista) + Equo AI neutro (vet/istruttori) — vedi claude/equo-agenti-ai.md.
 // Hammer: persona tecnica di mascalcia, schede ai_conoscenze ambito 'maniscalco', ricerca web
 // limitata ai siti di settore (Mustad, Kerckhaert, O'Grady, American Farriers Journal, Il Portale del Cavallo).
 //
@@ -34,10 +34,9 @@ const COSTO_RICERCA_USD = 0.01;
 const TIPI_EVENTO = { vaccino: "Vaccino", coggins: "Test Coggins (AIE)", ferratura: "Ferratura", sverminazione: "Sverminazione" };
 
 // ---------------------------------------------------------------- istruzioni fisse (in cache)
-const ISTRUZIONI = `Sei **Equo AI**, l'assistente dell'app Equo per chi possiede o monta un cavallo in Italia.
-Parli in italiano, in modo caldo ma diretto, come un esperto di scuderia che conosce bene anche la burocrazia.
-
-## Come lavori
+// Corpo comune (dati, azioni, foto, sicurezza, guida all'app). Sopra ci va l'identità:
+// PEGASUS per la vista proprietario; "Equo AI" neutro per veterinari/istruttori finché non arrivano Galeno e Ares.
+const CORPO_PROPRIETARIO = `## Come lavori
 - Per QUALSIASI cosa che riguarda i dati dell'utente (i suoi cavalli, scadenze, vaccini, ferrature, spese, appuntamenti col maniscalco, lezioni) usa SEMPRE gli strumenti per leggerli: non indovinare e non inventare mai date, importi o nomi.
 - Per domande su salute, normative, vaccinazioni, Coggins/AIE, anagrafe equina, sverminazione, ferratura, alimentazione, emergenze: prima cerca nelle schede verificate con lo strumento cerca_conoscenze. Se trovi una scheda pertinente basati su quella e alla fine scrivi "Fonte: <titolo fonte>". Se non c'è una scheda, rispondi con conoscenze generali prudenti e dillo ("indicazione generale").
 - Se l'utente ti dice qualcosa di utile da ricordare in futuro (abitudini, allergie o sensibilità del cavallo, preferenze, nome del veterinario o della scuderia), salvalo con salva_memoria, senza chiedere il permesso per cose ovvie. Non salvare dati sensibili sulla salute delle PERSONE.
@@ -75,6 +74,25 @@ Parli in italiano, in modo caldo ma diretto, come un esperto di scuderia che con
 - Piano: Free (1 cavallo, 5 messaggi AI al mese) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
 - Assistenza: gestione.equo@gmail.com.`;
 
+const ISTRUZIONI_PEGASUS = `Sei **Pegasus**, l'agente AI di Equo che aiuta i proprietari a prendersi cura del proprio cavallo, in Italia.
+Il tuo focus è la salute preventiva, le scadenze sanitarie e di legge, i costi di mantenimento e il rapporto con veterinario, maniscalco e istruttore. Comunichi in modo caldo, semplice e pratico, traduci i termini tecnici in parole comuni e porti sempre l'utente a un'azione concreta.
+
+## Chi sei (persona e tono)
+- Sei il compagno di scuderia digitale del proprietario: conosci i suoi cavalli per nome, tieni d'occhio scadenze e spese e lo avvisi prima che se ne dimentichi.
+- Tono caldo, rassicurante e pratico, come un amico esperto che vive in scuderia da anni. Dai del tu e chiami i cavalli per nome.
+- Niente gergo: se usi un termine tecnico, spiegalo in poche parole tra parentesi (es. "Coggins (il test per l'anemia infettiva)").
+- Priorità: tranquillità e prevenzione. Cosa scade, cosa controllare, quando chiamare chi. Non fai il lavoro del veterinario o del maniscalco: aiuti il proprietario a capire la situazione e a sapere cosa chiedere loro.
+- Nelle emergenze abbandoni il tono amichevole e diventi secco e chiaro: prima la cosa da fare, poi il resto.
+- Se ti chiedono chi sei: "Sono Pegasus, l'agente di Equo per chi ha un cavallo". Non presentarti a ogni messaggio.
+- Ogni lunedì mandi al proprietario "La tua settimana con Pegasus" (scadenze, maniscalco, calendario, spese, un consiglio): lo trova qui in chat; con Premium anche con notifica ed email. Si disattiva dal menu profilo → "Riepilogo settimanale di Pegasus". Se l'utente ti chiede di quel riepilogo, rileggi i dati aggiornati con gli strumenti.
+
+${CORPO_PROPRIETARIO}`;
+
+const ISTRUZIONI = `Sei **Equo AI**, l'assistente dell'app Equo per chi lavora con i cavalli in Italia.
+Parli in italiano, in modo cordiale, diretto e pratico.
+
+${CORPO_PROPRIETARIO}`;
+
 // ---------------------------------------------------------------- strumenti
 const STRUMENTI = [
   { name: "elenco_cavalli", description: "Elenca i cavalli dell'utente con razza, data di nascita, microchip, mantello e note.", input_schema: { type: "object", properties: {} } },
@@ -83,7 +101,7 @@ const STRUMENTI = [
   { name: "spese", description: "Riepilogo spese in un periodo: totale, totale per categoria, per mese e per cavallo, più le ultime voci.", input_schema: { type: "object", properties: { da: { type: "string", description: "Data inizio YYYY-MM-DD (default: 1 gennaio dell'anno in corso)." }, a: { type: "string", description: "Data fine YYYY-MM-DD (default: oggi)." }, categoria: { type: "string", enum: ["pensione", "mangime", "veterinario", "maniscalco", "attrezzatura", "altro"] } } } },
   { name: "appuntamenti_maniscalco", description: "Maniscalchi collegati all'utente e appuntamenti (richiesti, confermati, rifiutati) da 7 giorni fa in poi.", input_schema: { type: "object", properties: {} } },
   { name: "lezioni", description: "Lezioni, allenamenti e gare segnati nel calendario, in un periodo.", input_schema: { type: "object", properties: { da: { type: "string" }, a: { type: "string" } } } },
-  { name: "cerca_conoscenze", description: "Cerca nelle schede verificate di Equo (normativa italiana, vaccinazioni, Coggins/AIE, anagrafe, sverminazione, ferratura, alimentazione, emergenze, uso dell'app). Restituisce testo e fonte.", input_schema: { type: "object", properties: { domanda: { type: "string", description: "Parole chiave o domanda in italiano." } }, required: ["domanda"] } },
+  { name: "cerca_conoscenze", description: "Cerca nelle schede verificate di Equo (normativa italiana, vaccinazioni tetano/influenza, Coggins/AIE, anagrafe, sverminazione, ferratura, alimentazione e acqua, parametri vitali, denti, condizione corporea, ferite e primo soccorso, colica, laminite, cavallo anziano/Cushing, calendario delle cure, uso dell'app). Restituisce testo e fonte.", input_schema: { type: "object", properties: { domanda: { type: "string", description: "Parole chiave o domanda in italiano." } }, required: ["domanda"] } },
   { name: "salva_memoria", description: "Salva un'informazione utile da ricordare nelle prossime conversazioni (es. 'Aurora è sensibile agli anteriori', 'il veterinario è il Dr. Rossi').", input_schema: { type: "object", properties: { testo: { type: "string" }, cavallo: { type: "string", description: "Nome del cavallo, se riguarda un cavallo." } }, required: ["testo"] } },
   {
     name: "proponi_evento_sanitario",
@@ -591,6 +609,9 @@ exports.handler = async (event) => {
   const piano = profilo?.piano === "premium" ? "premium" : "free";
   // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
+  // Pegasus: vista proprietario. Veterinari/istruttori (vista professionista non maniscalco): Equo AI neutro
+  const pegasus = vista === "proprietario";
+  const agente = hammer ? "hammer" : pegasus ? "pegasus" : "equo";
   const limite = LIMITI[piano];
   const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", mese).maybeSingle();
   const usati = uso?.conteggio || 0;
@@ -638,7 +659,7 @@ exports.handler = async (event) => {
           model: MODELLO,
           max_tokens: allegati.length ? 2000 : (hammer ? 1500 : 1200),
           system: [
-            { type: "text", text: hammer ? ISTRUZIONI_HAMMER : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: hammer ? ISTRUZIONI_HAMMER : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
           tools: hammer ? STRUMENTI_HAMMER : STRUMENTI,
@@ -687,8 +708,8 @@ exports.handler = async (event) => {
   ]);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese, conteggio: usati + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
-  return risposta(200, { reply: testoFinale, agente: hammer ? "hammer" : "equo", azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
+  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
 };
 
 // esportati solo per i test
-exports._interni = { eseguiStrumento, ISTRUZIONI, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };
+exports._interni = { eseguiStrumento, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };

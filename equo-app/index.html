@@ -252,6 +252,26 @@ select.input{cursor:pointer}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:60}
 .ai-fab .icon{width:24px;height:24px}
+.ai-fab-dot{display:none;position:absolute;top:4px;right:4px;width:13px;height:13px;border-radius:50%;background:#e5484d;border:2px solid var(--bg,#fff)}
+.ai-fab.con-novita .ai-fab-dot{display:block}
+/* icona dell'agente (Pegasus = testa di cavallo, Hammer = martello) con piccola rotazione sx/dx + zoom */
+#banner-aggiornamento{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));
+  z-index:200;width:calc(100% - 32px);max-width:448px;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px 10px 16px;border-radius:14px;background:var(--card,#fff);color:var(--text,#1c2b22);
+  box-shadow:0 8px 24px rgba(0,0,0,.22);font-size:13.5px;font-weight:600}
+#banner-aggiornamento.attivo{display:flex}
+.ai-fab-agente{display:none;font-size:23px;line-height:1}
+.ai-fab.agente-pegasus .ai-fab-sparkles,.ai-fab.agente-hammer .ai-fab-sparkles{display:none}
+.ai-fab.agente-pegasus .ai-fab-agente,.ai-fab.agente-hammer .ai-fab-agente{display:block;animation:aiFabMuovi 4.5s ease-in-out infinite;transform-origin:50% 60%}
+.ai-fab.agente-hammer .ai-fab-agente{transform-origin:25% 80%} /* il martello oscilla dal manico */
+@keyframes aiFabMuovi{
+  0%,55%,100%{transform:rotate(0) scale(1)}
+  63%{transform:rotate(-14deg) scale(1.12)}
+  72%{transform:rotate(12deg) scale(1.16)}
+  81%{transform:rotate(-7deg) scale(1.08)}
+  90%{transform:rotate(3deg) scale(1.02)}
+}
+@media (prefers-reduced-motion: reduce){.ai-fab .ai-fab-agente{animation:none!important}}
 .ai-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
   z-index:70;align-items:flex-end;justify-content:center}
 .ai-sheet-overlay.active{display:flex}
@@ -975,12 +995,18 @@ select.input{cursor:pointer}
   </div>
 
   <!-- AI FAB -->
-  <button class="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
-    <span class="icon"><svg><use href="#i-sparkles"/></svg></span>
+  <button class="ai-fab" id="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
+    <span class="icon ai-fab-sparkles"><svg><use href="#i-sparkles"/></svg></span>
+    <i class="fa-solid fa-horse-head ai-fab-agente" id="ai-fab-icona" aria-hidden="true"></i>
+    <span class="ai-fab-dot" aria-hidden="true"></span>
   </button>
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
+  <div id="banner-aggiornamento" role="status">
+    <span>Nuova versione di Equo disponibile</span>
+    <button class="btn btn-primary btn-sm" onclick="location.reload()">Aggiorna</button>
+  </div>
 
   <!-- AI SHEET (mezza schermata) -->
   <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="closeOut(event,'ai-sheet-overlay')">
@@ -1617,6 +1643,17 @@ select.input{cursor:pointer}
         </div>
         <span class="icon"><svg><use href="#i-chevron"/></svg></span>
       </div>
+      <div class="menu-section-label">Pegasus</div>
+      <div class="menu-row">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-calendar-week"></i></span>
+          <span>Riepilogo settimanale di Pegasus<br><small class="muted" style="font-size:11px">Ogni lunedì in chat · Premium: anche notifica ed email</small></span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="riepilogo-switch" onchange="toggleRiepilogoSettimanale(this.checked)">
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+        </label>
+      </div>
     </div>
 
     <div class="menu-section-label">Aspetto</div>
@@ -1662,6 +1699,7 @@ select.input{cursor:pointer}
     <div style="height:8px"></div>
     <button class="btn btn-outline" style="width:100%" onclick="openModal('modal-confirm-logout')">Esci</button>
     <button class="btn btn-ghost" style="width:100%;margin-top:6px;color:var(--red)" onclick="closeModal('modal-menu');openModal('modal-delete-account')">Elimina account</button>
+    <div class="muted" id="menu-versioni" style="text-align:center;font-size:11px;margin-top:14px;opacity:.75">Equo App v1.0</div>
   </div>
 </div>
 
@@ -3211,6 +3249,9 @@ async function enterApp(ruolo){
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();
   currentUser.vistaAttiva = ruolo;
+  aggiornaFabAi();
+  controllaNovitaAi();
+  controllaAggiornamentoApp();
   updateRoleBadgeUI(ruolo);
   renderMenuDualRole();
   if(PRO_ROLES.includes(ruolo)){
@@ -3890,6 +3931,8 @@ function openMenu(){
   document.getElementById("theme-switch").checked = document.documentElement.getAttribute("data-theme") === "light" ? false : true;
   updateThemeMenuUI();
   updatePianoUI();
+  caricaSwitchRiepilogo();
+  aggiornaVersioniMenu();
   openModal("modal-menu");
 }
 
@@ -3997,28 +4040,123 @@ function vistaAi(){
   const v = currentUser?.vistaAttiva || currentUser?.ruolo;
   return PRO_ROLES.includes(v) ? "professionista" : "proprietario";
 }
-// Hammer = agente dei maniscalchi (vista professionista con ruolo maniscalco); tutti gli altri: Equo AI
+// Hammer = agente dei maniscalchi (vista professionista con ruolo maniscalco);
+// Pegasus = agente del proprietario (vista proprietario); vet/istruttori: Equo AI neutro (fino a Galeno/Ares)
 function agenteAiHammer(){
   return vistaAi() === "professionista" && (currentUser?.vistaAttiva || currentUser?.ruolo) === "maniscalco";
 }
+function nomeAgenteAi(){
+  return agenteAiHammer() ? "Hammer" : vistaAi() === "proprietario" ? "Pegasus" : "Equo AI";
+}
+const BENVENUTO_PEGASUS = 'Ciao, sono <strong>Pegasus</strong> 🪽. Tengo d\'occhio i tuoi cavalli: scadenze, spese, appuntamenti col maniscalco e lezioni, e ti dico cosa fare e quando. Prova a chiedermi <em>"Cosa scade questo mese?"</em> o <em>"Quanto ho speso in pensione quest\'anno?"</em>. Con la 📎 mandami una fattura o il certificato vaccinale: preparo io le schede da confermare.';
 const BENVENUTO_EQUO_AI = document.getElementById("ai-benvenuto")?.innerHTML || "";
 function aggiornaTestataAi(){
   const hammer = agenteAiHammer();
+  const pegasus = !hammer && vistaAi() === "proprietario";
   const titolo = document.getElementById("ai-sheet-titolo");
-  if(titolo) titolo.textContent = hammer ? "Hammer · mascalcia" : "Assistente AI";
+  if(titolo) titolo.textContent = hammer ? "Hammer · mascalcia" : pegasus ? "Pegasus · il tuo assistente" : "Assistente AI";
   const benv = document.getElementById("ai-benvenuto");
   if(benv) benv.innerHTML = hammer
     ? 'Ciao, sono <strong>Hammer</strong> 🔨, l\'agente di mascalcia di Equo. Tecnica (pareggio, ferri ortopedici, setole, laminite), prodotti e link da Mustad, Kerckhaert e O\'Grady, e il tuo lavoro: prova <em>"cosa ho domani?"</em>, <em>"chi ha la ferratura scaduta?"</em>, <em>"quanto devo incassare?"</em>. Con la 📎 mandami la foto di uno zoccolo.'
-    : BENVENUTO_EQUO_AI;
+    : pegasus ? BENVENUTO_PEGASUS : BENVENUTO_EQUO_AI;
   const input = document.getElementById("chat-input");
-  if(input) input.placeholder = hammer ? "Chiedi a Hammer o allega una foto…" : "Scrivi o allega una foto…";
+  if(input) input.placeholder = hammer ? "Chiedi a Hammer o allega una foto…" : pegasus ? "Chiedi a Pegasus o allega una foto…" : "Scrivi o allega una foto…";
 }
 let aiStoriaVista = null;
+// versioni mostrate in fondo al menu profilo. REGOLA DI SIMONE (27/09/2026): restano tutte v1.0 finché non decide
+// lui di cambiarle (almeno 10-20 utenti reali). NON aumentarle in automatico né a ogni deploy.
+const VERSIONI = { app: "1.0", pegasus: "1.0", hammer: "1.0" };
+function aggiornaVersioniMenu(){
+  const el = document.getElementById("menu-versioni");
+  if(!el) return;
+  const agente = agenteAiHammer() ? `Hammer v${VERSIONI.hammer}` : vistaAi() === "proprietario" ? `Pegasus v${VERSIONI.pegasus}` : "";
+  el.textContent = `Equo App v${VERSIONI.app}` + (agente ? ` · ${agente}` : "");
+}
+// tasto rotondo AI: icona dell'agente della vista attiva (Pegasus / Hammer; vet e istruttori: scintille)
+function aggiornaFabAi(){
+  const fab = document.getElementById("ai-fab"), ic = document.getElementById("ai-fab-icona");
+  if(!fab || !ic) return;
+  const hammer = agenteAiHammer(), pegasus = !hammer && vistaAi() === "proprietario";
+  fab.classList.toggle("agente-hammer", hammer);
+  fab.classList.toggle("agente-pegasus", pegasus);
+  ic.className = "fa-solid " + (hammer ? "fa-hammer" : "fa-horse-head") + " ai-fab-agente";
+  fab.setAttribute("aria-label", hammer ? "Hammer, agente di mascalcia" : pegasus ? "Pegasus, il tuo assistente" : "Assistente AI");
+}
+// ---- Novità nella chat dell'agente: riepilogo del lunedì (solo Pegasus) + annunci (tutti gli agenti).
+// Pallino rosso sul tasto AI finché non si apre la chat; aprendola si segnano come letti.
+let novitaAi = { riepilogo: false, annunci: false };
+async function controllaNovitaAi(){
+  if(DEMO_MODE || !currentUser) return;
+  const vista = vistaAi();
+  const [r, a] = await Promise.all([
+    vista === "proprietario"
+      ? sb.from("ai_riepiloghi").select("settimana").eq("user_id", currentUser.id).is("letto_il", null).limit(1)
+      : Promise.resolve({ data: [] }),
+    sb.from("annunci_destinatari").select("annuncio_id").eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null).limit(1),
+  ]);
+  if(r.error) console.error("controllaNovitaAi riepilogo:", r.error);
+  if(a.error) console.error("controllaNovitaAi annunci:", a.error);
+  if(vista !== vistaAi()) return; // nel frattempo ha cambiato vista
+  novitaAi = { riepilogo: !!r.data?.length, annunci: !!a.data?.length };
+  document.getElementById("ai-fab")?.classList.toggle("con-novita", novitaAi.riepilogo || novitaAi.annunci);
+}
+async function segnaNovitaLette(){
+  document.getElementById("ai-fab")?.classList.remove("con-novita");
+  if(DEMO_MODE || !currentUser) return;
+  const ora = new Date().toISOString(), vista = vistaAi(), n = novitaAi;
+  novitaAi = { riepilogo: false, annunci: false };
+  if(n.riepilogo && vista === "proprietario"){
+    const { error } = await sb.from("ai_riepiloghi").update({ letto_il: ora }).eq("user_id", currentUser.id).is("letto_il", null);
+    if(error) console.error("segnaNovitaLette riepilogo:", error);
+  }
+  if(n.annunci){
+    const { error } = await sb.from("annunci_destinatari").update({ letto_il: ora }).eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null);
+    if(error) console.error("segnaNovitaLette annunci:", error);
+  }
+}
+
+// ---- Aggiornamento app: Netlify scrive il codice di build a ogni deploy (netlify/scrivi-build.js).
+// Se online c'è un deploy più nuovo compare il banner "Nuova versione disponibile → Aggiorna".
+// È un codice INTERNO, non la versione v1.0 mostrata nel menu.
+const EQUO_BUILD = "__EQUO_BUILD__";
+let ultimoControlloBuild = 0;
+async function controllaAggiornamentoApp(){
+  if(EQUO_BUILD.startsWith("__") || DEMO_MODE) return; // in locale / senza build Netlify: disattivato
+  if(Date.now() - ultimoControlloBuild < 5 * 60 * 1000) return;
+  ultimoControlloBuild = Date.now();
+  try {
+    const res = await fetch("/version.json?t=" + Date.now(), { cache: "no-store" });
+    if(!res.ok) return;
+    const { build } = await res.json();
+    if(build && build !== EQUO_BUILD) document.getElementById("banner-aggiornamento")?.classList.add("attivo");
+  } catch(e){ /* offline: riproverà */ }
+}
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState !== "visible") return;
+  controllaAggiornamentoApp();
+  if(document.getElementById("screen-app")?.classList.contains("active")) controllaNovitaAi();
+});
+async function caricaSwitchRiepilogo(){
+  const sw = document.getElementById("riepilogo-switch");
+  if(!sw) return;
+  sw.checked = true;
+  if(DEMO_MODE || !currentUser) return;
+  const { data } = await sb.from("profiles").select("riepilogo_settimanale").eq("id", currentUser.id).maybeSingle();
+  sw.checked = data?.riepilogo_settimanale !== false;
+}
+async function toggleRiepilogoSettimanale(attivo){
+  if(DEMO_MODE || !currentUser){ showToast(attivo ? "Riepilogo attivato" : "Riepilogo disattivato"); return; }
+  const { error } = await sb.from("profiles").update({ riepilogo_settimanale: attivo }).eq("id", currentUser.id);
+  if(error){ console.error("toggleRiepilogoSettimanale:", error); document.getElementById("riepilogo-switch").checked = !attivo; showToast("Non sono riuscito a salvare, riprova."); return; }
+  showToast(attivo ? "Pegasus ti manderà il riepilogo ogni lunedì" : "Riepilogo settimanale disattivato");
+}
 async function openAiSheet(){
   document.getElementById("ai-sheet-overlay").classList.add("active");
   aggiornaTestataAi();
-  // se l'utente ha cambiato vista (proprietario ↔ professionista) si ricarica la conversazione giusta
-  if(aiStoriaCaricata && aiStoriaVista !== vistaAi()){
+  const conNovita = document.getElementById("ai-fab")?.classList.contains("con-novita");
+  segnaNovitaLette();
+  // se ha cambiato vista (proprietario ↔ professionista) o sono arrivate novità, si ricarica la conversazione
+  if(aiStoriaCaricata && (aiStoriaVista !== vistaAi() || conNovita)){
     document.querySelectorAll("#chat-messages .chat-bubble:not(#ai-benvenuto)").forEach(el => el.remove());
     aiStoriaCaricata = false;
   }
@@ -4051,7 +4189,7 @@ async function aggiornaNotaUsoAi(uso){
   el.textContent = `${uso.usati} di ${uso.limite} messaggi AI questo mese` + (uso.limite <= 5 ? " · Premium: 500" : "");
 }
 async function nuovaConversazioneAi(){
-  if(!confirm(`Cancellare la conversazione con ${agenteAiHammer() ? "Hammer" : "Equo AI"}? Le note che ha memorizzato restano.`)) return;
+  if(!confirm(`Cancellare la conversazione con ${nomeAgenteAi()}? Le note che ha memorizzato restano.`)) return;
   if(!DEMO_MODE && currentUser){
     const { error } = await sb.from("ai_messaggi").delete().eq("user_id", currentUser.id).eq("vista", vistaAi());
     if(error){ showToast("Non sono riuscito a cancellare, riprova."); return; }
@@ -7441,7 +7579,7 @@ async function sendChatMessage(){
     if(res.status === 413){
       bolla.textContent = "Allegati troppo pesanti: prova con meno foto o un PDF più leggero.";
     } else if(res.status === 401){
-      bolla.textContent = "Sessione scaduta: esci e rientra per usare Equo AI.";
+      bolla.textContent = `Sessione scaduta: esci e rientra per usare ${nomeAgenteAi()}.`;
     } else if(data.limite_raggiunto){
       bolla.innerHTML = `<p>Hai usato tutti i <strong>${data.uso.limite} messaggi AI</strong> di questo mese.</p>` +
         (data.uso.piano === "premium" ? "<p>Il contatore riparte il 1° del mese.</p>" :

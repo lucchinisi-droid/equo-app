@@ -1,9 +1,20 @@
 [build]
   functions = "netlify/functions"
   publish = "."
+  # codice di build interno per il banner "Nuova versione disponibile" (non è la versione v1.0 mostrata)
+  command = "node netlify/scrivi-build.js"
 
 [functions]
   node_bundler = "esbuild"
+
+# Annunci degli agenti: push degli annunci pubblicati con pubblica_annuncio() (SQL), ogni 15 minuti.
+[functions."invia-annunci"]
+  schedule = "*/15 * * * *"
+
+# Pegasus: riepilogo settimanale il lunedì, ogni ora 6-9 UTC (8-11 in estate, 7-10 in inverno).
+# Più giri = più utenti elaborati senza superare i 30 s delle funzioni programmate.
+[functions."riepilogo-settimanale"]
+  schedule = "0 6-9 * * 1"
 
 [[headers]]
   for = "/.netlify/functions/*"
@@ -11,6 +22,11 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, stripe-signature"
     Access-Control-Allow-Methods = "POST, OPTIONS"
+
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 [[headers]]
   for = "/manifest.json"
