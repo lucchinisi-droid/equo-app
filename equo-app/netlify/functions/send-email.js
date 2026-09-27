@@ -28,7 +28,8 @@ exports.handler = async (event) => {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Equo <onboarding@resend.dev>",
+        from: process.env.EMAIL_MITTENTE || "Equo <onboarding@resend.dev>",
+        reply_to: process.env.EMAIL_RISPOSTE || "gestione.equo@gmail.com",
         to,
         subject,
         html,

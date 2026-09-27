@@ -74,7 +74,8 @@ exports.handler = async (event) => {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
     body: JSON.stringify({
-      from: "Equo <onboarding@resend.dev>",
+      from: process.env.EMAIL_MITTENTE || "Equo <onboarding@resend.dev>",
+      reply_to: process.env.EMAIL_RISPOSTE || "gestione.equo@gmail.com",
       to: EMAIL_ADMIN,
       subject: `Nuovo iscritto Equo: ${p.full_name || email || "utente"} (${RUOLO_LABEL[p.ruolo] || p.ruolo})`,
       html,

@@ -33,7 +33,7 @@ exports.handler = async (event) => {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-    body: JSON.stringify({ from: "Equo <onboarding@resend.dev>", to: "gestione.equo@gmail.com", subject: `Segnalazione maneggio: ${r.nome_struttura} (${r.citta})`, html }),
+    body: JSON.stringify({ from: process.env.EMAIL_MITTENTE || "Equo <onboarding@resend.dev>", to: "gestione.equo@gmail.com", subject: `Segnalazione maneggio: ${r.nome_struttura} (${r.citta})`, html }),
   });
   if (res.ok) await supabase.from("segnalazioni_maneggio").update({ notificata_at: new Date().toISOString() }).eq("id", id);
   return { statusCode: 200, body: JSON.stringify({ esito: res.ok ? "email_inviata" : "errore_resend", http_status: res.status }) };

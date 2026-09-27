@@ -6,6 +6,8 @@
 // - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   (già usate da stripe-webhook.js)
 // - ONESIGNAL_APP_ID
 // - ONESIGNAL_REST_API_KEY
+// - ONESIGNAL_SCUDERIA_APP_ID / ONESIGNAL_SCUDERIA_REST_API_KEY (app OneSignal di scuderia.equohub.com:
+//   un App ID web push vale per un solo dominio; se mancano si usa quella di Equo App)
 // - CHAT_WEBHOOK_SECRET   (stringa a piacere, la stessa da mettere nell'header
 //   custom del webhook Supabase, per evitare che chiunque possa chiamare
 //   questa function e far partire notifiche a caso)
@@ -97,7 +99,7 @@ async function gestisciChatScuderia(supabase, record) {
       .not("user_id", "is", null);
     const destinatari = (staff || []).map((s) => s.user_id).filter((id) => id && id !== mittente_user_id);
     if (destinatari.length === 0) return "cliente_a_staff_nessuno_staff_collegato";
-    const push = await inviaPush(destinatari, `Nuovo messaggio da ${membro.nome_visualizzato || "un cliente"}`, testo);
+    const push = await inviaPush(destinatari, `Nuovo messaggio da ${membro.nome_visualizzato || "un cliente"}`, testo, "scuderia");
     return "cliente_a_staff_dest=" + destinatari.length + " push=" + JSON.stringify(push);
   } else {
     // Il messaggio arriva dallo staff: notifica il cliente/professionista.
@@ -157,17 +159,21 @@ async function gestisciChatMascalcia(supabase, record) {
   }
 }
 
-async function inviaPush(externalIds, titolo, corpo) {
+async function inviaPush(externalIds, titolo, corpo, app = "equo") {
   if (!externalIds || externalIds.length === 0) return { attempted: false, motivo: "nessun_destinatario" };
+  // lo staff della scuderia è iscritto alle push su scuderia.equohub.com → app OneSignal dedicata
+  const scuderia = app === "scuderia" && process.env.ONESIGNAL_SCUDERIA_APP_ID && process.env.ONESIGNAL_SCUDERIA_REST_API_KEY;
+  const appId = scuderia ? process.env.ONESIGNAL_SCUDERIA_APP_ID : process.env.ONESIGNAL_APP_ID;
+  const restKey = scuderia ? process.env.ONESIGNAL_SCUDERIA_REST_API_KEY : process.env.ONESIGNAL_REST_API_KEY;
   const testoTroncato = (corpo || "").slice(0, 140);
   const res = await fetch(ONESIGNAL_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Key ${process.env.ONESIGNAL_REST_API_KEY}`,
+      Authorization: `Key ${restKey}`,
     },
     body: JSON.stringify({
-      app_id: process.env.ONESIGNAL_APP_ID,
+      app_id: appId,
       target_channel: "push",
       include_aliases: { external_id: externalIds },
       headings: { en: titolo },
