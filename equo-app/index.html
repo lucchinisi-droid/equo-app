@@ -292,6 +292,12 @@ select.input{cursor:pointer}
 /* MASCALCIA CHAT (stile WhatsApp, palette Equo) */
 .mchat-overlay{display:none;position:fixed;inset:0;z-index:70;flex-direction:column;background:var(--bg)}
 .mchat-overlay.active{display:flex}
+.mchat-foto{max-width:220px;max-height:280px;border-radius:12px;display:block;object-fit:cover}
+.allegati-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center}
+.allegati-overlay.active{display:flex}
+.allegati-sheet{width:100%;max-width:480px;background:var(--surface);border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.allegati-opt{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+.allegati-opt i{width:22px;text-align:center;color:var(--accent);font-size:18px}
 .mchat-header{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));
   border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
 .mchat-header-name{font-weight:700;font-size:14.5px}
@@ -939,6 +945,17 @@ select.input{cursor:pointer}
     <div class="card" id="inbox-card" style="margin-bottom:14px">
       <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px">
+      <div class="section-title" style="margin-bottom:0">Colleghi</div>
+      <button class="btn btn-primary btn-sm" onclick="apriNuovoCollega()">+ Collega</button>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div id="colleghi-list"><div class="muted" style="font-size:13px">Caricamento…</div></div>
+    </div>
+    <div class="muted" style="font-size:12px;line-height:1.6;text-align:center">
+      Confrontati con il veterinario, il maniscalco o l'istruttore di fiducia: foto, PDF e casi dei tuoi clienti in un posto solo.
+      Video e note vocali tra colleghi con <strong>Premium</strong>.
+    </div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -952,7 +969,7 @@ select.input{cursor:pointer}
   <div class="bottom-nav" id="bottom-nav-pro" style="display:none">
     <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
     <button class="nav-btn" data-page="pro-agenda" onclick="showPage('pro-agenda')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
-    <button class="nav-btn" data-page="pro-inbox" onclick="showPage('pro-inbox')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>
+    <button class="nav-btn" data-page="pro-inbox" onclick="showPage('pro-inbox'); loadColleghiList();"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>
     <button class="nav-btn" data-page="pro-clienti" onclick="showPage('pro-clienti')"><span class="fa-icon"><i class="fa-solid fa-users"></i></span><small>Clienti</small></button>
     <button class="nav-btn" data-page="pro-incassi" onclick="showPage('pro-incassi')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Incassi</small></button>
   </div>
@@ -995,6 +1012,20 @@ select.input{cursor:pointer}
     </div>
   </div>
 
+  <!-- MENU ALLEGATI (tutte le chat): fotocamera, galleria, documento PDF -->
+  <div class="allegati-overlay" id="allegati-overlay" onclick="if(event.target === this) chiudiMenuAllegati()">
+    <div class="allegati-sheet">
+      <button class="allegati-opt" onclick="scegliAllegato('camera')"><i class="fa-solid fa-camera"></i> Scatta una foto</button>
+      <button class="allegati-opt" onclick="scegliAllegato('galleria')"><i class="fa-solid fa-image"></i> <span id="allegati-galleria-label">Foto dalla galleria</span></button>
+      <button class="allegati-opt" onclick="scegliAllegato('documento')"><i class="fa-solid fa-file-pdf"></i> Documento PDF</button>
+      <button class="allegati-opt" id="allegati-video-premium" style="display:none" onclick="chiudiMenuAllegati(); showToast('I video in chat sono inclusi in Equo Premium'); togglePiano();"><i class="fa-solid fa-video"></i> Video <span class="badge-premium-mini" style="margin-left:auto;font-size:11px;font-weight:800;color:var(--accent)">PREMIUM</span></button>
+      <button class="btn btn-ghost" style="margin-top:4px" onclick="chiudiMenuAllegati()">Annulla</button>
+    </div>
+  </div>
+  <input type="file" id="allegato-camera" accept="image/*" capture="environment" style="display:none" onchange="allegatoScelto(event)">
+  <input type="file" id="allegato-galleria" accept="image/*" style="display:none" onchange="allegatoScelto(event)">
+  <input type="file" id="allegato-documento" accept="application/pdf,.pdf" style="display:none" onchange="allegatoScelto(event)">
+
   <!-- MASCALCIA CHAT (stile WhatsApp) -->
   <div class="mchat-overlay" id="mchat-overlay">
     <div class="mchat-header">
@@ -1018,6 +1049,7 @@ select.input{cursor:pointer}
     </div>
     <div class="mchat-input-bar" id="mchat-input-bar">
       <button class="mchat-emoji-btn" onclick="toggleEmojiPicker()" aria-label="Emoji">🙂</button>
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('mchat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="mchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMascalciaMessage()">
       <button class="mchat-mic-btn" id="mchat-mic-btn" onclick="startVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
       <button class="mchat-send-btn btn btn-primary" onclick="sendMascalciaMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
@@ -1044,6 +1076,7 @@ select.input{cursor:pointer}
     </div>
     <div class="mchat-messages" id="fchat-messages"></div>
     <div class="mchat-input-bar">
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('fchat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="fchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendFarrierChatMessage()">
       <button class="mchat-send-btn btn btn-primary" onclick="sendFarrierChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
@@ -1060,6 +1093,7 @@ select.input{cursor:pointer}
     </div>
     <div class="mchat-messages" id="schat-messages"></div>
     <div class="mchat-input-bar">
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('schat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="schat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendStableChatMessage()">
       <button class="mchat-send-btn btn btn-primary" onclick="sendStableChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
@@ -1079,7 +1113,7 @@ select.input{cursor:pointer}
     <input type="file" id="ochat-media-input" accept="image/*,video/*" style="display:none" onchange="handleOwnerChatMediaChange(event)">
     <div class="mchat-input-bar" id="ochat-input-bar">
       <button class="mchat-emoji-btn" onclick="toggleOwnerEmojiPicker()" aria-label="Emoji">🙂</button>
-      <button class="mchat-emoji-btn" onclick="document.getElementById('ochat-media-input').click()" aria-label="Allega foto o video"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-camera"></i></span></button>
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('ochat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="ochat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendOwnerChatMessage()">
       <button class="mchat-mic-btn" id="ochat-mic-btn" onclick="startOwnerVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
       <button class="mchat-send-btn btn btn-primary" onclick="sendOwnerChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
@@ -1792,6 +1826,26 @@ select.input{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-nuovo-collega" onclick="closeOut(event,'modal-nuovo-collega')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-user-doctor"></i></span>Chatta con un collega</div>
+    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+      Chiedi al collega il suo <strong>codice professionista</strong> (lo trova nel menu → "Il tuo codice personale").
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice del collega</label>
+        <input class="input" id="nuovo-collega-codice" placeholder="EQUO-PRO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')avviaChatCollega()">
+      </div>
+      <div class="auth-error" id="nuovo-collega-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="avviaChatCollega()" style="width:100%;margin-top:6px">Avvia chat</button>
+      <div class="muted" style="font-size:12.5px;text-align:center;margin:16px 0 8px">Il tuo collega non usa ancora Equo?</div>
+      <button class="btn btn-outline" onclick="invitaCollega()" style="width:100%"><span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-share-nodes"></i></span> Invitalo su Equo</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-collega-maniscalco" onclick="closeOut(event,'modal-collega-maniscalco')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -2338,6 +2392,42 @@ const DB = {
     const row = Array.isArray(data) ? data[0] : data;
     return row || null;
   },
+  /* -- Chat tra colleghi professionisti (stesse tabelle, conversazioni_proprietari.tipo = 'colleghi') -- */
+  async listColleghi(){
+    if(DEMO_MODE){
+      return (demoState.colleghi || []).map(c => {
+        const msgs = demoState.messaggiProprietari.filter(m => m.conversazione_id === c.conversazione_id).slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+        return { ...c, ultimoMessaggio: msgs[0] || null, unread: msgs.filter(m => m.mittente_id !== "demo-user" && !m.letto).length };
+      });
+    }
+    const { data, error } = await sb.rpc("lista_colleghi");
+    if(error){ console.error("listColleghi:", error); return []; }
+    const lista = data || [];
+    if(!lista.length) return [];
+    const { data: messaggi, error: mErr } = await sb.from("messaggi_proprietari").select("*").in("conversazione_id", lista.map(c => c.conversazione_id)).order("created_at", { ascending: false }).limit(300);
+    if(mErr) console.error("listColleghi (messaggi):", mErr);
+    return lista.map(c => {
+      const msgs = (messaggi || []).filter(m => m.conversazione_id === c.conversazione_id);
+      return { ...c, ultimoMessaggio: msgs[0] || null, unread: msgs.filter(m => m.mittente_id !== currentUser.id && !m.letto).length };
+    }).sort((a,b) => new Date(b.ultimoMessaggio?.created_at || 0) - new Date(a.ultimoMessaggio?.created_at || 0));
+  },
+  async creaChatCollega(codice){
+    if(DEMO_MODE){
+      demoState.colleghi = demoState.colleghi || [];
+      if(codice !== "EQUO-PRO-DEMO") return { ok: false, errore: "codice_non_valido" };
+      let c = demoState.colleghi[0];
+      if(!c){
+        const conv = { id: "co-" + (++demoIdCounter), proprietario_a_id: "demo-user", proprietario_b_id: "demo-vet", tipo: "colleghi", created_at: new Date().toISOString() };
+        demoState.conversazioniProprietari.push(conv);
+        c = { conversazione_id: conv.id, altro_id: "demo-vet", nome: "Dott.ssa Giulia Neri", ruolo: "veterinario", avatar_url: null, certificato: true };
+        demoState.colleghi.push(c);
+      }
+      return { ok: true, conversazione_id: c.conversazione_id, nome: c.nome, ruolo: c.ruolo };
+    }
+    const { data, error } = await sb.rpc("crea_chat_collega", { p_codice: codice });
+    if(error){ console.error("creaChatCollega:", error); return { ok: false, errore: error.message }; }
+    return data || { ok: false, errore: "errore" };
+  },
   async getOrCreateConversazione(altroId){
     if(DEMO_MODE){
       let c = demoState.conversazioniProprietari.find(c => (c.proprietario_a_id === "demo-user" && c.proprietario_b_id === altroId) || (c.proprietario_a_id === altroId && c.proprietario_b_id === "demo-user"));
@@ -2357,7 +2447,7 @@ const DB = {
   },
   async listConversazioniProprietario(){
     if(DEMO_MODE){
-      return demoState.conversazioniProprietari.map(c => {
+      return demoState.conversazioniProprietari.filter(c => c.tipo !== "colleghi").map(c => {
         const altroId = c.proprietario_a_id === "demo-user" ? c.proprietario_b_id : c.proprietario_a_id;
         const altro = demoState.altriProprietari.find(p => p.id === altroId) || { full_name: "Proprietario" };
         const msgs = demoState.messaggiProprietari.filter(m => m.conversazione_id === c.id).slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
@@ -2365,21 +2455,27 @@ const DB = {
         return { id: c.id, altro, ultimoMessaggio: msgs[0] || null, unread };
       }).sort((a,b) => new Date(b.ultimoMessaggio?.created_at || 0) - new Date(a.ultimoMessaggio?.created_at || 0));
     }
-    const { data: convos } = await sb.from("conversazioni_proprietari").select("*")
+    let { data: convos, error: convErr } = await sb.from("conversazioni_proprietari").select("*")
       .or(`proprietario_a_id.eq.${currentUser.id},proprietario_b_id.eq.${currentUser.id}`);
-    if(!convos || convos.length === 0) return [];
+    if(convErr) console.error("listConversazioniProprietario (conversazioni):", convErr);
+    const convosProp = (convos || []).filter(c => c.tipo !== "colleghi"); // le chat tra colleghi stanno nella vista professionista
+    if(convosProp.length === 0) return [];
+    convos = convosProp;
     const ids = convos.map(c => c.id);
     // Via RPC sicura: il client non può leggere profiles di altri utenti per via
     // dell'RLS, quindi i nomi arrivano da una funzione lato server che restituisce
     // solo i profili delle persone con cui si ha già una conversazione.
-    const [{ data: profili }, { data: messaggi }] = await Promise.all([
+    const [{ data: profili, error: nomiErr }, { data: messaggi, error: msgErr }] = await Promise.all([
       sb.rpc("get_nomi_conversazioni_proprietario"),
       sb.from("messaggi_proprietari").select("*").in("conversazione_id", ids).order("created_at", { ascending: false }).limit(300),
     ]);
+    if(nomiErr) console.error("listConversazioniProprietario (nomi):", nomiErr);
+    if(msgErr) console.error("listConversazioniProprietario (messaggi):", msgErr);
     return convos.map(c => {
       const altroId = c.proprietario_a_id === currentUser.id ? c.proprietario_b_id : c.proprietario_a_id;
       const p = (profili || []).find(p => p.altro_id === altroId);
-      const altro = p ? { id: p.altro_id, full_name: p.full_name, avatar_url: p.avatar_url } : { full_name: "Proprietario" };
+      // nome vuoto nel profilo dell'altro → "Utente Equo" (il vecchio "Proprietario" sembrava un errore)
+      const altro = p ? { id: p.altro_id, full_name: p.full_name || "Utente Equo", avatar_url: p.avatar_url } : { id: altroId, full_name: "Utente Equo" };
       const msgsConvo = (messaggi || []).filter(m => m.conversazione_id === c.id);
       const unread = msgsConvo.filter(m => m.mittente_id !== currentUser.id && !m.letto).length;
       return { id: c.id, altro, ultimoMessaggio: msgsConvo[0] || null, unread };
@@ -2390,13 +2486,15 @@ const DB = {
     const { data, error } = await sb.from("messaggi_proprietari").select("*").eq("conversazione_id", conversazioneId).order("created_at", { ascending: true });
     return error ? [] : (data || []);
   },
-  async insertMessaggioProprietario({ conversazione_id, tipo, testo, media_url }){
+  async insertMessaggioProprietario({ conversazione_id, tipo, testo, media_url, file_nome }){
     tipo = tipo || "testo";
+    const extra = file_nome ? { file_nome } : {};
     if(DEMO_MODE){
-      demoState.messaggiProprietari.push({ id: "mo-" + (++demoIdCounter), conversazione_id, mittente_id: "demo-user", tipo, testo: testo || null, media_url: media_url || null, letto: true, created_at: new Date().toISOString() });
+      demoState.messaggiProprietari.push({ id: "mo-" + (++demoIdCounter), conversazione_id, mittente_id: "demo-user", tipo, testo: testo || null, media_url: media_url || null, ...extra, letto: true, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_proprietari").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, letto: true });
+    const { error } = await sb.from("messaggi_proprietari").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, ...extra, letto: true });
+    if(error) console.error("insertMessaggioProprietario:", error);
     return { error };
   },
   async markLettiProprietario(conversazioneId){
@@ -2431,19 +2529,56 @@ const DB = {
   /* -- Chat con la/le scuderie collegate (riusa chat_messaggi già usata da Equo Scuderia) -- */
   async listScuderieCollegate(){
     if(DEMO_MODE) return [];
-    const { data, error } = await sb.from("scuderia_membri").select("id, centro_id, centri(nome)").eq("user_id", currentUser.id);
-    if(error || !data) return [];
-    return data.map(m => ({ membro_id: m.id, centro_id: m.centro_id, nome: m.centri?.nome || "La tua scuderia" }));
+    // RPC sicura (SQL fix sicurezza 27/09): il proprietario non può più leggere la tabella centri
+    const { data, error } = await sb.rpc("mie_scuderie_collegate");
+    if(error){
+      console.error("listScuderieCollegate:", error);
+      // SQL non ancora eseguita: vecchio metodo
+      const old = await sb.from("scuderia_membri").select("id, centro_id, centri(nome)").eq("user_id", currentUser.id);
+      if(old.error){ console.error("listScuderieCollegate (fallback):", old.error); return []; }
+      return (old.data || []).map(m => ({ membro_id: m.id, centro_id: m.centro_id, nome: m.centri?.nome || "La tua scuderia" }));
+    }
+    return (data || []).map(m => ({ membro_id: m.membro_id, centro_id: m.centro_id, nome: m.nome || "La tua scuderia" }));
   },
   async listMessaggiScuderia(membroId){
     if(DEMO_MODE) return [];
     const { data, error } = await sb.from("chat_messaggi").select("*").eq("membro_id", membroId).order("created_at", { ascending: true });
+    if(error) console.error("listMessaggiScuderia:", error);
     return error ? [] : (data || []);
   },
-  async inviaMessaggioScuderia({ centro_id, membro_id, testo }){
+  async inviaMessaggioScuderia({ centro_id, membro_id, testo, tipo = "testo", file_url = null, file_nome = null }){
     if(DEMO_MODE) return { error: null };
-    const { error } = await sb.from("chat_messaggi").insert({ centro_id, membro_id, mittente_user_id: currentUser.id, testo });
+    const row = { centro_id, membro_id, mittente_user_id: currentUser.id, testo: testo || null };
+    if(tipo !== "testo") Object.assign(row, { tipo, file_url, file_nome });
+    const { error } = await sb.from("chat_messaggi").insert(row);
+    if(error) console.error("inviaMessaggioScuderia:", error);
     return { error };
+  },
+  // Allegati chat (foto ridotte a max 1600px, PDF fino a 10 MB) nel contenitore "chat-allegati/<uid>/..."
+  async uploadAllegatoChat(file, cartella, tipo){
+    const isPdf = tipo === "documento", isVideo = tipo === "video";
+    const extVideo = ((file.name || "").split(".").pop() || "mp4").toLowerCase();
+    const nome = isPdf ? (file.name || "Documento.pdf") : isVideo ? "Video." + extVideo : "Foto.jpg";
+    if(DEMO_MODE) return { url: URL.createObjectURL(file), nome, error: null };
+    let blob = file;
+    if(tipo === "foto"){ try{ blob = await (await fetch(await riduciImmagine(file))).blob(); } catch(e){ console.error("riduci foto:", e); } }
+    const rnd = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+    const path = `${currentUser.id}/${cartella}/${rnd}.${isPdf ? "pdf" : isVideo ? extVideo : "jpg"}`;
+    const contentType = isPdf ? "application/pdf" : isVideo ? (file.type || "video/mp4") : "image/jpeg";
+    const { error } = await sb.storage.from("chat-allegati").upload(path, blob, { contentType });
+    if(error){ console.error("uploadAllegatoChat:", error); return { url: null, nome, error }; }
+    const { data } = sb.storage.from("chat-allegati").getPublicUrl(path);
+    return { url: data?.publicUrl || null, nome, error: null };
+  },
+  async inviaAllegatoAlManiscalco(clienteId, tipo, file_url, file_nome){
+    if(DEMO_MODE){
+      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id: clienteId, mittente_tipo: "cliente", tipo, file_url, file_nome, letto: false, created_at: new Date().toISOString() });
+      return { error: null };
+    }
+    const { data, error } = await sb.rpc("invia_allegato_mascalcia_cliente", { p_cliente_id: clienteId, p_tipo: tipo, p_file_url: file_url, p_file_nome: file_nome });
+    if(error){ console.error("inviaAllegatoAlManiscalco:", error); return { error }; }
+    if(data && data.ok === false){ console.error("inviaAllegatoAlManiscalco:", data); return { error: { message: data.errore || "invio non riuscito" } }; }
+    return { error: null };
   },
 
   async findStableByCode(code){
@@ -3106,6 +3241,7 @@ async function setupProNav(ruolo){
   showPage("pro-home");
   await loadClientiMascalcia();
   await loadInboxMascalcia();
+  loadColleghiList();
   await renderIncassi();
 }
 
@@ -3992,7 +4128,7 @@ async function loadHomeLastMessage(){
   for(const s of scuderie){
     const msgs = await DB.listMessaggiScuderia(s.membro_id);
     const ultimo = msgs[msgs.length - 1];
-    if(ultimo) candidates.push({ tipo: "scuderia", nome: s.nome, testo: ultimo.testo || "", data: ultimo.created_at, target: s });
+    if(ultimo) candidates.push({ tipo: "scuderia", nome: s.nome, testo: ultimo.testo || previewAllegato(ultimo.tipo, ultimo.file_nome), data: ultimo.created_at, target: s });
   }
   const maniscalchi = await DB.listManiscalchiCollegati();
   maniscalchi.forEach(f => {
@@ -4003,8 +4139,8 @@ async function loadHomeLastMessage(){
   (conversazioni || []).forEach(c => {
     const m = c.ultimoMessaggio;
     if(!m) return;
-    const testo = m.tipo && m.tipo !== "testo" ? (m.tipo === "audio" ? "🎙️ Nota vocale" : m.tipo === "foto" ? "📷 Foto" : "🎬 Video") : (m.testo || "");
-    candidates.push({ tipo: "proprietario", nome: c.altro?.full_name || "Proprietario", testo, data: m.created_at, target: c });
+    const testo = m.tipo && m.tipo !== "testo" ? previewAllegato(m.tipo, m.file_nome) : (m.testo || "");
+    candidates.push({ tipo: "proprietario", nome: c.altro?.full_name || "Utente Equo", testo, data: m.created_at, target: c });
   });
 
   if(candidates.length === 0) return;
@@ -4027,7 +4163,7 @@ function goToLastMessage(){
     loadFarrierChatSection().then(() => openFarrierChatThread(f.cliente_mascalcia_id, f.nome_maniscalco || "Il tuo maniscalco"));
   } else {
     const c = homeLastMessageTarget.target;
-    loadOwnerChatList().then(() => openOwnerChatThread(c.id, c.altro?.full_name || "Proprietario"));
+    loadOwnerChatList().then(() => openOwnerChatThread(c.id, c.altro?.full_name || "Utente Equo"));
   }
 }
 
@@ -5788,8 +5924,8 @@ async function renderChatThread(clienteId){
     const out = m.mittente_tipo === "maniscalco";
     const body = m.tipo === "audio"
       ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
-      : m.tipo === "documento"
-        ? `<a class="mchat-doc" href="${escapeHtml(m.file_url || "#")}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(m.file_nome || "Documento.pdf")}</span></a>${m.testo ? `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>` : ""}`
+      : (m.tipo === "documento" || m.tipo === "foto" || m.tipo === "video")
+        ? bollaAllegato(m.tipo, m.file_url, m.file_nome, m.testo)
         : `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
@@ -5799,6 +5935,74 @@ async function renderChatThread(clienteId){
   });
   box.innerHTML = html;
   box.scrollTop = box.scrollHeight;
+}
+
+/* ---------- ALLEGATI IN CHAT (foto da fotocamera/galleria, PDF) ---------- */
+let allegatoChatTarget = null; // "mchat" (maniscalco→cliente) | "fchat" (cliente→maniscalco) | "schat" (proprietario→scuderia) | "ochat" (tra proprietari)
+function apriMenuAllegati(chat){
+  allegatoChatTarget = chat;
+  // video: tra proprietari per tutti (come prima); verso maniscalco e scuderia solo per i proprietari Premium
+  const videoPremium = chat === "fchat" || chat === "schat" || (chat === "ochat" && chatColleghiAperta);
+  const video = (chat === "ochat" && !chatColleghiAperta) || (videoPremium && isPremium());
+  document.getElementById("allegato-galleria").accept = video ? "image/*,video/*" : "image/*";
+  document.getElementById("allegati-galleria-label").textContent = video ? "Foto o video dalla galleria" : "Foto dalla galleria";
+  document.getElementById("allegati-video-premium").style.display = (videoPremium && !isPremium()) ? "flex" : "none";
+  document.getElementById("allegati-overlay").classList.add("active");
+}
+function chiudiMenuAllegati(){ document.getElementById("allegati-overlay").classList.remove("active"); }
+function scegliAllegato(fonte){
+  chiudiMenuAllegati();
+  document.getElementById("allegato-" + fonte).click();
+}
+function durataVideo(file){
+  return new Promise(ok => {
+    const v = document.createElement("video"); const u = URL.createObjectURL(file);
+    v.preload = "metadata";
+    v.onloadedmetadata = () => { URL.revokeObjectURL(u); ok(v.duration || 0); };
+    v.onerror = () => { URL.revokeObjectURL(u); ok(0); };
+    v.src = u;
+  });
+}
+async function allegatoScelto(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  const chat = allegatoChatTarget;
+  if(!file || !chat) return;
+  const isVideo = (file.type || "").startsWith("video/") || /\.(mp4|mov|m4v|webm|3gp)$/i.test(file.name || "");
+  if(chat === "ochat" && isVideo){
+    if(bloccaPremiumColleghi("I video")) return;
+    return handleOwnerChatMediaChange({ target: { files: [file], value: "" } });
+  }
+  if(isVideo){
+    if(!(chat === "fchat" || chat === "schat")){ showToast("Qui puoi allegare foto o documenti PDF."); return; }
+    if(!isPremium()){ showToast("I video in chat sono inclusi in Equo Premium"); togglePiano(); return; }
+    if(file.size > 50 * 1024 * 1024){ showToast("Video troppo pesante (max 50 MB): accorcialo o riprendilo a qualità più bassa."); return; }
+    const durata = await durataVideo(file);
+    if(durata > 62){ showToast("Video troppo lungo: massimo 1 minuto."); return; }
+  }
+  const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+  const isImg = (file.type || "").startsWith("image/") || /\.(jpe?g|png|heic|heif|webp)$/i.test(file.name || "");
+  if(!isPdf && !isImg && !isVideo){ showToast("Puoi allegare foto o documenti PDF."); return; }
+  if(isPdf && file.size > 10 * 1024 * 1024){ showToast("PDF troppo grande (max 10 MB)."); return; }
+  const tipo = isVideo ? "video" : isPdf ? "documento" : "foto";
+  showToast(isVideo ? "Invio del video… (può volerci qualche secondo)" : isPdf ? "Invio del PDF…" : "Invio della foto…");
+  const { url, nome, error: upErr } = await DB.uploadAllegatoChat(file, chat, tipo);
+  if(upErr || !url){ showToast("Caricamento non riuscito: " + (upErr?.message || "riprova")); return; }
+  let error = null;
+  if(chat === "mchat" && currentClienteId){
+    ({ error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: currentClienteId, tipo, file_url: url, file_nome: nome }));
+    if(!error){ await renderChatThread(currentClienteId); await loadInboxMascalcia(); }
+  } else if(chat === "fchat" && currentFarrier){
+    ({ error } = await DB.inviaAllegatoAlManiscalco(currentFarrier.cliente_mascalcia_id, tipo, url, nome));
+    if(!error){ await renderFarrierChatThread(); loadFarrierChatSection(); }
+  } else if(chat === "schat" && currentStableMembro){
+    ({ error } = await DB.inviaMessaggioScuderia({ centro_id: currentStableMembro.centro_id, membro_id: currentStableMembro.membro_id, tipo, file_url: url, file_nome: nome }));
+    if(!error){ await renderStableChatThread(); await loadStableChatSection(); }
+  } else if(chat === "ochat" && currentConversazioneId){
+    ({ error } = await DB.insertMessaggioProprietario({ conversazione_id: currentConversazioneId, tipo, media_url: url, file_nome: isPdf ? nome : null }));
+    if(!error){ await renderOwnerChatThread(currentConversazioneId); await aggiornaListeChatProprietari(); }
+  } else return;
+  if(error) showToast("Invio non riuscito: " + (error.message || "riprova"));
 }
 
 async function sendMascalciaMessage(){
@@ -5964,7 +6168,7 @@ async function loadInboxMascalcia(){
     const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
     const nome = m.clienti_mascalcia?.nome || "Cliente";
     const cavallo = m.clienti_mascalcia?.nome_cavallo;
-    const previewBody = m.tipo === "audio" ? "🎙️ Nota vocale" : (m.testo || "");
+    const previewBody = previewMessaggioMascalcia(m.tipo, m.testo, m.file_nome);
     const preview = (m.mittente_tipo === "maniscalco" ? "Tu: " : "") + previewBody;
     return `
     <div class="inbox-item ${unread > 0 ? "unread" : ""}" onclick="openChatThread('${m.cliente_mascalcia_id}')">
@@ -6007,11 +6211,11 @@ async function loadOwnerChatList(){
     return;
   }
   box.innerHTML = conversazioni.map(c => {
-    const nome = c.altro?.full_name || "Proprietario";
+    const nome = c.altro?.full_name || "Utente Equo";
     const m = c.ultimoMessaggio;
     let previewBody = "Inizia la conversazione";
     if(m){
-      previewBody = m.tipo === "audio" ? "🎙️ Nota vocale" : m.tipo === "foto" ? "📷 Foto" : m.tipo === "video" ? "🎬 Video" : (m.testo || "");
+      previewBody = (m.tipo && m.tipo !== "testo") ? previewAllegato(m.tipo, m.file_nome) : (m.testo || "");
       previewBody = (m.mittente_id === currentUser.id ? "Tu: " : "") + previewBody;
     }
     return `
@@ -6039,7 +6243,7 @@ async function loadStableChatSection(){
   box.innerHTML = conMessaggi.map(s => {
     const ultimo = s.messaggi[s.messaggi.length - 1];
     let preview = "Inizia la conversazione con la scuderia";
-    if(ultimo) preview = (ultimo.mittente_user_id === currentUser.id ? "Tu: " : "") + (ultimo.testo || "");
+    if(ultimo) preview = (ultimo.mittente_user_id === currentUser.id ? "Tu: " : "") + (ultimo.testo || previewAllegato(ultimo.tipo, ultimo.file_nome));
     const nonLetti = contaNonLettiScuderia(s.membro_id, s.messaggi);
     return `
     <div class="inbox-item" onclick='openStableChatThread(${JSON.stringify(s.membro_id)}, ${JSON.stringify(s.centro_id)}, ${JSON.stringify(s.nome)})'>
@@ -6163,9 +6367,11 @@ async function renderStableChatThread(){
       lastDay = day;
     }
     const out = m.mittente_user_id === currentUser.id;
+    const body = (m.tipo === "foto" || m.tipo === "documento" || m.tipo === "video") ? bollaAllegato(m.tipo, m.file_url, m.file_nome, m.testo)
+      : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
-        <div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>
+        ${body}
         <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
       </div>`;
   });
@@ -6187,7 +6393,23 @@ async function sendStableChatMessage(){
 /* ---------- CHAT COL PROPRIO MANISCALCO (lato proprietario) ---------- */
 let currentFarrier = null; // { cliente_mascalcia_id, nome }
 
+// Corpo di una bolla con allegato (foto o PDF), uguale in tutte le chat
+function bollaAllegato(tipo, url, nome, testo){
+  const extra = testo ? `<div class="mchat-bubble-text">${escapeHtml(testo)}</div>` : "";
+  if(tipo === "foto") return `<a href="${escapeHtml(url || "#")}" target="_blank" rel="noopener"><img class="mchat-foto" src="${escapeHtml(url || "")}" alt="Foto" loading="lazy"></a>${extra}`;
+  if(tipo === "video") return `<video class="mchat-foto" controls playsinline preload="metadata" src="${escapeHtml(url || "")}"></video>${extra}`;
+  return `<a class="mchat-doc" href="${escapeHtml(url || "#")}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
+}
+function previewAllegato(tipo, nome){
+  if(tipo === "foto") return "📷 Foto";
+  if(tipo === "video") return "🎬 Video";
+  if(tipo === "audio") return "🎙️ Nota vocale";
+  if(tipo === "documento") return "📄 " + (nome || "Documento PDF");
+  return "";
+}
 function previewMessaggioMascalcia(tipo, testo, fileNome){
+  if(tipo === "foto") return "📷 Foto";
+  if(tipo === "video") return "🎬 Video";
   if(tipo === "documento") return "📄 " + (fileNome || "Documento PDF");
   if(tipo === "audio") return "🎙️ Nota vocale";
   return testo || "";
@@ -6381,8 +6603,8 @@ async function renderFarrierChatThread(){
     const out = m.mittente_tipo === "cliente";
     const body = m.tipo === "audio"
       ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
-      : m.tipo === "documento"
-        ? `<a class="mchat-doc" href="${escapeHtml(m.file_url || "#")}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(m.file_nome || "Documento.pdf")}</span></a>${m.testo ? `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>` : ""}`
+      : (m.tipo === "documento" || m.tipo === "foto" || m.tipo === "video")
+        ? bollaAllegato(m.tipo, m.file_url, m.file_nome, m.testo)
         : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
@@ -6549,6 +6771,71 @@ function scanQrLoop(){
   qrScanRAF = requestAnimationFrame(scanQrLoop);
 }
 
+/* ---------- CHAT TRA COLLEGHI (vista professionista) ---------- */
+let chatColleghiAperta = false; // true quando l'overlay chat (ochat) è usato per un collega
+async function loadColleghiList(){
+  const box = document.getElementById("colleghi-list");
+  if(!box) return;
+  const lista = await DB.listColleghi();
+  if(!lista.length){
+    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6;text-align:center;padding:6px 0">Nessun collega ancora.<br>Tocca "+ Collega" e inserisci il suo codice professionista.</div>';
+    return;
+  }
+  box.innerHTML = lista.map(c => {
+    const nome = c.nome || "Collega";
+    const m = c.ultimoMessaggio;
+    let preview = "Inizia la conversazione";
+    if(m) preview = (m.mittente_id === currentUser.id ? "Tu: " : "") + ((m.tipo && m.tipo !== "testo") ? previewAllegato(m.tipo, m.file_nome) : (m.testo || ""));
+    return `
+    <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick='apriChatCollega(${JSON.stringify(c.conversazione_id)}, ${JSON.stringify(nome)}, ${JSON.stringify(c.ruolo || "")})'>
+      <div class="horse-avatar">${c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : '<i class="fa-solid fa-user-doctor" style="font-size:18px"></i>'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(nome)}${c.certificato ? " " + BADGE_CERTIFIED_HTML : ""}</div>
+        <div class="muted" style="font-size:11.5px">${escapeHtml(ROLE_LABELS[c.ruolo] || "Professionista")}</div>
+        <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
+      </div>
+      ${c.unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
+    </div>`;
+  }).join("");
+}
+function apriNuovoCollega(){
+  document.getElementById("nuovo-collega-codice").value = "";
+  document.getElementById("nuovo-collega-error").style.display = "none";
+  openModal("modal-nuovo-collega");
+}
+async function avviaChatCollega(){
+  const codice = document.getElementById("nuovo-collega-codice").value.trim().toUpperCase();
+  const errBox = document.getElementById("nuovo-collega-error");
+  errBox.style.display = "none";
+  if(!codice) return;
+  const r = await DB.creaChatCollega(codice);
+  if(!r || !r.ok){
+    const msg = { codice_non_valido: "Codice non valido: controlla che sia un codice professionista (EQUO-PRO-…).", codice_tuo: "Questo è il tuo codice.", solo_professionisti: "La chat tra colleghi è per i professionisti." }[r?.errore];
+    errBox.textContent = (msg || "Non sono riuscito ad avviare la chat, riprova.") + (DEMO_MODE ? " (in demo prova EQUO-PRO-DEMO)" : "");
+    errBox.style.display = "block";
+    return;
+  }
+  closeModal("modal-nuovo-collega");
+  await loadColleghiList();
+  await apriChatCollega(r.conversazione_id, r.nome || "Collega", r.ruolo || "");
+}
+async function apriChatCollega(conversazioneId, nome, ruolo){
+  await openOwnerChatThread(conversazioneId, nome + (ROLE_LABELS[ruolo] ? " · " + ROLE_LABELS[ruolo] : ""), true);
+}
+async function invitaCollega(){
+  const codice = await DB.ensureCodiceProfessionista();
+  const text = `Ciao! Ti scrivo su Equo, l'app per chi lavora con i cavalli: chat, foto e casi in un posto solo. Scaricala su https://app.equohub.com e aggiungimi con il mio codice ${codice}`;
+  if(navigator.share){ navigator.share({ text }).catch(() => {}); return; }
+  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+}
+// Video e note vocali tra colleghi: solo Premium
+function bloccaPremiumColleghi(cosa){
+  if(!chatColleghiAperta || isPremium()) return false;
+  showToast(cosa + " tra colleghi sono inclusi in Equo Premium");
+  togglePiano();
+  return true;
+}
+
 async function startNewChat(){
   const codice = document.getElementById("new-chat-codice").value.trim().toUpperCase();
   const errBox = document.getElementById("new-chat-error");
@@ -6569,19 +6856,23 @@ async function startNewChat(){
   document.getElementById("new-chat-codice").value = "";
   closeModal("modal-new-chat");
   await loadOwnerChatList();
-  await openOwnerChatThread(conversazioneId, altro.full_name || "Proprietario");
+  await openOwnerChatThread(conversazioneId, altro.full_name || "Utente Equo");
 }
 
-async function openOwnerChatThread(conversazioneId, nome){
+async function openOwnerChatThread(conversazioneId, nome, colleghi = false){
+  chatColleghiAperta = !!colleghi;
   currentConversazioneId = conversazioneId;
-  document.getElementById("ochat-nome").textContent = nome || "Proprietario";
+  document.getElementById("ochat-nome").textContent = nome || "Utente Equo";
   document.getElementById("ochat-emoji-picker").classList.remove("active");
   document.getElementById("ochat-input").value = "";
   document.getElementById("ochat-overlay").classList.add("active");
   await DB.markLettiProprietario(conversazioneId);
   await renderOwnerChatThread(conversazioneId);
-  await loadOwnerChatList();
+  await aggiornaListeChatProprietari();
   refreshChatBadge();
+}
+async function aggiornaListeChatProprietari(){
+  if(chatColleghiAperta) await loadColleghiList(); else await loadOwnerChatList();
 }
 
 function closeOwnerChatThread(){
@@ -6614,6 +6905,7 @@ async function renderOwnerChatThread(conversazioneId){
       </button>`;
     else if(m.tipo === "video") body = `<video controls src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block"></video>
       <div class="muted" style="font-size:11px;margin-top:4px">I video si condividono solo dentro Equo per ora.</div>`;
+    else if(m.tipo === "documento") body = bollaAllegato("documento", m.media_url, m.file_nome, m.testo);
     else body = `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
@@ -6633,7 +6925,7 @@ async function sendOwnerChatMessage(){
   const { error } = await DB.insertMessaggioProprietario({ conversazione_id: currentConversazioneId, tipo: "testo", testo });
   if(error){ showToast("Errore: " + error.message); return; }
   await renderOwnerChatThread(currentConversazioneId);
-  await loadOwnerChatList();
+  await aggiornaListeChatProprietari();
 }
 
 async function handleOwnerChatMediaChange(event){
@@ -6649,7 +6941,7 @@ async function handleOwnerChatMediaChange(event){
   const { error: insertError } = await DB.insertMessaggioProprietario({ conversazione_id: currentConversazioneId, tipo, media_url: url });
   if(insertError){ showToast("Errore: " + insertError.message); return; }
   await renderOwnerChatThread(currentConversazioneId);
-  await loadOwnerChatList();
+  await aggiornaListeChatProprietari();
 }
 
 /* -- Note vocali chat proprietario (stesso pattern della chat mascalcia) -- */
@@ -6660,6 +6952,7 @@ let ownerRecordingSeconds = 0;
 let ownerRecordingStream = null;
 
 async function startOwnerVoiceRecording(){
+  if(bloccaPremiumColleghi("Le note vocali")) return;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined"){
     showToast("Il tuo browser non supporta la registrazione vocale.");
     return;

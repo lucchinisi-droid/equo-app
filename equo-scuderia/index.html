@@ -970,6 +970,8 @@ textarea.input{resize:vertical}
     <div class="modal-title"><span id="chat-membro-nome">Chat</span> <span class="x" onclick="closeChatModal()">✕</span></div>
     <div id="chat-messages" style="flex:1;overflow-y:auto;min-height:220px;max-height:340px;display:flex;flex-direction:column;gap:8px;padding:6px 2px;margin-bottom:10px"></div>
     <div style="display:flex;gap:8px">
+      <input type="file" id="chat-allegato-input" accept="image/*,application/pdf,.pdf" style="display:none" onchange="inviaAllegatoChat(event)">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('chat-allegato-input').click()" title="Allega foto o PDF"><i class="fa-solid fa-paperclip"></i></button>
       <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaChatMessaggio()}">
       <button class="btn btn-primary btn-sm" onclick="inviaChatMessaggio()"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
@@ -2104,10 +2106,11 @@ async function loadAndRenderChat(){
     messaggi = demoState.chat[currentChatMembro.id] || [];
   } else {
     const { data, error } = await sb.from("chat_messaggi")
-      .select("id, mittente_user_id, testo, created_at")
+      .select("*")
       .eq("centro_id", currentCentro.id)
       .eq("membro_id", currentChatMembro.id)
       .order("created_at", { ascending: true });
+    if(error) console.error("loadAndRenderChat:", error);
     messaggi = error ? [] : (data || []);
   }
   renderChatMessaggi(messaggi);
@@ -2120,11 +2123,68 @@ function renderChatMessaggi(messaggi){
   box.innerHTML = messaggi.map(msg => {
     const mine = msg.mittente_user_id === currentUser.id;
     return `<div style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%;background:${mine ? "var(--primary)" : "var(--muted-bg)"};color:${mine ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">
-      ${escapeHtml(msg.testo)}
+      ${corpoMessaggioChat(msg, mine)}
       <div style="font-size:10px;opacity:.7;margin-top:3px">${new Date(msg.created_at).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>
     </div>`;
   }).join("") || `<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Nessun messaggio ancora. Scrivi il primo!</p>`;
   if(wasAtBottom || messaggi.length <= 1) box.scrollTop = box.scrollHeight;
+}
+
+// Foto e PDF nella chat con i clienti (stesso contenitore "chat-allegati" di Equo App)
+function corpoMessaggioChat(msg, mine){
+  const testo = msg.testo ? escapeHtml(msg.testo) : "";
+  if(msg.tipo === "foto" && msg.file_url){
+    return `<a href="${escapeHtml(msg.file_url)}" target="_blank" rel="noopener"><img src="${escapeHtml(msg.file_url)}" alt="Foto" loading="lazy" style="max-width:220px;max-height:260px;border-radius:10px;display:block;object-fit:cover"></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
+  }
+  if(msg.tipo === "video" && msg.file_url){
+    return `<video controls playsinline preload="metadata" src="${escapeHtml(msg.file_url)}" style="max-width:220px;max-height:260px;border-radius:10px;display:block"></video>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
+  }
+  if(msg.tipo === "documento" && msg.file_url){
+    return `<a href="${escapeHtml(msg.file_url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none"><span style="background:#c0392b;color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:8px 5px">PDF</span><span style="text-decoration:underline">${escapeHtml(msg.file_nome || "Documento.pdf")}</span></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
+  }
+  return testo;
+}
+async function riduciFotoChat(file){
+  const url = await new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = ko; r.readAsDataURL(file); });
+  const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = url; });
+  const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return await new Promise(ok => c.toBlob(ok, "image/jpeg", 0.82));
+}
+async function inviaAllegatoChat(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  if(!file || !currentChatMembro) return;
+  const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+  const isImg = (file.type || "").startsWith("image/");
+  if(!isPdf && !isImg){ showToast("Puoi allegare foto o documenti PDF."); return; }
+  if(isPdf && file.size > 10 * 1024 * 1024){ showToast("PDF troppo grande (max 10 MB)."); return; }
+  const tipo = isPdf ? "documento" : "foto";
+  const file_nome = isPdf ? (file.name || "Documento.pdf") : "Foto.jpg";
+  try{
+    if(DEMO_MODE){
+      demoState.chat = demoState.chat || {};
+      if(!demoState.chat[currentChatMembro.id]) demoState.chat[currentChatMembro.id] = [];
+      demoState.chat[currentChatMembro.id].push({ id: "chat" + (demoIdCounter++ + 900), mittente_user_id: currentUser.id, testo: null, tipo, file_url: URL.createObjectURL(file), file_nome, created_at: new Date().toISOString() });
+    } else {
+      showToast(isPdf ? "Invio del PDF…" : "Invio della foto…");
+      let blob = file;
+      if(!isPdf){ try{ blob = await riduciFotoChat(file) || file; } catch(e){ console.error("riduci foto:", e); } }
+      const rnd = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+      const path = `${currentUser.id}/scuderia/${rnd}.${isPdf ? "pdf" : "jpg"}`;
+      const up = await sb.storage.from("chat-allegati").upload(path, blob, { contentType: isPdf ? "application/pdf" : "image/jpeg" });
+      if(up.error) throw up.error;
+      const file_url = sb.storage.from("chat-allegati").getPublicUrl(path).data?.publicUrl;
+      const { error } = await sb.from("chat_messaggi").insert({ centro_id: currentCentro.id, membro_id: currentChatMembro.id, mittente_user_id: currentUser.id, testo: null, tipo, file_url, file_nome });
+      if(error) throw error;
+    }
+    await loadAndRenderChat();
+  } catch(err){
+    console.error("inviaAllegatoChat:", err);
+    showToast("Invio non riuscito: " + (err?.message || "riprova"));
+  }
 }
 
 async function inviaChatMessaggio(){

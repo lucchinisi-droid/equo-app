@@ -64,9 +64,19 @@ exports.handler = async (event) => {
   }
 };
 
+// Testo della notifica per i messaggi con allegato (foto, PDF, vocali, video)
+function corpoAllegato(tipo, file_nome) {
+  if (tipo === "foto") return "📷 Foto";
+  if (tipo === "video") return "🎬 Video";
+  if (tipo === "audio") return "🎙️ Nota vocale";
+  if (tipo === "documento") return "📄 " + (file_nome || "Documento PDF");
+  return null;
+}
+
 // Chat scuderia <-> proprietario/professionista (tabella chat_messaggi).
 async function gestisciChatScuderia(supabase, record) {
-  const { membro_id, mittente_user_id, testo, centro_id } = record;
+  const { membro_id, mittente_user_id, centro_id } = record;
+  const testo = record.testo || corpoAllegato(record.tipo, record.file_nome) || "Nuovo messaggio";
   if (!membro_id || !mittente_user_id) return "dati_mancanti_nel_record";
 
   const { data: membro } = await supabase
@@ -100,7 +110,7 @@ async function gestisciChatScuderia(supabase, record) {
 
 // Chat proprietario <-> proprietario/professionista (tabella messaggi_proprietari).
 async function gestisciChatProprietari(supabase, record) {
-  const { conversazione_id, mittente_id, tipo, testo, media_url } = record;
+  const { conversazione_id, mittente_id, tipo, testo, media_url, file_nome } = record;
   if (!conversazione_id || !mittente_id) return "dati_mancanti_nel_record";
 
   const { data: conv } = await supabase
@@ -114,7 +124,7 @@ async function gestisciChatProprietari(supabase, record) {
   if (!destinatarioId) return "destinatario_non_trovato";
 
   const { data: mittente } = await supabase.from("profiles").select("full_name").eq("id", mittente_id).maybeSingle();
-  const corpo = tipo === "testo" ? testo : media_url ? "Ha inviato un allegato" : (testo || "Nuovo messaggio");
+  const corpo = tipo === "testo" ? testo : corpoAllegato(tipo, file_nome) || (media_url ? "Ha inviato un allegato" : (testo || "Nuovo messaggio"));
   const push = await inviaPush([destinatarioId], `Nuovo messaggio da ${mittente?.full_name || "un utente Equo"}`, corpo);
   return "dest=" + destinatarioId + " push=" + JSON.stringify(push);
 }
@@ -135,8 +145,7 @@ async function gestisciChatMascalcia(supabase, record) {
   if (!cliente) return "cliente_non_trovato";
 
   const corpo = tipo === "testo" ? testo
-    : tipo === "documento" ? "📄 " + (file_nome || "Documento PDF")
-    : audio_url ? "Ha inviato un vocale" : (testo || "Nuovo messaggio");
+    : corpoAllegato(tipo, file_nome) || (audio_url ? "Ha inviato un vocale" : (testo || "Nuovo messaggio"));
 
   if (mittente_tipo === "maniscalco") {
     if (!cliente.cliente_user_id) return "maniscalco_a_cliente_non_collegato"; // il cliente non usa Equo App: nessuna push possibile
