@@ -136,7 +136,7 @@ a{color:inherit}
 }
 .topbar-title{font-weight:700;font-size:16px}
 .hamburger{background:none;border:none;font-size:20px;color:var(--text);cursor:pointer;padding:6px}
-.content{padding:28px 32px;flex:1;position:relative;z-index:1}
+.content{padding:28px 32px 100px;flex:1;position:relative;z-index:1} /* 100px in fondo: spazio per il bubble di Athena */
 /* sfondo fotografico per pagina: molto trasparente, dietro al contenuto (vedi SFONDI_PAGINE) */
 .athena-fab{position:fixed;right:22px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:60;
   width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:#f4d3dc;color:#8c3a55;
@@ -165,7 +165,7 @@ a{color:inherit}
   .sidebar.open{transform:translateX(0)}
   .main,.app-shell.collapsed .main{margin-left:0}
   .topbar{display:flex}
-  .content{padding:18px}
+  .content{padding:18px 18px 150px}
 }
 
 /* ---------- UI PRIMITIVES ---------- */
@@ -647,26 +647,29 @@ textarea.input{resize:vertical}
           </div>
 
           <div class="card" id="card-hard-reset" style="margin-top:16px;display:none;border:1px solid #ef4444">
-            <h3 style="margin-top:0;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> Hard Reset</h3>
-            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Operazioni riservate al Livello Admin. Cancellano definitivamente i dati del centro — non sono reversibili.</p>
-            <div class="field">
-              <label>Reset parziale — svuota un singolo modulo</label>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <select class="input" id="reset-modulo-select" style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h3 style="margin:0;color:#ef4444"><i class="fa-solid fa-lock" id="hard-reset-lock"></i> Hard Reset <span style="font-size:12px;font-weight:500;color:var(--muted)">— area protetta</span></h3>
+              <button class="btn btn-outline btn-sm" id="hard-reset-toggle" onclick="toggleHardReset()">Apri</button>
+            </div>
+            <div id="hard-reset-body" style="display:none;margin-top:12px">
+              <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Operazioni riservate all'amministratore. Cancellano definitivamente i dati del centro e non sono reversibili. Per sicurezza serve un <strong>codice usa e getta di 6 cifre</strong> fornito da Equo: vale 30 minuti, una sola volta e solo per il reset richiesto.</p>
+              <div class="field">
+                <label>Cosa vuoi cancellare</label>
+                <select class="input" id="reset-modulo-select">
                   <option value="cavalli">Cavalli (e storico sanitario collegato)</option>
                   <option value="eventi">Solo eventi sanitari</option>
                   <option value="lezioni">Lezioni</option>
                   <option value="pacchetti">Pacchetti/abbonamenti</option>
                   <option value="messaggi">Messaggi</option>
                   <option value="note">Post-it</option>
+                  <option value="totale">TUTTO — reset totale (cavalli, eventi, lezioni, pacchetti, messaggi, post-it, contatti, dati societari)</option>
                 </select>
-                <button class="btn btn-danger btn-sm" onclick="askHardReset('parziale')">Svuota modulo</button>
               </div>
-            </div>
-            <div class="field" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-              <label>Reset totale — azzera tutti i dati operativi</label>
-              <p style="margin:0 0 10px;color:var(--muted);font-size:12px">Cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti e dati societari. Centro e team restano intatti.</p>
-              <button class="btn btn-danger btn-block" onclick="askHardReset('totale')"><i class="fa-solid fa-radiation"></i> Reset totale del sistema</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                <button class="btn btn-outline btn-sm" style="flex:1;min-width:200px" onclick="richiediCodiceReset()"><i class="fa-solid fa-envelope"></i> 1. Richiedi il codice a Equo</button>
+                <button class="btn btn-danger btn-sm" style="flex:1;min-width:200px" onclick="askHardReset()"><i class="fa-solid fa-key"></i> 2. Ho il codice: esegui il reset</button>
+              </div>
+              <p style="margin:10px 0 0;color:var(--muted);font-size:11.5px">Centro e team restano sempre intatti. Se l'email non si apre, scrivi a <strong>gestione.equo@gmail.com</strong> indicando il centro e cosa vuoi cancellare.</p>
             </div>
           </div>
         </div>
@@ -985,19 +988,19 @@ textarea.input{resize:vertical}
   </div>
 </div>
 
-<!-- MODAL: conferma Hard Reset -->
+<!-- MODAL: conferma Hard Reset (codice usa e getta Equo) -->
 <div class="modal-overlay" id="modal-hard-reset" onclick="closeOut(event,'modal-hard-reset')">
   <div class="modal">
     <div class="modal-title">Conferma Hard Reset <span class="x" onclick="closeModal('modal-hard-reset')">✕</span></div>
     <p id="hard-reset-desc" style="color:var(--muted);font-size:13.5px"></p>
     <div class="field">
-      <label>Digita <strong id="hard-reset-keyword-display"></strong> per confermare</label>
-      <input class="input" id="hard-reset-confirm-input">
+      <label>Codice Equo (6 cifre)</label>
+      <input class="input" id="hard-reset-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" style="letter-spacing:.35em;font-size:18px;text-align:center">
     </div>
     <div class="auth-error" id="hard-reset-error"></div>
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-hard-reset')">Annulla</button>
-      <button class="btn btn-danger" style="flex:1" onclick="confirmHardReset()">Conferma reset</button>
+      <button class="btn btn-danger" style="flex:1" id="hard-reset-confirm-btn" onclick="confirmHardReset()">Cancella definitivamente</button>
     </div>
   </div>
 </div>
@@ -2018,54 +2021,82 @@ function copyDatiFiscali(){
   navigator.clipboard?.writeText(lines.join("\n")).then(() => showToast("Dati copiati negli appunti!"));
 }
 
-/* ---------- HARD RESET (solo Livello Admin) ---------- */
-let pendingHardReset = null;
-
-const RESET_MODULO_TABLES = {
-  cavalli: ["scuderia_cavalli"],
-  eventi: ["scuderia_eventi_sanitari"],
-  lezioni: ["scuderia_lezioni"],
-  pacchetti: ["scuderia_pacchetti"],
-  messaggi: ["scuderia_messaggi"],
-  note: ["scuderia_note"],
+/* ---------- HARD RESET (solo admin, con codice usa e getta fornito da Equo) ----------
+   La cancellazione avviene SOLO nella funzione SQL esegui_hard_reset (verifica admin + codice).
+   Codice generato da Equo con: select genera_codice_reset('<nome o id centro>', '<tipo>');
+   (vedi Claude outputs/migrazione-scuderia-hard-reset-otp.sql). */
+const RESET_LABELS = { cavalli:"Cavalli (e storico sanitario)", eventi:"Eventi sanitari", lezioni:"Lezioni", pacchetti:"Pacchetti/abbonamenti", messaggi:"Messaggi", note:"Post-it", totale:"TUTTO (reset totale)" };
+const RESET_DEMO_TABLES = {
+  cavalli:["scuderia_eventi_sanitari","scuderia_cavalli"], eventi:["scuderia_eventi_sanitari"], lezioni:["scuderia_lezioni"],
+  pacchetti:["scuderia_pacchetti"], messaggi:["scuderia_messaggi"], note:["scuderia_note"],
+  totale:["scuderia_note","scuderia_messaggi","scuderia_pacchetti","scuderia_lezioni","scuderia_eventi_sanitari","scuderia_cavalli","scuderia_contatti","scuderia_dati_fiscali"],
 };
-const RESET_MODULO_LABELS = { cavalli:"Cavalli", eventi:"Eventi sanitari", lezioni:"Lezioni", pacchetti:"Pacchetti", messaggi:"Messaggi", note:"Post-it" };
-const RESET_TOTALE_TABLES = ["scuderia_note","scuderia_messaggi","scuderia_pacchetti","scuderia_lezioni","scuderia_eventi_sanitari","scuderia_cavalli","scuderia_contatti","scuderia_dati_fiscali"];
+let pendingHardReset = null;
 
 function refreshHardResetCard(){
   const isAdminUser = currentMembro?.ruolo === "admin";
   const card = document.getElementById("card-hard-reset");
   if(card) card.style.display = isAdminUser ? "block" : "none";
+  chiudiHardReset(); // di default sempre CHIUSO
+}
+function chiudiHardReset(){
+  const body = document.getElementById("hard-reset-body");
+  if(body) body.style.display = "none";
+  const btn = document.getElementById("hard-reset-toggle"); if(btn) btn.textContent = "Apri";
+  const lock = document.getElementById("hard-reset-lock"); if(lock) lock.className = "fa-solid fa-lock";
+}
+function toggleHardReset(){
+  const body = document.getElementById("hard-reset-body");
+  if(body.style.display === "none"){
+    body.style.display = "block";
+    document.getElementById("hard-reset-toggle").textContent = "Chiudi";
+    document.getElementById("hard-reset-lock").className = "fa-solid fa-lock-open";
+  } else chiudiHardReset();
 }
 
-function askHardReset(tipo){
-  const modulo = tipo === "parziale" ? document.getElementById("reset-modulo-select").value : null;
-  pendingHardReset = { tipo, modulo };
-  const keyword = tipo === "totale" ? "RESET TOTALE" : "RESET";
-  document.getElementById("hard-reset-keyword-display").textContent = keyword;
-  document.getElementById("hard-reset-confirm-input").value = "";
+function richiediCodiceReset(){
+  const tipo = document.getElementById("reset-modulo-select").value;
+  const oggetto = `Richiesta codice Hard Reset — ${currentCentro?.nome || "centro"}`;
+  const corpo = `Ciao Equo,\n\nchiedo un codice usa e getta per l'Hard Reset.\n\n`
+    + `Centro: ${currentCentro?.nome || "—"}\nID centro: ${currentCentro?.id || "—"}\nCosa cancellare: ${RESET_LABELS[tipo]}\n`
+    + `Richiesto da: ${currentUser?.email || "—"}\n\n`
+    + `(Per Equo) Comando da eseguire su Supabase:\nselect genera_codice_reset('${currentCentro?.id || ""}', '${tipo}');\n`;
+  window.location.href = `mailto:gestione.equo@gmail.com?subject=${encodeURIComponent(oggetto)}&body=${encodeURIComponent(corpo)}`;
+  showToast("Si apre la tua email: invia la richiesta a Equo.");
+}
+
+function askHardReset(){
+  const tipo = document.getElementById("reset-modulo-select").value;
+  pendingHardReset = { tipo };
+  document.getElementById("hard-reset-code-input").value = "";
   document.getElementById("hard-reset-error").style.display = "none";
-  document.getElementById("hard-reset-desc").textContent = tipo === "totale"
-    ? "Stai per cancellare definitivamente TUTTI i dati operativi del centro (cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti, dati societari). Centro e team resteranno."
-    : `Stai per cancellare definitivamente tutti i dati del modulo "${RESET_MODULO_LABELS[modulo]}". Operazione irreversibile.`;
+  document.getElementById("hard-reset-desc").innerHTML = (tipo === "totale"
+    ? "Stai per cancellare definitivamente <strong>TUTTI</strong> i dati operativi del centro (cavalli, eventi sanitari, lezioni, pacchetti, messaggi, post-it, contatti, dati societari). Centro e team resteranno."
+    : `Stai per cancellare definitivamente tutti i dati di: <strong>${escapeHtml(RESET_LABELS[tipo])}</strong>. Operazione irreversibile.`)
+    + (DEMO_MODE ? "<br><em>Demo: usa il codice 123456.</em>" : "");
   openModal("modal-hard-reset");
+  setTimeout(() => document.getElementById("hard-reset-code-input").focus(), 50);
 }
 
 async function confirmHardReset(){
   if(!pendingHardReset) return;
-  const keyword = pendingHardReset.tipo === "totale" ? "RESET TOTALE" : "RESET";
-  const typed = document.getElementById("hard-reset-confirm-input").value.trim();
+  const codice = document.getElementById("hard-reset-code-input").value.replace(/\D/g, "");
   const errBox = document.getElementById("hard-reset-error");
+  const btn = document.getElementById("hard-reset-confirm-btn");
   errBox.style.display = "none";
-  if(typed !== keyword){
-    errBox.textContent = `Devi digitare esattamente "${keyword}" per confermare.`;
-    errBox.style.display = "block";
-    return;
-  }
+  if(codice.length !== 6){ errBox.textContent = "Inserisci il codice di 6 cifre ricevuto da Equo."; errBox.style.display = "block"; return; }
+  btn.disabled = true;
   try{
-    const tables = pendingHardReset.tipo === "totale" ? RESET_TOTALE_TABLES : RESET_MODULO_TABLES[pendingHardReset.modulo];
-    await hardResetTables(tables);
+    if(DEMO_MODE){
+      if(codice !== "123456") throw new Error("Codice errato.");
+      hardResetDemo(RESET_DEMO_TABLES[pendingHardReset.tipo]);
+    } else {
+      const { data, error } = await sb.rpc("esegui_hard_reset", { p_centro_id: currentCentro.id, p_tipo: pendingHardReset.tipo, p_codice: codice });
+      if(error) throw error;
+      if(!data?.ok) throw new Error(data?.errore || "Reset non eseguito.");
+    }
     closeModal("modal-hard-reset");
+    chiudiHardReset();
     showToast("Reset eseguito.");
     pendingHardReset = null;
     await refreshHomeModule();
@@ -2077,23 +2108,18 @@ async function confirmHardReset(){
   } catch(err){
     errBox.textContent = err.message || "Errore durante il reset.";
     errBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
   }
 }
 
-async function hardResetTables(tables){
-  if(DEMO_MODE){
-    const stateKeyMap = { scuderia_cavalli:"cavalli", scuderia_eventi_sanitari:"eventi", scuderia_lezioni:"lezioni", scuderia_pacchetti:"pacchetti", scuderia_messaggi:"messaggi", scuderia_note:"note", scuderia_contatti:"contatti" };
-    tables.forEach(t => {
-      if(t === "scuderia_dati_fiscali"){ demoState.datiFiscali = null; datiFiscali = null; return; }
-      const key = stateKeyMap[t];
-      if(key) demoState[key] = [];
-    });
-    return;
-  }
-  for(const table of tables){
-    const { error } = await sb.from(table).delete().eq("centro_id", currentCentro.id);
-    if(error) throw error;
-  }
+function hardResetDemo(tables){
+  const stateKeyMap = { scuderia_cavalli:"cavalli", scuderia_eventi_sanitari:"eventi", scuderia_lezioni:"lezioni", scuderia_pacchetti:"pacchetti", scuderia_messaggi:"messaggi", scuderia_note:"note", scuderia_contatti:"contatti" };
+  tables.forEach(t => {
+    if(t === "scuderia_dati_fiscali"){ demoState.datiFiscali = null; datiFiscali = null; return; }
+    const key = stateKeyMap[t];
+    if(key) demoState[key] = [];
+  });
 }
 
 /* ---------- CHAT INTERNA (membro Equo App <-> struttura) ---------- */
