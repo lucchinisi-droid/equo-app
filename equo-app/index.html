@@ -803,9 +803,15 @@ select.input{cursor:pointer}
   <div class="page-content" id="page-prenotazioni">
     <div class="section-title">Calendario</div>
 
-    <div class="note-box" style="margin-bottom:14px">
+    <div class="note-box" id="cal-nota-scuderia" style="margin-bottom:14px">
       <strong>Con Equo Scuderia sarebbe automatico.</strong> Se la tua scuderia usa Equo Scuderia, le lezioni prenotate appariranno qui da sole. Per ora le aggiungi tu a mano.
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px" onclick="openModal('modal-join-stable')">Collega la tua scuderia</button>
+    </div>
+
+    <!-- Lezioni ed eventi sanitari inseriti dalla scuderia collegata (sola lettura + Accetta/Modifica) -->
+    <div id="scuderia-cal-box" style="display:none;margin-bottom:22px">
+      <div class="section-title" style="font-size:15px;margin-bottom:6px">Dalla tua scuderia</div>
+      <div id="scuderia-cal-list"></div>
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -965,6 +971,12 @@ select.input{cursor:pointer}
     <div class="card" id="inbox-card" style="margin-bottom:14px">
       <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
+    <div id="inbox-strutture-wrap" style="display:none">
+      <div class="section-title" style="margin:22px 0 10px">Strutture</div>
+      <div class="card" style="margin-bottom:14px">
+        <div id="inbox-strutture-list"></div>
+      </div>
+    </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px">
       <div class="section-title" style="margin-bottom:0">Colleghi</div>
       <button class="btn btn-primary btn-sm" onclick="apriNuovoCollega()">+ Collega</button>
@@ -1063,7 +1075,7 @@ select.input{cursor:pointer}
       </div>
     </div>
     <div class="mchat-quick-actions">
-      <button class="btn btn-outline btn-sm" onclick="openInterventoModal(currentClienteId)">Segna intervento fatto</button>
+      <button class="btn btn-outline btn-sm" id="mchat-btn-intervento" onclick="isStrutturaCollegata(currentClienteId) ? apriPropostaStruttura(currentClienteId) : openInterventoModal(currentClienteId)">Segna intervento fatto</button>
       <button class="btn btn-outline btn-sm" onclick="shareInviteCodeFromChat()">Condividi codice invito</button>
     </div>
     <div class="mchat-messages" id="mchat-messages"></div>
@@ -1323,7 +1335,8 @@ select.input{cursor:pointer}
       <button class="btn btn-outline" onclick="azioneEvento('modifica')"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
       <button class="btn btn-outline" onclick="azioneEvento('pdf')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Stampa PDF</button>
       <button class="btn btn-outline" onclick="azioneEvento('chat')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat</button>
-      <button class="btn btn-danger" onclick="azioneEvento('elimina')"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span> Elimina</button>
+      <button class="btn btn-outline" id="azioni-evento-annulla-struttura" style="display:none;color:var(--red)" onclick="azioneEvento('annulla_struttura')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla con la struttura</button>
+      <button class="btn btn-danger" id="azioni-evento-elimina" onclick="azioneEvento('elimina')"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span> Elimina</button>
     </div>
   </div>
 </div>
@@ -1860,6 +1873,48 @@ select.input{cursor:pointer}
       <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
         <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
       </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-proponi-struttura" onclick="closeOut(event,'modal-proponi-struttura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Proponi a <span id="prop-str-nome" style="margin-left:4px">struttura</span></div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px;line-height:1.5">La struttura riceve la proposta e la conferma, propone un'altra data o la annulla.</div>
+    <div class="auth-form">
+      <div class="input-group"><label class="input-label">Tipo</label>
+        <select class="input" id="prop-str-tipo" onchange="document.getElementById('prop-str-tipo-altro-group').style.display = this.value === 'altro' ? 'flex' : 'none'">
+          <option value="ferratura">Ferratura</option><option value="mezza_ferratura">Mezza ferratura</option><option value="pareggio">Pareggio</option><option value="altro">Altro</option>
+        </select></div>
+      <div class="input-group" id="prop-str-tipo-altro-group" style="display:none"><label class="input-label">Specifica</label><input class="input" id="prop-str-tipo-altro" maxlength="60"></div>
+      <div class="input-group"><label class="input-label">Cavalli della struttura</label><div id="prop-str-cavalli" style="max-height:210px;overflow-y:auto"></div></div>
+      <div style="display:flex;gap:10px">
+        <div class="input-group" style="flex:1"><label class="input-label">Data</label><input class="input" type="date" id="prop-str-data"></div>
+        <div class="input-group" style="flex:1"><label class="input-label">Ora</label><input class="input" type="time" id="prop-str-ora"></div>
+      </div>
+      <div class="input-group"><label class="input-label">Importo per cavallo € (facoltativo)</label><input class="input" type="number" inputmode="decimal" min="0" step="0.5" id="prop-str-importo"></div>
+      <div class="input-group"><label class="input-label">Note (facoltative)</label><input class="input" id="prop-str-note" maxlength="300"></div>
+      <div class="auth-error" id="prop-str-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="inviaPropostaStruttura()" style="width:100%;margin-top:6px">Invia proposta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-collega-struttura" onclick="closeOut(event,'modal-collega-struttura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Collega una struttura</div>
+    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+      Inserisci il <strong>codice della struttura</strong> (lo trova in Equo Scuderia → Il tuo Centro → Codice invito). La struttura riceve la richiesta e la conferma.
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice della struttura</label>
+        <input class="input" id="collega-struttura-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaRichiestaStruttura()">
+      </div>
+      <div class="auth-error" id="collega-struttura-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="inviaRichiestaStruttura()" style="width:100%;margin-top:6px">Invia richiesta</button>
     </div>
   </div>
 </div>
@@ -2678,7 +2733,7 @@ const DB = {
   },
   async listInterventiMascalcia(clienteId){
     if(DEMO_MODE) return demoState.interventiMascalcia.filter(i => i.cliente_mascalcia_id === clienteId && i.stato !== "rifiutato").slice().sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
-    const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).neq("stato", "rifiutato").order("data_intervento", { ascending: false });
+    const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).not("stato", "in", "(rifiutato,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
   async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
@@ -2728,7 +2783,7 @@ const DB = {
     }
     const { data, error } = await sb.from("interventi_mascalcia")
       .select("*, clienti_mascalcia(nome, nome_cavallo, cliente_user_id), cavalli_clienti_mascalcia(nome)")
-      .eq("maniscalco_id", currentUser.id).neq("stato", "rifiutato")
+      .eq("maniscalco_id", currentUser.id).not("stato", "in", "(rifiutato,annullato)")
       .gte("data_intervento", daIso).lte("data_intervento", aIso)
       .order("data_intervento", { ascending: true }).order("ora", { ascending: true, nullsFirst: false });
     if(error){ console.error("listInterventiPeriodo:", error); return []; }
@@ -2759,7 +2814,7 @@ const DB = {
       const clienti = [...new Set(righe.map(r => r.cliente_mascalcia_id))];
       const res = await sb.from("interventi_mascalcia").select("id, cliente_mascalcia_id, cavallo_cliente_id, data_intervento")
         .eq("maniscalco_id", currentUser.id).in("cliente_mascalcia_id", clienti).gt("data_intervento", minData)
-        .not("stato", "in", "(richiesto,rifiutato)");
+        .not("stato", "in", "(richiesto,rifiutato,proposto,annullato)");
       if(res.error) console.error("listScadenzePeriodo (successivi):", res.error);
       successivi = res.data || [];
     }
@@ -2820,7 +2875,7 @@ const DB = {
         .sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
     }
     const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome)")
-      .eq("maniscalco_id", currentUser.id).not("stato", "in", "(richiesto,rifiutato)").order("data_intervento", { ascending: false });
+      .eq("maniscalco_id", currentUser.id).not("stato", "in", "(richiesto,rifiutato,proposto,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
   async listProssimeScadenzeMascalcia(limit){
@@ -3017,7 +3072,7 @@ const DB = {
       return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
         .map(m => ({ ...m, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome, nome_cavallo: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome_cavallo } }));
     }
-    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo)")
+    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo, centro_id, collegamento_stato)")
       .eq("maniscalco_id", currentUser.id).order("created_at", { ascending: false }).limit(200);
     return error ? [] : (data || []);
   },
@@ -4607,6 +4662,7 @@ let lezioniCache = [];
 let editingLezioneId = null;
 
 async function loadLezioni(){
+  loadCalendarioScuderia();
   const box = document.getElementById("lezioni-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   const data = await DB.listLezioni();
@@ -4624,6 +4680,141 @@ async function loadLezioni(){
       <span class="icon"><svg><use href="#i-chevron"/></svg></span>
     </div>
   `).join("");
+}
+
+/* ---------- CALENDARIO: lezioni ed eventi sanitari dalla scuderia collegata ----------
+   Dati via RPC sicure (mie_lezioni_scuderia, miei_eventi_scuderia). Quando la scuderia crea,
+   sposta o annulla una lezione, o registra un evento sanitario sul cavallo, il database scrive
+   un messaggio automatico nella chat con la scuderia (=> notifica push). "Accetta" conferma la
+   lezione e avvisa la struttura; "Modifica" apre la chat con la struttura. */
+const LEZ_SCUD_STATO = {
+  prenotata:  ["Da confermare", "badge-accent"],
+  confermata: ["Confermata", "badge-green"],
+  completata: ["Completata", ""],
+  annullata:  ["Annullata", "badge-red"],
+};
+const EVENTO_SCUD_LABEL = { vaccino: "Vaccino", coggins: "Coggins", ferratura: "Ferratura", sverminazione: "Sverminazione" };
+let calScuderiaCache = { lezioni: [], eventi: [] };
+
+function oggiISO(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function dataLezioneIt(dataStr, ora){
+  const d = new Date(dataStr + "T12:00:00");
+  const txt = d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
+  return txt.charAt(0).toUpperCase() + txt.slice(1) + (ora ? ", " + ora : "");
+}
+
+async function loadCalendarioScuderia(){
+  const wrap = document.getElementById("scuderia-cal-box");
+  const box = document.getElementById("scuderia-cal-list");
+  const nota = document.getElementById("cal-nota-scuderia");
+  if(!wrap || !box) return;
+  if(DEMO_MODE || !currentUser){ wrap.style.display = "none"; return; }
+  try{
+    const [scuderie, lez, ev] = await Promise.all([
+      DB.listScuderieCollegate(),
+      sb.rpc("mie_lezioni_scuderia"),
+      sb.rpc("miei_eventi_scuderia"),
+    ]);
+    if(lez.error) console.error("mie_lezioni_scuderia:", lez.error);
+    if(ev.error) console.error("miei_eventi_scuderia:", ev.error);
+    calScuderiaCache = { lezioni: lez.error ? [] : (lez.data || []), eventi: ev.error ? [] : (ev.data || []) };
+    if(nota) nota.style.display = (scuderie && scuderie.length) ? "none" : "";
+    if(!(scuderie && scuderie.length) && !calScuderiaCache.lezioni.length && !calScuderiaCache.eventi.length){
+      wrap.style.display = "none"; return;
+    }
+    wrap.style.display = "block";
+    renderCalendarioScuderia();
+  } catch(err){
+    console.error("loadCalendarioScuderia:", err);
+    wrap.style.display = "none";
+  }
+}
+
+function renderCalendarioScuderia(){
+  const box = document.getElementById("scuderia-cal-list");
+  if(!box) return;
+  const oggi = oggiISO();
+  const { lezioni, eventi } = calScuderiaCache;
+  const future = lezioni.filter(l => l.data >= oggi);
+  const passate = lezioni.filter(l => l.data < oggi).reverse();
+  let html = "";
+
+  if(future.length === 0 && passate.length === 0){
+    html += '<div class="muted" style="font-size:13px;padding:6px 0 10px">Nessuna lezione in programma dalla scuderia.</div>';
+  }
+  html += future.map(l => cardLezioneScuderia(l, true)).join("");
+  if(passate.length){
+    html += `<details style="margin-top:6px"><summary class="muted" style="font-size:12.5px;cursor:pointer;padding:6px 0">Lezioni passate (${passate.length})</summary>${passate.map(l => cardLezioneScuderia(l, false)).join("")}</details>`;
+  }
+
+  if(eventi.length){
+    html += '<div style="font-weight:700;font-size:13.5px;margin:16px 0 4px">Salute registrata dalla scuderia</div>';
+    html += eventi.map(e => {
+      const tipo = EVENTO_SCUD_LABEL[e.tipo] || (e.tipo_altro || "Evento sanitario");
+      const scad = e.data_scadenza ? ` · prossima scadenza ${formatDate(e.data_scadenza)}` : "";
+      const scaduto = e.data_scadenza && e.data_scadenza < oggi;
+      return `
+      <div class="event-item">
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:14px">${escapeHtml(tipo)} · ${escapeHtml(e.cavallo || "Cavallo")}</div>
+          <div class="muted" style="font-size:12px">${formatDate(e.data_evento)}${scad} · ${escapeHtml(e.scuderia)}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+        </div>
+        ${scaduto ? '<span class="badge badge-red">Scaduto</span>' : ""}
+      </div>`;
+    }).join("");
+  }
+  box.innerHTML = html;
+}
+
+function cardLezioneScuderia(l, futura){
+  const [statoTxt, statoCls] = LEZ_SCUD_STATO[l.stato] || [l.stato, ""];
+  const dettagli = [
+    l.cavaliere ? "monta " + escapeHtml(l.cavaliere) : null,
+    l.cavallo ? "su " + escapeHtml(l.cavallo) : null,
+    l.istruttore ? "istruttore " + escapeHtml(l.istruttore) : null,
+  ].filter(Boolean).join(" · ");
+  const azioni = futura && l.stato !== "annullata" && l.stato !== "completata" ? `
+    <div style="display:flex;gap:8px;margin-top:10px">
+      ${l.stato === "prenotata" ? `<button class="btn btn-primary btn-sm" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="modificaLezioneScuderia('${l.id}')">Modifica</button>
+    </div>` : "";
+  return `
+    <div class="event-item" style="display:block;${futura ? "" : "opacity:.65"}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:14px">${escapeHtml(dataLezioneIt(l.data, l.ora))} · Lezione</div>
+          <div class="muted" style="font-size:12px">${dettagli ? dettagli + " · " : ""}${escapeHtml(l.scuderia)}</div>
+        </div>
+        <span class="badge ${statoCls}" style="flex-shrink:0${statoCls ? "" : ";background:rgba(0,0,0,.07);color:var(--muted)"}">${statoTxt}</span>
+      </div>
+      ${azioni}
+    </div>`;
+}
+
+async function accettaLezioneScuderia(id, btn){
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("accetta_lezione_scuderia", { p_lezione_id: id });
+  if(error || !data?.ok){
+    showToast((data && data.errore) || "Non sono riuscito a confermare la lezione. Riprova.");
+    if(btn) btn.disabled = false;
+    return;
+  }
+  showToast(data.gia ? "La lezione era già confermata." : "Lezione confermata: la scuderia riceve l'avviso.");
+  await loadCalendarioScuderia();
+}
+
+async function modificaLezioneScuderia(id){
+  const l = calScuderiaCache.lezioni.find(x => x.id === id);
+  if(!l) return;
+  await openStableChatThread(l.membro_id, l.centro_id, l.scuderia);
+  const input = document.getElementById("schat-input");
+  if(input){
+    input.value = `Vorrei modificare la lezione di ${dataLezioneIt(l.data, l.ora)}: `;
+    input.focus();
+  }
 }
 
 function openAddLezioneModal(id){
@@ -4704,14 +4895,25 @@ function renderClientiList(){
         <div style="font-weight:700">${escapeHtml(c.nome)}</div>
         <div class="muted" style="font-size:13px">${escapeHtml(c.nome_cavallo || (isStruttura(c) ? "Nessun cavallo indicato" : "Cavallo non indicato"))}</div>
       </div>
-      ${c.cliente_user_id ? '<span class="badge badge-green" style="font-size:10.5px;flex-shrink:0">su Equo</span>' : ""}
-    </div>`;
+      ${badgeCollegamentoCliente(c)}
+    </div>
+    ${c.collegamento_stato === "da_confermare_pro" ? `
+    <div class="card" style="margin:-4px 0 12px;padding:12px 14px">
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px"><strong>${escapeHtml(c.nome)}</strong> ti ha invitato a collegarti come maniscalco su Equo Scuderia: chat e appuntamenti con la struttura con doppia conferma.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this)">Accetta</button>
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this)">Rifiuta</button>
+      </div>
+    </div>` : ""}`;
   const sezione = (tipo, titolo, vuoto) => {
     const lista = clientiMascalcia.filter(c => (isStruttura(c) ? "struttura" : "proprietario") === tipo).sort(alfabetico);
     return `
       <div class="clienti-sez-head">
         <div class="clienti-sez-title">${titolo} (${lista.length})</div>
-        <button class="btn btn-outline btn-sm" onclick="apriNuovoCliente('${tipo}')">+ Aggiungi</button>
+        <div style="display:flex;gap:6px">
+          ${tipo === "struttura" && isManiscalcoUtente() ? `<button class="btn btn-outline btn-sm" onclick="apriCollegaStruttura(null)"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-link"></i></span> Collega</button>` : ""}
+          <button class="btn btn-outline btn-sm" onclick="apriNuovoCliente('${tipo}')">+ Aggiungi</button>
+        </div>
       </div>
       ${lista.length ? lista.map(card).join("") : `<div class="muted" style="font-size:13px;margin-bottom:6px">${vuoto}</div>`}`;
   };
@@ -4720,6 +4922,82 @@ function renderClientiList(){
 }
 
 function isStruttura(c){ return c && c.tipo_cliente === "struttura"; }
+function isStrutturaCollegata(clienteId){
+  const c = clientiMascalcia.find(x => x.id === clienteId);
+  return !!(c && c.centro_id && c.collegamento_stato === "attivo");
+}
+
+/* ---------- STRUTTURE COLLEGATE A EQUO SCUDERIA (Professionisti, opzione A) ----------
+   La struttura è un cliente "struttura" con centro_id. Collegamento con doppia conferma:
+   invito dalla struttura → il maniscalco accetta qui; richiesta del maniscalco (codice del centro) → accetta la struttura. */
+function isManiscalcoUtente(){
+  return !!currentUser && [currentUser.ruolo, currentUser.ruoloSecondario, currentUser.ruolo_secondario].includes("maniscalco");
+}
+function badgeCollegamentoCliente(c){
+  if(c.collegamento_stato === "attivo") return '<span class="badge badge-green" style="font-size:10.5px;flex-shrink:0">Equo Scuderia</span>';
+  if(c.collegamento_stato === "da_confermare_pro") return '<span class="badge badge-red" style="font-size:10.5px;flex-shrink:0">Invito</span>';
+  if(c.collegamento_stato === "da_confermare_struttura") return '<span class="badge badge-accent" style="font-size:10.5px;flex-shrink:0">In attesa</span>';
+  return c.cliente_user_id ? '<span class="badge badge-green" style="font-size:10.5px;flex-shrink:0">su Equo</span>' : "";
+}
+
+async function rispondiInvitoStruttura(clienteId, accetta, btn){
+  if(window.event) window.event.stopPropagation();
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("pro_rispondi_collegamento_struttura", { p_cliente_id: clienteId, p_accetta: accetta });
+  if(error || !data?.ok){
+    showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
+    if(btn) btn.disabled = false;
+    return;
+  }
+  showToast(accetta ? "Struttura collegata: trovi la chat in Messaggi → Strutture." : "Invito rifiutato.");
+  await loadClientiMascalcia();
+}
+
+let collegaStrutturaClienteId = null;
+function apriCollegaStruttura(clienteId){
+  collegaStrutturaClienteId = clienteId || null;
+  document.getElementById("collega-struttura-codice").value = "";
+  document.getElementById("collega-struttura-error").style.display = "none";
+  openModal("modal-collega-struttura");
+}
+
+async function inviaRichiestaStruttura(){
+  const input = document.getElementById("collega-struttura-codice");
+  const err = document.getElementById("collega-struttura-error");
+  const codice = input.value.trim().toUpperCase();
+  err.style.display = "none";
+  if(!codice){ err.textContent = "Inserisci il codice della struttura."; err.style.display = "block"; return; }
+  if(DEMO_MODE){ closeModal("modal-collega-struttura"); showToast("In demo il collegamento non è disponibile."); return; }
+  const { data, error } = await sb.rpc("pro_richiedi_collegamento_struttura", { p_codice: codice, p_cliente_id: collegaStrutturaClienteId });
+  if(error || !data?.ok){
+    err.textContent = (data && data.errore) || "Non è stato possibile inviare la richiesta. Riprova.";
+    err.style.display = "block";
+    return;
+  }
+  closeModal("modal-collega-struttura");
+  showToast(data.gia
+    ? (data.stato === "attivo" ? `Sei già collegato a ${data.nome}.` : `C'è già una richiesta in corso con ${data.nome}.`)
+    : `Richiesta inviata a ${data.nome}: la struttura deve accettarla.`);
+  await loadClientiMascalcia();
+  if(currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") openClienteDetail(currentClienteId);
+}
+
+async function scollegaStrutturaCorrente(){
+  const c = clientiMascalcia.find(x => x.id === currentClienteId);
+  if(!c || !c.centro_id) return;
+  const btn = document.getElementById("cliente-scollega-btn");
+  if(btn && btn.dataset.conferma !== "1"){
+    btn.dataset.conferma = "1";
+    btn.textContent = "Tocca di nuovo per confermare";
+    setTimeout(() => { if(btn){ btn.dataset.conferma = ""; btn.textContent = "Scollega da Equo Scuderia"; } }, 4000);
+    return;
+  }
+  const { data, error } = await sb.rpc("pro_scollega_struttura", { p_cliente_id: c.id });
+  if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita. Riprova."); return; }
+  showToast("Collegamento chiuso. La scheda cliente resta tua.");
+  await loadClientiMascalcia();
+  openClienteDetail(c.id);
+}
 
 const ERRORI_COLLEGA_CLIENTE = {
   codice_non_valido: "Codice Equo non trovato. Controlla di averlo scritto bene.",
@@ -4808,6 +5086,36 @@ async function openClienteDetail(id){
   const qrBox = document.getElementById("detail-cliente-qr");
   qrBox.innerHTML = "";
   if(window.QRCode){ new QRCode(qrBox, { text: c.codice_invito, width: 140, height: 140 }); }
+  // Strutture: collegamento con Equo Scuderia al posto del codice invito
+  const qrCard = qrBox.closest(".card");
+  let boxScud = document.getElementById("detail-cliente-scuderia");
+  if(!boxScud){
+    boxScud = document.createElement("div");
+    boxScud.id = "detail-cliente-scuderia";
+    boxScud.className = "card";
+    boxScud.style.marginBottom = "14px";
+    qrCard.parentNode.insertBefore(boxScud, qrCard);
+  }
+  if(isStruttura(c) && c.centro_id){
+    if(qrCard) qrCard.style.display = "none";
+    boxScud.style.display = "block";
+    const statoTxt = c.collegamento_stato === "attivo" ? '<strong style="color:var(--green)">✓ Collegata a Equo Scuderia</strong> — chat e appuntamenti con la struttura con doppia conferma.'
+      : c.collegamento_stato === "da_confermare_pro" ? "La struttura ti ha invitato: accetta per collegarti."
+      : "Richiesta inviata: in attesa che la struttura accetti.";
+    boxScud.innerHTML = `<div style="font-size:13.5px;line-height:1.6;margin-bottom:10px">${statoTxt}</div>
+      ${c.collegamento_stato === "da_confermare_pro" ? `<div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this).then(() => closeClienteDetail())">Rifiuta</button></div>` : ""}
+      <button class="btn btn-ghost btn-sm" id="cliente-scollega-btn" style="width:100%;color:var(--red)" onclick="scollegaStrutturaCorrente()">${c.collegamento_stato === "attivo" ? "Scollega da Equo Scuderia" : "Annulla richiesta"}</button>`;
+  } else if(isStruttura(c) && isManiscalcoUtente()){
+    if(qrCard) qrCard.style.display = "";
+    boxScud.style.display = "block";
+    boxScud.innerHTML = `<div style="font-size:13.5px;line-height:1.6;margin-bottom:10px">La struttura usa <strong>Equo Scuderia</strong>? Collegala per chattare con lo staff e fissare gli appuntamenti con doppia conferma.</div>
+      <button class="btn btn-outline btn-sm" style="width:100%" onclick="apriCollegaStruttura('${c.id}')"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-link"></i></span> Collega a Equo Scuderia</button>`;
+  } else {
+    if(qrCard) qrCard.style.display = "";
+    boxScud.style.display = "none";
+  }
   await loadClienteInterventi(id);
 }
 
@@ -5396,6 +5704,14 @@ async function openInterventoModal(clienteId, intervento, preset){
 
 async function onInterventoClienteChange(){
   const clienteId = document.getElementById("intervento-cliente-select").value;
+  if(!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId)){
+    const preset = { ...(interventoPreset || {}),
+      tipo_ferratura: document.getElementById("intervento-tipo").value,
+      data_intervento: document.getElementById("intervento-data").value,
+      ora: document.getElementById("intervento-ora").value };
+    closeModal("modal-add-intervento");
+    return apriPropostaStruttura(clienteId, preset);
+  }
   const isNuovo = clienteId === "__nuovo__";
   document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
   const sel = document.getElementById("intervento-cavallo-select");
@@ -5496,9 +5812,12 @@ async function salvaInterventoMascalcia(){
     const quando = new Date(data_intervento + "T" + (ora || "00:00")); // senza ora: oggi = fatto
     const futuro = quando.getTime() > Date.now();
     const statoPrec = interventoInModifica ? (interventoInModifica.stato || "fatto") : null;
-    const eraRichiesta = STATI_NON_CONFERMATI.includes(statoPrec);
+    const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id); // appuntamento con struttura Equo Scuderia
+    const eraRichiesta = !diGruppo && STATI_NON_CONFERMATI.includes(statoPrec);
     // una richiesta confermata per oggi o per il futuro diventa "programmato", mai "fatto" da sola
-    const stato = eraRichiesta ? (data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto")
+    // (appuntamenti con struttura: lo stato cambia solo con i tasti; se cambi data/ora la struttura deve riconfermare)
+    const stato = diGruppo ? statoPrec
+      : eraRichiesta ? (data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto")
       : futuro ? "programmato" : (statoPrec || "fatto");
 
     const payload = { cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
@@ -5612,14 +5931,16 @@ async function renderAgendaSettimana(direzione){
     const tot = evGiorno.length + promGiorno.length;
     const aperto = agGiorniAperti.has(iso);
     const righe = evGiorno.map(e => `
-      <div class="ag-ev${e.stato === "fatto" ? " fatto" : e.stato === "richiesto" ? " richiesta" : ""}">
+      <div class="ag-ev${e.stato === "fatto" ? " fatto" : (e.stato === "richiesto" || e.stato === "proposto") ? " richiesta" : ""}">
         <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
         <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
           <div class="ag-ev-title">${escapeHtml(e.clienti_mascalcia?.nome || "")}${agNomeCavallo(e) ? " · " + escapeHtml(agNomeCavallo(e)) : ""}</div>
-          <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : ""}${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della struttura · " : ""}${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
         </div>
         ${e.stato === "fatto"
           ? '<span class="ag-ev-done">✓ Fatto</span>'
+          : e.stato === "proposto"
+            ? '<span class="ag-ev-done" style="color:var(--accent)">attesa</span>'
           : e.stato === "richiesto"
             ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>`
             : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
@@ -5656,7 +5977,7 @@ async function renderAgendaSettimana(direzione){
 }
 
 /* ---------- RICHIESTE DI APPUNTAMENTO (Step 5d) ---------- */
-const STATI_NON_CONFERMATI = ["richiesto", "rifiutato"];
+const STATI_NON_CONFERMATI = ["richiesto", "rifiutato", "proposto", "annullato"];
 let richiesteCache = {};
 
 function formatDataBreve(iso){
@@ -5675,9 +5996,18 @@ function testoRichiesta(prefisso, i, nomeCavallo){
 async function renderRichiestePendenti(){
   const box = document.getElementById("ag-richieste");
   if(!box) return;
-  const lista = await DB.listRichiestePendenti();
+  const tutte = await DB.listRichiestePendenti();
   richiesteCache = {};
-  lista.forEach(r => { richiesteCache[r.id] = r; });
+  tutte.forEach(r => { richiesteCache[r.id] = r; });
+  // appuntamenti chiesti da una struttura (più cavalli) = una sola richiesta
+  const visti = {};
+  const lista = [];
+  tutte.forEach(r => {
+    if(!r.gruppo_id){ lista.push(r); return; }
+    if(visti[r.gruppo_id]){ visti[r.gruppo_id]._cavalli.push(agNomeCavallo(r)); return; }
+    visti[r.gruppo_id] = { ...r, _cavalli: [agNomeCavallo(r)] };
+    lista.push(visti[r.gruppo_id]);
+  });
   if(!lista.length){ box.style.display = "none"; box.innerHTML = ""; return; }
   box.style.display = "block";
   box.innerHTML = `
@@ -5685,12 +6015,68 @@ async function renderRichiestePendenti(){
     ${lista.map(r => `
       <div class="rich-item">
         <div style="flex:1;min-width:0;cursor:pointer" onclick="vaiAllaDataAgenda('${r.data_intervento}')">
-          <div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(r.clienti_mascalcia?.nome || "")}${agNomeCavallo(r) ? " · " + escapeHtml(agNomeCavallo(r)) : ""}</div>
+          <div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(r.clienti_mascalcia?.nome || "")}${(r._cavalli ? r._cavalli.filter(Boolean).join(", ") : agNomeCavallo(r)) ? " · " + escapeHtml(r._cavalli ? r._cavalli.filter(Boolean).join(", ") : agNomeCavallo(r)) : ""}</div>
           <div class="muted" style="font-size:12px">${formatDataBreve(r.data_intervento)}${r.ora ? " · " + String(r.ora).slice(0, 5) : ""} · ${escapeHtml(agDescrizioneTipo(r))}${r.note ? " · " + escapeHtml(r.note) : ""}</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="rifiutaRichiesta('${r.id}')">Rifiuta</button>
         <button class="btn btn-primary btn-sm" onclick="accettaRichiesta('${r.id}')">Accetta</button>
       </div>`).join("")}`;
+}
+
+/* ---------- APPUNTAMENTI CON STRUTTURE EQUO SCUDERIA (doppia conferma, più cavalli) ---------- */
+async function azioneGruppoStruttura(gruppoId, azione){
+  const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: gruppoId, p_azione: azione });
+  if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita: " + (error?.message || "riprova")); return; }
+  showToast(azione === "conferma" ? "Confermato: la struttura riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
+  await renderAgendaSettimana();
+  if(currentClienteId) await loadClienteInterventi(currentClienteId);
+}
+
+let propStrutturaClienteId = null;
+async function apriPropostaStruttura(clienteId, preset){
+  propStrutturaClienteId = clienteId;
+  const c = clientiMascalcia.find(x => x.id === clienteId);
+  document.getElementById("prop-str-nome").textContent = c?.nome || "Struttura";
+  const p = preset || {};
+  document.getElementById("prop-str-tipo").value = p.tipo_ferratura || "ferratura";
+  document.getElementById("prop-str-tipo-altro").value = p.tipo_altro || "";
+  document.getElementById("prop-str-tipo-altro-group").style.display = (p.tipo_ferratura === "altro") ? "flex" : "none";
+  document.getElementById("prop-str-data").value = p.data_intervento || "";
+  document.getElementById("prop-str-data").min = isoLocale(new Date());
+  document.getElementById("prop-str-ora").value = p.ora ? String(p.ora).slice(0, 5) : "";
+  document.getElementById("prop-str-importo").value = "";
+  document.getElementById("prop-str-note").value = "";
+  document.getElementById("prop-str-error").style.display = "none";
+  const box = document.getElementById("prop-str-cavalli");
+  box.innerHTML = '<div class="muted" style="font-size:13px">Caricamento…</div>';
+  openModal("modal-proponi-struttura");
+  const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
+  const cav = data || [];
+  box.innerHTML = cav.length
+    ? cav.map(x => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id ? " checked" : ""}> ${escapeHtml(x.nome)}</label>`).join("")
+    : '<div class="muted" style="font-size:13px">La struttura non ha ancora cavalli in scheda: l\'appuntamento sarà generico.</div>';
+}
+
+async function inviaPropostaStruttura(){
+  const err = document.getElementById("prop-str-error");
+  err.style.display = "none";
+  const tipo = document.getElementById("prop-str-tipo").value;
+  const tipoAltro = document.getElementById("prop-str-tipo-altro").value.trim();
+  const data = document.getElementById("prop-str-data").value;
+  const ora = document.getElementById("prop-str-ora").value;
+  const importo = document.getElementById("prop-str-importo").value;
+  const note = document.getElementById("prop-str-note").value.trim();
+  const cavalli = Array.from(document.querySelectorAll(".prop-str-cav:checked")).map(el => el.value);
+  if(!data){ err.textContent = "Scegli la data."; err.style.display = "block"; return; }
+  if(tipo === "altro" && !tipoAltro){ err.textContent = "Specifica il tipo di intervento."; err.style.display = "block"; return; }
+  const { data: res, error } = await sb.rpc("pro_proponi_appuntamento_struttura", {
+    p_cliente_id: propStrutturaClienteId, p_tipo: tipo, p_tipo_altro: tipoAltro || null, p_data: data, p_ora: ora || null,
+    p_cavalli: cavalli, p_note: note || null, p_importo: importo ? Number(importo) : null });
+  if(error || !res?.ok){ err.textContent = (res && res.errore) || ("Invio non riuscito: " + (error?.message || "riprova")); err.style.display = "block"; return; }
+  closeModal("modal-proponi-struttura");
+  showToast("Proposta inviata: la struttura deve confermarla.");
+  if(document.getElementById("ag-week")) await renderAgendaSettimana();
+  if(currentClienteId) await loadClienteInterventi(currentClienteId);
 }
 
 function vaiAllaDataAgenda(iso){
@@ -5706,6 +6092,7 @@ function vaiAllaDataAgenda(iso){
 function accettaRichiesta(id){
   const r = richiesteCache[id] || agEventiCache[id];
   if(!r) return;
+  if(r.gruppo_id) return azioneGruppoStruttura(r.gruppo_id, "conferma");
   // apre il form già compilato: il maniscalco aggiunge importo/misura e conferma
   openInterventoModal(null, r);
 }
@@ -5713,6 +6100,10 @@ function accettaRichiesta(id){
 async function rifiutaRichiesta(id){
   const r = richiesteCache[id] || agEventiCache[id];
   if(!r) return;
+  if(r.gruppo_id){
+    if(!confirm("Rifiutare la richiesta della struttura? Riceve un messaggio in chat per trovare un'altra data.")) return;
+    return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
+  }
   if(!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
   const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
   if(error){ showToast("Errore: " + error.message); return; }
@@ -5791,11 +6182,17 @@ function apriAzioniEvento(id){
     `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
     escapeHtml(agDescrizioneTipo(e)),
     (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"),
-    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : "Da fare",
+    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della struttura</span>' : "Da fare",
+    e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con struttura Equo Scuderia: se cambi data o ora, la struttura deve riconfermare.</span>' : "",
     e.note ? escapeHtml(e.note) : ""
   ].filter(Boolean).join("<br>");
   const btnFatto = document.getElementById("azioni-evento-fatto");
   btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
+  btnFatto.style.display = e.stato === "proposto" ? "none" : "";
+  const btnAnnStr = document.getElementById("azioni-evento-annulla-struttura");
+  if(btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto","programmato"].includes(e.stato) ? "" : "none";
+  const btnElim = document.getElementById("azioni-evento-elimina");
+  if(btnElim) btnElim.style.display = e.gruppo_id && e.stato !== "fatto" ? "none" : "";
   openModal("modal-azioni-evento");
 }
 
@@ -5805,6 +6202,10 @@ async function azioneEvento(tipo){
   if(tipo === "modifica"){
     closeModal("modal-azioni-evento");
     openInterventoModal(null, e);
+  } else if(tipo === "annulla_struttura" && e.gruppo_id){
+    if(!confirm("Annullare l'appuntamento con la struttura (tutti i cavalli)? La struttura riceve un avviso in chat.")) return;
+    closeModal("modal-azioni-evento");
+    await azioneGruppoStruttura(e.gruppo_id, "annulla");
   } else if(tipo === "fatto" && e.stato === "richiesto"){
     closeModal("modal-azioni-evento");
     accettaRichiesta(e.id);
@@ -6013,9 +6414,15 @@ function insertEmoji(emoji){
 async function openChatThread(clienteId){
   if(!clienteId) return;
   currentClienteId = clienteId;
+  if(!clientiMascalcia || !clientiMascalcia.some(x => x.id === clienteId)) clientiMascalcia = await DB.listClientiMascalcia();
   const c = clientiMascalcia.find(x => x.id === clienteId);
   document.getElementById("mchat-cliente-nome").textContent = c?.nome || "Cliente";
-  document.getElementById("mchat-cliente-sub").textContent = c?.nome_cavallo || "";
+  const strutturaColl = isStrutturaCollegata(clienteId);
+  document.getElementById("mchat-cliente-sub").textContent = strutturaColl ? "Struttura · Equo Scuderia" : (c?.nome_cavallo || "");
+  const btnCodice = document.querySelector('#mchat-overlay [onclick="shareInviteCodeFromChat()"]');
+  if(btnCodice) btnCodice.style.display = strutturaColl ? "none" : "";
+  const btnInt = document.getElementById("mchat-btn-intervento");
+  if(btnInt) btnInt.textContent = strutturaColl ? "Proponi appuntamento" : "Segna intervento fatto";
   document.getElementById("mchat-emoji-picker").classList.remove("active");
   document.getElementById("mchat-input").value = "";
   document.getElementById("mchat-overlay").classList.add("active");
@@ -6064,10 +6471,11 @@ async function renderChatThread(clienteId){
       ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
       : (m.tipo === "documento" || m.tipo === "foto" || m.tipo === "video")
         ? bollaAllegato(m.tipo, m.file_url, m.file_nome, m.testo)
-        : `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
+        : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
+    const firma = !out && m.mittente_nome ? `<div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">${escapeHtml(m.mittente_nome)}</div>` : "";
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}">
-        ${body}
+        ${firma}${body}
         <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
       </div>`;
   });
@@ -6080,7 +6488,8 @@ let allegatoChatTarget = null; // "mchat" (maniscalco→cliente) | "fchat" (clie
 function apriMenuAllegati(chat){
   allegatoChatTarget = chat;
   // video: tra proprietari per tutti (come prima); verso maniscalco e scuderia solo per i proprietari Premium
-  const videoPremium = chat === "fchat" || chat === "schat" || (chat === "ochat" && chatColleghiAperta);
+  const videoPremium = chat === "fchat" || chat === "schat" || (chat === "ochat" && chatColleghiAperta)
+    || (chat === "mchat" && isStrutturaCollegata(currentClienteId));
   const video = (chat === "ochat" && !chatColleghiAperta) || (videoPremium && isPremium());
   document.getElementById("allegato-galleria").accept = video ? "image/*,video/*" : "image/*";
   document.getElementById("allegati-galleria-label").textContent = video ? "Foto o video dalla galleria" : "Foto dalla galleria";
@@ -6112,7 +6521,7 @@ async function allegatoScelto(event){
     return handleOwnerChatMediaChange({ target: { files: [file], value: "" } });
   }
   if(isVideo){
-    if(!(chat === "fchat" || chat === "schat")){ showToast("Qui puoi allegare foto o documenti PDF."); return; }
+    if(!(chat === "fchat" || chat === "schat" || (chat === "mchat" && isStrutturaCollegata(currentClienteId)))){ showToast("Qui puoi allegare foto o documenti PDF."); return; }
     if(!isPremium()){ showToast("I video in chat sono inclusi in Equo Premium"); togglePiano(); return; }
     if(file.size > 50 * 1024 * 1024){ showToast("Video troppo pesante (max 50 MB): accorcialo o riprendilo a qualità più bassa."); return; }
     const durata = await durataVideo(file);
@@ -6216,7 +6625,9 @@ async function startVoiceRecording(){
   document.getElementById("mchat-emoji-picker").classList.remove("active");
   recordingTimer = setInterval(() => {
     recordingSeconds++;
-    document.getElementById("mchat-rec-timer").textContent = formatRecTimer(recordingSeconds);
+    document.getElementById("mchat-rec-timer").textContent = formatRecTimer(recordingSeconds) + (isPremium() ? "" : " / 0:30");
+    // piano Free del professionista: note vocali max 30 secondi (e 5 al giorno, controllo lato server)
+    if(!isPremium() && recordingSeconds >= 30){ showToast("Piano Free: note vocali fino a 30 secondi."); stopAndSendVoiceRecording(); }
   }, 1000);
 }
 
@@ -6297,12 +6708,17 @@ async function loadInboxMascalcia(){
   const navBadge = document.getElementById("inbox-nav-badge");
   if(navBadge) navBadge.style.display = totalUnread > 0 ? "block" : "none";
 
-  if(conversazioni.length === 0){
+  // Strutture collegate a Equo Scuderia: sezione a parte
+  const strutture = conversazioni.filter(m => m.clienti_mascalcia?.centro_id);
+  const clientiConv = conversazioni.filter(m => !m.clienti_mascalcia?.centro_id);
+  renderInboxStrutture(strutture, unreadByCliente);
+
+  if(clientiConv.length === 0){
     box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessun messaggio.<br>Le conversazioni con i clienti collegati appariranno qui.</div></div>';
     return;
   }
 
-  box.innerHTML = conversazioni.map(m => {
+  box.innerHTML = clientiConv.map(m => {
     const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
     const nome = m.clienti_mascalcia?.nome || "Cliente";
     const cavallo = m.clienti_mascalcia?.nome_cavallo;
@@ -6313,6 +6729,38 @@ async function loadInboxMascalcia(){
       <div class="horse-avatar"><i class="fa-solid fa-user" style="font-size:20px"></i></div>
       <div style="flex:1;min-width:0">
         <div class="inbox-name" style="font-size:14px">${escapeHtml(nome)}${cavallo ? " · " + escapeHtml(cavallo) : ""}</div>
+        <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
+      </div>
+      ${unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function renderInboxStrutture(strutture, unreadByCliente){
+  const wrap = document.getElementById("inbox-strutture-wrap");
+  const box = document.getElementById("inbox-strutture-list");
+  if(!wrap || !box) return;
+  const mostra = isManiscalcoUtente() || strutture.length > 0;
+  wrap.style.display = mostra ? "block" : "none";
+  if(!mostra) return;
+  if(strutture.length === 0){
+    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6">Nessuna struttura collegata. Da <strong>Clienti → Strutture → Collega</strong> inserisci il codice del centro, oppure accetta l\'invito di una struttura che usa Equo Scuderia.</div>';
+    return;
+  }
+  box.innerHTML = strutture.map(m => {
+    const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
+    const c = m.clienti_mascalcia || {};
+    const stato = c.collegamento_stato === "attivo" ? "" : c.collegamento_stato === "da_confermare_pro" ? "Invito da accettare · " : "In attesa della struttura · ";
+    const chi = m.mittente_tipo === "maniscalco" ? "Tu: " : (m.mittente_nome ? m.mittente_nome + ": " : "");
+    const preview = stato + chi + previewMessaggioMascalcia(m.tipo, m.testo, m.file_nome);
+    const azione = c.collegamento_stato === "da_confermare_pro"
+      ? `showPage('pro-clienti'); openClienteDetail('${m.cliente_mascalcia_id}')`
+      : `openChatThread('${m.cliente_mascalcia_id}')`;
+    return `
+    <div class="inbox-item ${unread > 0 ? "unread" : ""}" onclick="${azione}">
+      <div class="horse-avatar"><i class="fa-solid fa-building" style="font-size:19px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(c.nome || "Struttura")}</div>
         <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
       </div>
       ${unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
@@ -7489,6 +7937,11 @@ async function confermaAzioneAi(id){
     }
     fatto = "✓ Salvato in agenda. Misura e numero di ferri li aggiungi aprendo l'appuntamento.";
     if(!error) await aggiornaViteManiscalco(x.cliente_mascalcia_id);
+  } else if((azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta") && x.gruppo_id){
+    // richiesta di una struttura Equo Scuderia: si conferma/rifiuta tutto il gruppo con la doppia conferma
+    const r = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: x.gruppo_id, p_azione: azione.tipo === "accetta_richiesta" ? "conferma" : "rifiuta" });
+    error = r.error || (r.data && !r.data.ok ? { message: r.data.errore } : null);
+    if(!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la struttura riceve l'avviso in chat." : "✓ Richiesta rifiutata: la struttura riceve un messaggio in chat.";
   } else if(azione.tipo === "accetta_richiesta"){
     const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura];
     const payload = { stato: x.data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto", prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null };

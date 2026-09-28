@@ -229,9 +229,9 @@ const STRUMENTI_HAMMER = [
 ];
 
 // ---- supporto strumenti gestionali (sempre con il client dell'utente: RLS del maniscalco)
-const SEL_INTERVENTO = "id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note, clienti_mascalcia(nome, cliente_user_id), cavalli_clienti_mascalcia(nome)";
+const SEL_INTERVENTO = "id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, data_intervento, ora, stato, gruppo_id, prossima_scadenza, importo, stato_pagamento, note, clienti_mascalcia(nome, cliente_user_id), cavalli_clienti_mascalcia(nome)";
 const descrTipo = (i) => (i.tipo_ferratura === "altro" && i.tipo_altro) ? i.tipo_altro : (TIPO_INTERVENTO_LABEL[i.tipo_ferratura] || i.tipo_ferratura);
-const STATO_LABEL = { richiesto: "richiesta da confermare", programmato: "programmato", fatto: "fatto" };
+const STATO_LABEL = { richiesto: "richiesta da confermare", programmato: "programmato", fatto: "fatto", proposto: "proposto alla struttura, in attesa della sua conferma", annullato: "annullato" };
 const rigaIntervento = (i) => ({ id: i.id, data: i.data_intervento, ora: i.ora ? String(i.ora).slice(0, 5) : null, cliente: i.clienti_mascalcia?.nome || null,
   cavallo: i.cavalli_clienti_mascalcia?.nome || null, tipo: descrTipo(i), stato: STATO_LABEL[i.stato] || i.stato,
   importo: i.importo != null ? Number(i.importo) : null, pagamento: i.stato_pagamento === "saldato" ? "saldato" : "da saldare", note: i.note || null });
@@ -464,7 +464,7 @@ async function eseguiStrumento(nome, input, ctx) {
     case "agenda": {
       const da = isoValida(input.da) ? input.da : oggiISO();
       const a = isoValida(input.a) ? input.a : aggiungiGiorni(da, 7);
-      const { data, error } = await db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("maniscalco_id", userId).neq("stato", "rifiutato")
+      const { data, error } = await db.from("interventi_mascalcia").select(SEL_INTERVENTO).eq("maniscalco_id", userId).not("stato", "in", "(rifiutato,annullato)")
         .gte("data_intervento", da).lte("data_intervento", a).order("data_intervento", { ascending: true }).order("ora", { ascending: true, nullsFirst: false }).limit(200);
       if (error) return "Errore nel leggere l'agenda.";
       return { periodo: { da, a }, appuntamenti: (data || []).map(rigaIntervento) };
@@ -485,7 +485,7 @@ async function eseguiStrumento(nome, input, ctx) {
       const chiave = (i) => i.cavallo_cliente_id || "c:" + i.cliente_mascalcia_id;
       const clientiIds = [...new Set(data.map((i) => i.cliente_mascalcia_id))];
       const { data: tutti } = await db.from("interventi_mascalcia").select("id, cliente_mascalcia_id, cavallo_cliente_id, data_intervento, stato")
-        .eq("maniscalco_id", userId).in("cliente_mascalcia_id", clientiIds).not("stato", "in", "(richiesto,rifiutato)");
+        .eq("maniscalco_id", userId).in("cliente_mascalcia_id", clientiIds).not("stato", "in", "(richiesto,rifiutato,proposto,annullato)");
       const visti = new Set(); const out = [];
       for (const i of data) {
         const k = chiave(i);
@@ -547,7 +547,7 @@ async function eseguiStrumento(nome, input, ctx) {
       if (!r || r.stato !== "richiesto") return "Richiesta non trovata o già gestita: rileggi richieste_da_confermare e usa l'id giusto.";
       const dati = { id: r.id, cliente_mascalcia_id: r.cliente_mascalcia_id, nome_cliente: r.clienti_mascalcia?.nome || null, cliente_su_equo: !!r.clienti_mascalcia?.cliente_user_id,
         cavallo: r.cavalli_clienti_mascalcia?.nome || null, tipo_ferratura: r.tipo_ferratura, tipo_altro: r.tipo_altro, data_intervento: r.data_intervento,
-        ora: r.ora ? String(r.ora).slice(0, 5) : null, note: r.note || null };
+        ora: r.ora ? String(r.ora).slice(0, 5) : null, note: r.note || null, gruppo_id: r.gruppo_id || null };
       if (nome === "proponi_rifiuta_richiesta") { ctx.azioni.push({ tipo: "rifiuta_richiesta", dati }); return "Scheda di rifiuto mostrata, da confermare."; }
       if (Number(input.importo) > 0) dati.importo = Math.round(Number(input.importo) * 100) / 100;
       dati.invia_riepilogo = !!input.invia_riepilogo;

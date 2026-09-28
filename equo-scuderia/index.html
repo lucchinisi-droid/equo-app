@@ -112,6 +112,15 @@ a{color:inherit}
 .sidebar.collapsed .nav-item .nav-label,.sidebar.collapsed .nav-item .badge{display:none}
 /* barra chiusa: il contatore diventa un pallino in alto a destra dell'icona */
 .sidebar.collapsed .nav-item .nav-unread-badge{position:absolute;top:1px;right:3px;margin:0;min-width:16px;height:16px;padding:0 4px;font-size:9px}
+/* Professionisti: schede Maniscalchi / Veterinari / Istruttori */
+.pro-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.pro-tab{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:var(--radius-full);
+  padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.pro-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.pro-tab .soon{font-size:9.5px;font-weight:700;letter-spacing:.03em;background:var(--accent);color:var(--accent-fg);padding:2px 6px;border-radius:var(--radius-full)}
+.pro-avatar{width:40px;height:40px;border-radius:50%;background:var(--secondary);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;overflow:hidden;color:var(--muted);font-size:17px}
+.pro-avatar img{width:100%;height:100%;object-fit:cover}
 .unread-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--danger);margin-left:8px;flex-shrink:0}
 .nav-divider{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);
   text-transform:uppercase;padding:14px 12px 6px;white-space:nowrap;overflow:hidden}
@@ -506,12 +515,13 @@ textarea.input{resize:vertical}
           <i class="fa-solid fa-comments"></i> <span class="nav-label">Comunicazioni & Chat</span> <span class="nav-unread-badge sem-verde" id="chat-nav-unread-badge" title="Messaggi non letti">0</span>
         </button>
 
-        <div class="nav-divider">In arrivo</div>
-        <button class="nav-item" data-module="professionisti" onclick="showModule('professionisti')">
-          <i class="fa-solid fa-user-doctor"></i> <span class="nav-label">Professionisti</span> <span class="badge">SOON</span>
-        </button>
         <button class="nav-item" data-module="magazzino" onclick="showModule('magazzino')">
           <i class="fa-solid fa-boxes-stacked"></i> <span class="nav-label">Magazzino</span> <span class="badge">SOON</span>
+        </button>
+
+        <div class="nav-divider">Altre funzioni</div>
+        <button class="nav-item" data-module="professionisti" onclick="showModule('professionisti')">
+          <i class="fa-solid fa-user-doctor"></i> <span class="nav-label">Professionisti</span> <span class="nav-unread-badge" id="pro-nav-badge" title="Messaggi e richieste dai professionisti" style="display:none">0</span>
         </button>
         <button class="nav-item" data-module="store" onclick="showModule('store')">
           <i class="fa-solid fa-store"></i> <span class="nav-label">Store</span> <span class="badge">SOON</span>
@@ -520,7 +530,7 @@ textarea.input{resize:vertical}
           <i class="fa-solid fa-file-invoice"></i> <span class="nav-label">Fatturazione SDI</span> <span class="badge">SOON</span>
         </button>
         <button class="nav-item" data-module="ai" onclick="showModule('ai')">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-label">Assistenti AI</span> <span class="badge">SOON</span>
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-label">Agenti AI</span> <span class="badge">SOON</span>
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -842,7 +852,44 @@ textarea.input{resize:vertical}
             </div>
           </div>
         </div>
-        <div class="module-page" id="module-professionisti" style="display:none"></div>
+        <div class="module-page" id="module-professionisti" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-user-doctor"></i></span> Professionisti</h1>
+              <p>Professionisti esterni con P.IVA o codice fiscale che lavorano con il centro: chat e appuntamenti con doppia conferma.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-aggiungi-pro" onclick="apriAggiungiProfessionista()"><i class="fa-solid fa-plus"></i> Aggiungi maniscalco</button>
+          </div>
+          <div class="pro-tabs">
+            <button class="pro-tab active" data-pro-tab="maniscalchi" onclick="selezionaTabPro('maniscalchi')"><i class="fa-solid fa-hammer"></i> Maniscalchi</button>
+            <button class="pro-tab" data-pro-tab="veterinari" onclick="selezionaTabPro('veterinari')"><i class="fa-solid fa-stethoscope"></i> Veterinari <span class="soon">COMING SOON</span></button>
+            <button class="pro-tab" data-pro-tab="istruttori" onclick="selezionaTabPro('istruttori')"><i class="fa-solid fa-person-running"></i> Istruttori/Trainer <span class="soon">COMING SOON</span></button>
+          </div>
+          <div id="pro-tab-maniscalchi">
+            <div class="card">
+              <div id="pro-maniscalchi-list"></div>
+              <div class="empty-state" id="pro-maniscalchi-empty" style="display:none">
+                <i class="fa-solid fa-hammer"></i>
+                <div>Nessun maniscalco collegato. Tocca "Aggiungi maniscalco" e inserisci il suo codice professionista (lo trova in Equo App nel menu profilo).</div>
+              </div>
+            </div>
+            <p style="color:var(--muted);font-size:12.5px;margin-top:10px" id="pro-codice-centro-hint"></p>
+          </div>
+          <div id="pro-tab-veterinari" style="display:none">
+            <div class="card coming-soon" style="text-align:center;padding:36px 20px">
+              <span class="badge-pill badge-yellow">COMING SOON</span>
+              <h2 style="font-size:17px;margin:6px 0">Veterinari</h2>
+              <p style="color:var(--muted);font-size:13.5px;max-width:460px;margin:0 auto">Chat, visite, vaccini e Coggins con i veterinari esterni del centro, con conferma da entrambe le parti.</p>
+            </div>
+          </div>
+          <div id="pro-tab-istruttori" style="display:none">
+            <div class="card coming-soon" style="text-align:center;padding:36px 20px">
+              <span class="badge-pill badge-yellow">COMING SOON</span>
+              <h2 style="font-size:17px;margin:6px 0">Istruttori / Trainer</h2>
+              <p style="color:var(--muted);font-size:13.5px;max-width:460px;margin:0 auto">Chat, allenamenti e lezioni con istruttori e trainer esterni del centro, con conferma da entrambe le parti.</p>
+            </div>
+          </div>
+        </div>
         <div class="module-page" id="module-magazzino" style="display:none"></div>
         <div class="module-page" id="module-store" style="display:none"></div>
         <div class="module-page" id="module-fatturazione" style="display:none"></div>
@@ -1001,6 +1048,90 @@ textarea.input{resize:vertical}
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-hard-reset')">Annulla</button>
       <button class="btn btn-danger" style="flex:1" id="hard-reset-confirm-btn" onclick="confirmHardReset()">Cancella definitivamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: aggiungi maniscalco (codice professionista) -->
+<div class="modal-overlay" id="modal-aggiungi-pro" onclick="closeOut(event,'modal-aggiungi-pro')">
+  <div class="modal">
+    <div class="modal-title">Aggiungi maniscalco <span class="x" onclick="closeModal('modal-aggiungi-pro')">✕</span></div>
+    <div class="field">
+      <label>Codice professionista</label>
+      <input class="input" id="pro-codice-input" placeholder="Es. EQUO-PRO-AB12C" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaInvitoProfessionista()">
+      <p style="color:var(--muted);font-size:12px;margin-top:4px">Il maniscalco trova il suo codice in Equo App (menu profilo). Deve aver inserito P.IVA o codice fiscale nel profilo. Riceverà l'invito e dovrà accettarlo.</p>
+    </div>
+    <div class="auth-error" id="pro-codice-error"></div>
+    <button class="btn btn-primary btn-block" id="pro-codice-btn" onclick="inviaInvitoProfessionista()">Invia invito</button>
+  </div>
+</div>
+
+<!-- MODAL: conferma chiusura collegamento professionista -->
+<div class="modal-overlay" id="modal-scollega-pro" onclick="closeOut(event,'modal-scollega-pro')">
+  <div class="modal">
+    <div class="modal-title">Chiudi collegamento <span class="x" onclick="closeModal('modal-scollega-pro')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px" id="scollega-pro-text"></p>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-scollega-pro')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" id="scollega-pro-btn" onclick="confermaScollegaProfessionista()">Chiudi collegamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: chat con un maniscalco collegato (messaggi_mascalcia via RPC) -->
+<div class="modal-overlay" id="modal-chat-pro" onclick="closeOut(event,'modal-chat-pro')">
+  <div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh">
+    <div class="modal-title"><span><i class="fa-solid fa-hammer" style="color:var(--muted);margin-right:6px"></i><span id="chat-pro-nome">Maniscalco</span></span> <span class="x" onclick="chiudiChatProfessionista()">✕</span></div>
+    <div id="chat-pro-messages" style="flex:1;overflow-y:auto;min-height:240px;max-height:380px;display:flex;flex-direction:column;gap:8px;padding:6px 2px;margin-bottom:10px"></div>
+    <div id="chat-pro-rec" style="display:none;align-items:center;gap:10px;margin-bottom:8px;padding:8px 12px;border-radius:12px;background:var(--danger-bg);color:var(--danger);font-size:13px;font-weight:600">
+      <span style="width:9px;height:9px;border-radius:50%;background:var(--danger)"></span>
+      <span style="flex:1">Registrazione… <span id="chat-pro-rec-timer">0:00</span></span>
+      <button class="btn btn-ghost btn-sm" onclick="annullaAudioPro()">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="inviaAudioPro()"><i class="fa-solid fa-paper-plane"></i> Invia</button>
+    </div>
+    <div style="display:flex;gap:6px" id="chat-pro-bar">
+      <input type="file" id="chat-pro-file" accept="image/*,video/*,application/pdf,.pdf" style="display:none" onchange="inviaAllegatoPro(event)">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('chat-pro-file').click()" title="Allega foto, video o PDF"><i class="fa-solid fa-paperclip"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="avviaAudioPro()" title="Nota vocale"><i class="fa-solid fa-microphone"></i></button>
+      <input class="input" id="chat-pro-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaTestoPro()}">
+      <button class="btn btn-primary btn-sm" onclick="inviaTestoPro()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: appuntamenti con un maniscalco collegato (doppia conferma, più cavalli) -->
+<div class="modal-overlay" id="modal-app-pro" onclick="closeOut(event,'modal-app-pro')">
+  <div class="modal" style="max-width:560px;max-height:88vh;overflow-y:auto">
+    <div class="modal-title"><span><i class="fa-solid fa-calendar-check" style="color:var(--muted);margin-right:6px"></i>Appuntamenti · <span id="app-pro-nome">Maniscalco</span></span> <span class="x" onclick="chiudiAppuntamentiPro()">✕</span></div>
+    <div id="app-pro-lista-view">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+        <p style="margin:0;color:var(--muted);font-size:12.5px">Ogni appuntamento va confermato da entrambi: chi lo riceve conferma, propone un'altra data o annulla.</p>
+        <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="nuovoAppuntamentoPro()"><i class="fa-solid fa-plus"></i> Nuovo</button>
+      </div>
+      <div id="app-pro-lista"></div>
+    </div>
+    <div id="app-pro-form-view" style="display:none">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px" id="app-pro-form-titolo">Nuovo appuntamento</div>
+      <div id="app-pro-form-nuovo">
+        <div class="field"><label>Tipo</label>
+          <select class="input" id="app-pro-tipo" onchange="document.getElementById('app-pro-tipo-altro-wrap').style.display = this.value === 'altro' ? 'block' : 'none'">
+            <option value="ferratura">Ferratura</option><option value="mezza_ferratura">Mezza ferratura</option>
+            <option value="pareggio">Pareggio</option><option value="altro">Altro</option>
+          </select></div>
+        <div class="field" id="app-pro-tipo-altro-wrap" style="display:none"><label>Specifica</label><input class="input" id="app-pro-tipo-altro" maxlength="60" placeholder="Es. controllo zoccoli"></div>
+        <div class="field"><label>Cavalli <span style="color:var(--muted);font-weight:400">(uno o più)</span></label>
+          <div id="app-pro-cavalli" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px"></div></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="field" style="flex:1"><label>Data</label><input class="input" type="date" id="app-pro-data"></div>
+        <div class="field" style="flex:1"><label>Ora</label><input class="input" type="time" id="app-pro-ora"></div>
+      </div>
+      <div class="field"><label>Note <span style="color:var(--muted);font-weight:400">(facoltative)</span></label><input class="input" id="app-pro-note" maxlength="300"></div>
+      <div class="auth-error" id="app-pro-error"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" style="flex:1" onclick="mostraListaAppPro()">Indietro</button>
+        <button class="btn btn-primary" style="flex:1" id="app-pro-salva" onclick="salvaAppuntamentoPro()">Invia al maniscalco</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1186,7 +1317,7 @@ textarea.input{resize:vertical}
       <li>Tiene d'occhio scadenze sanitarie e pacchetti e ti avvisa prima.</li>
     </ul>
     <p style="color:var(--muted);font-size:12.5px;margin:0 0 16px">Inclusa in Equo Scuderia, con messaggi mensili in base al pacchetto (5 / 50 / 500). Altri agenti add-on: Merlino, Galeno, Hammer, Ares.</p>
-    <button class="btn btn-primary btn-block" onclick="closeModal('modal-athena');showModule('ai')">Scopri gli Assistenti AI</button>
+    <button class="btn btn-primary btn-block" onclick="closeModal('modal-athena');showModule('ai')">Scopri gli Agenti AI</button>
   </div>
 </div>
 
@@ -1375,11 +1506,10 @@ const CONTATTO_TIPO_LABELS = {
   fornitore:"Fornitore", altro:"Altro",
 };
 const COMING_SOON_COPY = {
-  professionisti: { icon:"fa-user-doctor", titolo:"Professionisti", testo:"Veterinari, maniscalchi e istruttori collegati al centro: agenda degli interventi, ferrature e visite per ogni cavallo, chat e documenti condivisi." },
   magazzino: { icon:"fa-boxes-stacked", titolo:"Magazzino", testo:"Selle, finimenti, mangimi e scorte del centro: quantità, stato, chi li usa e avvisi quando qualcosa sta per finire o va sostituito." },
   store: { icon:"fa-store", titolo:"Store", testo:"Vendi ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
   fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"Genera e invia fatture elettroniche conformi SDI direttamente dagli abbonamenti e dalle lezioni registrate nel gestionale." },
-  ai: { icon:"fa-wand-magic-sparkles", titolo:"Assistenti AI", testo:"Athena, la segreteria AI inclusa nel gestionale, più gli agenti add-on: Merlino (contabilità e personale), Galeno (veterinario), Hammer (mascalcia) e Ares (istruttore)." },
+  ai: { icon:"fa-wand-magic-sparkles", titolo:"Agenti AI", testo:"Athena, la segreteria AI inclusa nel gestionale, più gli agenti add-on: Merlino (contabilità e personale), Galeno (veterinario), Hammer (mascalcia) e Ares (istruttore)." },
 };
 const ACTIVE_PLACEHOLDER_COPY = {};
 
@@ -2212,10 +2342,9 @@ function renderChatMessaggi(messaggi){
   const wasAtBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
   box.innerHTML = messaggi.map(msg => {
     const mine = msg.mittente_user_id === currentUser.id;
-    return `<div style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%;background:${mine ? "var(--primary)" : "var(--muted-bg)"};color:${mine ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">
-      ${corpoMessaggioChat(msg, mine)}
-      <div style="font-size:10px;opacity:.7;margin-top:3px">${new Date(msg.created_at).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>
-    </div>`;
+    return `<div style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%;background:${mine ? "var(--primary)" : "var(--muted-bg)"};color:${mine ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">`
+      + corpoMessaggioChat(msg, mine)
+      + `<div style="font-size:10px;opacity:.7;margin-top:3px">${new Date(msg.created_at).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div></div>`;
   }).join("") || `<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Nessun messaggio ancora. Scrivi il primo!</p>`;
   if(wasAtBottom || messaggi.length <= 1) box.scrollTop = box.scrollHeight;
 }
@@ -2228,6 +2357,9 @@ function corpoMessaggioChat(msg, mine){
   }
   if(msg.tipo === "video" && msg.file_url){
     return `<video controls playsinline preload="metadata" src="${escapeHtml(msg.file_url)}" style="max-width:220px;max-height:260px;border-radius:10px;display:block"></video>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
+  }
+  if(msg.tipo === "audio" && (msg.audio_url || msg.file_url)){
+    return `<audio controls preload="none" src="${escapeHtml(msg.audio_url || msg.file_url)}" style="max-width:230px;height:36px;display:block"></audio>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
   }
   if(msg.tipo === "documento" && msg.file_url){
     return `<a href="${escapeHtml(msg.file_url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none"><span style="background:#c0392b;color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:8px 5px">PDF</span><span style="text-decoration:underline">${escapeHtml(msg.file_nome || "Documento.pdf")}</span></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
@@ -2442,6 +2574,484 @@ function renderPlaceholderModules(){
     const c = COMING_SOON_COPY[key];
     document.getElementById("module-" + key).innerHTML = comingSoonHtml(c.icon, c.titolo, c.testo, "PRESTO DISPONIBILE");
   });
+}
+
+/* ---------- PROFESSIONISTI (maniscalchi esterni collegati via Equo App) ----------
+   Opzione A: la struttura è un cliente "struttura" del maniscalco (clienti_mascalcia.centro_id).
+   Collegamento con doppia conferma (RPC scuderia_aggiungi_maniscalco / scuderia_rispondi_collegamento /
+   scuderia_scollega_professionista). Accettano/chiudono: admin o livello 2-3. Chat ed eventi: tutto lo staff. */
+let professionistiList = [];
+let proDaScollegare = null;
+
+function puoCollegareProfessionisti(){
+  if(!currentMembro) return false;
+  return currentMembro.ruolo === "admin" || ["admin","2","3"].includes(String(currentMembro.livello || ""));
+}
+
+function selezionaTabPro(tab){
+  document.querySelectorAll(".pro-tab").forEach(b => b.classList.toggle("active", b.dataset.proTab === tab));
+  ["maniscalchi","veterinari","istruttori"].forEach(t => {
+    const el = document.getElementById("pro-tab-" + t);
+    if(el) el.style.display = t === tab ? "block" : "none";
+  });
+  const btn = document.getElementById("btn-aggiungi-pro");
+  if(btn) btn.style.display = (tab === "maniscalchi" && puoCollegareProfessionisti()) ? "" : "none";
+}
+
+async function loadProfessionisti(){
+  if(DEMO_MODE || !currentCentro){ professionistiList = []; return; }
+  const { data, error } = await sb.rpc("scuderia_lista_professionisti", { p_centro_id: currentCentro.id });
+  if(error){ console.error("scuderia_lista_professionisti:", error); professionistiList = []; return; }
+  professionistiList = data || [];
+  aggiornaBadgeProfessionisti();
+}
+
+function aggiornaBadgeProfessionisti(){
+  const el = document.getElementById("pro-nav-badge");
+  if(!el) return;
+  const n = professionistiList.reduce((t, p) => t + (Number(p.non_letti) || 0) + (Number(p.da_confermare) || 0) + (p.stato === "da_confermare_struttura" ? 1 : 0), 0);
+  el.textContent = n;
+  el.style.display = n > 0 ? "flex" : "none";
+}
+
+async function refreshProfessionistiModule(){
+  selezionaTabPro(document.querySelector(".pro-tab.active")?.dataset.proTab || "maniscalchi");
+  const hint = document.getElementById("pro-codice-centro-hint");
+  if(hint && currentCentro?.join_code){
+    hint.innerHTML = `Il maniscalco può anche chiedere il collegamento da Equo App inserendo il codice del centro <strong>${escapeHtml(currentCentro.join_code)}</strong>: la richiesta compare qui da accettare.`;
+  }
+  await loadProfessionisti();
+  renderProfessionistiList();
+}
+
+function renderProfessionistiList(){
+  const box = document.getElementById("pro-maniscalchi-list");
+  const empty = document.getElementById("pro-maniscalchi-empty");
+  if(!box) return;
+  const lista = professionistiList.filter(p => p.categoria === "maniscalco");
+  empty.style.display = lista.length ? "none" : "block";
+  const puo = puoCollegareProfessionisti();
+  const ordine = { da_confermare_struttura: 0, attivo: 1, da_confermare_pro: 2 };
+  box.innerHTML = lista.slice().sort((a, b) => (ordine[a.stato] - ordine[b.stato]) || (a.nome || "").localeCompare(b.nome || "")).map(p => {
+    const avatar = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : '<i class="fa-solid fa-user"></i>';
+    const cert = p.certificato ? ' <span class="badge-pill badge-green" style="font-size:10.5px;padding:2px 8px" title="P.IVA verificata da Equo"><i class="fa-solid fa-circle-check"></i> Equo Certified</span>' : "";
+    let stato = "", azioni = "";
+    if(p.stato === "attivo"){
+      stato = '<span style="color:#2f8a4e;font-weight:600">Collegato</span>';
+      azioni = `
+        <button class="btn btn-outline btn-sm" onclick="apriChatProfessionista('${p.cliente_id}')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
+        <button class="btn btn-outline btn-sm" onclick="apriEventiProfessionista('${p.cliente_id}')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
+        ${puo ? `<button class="btn btn-ghost btn-sm" title="Chiudi collegamento" onclick="chiediScollegaProfessionista('${p.cliente_id}')"><i class="fa-solid fa-link-slash"></i></button>` : ""}`;
+    } else if(p.stato === "da_confermare_pro"){
+      stato = "Invito inviato: in attesa che il maniscalco accetti";
+      azioni = puo ? `<button class="btn btn-ghost btn-sm" onclick="chiediScollegaProfessionista('${p.cliente_id}')">Annulla invito</button>` : "";
+    } else if(p.stato === "da_confermare_struttura"){
+      stato = '<span style="color:var(--danger);font-weight:600">Chiede di collegarsi al centro</span>';
+      azioni = puo
+        ? `<button class="btn btn-primary btn-sm" onclick="rispondiCollegamentoPro('${p.cliente_id}', true, this)">Accetta</button>
+           <button class="btn btn-ghost btn-sm" onclick="rispondiCollegamentoPro('${p.cliente_id}', false, this)">Rifiuta</button>`
+        : '<span style="color:var(--muted);font-size:12px">Può accettare l\'amministratore o un membro di livello 2-3</span>';
+    }
+    return `
+      <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <div class="pro-avatar">${avatar}</div>
+          <div style="min-width:0">
+            <div><span class="who">${escapeHtml(p.nome || "Maniscalco")}</span>${cert}${Number(p.non_letti) ? '<span class="unread-dot" title="Messaggi non letti"></span>' : ""}</div>
+            <div style="color:var(--muted);font-size:12px">Maniscalco · ${stato}</div>
+            ${p.stato === "attivo" && (p.prossimo || Number(p.da_confermare)) ? `<div style="font-size:12px;margin-top:2px">${Number(p.da_confermare) ? `<span style="color:var(--danger);font-weight:700">${p.da_confermare} da confermare</span>${p.prossimo ? " · " : ""}` : ""}${p.prossimo ? `Prossimo: ${escapeHtml(p.prossimo.tipo)} ${escapeHtml(dataAppIt(p.prossimo.data, p.prossimo.ora))}` : ""}</div>` : ""}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${azioni}</div>
+      </div>`;
+  }).join("");
+}
+
+function apriAggiungiProfessionista(){
+  document.getElementById("pro-codice-input").value = "";
+  document.getElementById("pro-codice-error").style.display = "none";
+  openModal("modal-aggiungi-pro");
+  setTimeout(() => document.getElementById("pro-codice-input").focus(), 50);
+}
+
+async function inviaInvitoProfessionista(){
+  const input = document.getElementById("pro-codice-input");
+  const err = document.getElementById("pro-codice-error");
+  const btn = document.getElementById("pro-codice-btn");
+  const codice = input.value.trim().toUpperCase();
+  err.style.display = "none";
+  if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
+  if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice });
+  btn.disabled = false;
+  if(error || !data?.ok){
+    err.textContent = (data && data.errore) || "Non è stato possibile inviare l'invito. Riprova.";
+    err.style.display = "block";
+    return;
+  }
+  closeModal("modal-aggiungi-pro");
+  showToast(data.gia
+    ? (data.stato === "attivo" ? `${data.nome} è già collegato.` : `C'è già una richiesta in corso con ${data.nome}.`)
+    : `Invito inviato a ${data.nome}: riceverà una notifica per accettarlo.`);
+  await refreshProfessionistiModule();
+}
+
+async function rispondiCollegamentoPro(clienteId, accetta, btn){
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: clienteId, p_accetta: accetta });
+  if(error || !data?.ok){
+    showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
+    if(btn) btn.disabled = false;
+    return;
+  }
+  showToast(accetta ? "Maniscalco collegato: ora potete scrivervi e fissare gli appuntamenti." : "Richiesta rifiutata.");
+  await refreshProfessionistiModule();
+}
+
+function chiediScollegaProfessionista(clienteId){
+  const p = professionistiList.find(x => x.cliente_id === clienteId);
+  if(!p) return;
+  proDaScollegare = clienteId;
+  document.getElementById("scollega-pro-text").textContent = p.stato === "attivo"
+    ? `Vuoi chiudere il collegamento con ${p.nome}? La chat e gli appuntamenti con il centro non saranno più condivisi.`
+    : `Vuoi annullare l'invito a ${p.nome}?`;
+  openModal("modal-scollega-pro");
+}
+
+async function confermaScollegaProfessionista(){
+  if(!proDaScollegare) return;
+  const btn = document.getElementById("scollega-pro-btn");
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_scollega_professionista", { p_cliente_id: proDaScollegare });
+  btn.disabled = false;
+  closeModal("modal-scollega-pro");
+  proDaScollegare = null;
+  if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita. Riprova."); return; }
+  showToast("Collegamento chiuso.");
+  await refreshProfessionistiModule();
+}
+
+// Step 2 (chat) e step 3 (appuntamenti) — sostituite più avanti
+/* -- Chat con il maniscalco (step 2) -- */
+let chatProCorrente = null;      // cliente_id del collegamento
+let chatProPoll = null;
+let chatProRecorder = null, chatProChunks = [], chatProRecTimer = null, chatProRecSec = 0, chatProStream = null;
+
+async function apriChatProfessionista(clienteId){
+  const p = professionistiList.find(x => x.cliente_id === clienteId);
+  chatProCorrente = clienteId;
+  document.getElementById("chat-pro-nome").textContent = p?.nome || "Maniscalco";
+  document.getElementById("chat-pro-input").value = "";
+  document.getElementById("chat-pro-messages").innerHTML = '<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Caricamento…</p>';
+  openModal("modal-chat-pro");
+  await caricaChatProfessionista(true);
+  clearInterval(chatProPoll);
+  chatProPoll = setInterval(() => { if(document.getElementById("modal-chat-pro").classList.contains("active")) caricaChatProfessionista(false); else clearInterval(chatProPoll); }, 8000);
+}
+
+function chiudiChatProfessionista(){
+  annullaAudioPro();
+  clearInterval(chatProPoll);
+  closeModal("modal-chat-pro");
+  chatProCorrente = null;
+  refreshProfessionistiModule();
+}
+
+async function caricaChatProfessionista(segna){
+  if(!chatProCorrente || DEMO_MODE) return;
+  const { data, error } = await sb.rpc("scuderia_chat_professionista", { p_cliente_id: chatProCorrente });
+  if(error || !data){ console.error("scuderia_chat_professionista:", error); return; }
+  const box = document.getElementById("chat-pro-messages");
+  const inFondo = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
+  const msgs = data.messaggi || [];
+  box.innerHTML = msgs.map(m => {
+    const mio = m.mittente_tipo === "cliente";
+    const firma = mio && m.mittente_user_id !== currentUser.id && m.mittente_nome
+      ? `<div style="font-size:10.5px;font-weight:700;opacity:.8;margin-bottom:2px">${escapeHtml(m.mittente_nome)}</div>` : "";
+    return `<div style="align-self:${mio ? "flex-end" : "flex-start"};max-width:80%;background:${mio ? "var(--primary)" : "var(--muted-bg)"};color:${mio ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">`
+      + firma + corpoMessaggioChat(m, mio)
+      + `<div style="font-size:10px;opacity:.7;margin-top:3px">${new Date(m.created_at).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div></div>`;
+  }).join("") || '<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Nessun messaggio ancora. Scrivi il primo!</p>';
+  if(inFondo || segna) box.scrollTop = box.scrollHeight;
+  if(msgs.some(m => m.mittente_tipo === "maniscalco" && !m.letto)){
+    await sb.rpc("scuderia_segna_letti_professionista", { p_cliente_id: chatProCorrente });
+  }
+}
+
+async function inviaMessaggioPro(tipo, testo, file_url, file_nome){
+  const { data, error } = await sb.rpc("scuderia_invia_messaggio_professionista", {
+    p_cliente_id: chatProCorrente, p_tipo: tipo, p_testo: testo || null, p_file_url: file_url || null, p_file_nome: file_nome || null });
+  if(error || !data?.ok){ showToast((data && data.errore) || ("Invio non riuscito: " + (error?.message || "riprova"))); return false; }
+  await caricaChatProfessionista(true);
+  return true;
+}
+
+async function inviaTestoPro(){
+  const input = document.getElementById("chat-pro-input");
+  const testo = input.value.trim();
+  if(!testo || !chatProCorrente) return;
+  input.value = "";
+  const ok = await inviaMessaggioPro("testo", testo);
+  if(!ok) input.value = testo;
+}
+
+async function caricaFileChatPro(blob, estensione, contentType){
+  const rnd = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+  const path = `${currentUser.id}/professionisti/${rnd}.${estensione}`;
+  const up = await sb.storage.from("chat-allegati").upload(path, blob, { contentType });
+  if(up.error) throw up.error;
+  return sb.storage.from("chat-allegati").getPublicUrl(path).data?.publicUrl;
+}
+
+async function inviaAllegatoPro(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  if(!file || !chatProCorrente) return;
+  const tipoMime = file.type || "";
+  const isPdf = tipoMime === "application/pdf" || /\.pdf$/i.test(file.name || "");
+  const isVideo = tipoMime.startsWith("video/") || /\.(mp4|mov|m4v|webm|3gp)$/i.test(file.name || "");
+  const isImg = tipoMime.startsWith("image/");
+  if(!isPdf && !isVideo && !isImg){ showToast("Puoi allegare foto, video o documenti PDF."); return; }
+  if(isPdf && file.size > 10 * 1024 * 1024){ showToast("PDF troppo grande (max 10 MB)."); return; }
+  if(isVideo && file.size > 50 * 1024 * 1024){ showToast("Video troppo pesante (max 50 MB)."); return; }
+  try{
+    showToast(isVideo ? "Invio del video… (può volerci qualche secondo)" : isPdf ? "Invio del PDF…" : "Invio della foto…");
+    let blob = file, ext, ct;
+    if(isImg){ try{ blob = await riduciFotoChat(file) || file; } catch(e){ console.error("riduci foto:", e); } ext = "jpg"; ct = "image/jpeg"; }
+    else if(isPdf){ ext = "pdf"; ct = "application/pdf"; }
+    else {
+      ext = ((file.name || "").split(".").pop() || "mp4").toLowerCase();
+      ct = tipoMime || (ext === "mov" ? "video/quicktime" : "video/mp4");
+    }
+    const url = await caricaFileChatPro(blob, ext, ct);
+    const nome = isPdf ? (file.name || "Documento.pdf") : isVideo ? "Video" : "Foto.jpg";
+    await inviaMessaggioPro(isPdf ? "documento" : isVideo ? "video" : "foto", null, url, nome);
+  } catch(err){
+    console.error("inviaAllegatoPro:", err);
+    showToast("Invio non riuscito: " + (err?.message || "riprova"));
+  }
+}
+
+async function avviaAudioPro(){
+  if(!chatProCorrente || chatProRecorder) return;
+  if(!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined"){ showToast("Il browser non supporta la registrazione audio."); return; }
+  try{
+    chatProStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e){ showToast("Consenti l'uso del microfono per registrare una nota vocale."); return; }
+  chatProChunks = [];
+  chatProRecorder = new MediaRecorder(chatProStream);
+  chatProRecorder.ondataavailable = e => { if(e.data && e.data.size > 0) chatProChunks.push(e.data); };
+  chatProRecorder.start();
+  chatProRecSec = 0;
+  document.getElementById("chat-pro-rec-timer").textContent = "0:00";
+  document.getElementById("chat-pro-rec").style.display = "flex";
+  document.getElementById("chat-pro-bar").style.display = "none";
+  chatProRecTimer = setInterval(() => {
+    chatProRecSec++;
+    document.getElementById("chat-pro-rec-timer").textContent = Math.floor(chatProRecSec / 60) + ":" + String(chatProRecSec % 60).padStart(2, "0");
+    if(chatProRecSec >= 300) inviaAudioPro(); // massimo 5 minuti
+  }, 1000);
+}
+
+function fermaAudioProUI(){
+  clearInterval(chatProRecTimer); chatProRecTimer = null;
+  document.getElementById("chat-pro-rec").style.display = "none";
+  document.getElementById("chat-pro-bar").style.display = "flex";
+  if(chatProStream){ chatProStream.getTracks().forEach(t => t.stop()); chatProStream = null; }
+}
+
+function annullaAudioPro(){
+  if(chatProRecorder && chatProRecorder.state !== "inactive"){ chatProRecorder.onstop = null; chatProRecorder.stop(); }
+  chatProRecorder = null; chatProChunks = [];
+  if(document.getElementById("chat-pro-rec")) fermaAudioProUI();
+}
+
+function inviaAudioPro(){
+  const rec = chatProRecorder;
+  if(!rec || rec.state === "inactive") return;
+  rec.onstop = async () => {
+    fermaAudioProUI();
+    const mime = (rec.mimeType || "audio/webm").split(";")[0];
+    const blob = new Blob(chatProChunks, { type: mime });
+    chatProRecorder = null; chatProChunks = [];
+    if(blob.size < 800){ showToast("Registrazione troppo breve, riprova."); return; }
+    try{
+      showToast("Invio della nota vocale…");
+      const ext = mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : mime.includes("mpeg") ? "mp3" : "webm";
+      const url = await caricaFileChatPro(blob, ext, mime);
+      await inviaMessaggioPro("audio", null, url, "Nota vocale");
+    } catch(err){
+      console.error("inviaAudioPro:", err);
+      showToast("Invio non riuscito: " + (err?.message || "riprova"));
+    }
+  };
+  rec.stop();
+}
+/* -- Appuntamenti con il maniscalco (step 3): gruppi di interventi_mascalcia, doppia conferma -- */
+let appProCliente = null, appProLista = [], appProModificaGruppo = null;
+const APP_TIPO_LABELS = { ferratura:"Ferratura", mezza_ferratura:"Mezza ferratura", pareggio:"Pareggio", altro:"Altro" };
+
+function dataAppIt(iso, ora){
+  if(!iso) return "";
+  const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number);
+  const txt = new Date(y, m - 1, d).toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" });
+  return txt + (ora ? " ore " + String(ora).slice(0, 5) : "");
+}
+function oggiIsoScud(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+async function apriEventiProfessionista(clienteId){
+  const p = professionistiList.find(x => x.cliente_id === clienteId);
+  appProCliente = clienteId;
+  document.getElementById("app-pro-nome").textContent = p?.nome || "Maniscalco";
+  mostraListaAppPro();
+  openModal("modal-app-pro");
+  await caricaAppuntamentiPro();
+}
+
+function chiudiAppuntamentiPro(){
+  closeModal("modal-app-pro");
+  appProCliente = null;
+  refreshProfessionistiModule();
+}
+
+function mostraListaAppPro(){
+  document.getElementById("app-pro-lista-view").style.display = "block";
+  document.getElementById("app-pro-form-view").style.display = "none";
+}
+
+async function caricaAppuntamentiPro(){
+  const box = document.getElementById("app-pro-lista");
+  if(DEMO_MODE || !appProCliente){ box.innerHTML = '<p style="color:var(--muted);font-size:13px">Nessun appuntamento.</p>'; return; }
+  box.innerHTML = '<p style="color:var(--muted);font-size:13px">Caricamento…</p>';
+  const { data, error } = await sb.rpc("scuderia_appuntamenti_professionista", { p_cliente_id: appProCliente });
+  if(error){ console.error("scuderia_appuntamenti_professionista:", error); box.innerHTML = '<p style="color:var(--danger);font-size:13px">Non riesco a caricare gli appuntamenti.</p>'; return; }
+  appProLista = data || [];
+  renderAppuntamentiPro();
+}
+
+function renderAppuntamentiPro(){
+  const box = document.getElementById("app-pro-lista");
+  const oggi = oggiIsoScud();
+  const attivi = appProLista.filter(g => ["richiesto","proposto","programmato"].includes(g.stato) && g.data_intervento >= oggi)
+    .sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+  const storico = appProLista.filter(g => !attivi.includes(g));
+  const STATO = {
+    proposto:   ["Da confermare", "badge-yellow"],
+    richiesto:  ["In attesa del maniscalco", "badge-gray"],
+    programmato:["Confermato", "badge-green"],
+    fatto:      ["Fatto", "badge-green"],
+    annullato:  ["Annullato", "badge-red"],
+    rifiutato:  ["Non disponibile", "badge-gray"],
+  };
+  const card = (g, attivo) => {
+    const [txt, cls] = STATO[g.stato] || [g.stato, "badge-gray"];
+    const tipo = g.tipo === "altro" && g.tipo_altro ? g.tipo_altro : (APP_TIPO_LABELS[g.tipo] || g.tipo);
+    const cavalli = (g.cavalli || []).filter(c => c.scuderia_cavallo_id || c.nome !== "Cavallo")
+      .map(c => `<span class="badge-pill badge-gray" style="font-size:11px;padding:2px 8px">${c.fatto ? "✓ " : ""}${escapeHtml(c.nome)}</span>`).join(" ");
+    const azioni = attivo ? `
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+        ${g.stato === "proposto" ? `<button class="btn btn-primary btn-sm" onclick="azioneAppPro('${g.gruppo_id}','conferma',this)">Conferma</button>` : ""}
+        <button class="btn btn-outline btn-sm" onclick="modificaAppPro('${g.gruppo_id}')">Modifica</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="azioneAppPro('${g.gruppo_id}','annulla',this)">Annulla</button>
+      </div>` : "";
+    return `
+      <div class="msg-item"${attivo ? "" : ' style="opacity:.7"'}>
+        <div style="display:flex;justify-content:space-between;gap:6px 10px;align-items:flex-start;flex-wrap:wrap">
+          <div style="min-width:0;flex:1 1 200px">
+            <div style="font-weight:700;font-size:14px">${escapeHtml(dataAppIt(g.data_intervento, g.ora))} · ${escapeHtml(tipo)}</div>
+            ${g.stato === "proposto" ? '<div style="font-size:12px;color:var(--muted)">Proposta del maniscalco: conferma o proponi un\'altra data</div>' : ""}
+            ${cavalli ? `<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${cavalli}</div>` : ""}
+            ${g.note ? `<div style="color:var(--muted);font-size:12.5px;margin-top:4px">${escapeHtml(g.note)}</div>` : ""}
+          </div>
+          <span class="badge-pill ${cls}" style="flex-shrink:0;font-size:11px">${txt}</span>
+        </div>
+        ${azioni}
+      </div>`;
+  };
+  box.innerHTML = (attivi.length ? attivi.map(g => card(g, true)).join("") : '<p style="color:var(--muted);font-size:13px">Nessun appuntamento in programma. Tocca "Nuovo" per chiederne uno.</p>')
+    + (storico.length ? `<details style="margin-top:10px"><summary style="cursor:pointer;color:var(--muted);font-size:12.5px;padding:6px 0">Storico (${storico.length})</summary>${storico.map(g => card(g, false)).join("")}</details>` : "");
+}
+
+async function nuovoAppuntamentoPro(){
+  appProModificaGruppo = null;
+  document.getElementById("app-pro-form-titolo").textContent = "Nuovo appuntamento";
+  document.getElementById("app-pro-form-nuovo").style.display = "block";
+  document.getElementById("app-pro-salva").textContent = "Invia al maniscalco";
+  document.getElementById("app-pro-tipo").value = "ferratura";
+  document.getElementById("app-pro-tipo-altro").value = "";
+  document.getElementById("app-pro-tipo-altro-wrap").style.display = "none";
+  document.getElementById("app-pro-data").value = "";
+  document.getElementById("app-pro-data").min = oggiIsoScud();
+  document.getElementById("app-pro-ora").value = "";
+  document.getElementById("app-pro-note").value = "";
+  document.getElementById("app-pro-error").style.display = "none";
+  if(!cavalliList.length) await loadCavalli();
+  document.getElementById("app-pro-cavalli").innerHTML = cavalliList.length
+    ? cavalliList.map(c => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;cursor:pointer"><input type="checkbox" class="app-pro-cav" value="${c.id}" style="width:17px;height:17px"> ${escapeHtml(c.nome)}</label>`).join("")
+    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo in scheda: l\'appuntamento sarà generico.</p>';
+  document.getElementById("app-pro-lista-view").style.display = "none";
+  document.getElementById("app-pro-form-view").style.display = "block";
+}
+
+function modificaAppPro(gruppoId){
+  const g = appProLista.find(x => x.gruppo_id === gruppoId);
+  if(!g) return;
+  appProModificaGruppo = gruppoId;
+  document.getElementById("app-pro-form-titolo").textContent = "Proponi un'altra data";
+  document.getElementById("app-pro-form-nuovo").style.display = "none";
+  document.getElementById("app-pro-salva").textContent = "Invia la nuova proposta";
+  document.getElementById("app-pro-data").value = g.data_intervento;
+  document.getElementById("app-pro-data").min = oggiIsoScud();
+  document.getElementById("app-pro-ora").value = g.ora || "";
+  document.getElementById("app-pro-note").value = g.note || "";
+  document.getElementById("app-pro-error").style.display = "none";
+  document.getElementById("app-pro-lista-view").style.display = "none";
+  document.getElementById("app-pro-form-view").style.display = "block";
+}
+
+async function salvaAppuntamentoPro(){
+  const err = document.getElementById("app-pro-error");
+  const btn = document.getElementById("app-pro-salva");
+  const data = document.getElementById("app-pro-data").value;
+  const ora = document.getElementById("app-pro-ora").value;
+  const note = document.getElementById("app-pro-note").value.trim();
+  err.style.display = "none";
+  if(!data){ err.textContent = "Scegli la data."; err.style.display = "block"; return; }
+  btn.disabled = true;
+  let res;
+  if(appProModificaGruppo){
+    res = await sb.rpc("scuderia_azione_appuntamento", { p_gruppo_id: appProModificaGruppo, p_azione: "modifica", p_data: data, p_ora: ora || null, p_note: note || null });
+  } else {
+    const tipo = document.getElementById("app-pro-tipo").value;
+    const tipoAltro = document.getElementById("app-pro-tipo-altro").value.trim();
+    if(tipo === "altro" && !tipoAltro){ btn.disabled = false; err.textContent = "Specifica il tipo di intervento."; err.style.display = "block"; return; }
+    const cavalli = Array.from(document.querySelectorAll(".app-pro-cav:checked")).map(el => el.value);
+    res = await sb.rpc("scuderia_proponi_appuntamento", { p_cliente_id: appProCliente, p_tipo: tipo, p_tipo_altro: tipoAltro || null,
+      p_data: data, p_ora: ora || null, p_cavalli: cavalli, p_note: note || null });
+  }
+  btn.disabled = false;
+  if(res.error || !res.data?.ok){ err.textContent = (res.data && res.data.errore) || ("Operazione non riuscita: " + (res.error?.message || "riprova")); err.style.display = "block"; return; }
+  showToast(appProModificaGruppo ? "Nuova proposta inviata: il maniscalco deve confermarla." : "Richiesta inviata: il maniscalco riceve una notifica per confermarla.");
+  appProModificaGruppo = null;
+  mostraListaAppPro();
+  await caricaAppuntamentiPro();
+}
+
+async function azioneAppPro(gruppoId, azione, btn){
+  if(azione === "annulla" && btn && btn.dataset.conferma !== "1"){
+    btn.dataset.conferma = "1"; btn.textContent = "Tocca ancora per annullare";
+    setTimeout(() => { if(btn){ btn.dataset.conferma = ""; btn.textContent = "Annulla"; } }, 4000);
+    return;
+  }
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_azione_appuntamento", { p_gruppo_id: gruppoId, p_azione: azione });
+  if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita. Riprova."); if(btn) btn.disabled = false; return; }
+  showToast(azione === "conferma" ? "Appuntamento confermato: il maniscalco riceve l'avviso." : "Appuntamento annullato: il maniscalco riceve l'avviso.");
+  await caricaAppuntamentiPro();
 }
 
 /* ---------- CAVALLI & SALUTE ---------- */
@@ -3524,6 +4134,7 @@ let chatNonLettiPerMembro = {};
 let chatUnreadPollTimer = null;
 
 async function refreshChatUnread(){
+  loadProfessionisti().then(() => { if(document.getElementById("module-professionisti")?.style.display === "block") renderProfessionistiList(); });
   if(DEMO_MODE || !currentCentro){
     impostaContatoreNav("chat-nav-unread-badge", 0, "verde");
     return;
@@ -3620,10 +4231,10 @@ async function proponiImportCavalli(membroId, nome, onDone){
 function renderImportCavalliList(nome){
   const n = importCavalliPendenti.length;
   document.getElementById("import-cavalli-title").textContent =
-    `${nome} ha ${n === 1 ? "un cavallo" : n + " cavalli"} sul suo profilo Equo App non ancora in scheda qui. Vuoi importarli?`;
+    `${nome} ha ${n === 1 ? "un cavallo" : n + " cavalli"} sul suo profilo Equo App non ancora in scheda qui. Seleziona quelli da importare.`;
   document.getElementById("import-cavalli-list").innerHTML = importCavalliPendenti.map(h => `
     <label style="display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--border)">
-      <input type="checkbox" class="import-cavallo-check" value="${h.id}" checked style="width:18px;height:18px;flex-shrink:0">
+      <input type="checkbox" class="import-cavallo-check" value="${h.id}" style="width:18px;height:18px;flex-shrink:0">
       <div>
         <div style="font-weight:600">${escapeHtml(h.name || "Cavallo")}</div>
         <div style="color:var(--muted);font-size:12px">${escapeHtml([h.breed, h.microchip ? "Microchip " + h.microchip : null].filter(Boolean).join(" · ") || "—")}</div>
@@ -3636,14 +4247,23 @@ async function confermaImportCavalli(){
   closeModal("modal-import-cavalli");
   if(ids.length > 0){
     let ok = 0;
+    const errori = [];
     for(const horseId of ids){
       const { error } = await sb.rpc("importa_cavallo_scuderia", { p_horse_id: horseId, p_membro_id: importCavalliMembroId });
       if(!error) ok++;
+      else {
+        const nome = (importCavalliPendenti.find(h => h.id === horseId) || {}).name || "cavallo";
+        errori.push(`${nome}: ${error.message || "errore"}`);
+      }
     }
     if(ok > 0){
       await loadCavalli();
       renderCavalliList();
-      showToast(ok === 1 ? "Cavallo importato." : `${ok} cavalli importati.`);
+    }
+    if(errori.length === 0){
+      if(ok > 0) showToast(ok === 1 ? "Cavallo importato." : `${ok} cavalli importati.`);
+    } else {
+      showToast((ok > 0 ? `${ok} importat${ok === 1 ? "o" : "i"}, ` : "") + `non importat${errori.length === 1 ? "o" : "i"}: ` + errori.join(" · "));
     }
   }
   importCavalliPendenti = [];
@@ -3770,11 +4390,11 @@ const QUICK_ACCESS_ITEMS = [
   { key:"lezioni", icon:"fa-calendar-days", titolo:"Lezioni & Prenotazioni", testo:"Calendario delle lezioni del centro." },
   { key:"pacchetti", icon:"fa-ticket", titolo:"Pacchetti & Abbonamenti", testo:"Carnet, abbonamenti e cruscotto scadenze." },
   { key:"comunicazioni", icon:"fa-comments", titolo:"Comunicazioni & Chat", testo:"Messaggi al team e chat con i clienti." },
-  { key:"professionisti", icon:"fa-user-doctor", titolo:"Professionisti", testo:"Veterinari, maniscalchi e istruttori collegati al centro.", soon:true },
   { key:"magazzino", icon:"fa-boxes-stacked", titolo:"Magazzino", testo:"Selle, finimenti, mangimi e scorte.", soon:true },
+  { key:"professionisti", icon:"fa-user-doctor", titolo:"Professionisti", testo:"Maniscalchi collegati: chat e appuntamenti con doppia conferma." },
   { key:"store", icon:"fa-store", titolo:"Store", testo:"Vendita di prodotti e servizi ai clienti.", soon:true },
   { key:"fatturazione", icon:"fa-file-invoice", titolo:"Fatturazione SDI", testo:"Fatture elettroniche conformi SDI.", soon:true },
-  { key:"ai", icon:"fa-wand-magic-sparkles", titolo:"Assistenti AI", testo:"Athena inclusa, più gli agenti add-on: Merlino, Galeno, Hammer, Ares.", soon:true },
+  { key:"ai", icon:"fa-wand-magic-sparkles", titolo:"Agenti AI", testo:"Athena inclusa, più gli agenti add-on: Merlino, Galeno, Hammer, Ares.", soon:true },
 ];
 
 async function refreshHomeModule(){
@@ -4045,7 +4665,7 @@ function comingSoonHtml(icon, titolo, testo, badgeText){
 const MODULE_TITLES = {
   home:"Home", centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
   pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Comunicazioni & Chat",
-  professionisti:"Professionisti", magazzino:"Magazzino", store:"Store", fatturazione:"Fatturazione SDI", ai:"Assistenti AI",
+  professionisti:"Professionisti", magazzino:"Magazzino", store:"Store", fatturazione:"Fatturazione SDI", ai:"Agenti AI",
 };
 // foto di sfondo per pagina (FOTO/ originali → assets/sfondi, JPEG 1600px). Pagine SOON: nessuna foto.
 // Opacità calibrate foto per foto (contrasto e luminosità misurati) per avere la stessa intensità percepita
@@ -4057,6 +4677,7 @@ const SFONDI_PAGINE = {
   lezioni:       { file:"lezioni",       chiaro:.100, scuro:.065 }, // foto 7
   pacchetti:     { file:"pacchetti",     chiaro:.088, scuro:.055 }, // foto 17
   comunicazioni: { file:"comunicazioni", chiaro:.128, scuro:.062 }, // foto 13
+  professionisti:{ file:"professionisti",chiaro:.095, scuro:.048 }, // foto 16 (luminosità/contrasto simili a foto 19)
 };
 let sfondoAttivo = "a", sfondoCorrente = null, sfondiPrecaricati = false;
 function aggiornaSfondoPagina(key){
@@ -4094,6 +4715,7 @@ function showModule(key){
   if(key === "lezioni") refreshLezioniModule();
   if(key === "pacchetti") refreshPacchettiModule();
   if(key === "comunicazioni") refreshComunicazioniModule();
+  if(key === "professionisti") refreshProfessionistiModule();
 }
 
 function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebar-overlay").classList.add("active"); }

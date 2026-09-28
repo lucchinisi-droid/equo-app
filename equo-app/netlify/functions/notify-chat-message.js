@@ -141,13 +141,29 @@ async function gestisciChatMascalcia(supabase, record) {
 
   const { data: cliente } = await supabase
     .from("clienti_mascalcia")
-    .select("nome, cliente_user_id")
+    .select("nome, cliente_user_id, centro_id, collegamento_stato")
     .eq("id", cliente_mascalcia_id)
     .maybeSingle();
   if (!cliente) return "cliente_non_trovato";
 
   const corpo = tipo === "testo" ? testo
     : corpoAllegato(tipo, file_nome) || (audio_url ? "Ha inviato un vocale" : (testo || "Nuovo messaggio"));
+
+  // Cliente = struttura collegata a Equo Scuderia (Professionisti): il maniscalco scrive → notifica tutto lo staff del centro
+  if (mittente_tipo === "maniscalco" && cliente.centro_id) {
+    const { data: staff } = await supabase
+      .from("scuderia_membri")
+      .select("user_id")
+      .eq("centro_id", cliente.centro_id)
+      .neq("ruolo", "proprietario")
+      .not("user_id", "is", null);
+    const destinatari = (staff || []).map((s) => s.user_id).filter((id) => id && id !== maniscalco_id);
+    if (destinatari.length === 0) return "maniscalco_a_struttura_nessuno_staff";
+    const { data: pro } = await supabase.from("profiles").select("full_name, dati_pagamento_nome").eq("id", maniscalco_id).maybeSingle();
+    const nomePro = (pro?.full_name || "").trim() || (pro?.dati_pagamento_nome || "").trim() || "il maniscalco";
+    const push = await inviaPush(destinatari, `Messaggio da ${nomePro} (maniscalco)`, corpo, "scuderia");
+    return "maniscalco_a_struttura_dest=" + destinatari.length + " push=" + JSON.stringify(push);
+  }
 
   if (mittente_tipo === "maniscalco") {
     if (!cliente.cliente_user_id) return "maniscalco_a_cliente_non_collegato"; // il cliente non usa Equo App: nessuna push possibile
