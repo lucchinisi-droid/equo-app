@@ -33,6 +33,20 @@ const HAMMER_MAX_RICERCHE = 3;
 const COSTO_RICERCA_USD = 0.01;
 const TIPI_EVENTO = { vaccino: "Vaccino", coggins: "Test Coggins (AIE)", ferratura: "Ferratura", sverminazione: "Sverminazione" };
 
+
+// ---------------------------------------------------------------- regole comuni a TUTTI gli agenti
+// Proattività + "Messaggero dei Boss" (richieste, problemi e idee degli utenti girati ai fondatori).
+const REGOLE_COMUNI = `## Proattività
+- Non limitarti a rispondere: quando leggi i dati e noti qualcosa di utile (una scadenza vicina o superata, una richiesta in attesa, un incasso da riscuotere, un appuntamento senza conferma), segnalalo in una riga anche se l'utente non l'ha chiesto e proponi l'azione.
+- Quando ha senso, dai UN consiglio pratico per lavorare meglio con Equo o organizzarsi meglio (breve, concreto, mai ripetuto se l'hai già dato).
+
+## Messaggero dei Boss
+- I "Boss" sono i fondatori di Equo. Tu fai da ponte tra l'utente e loro.
+- Quando l'utente segnala un malfunzionamento o un errore dell'app, chiede una funzione che Equo non ha o qualcosa che non puoi fare, propone un'idea o un miglioramento, oppure fa una domanda su Equo (account, abbonamento, prezzi, dati, privacy) a cui non sai rispondere con certezza, offri in modo naturale: "Se vuoi lo chiedo ai Boss e ti faccio sapere il prima possibile."
+- Se accetta (o se ti chiede lui di dirlo ai Boss, al team, all'assistenza o agli sviluppatori), usa riferisci_ai_boss con: tipo, un riassunto chiaro in 1-3 frasi, le sue parole e, per i problemi, cosa stava facendo, cosa si aspettava e cosa è successo (se mancano, chiedili prima con UNA sola domanda). Poi conferma: "Fatto, l'ho girato ai Boss: appena mi rispondono te lo scrivo qui."
+- Non promettere tempi né che la cosa verrà fatta, e non inventare mai risposte al posto dei Boss. Per sapere a che punto è una richiesta usa le_mie_segnalazioni.
+- Le risposte dei Boss arrivano in questa chat con il titolo "📬 Risposta dai Boss": se l'utente ci risponde e vuole aggiungere qualcosa, gira anche quello.`;
+
 // ---------------------------------------------------------------- istruzioni fisse (in cache)
 // Corpo comune (dati, azioni, foto, sicurezza, guida all'app). Sopra ci va l'identità:
 // PEGASUS per la vista proprietario; "Equo AI" neutro per veterinari/istruttori finché non arrivano Galeno e Ares.
@@ -72,7 +86,9 @@ const CORPO_PROPRIETARIO = `## Come lavori
 - Chat: sezione "Il tuo maniscalco" → "+ Collega" con il codice che dà il maniscalco; poi "Prenota" per chiedere un appuntamento e l'icona del cavallo per abbinare i cavalli. Chat tra proprietari con il codice personale (menu profilo → "Il tuo codice per la chat") o scansionando il QR.
 - Home → "Servizi vicino a te": veterinari, centri ippici e negozi vicini, con chiamata e indicazioni.
 - Piano: Free (1 cavallo, 5 messaggi AI al mese) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
-- Assistenza: gestione.equo@gmail.com.`;
+- Assistenza: gestione.equo@gmail.com.
+
+${REGOLE_COMUNI}`;
 
 const ISTRUZIONI_PEGASUS = `Sei **Pegasus**, l'agente AI di Equo che aiuta i proprietari a prendersi cura del proprio cavallo, in Italia.
 Il tuo focus è la salute preventiva, le scadenze sanitarie e di legge, i costi di mantenimento e il rapporto con veterinario, maniscalco e istruttore. Comunichi in modo caldo, semplice e pratico, traduci i termini tecnici in parole comuni e porti sempre l'utente a un'azione concreta.
@@ -139,6 +155,13 @@ const STRUMENTI = [
       note: { type: "string", description: "Es. istruttore, luogo, orario, categoria della gara." },
     }, required: ["tipo", "data"] },
   },
+  { name: "riferisci_ai_boss", description: "Gira ai Boss (i fondatori di Equo) una richiesta, un problema/malfunzionamento, un'idea o una domanda dell'utente. Usalo solo dopo che l'utente ha accettato (o l'ha chiesto lui). I Boss ricevono una email; la loro risposta arriverà in questa chat.", input_schema: { type: "object", properties: {
+      tipo: { type: "string", enum: ["problema", "richiesta", "idea", "domanda"] },
+      riassunto: { type: "string", description: "1-3 frasi chiare in italiano, scritte in modo neutro come titolo della richiesta (es. \"Esportare l'agenda su Google Calendar\", \"La chat non mostra i nuovi messaggi finché non si esce e rientra\"): verrà mostrato anche all'utente quando arriva la risposta." },
+      parole_utente: { type: "string", description: "Le parole dell'utente (citazione breve)." },
+      dettagli: { type: "string", description: "Per i problemi: cosa stava facendo, cosa si aspettava, cosa è successo, su che schermata/dispositivo. Facoltativo." },
+    }, required: ["tipo", "riassunto"] } },
+  { name: "le_mie_segnalazioni", description: "Richieste e segnalazioni che l'utente ha girato ai Boss tramite gli agenti, con stato e risposta.", input_schema: { type: "object", properties: {} } },
   {
     name: "proponi_richiesta_maniscalco",
     description: "Propone di inviare al maniscalco collegato una richiesta di appuntamento (il maniscalco poi conferma o rifiuta).",
@@ -193,7 +216,9 @@ Il tuo focus è l'anatomia dello zoccolo, il pareggio, le tipologie di ferri (tr
   · proponi_segna_saldato: segna come pagati uno o più interventi (leggi prima incassi per avere gli id).
 - "Oggi", "domani", "giovedì" convertili in data usando la data di oggi. Se manca qualcosa di essenziale (cliente, data, quale richiesta) chiedilo in una domanda breve. Se il cliente ha un solo cavallo, usa quello.
 - Quando elenchi agenda o scadenze: prima le più vicine o le più in ritardo, data in italiano (es. gio 2 ottobre, ore 9:00), una riga per voce.
-- Assistenza: gestione.equo@gmail.com.`;
+- Assistenza: gestione.equo@gmail.com.
+
+${REGOLE_COMUNI}`;
 
 const clonaStrumento = (nome) => { const t = STRUMENTI.find((x) => x.name === nome); const { cache_control, ...resto } = t; return { ...resto }; };
 const TIPI_INTERVENTO = ["ferratura", "mezza_ferratura", "pareggio", "altro"];
@@ -224,6 +249,8 @@ const STRUMENTI_HAMMER = [
     user_location: { type: "approximate", country: "IT", timezone: "Europe/Rome" } },
   { ...clonaStrumento("cerca_conoscenze"), description: "Cerca nelle schede verificate di mascalcia di Equo (esame, pareggio, appiombi, ferratura, ferri speciali, andature, patologie dello zoccolo, laminite, materiali). Restituisce testo e fonte." },
   clonaStrumento("salva_memoria"),
+  clonaStrumento("riferisci_ai_boss"),
+  clonaStrumento("le_mie_segnalazioni"),
   ...STRUMENTI_GESTIONE.slice(0, -1),
   { ...STRUMENTI_GESTIONE[STRUMENTI_GESTIONE.length - 1], cache_control: { type: "ephemeral" } },
 ];
@@ -575,6 +602,33 @@ async function eseguiStrumento(nome, input, ctx) {
       return `Scheda "segna come saldato" (${righe.length} interventi, € ${totale.toFixed(2)}) mostrata, da confermare.`;
     }
 
+    case "riferisci_ai_boss": {
+      const tipo = ["problema", "richiesta", "idea", "domanda"].includes(input.tipo) ? input.tipo : "richiesta";
+      const riassunto = String(input.riassunto || "").trim().slice(0, 1000);
+      if (!riassunto) return "Manca il riassunto della richiesta.";
+      if ((ctx._segnalate || 0) >= 2) return "Hai già girato due segnalazioni in questa risposta: basta così.";
+      const { count } = await ctx.admin.from("segnalazioni_boss").select("id", { count: "exact", head: true })
+        .eq("user_id", userId).gte("created_at", new Date(Date.now() - 86400000).toISOString());
+      if ((count || 0) >= 10) return "Oggi sono già arrivate molte segnalazioni da questo utente: di' che i Boss le stanno già guardando e non girarne altre.";
+      const { error } = await ctx.admin.from("segnalazioni_boss").insert({
+        user_id: userId, agente: ctx.agente, vista: ctx.vista, tipo, riassunto,
+        parole_utente: String(input.parole_utente || "").trim().slice(0, 2000) || null,
+        dettagli: String(input.dettagli || "").trim().slice(0, 2000) || null,
+        contesto: ctx.contestoConversazione || null,
+      });
+      if (error) { console.error("riferisci_ai_boss:", error); return "Non sono riuscito a girarla: dillo all'utente e suggerisci di scrivere a gestione.equo@gmail.com."; }
+      ctx._segnalate = (ctx._segnalate || 0) + 1;
+      return "Girata ai Boss: riceveranno una email. Conferma all'utente che la risposta arriverà qui in chat, senza promettere tempi.";
+    }
+
+    case "le_mie_segnalazioni": {
+      const { data, error } = await db.from("segnalazioni_boss").select("tipo, riassunto, stato, risposta, created_at, risposta_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(10);
+      if (error) return "Errore nel leggere le segnalazioni.";
+      if (!(data || []).length) return "Nessuna segnalazione girata ai Boss finora.";
+      return data.map((x) => ({ tipo: x.tipo, riassunto: x.riassunto, inviata_il: x.created_at.slice(0, 10),
+        stato: x.stato === "risposta" ? "i Boss hanno risposto" : x.stato === "chiusa" ? "chiusa" : "in attesa di risposta", risposta: x.risposta || null }));
+    }
+
     default:
       return "Strumento sconosciuto.";
   }
@@ -605,7 +659,7 @@ exports.handler = async (event) => {
 
   // limite mensile lato server
   const mese = oggiISO().slice(0, 7);
-  const { data: profilo } = await admin.from("profiles").select("full_name, piano, ruolo, ruolo_secondario").eq("id", user.id).maybeSingle();
+  const { data: profilo } = await admin.from("profiles").select("full_name, piano, ruolo, ruolo_secondario, created_at, ai_feedback_chiesto_at").eq("id", user.id).maybeSingle();
   const piano = profilo?.piano === "premium" ? "premium" : "free";
   // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
@@ -623,6 +677,12 @@ exports.handler = async (event) => {
   const { data: storia } = await db.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", user.id).eq("vista", vista).order("created_at", { ascending: false }).limit(16);
 
   const listaCavalli = cavalli || [];
+  // Ogni ~14 giorni (non ai nuovi iscritti, non con allegati, solo in conversazioni già avviate) l'agente chiede un parere per i Boss
+  const GIORNI_FEEDBACK = 14;
+  const ultimoFeedback = profilo?.ai_feedback_chiesto_at ? new Date(profilo.ai_feedback_chiesto_at).getTime() : 0;
+  const chiediFeedback = !allegati.length && (storia || []).length >= 4
+    && Date.now() - ultimoFeedback > GIORNI_FEEDBACK * 86400000
+    && Date.now() - new Date(profilo?.created_at || Date.now()).getTime() > 3 * 86400000;
   const contesto = [
     `Oggi è ${new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome" })} (${oggiISO()}).`,
     `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati questo mese: ${usati + 1} di ${limite}.`,
@@ -630,6 +690,7 @@ exports.handler = async (event) => {
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
     hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
       vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
+    chiediFeedback ? "DOMANDA PER I BOSS: in questa risposta, SOLO se la conversazione è tranquilla (nessuna emergenza, nessun problema urgente o arrabbiato), dopo aver risposto aggiungi in fondo una riga con parole tue di questo senso: \"C'è qualcosa che vorresti cambiare o migliorare in Equo? Dimmelo, che lo faccio presente ai Boss.\" Se non è il momento giusto, non aggiungerla." : "",
   ].filter(Boolean).join("\n");
 
   const messages = (storia || []).reverse().map((m) => ({ role: m.ruolo === "assistant" ? "assistant" : "user", content: m.contenuto }));
@@ -645,7 +706,10 @@ exports.handler = async (event) => {
     messages.push({ role: "user", content: messaggio });
   }
 
-  const ctx = { db, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : "proprietario" };
+  const contestoConversazione = [...(storia || []).slice(0, 6).reverse().map((m) => ({ ruolo: m.ruolo, testo: String(m.contenuto || "").slice(0, 600) })),
+    { ruolo: "user", testo: (messaggio || "(allegato)").slice(0, 600) }];
+  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : "proprietario",
+    agente, vista, contestoConversazione };
   const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0, ricerche: 0 };
   let link = [];
   let testoFinale = "";
@@ -706,6 +770,8 @@ exports.handler = async (event) => {
     { user_id: user.id, vista, ruolo: "user", contenuto: testoUtenteSalvato },
     { user_id: user.id, vista, ruolo: "assistant", contenuto: testoFinale },
   ]);
+  // domanda per i Boss fatta davvero: si segna per non ripeterla prima di 14 giorni
+  if (chiediFeedback && /boss/i.test(testoFinale)) await admin.from("profiles").update({ ai_feedback_chiesto_at: new Date().toISOString() }).eq("id", user.id);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese, conteggio: usati + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
   return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });

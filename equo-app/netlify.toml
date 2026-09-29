@@ -16,6 +16,10 @@
 [functions."riepilogo-settimanale"]
   schedule = "0 6-9 * * 1"
 
+# Hammer: riepilogo settimanale dei maniscalchi, stesse ore del lunedì.
+[functions."riepilogo-hammer"]
+  schedule = "0 6-9 * * 1"
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]

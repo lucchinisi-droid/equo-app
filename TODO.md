@@ -102,6 +102,20 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
   - Proprietario: 1 agente esperto equestre + esecuzione procedure (allenamenti, appuntamenti, ecc.)
   - App professionisti: 1 agente specializzato per categoria (maniscalco/veterinario/istruttore) + procedure della sua categoria
   - Equo Scuderia: più agenti a scelta (Segretaria, Commercialista, Esperto Equestre...) — 1 incluso nel pack scelto alla prima configurazione, altri ADD-ON a pagamento → serve un modello "moduli/add-on acquistabili" per scuderia, non basta il flag free/premium binario attuale
+- [ ] **Regole comuni a TUTTI gli agenti (Pegasus, Hammer, Galeno, Ares, Athena, Merlino, Ermes)** — richiesta Simone 30/09/2026
+  - Proattivi: promemoria e consigli per migliorare le operazioni (riepilogo periodico + avvisi puntuali), non solo risposte
+  - "Messaggero dei Boss": strumento `riferisci_ai_boss` (problema / richiesta / idea / domanda) → tabella segnalazioni + email a gestione.equo@gmail.com; l'agente dice "lo giro ai Boss e ti faccio sapere il prima possibile"; la risposta dei Boss torna nella chat dell'agente con notifica
+  - Ogni tanto (max 1 volta ogni ~14 giorni per utente, mai in emergenza) chiede: "C'è qualcosa che vorresti cambiare o migliorare? Dimmelo, che lo faccio presente ai Boss."
+  - ✅ 30/09 FATTO su Pegasus e Hammer (e Equo AI neutro): regole comuni REGOLE_COMUNI in agent.js, strumenti riferisci_ai_boss + le_mie_segnalazioni, tabella segnalazioni_boss, email ai Boss (notify-segnalazione-boss.js), risposta con `select rispondi_segnalazione_boss('<id>', 'testo');` → messaggio nella chat dell'agente + push; domanda "cosa vorresti migliorare?" max ogni 14 giorni (profiles.ai_feedback_chiesto_at)
+  - ✅ 30/09 Hammer proattivo: riepilogo del lunedì (riepilogo-hammer.js: agenda 7 gg, richieste da confermare, scaduti da richiamare, incassi, proposte alle strutture, consiglio Haiku; Premium push+email; switch nel menu pro)
+  - [ ] Pagina admin per leggere e rispondere alle segnalazioni senza SQL
+  - [ ] Galeno/Ares/Athena/Merlino/Ermes: nascono già con REGOLE_COMUNI + riepilogo periodico proprio
+- [ ] **Ermes — Magazziniere & Responsabile Logistica (Equo Scuderia)** — scheda definita il 30/09/2026, prompt base in `prompt-agenti/ermes-system-prompt.txt`
+  - Tono: sintetico, preciso, organizzato, proattivo, orientato al controllo delle scorte; risponde con tabelle ed elenchi puntati
+  - Funzioni: mappatura dei depositi (scaffali, ripiani, zone di stoccaggio), tracciamento giacenze (mangimi, integratori, farmaci veterinari, ferri/chiodi, coperte, attrezzatura), alert di sotto-scorta, liste di riordino e gestione riordini con i fornitori
+  - Prerequisito: modulo **Magazzino** di Equo Scuderia (oggi "SOON" nel menu) → servono tabelle depositi/ubicazioni, articoli, movimenti di carico/scarico, soglie minime, fornitori, ordini
+  - Strumenti da costruire (sul motore comune `agent.js`, azioni sempre con conferma): leggi_giacenze, cerca_articolo, articoli_sotto_scorta, proponi_movimento (carico/scarico), proponi_articolo, proponi_riordino (lista per fornitore)
+  - Regole: mai dosi o indicazioni d'uso dei farmaci (solo quantità e scadenze di magazzino); segnala lotti in scadenza; add-on a pagamento su Scuderia (prezzo da definire)
 - [ ] Conversazione vocale in tempo reale: Claude non ha (ad oggi, 18/09/2026) una Live API vocale pubblica per sviluppatori paragonabile a Gemini — solo Voice Mode nelle sue app consumer, non integrabile in Equo
   - Se si vuole voce nativa: valutare Gemini Live API (audio bidirezionale + function calling nella stessa sessione) come provider AI separato solo per quella funzione, oppure dettatura di sistema (STT del telefono) come alternativa a costo zero mantenendo tutto su Claude
   - Gemini Live/TTS usa lo stesso pacchetto di ~30 voci native (maschili/femminili) dell'app Gemini — nessuna differenza di qualità tra API e app

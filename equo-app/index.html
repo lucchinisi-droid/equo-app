@@ -374,7 +374,23 @@ body.ai-aperta{overflow:hidden}
 .mchat-bubble.out{align-self:flex-end;background:var(--accent);color:#14231b;border-bottom-right-radius:3px}
 .mchat-bubble.in{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
 .mchat-bubble-text{white-space:pre-wrap;word-break:break-word}
-.mchat-bubble-time{font-size:10.5px;align-self:flex-end;opacity:.65}
+.mchat-messages{overscroll-behavior:contain;position:relative}
+.mchat-bubble.nuovo{animation:bollaIn .18s ease-out}
+@keyframes bollaIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.mchat-bubble.pending{opacity:.8}
+.mchat-bubble.failed{opacity:.9;outline:1.5px solid var(--red)}
+.ferri-invio{color:rgba(20,35,27,.45)}
+.ferri-errore{color:#fff;background:var(--red);border-radius:50%;width:14px;height:14px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.mchat-nuovi{position:sticky;bottom:6px;align-self:center;background:var(--accent);color:#14231b;border:none;border-radius:20px;
+  padding:6px 14px;font-size:12.5px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;font-family:inherit;z-index:2}
+@media (prefers-reduced-motion: reduce){.mchat-bubble.nuovo{animation:none}}
+.mchat-bubble-time{font-size:10.5px;align-self:flex-end;display:flex;align-items:center;gap:4px}
+.mchat-bubble-time .t{opacity:.65}
+/* spunte di lettura con mini ferri di cavallo: 1 = inviato, 2 grigi = consegnato, 2 verde scuro = letto */
+.ferri{display:inline-flex;align-items:center;line-height:0}
+.ferri svg{height:12px;width:auto;display:block}
+.ferri-inviato,.ferri-consegnato{color:rgba(20,35,27,.45)}
+.ferri-letto{color:#0b4a2c}
 .mchat-day-sep{align-self:center;font-size:11px;color:var(--muted);background:var(--surface);
   border:1px solid var(--border);padding:3px 12px;border-radius:20px;margin:6px 0}
 .mchat-input-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;
@@ -542,7 +558,13 @@ body.ai-aperta{overflow:hidden}
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal){
-    await OneSignal.init({ appId: "440aeba3-69c9-4dc8-ad3d-9bf6f23ae7f0" });
+    await OneSignal.init({ appId: "440aeba3-69c9-4dc8-ad3d-9bf6f23ae7f0",
+      // se l'app è già aperta la notifica la porta in primo piano e apre la chat giusta (evento "click" sotto)
+      notificationClickHandlerMatch: "origin", notificationClickHandlerAction: "focus" });
+    OneSignal.Notifications.addEventListener("click", (ev) => {
+      const d = ev?.notification?.additionalData;
+      if(d && d.apri === "chat") window.apriDaNotifica ? window.apriDaNotifica(d) : (window.__notificaInSospeso = d);
+    });
   });
 </script>
 </head>
@@ -1130,7 +1152,7 @@ body.ai-aperta{overflow:hidden}
       <button class="mchat-emoji-btn" onclick="apriMenuAllegati('mchat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="mchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMascalciaMessage()">
       <button class="mchat-mic-btn" id="mchat-mic-btn" onclick="startVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
-      <button class="mchat-send-btn btn btn-primary" onclick="sendMascalciaMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendMascalciaMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
     <div class="mchat-recording-bar" id="mchat-recording-bar">
       <button class="mchat-cancel-rec-btn" onclick="cancelVoiceRecording()" aria-label="Annulla"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
@@ -1156,7 +1178,7 @@ body.ai-aperta{overflow:hidden}
     <div class="mchat-input-bar">
       <button class="mchat-emoji-btn" onclick="apriMenuAllegati('fchat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="fchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendFarrierChatMessage()">
-      <button class="mchat-send-btn btn btn-primary" onclick="sendFarrierChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendFarrierChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
   </div>
 
@@ -1173,7 +1195,7 @@ body.ai-aperta{overflow:hidden}
     <div class="mchat-input-bar">
       <button class="mchat-emoji-btn" onclick="apriMenuAllegati('schat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="schat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendStableChatMessage()">
-      <button class="mchat-send-btn btn btn-primary" onclick="sendStableChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendStableChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
   </div>
 
@@ -1194,7 +1216,7 @@ body.ai-aperta{overflow:hidden}
       <button class="mchat-emoji-btn" onclick="apriMenuAllegati('ochat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
       <input class="input" id="ochat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendOwnerChatMessage()">
       <button class="mchat-mic-btn" id="ochat-mic-btn" onclick="startOwnerVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
-      <button class="mchat-send-btn btn btn-primary" onclick="sendOwnerChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendOwnerChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
     </div>
     <div class="mchat-recording-bar" id="ochat-recording-bar">
       <button class="mchat-cancel-rec-btn" onclick="cancelOwnerVoiceRecording()" aria-label="Annulla"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
@@ -1689,6 +1711,19 @@ body.ai-aperta{overflow:hidden}
         </div>
         <span class="icon"><svg><use href="#i-chevron"/></svg></span>
       </div>
+      <div id="menu-hammer-riepilogo" style="display:none">
+        <div class="menu-section-label">Hammer</div>
+        <div class="menu-row">
+          <div class="menu-row-label">
+            <span class="fa-icon"><i class="fa-solid fa-calendar-week"></i></span>
+            <span>Riepilogo settimanale di Hammer<br><small class="muted" style="font-size:11px">Ogni lunedì in chat: agenda, richieste, clienti da richiamare, incassi · Premium: anche notifica ed email</small></span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="riepilogo-hammer-switch" onchange="toggleRiepilogoHammer(this.checked)">
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
     </div>
 
     <div id="menu-owner-section" style="display:none">
@@ -1825,7 +1860,7 @@ body.ai-aperta{overflow:hidden}
         <div class="input-group"><label class="input-label">Telefono</label><input class="input" id="rs-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
         <div class="muted" style="font-size:11.5px;line-height:1.5">Useremo questi dati solo per ricontattarti, come previsto dall'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.</div>
         <div class="auth-error" id="rs-error" style="display:none"></div>
-        <button class="btn btn-primary" id="rs-btn" onclick="inviaRichiestaStruttura()" style="width:100%;margin-top:4px">Invia</button>
+        <button class="btn btn-primary" id="rs-btn" onclick="inviaContattoStruttura()" style="width:100%;margin-top:4px">Invia</button>
       </div>
     </div>
     <div id="rs-ok" class="richiesta-ok" style="display:none">
@@ -3352,7 +3387,7 @@ async function salvaRichiestaContatto(row){
   return error;
 }
 
-async function inviaRichiestaStruttura(){
+async function inviaContattoStruttura(){
   const v = id => document.getElementById(id).value.trim();
   const errBox = document.getElementById("rs-error");
   errBox.style.display = "none";
@@ -3520,6 +3555,7 @@ async function enterApp(ruolo){
   collegaOneSignal();
   currentUser.vistaAttiva = ruolo;
   applicaPaletteVista(ruolo);
+  avviaSpunte();
   try{ localStorage.setItem("equo-vista-" + currentUser.id, ruolo); }catch(e){}
   aggiornaFabAi();
   controllaNovitaAi();
@@ -4137,6 +4173,7 @@ async function continueBootAfterProfile(){
   }catch(e){}
   await enterApp(vista);
   checkPendingDeletion();
+  apriChatDaUrl();
   await handleCheckoutReturn();
 }
 
@@ -4165,6 +4202,58 @@ async function saveCompleteProfile(){
 /* Al ritorno da Stripe Checkout (?checkout=success in URL) il webhook potrebbe
    impiegare qualche istante ad aggiornare profiles.piano: aspettiamo un attimo e
    ricontrolliamo, poi ripuliamo l'URL per non ritriggerare al refresh. */
+/* ---------- APERTURA DA NOTIFICA: porta direttamente alla chat di chi ha scritto ---------- */
+function apriChatDaUrl(){
+  const p = new URLSearchParams(window.location.search);
+  if(p.get("apri") === "chat"){
+    const d = Object.fromEntries(p.entries());
+    window.history.replaceState({}, "", window.location.pathname);
+    apriDaNotifica(d);
+  } else if(window.__notificaInSospeso){
+    const d = window.__notificaInSospeso; window.__notificaInSospeso = null;
+    apriDaNotifica(d);
+  }
+}
+async function assicuraVista(tipo){
+  const ruoli = [currentUser.ruolo, currentUser.ruoloSecondario].filter(Boolean);
+  const target = tipo === "pro" ? ruoli.find(r => PRO_ROLES.includes(r)) : (ruoli.includes("proprietario") ? "proprietario" : null);
+  if(target && currentUser.vistaAttiva !== target) await enterApp(target);
+}
+async function apriDaNotifica(d){
+  if(!d || !d.c || !d.id) return;
+  const firma = d.c + ":" + d.id, ora = Date.now();
+  if(apriDaNotifica.ultima === firma && ora - (apriDaNotifica.quando || 0) < 4000) return; // stesso click arrivato due volte
+  apriDaNotifica.ultima = firma; apriDaNotifica.quando = ora;
+  if(!currentUser || !document.getElementById("screen-app")?.classList.contains("active")){ window.__notificaInSospeso = d; return; }
+  try{
+    // chiude eventuali altre chat aperte
+    ["mchat-overlay","fchat-overlay","schat-overlay","ochat-overlay"].forEach(id => document.getElementById(id)?.classList.remove("active"));
+    fermaChatLive();
+    if(d.c === "mchat"){
+      await assicuraVista("pro");
+      await openChatThread(d.id);
+    } else if(d.c === "colleghi"){
+      await assicuraVista("pro");
+      await openOwnerChatThread(d.id, d.n || "Collega", true);
+    } else if(d.c === "fchat"){
+      await assicuraVista("owner");
+      const f = (await DB.listManiscalchiCollegati()).find(x => x.cliente_mascalcia_id === d.id);
+      await openFarrierChatThread(d.id, f?.nome_maniscalco || "Il tuo maniscalco", !!f?.certificato);
+    } else if(d.c === "schat"){
+      await assicuraVista("owner");
+      await openStableChatThread(d.id, d.centro || null, d.n || "Scuderia");
+    } else if(d.c === "ai"){
+      // risposta dei Boss o riepilogo settimanale: apre la chat dell'agente giusto
+      await assicuraVista(d.v === "professionista" ? "pro" : "owner");
+      await openAiSheet();
+    } else if(d.c === "ochat"){
+      await assicuraVista("owner");
+      await openOwnerChatThread(d.id, d.n || "Utente Equo", false);
+    }
+  } catch(e){ console.error("apriDaNotifica:", e); }
+}
+window.apriDaNotifica = apriDaNotifica;
+
 async function handleCheckoutReturn(){
   const params = new URLSearchParams(window.location.search);
   const checkout = params.get("checkout");
@@ -4369,9 +4458,7 @@ async function controllaNovitaAi(){
   if(DEMO_MODE || !currentUser) return;
   const vista = vistaAi();
   const [r, a] = await Promise.all([
-    vista === "proprietario"
-      ? sb.from("ai_riepiloghi").select("settimana").eq("user_id", currentUser.id).is("letto_il", null).limit(1)
-      : Promise.resolve({ data: [] }),
+    sb.from("ai_riepiloghi").select("settimana").eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null).limit(1),
     sb.from("annunci_destinatari").select("annuncio_id").eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null).limit(1),
   ]);
   if(r.error) console.error("controllaNovitaAi riepilogo:", r.error);
@@ -4385,8 +4472,8 @@ async function segnaNovitaLette(){
   if(DEMO_MODE || !currentUser) return;
   const ora = new Date().toISOString(), vista = vistaAi(), n = novitaAi;
   novitaAi = { riepilogo: false, annunci: false };
-  if(n.riepilogo && vista === "proprietario"){
-    const { error } = await sb.from("ai_riepiloghi").update({ letto_il: ora }).eq("user_id", currentUser.id).is("letto_il", null);
+  if(n.riepilogo){
+    const { error } = await sb.from("ai_riepiloghi").update({ letto_il: ora }).eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null);
     if(error) console.error("segnaNovitaLette riepilogo:", error);
   }
   if(n.annunci){
@@ -4418,11 +4505,21 @@ document.addEventListener("visibilitychange", () => {
 });
 async function caricaSwitchRiepilogo(){
   const sw = document.getElementById("riepilogo-switch");
-  if(!sw) return;
-  sw.checked = true;
+  const swH = document.getElementById("riepilogo-hammer-switch");
+  const boxH = document.getElementById("menu-hammer-riepilogo");
+  if(boxH) boxH.style.display = agenteAiHammer() ? "block" : "none";
+  if(sw) sw.checked = true;
+  if(swH) swH.checked = true;
   if(DEMO_MODE || !currentUser) return;
-  const { data } = await sb.from("profiles").select("riepilogo_settimanale").eq("id", currentUser.id).maybeSingle();
-  sw.checked = data?.riepilogo_settimanale !== false;
+  const { data } = await sb.from("profiles").select("riepilogo_settimanale, riepilogo_hammer").eq("id", currentUser.id).maybeSingle();
+  if(sw) sw.checked = data?.riepilogo_settimanale !== false;
+  if(swH) swH.checked = data?.riepilogo_hammer !== false;
+}
+async function toggleRiepilogoHammer(attivo){
+  if(DEMO_MODE || !currentUser){ showToast(attivo ? "Riepilogo attivato" : "Riepilogo disattivato"); return; }
+  const { error } = await sb.from("profiles").update({ riepilogo_hammer: attivo }).eq("id", currentUser.id);
+  if(error){ console.error("toggleRiepilogoHammer:", error); document.getElementById("riepilogo-hammer-switch").checked = !attivo; showToast("Non sono riuscito a salvare, riprova."); return; }
+  showToast(attivo ? "Hammer ti manderà il riepilogo ogni lunedì" : "Riepilogo settimanale disattivato");
 }
 async function toggleRiepilogoSettimanale(attivo){
   if(DEMO_MODE || !currentUser){ showToast(attivo ? "Riepilogo attivato" : "Riepilogo disattivato"); return; }
@@ -6665,15 +6762,19 @@ async function openChatThread(clienteId){
   document.getElementById("mchat-emoji-picker").classList.remove("active");
   document.getElementById("mchat-input").value = "";
   document.getElementById("mchat-overlay").classList.add("active");
-  await DB.markLettiMascalcia(clienteId);
+  const letti = DB.markLettiMascalcia(clienteId);
   await renderChatThread(clienteId);
-  await loadInboxMascalcia(); // aggiorna badge/anteprima non appena i messaggi sono segnati come letti
+  avviaChatLive({ chiave: "mchat:" + clienteId, tabella: "messaggi_mascalcia", colonna: "cliente_mascalcia_id", valore: clienteId, overlay: "mchat-overlay",
+    aggiorna: () => renderChatThread(clienteId), segnaLetti: () => DB.markLettiMascalcia(clienteId).then(() => loadInboxMascalcia()) });
+  await letti;
+  loadInboxMascalcia(); // aggiorna badge/anteprima non appena i messaggi sono segnati come letti
 }
 
 function closeChatThread(){
   if(mediaRecorder && mediaRecorder.state !== "inactive") cancelVoiceRecording();
   rimuoviAllegatoChat();
   document.getElementById("mchat-overlay").classList.remove("active");
+  fermaChatLive();
 }
 
 function formatChatTime(iso){
@@ -6689,12 +6790,224 @@ function formatChatDay(iso){
   return d.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
 }
 
+/* ---------- SPUNTE DI LETTURA (mini ferri di cavallo) ---------- */
+const FERRO_D = "M0.8 11.6V6A5.2 5.2 0 0 1 11.2 6V11.6H8.5V6.2A2.5 2.5 0 0 0 3.5 6.2V11.6Z M1.8 7.4h1v1.1h-1Z M1.8 9.6h1v1.1h-1Z M9.2 7.4h1v1.1h-1Z M9.2 9.6h1v1.1h-1Z M2.4 3.9l.8-.8.8.8-.8.8Z M7.9 3.9l.8-.8.8.8-.8.8Z";
+function statoSpunta(m){ return m.letto ? "letto" : (m.consegnato_at ? "consegnato" : "inviato"); }
+function ferriHtml(stato){
+  const titoli = { inviato: "Inviato", consegnato: "Consegnato", letto: "Letto" };
+  const uno = x => `<path transform="translate(${x} 0)" fill="currentColor" fill-rule="evenodd" d="${FERRO_D}"/>`;
+  const svg = stato === "inviato"
+    ? `<svg viewBox="0 0 12 12" aria-hidden="true">${uno(0)}</svg>`
+    : `<svg viewBox="0 0 25 12" aria-hidden="true">${uno(0)}${uno(13)}</svg>`;
+  return `<span class="ferri ferri-${stato}" title="${titoli[stato]}" aria-label="${titoli[stato]}">${svg}</span>`;
+}
+// riga ora + ferri (i ferri solo sui messaggi inviati da me)
+function oraBolla(m, out){
+  return `<div class="mchat-bubble-time"><span class="t">${formatChatTime(m.created_at)}</span>${out ? ferriHtml(statoSpunta(m)) : ""}</div>`;
+}
+function attrBolla(m, out, tabella){
+  if(!m.id) return "";
+  return ` data-id="${escapeHtml(m.id)}"` + (out ? ` data-mid="${escapeHtml(m.id)}" data-tab="${tabella}" data-stato="${statoSpunta(m)}"` : "");
+}
+// aggiorna i ferri delle bolle aperte senza ricaricare la chat
+async function aggiornaSpunte(){
+  if(DEMO_MODE || !currentUser) return;
+  const bolle = [...document.querySelectorAll('.mchat-bubble.out[data-mid]:not([data-stato="letto"])')]
+    .filter(b => b.offsetParent !== null);
+  if(!bolle.length) return;
+  const perTab = {};
+  bolle.forEach(b => (perTab[b.dataset.tab] = perTab[b.dataset.tab] || []).push(b.dataset.mid));
+  for(const [tab, ids] of Object.entries(perTab)){
+    const { data, error } = await sb.from(tab).select("id, letto, consegnato_at").in("id", ids.slice(-100));
+    if(error || !data) continue;
+    data.forEach(r => {
+      const stato = statoSpunta(r);
+      document.querySelectorAll(`.mchat-bubble.out[data-mid="${r.id}"]`).forEach(b => {
+        if(b.dataset.stato === stato) return;
+        b.dataset.stato = stato;
+        const f = b.querySelector(".ferri");
+        if(f) f.outerHTML = ferriHtml(stato);
+      });
+    });
+  }
+}
+// "consegnato": appena apro Equo (e poi periodicamente) i messaggi indirizzati a me risultano consegnati
+async function segnaConsegnati(){
+  if(DEMO_MODE || !currentUser || document.visibilityState !== "visible") return;
+  try{ await sb.rpc("segna_messaggi_consegnati"); }catch(e){}
+}
+let spunteTimer = null;
+function avviaSpunte(){
+  segnaConsegnati();
+  clearInterval(spunteTimer);
+  let giri = 0;
+  spunteTimer = setInterval(() => {
+    aggiornaSpunte();
+    if(++giri % 5 === 0) segnaConsegnati(); // ogni ~30 s
+  }, 6000);
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible"){ segnaConsegnati(); aggiornaSpunte(); } });
+
+/* ---------- CHAT FLUIDA (stile WhatsApp) ----------
+   - apertura istantanea: si mostra subito l'ultima versione del thread in memoria, poi si aggiorna;
+   - aggiornamento senza sfarfallio: si aggiungono solo i messaggi nuovi (niente ricarica completa,
+     le note vocali in riproduzione non si interrompono);
+   - tempo reale (Supabase Realtime) + controllo di riserva ogni 4 s mentre la chat è aperta;
+   - invio ottimistico: la bolla compare subito, con l'orologio finché il server non conferma. */
+const cacheThread = new Map();
+function vicinoAlFondo(box){ return box.scrollHeight - box.scrollTop - box.clientHeight < 120; }
+function inizioThread(box, chiave){
+  if(box.dataset.thread === chiave && !box.dataset.vuoto) return; // già aperto: aggiornamento silenzioso
+  delete box.dataset.vuoto;
+  if(cacheThread.has(chiave)){
+    box.innerHTML = cacheThread.get(chiave);
+    box.dataset.thread = chiave;
+    box.scrollTop = box.scrollHeight;
+  } else {
+    box.dataset.thread = "";
+    box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  }
+}
+function applicaThread(box, chiave, html){
+  cacheThread.set(chiave, html);
+  delete box.dataset.vuoto;
+  const tpl = document.createElement("div");
+  tpl.innerHTML = html;
+  const nuovi = [...tpl.children];
+  const inAttesa = [...box.querySelectorAll(".mchat-bubble.pending")];
+  const vecchi = [...box.children].filter(el => !el.classList.contains("pending") && !el.classList.contains("mchat-nuovi"));
+  const eraInFondo = vicinoAlFondo(box) || inAttesa.length > 0;
+  const stessoThread = box.dataset.thread === chiave && vecchi.length > 0 && vecchi.every(el => el.dataset.id);
+  const idNuovi = nuovi.map(el => el.dataset.id);
+  const prefisso = stessoThread && vecchi.length <= nuovi.length && vecchi.every((el, i) => el.dataset.id === idNuovi[i]);
+  if(!prefisso){
+    box.innerHTML = html;
+    box.dataset.thread = chiave;
+    box.scrollTop = box.scrollHeight;
+    return;
+  }
+  // aggiorna i ferri delle bolle già presenti
+  vecchi.forEach((el, i) => {
+    const n = nuovi[i];
+    if(el.dataset.stato && n.dataset.stato && el.dataset.stato !== n.dataset.stato){
+      el.dataset.stato = n.dataset.stato;
+      const f = el.querySelector(".ferri"), nf = n.querySelector(".ferri");
+      if(f && nf) f.outerHTML = nf.outerHTML;
+    }
+  });
+  const aggiunti = nuovi.slice(vecchi.length);
+  if(!aggiunti.length && !inAttesa.length) return;
+  // le bolle "in invio" lasciano il posto a quelle vere (in attesa restano solo quelle non ancora arrivate)
+  const daRimuovere = inAttesa.slice(0, aggiunti.filter(el => el.classList.contains("out")).length);
+  daRimuovere.forEach(el => el.remove());
+  const primaPending = box.querySelector(".mchat-bubble.pending");
+  let arrivatiDaAltri = false;
+  aggiunti.forEach(el => {
+    el.classList.add("nuovo");
+    if(el.classList.contains("in")) arrivatiDaAltri = true;
+    box.insertBefore(el, primaPending || box.querySelector(".mchat-nuovi"));
+  });
+  if(eraInFondo){
+    box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+  } else if(arrivatiDaAltri){
+    mostraPillolaNuovi(box);
+  }
+}
+function mostraPillolaNuovi(box){
+  let pill = box.querySelector(".mchat-nuovi");
+  if(!pill){
+    pill = document.createElement("button");
+    pill.className = "mchat-nuovi";
+    pill.textContent = "Nuovi messaggi ↓";
+    pill.onclick = () => { box.scrollTo({ top: box.scrollHeight, behavior: "smooth" }); pill.remove(); };
+    box.appendChild(pill);
+    box.addEventListener("scroll", function via(){ if(vicinoAlFondo(box)){ pill.remove(); box.removeEventListener("scroll", via); } });
+  }
+}
+// bolla ottimistica: compare subito con l'orologio
+function bollaInAttesa(boxId, testo){
+  const box = document.getElementById(boxId);
+  if(!box) return null;
+  if(box.dataset.vuoto){ box.innerHTML = ""; }
+  const el = document.createElement("div");
+  el.className = "mchat-bubble out pending nuovo";
+  el.innerHTML = `<div class="mchat-bubble-text">${escapeHtml(testo)}</div><div class="mchat-bubble-time"><span class="t">${formatChatTime(new Date().toISOString())}</span><span class="ferri ferri-invio" title="Invio in corso">${ICONA_OROLOGIO}</span></div>`;
+  box.appendChild(el);
+  box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+  return el;
+}
+const ICONA_OROLOGIO = '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.4V6l1.8 1.1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+function bollaNonInviata(el){
+  if(!el) return;
+  el.classList.remove("pending");
+  el.classList.add("failed");
+  const f = el.querySelector(".ferri");
+  if(f) f.outerHTML = '<span class="ferri ferri-errore" title="Non inviato">!</span>';
+}
+
+// tempo reale + controllo di riserva mentre una chat è aperta
+const chatLive = { chiave: null, canale: null, timer: null, inCorso: false, ancora: false, cfg: null };
+function avviaChatLive(cfg){
+  // cfg: { chiave, tabella, colonna, valore, aggiorna: async fn, segnaLetti: async fn, overlay }
+  fermaChatLive();
+  chatLive.chiave = cfg.chiave; chatLive.cfg = cfg;
+  if(DEMO_MODE) return;
+  try{
+    chatLive.canale = sb.channel("chat-" + cfg.chiave.replace(/[^a-z0-9-]/gi, "-"))
+      .on("postgres_changes", { event: "*", schema: "public", table: cfg.tabella, filter: `${cfg.colonna}=eq.${cfg.valore}` }, (p) => {
+        const r = p.new || {};
+        const altrui = p.eventType === "INSERT" && !eMioMessaggio(cfg.tabella, r);
+        aggiornaChatLive(altrui);
+      })
+      .subscribe();
+  }catch(e){ console.error("realtime chat:", e); }
+  chatLive.timer = setInterval(() => {
+    const ov = document.getElementById(cfg.overlay);
+    if(!ov || !ov.classList.contains("active")){ fermaChatLive(); return; }
+    if(document.visibilityState === "visible") aggiornaChatLive(false);
+  }, 4000);
+}
+function eMioMessaggio(tabella, r){
+  if(tabella === "messaggi_proprietari") return r.mittente_id === currentUser?.id;
+  if(tabella === "chat_messaggi") return r.mittente_user_id === currentUser?.id;
+  if(tabella === "messaggi_mascalcia") return chatLive.chiave?.startsWith("mchat:") ? r.mittente_tipo === "maniscalco" : r.mittente_tipo !== "maniscalco";
+  return false;
+}
+let letturaTimer = null;
+async function aggiornaChatLive(conNuoviAltrui){
+  const cfg = chatLive.cfg;
+  if(!cfg) return;
+  if(chatLive.inCorso){ chatLive.ancora = true; return; }
+  chatLive.inCorso = true;
+  try{
+    await cfg.aggiorna();
+    // i messaggi arrivati mentre guardo la chat sono letti
+    const box = document.querySelector("#" + cfg.overlay + " .mchat-messages");
+    const nonLetti = box && [...box.querySelectorAll(".mchat-bubble.in.nuovo")].length;
+    if((conNuoviAltrui || nonLetti) && document.visibilityState === "visible" && cfg.segnaLetti){
+      clearTimeout(letturaTimer);
+      letturaTimer = setTimeout(() => { cfg.segnaLetti().then(() => refreshChatBadge && refreshChatBadge()).catch(() => {}); }, 400);
+      box && box.querySelectorAll(".mchat-bubble.in.nuovo").forEach(el => el.classList.remove("nuovo"));
+    }
+  } catch(e){ console.error("aggiornaChatLive:", e); }
+  chatLive.inCorso = false;
+  if(chatLive.ancora){ chatLive.ancora = false; aggiornaChatLive(false); }
+}
+function fermaChatLive(){
+  clearInterval(chatLive.timer); chatLive.timer = null;
+  if(chatLive.canale){ try{ sb.removeChannel(chatLive.canale); }catch(e){} }
+  chatLive.canale = null; chatLive.chiave = null; chatLive.cfg = null;
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && chatLive.cfg) aggiornaChatLive(true); });
+
 async function renderChatThread(clienteId){
   const box = document.getElementById("mchat-messages");
-  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const chiaveThread = "mchat:" + clienteId;
+  inizioThread(box, chiaveThread);
   const data = await DB.listThreadMascalcia(clienteId);
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px;text-align:center;margin-top:20px">Nessun messaggio ancora.<br>Scrivi il primo messaggio qui sotto.</div>';
+    box.dataset.thread = chiaveThread; box.dataset.vuoto = '1';
     return;
   }
   let lastDay = null;
@@ -6702,7 +7015,7 @@ async function renderChatThread(clienteId){
   data.forEach(m => {
     const day = formatChatDay(m.created_at);
     if(day !== lastDay){
-      html += `<div class="mchat-day-sep">${day}</div>`;
+      html += `<div class="mchat-day-sep" data-id="day-${escapeHtml(day)}">${day}</div>`;
       lastDay = day;
     }
     const out = m.mittente_tipo === "maniscalco";
@@ -6713,13 +7026,12 @@ async function renderChatThread(clienteId){
         : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     const firma = !out && m.mittente_nome ? `<div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">${escapeHtml(m.mittente_nome)}</div>` : "";
     html += `
-      <div class="mchat-bubble ${out ? "out" : "in"}">
+      <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_mascalcia")}>
         ${firma}${body}
-        <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
+        ${oraBolla(m, out)}
       </div>`;
   });
-  box.innerHTML = html;
-  box.scrollTop = box.scrollHeight;
+  applicaThread(box, chiaveThread, html);
 }
 
 /* ---------- ALLEGATI IN CHAT (foto da fotocamera/galleria, PDF) ---------- */
@@ -6817,10 +7129,13 @@ async function sendMascalciaMessage(){
   }
   if(!testo) return;
   input.value = "";
-  const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: currentClienteId, tipo: "testo", testo });
-  if(error){ showToast("Errore: " + error.message); return; }
-  await renderChatThread(currentClienteId);
-  await loadInboxMascalcia();
+  input.focus();
+  const clienteId = currentClienteId;
+  const bolla = bollaInAttesa("mchat-messages", testo);
+  const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: clienteId, tipo: "testo", testo });
+  if(error){ bollaNonInviata(bolla); showToast("Non inviato: " + error.message); return; }
+  if(currentClienteId === clienteId) await aggiornaChatLive(false);
+  loadInboxMascalcia();
 }
 
 /* ---------- NOTE VOCALI ---------- */
@@ -7088,6 +7403,8 @@ async function openStableChatThread(membroId, centroId, nome){
   document.getElementById("schat-input").value = "";
   document.getElementById("schat-overlay").classList.add("active");
   await renderStableChatThread();
+  avviaChatLive({ chiave: "schat:" + membroId, tabella: "chat_messaggi", colonna: "membro_id", valore: membroId, overlay: "schat-overlay",
+    aggiorna: () => currentStableMembro ? renderStableChatThread() : null, segnaLetti: () => segnaLettiChatApp(membroId) });
   await segnaLettiChatApp(membroId);
   refreshChatBadge();
 }
@@ -7172,15 +7489,18 @@ function startChatBadgePolling(){
 
 function closeStableChatThread(){
   document.getElementById("schat-overlay").classList.remove("active");
+  fermaChatLive();
   currentStableMembro = null;
 }
 
 async function renderStableChatThread(){
   const box = document.getElementById("schat-messages");
-  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const chiaveThread = "schat:" + currentStableMembro.membro_id;
+  inizioThread(box, chiaveThread);
   const data = await DB.listMessaggiScuderia(currentStableMembro.membro_id);
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px;text-align:center;margin-top:20px">Nessun messaggio ancora.<br>Scrivi il primo messaggio qui sotto.</div>';
+    box.dataset.thread = chiaveThread; box.dataset.vuoto = '1';
     return;
   }
   let lastDay = null;
@@ -7188,20 +7508,19 @@ async function renderStableChatThread(){
   data.forEach(m => {
     const day = formatChatDay(m.created_at);
     if(day !== lastDay){
-      html += `<div class="mchat-day-sep">${day}</div>`;
+      html += `<div class="mchat-day-sep" data-id="day-${escapeHtml(day)}">${day}</div>`;
       lastDay = day;
     }
     const out = m.mittente_user_id === currentUser.id;
     const body = (m.tipo === "foto" || m.tipo === "documento" || m.tipo === "video") ? bollaAllegato(m.tipo, m.file_url, m.file_nome, m.testo)
       : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     html += `
-      <div class="mchat-bubble ${out ? "out" : "in"}">
+      <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "chat_messaggi")}>
         ${body}
-        <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
+        ${oraBolla(m, out)}
       </div>`;
   });
-  box.innerHTML = html;
-  box.scrollTop = box.scrollHeight;
+  applicaThread(box, chiaveThread, html);
 }
 
 async function sendStableChatMessage(){
@@ -7209,10 +7528,12 @@ async function sendStableChatMessage(){
   const testo = input.value.trim();
   if(!testo || !currentStableMembro) return;
   input.value = "";
+  input.focus();
+  const bolla = bollaInAttesa("schat-messages", testo);
   const { error } = await DB.inviaMessaggioScuderia({ centro_id: currentStableMembro.centro_id, membro_id: currentStableMembro.membro_id, testo });
-  if(error){ showToast("Errore: " + error.message); return; }
-  await renderStableChatThread();
-  await loadStableChatSection();
+  if(error){ bollaNonInviata(bolla); showToast("Non inviato: " + error.message); return; }
+  if(currentStableMembro) await aggiornaChatLive(false);
+  loadStableChatSection();
 }
 
 /* ---------- CHAT COL PROPRIO MANISCALCO (lato proprietario) ---------- */
@@ -7401,6 +7722,8 @@ async function openFarrierChatThread(clienteId, nome, certificato){
   document.getElementById("fchat-input").value = "";
   document.getElementById("fchat-overlay").classList.add("active");
   await renderFarrierChatThread();
+  avviaChatLive({ chiave: "fchat:" + clienteId, tabella: "messaggi_mascalcia", colonna: "cliente_mascalcia_id", valore: clienteId, overlay: "fchat-overlay",
+    aggiorna: () => currentFarrier ? renderFarrierChatThread() : null, segnaLetti: () => DB.segnaLettiDalManiscalco(clienteId) });
   await DB.segnaLettiDalManiscalco(clienteId);
   loadFarrierChatSection();
   refreshChatBadge();
@@ -7408,23 +7731,26 @@ async function openFarrierChatThread(clienteId, nome, certificato){
 
 function closeFarrierChatThread(){
   document.getElementById("fchat-overlay").classList.remove("active");
+  fermaChatLive();
   currentFarrier = null;
 }
 
 async function renderFarrierChatThread(){
   if(!currentFarrier) return;
   const box = document.getElementById("fchat-messages");
-  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const chiaveThread = "fchat:" + currentFarrier.cliente_mascalcia_id;
+  inizioThread(box, chiaveThread);
   const data = await DB.listThreadMascalcia(currentFarrier.cliente_mascalcia_id);
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px;text-align:center;margin-top:20px">Nessun messaggio ancora.<br>Scrivi al tuo maniscalco qui sotto.</div>';
+    box.dataset.thread = chiaveThread; box.dataset.vuoto = '1';
     return;
   }
   let lastDay = null;
   let html = "";
   data.forEach(m => {
     const day = formatChatDay(m.created_at);
-    if(day !== lastDay){ html += `<div class="mchat-day-sep">${day}</div>`; lastDay = day; }
+    if(day !== lastDay){ html += `<div class="mchat-day-sep" data-id="day-${escapeHtml(day)}">${day}</div>`; lastDay = day; }
     const out = m.mittente_tipo === "cliente";
     const body = m.tipo === "audio"
       ? `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.audio_url)}"></audio></div>`
@@ -7432,13 +7758,12 @@ async function renderFarrierChatThread(){
         ? bollaAllegato(m.tipo, m.file_url, m.file_nome, m.testo)
         : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     html += `
-      <div class="mchat-bubble ${out ? "out" : "in"}">
+      <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_mascalcia")}>
         ${body}
-        <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
+        ${oraBolla(m, out)}
       </div>`;
   });
-  box.innerHTML = html;
-  box.scrollTop = box.scrollHeight;
+  applicaThread(box, chiaveThread, html);
 }
 
 async function sendFarrierChatMessage(){
@@ -7446,9 +7771,11 @@ async function sendFarrierChatMessage(){
   const testo = input.value.trim();
   if(!testo || !currentFarrier) return;
   input.value = "";
+  input.focus();
+  const bolla = bollaInAttesa("fchat-messages", testo);
   const { error } = await DB.inviaMessaggioAlManiscalco(currentFarrier.cliente_mascalcia_id, testo);
-  if(error){ input.value = testo; showToast("Errore: " + error.message); return; }
-  await renderFarrierChatThread();
+  if(error){ bollaNonInviata(bolla); showToast("Non inviato: " + error.message); return; }
+  if(currentFarrier) await aggiornaChatLive(false);
   loadFarrierChatSection();
 }
 
@@ -7712,9 +8039,12 @@ async function openOwnerChatThread(conversazioneId, nome, colleghi = false){
   document.getElementById("ochat-emoji-picker").classList.remove("active");
   document.getElementById("ochat-input").value = "";
   document.getElementById("ochat-overlay").classList.add("active");
-  await DB.markLettiProprietario(conversazioneId);
+  const letti = DB.markLettiProprietario(conversazioneId);
   await renderOwnerChatThread(conversazioneId);
-  await aggiornaListeChatProprietari();
+  avviaChatLive({ chiave: "ochat:" + conversazioneId, tabella: "messaggi_proprietari", colonna: "conversazione_id", valore: conversazioneId, overlay: "ochat-overlay",
+    aggiorna: () => renderOwnerChatThread(conversazioneId), segnaLetti: () => DB.markLettiProprietario(conversazioneId) });
+  await letti;
+  aggiornaListeChatProprietari();
   refreshChatBadge();
 }
 async function aggiornaListeChatProprietari(){
@@ -7724,14 +8054,17 @@ async function aggiornaListeChatProprietari(){
 function closeOwnerChatThread(){
   if(ownerMediaRecorder && ownerMediaRecorder.state !== "inactive") cancelOwnerVoiceRecording();
   document.getElementById("ochat-overlay").classList.remove("active");
+  fermaChatLive();
 }
 
 async function renderOwnerChatThread(conversazioneId){
   const box = document.getElementById("ochat-messages");
-  box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  const chiaveThread = "ochat:" + conversazioneId;
+  inizioThread(box, chiaveThread);
   const data = await DB.listThreadProprietario(conversazioneId);
   if(!data || data.length === 0){
     box.innerHTML = '<div class="muted" style="font-size:13px;text-align:center;margin-top:20px">Nessun messaggio ancora.<br>Scrivi il primo messaggio qui sotto.</div>';
+    box.dataset.thread = chiaveThread; box.dataset.vuoto = '1';
     return;
   }
   let lastDay = null;
@@ -7739,7 +8072,7 @@ async function renderOwnerChatThread(conversazioneId){
   data.forEach(m => {
     const day = formatChatDay(m.created_at);
     if(day !== lastDay){
-      html += `<div class="mchat-day-sep">${day}</div>`;
+      html += `<div class="mchat-day-sep" data-id="day-${escapeHtml(day)}">${day}</div>`;
       lastDay = day;
     }
     const out = m.mittente_id === currentUser.id;
@@ -7754,13 +8087,12 @@ async function renderOwnerChatThread(conversazioneId){
     else if(m.tipo === "documento") body = bollaAllegato("documento", m.media_url, m.file_nome, m.testo);
     else body = `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
-      <div class="mchat-bubble ${out ? "out" : "in"}">
+      <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_proprietari")}>
         ${body}
-        <div class="mchat-bubble-time">${formatChatTime(m.created_at)}</div>
+        ${oraBolla(m, out)}
       </div>`;
   });
-  box.innerHTML = html;
-  box.scrollTop = box.scrollHeight;
+  applicaThread(box, chiaveThread, html);
 }
 
 async function sendOwnerChatMessage(){
@@ -7768,10 +8100,13 @@ async function sendOwnerChatMessage(){
   const testo = input.value.trim();
   if(!testo || !currentConversazioneId) return;
   input.value = "";
-  const { error } = await DB.insertMessaggioProprietario({ conversazione_id: currentConversazioneId, tipo: "testo", testo });
-  if(error){ showToast("Errore: " + error.message); return; }
-  await renderOwnerChatThread(currentConversazioneId);
-  await aggiornaListeChatProprietari();
+  input.focus();
+  const convId = currentConversazioneId;
+  const bolla = bollaInAttesa("ochat-messages", testo);
+  const { error } = await DB.insertMessaggioProprietario({ conversazione_id: convId, tipo: "testo", testo });
+  if(error){ bollaNonInviata(bolla); showToast("Non inviato: " + error.message); return; }
+  if(currentConversazioneId === convId) await aggiornaChatLive(false);
+  aggiornaListeChatProprietari();
 }
 
 async function handleOwnerChatMediaChange(event){

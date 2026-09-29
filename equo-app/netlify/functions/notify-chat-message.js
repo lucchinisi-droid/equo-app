@@ -99,13 +99,15 @@ async function gestisciChatScuderia(supabase, record) {
       .not("user_id", "is", null);
     const destinatari = (staff || []).map((s) => s.user_id).filter((id) => id && id !== mittente_user_id);
     if (destinatari.length === 0) return "cliente_a_staff_nessuno_staff_collegato";
-    const push = await inviaPush(destinatari, `Nuovo messaggio da ${membro.nome_visualizzato || "un cliente"}`, testo, "scuderia");
+    const push = await inviaPush(destinatari, `Nuovo messaggio da ${membro.nome_visualizzato || "un cliente"}`, testo, "scuderia",
+      { c: "cliente", id: membro_id });
     return "cliente_a_staff_dest=" + destinatari.length + " push=" + JSON.stringify(push);
   } else {
     // Il messaggio arriva dallo staff: notifica il cliente/professionista.
     if (!membro.user_id) return "staff_a_cliente_membro_senza_user_id";
     const { data: centro } = await supabase.from("centri").select("nome").eq("id", centro_id).maybeSingle();
-    const push = await inviaPush([membro.user_id], `Nuovo messaggio da ${centro?.nome || "la tua scuderia"}`, testo);
+    const push = await inviaPush([membro.user_id], `Nuovo messaggio da ${centro?.nome || "la tua scuderia"}`, testo, "equo",
+      { c: "schat", id: membro_id, centro: centro_id, n: centro?.nome || "Scuderia" });
     return "staff_a_cliente_dest=" + membro.user_id + " push=" + JSON.stringify(push);
   }
 }
@@ -117,7 +119,7 @@ async function gestisciChatProprietari(supabase, record) {
 
   const { data: conv } = await supabase
     .from("conversazioni_proprietari")
-    .select("proprietario_a_id, proprietario_b_id")
+    .select("proprietario_a_id, proprietario_b_id, tipo")
     .eq("id", conversazione_id)
     .maybeSingle();
   if (!conv) return "conversazione_non_trovata";
@@ -127,7 +129,9 @@ async function gestisciChatProprietari(supabase, record) {
 
   const { data: mittente } = await supabase.from("profiles").select("full_name").eq("id", mittente_id).maybeSingle();
   const corpo = tipo === "testo" ? testo : corpoAllegato(tipo, file_nome) || (media_url ? "Ha inviato un allegato" : (testo || "Nuovo messaggio"));
-  const push = await inviaPush([destinatarioId], `Nuovo messaggio da ${mittente?.full_name || "un utente Equo"}`, corpo);
+  const colleghi = conv.tipo === "colleghi";
+  const push = await inviaPush([destinatarioId], `Nuovo messaggio da ${mittente?.full_name || "un utente Equo"}`, corpo, "equo",
+    { c: colleghi ? "colleghi" : "ochat", id: conversazione_id, n: mittente?.full_name || "Utente Equo" });
   return "dest=" + destinatarioId + " push=" + JSON.stringify(push);
 }
 
@@ -161,21 +165,25 @@ async function gestisciChatMascalcia(supabase, record) {
     if (destinatari.length === 0) return "maniscalco_a_struttura_nessuno_staff";
     const { data: pro } = await supabase.from("profiles").select("full_name, dati_pagamento_nome").eq("id", maniscalco_id).maybeSingle();
     const nomePro = (pro?.full_name || "").trim() || (pro?.dati_pagamento_nome || "").trim() || "il maniscalco";
-    const push = await inviaPush(destinatari, `Messaggio da ${nomePro} (maniscalco)`, corpo, "scuderia");
+    const push = await inviaPush(destinatari, `Messaggio da ${nomePro} (maniscalco)`, corpo, "scuderia",
+      { c: "pro", id: cliente_mascalcia_id });
     return "maniscalco_a_struttura_dest=" + destinatari.length + " push=" + JSON.stringify(push);
   }
 
   if (mittente_tipo === "maniscalco") {
     if (!cliente.cliente_user_id) return "maniscalco_a_cliente_non_collegato"; // il cliente non usa Equo App: nessuna push possibile
-    const push = await inviaPush([cliente.cliente_user_id], "Nuovo messaggio dal tuo maniscalco", corpo);
+    const push = await inviaPush([cliente.cliente_user_id], "Nuovo messaggio dal tuo maniscalco", corpo, "equo",
+      { c: "fchat", id: cliente_mascalcia_id });
     return "maniscalco_a_cliente_dest=" + cliente.cliente_user_id + " push=" + JSON.stringify(push);
   } else {
-    const push = await inviaPush([maniscalco_id], `Nuovo messaggio da ${cliente.nome || "un cliente"}`, corpo);
+    const push = await inviaPush([maniscalco_id], `Nuovo messaggio da ${cliente.nome || "un cliente"}`, corpo, "equo",
+      { c: "mchat", id: cliente_mascalcia_id });
     return "cliente_a_maniscalco_dest=" + maniscalco_id + " push=" + JSON.stringify(push);
   }
 }
 
-async function inviaPush(externalIds, titolo, corpo, app = "equo") {
+// link: { c: tipo di chat, id: thread, ... } → la notifica apre direttamente quella chat
+async function inviaPush(externalIds, titolo, corpo, app = "equo", link = null) {
   if (!externalIds || externalIds.length === 0) return { attempted: false, motivo: "nessun_destinatario" };
   // lo staff della scuderia è iscritto alle push su scuderia.equohub.com → app OneSignal dedicata
   const scuderia = app === "scuderia" && process.env.ONESIGNAL_SCUDERIA_APP_ID && process.env.ONESIGNAL_SCUDERIA_REST_API_KEY;
@@ -194,6 +202,11 @@ async function inviaPush(externalIds, titolo, corpo, app = "equo") {
       include_aliases: { external_id: externalIds },
       headings: { en: titolo },
       contents: { en: testoTroncato || "Nuovo messaggio" },
+      ...(link ? {
+        data: { apri: "chat", ...link },
+        url: (app === "scuderia" ? "https://scuderia.equohub.com/" : "https://app.equohub.com/") +
+          "?" + new URLSearchParams(Object.fromEntries(Object.entries({ apri: "chat", ...link }).map(([k, v]) => [k, String(v ?? "")]))).toString(),
+      } : {}),
     }),
   });
   const bodyText = await res.text();

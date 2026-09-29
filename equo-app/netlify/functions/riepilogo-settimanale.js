@@ -143,7 +143,8 @@ async function inviaPush(userId, corpo) {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Key ${process.env.ONESIGNAL_REST_API_KEY}` },
     body: JSON.stringify({ app_id: process.env.ONESIGNAL_APP_ID, target_channel: "push", include_aliases: { external_id: [userId] },
-      headings: { en: "Pegasus · la tua settimana" }, contents: { en: corpo.slice(0, 140) }, web_url: URL_APP }),
+      headings: { en: "Pegasus · la tua settimana" }, contents: { en: corpo.slice(0, 140) },
+      data: { apri: "chat", c: "ai", id: "riepilogo", v: "proprietario" }, url: URL_APP + "/?apri=chat&c=ai&id=riepilogo&v=proprietario" }),
   });
   if (!res.ok) console.error("riepilogo push:", await res.text());
   return res.ok;
@@ -181,14 +182,14 @@ async function elaboraUtente(admin, p, oggi, settimana) {
   const ai = await consiglioAi(d, oggi);
   const testo = componiTesto(d, oggi, ai.testo, premium);
   // prima si "prenota" la settimana: se un altro giro l'ha già fatto, ci si ferma (niente doppioni)
-  const { error: errIns } = await admin.from("ai_riepiloghi").insert({ user_id: p.id, settimana, testo, costo_usd: ai.costo });
+  const { error: errIns } = await admin.from("ai_riepiloghi").insert({ user_id: p.id, settimana, vista: "proprietario", testo, costo_usd: ai.costo });
   if (errIns) return "gia_fatto";
   await admin.from("ai_messaggi").insert({ user_id: p.id, vista: "proprietario", ruolo: "assistant", contenuto: testo });
   let push = false, email = false;
   if (premium && haNovita(d)) {
     push = await inviaPush(p.id, testoPush(d)).catch(() => false);
     email = await inviaEmail(p.email, testo, p.full_name).catch(() => false);
-    await admin.from("ai_riepiloghi").update({ inviato_push: push, inviato_email: email }).eq("user_id", p.id).eq("settimana", settimana);
+    await admin.from("ai_riepiloghi").update({ inviato_push: push, inviato_email: email }).eq("user_id", p.id).eq("settimana", settimana).eq("vista", "proprietario");
   }
   return premium ? `premium push=${push} email=${email}` : "free";
 }
@@ -203,7 +204,7 @@ exports.handler = async () => {
   const { data: proprietari, error } = await admin.from("horses").select("owner_id").limit(20000);
   if (error) { console.error("riepilogo: lettura cavalli", error); return { statusCode: 500, body: "errore" }; }
   const ids = [...new Set((proprietari || []).map((h) => h.owner_id).filter(Boolean))];
-  const { data: fatti } = await admin.from("ai_riepiloghi").select("user_id").eq("settimana", settimana).limit(20000);
+  const { data: fatti } = await admin.from("ai_riepiloghi").select("user_id").eq("settimana", settimana).eq("vista", "proprietario").limit(20000);
   const giaFatti = new Set((fatti || []).map((f) => f.user_id));
   const daFare = ids.filter((id) => !giaFatti.has(id));
 
