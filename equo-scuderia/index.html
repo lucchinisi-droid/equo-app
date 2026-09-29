@@ -521,7 +521,7 @@ textarea.input{resize:vertical}
 
         <div class="nav-divider">Altre funzioni</div>
         <button class="nav-item" data-module="professionisti" onclick="showModule('professionisti')">
-          <i class="fa-solid fa-user-doctor"></i> <span class="nav-label">Professionisti</span> <span class="nav-unread-badge" id="pro-nav-badge" title="Messaggi e richieste dai professionisti" style="display:none">0</span>
+          <i class="fa-solid fa-user-doctor"></i> <span class="nav-label">Professionisti</span> <span class="nav-unread-badge sem-verde" id="pro-nav-badge" title="Professionisti: rosso = da confermare (collegamenti o appuntamenti), giallo = messaggi non letti">0</span>
         </button>
         <button class="nav-item" data-module="store" onclick="showModule('store')">
           <i class="fa-solid fa-store"></i> <span class="nav-label">Store</span> <span class="badge">SOON</span>
@@ -2606,12 +2606,12 @@ async function loadProfessionisti(){
   aggiornaBadgeProfessionisti();
 }
 
+// Contatore a semaforo (come gli altri del menu): rosso = qualcosa da confermare dalla struttura
+// (richieste di collegamento o appuntamenti proposti dal maniscalco), giallo = messaggi non letti, verde = tutto a posto.
 function aggiornaBadgeProfessionisti(){
-  const el = document.getElementById("pro-nav-badge");
-  if(!el) return;
-  const n = professionistiList.reduce((t, p) => t + (Number(p.non_letti) || 0) + (Number(p.da_confermare) || 0) + (p.stato === "da_confermare_struttura" ? 1 : 0), 0);
-  el.textContent = n;
-  el.style.display = n > 0 ? "flex" : "none";
+  const daConfermare = professionistiList.reduce((t, p) => t + (Number(p.da_confermare) || 0) + (p.stato === "da_confermare_struttura" ? 1 : 0), 0);
+  const nonLetti = professionistiList.reduce((t, p) => t + (Number(p.non_letti) || 0), 0);
+  impostaContatoreNav("pro-nav-badge", daConfermare + nonLetti, daConfermare ? "rosso" : nonLetti ? "giallo" : "verde");
 }
 
 async function refreshProfessionistiModule(){

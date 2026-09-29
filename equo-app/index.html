@@ -203,6 +203,36 @@ select.input{cursor:pointer}
 .menu-row-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
 
 .role-chip-row{display:flex;gap:8px;margin-top:8px}
+/* interruttore profilo proprietario <-> professionista */
+.profilo-switch-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.profilo-switch-row .lab{flex:1;font-size:13.5px;font-weight:700;color:var(--muted);transition:color .2s}
+.profilo-switch-row .lab.a{text-align:right}
+.profilo-switch-row .lab.on{color:var(--text)}
+.switch.big{width:54px;height:30px}
+.switch.big .switch-thumb{width:24px;height:24px}
+.switch.big input:checked + .switch-track .switch-thumb{transform:translateX(24px)}
+.switch.duale .switch-track{background:var(--accent)}
+.link-altro-profilo{display:block;width:100%;background:none;border:none;color:var(--muted);font-size:12px;
+  text-align:center;margin-top:8px;cursor:pointer;font-family:inherit;line-height:1.5}
+.link-altro-profilo u{color:var(--accent);text-decoration:underline}
+.richiesta-ok{text-align:center;padding:10px 4px}
+.richiesta-ok .emoji{font-size:38px;margin-bottom:8px}
+
+/* palette per profilo (sfumatura stile Revolut, dal più chiaro in alto al più scuro in basso) */
+:root[data-vista="owner"]{--grad-top:#1d3d32;--grad-bottom:#08140f}
+:root[data-theme="light"][data-vista="owner"]{--grad-top:#fbf8f1;--grad-bottom:#ece3d0}
+:root[data-vista="pro"]{
+  --bg:#2a1f0b; --surface:#3a2b10; --surface2:#4a3816; --card:#3a2b10;
+  --border:#5f4a22; --accent:#f0c05e; --accent2:#d9a441; --text:#f8f0de; --muted:#cdb88c;
+  --grad-top:#6b4f18; --grad-bottom:#1f1707}
+:root[data-theme="light"][data-vista="pro"]{
+  --bg:#f5e8c9; --surface:#fffaf0; --surface2:#f6ead0; --card:#fffaf0;
+  --border:#e6d3a6; --accent:#a8721c; --accent2:#8a5c15; --text:#3b2c10; --muted:#7c6a45;
+  --grad-top:#fbf1dc; --grad-bottom:#ecd49f}
+:root[data-vista] body{background:linear-gradient(180deg,var(--grad-top) 0%,var(--grad-bottom) 100%) fixed;background-color:var(--grad-bottom)}
+:root[data-vista] #screen-app{background:transparent}
+:root[data-vista] .topbar{background:transparent}
 .role-chip{flex:1;text-align:center;padding:9px 8px;border-radius:10px;border:1px solid var(--border);
   background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text)}
 .role-chip.active{background:var(--accent);color:#14231b;border-color:var(--accent)}
@@ -272,13 +302,22 @@ select.input{cursor:pointer}
   90%{transform:rotate(3deg) scale(1.02)}
 }
 @media (prefers-reduced-motion: reduce){.ai-fab .ai-fab-agente{animation:none!important}}
-.ai-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
-  z-index:70;align-items:flex-end;justify-content:center}
+.ai-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  z-index:70;align-items:flex-end;justify-content:center;overscroll-behavior:contain}
 .ai-sheet-overlay.active{display:flex}
-.ai-sheet{background:var(--bg);width:100%;max-width:480px;height:58vh;
-  border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden}
+/* chat AI: a tutta pagina sul telefono, altezza sulla parte visibile (tastiera iOS compresa, --ai-vh via visualViewport) */
+.ai-sheet{background:var(--bg);width:100%;max-width:none;
+  height:var(--ai-vh, 100dvh);
+  border-radius:0;display:flex;flex-direction:column;overflow:hidden;border:none}
+.ai-sheet .chat-wrap{flex:1;min-height:0}
+@media (min-width:700px){.ai-sheet{max-width:480px;height:min(78vh, 760px);border-radius:20px;margin-bottom:24px;border:1px solid var(--border);box-shadow:0 -8px 30px rgba(0,0,0,.35)}}
+body.ai-aperta{overflow:hidden}
+@media (max-width:520px){.ai-sheet .chat-bubble.ai{max-width:92%}.ai-sheet .chat-bubble.user{max-width:85%}}
 .ai-sheet-header{display:flex;align-items:center;justify-content:space-between;
   padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ai-sheet .ai-sheet-header{padding-top:calc(14px + env(safe-area-inset-top))}
+@media (min-width:700px){.ai-sheet .ai-sheet-header{padding-top:14px}}
 
 /* AI CHAT */
 .chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
@@ -579,7 +618,7 @@ select.input{cursor:pointer}
   <div id="onb-step-1" style="width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center">
     <img src="assets/logo-equo.png" alt="Equo" class="auth-logo-img">
     <div class="section-title" style="text-align:center;margin-bottom:6px">Cosa ti porta su Equo?</div>
-    <div class="muted" style="text-align:center;font-size:13.5px;margin-bottom:16px">Scegli il profilo più adatto a te — potrai sempre cambiarlo dal menu.</div>
+    <div class="muted" style="text-align:center;font-size:13.5px;margin-bottom:16px">Scegli il profilo più adatto a te. In seguito potrai aggiungere un secondo profilo dal menu.</div>
     <div class="card" id="onb-consent-group" style="width:100%;margin-bottom:20px;display:none">
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.55;cursor:pointer">
         <input type="checkbox" id="onb-consent" style="margin-top:3px;flex-shrink:0">
@@ -595,9 +634,9 @@ select.input{cursor:pointer}
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-wrench"></i></span></div>
         <div><div class="role-card-title">🔧 Sono un professionista</div><div class="role-card-desc">Maniscalco, veterinario, istruttore</div></div>
       </button>
-      <button class="role-card" onclick="chooseMainRole('gestore_struttura')">
+      <button class="role-card" onclick="openRichiestaStruttura()">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-building"></i></span></div>
-        <div><div class="role-card-title">🏇 Gestisco un centro/scuderia</div><div class="role-card-desc">Ti serve Equo Scuderia, il gestionale dedicato</div></div>
+        <div><div class="role-card-title">🏇 Gestisco un centro/scuderia</div><div class="role-card-desc">Lasciaci i tuoi contatti: ti attiviamo Equo Scuderia</div></div>
       </button>
     </div>
   </div>
@@ -607,6 +646,7 @@ select.input{cursor:pointer}
       <button class="back-btn" onclick="showOnboardingStep(1)"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
       <div class="section-title" style="margin-bottom:0;font-size:17px">Che tipo di professionista sei?</div>
     </div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5;margin-top:10px;text-align:center">La professione scelta resta legata al tuo account e al badge Equo Certified: non si potrà cambiare dall'app.</div>
     <div class="role-list" style="margin-top:16px">
       <button class="role-card" onclick="chooseMainRole('maniscalco')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
@@ -1021,7 +1061,7 @@ select.input{cursor:pointer}
   </div>
 
   <!-- AI SHEET (mezza schermata) -->
-  <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="closeOut(event,'ai-sheet-overlay')">
+  <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="if(event.target.id==='ai-sheet-overlay')closeAiSheet()">
     <div class="ai-sheet">
       <div class="ai-sheet-header">
         <div style="display:flex;align-items:center;gap:8px;font-weight:700">
@@ -1621,13 +1661,17 @@ select.input{cursor:pointer}
         <span class="fa-icon"><i class="fa-solid fa-id-badge"></i></span>
         <span id="menu-role-label">—</span>
       </div>
-      <button class="btn btn-ghost btn-sm" style="padding:6px 10px" onclick="closeModal('modal-menu');reopenOnboarding()">Cambia</button>
     </div>
-    <div class="role-chip-row" id="menu-dual-role-switcher" style="display:none">
-      <button class="role-chip" id="chip-vista-a"></button>
-      <button class="role-chip" id="chip-vista-b"></button>
+    <div class="profilo-switch-row" id="menu-dual-role-switcher" style="display:none">
+      <span class="lab a" id="sw-lab-a">Proprietario</span>
+      <label class="switch big duale">
+        <input type="checkbox" id="profilo-switch" onchange="onProfiloSwitch(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+      <span class="lab b" id="sw-lab-b">Professionista</span>
     </div>
     <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
+    <button class="link-altro-profilo" onclick="openRichiestaProfilo()">Hai bisogno di aggiungere un altro profilo? <u>Clicca qui</u></button>
 
     <div id="menu-pro-section" style="display:none">
       <div class="menu-section-label">Attività professionale</div>
@@ -1749,6 +1793,7 @@ select.input{cursor:pointer}
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">Che tipo di professionista sei?</div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5">Scegli con attenzione: la professione resta legata al tuo account e al badge Equo Certified e non si potrà cambiare dall'app.</div>
     <div class="role-list" style="margin-top:8px">
       <button class="role-card" onclick="confirmAddSecondaryRole('maniscalco')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
@@ -1762,6 +1807,73 @@ select.input{cursor:pointer}
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
         <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Lezioni e allievi</div></div>
       </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-richiesta-struttura" onclick="closeOut(event,'modal-richiesta-struttura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="rs-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Equo per la tua struttura</div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Lasciaci i dati del tuo centro o della tua scuderia: ti ricontattiamo noi per attivare Equo Scuderia, il gestionale dedicato.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Nome struttura</label><input class="input" id="rs-nome" maxlength="160" placeholder="es. Centro Ippico Le Querce"></div>
+        <div class="input-group"><label class="input-label">Via</label><input class="input" id="rs-via" maxlength="200" placeholder="Via e numero civico"></div>
+        <div class="input-group"><label class="input-label">Città</label><input class="input" id="rs-citta" maxlength="120" placeholder="Città (provincia)"></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input" id="rs-email" type="email" maxlength="200" placeholder="email@struttura.it"></div>
+        <div class="input-group"><label class="input-label">Telefono</label><input class="input" id="rs-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
+        <div class="muted" style="font-size:11.5px;line-height:1.5">Useremo questi dati solo per ricontattarti, come previsto dall'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.</div>
+        <div class="auth-error" id="rs-error" style="display:none"></div>
+        <button class="btn btn-primary" id="rs-btn" onclick="inviaRichiestaStruttura()" style="width:100%;margin-top:4px">Invia</button>
+      </div>
+    </div>
+    <div id="rs-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">🏇</div>
+      <div class="section-title" style="margin-bottom:6px">Grazie, richiesta inviata!</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">Ti ricontatteremo al più presto per attivare Equo Scuderia. Se hai anche un cavallo o sei un professionista, puoi intanto scegliere quel profilo.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeModal('modal-richiesta-struttura')">Ok</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-richiesta-profilo" onclick="closeOut(event,'modal-richiesta-profilo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="rp-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-user-plus"></i></span>Un altro profilo</div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Dicci di cosa hai bisogno: verifichiamo la richiesta e ti ricontattiamo noi.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Cosa ti serve?</label>
+          <select class="input" id="rp-richiesta" onchange="aggiornaFormRichiestaProfilo()">
+            <option value="seconda_professione">Aggiungere una seconda professione</option>
+            <option value="cambio_professione">Cambiare la mia professione</option>
+            <option value="struttura">Aggiungere un profilo struttura (centro/scuderia)</option>
+            <option value="altro">Altro</option>
+          </select></div>
+        <div class="input-group" id="rp-prof-group"><label class="input-label">Professione</label>
+          <select class="input" id="rp-professione">
+            <option value="maniscalco">Maniscalco</option>
+            <option value="veterinario">Veterinario</option>
+            <option value="istruttore">Istruttore/Trainer</option>
+          </select></div>
+        <div id="rp-struttura-group" style="display:none;flex-direction:column;gap:12px">
+          <div class="input-group"><label class="input-label">Nome struttura</label><input class="input" id="rp-nome-struttura" maxlength="160"></div>
+          <div class="input-group"><label class="input-label">Città</label><input class="input" id="rp-citta" maxlength="120"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Nome e cognome</label><input class="input" id="rp-nome" maxlength="160"></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input" id="rp-email" type="email" maxlength="200"></div>
+        <div class="input-group"><label class="input-label">Telefono</label><input class="input" id="rp-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
+        <div class="input-group"><label class="input-label">Messaggio (facoltativo)</label><textarea class="input" id="rp-messaggio" rows="3" maxlength="1500" placeholder="es. sono veterinario e anche maniscalco"></textarea></div>
+        <div class="auth-error" id="rp-error" style="display:none"></div>
+        <button class="btn btn-primary" id="rp-btn" onclick="inviaRichiestaProfilo()" style="width:100%;margin-top:4px">Invia</button>
+      </div>
+    </div>
+    <div id="rp-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">✉️</div>
+      <div class="section-title" style="margin-bottom:6px">Richiesta inviata</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">Ti ricontatteremo al più presto.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeModal('modal-richiesta-profilo')">Ok</button>
     </div>
   </div>
 </div>
@@ -1944,15 +2056,18 @@ select.input{cursor:pointer}
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span>Collega il tuo maniscalco</div>
     <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
-      Inserisci il codice che ti ha dato il tuo maniscalco: potrai scrivergli in chat e ricevere qui appuntamenti e riepiloghi in PDF.
+      Inserisci o scansiona il codice del tuo maniscalco (il suo codice personale EQUO-PRO-… oppure quello che ti ha dato): potrai scrivergli in chat e ricevere qui appuntamenti e riepiloghi in PDF.
     </div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Codice maniscalco</label>
-        <input class="input" id="collega-maniscalco-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')collegaManiscalco()">
+        <input class="input" id="collega-maniscalco-codice" placeholder="EQUO-PRO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')collegaManiscalco()">
       </div>
       <div class="auth-error" id="collega-maniscalco-error" style="display:none"></div>
       <button class="btn btn-primary" id="collega-maniscalco-btn" onclick="collegaManiscalco()" style="width:100%;margin-top:6px">Collega</button>
+      <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
+        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
+      </button>
     </div>
   </div>
 </div>
@@ -3219,6 +3334,81 @@ async function chooseMainRole(ruolo){
   }
 }
 
+/* ---------- RICHIESTE DI CONTATTO (struttura al primo accesso / altro profilo) ---------- */
+function openRichiestaStruttura(){
+  ["rs-nome","rs-via","rs-citta","rs-telefono"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("rs-email").value = currentUser?.email || "";
+  document.getElementById("rs-error").style.display = "none";
+  document.getElementById("rs-form").style.display = "block";
+  document.getElementById("rs-ok").style.display = "none";
+  openModal("modal-richiesta-struttura");
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function salvaRichiestaContatto(row){
+  if(DEMO_MODE) return null;
+  const { error } = await sb.from("richieste_contatto").insert({ ...row, user_id: currentUser.id });
+  return error;
+}
+
+async function inviaRichiestaStruttura(){
+  const v = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById("rs-error");
+  errBox.style.display = "none";
+  const row = { tipo: "struttura", nome_struttura: v("rs-nome"), via: v("rs-via"), citta: v("rs-citta"), email: v("rs-email"), telefono: v("rs-telefono") };
+  if(!row.nome_struttura || !row.via || !row.citta || !row.email || !row.telefono){
+    errBox.textContent = "Compila tutti i campi."; errBox.style.display = "block"; return;
+  }
+  if(!EMAIL_RE.test(row.email)){ errBox.textContent = "Controlla l'indirizzo email."; errBox.style.display = "block"; return; }
+  const btn = document.getElementById("rs-btn"); btn.disabled = true;
+  const error = await salvaRichiestaContatto(row);
+  btn.disabled = false;
+  if(error){ console.error("richiesta struttura:", error); errBox.textContent = error.message || "Invio non riuscito, riprova."; errBox.style.display = "block"; return; }
+  document.getElementById("rs-form").style.display = "none";
+  document.getElementById("rs-ok").style.display = "block";
+}
+
+function openRichiestaProfilo(){
+  closeModal("modal-menu");
+  document.getElementById("rp-richiesta").value = "seconda_professione";
+  ["rp-nome-struttura","rp-citta","rp-telefono","rp-messaggio"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("rp-nome").value = currentUser?.fullName || currentUser?.full_name || document.getElementById("profile-name")?.textContent?.replace("—","").trim() || "";
+  document.getElementById("rp-email").value = currentUser?.email || "";
+  document.getElementById("rp-error").style.display = "none";
+  document.getElementById("rp-form").style.display = "block";
+  document.getElementById("rp-ok").style.display = "none";
+  aggiornaFormRichiestaProfilo();
+  openModal("modal-richiesta-profilo");
+}
+
+function aggiornaFormRichiestaProfilo(){
+  const r = document.getElementById("rp-richiesta").value;
+  document.getElementById("rp-prof-group").style.display = (r === "seconda_professione" || r === "cambio_professione") ? "flex" : "none";
+  document.getElementById("rp-struttura-group").style.display = r === "struttura" ? "flex" : "none";
+}
+
+async function inviaRichiestaProfilo(){
+  const v = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById("rp-error");
+  errBox.style.display = "none";
+  const richiesta = v("rp-richiesta");
+  const row = { tipo: "profilo", richiesta, nome: v("rp-nome"), email: v("rp-email"), telefono: v("rp-telefono"), messaggio: v("rp-messaggio") || null,
+    professione: (richiesta === "seconda_professione" || richiesta === "cambio_professione") ? v("rp-professione") : null,
+    nome_struttura: richiesta === "struttura" ? v("rp-nome-struttura") : null, citta: richiesta === "struttura" ? v("rp-citta") : null };
+  if(!row.nome || !row.email || !row.telefono){ errBox.textContent = "Inserisci nome, email e telefono."; errBox.style.display = "block"; return; }
+  if(!EMAIL_RE.test(row.email)){ errBox.textContent = "Controlla l'indirizzo email."; errBox.style.display = "block"; return; }
+  if(richiesta === "struttura" && (!row.nome_struttura || !row.citta)){ errBox.textContent = "Inserisci nome e città della struttura."; errBox.style.display = "block"; return; }
+  if(richiesta === "altro" && !row.messaggio){ errBox.textContent = "Scrivici in breve di cosa hai bisogno."; errBox.style.display = "block"; return; }
+  const btn = document.getElementById("rp-btn"); btn.disabled = true;
+  const error = await salvaRichiestaContatto(row);
+  btn.disabled = false;
+  if(error){ console.error("richiesta profilo:", error); errBox.textContent = error.message || "Invio non riuscito, riprova."; errBox.style.display = "block"; return; }
+  document.getElementById("rp-form").style.display = "none";
+  document.getElementById("rp-ok").style.display = "block";
+}
+
+// Non più raggiungibile dal menu (il profilo non si cambia dall'app): resta solo per compatibilità.
 function reopenOnboarding(){
   document.getElementById("screen-app").classList.remove("active");
   document.getElementById("screen-onboarding").classList.add("active");
@@ -3263,14 +3453,17 @@ function renderMenuDualRole(){
   if(secondario){
     chipRow.style.display = "flex";
     addBtn.style.display = "none";
-    const a = document.getElementById("chip-vista-a");
-    const b = document.getElementById("chip-vista-b");
-    a.textContent = ROLE_LABELS[primario] || primario;
-    b.textContent = ROLE_LABELS[secondario] || secondario;
-    a.className = "role-chip" + (attiva === primario ? " active" : "");
-    b.className = "role-chip" + (attiva === secondario ? " active" : "");
-    a.onclick = () => switchVista(primario);
-    b.onclick = () => switchVista(secondario);
+    // a sinistra sempre il proprietario, a destra la professione
+    const pro = PRO_ROLES.includes(primario) ? primario : secondario;
+    const own = pro === primario ? secondario : primario;
+    const la = document.getElementById("sw-lab-a"), lb = document.getElementById("sw-lab-b");
+    la.textContent = ROLE_LABELS[own] || own;
+    lb.textContent = ROLE_LABELS[pro] || pro;
+    const sw = document.getElementById("profilo-switch");
+    sw.checked = attiva === pro;
+    la.classList.toggle("on", attiva !== pro);
+    lb.classList.toggle("on", attiva === pro);
+    sw.dataset.own = own; sw.dataset.pro = pro;
   } else {
     chipRow.style.display = "none";
     const isPro = PRO_ROLES.includes(primario);
@@ -3278,6 +3471,15 @@ function renderMenuDualRole(){
     addBtn.textContent = isPro ? "+ Aggiungi profilo Proprietario" : "+ Aggiungi profilo Professionista";
     addBtn.onclick = isPro ? () => confirmAddSecondaryRole("proprietario") : () => openModal("modal-add-pro-role");
   }
+}
+
+function onProfiloSwitch(versoPro){
+  const sw = document.getElementById("profilo-switch");
+  const ruolo = versoPro ? sw.dataset.pro : sw.dataset.own;
+  document.getElementById("sw-lab-a").classList.toggle("on", !versoPro);
+  document.getElementById("sw-lab-b").classList.toggle("on", versoPro);
+  // piccola pausa per far vedere l'animazione dell'interruttore
+  setTimeout(() => switchVista(ruolo), 180);
 }
 
 async function switchVista(ruolo){
@@ -3292,11 +3494,24 @@ async function confirmAddSecondaryRole(ruolo){
     currentUser.ruoloSecondario = ruolo;
   } else {
     const { error } = await sb.from("profiles").update({ ruolo_secondario: ruolo }).eq("id", currentUser.id);
-    if(error){ showToast("Non sono riuscito a salvare, riprova."); return; }
+    if(error){ console.error("confirmAddSecondaryRole:", error); showToast(error.message && /profil|professione/i.test(error.message) ? error.message : "Non sono riuscito a salvare, riprova."); return; }
     currentUser.ruoloSecondario = ruolo;
   }
   closeModal("modal-menu");
   await enterApp(ruolo);
+}
+
+// Colori per profilo: proprietario beige/verde scuro, professionista ocra tenue/oro scuro (vedi CSS data-vista)
+function applicaPaletteVista(ruolo){
+  const pro = PRO_ROLES.includes(ruolo);
+  document.documentElement.setAttribute("data-vista", pro ? "pro" : "owner");
+  aggiornaThemeColorMeta();
+}
+function aggiornaThemeColorMeta(){
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(!m) return;
+  const top = getComputedStyle(document.documentElement).getPropertyValue("--grad-top").trim();
+  m.setAttribute("content", top || getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#0e2019");
 }
 
 async function enterApp(ruolo){
@@ -3304,6 +3519,8 @@ async function enterApp(ruolo){
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();
   currentUser.vistaAttiva = ruolo;
+  applicaPaletteVista(ruolo);
+  try{ localStorage.setItem("equo-vista-" + currentUser.id, ruolo); }catch(e){}
   aggiornaFabAi();
   controllaNovitaAi();
   controllaAggiornamentoApp();
@@ -3736,6 +3953,8 @@ async function logout(){
   if(!DEMO_MODE) await sb.auth.signOut();
   currentUser = null;
   DEMO_MODE = false;
+  document.documentElement.removeAttribute("data-vista");
+  aggiornaThemeColorMeta();
   closeModal("modal-menu");
   document.getElementById("screen-app").classList.remove("active");
   document.getElementById("screen-auth").classList.add("active");
@@ -3911,7 +4130,12 @@ async function continueBootAfterProfile(){
     showOnboardingStep(1);
     return;
   }
-  await enterApp(currentUser.ruolo);
+  let vista = currentUser.ruolo;
+  try{
+    const salvata = localStorage.getItem("equo-vista-" + currentUser.id);
+    if(salvata && (salvata === currentUser.ruolo || salvata === currentUser.ruoloSecondario)) vista = salvata;
+  }catch(e){}
+  await enterApp(vista);
   checkPendingDeletion();
   await handleCheckoutReturn();
 }
@@ -4004,6 +4228,7 @@ function toggleTheme(){
   document.documentElement.setAttribute("data-theme", next);
   localStorage.setItem("equo-theme", next);
   updateThemeMenuUI();
+  aggiornaThemeColorMeta();
 }
 
 function updateThemeMenuUI(){
@@ -4205,7 +4430,21 @@ async function toggleRiepilogoSettimanale(attivo){
   if(error){ console.error("toggleRiepilogoSettimanale:", error); document.getElementById("riepilogo-switch").checked = !attivo; showToast("Non sono riuscito a salvare, riprova."); return; }
   showToast(attivo ? "Pegasus ti manderà il riepilogo ogni lunedì" : "Riepilogo settimanale disattivato");
 }
+function aggiornaAltezzaAiSheet(){
+  const vv = window.visualViewport;
+  const h = vv ? vv.height : window.innerHeight;
+  document.documentElement.style.setProperty("--ai-vh", h + "px");
+  const ov = document.getElementById("ai-sheet-overlay");
+  // con la tastiera aperta su iOS la pagina scorre: il pannello segue la parte visibile
+  if(ov && vv){ ov.style.top = vv.offsetTop + "px"; ov.style.height = vv.height + "px"; ov.style.bottom = "auto"; }
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
+  window.visualViewport.addEventListener("scroll", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
+}
 async function openAiSheet(){
+  aggiornaAltezzaAiSheet();
+  document.body.classList.add("ai-aperta");
   document.getElementById("ai-sheet-overlay").classList.add("active");
   aggiornaTestataAi();
   const conNovita = document.getElementById("ai-fab")?.classList.contains("con-novita");
@@ -4281,7 +4520,7 @@ function showToast(message){
   toastTimer = setTimeout(() => el.classList.remove("active"), 2600);
 }
 function showAiComingSoon(){ openAiSheet(); }
-function closeAiSheet(){ document.getElementById("ai-sheet-overlay").classList.remove("active"); }
+function closeAiSheet(){ document.getElementById("ai-sheet-overlay").classList.remove("active"); document.body.classList.remove("ai-aperta"); }
 
 /* ---------- HORSES ---------- */
 async function loadHorses(){
@@ -7350,11 +7589,30 @@ function scanQrLoop(){
   const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
   if(code && code.data){
     closeQrScanner();
-    document.getElementById("new-chat-codice").value = code.data.trim().toUpperCase();
-    startNewChat();
+    gestisciCodiceScansionato(code.data);
     return;
   }
   qrScanRAF = requestAnimationFrame(scanQrLoop);
+}
+
+// Instrada il codice letto dal QR: EQUO-OWN-… = chat tra proprietari, EQUO-PRO-… o EQUO-XXXXX = collega il maniscalco
+function gestisciCodiceScansionato(testo){
+  const raw = String(testo || "").trim().toUpperCase();
+  const m = raw.match(/EQUO-(?:PRO-|OWN-)?[A-Z0-9]{4,8}/);
+  const codice = m ? m[0] : raw;
+  if(codice.startsWith("EQUO-OWN-") || codice === "EQUO-OWN-DEMO"){
+    closeModal("modal-collega-maniscalco");
+    document.getElementById("new-chat-codice").value = codice;
+    document.getElementById("new-chat-error").style.display = "none";
+    openModal("modal-new-chat");
+    startNewChat();
+    return;
+  }
+  closeModal("modal-new-chat");
+  document.getElementById("collega-maniscalco-codice").value = codice;
+  document.getElementById("collega-maniscalco-error").style.display = "none";
+  openModal("modal-collega-maniscalco");
+  collegaManiscalco();
 }
 
 /* ---------- CHAT TRA COLLEGHI (vista professionista) ---------- */
@@ -7427,6 +7685,8 @@ async function startNewChat(){
   const errBox = document.getElementById("new-chat-error");
   errBox.style.display = "none";
   if(!codice) return;
+  // codice di un maniscalco inserito per errore qui: lo colleghiamo come maniscalco
+  if(codice.startsWith("EQUO-PRO-") || /^EQUO-[A-Z0-9]{5}$/.test(codice)){ gestisciCodiceScansionato(codice); return; }
   const altro = await DB.findProprietarioByCodice(codice);
   if(!altro){
     errBox.textContent = "Codice non valido." + (DEMO_MODE ? " (in demo prova EQUO-OWN-DEMO)" : "");
