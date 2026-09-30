@@ -20,6 +20,10 @@
 [functions."riepilogo-hammer"]
   schedule = "0 6-9 * * 1"
 
+# Merlino: radar della concorrenza per i centri PREMIUM, il lunedì alle 7 UTC (8-9 in Italia).
+[functions."radar-merlino-settimanale"]
+  schedule = "0 7 * * 1"
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]

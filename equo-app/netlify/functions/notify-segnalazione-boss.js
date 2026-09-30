@@ -24,15 +24,19 @@ exports.handler = async (event) => {
   if (payload.type === "UPDATE") {
     if (!s.risposta || s.risposta_notificata_at) return { statusCode: 200, body: JSON.stringify({ esito: "niente_da_notificare" }) };
     let ok = false;
-    if (process.env.ONESIGNAL_APP_ID && process.env.ONESIGNAL_REST_API_KEY) {
+    // Athena vive in Equo Scuderia: push con l'app OneSignal di scuderia.equohub.com
+    const scud = s.vista === "scuderia" && process.env.ONESIGNAL_SCUDERIA_APP_ID && process.env.ONESIGNAL_SCUDERIA_REST_API_KEY;
+    const appId = scud ? process.env.ONESIGNAL_SCUDERIA_APP_ID : process.env.ONESIGNAL_APP_ID;
+    const restKey = scud ? process.env.ONESIGNAL_SCUDERIA_REST_API_KEY : process.env.ONESIGNAL_REST_API_KEY;
+    if (appId && restKey && (s.vista !== "scuderia" || scud)) {
       const corpo = s.risposta.replace(/\s+/g, " ").trim();
       const link = { apri: "chat", c: "ai", id: s.id, v: s.vista };
       const res = await fetch("https://api.onesignal.com/notifications?c=push", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Key ${process.env.ONESIGNAL_REST_API_KEY}` },
-        body: JSON.stringify({ app_id: process.env.ONESIGNAL_APP_ID, target_channel: "push", include_aliases: { external_id: [s.user_id] },
+        headers: { "Content-Type": "application/json", Authorization: `Key ${restKey}` },
+        body: JSON.stringify({ app_id: appId, target_channel: "push", include_aliases: { external_id: [s.user_id] },
           headings: { en: `${nomeAgente} · risposta dai Boss` }, contents: { en: corpo.length > 140 ? corpo.slice(0, 137) + "…" : corpo },
-          data: link, url: "https://app.equohub.com/?" + new URLSearchParams(link).toString() }),
+          data: link, url: (scud ? "https://scuderia.equohub.com/?" : "https://app.equohub.com/?") + new URLSearchParams(link).toString() }),
       });
       ok = res.ok;
       if (!res.ok) console.error("push risposta boss:", await res.text());

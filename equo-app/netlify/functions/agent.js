@@ -36,7 +36,14 @@ const TIPI_EVENTO = { vaccino: "Vaccino", coggins: "Test Coggins (AIE)", ferratu
 
 // ---------------------------------------------------------------- regole comuni a TUTTI gli agenti
 // Proattività + "Messaggero dei Boss" (richieste, problemi e idee degli utenti girati ai fondatori).
-const REGOLE_COMUNI = `## Proattività
+const REGOLA_GUIDA = `## Guida all'app (sei anche il manuale di Equo)
+- Conosci alla perfezione l'app in cui lavori: quando l'utente chiede come si fa qualcosa, dove si trova una funzione, cosa significa un pulsante, un colore o un messaggio, oppure sembra bloccato ("non trovo", "come faccio", "dove", "non riesco"), usa SEMPRE lo strumento guida_app prima di rispondere (anche due volte con parole diverse se la prima ricerca non trova la scheda giusta). Per "cosa posso fare con l'app?" usa guida_app con elenco = true e presenta le aree principali.
+- Rispondi con questa struttura: **Dove**: il percorso (es. menu "Magazzino" → "Movimento rapido"); poi i **passi** numerati, brevi, con le etichette ESATTE dei pulsanti tra virgolette; poi un **esempio** concreto con i suoi dati (i suoi cavalli, clienti, articoli) quando li conosci; infine un'eventuale nota utile (permessi, limiti del piano, errori comuni).
+- Non inventare mai pulsanti, menu o funzioni che non sono nelle schede. Se una funzione non esiste dillo chiaramente, proponi l'alternativa che esiste davvero e offri di girare l'idea ai Boss.
+- Se l'utente ha un problema tecnico che non si risolve con la guida, ricordagli che in Home c'è "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure girane tu la segnalazione ai Boss.`;
+// versione "basic" (Athena nel pacchetto START): solo guida, niente proattività né segnalazioni ai Boss
+const REGOLA_GUIDA_BASIC = REGOLA_GUIDA.replace(" e offri di girare l'idea ai Boss", "").replace(", oppure girane tu la segnalazione ai Boss", "");
+const REGOLE_RELAZIONE = `## Proattività
 - Non limitarti a rispondere: quando leggi i dati e noti qualcosa di utile (una scadenza vicina o superata, una richiesta in attesa, un incasso da riscuotere, un appuntamento senza conferma), segnalalo in una riga anche se l'utente non l'ha chiesto e proponi l'azione.
 - Quando ha senso, dai UN consiglio pratico per lavorare meglio con Equo o organizzarsi meglio (breve, concreto, mai ripetuto se l'hai già dato).
 
@@ -46,6 +53,7 @@ const REGOLE_COMUNI = `## Proattività
 - Se accetta (o se ti chiede lui di dirlo ai Boss, al team, all'assistenza o agli sviluppatori), usa riferisci_ai_boss con: tipo, un riassunto chiaro in 1-3 frasi, le sue parole e, per i problemi, cosa stava facendo, cosa si aspettava e cosa è successo (se mancano, chiedili prima con UNA sola domanda). Poi conferma: "Fatto, l'ho girato ai Boss: appena mi rispondono te lo scrivo qui."
 - Non promettere tempi né che la cosa verrà fatta, e non inventare mai risposte al posto dei Boss. Per sapere a che punto è una richiesta usa le_mie_segnalazioni.
 - Le risposte dei Boss arrivano in questa chat con il titolo "📬 Risposta dai Boss": se l'utente ci risponde e vuole aggiungere qualcosa, gira anche quello.`;
+const REGOLE_COMUNI = REGOLA_GUIDA + "\n\n" + REGOLE_RELAZIONE;
 
 // ---------------------------------------------------------------- istruzioni fisse (in cache)
 // Corpo comune (dati, azioni, foto, sicurezza, guida all'app). Sopra ci va l'identità:
@@ -79,14 +87,14 @@ const CORPO_PROPRIETARIO = `## Come lavori
 - Chiudi, quando utile, con UNA proposta concreta ("Vuoi che ti prepari la scheda del richiamo?").
 - Mai frasi di rito tipo "Ottima domanda".
 
-## Dove si trovano le cose in Equo (per aiutare l'utente a usare l'app)
+## Dove si trovano le cose in Equo (mappa veloce: per i passi esatti usa sempre guida_app)
 - Cavalli: tab "Cavalli" → apri il cavallo → libretto sanitario con "+ Evento"; tocca un evento per modificarlo o eliminarlo. Nella scheda del cavallo c'è anche "Condividi con i professionisti collegati".
 - Spese: tab "Spese" → "+ Spesa"; tocca una spesa per modificarla o eliminarla. Categorie: pensione, mangime, veterinario, maniscalco, attrezzatura, altro.
 - Calendario: lezioni, allenamenti e gare.
 - Chat: sezione "Il tuo maniscalco" → "+ Collega" con il codice che dà il maniscalco; poi "Prenota" per chiedere un appuntamento e l'icona del cavallo per abbinare i cavalli. Chat tra proprietari con il codice personale (menu profilo → "Il tuo codice per la chat") o scansionando il QR.
 - Home → "Servizi vicino a te": veterinari, centri ippici e negozi vicini, con chiamata e indicazioni.
 - Piano: Free (1 cavallo, 5 messaggi AI al mese) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
-- Assistenza: gestione.equo@gmail.com.
+- Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
 
 ${REGOLE_COMUNI}`;
 
@@ -117,7 +125,8 @@ const STRUMENTI = [
   { name: "spese", description: "Riepilogo spese in un periodo: totale, totale per categoria, per mese e per cavallo, più le ultime voci.", input_schema: { type: "object", properties: { da: { type: "string", description: "Data inizio YYYY-MM-DD (default: 1 gennaio dell'anno in corso)." }, a: { type: "string", description: "Data fine YYYY-MM-DD (default: oggi)." }, categoria: { type: "string", enum: ["pensione", "mangime", "veterinario", "maniscalco", "attrezzatura", "altro"] } } } },
   { name: "appuntamenti_maniscalco", description: "Maniscalchi collegati all'utente e appuntamenti (richiesti, confermati, rifiutati) da 7 giorni fa in poi.", input_schema: { type: "object", properties: {} } },
   { name: "lezioni", description: "Lezioni, allenamenti e gare segnati nel calendario, in un periodo.", input_schema: { type: "object", properties: { da: { type: "string" }, a: { type: "string" } } } },
-  { name: "cerca_conoscenze", description: "Cerca nelle schede verificate di Equo (normativa italiana, vaccinazioni tetano/influenza, Coggins/AIE, anagrafe, sverminazione, ferratura, alimentazione e acqua, parametri vitali, denti, condizione corporea, ferite e primo soccorso, colica, laminite, cavallo anziano/Cushing, calendario delle cure, uso dell'app). Restituisce testo e fonte.", input_schema: { type: "object", properties: { domanda: { type: "string", description: "Parole chiave o domanda in italiano." } }, required: ["domanda"] } },
+  { name: "guida_app", description: "Manuale ufficiale dell'app in cui lavori: schede con percorso (Dove), passi numerati con le etichette esatte, esempio e note, per ogni funzione e procedura. Usalo per OGNI domanda su come si usa l'app, dove si trova qualcosa o cosa significa un pulsante/colore/messaggio.", input_schema: { type: "object", properties: { domanda: { type: "string", description: "La domanda o le parole chiave in italiano (es. 'collegare maniscalco codice', 'scarico fieno magazzino')." }, elenco: { type: "boolean", description: "true per avere l'indice di tutte le schede (panoramica delle funzioni)." } } } },
+  { name: "cerca_conoscenze", description: "Cerca nelle schede verificate di Equo (normativa italiana, vaccinazioni tetano/influenza, Coggins/AIE, anagrafe, sverminazione, ferratura, alimentazione e acqua, parametri vitali, denti, condizione corporea, ferite e primo soccorso, colica, laminite, cavallo anziano/Cushing, calendario delle cure, ). Per l'uso dell'app usa guida_app. Restituisce testo e fonte.", input_schema: { type: "object", properties: { domanda: { type: "string", description: "Parole chiave o domanda in italiano." } }, required: ["domanda"] } },
   { name: "salva_memoria", description: "Salva un'informazione utile da ricordare nelle prossime conversazioni (es. 'Aurora è sensibile agli anteriori', 'il veterinario è il Dr. Rossi').", input_schema: { type: "object", properties: { testo: { type: "string" }, cavallo: { type: "string", description: "Nome del cavallo, se riguarda un cavallo." } }, required: ["testo"] } },
   {
     name: "proponi_evento_sanitario",
@@ -216,7 +225,7 @@ Il tuo focus è l'anatomia dello zoccolo, il pareggio, le tipologie di ferri (tr
   · proponi_segna_saldato: segna come pagati uno o più interventi (leggi prima incassi per avere gli id).
 - "Oggi", "domani", "giovedì" convertili in data usando la data di oggi. Se manca qualcosa di essenziale (cliente, data, quale richiesta) chiedilo in una domanda breve. Se il cliente ha un solo cavallo, usa quello.
 - Quando elenchi agenda o scadenze: prima le più vicine o le più in ritardo, data in italiano (es. gio 2 ottobre, ore 9:00), una riga per voce.
-- Assistenza: gestione.equo@gmail.com.
+- Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
 
 ${REGOLE_COMUNI}`;
 
@@ -248,11 +257,85 @@ const STRUMENTI_HAMMER = [
   { type: "web_search_20250305", name: "web_search", max_uses: HAMMER_MAX_RICERCHE, allowed_domains: HAMMER_SITI,
     user_location: { type: "approximate", country: "IT", timezone: "Europe/Rome" } },
   { ...clonaStrumento("cerca_conoscenze"), description: "Cerca nelle schede verificate di mascalcia di Equo (esame, pareggio, appiombi, ferratura, ferri speciali, andature, patologie dello zoccolo, laminite, materiali). Restituisce testo e fonte." },
+  clonaStrumento("guida_app"),
   clonaStrumento("salva_memoria"),
   clonaStrumento("riferisci_ai_boss"),
   clonaStrumento("le_mie_segnalazioni"),
   ...STRUMENTI_GESTIONE.slice(0, -1),
   { ...STRUMENTI_GESTIONE[STRUMENTI_GESTIONE.length - 1], cache_control: { type: "ephemeral" } },
+];
+
+// ---------------------------------------------------------------- ATHENA (Equo Scuderia: gestori, staff, istruttori)
+const ISTRUZIONI_ATHENA = `Sei **Athena**, l'agente AI di Equo Scuderia: la segreteria digitale del centro ippico. Parli con chi lavora nel centro (amministratore, segreteria, istruttori, staff di scuderia), in italiano.
+Il tuo compito principale è essere la GUIDA puntuale del gestionale: conosci ogni funzione e procedura (Home, Il tuo Centro e staff, Cavalli & Salute, Lezioni, Pacchetti e carnet, Chat con clienti e team, Professionisti, Magazzino con categorie, articoli, movimenti, lotti, riordini, depositi e fornitori) e le spieghi passo per passo con esempi chiari.
+
+## Chi sei (persona e tono)
+- Precisa, calma e organizzata, come la migliore responsabile di segreteria di un centro ippico. Dai del tu, frasi brevi, zero gergo informatico.
+- Se ti chiedono chi sei: "Sono Athena, l'agente di Equo Scuderia che ti guida nel gestionale". Non presentarti a ogni messaggio.
+
+## Come lavori
+- Domande su come si usa il gestionale: usa SEMPRE guida_app (vedi "Guida all'app" qui sotto). Se la procedura dipende dai permessi (livelli 1, 2, 3, Admin), dillo.
+- Domande sulla situazione del centro ("cosa c'è da fare?", "cosa scade?", "cosa manca in magazzino?", "chi deve rinnovare il carnet?"): usa situazione_centro e rispondi con i dati veri, mai inventati; poi spiega dove andare nel gestionale per intervenire.
+- Non puoi ancora modificare dati da sola: spiega all'utente i passi per farlo lui (sono pochi tocchi) e offri di guidarlo.
+- Salute dei cavalli: puoi dare indicazioni generali prudenti, ma per sintomi o emergenze la prima frase è "Chiama subito il veterinario". Mai dosi di farmaci.
+
+## Stile delle risposte
+- Brevi e pratiche: di solito 3–8 righe; passi numerati quando spieghi una procedura. Niente tabelle. Grassetto solo per la cosa più importante.
+- Chiudi, se utile, con UNA proposta concreta ("Vuoi che ti spieghi anche come inviare l'ordine al fornitore?").
+- Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
+
+${REGOLE_COMUNI}`;
+
+const STRUMENTI_ATHENA = [
+  clonaStrumento("guida_app"),
+  { name: "situazione_centro", description: "Situazione attuale del centro: scadenze sanitarie entro 30 giorni (e già scadute), pacchetti/carnet da rinnovare, lezioni di oggi e domani, articoli di magazzino sotto la soglia minima, ordini aperti, box (occupati, liberi, in manutenzione, cavalli fuori dal box e, dopo le 11, cavalli in box senza pasto del mattino segnato).", input_schema: { type: "object", properties: {} } },
+  clonaStrumento("riferisci_ai_boss"),
+  { ...clonaStrumento("le_mie_segnalazioni"), cache_control: { type: "ephemeral" } },
+];
+// Athena BASIC (pacchetto START): solo guida al gestionale, niente proattività, niente segnalazioni ai Boss
+const ISTRUZIONI_ATHENA_BASIC = ISTRUZIONI_ATHENA
+  .replace(REGOLE_COMUNI, "")
+  .replace(/- Domande sulla situazione del centro[^\n]*\n/, "")
+  .replace(/- Chiudi, se utile, con UNA proposta concreta[^\n]*\n/, "")
+  + REGOLA_GUIDA_BASIC + `
+
+## Versione Athena Basic (pacchetto START)
+- Rispondi solo alle domande: niente avvisi o consigli non richiesti, niente riepiloghi, niente domande sul miglioramento dell'app.
+- Non puoi girare segnalazioni ai Boss: per problemi, richieste o idee indica "Serve aiuto?" → "Apri un ticket" in Home.
+- Se l'utente chiede funzioni non incluse nel suo pacchetto (Pacchetti & Abbonamenti, Magazzino, Statistiche, Store, Fatturazione, altri agenti), spiega in una riga cosa fanno e che sono incluse da ADVANCE in su.`;
+const STRUMENTI_ATHENA_BASIC = [{ ...clonaStrumento("guida_app"), cache_control: { type: "ephemeral" } }];
+
+// ---------------------------------------------------------------- MERLINO (Equo Scuderia: analista, contabile e stratega del centro)
+const MERLINO_MAX_RICERCHE = 4;
+const ISTRUZIONI_MERLINO = `Sei **Merlino**, l'agente AI di Equo Scuderia esperto di numeri, conti e strategia di un centro ippico. Parli con il titolare o la direzione del centro, in italiano.
+Il tuo lavoro: trasformare i dati del gestionale in decisioni. Trovi dove il centro guadagna e dove perde, chi sta per andarsene, quali ore e quali cavalli rendono, come si muove la concorrenza della zona, e proponi mosse concrete con i numeri alla mano.
+
+## Chi sei (persona e tono)
+- Un consulente di direzione pratico e brillante: diretto, concreto, con i numeri sempre in evidenza. Frasi brevi, niente gergo da manuale.
+- Ami i "numeri ad effetto" ma MAI inventati: ogni cifra viene dagli strumenti (statistiche_centro, situazione_centro, ultimo_radar) o dalla ricerca web con la fonte.
+- Se ti chiedono chi sei: "Sono Merlino, l'agente di Equo Scuderia per numeri, conti e strategia del centro".
+
+## Come lavori
+- Per qualsiasi domanda su incassi, clienti, lezioni, cavalli, margini, costi, andamento: usa PRIMA statistiche_centro (e situazione_centro per scadenze e scorte). Cita i numeri precisi, confrontali (con il mese scorso, con la media, con i centri simili se disponibili) e chiudi con 1-3 azioni concrete e il pulsante/percorso dove farle nel gestionale.
+- Formato preferito: 1 riga di sintesi in grassetto con il numero più importante, poi punti brevi, poi "Cosa farei:" con azioni numerate.
+- Margine per cavallo: ricavi = pensioni/abbonamenti collegati al cavallo; costi = scarichi di magazzino sul cavallo + quota dei consumi comuni (costo_comune_per_cavallo). Se mancano dati (pensioni non collegate al cavallo, costi articolo non inseriti) dillo e spiega come completarli: è così che i numeri diventano affidabili.
+- Simulazioni ("e se aumento la lezione di 2 €?", "e se perdo 3 clienti?", "e se aggiungo 4 box?"): fai i conti passo passo con i dati reali e indica le ipotesi.
+- Concorrenza: usa ultimo_radar; se l'utente vuole dettagli o notizie fresche usa web_search (al massimo ${MERLINO_MAX_RICERCHE} ricerche) su strutture equestri della zona del centro: offerte, prezzi pubblicati, campi estivi, eventi, gare, recensioni, bandi e contributi regionali. Solo informazioni PUBBLICHE; riporta le fonti come [titolo](url) presi dai risultati, mai link inventati. Mai dati personali di privati. Non denigrare i concorrenti: confronta e suggerisci contromosse.
+- Confronto con centri simili: solo i valori aggregati e anonimi forniti da statistiche_centro; se non disponibile (meno di 5 centri Equo nella regione) dillo.
+- Fisco e contabilità: dai indicazioni generali e pratiche, ma per adempimenti, aliquote e scadenze fiscali rimanda al commercialista: le regole cambiano.
+
+## Stile
+- Brevi e d'impatto: di solito 5-12 righe. Niente tabelle lunghe (si legge anche sul telefono); al massimo una mini tabella di 3-5 righe se aiuta davvero.
+
+${REGOLE_COMUNI}`;
+const STRUMENTI_MERLINO = [
+  { type: "web_search_20250305", name: "web_search", max_uses: MERLINO_MAX_RICERCHE, user_location: { type: "approximate", country: "IT", timezone: "Europe/Rome" } },
+  clonaStrumento("guida_app"),
+  { name: "statistiche_centro", description: "Statistiche complete del centro: incassi e lezioni degli ultimi 12 mesi, clienti attivi e a rischio, carnet in esaurimento, previsione rinnovi a 90 giorni e tasso di rinnovo, margine per cavallo (ricavi pensioni vs costi di magazzino), costo comune per cavallo, carico di lavoro dei cavalli, occupazione per giorno/ora, prezzi medi, indice di salute 0-100 con componenti, confronto anonimo con centri simili, ultimo radar, box (liberi × pensione media = pensioni possibili).", input_schema: { type: "object", properties: {} } },
+  { name: "situazione_centro", description: "Situazione attuale: scadenze sanitarie entro 30 giorni, pacchetti da rinnovare, lezioni di oggi e domani, articoli sotto soglia, ordini aperti, box (occupati/liberi/manutenzione, cavalli fuori box, senza pasto del mattino).", input_schema: { type: "object", properties: {} } },
+  { name: "ultimo_radar", description: "Ultimo 'Radar di Merlino' sulla concorrenza della zona (offerte, prezzi, eventi, recensioni, opportunità, mosse consigliate) con data e fonti.", input_schema: { type: "object", properties: {} } },
+  clonaStrumento("riferisci_ai_boss"),
+  { ...clonaStrumento("le_mie_segnalazioni"), cache_control: { type: "ephemeral" } },
 ];
 
 // ---- supporto strumenti gestionali (sempre con il client dell'utente: RLS del maniscalco)
@@ -320,7 +403,12 @@ function linkCitati(blocchi) {
 const oggiISO = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
 const isoValida = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "") && !isNaN(new Date(v + "T12:00:00Z"));
 const aggiungiGiorni = (iso, g) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + g); return d.toISOString().slice(0, 10); };
-const risposta = (status, obj) => ({ statusCode: status, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) });
+// CORS: Athena viene chiamata anche da Equo Scuderia (scuderia.equohub.com), che è un altro dominio
+const ORIGINI_OK = ["https://scuderia.equohub.com", "https://app.equohub.com"];
+let corsOrigine = "https://app.equohub.com";
+const intestazioniCors = () => ({ "Access-Control-Allow-Origin": corsOrigine, "Vary": "Origin",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Max-Age": "86400" });
+const risposta = (status, obj) => ({ statusCode: status, headers: { "Content-Type": "application/json", ...intestazioniCors() }, body: JSON.stringify(obj) });
 
 async function utenteDaToken(event, admin) {
   const h = event.headers.authorization || event.headers.Authorization || "";
@@ -342,6 +430,8 @@ async function eseguiStrumento(nome, input, ctx) {
   const { db, userId, cavalli } = ctx;
   input = input || {};
   if (STRUMENTI_GESTIONE.some((t) => t.name === nome) && ctx.ambito !== "maniscalco") return "Strumento riservato ai maniscalchi.";
+  if (ctx.vista === "scuderia" && !(ctx.strumenti || []).some((t) => t.name === nome)) return "Strumento non disponibile.";
+  if (["situazione_centro", "statistiche_centro", "ultimo_radar"].includes(nome) && ctx.vista !== "scuderia") return "Strumento disponibile solo in Equo Scuderia.";
   switch (nome) {
     case "elenco_cavalli":
       return cavalli.length ? cavalli.map((c) => ({ nome: c.name, razza: c.breed, nascita: c.birth_date, microchip: c.microchip, mantello: c.mantello, note: c.note, condiviso_con_professionisti: c.condiviso_ecosistema !== false })) : "Nessun cavallo registrato.";
@@ -407,6 +497,39 @@ async function eseguiStrumento(nome, input, ctx) {
       const { data, error } = await db.from("lezioni_manuali").select("data, tipo, note, horse_id").eq("owner_id", userId).gte("data", da).lte("data", a).order("data", { ascending: true });
       if (error) return "Errore nel leggere il calendario.";
       return (data || []).map((l) => ({ data: l.data, tipo: l.tipo, cavallo: cavalli.find((c) => c.id === l.horse_id)?.name, note: l.note }));
+    }
+
+    case "guida_app": {
+      const ambitoGuida = ctx.guida || "proprietario";
+      if (input.elenco) {
+        const { data, error } = await db.rpc("indice_guida", { p_ambito: ambitoGuida });
+        if (error) return "Errore nel leggere la guida.";
+        return { schede_disponibili: data || [], nota: "Per i passi di una funzione richiama guida_app con la domanda." };
+      }
+      const domanda = String(input.domanda || "").slice(0, 300);
+      if (!domanda.trim()) return "Scrivi cosa cercare.";
+      const { data, error } = await db.rpc("cerca_guida", { p_query: domanda, p_ambito: ambitoGuida, p_limite: 3 });
+      if (error) { console.error("guida_app:", error); return "Errore nel leggere la guida."; }
+      if (!(data || []).length) return "Nessuna scheda trovata: riprova con altre parole (sinonimi, nome del menu) o con elenco = true per vedere tutte le schede. Non inventare percorsi.";
+      return data;
+    }
+
+    case "situazione_centro": {
+      if (!ctx.centroId) return "Nessun centro selezionato.";
+      const { data, error } = await db.rpc("athena_situazione", { p_centro_id: ctx.centroId });
+      if (error) { console.error("situazione_centro:", error); return "Errore nel leggere la situazione del centro."; }
+      return data;
+    }
+
+    case "statistiche_centro": {
+      const { data, error } = await db.rpc("statistiche_centro", { p_centro_id: ctx.centroId });
+      if (error) { console.error("statistiche_centro:", error); return "Errore nel leggere le statistiche."; }
+      return data;
+    }
+
+    case "ultimo_radar": {
+      const { data } = await db.from("merlino_radar").select("testo, fonti, zona, created_at").eq("centro_id", ctx.centroId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return data || "Nessun radar ancora generato: si genera dalla pagina Statistiche → \"Aggiorna il radar\" (e ogni lunedì in automatico).";
     }
 
     case "cerca_conoscenze": {
@@ -611,7 +734,7 @@ async function eseguiStrumento(nome, input, ctx) {
         .eq("user_id", userId).gte("created_at", new Date(Date.now() - 86400000).toISOString());
       if ((count || 0) >= 10) return "Oggi sono già arrivate molte segnalazioni da questo utente: di' che i Boss le stanno già guardando e non girarne altre.";
       const { error } = await ctx.admin.from("segnalazioni_boss").insert({
-        user_id: userId, agente: ctx.agente, vista: ctx.vista, tipo, riassunto,
+        user_id: userId, agente: ctx.agente, vista: ctx.vista, centro_id: ctx.centroId || null, tipo, riassunto,
         parole_utente: String(input.parole_utente || "").trim().slice(0, 2000) || null,
         dettagli: String(input.dettagli || "").trim().slice(0, 2000) || null,
         contesto: ctx.contestoConversazione || null,
@@ -636,6 +759,9 @@ async function eseguiStrumento(nome, input, ctx) {
 
 // ---------------------------------------------------------------- handler
 exports.handler = async (event) => {
+  const origine = event.headers.origin || event.headers.Origin || "";
+  corsOrigine = ORIGINI_OK.includes(origine) || /^https:\/\/[a-z0-9-]+--equo-(app|scuderia)\.netlify\.app$/.test(origine) ? origine : "https://app.equohub.com";
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: intestazioniCors(), body: "" };
   if (event.httpMethod !== "POST") return risposta(405, { error: "Method not allowed" });
 
   const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
@@ -650,7 +776,17 @@ exports.handler = async (event) => {
     a && typeof a.data === "string" && ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"].includes(a.media_type));
   if (allegati.reduce((n, a) => n + a.data.length, 0) > 5_500_000) return risposta(413, { error: "Allegati troppo grandi" });
   if (!messaggio && !allegati.length) return risposta(400, { error: "Messaggio mancante" });
-  const vista = body.vista === "professionista" ? "professionista" : "proprietario";
+  const vista = body.vista === "professionista" ? "professionista" : body.vista === "scuderia" ? "scuderia" : "proprietario";
+  // Athena (Equo Scuderia): serve il centro e l'appartenenza al suo staff (verificata qui, non dall'app)
+  let centro = null, membro = null;
+  if (vista === "scuderia") {
+    const centroId = String(body.centro_id || "");
+    if (!/^[0-9a-f-]{36}$/i.test(centroId)) return risposta(400, { error: "Centro mancante" });
+    const { data: m } = await admin.from("scuderia_membri").select("ruolo, livello, nome_visualizzato").eq("centro_id", centroId).eq("user_id", user.id).maybeSingle();
+    const { data: c } = await admin.from("centri").select("id, nome, owner_id").eq("id", centroId).maybeSingle();
+    if (!c || (!m && c.owner_id !== user.id)) return risposta(403, { error: "Non fai parte di questo centro" });
+    centro = c; membro = m || { ruolo: "admin", livello: "admin" };
+  }
 
   // client con i permessi DELL'UTENTE: tutte le letture passano dalle regole RLS
   const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY || CHIAVE_PUBBLICA, {
@@ -660,33 +796,53 @@ exports.handler = async (event) => {
   // limite mensile lato server
   const mese = oggiISO().slice(0, 7);
   const { data: profilo } = await admin.from("profiles").select("full_name, piano, ruolo, ruolo_secondario, created_at, ai_feedback_chiesto_at").eq("id", user.id).maybeSingle();
+  // Equo Scuderia: Athena (inclusa, basic in START) o Merlino (PREMIUM o add-on), secondo il pacchetto del centro
+  const scud = vista === "scuderia";
+  let limitiCentro = null;
+  if (scud) { const { data: lc } = await admin.rpc("centro_limiti", { p_centro_id: centro.id }); limitiCentro = lc || {}; }
+  const merlino = scud && body.agente === "merlino";
+  if (merlino && !(limitiCentro.agenti || []).includes("merlino")) return risposta(403, { error: "Merlino non è attivo per questo centro", bloccato: true });
+  const athena = scud && !merlino;
+  const athenaBasic = athena && limitiCentro.athena_proattiva === false;
+  const chiaveMese = merlino ? mese + "-merlino" : athena ? mese + "-athena" : mese;
   const piano = profilo?.piano === "premium" ? "premium" : "free";
   // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
   // Pegasus: vista proprietario. Veterinari/istruttori (vista professionista non maniscalco): Equo AI neutro
   const pegasus = vista === "proprietario";
-  const agente = hammer ? "hammer" : pegasus ? "pegasus" : "equo";
-  const limite = LIMITI[piano];
-  const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", mese).maybeSingle();
-  const usati = uso?.conteggio || 0;
+  const agente = merlino ? "merlino" : athena ? "athena" : hammer ? "hammer" : pegasus ? "pegasus" : "equo";
+  const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", chiaveMese).maybeSingle();
+  let limite = LIMITI[piano], usati = uso?.conteggio || 0;
+  if (scud) {
+    // in Scuderia il limite è del CENTRO (tutto lo staff insieme), per agente
+    limite = Number(merlino ? limitiCentro.merlino_messaggi : limitiCentro.athena_messaggi) || 30;
+    let q = admin.from("ai_messaggi").select("id", { count: "exact", head: true }).eq("centro_id", centro.id).eq("ruolo", "user").gte("created_at", mese + "-01T00:00:00Z");
+    q = merlino ? q.eq("agente", "merlino") : q.or("agente.is.null,agente.eq.athena");
+    const { count } = await q;
+    usati = count || 0;
+  }
   if (usati >= limite) return risposta(200, { limite_raggiunto: true, uso: { usati, limite, piano } });
 
   // contesto: cavalli, memoria, cronologia
-  const { data: cavalli } = await db.from("horses").select("id, name, breed, birth_date, microchip, mantello, note, condiviso_ecosistema").eq("owner_id", user.id).order("created_at", { ascending: true });
-  const { data: memoria } = await db.from("ai_memoria").select("testo, horse_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
-  const { data: storia } = await db.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", user.id).eq("vista", vista).order("created_at", { ascending: false }).limit(16);
+  const { data: cavalli } = scud ? { data: [] } : await db.from("horses").select("id, name, breed, birth_date, microchip, mantello, note, condiviso_ecosistema").eq("owner_id", user.id).order("created_at", { ascending: true });
+  const { data: memoria } = scud ? { data: [] } : await db.from("ai_memoria").select("testo, horse_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
+  let qStoria = db.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", user.id).eq("vista", vista);
+  if (scud) qStoria = qStoria.eq("centro_id", centro.id);
+  if (merlino) qStoria = qStoria.eq("agente", "merlino"); else if (athena) qStoria = qStoria.or("agente.is.null,agente.eq.athena");
+  const { data: storia } = await qStoria.order("created_at", { ascending: false }).limit(16);
 
   const listaCavalli = cavalli || [];
   // Ogni ~14 giorni (non ai nuovi iscritti, non con allegati, solo in conversazioni già avviate) l'agente chiede un parere per i Boss
   const GIORNI_FEEDBACK = 14;
   const ultimoFeedback = profilo?.ai_feedback_chiesto_at ? new Date(profilo.ai_feedback_chiesto_at).getTime() : 0;
-  const chiediFeedback = !allegati.length && (storia || []).length >= 4
+  const chiediFeedback = !athenaBasic && !allegati.length && (storia || []).length >= 4
     && Date.now() - ultimoFeedback > GIORNI_FEEDBACK * 86400000
     && Date.now() - new Date(profilo?.created_at || Date.now()).getTime() > 3 * 86400000;
   const contesto = [
     `Oggi è ${new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome" })} (${oggiISO()}).`,
-    `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati questo mese: ${usati + 1} di ${limite}.`,
-    listaCavalli.length ? `Cavalli: ${listaCavalli.map((c) => c.name).join(", ")}.` : "L'utente non ha ancora registrato cavalli (si aggiungono dal tab Cavalli).",
+    scud ? `Utente: ${membro.nome_visualizzato || profilo?.full_name || "—"} · centro "${centro.nome}" · ruolo ${membro.ruolo}${membro.livello ? " (livello " + membro.livello + ")" : ""} · pacchetto ${String(limitiCentro.pacchetto || "").toUpperCase()} · messaggi a ${merlino ? "Merlino" : "Athena"} questo mese (tutto il centro): ${usati + 1} di ${limite}.`
+      : `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati questo mese: ${usati + 1} di ${limite}.`,
+    scud ? "" : listaCavalli.length ? `Cavalli: ${listaCavalli.map((c) => c.name).join(", ")}.` : "L'utente non ha ancora registrato cavalli (si aggiungono dal tab Cavalli).",
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
     hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
       vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
@@ -709,7 +865,9 @@ exports.handler = async (event) => {
   const contestoConversazione = [...(storia || []).slice(0, 6).reverse().map((m) => ({ ruolo: m.ruolo, testo: String(m.contenuto || "").slice(0, 600) })),
     { ruolo: "user", testo: (messaggio || "(allegato)").slice(0, 600) }];
   const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : "proprietario",
-    agente, vista, contestoConversazione };
+    guida: scud ? "scuderia" : vista === "professionista" ? "maniscalco" : "proprietario",
+    strumenti: merlino ? STRUMENTI_MERLINO : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
+    centroId: centro?.id || null, agente, vista, contestoConversazione };
   const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0, ricerche: 0 };
   let link = [];
   let testoFinale = "";
@@ -721,12 +879,12 @@ exports.handler = async (event) => {
         headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
           model: MODELLO,
-          max_tokens: allegati.length ? 2000 : (hammer ? 1500 : 1200),
+          max_tokens: allegati.length ? 2000 : (hammer || merlino ? 1600 : 1200),
           system: [
-            { type: "text", text: hammer ? ISTRUZIONI_HAMMER : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
-          tools: hammer ? STRUMENTI_HAMMER : STRUMENTI,
+          tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : STRUMENTI,
           messages,
         }),
       });
@@ -767,15 +925,15 @@ exports.handler = async (event) => {
   const p = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
   const costoUsd = (costo.in * p.in + costo.out * p.out + costo.cacheRead * p.cacheRead + costo.cacheWrite * p.cacheWrite) / 1e6 + costo.ricerche * COSTO_RICERCA_USD;
   await admin.from("ai_messaggi").insert([
-    { user_id: user.id, vista, ruolo: "user", contenuto: testoUtenteSalvato },
-    { user_id: user.id, vista, ruolo: "assistant", contenuto: testoFinale },
+    { user_id: user.id, vista, agente, ruolo: "user", contenuto: testoUtenteSalvato, centro_id: centro?.id || null },
+    { user_id: user.id, vista, agente, ruolo: "assistant", contenuto: testoFinale, centro_id: centro?.id || null },
   ]);
   // domanda per i Boss fatta davvero: si segna per non ripeterla prima di 14 giorni
   if (chiediFeedback && /boss/i.test(testoFinale)) await admin.from("profiles").update({ ai_feedback_chiesto_at: new Date().toISOString() }).eq("id", user.id);
-  await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese, conteggio: usati + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
+  await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
   return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
 };
 
 // esportati solo per i test
-exports._interni = { eseguiStrumento, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };
+exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };

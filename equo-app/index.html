@@ -76,6 +76,8 @@ select.input{cursor:pointer}
 .btn-primary{background:var(--accent);color:#14231b}
 .btn-primary:hover{opacity:.85;transform:translateY(-1px)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+/* tasti di conferma/salvataggio: verde Equo con bordo giallo (criterio doppio tasto) */
+.btn-primary{background:#1d4a35;color:#fff;border:2px solid #e8b04b}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 .btn-ghost{background:transparent;color:var(--muted);font-size:13px}
@@ -216,7 +218,14 @@ select.input{cursor:pointer}
 .link-altro-profilo{display:block;width:100%;background:none;border:none;color:var(--muted);font-size:12px;
   text-align:center;margin-top:8px;cursor:pointer;font-family:inherit;line-height:1.5}
 .link-altro-profilo u{color:var(--accent);text-decoration:underline}
+/* CRITERIO DOPPIO TASTO (Simone 30/09/2026): VERDE Equo con bordo giallo = conferma · GIALLO Equo con bordo bianco = variazione (modifica/cambia/sposta) */
+.btn.btn-conferma,.btn-conferma{background:#1d4a35!important;color:#fff!important;border:2px solid #e8b04b!important}
+.btn.btn-conferma:hover{filter:brightness(1.08)}
+.btn.btn-variazione,.btn-variazione{background:#e8b04b!important;color:#14312a!important;border:2px solid #fff!important;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.btn.btn-variazione:hover{filter:brightness(1.04)}
 .richiesta-ok{text-align:center;padding:10px 4px}
+.aiuto-card{display:flex;align-items:center;gap:12px;cursor:pointer}
+.aiuto-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:19px;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .richiesta-ok .emoji{font-size:38px;margin-bottom:8px}
 
 /* palette per profilo (sfumatura stile Revolut, dal più chiaro in alto al più scuro in basso) */
@@ -285,11 +294,52 @@ select.input{cursor:pointer}
 .ai-fab-dot{display:none;position:absolute;top:4px;right:4px;width:13px;height:13px;border-radius:50%;background:#e5484d;border:2px solid var(--bg,#fff)}
 .ai-fab.con-novita .ai-fab-dot{display:block}
 /* icona dell'agente (Pegasus = testa di cavallo, Hammer = martello) con piccola rotazione sx/dx + zoom */
-#banner-aggiornamento{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));
-  z-index:200;width:calc(100% - 32px);max-width:448px;align-items:center;justify-content:space-between;gap:10px;
-  padding:10px 12px 10px 16px;border-radius:14px;background:var(--card,#fff);color:var(--text,#1c2b22);
-  box-shadow:0 8px 24px rgba(0,0,0,.22);font-size:13.5px;font-weight:600}
-#banner-aggiornamento.attivo{display:flex}
+/* ---------- POP-UP DI SISTEMA (offline / aggiornamento): rettangolo al centro, vetro semitrasparente ---------- */
+.eq-pop-overlay{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(10,20,15,.28);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:eqPopFade .2s ease}
+.eq-pop-overlay.attivo{display:flex}
+.eq-pop{width:100%;max-width:360px;box-sizing:border-box;border-radius:22px;padding:22px 20px 18px;text-align:center;color:var(--text,#1c2b22);
+  background:color-mix(in srgb,var(--surface,var(--card,#fff)) 84%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  border:1px solid color-mix(in srgb,var(--border,#ddd) 70%,transparent);box-shadow:0 18px 50px rgba(0,0,0,.25);animation:eqPopIn .25s cubic-bezier(.2,.9,.3,1.2)}
+.eq-pop .ic{width:54px;height:54px;border-radius:17px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.eq-pop .ic.off{background:#f3e3c3;color:#8a5a12}.eq-pop .ic.agg{background:#d9eadb;color:#2f6134}
+.eq-pop h3{margin:0 0 8px;font-size:18px;font-weight:800}
+.eq-pop p{margin:0 0 10px;font-size:14px;line-height:1.55;color:var(--text,#1c2b22)}
+.eq-pop .piccolo{font-size:12.5px;color:var(--muted,#6b7a70)}
+.eq-pop details{text-align:left;margin:4px 0 14px;border:1px solid color-mix(in srgb,var(--border,#ddd) 80%,transparent);border-radius:14px;padding:10px 12px;background:color-mix(in srgb,var(--surface,#fff) 55%,transparent)}
+.eq-pop summary{cursor:pointer;font-weight:700;font-size:13.5px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.eq-pop summary::-webkit-details-marker{display:none}
+.eq-pop summary::after{content:"▾";transition:transform .2s}.eq-pop details[open] summary::after{transform:rotate(180deg)}
+.eq-pop details ul{margin:10px 0 2px;padding-left:18px;font-size:13px;line-height:1.5;max-height:34vh;overflow-y:auto}
+.eq-pop details li{margin:4px 0}
+.eq-pop .az{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.eq-pop .az button{width:100%}
+.eq-pill-stato{position:fixed;left:50%;transform:translateX(-50%);top:calc(8px + env(safe-area-inset-top));z-index:2500;display:none;align-items:center;gap:7px;
+  padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.eq-pill-stato.attivo{display:flex}
+.eq-pill-stato.off{background:rgba(243,227,195,.92);color:#6d470c}.eq-pill-stato.agg{background:rgba(217,234,219,.94);color:#24502a}
+.eq-pop .ic.ric{background:#f3e3c3;color:#8a5a12}
+.eq-pop .grande{font-size:15.5px;margin:0 0 4px}
+.eq-pop .grande b{font-size:26px;display:block;margin-top:4px;letter-spacing:-.01em}
+.eq-pop .az-riga{display:flex;gap:10px;margin-top:6px}
+.eq-pop .az-riga button{flex:1}
+.btn-equo-ok{background:#1d4a35;color:#fff;border:2.5px solid #e8b04b;border-radius:14px;padding:12px 10px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit}
+.btn-equo-cambia{background:#e8b04b;color:#14312a;border:2.5px solid #fff;border-radius:14px;padding:12px 10px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+.btn-equo-ok:active,.btn-equo-cambia:active{transform:scale(.98)}
+.ric-ruota-box{position:relative;height:180px;margin:6px auto 10px;max-width:200px}
+.ric-ruota{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.ric-ruota::-webkit-scrollbar{display:none}
+.ric-ruota .pad{height:70px}
+.ric-ruota .n{height:40px;line-height:40px;scroll-snap-align:center;font-size:20px;font-weight:600;color:var(--muted,#6b7a70);transition:all .12s}
+.ric-ruota .n.sel{font-size:28px;font-weight:800;color:var(--text,#1c2b22)}
+.ric-ruota-box::before{content:"";position:absolute;left:8px;right:8px;top:70px;height:40px;border-top:2px solid #e8b04b;border-bottom:2px solid #e8b04b;border-radius:10px;pointer-events:none}
+.ric-ruota-box::after{content:"giorni";position:absolute;right:14px;top:70px;line-height:40px;font-size:12.5px;color:var(--muted,#6b7a70);pointer-events:none}
+.ric-giorni-input{width:70px;text-align:center}
+@keyframes eqPopFade{from{opacity:0}to{opacity:1}}
+@keyframes eqPopIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.eq-pop,.eq-pop-overlay{animation:none}}
 .ai-fab-agente{display:none;font-size:23px;line-height:1}
 .ai-fab.agente-pegasus .ai-fab-sparkles,.ai-fab.agente-hammer .ai-fab-sparkles{display:none}
 .ai-fab.agente-pegasus .ai-fab-agente,.ai-fab.agente-hammer .ai-fab-agente{display:block;animation:aiFabMuovi 4.5s ease-in-out infinite;transform-origin:50% 60%}
@@ -326,7 +376,7 @@ body.ai-aperta{overflow:hidden}
 .chat-bubble.user{align-self:flex-end;background:var(--accent);color:#14231b;border-bottom-right-radius:4px}
 .chat-bubble.ai{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
 .chat-bubble.ai p{margin:0 0 6px}.chat-bubble.ai p:last-child{margin:0}
-.chat-bubble.ai ul{margin:4px 0 6px;padding-left:18px}.chat-bubble.ai li{margin:2px 0}
+.chat-bubble.ai ul,.chat-bubble.ai ol{margin:4px 0 6px;padding-left:18px}.chat-bubble.ai li{margin:2px 0}
 .chat-bubble.ai a{color:var(--accent);text-decoration:underline}
 .ai-allegati{display:none;gap:8px;padding:6px 14px 0;overflow-x:auto}
 .ai-allegati.attivi{display:flex}
@@ -526,7 +576,7 @@ body.ai-aperta{overflow:hidden}
 .ag-ev-main{flex:1;min-width:0;cursor:pointer}
 .ag-ev-title{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-ev-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ag-ev-fatto{border:none;background:var(--accent);color:#14312a;font-weight:800;font-size:12px;border-radius:9px;padding:7px 10px;cursor:pointer;flex-shrink:0}
+.ag-ev-fatto{border:2px solid #e8b04b;background:#1d4a35;color:#fff;font-weight:800;font-size:12px;border-radius:9px;padding:7px 10px;cursor:pointer;flex-shrink:0}
 .ag-ev-done{color:var(--green);font-weight:800;font-size:12px;flex-shrink:0;padding:0 4px}
 .ag-ev-menu{border:none;background:none;color:var(--muted);font-size:18px;width:28px;cursor:pointer;flex-shrink:0;line-height:1}
 .ag-more{font-size:12px;color:var(--muted);padding:0 4px 4px}
@@ -788,6 +838,14 @@ body.ai-aperta{overflow:hidden}
         <span class="icon"><svg><use href="#i-mappin"/></svg></span> Servizi vicino a te
       </button>
     </div>
+    <div class="card aiuto-card" style="margin-top:14px" onclick="apriTicketAssistenza()">
+      <div class="aiuto-ico"><i class="fa-solid fa-life-ring"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14.5px">Serve aiuto?</div>
+        <div class="muted" style="font-size:12.5px;margin-top:2px;line-height:1.4">Scrivici: ti rispondiamo via email.</div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="event.stopPropagation();apriTicketAssistenza()">Apri un ticket</button>
+    </div>
   </div>
 
   <!-- CHAT (proprietario) -->
@@ -844,7 +902,7 @@ body.ai-aperta{overflow:hidden}
       <div class="card" style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-weight:700;font-size:14px">Scheda cavallo</div>
-          <button class="btn btn-outline btn-sm" onclick="openHorseForm(currentHorseId)">Modifica</button>
+          <button class="btn btn-outline btn-sm btn-variazione" onclick="openHorseForm(currentHorseId)">Modifica</button>
         </div>
         <div id="horse-info-box" style="display:flex;flex-direction:column;gap:4px;font-size:13px"></div>
       </div>
@@ -924,6 +982,14 @@ body.ai-aperta{overflow:hidden}
       <button class="btn btn-primary" style="flex:1" onclick="openInterventoModal(null)">+ Nuovo intervento</button>
       <button class="btn btn-outline" style="flex:1" onclick="apriNuovoCliente('proprietario')">+ Aggiungi cliente</button>
     </div>
+    <div class="card aiuto-card" style="margin-top:14px" onclick="apriTicketAssistenza()">
+      <div class="aiuto-ico"><i class="fa-solid fa-life-ring"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14.5px">Serve aiuto?</div>
+        <div class="muted" style="font-size:12.5px;margin-top:2px;line-height:1.4">Scrivici: ti rispondiamo via email.</div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="event.stopPropagation();apriTicketAssistenza()">Apri un ticket</button>
+    </div>
   </div>
 
   <!-- PROFESSIONISTA: AGENDA -->
@@ -1001,7 +1067,7 @@ body.ai-aperta{overflow:hidden}
       <div class="detail-header">
         <button class="back-btn" onclick="closeClienteDetail()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
         <div class="section-title" style="margin-bottom:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="detail-cliente-nome">Cliente</div>
-        <button class="btn btn-outline btn-sm" onclick="openEditCliente()"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
+        <button class="btn btn-outline btn-sm btn-variazione" onclick="openEditCliente()"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
       </div>
 
       <div class="card" style="margin-bottom:14px" id="detail-cliente-info"></div>
@@ -1077,9 +1143,49 @@ body.ai-aperta{overflow:hidden}
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
-  <div id="banner-aggiornamento" role="status">
-    <span>Nuova versione di Equo disponibile</span>
-    <button class="btn btn-primary btn-sm" onclick="location.reload()">Aggiorna</button>
+  <!-- POP-UP DI SISTEMA: offline e aggiornamento disponibile -->
+  <div class="eq-pill-stato off" id="eq-pill-offline" onclick="mostraPopOffline()"><i class="fa-solid fa-wifi"></i> Offline · Equo non ti abbandona</div>
+  <div class="eq-pill-stato agg" id="eq-pill-agg" onclick="mostraPopAggiornamento()"><i class="fa-solid fa-arrows-rotate"></i> Aggiornamento disponibile</div>
+  <div class="eq-pop-overlay" id="eq-pop-offline" onclick="if(event.target.id==='eq-pop-offline')chiudiPop('offline')">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-off-tit">
+      <div class="ic off"><i class="fa-solid fa-wifi"></i></div>
+      <h3 id="eq-pop-off-tit">Sei offline</h3>
+      <p id="eq-pop-off-testo"></p>
+      <p class="piccolo" id="eq-pop-off-ora"></p>
+      <div class="az"><button class="btn btn-primary" onclick="chiudiPop('offline')">Ho capito, continuo</button></div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-richiamo">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="ric-tit">
+      <div class="ic ric"><i class="fa-solid fa-calendar-plus"></i></div>
+      <h3 id="ric-tit">Prossimo intervento</h3>
+      <div id="ric-passo1">
+        <p class="grande">Inserisco il prossimo intervento tra<b id="ric-giorni-txt">35 giorni</b></p>
+        <p class="piccolo" id="ric-dettaglio"></p>
+        <div class="az-riga">
+          <button class="btn-equo-ok" onclick="richiamoConferma()">OK</button>
+          <button class="btn-equo-cambia" onclick="richiamoCambia()">CAMBIA</button>
+        </div>
+      </div>
+      <div id="ric-passo2" style="display:none">
+        <p style="margin-bottom:4px">Tra quanti giorni?</p>
+        <div class="ric-ruota-box"><div class="ric-ruota" id="ric-ruota" onscroll="richiamoRuotaScroll()"></div></div>
+        <p class="piccolo" id="ric-dettaglio2"></p>
+        <div class="az-riga"><button class="btn-equo-ok" onclick="richiamoConferma()">OK</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-agg" onclick="if(event.target.id==='eq-pop-agg')chiudiPop('agg')">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-agg-tit">
+      <div class="ic agg"><i class="fa-solid fa-arrows-rotate"></i></div>
+      <h3 id="eq-pop-agg-tit">È disponibile un aggiornamento</h3>
+      <p id="eq-pop-agg-testo"></p>
+      <details id="eq-pop-agg-novita" style="display:none"><summary>Cosa c'è di nuovo</summary><ul id="eq-pop-agg-lista"></ul></details>
+      <div class="az">
+        <button class="btn btn-primary" onclick="aggiornaOra()">Aggiorna ora</button>
+        <button class="btn btn-ghost" onclick="chiudiPop('agg')">Più tardi</button>
+      </div>
+    </div>
   </div>
 
   <!-- AI SHEET (mezza schermata) -->
@@ -1393,8 +1499,8 @@ body.ai-aperta{overflow:hidden}
     <div class="modal-title" id="azioni-evento-titolo">Appuntamento</div>
     <div class="muted" style="font-size:13px;line-height:1.6" id="azioni-evento-dettaglio"></div>
     <div class="ag-azioni">
-      <button class="btn btn-primary" id="azioni-evento-fatto" onclick="azioneEvento('fatto')">Segna come fatto</button>
-      <button class="btn btn-outline" onclick="azioneEvento('modifica')"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
+      <button class="btn btn-primary btn-conferma" id="azioni-evento-fatto" onclick="azioneEvento('fatto')">Segna come fatto</button>
+      <button class="btn btn-outline btn-variazione" onclick="azioneEvento('modifica')"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
       <button class="btn btn-outline" onclick="azioneEvento('pdf')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Stampa PDF</button>
       <button class="btn btn-outline" onclick="azioneEvento('chat')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat</button>
       <button class="btn btn-outline" id="azioni-evento-annulla-struttura" style="display:none;color:var(--red)" onclick="azioneEvento('annulla_struttura')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla con la struttura</button>
@@ -1711,6 +1817,13 @@ body.ai-aperta{overflow:hidden}
         </div>
         <span class="icon"><svg><use href="#i-chevron"/></svg></span>
       </div>
+      <div id="menu-richiami" style="display:none">
+        <div class="menu-section-label">Richiami predefiniti</div>
+        <div class="muted" style="font-size:11.5px;margin:-2px 0 8px">Dopo un intervento fatto, l'app propone il prossimo tra questi giorni (per ogni cavallo ricorda l'ultima scelta).</div>
+        <div class="menu-row"><div class="menu-row-label"><span>Ferratura</span></div><div><input class="input ric-giorni-input" type="number" min="1" max="60" id="ric-def-ferratura" onchange="salvaRichiamiPredefiniti()"> <small class="muted">giorni</small></div></div>
+        <div class="menu-row"><div class="menu-row-label"><span>Mezza ferratura</span></div><div><input class="input ric-giorni-input" type="number" min="1" max="60" id="ric-def-mezza_ferratura" onchange="salvaRichiamiPredefiniti()"> <small class="muted">giorni</small></div></div>
+        <div class="menu-row"><div class="menu-row-label"><span>Pareggio</span></div><div><input class="input ric-giorni-input" type="number" min="1" max="60" id="ric-def-pareggio" onchange="salvaRichiamiPredefiniti()"> <small class="muted">giorni</small></div></div>
+      </div>
       <div id="menu-hammer-riepilogo" style="display:none">
         <div class="menu-section-label">Hammer</div>
         <div class="menu-row">
@@ -1909,6 +2022,39 @@ body.ai-aperta{overflow:hidden}
       <div class="section-title" style="margin-bottom:6px">Richiesta inviata</div>
       <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">Ti ricontatteremo al più presto.</div>
       <button class="btn btn-primary" style="width:100%" onclick="closeModal('modal-richiesta-profilo')">Ok</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ticket" onclick="closeOut(event,'modal-ticket')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="tk-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-life-ring"></i></span>Apri un ticket</div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Raccontaci cosa succede: il team Equo ti risponde via email. Per dubbi veloci su come si usa l'app puoi chiedere anche al tuo assistente AI.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Di cosa si tratta?</label>
+          <select class="input" id="tk-categoria">
+            <option value="problema">Problema / errore</option>
+            <option value="domanda">Domanda sull'uso dell'app</option>
+            <option value="account">Account e accesso</option>
+            <option value="pagamenti">Abbonamento e pagamenti</option>
+            <option value="suggerimento">Suggerimento</option>
+            <option value="altro">Altro</option>
+          </select></div>
+        <div class="input-group"><label class="input-label">Oggetto</label><input class="input" id="tk-oggetto" maxlength="120" placeholder="es. Non riesco a collegare il maniscalco"></div>
+        <div class="input-group"><label class="input-label">Descrizione</label><textarea class="input" id="tk-descrizione" rows="5" maxlength="4000" placeholder="Cosa stavi facendo, cosa ti aspettavi e cosa è successo (eventuale messaggio di errore)"></textarea></div>
+        <div class="input-group"><label class="input-label">Email per la risposta</label><input class="input" id="tk-email" type="email" maxlength="160"></div>
+        <div class="input-group"><label class="input-label">Telefono (facoltativo)</label><input class="input" id="tk-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
+        <div class="auth-error" id="tk-error" style="display:none"></div>
+        <button class="btn btn-primary" id="tk-btn" onclick="inviaTicketAssistenza()" style="width:100%;margin-top:4px">Invia ticket</button>
+      </div>
+    </div>
+    <div id="tk-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">🛟</div>
+      <div class="section-title" style="margin-bottom:6px" id="tk-ok-titolo">Ticket inviato</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">Ti abbiamo mandato una email di conferma: la risposta del team arriverà allo stesso indirizzo.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeModal('modal-ticket')">Ok</button>
     </div>
   </div>
 </div>
@@ -2116,7 +2262,7 @@ body.ai-aperta{overflow:hidden}
     <div class="auth-error" id="abbina-cavalli-error" style="display:none;margin-top:8px"></div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-outline" style="flex:1" onclick="saltaAbbinamentoCavalli()">Non ora</button>
-      <button class="btn btn-primary" style="flex:1" id="abbina-cavalli-btn" onclick="confermaAbbinamentoCavalli()">Conferma</button>
+      <button class="btn btn-primary btn-conferma" style="flex:1" id="abbina-cavalli-btn" onclick="confermaAbbinamentoCavalli()">Conferma</button>
     </div>
   </div>
 </div>
@@ -3443,6 +3589,42 @@ async function inviaRichiestaProfilo(){
   document.getElementById("rp-ok").style.display = "block";
 }
 
+/* ---------- TICKET DI ASSISTENZA (Home → "Serve aiuto?") ---------- */
+function apriTicketAssistenza(){
+  document.getElementById("tk-categoria").value = "problema";
+  ["tk-oggetto","tk-descrizione","tk-telefono"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("tk-email").value = currentUser?.email || "";
+  document.getElementById("tk-error").style.display = "none";
+  document.getElementById("tk-form").style.display = "block";
+  document.getElementById("tk-ok").style.display = "none";
+  openModal("modal-ticket");
+}
+
+async function inviaTicketAssistenza(){
+  const v = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById("tk-error");
+  const errore = (t) => { errBox.textContent = t; errBox.style.display = "block"; };
+  errBox.style.display = "none";
+  const row = { app: "app", vista: currentUser?.vistaAttiva || currentUser?.ruolo || null, categoria: v("tk-categoria"),
+    oggetto: v("tk-oggetto"), descrizione: v("tk-descrizione"), email: v("tk-email"), telefono: v("tk-telefono") || null,
+    nome: currentUser?.fullName || currentUser?.full_name || null,
+    dispositivo: (navigator.userAgent || "").slice(0, 300) + " · " + window.innerWidth + "×" + window.innerHeight };
+  if(row.oggetto.length < 3) return errore("Scrivi un oggetto (almeno 3 caratteri).");
+  if(row.descrizione.length < 10) return errore("Descrivi il problema in qualche parola in più.");
+  if(!EMAIL_RE.test(row.email)) return errore("Controlla l'indirizzo email.");
+  const btn = document.getElementById("tk-btn"); btn.disabled = true;
+  let numero = null;
+  if(!DEMO_MODE){
+    const { data, error } = await sb.from("ticket_assistenza").insert({ ...row, user_id: currentUser.id }).select("numero").single();
+    btn.disabled = false;
+    if(error){ console.error("ticket:", error); return errore(error.message?.includes("5 ticket") ? error.message : "Invio non riuscito, riprova o scrivi a gestione.equo@gmail.com."); }
+    numero = data?.numero;
+  } else btn.disabled = false;
+  document.getElementById("tk-ok-titolo").textContent = numero ? `Ticket #${numero} inviato` : "Ticket inviato";
+  document.getElementById("tk-form").style.display = "none";
+  document.getElementById("tk-ok").style.display = "block";
+}
+
 // Non più raggiungibile dal menu (il profilo non si cambia dall'app): resta solo per compatibilità.
 function reopenOnboarding(){
   document.getElementById("screen-app").classList.remove("active");
@@ -4482,6 +4664,72 @@ async function segnaNovitaLette(){
   }
 }
 
+// testi dei pop-up di sistema (vedi sotto)
+const CHIAVE_ULTIMO_ONLINE = "equo-ultimo-online";
+// diventa true quando è pronta la coda offline (livello 2): da lì il testo dice che si può lavorare offline e le modifiche partono dopo
+const OFFLINE_CODA_ATTIVA = false;
+const TESTO_OFFLINE = () => OFFLINE_CODA_ATTIVA
+  ? `Nessun problema: <b>puoi continuare a lavorare</b>. Tutto quello che registri (interventi, appuntamenti, spese, eventi sanitari e messaggi) viene salvato sul telefono e <b>inviato da solo</b> appena torna la connessione.`
+  : `Nessun problema: <b>puoi continuare a usare Equo</b> e consultare tutto quello che hai già aperto. Per salvare nuove modifiche serve la connessione: appena torna te lo diciamo noi e tutto si aggiorna da solo.`;
+const TESTO_AGGIORNAMENTO = "Una nuova versione di Equo è pronta. Aggiornare richiede pochi secondi e non perdi nessun dato.";
+/* ---------- POP-UP DI SISTEMA: OFFLINE e AGGIORNAMENTO ----------
+   Offline: pop-up al centro + pillola in alto finché la connessione non torna.
+   Aggiornamento: pop-up con "Cosa c'è di nuovo" (testo da version.json, scritto al deploy da novita.json).
+   Il numero di versione mostrato (v1.0) NON cambia qui: lo decide solo Simone. */
+let ultimoOnline = Date.now(), popOfflineMostrato = false, aggNovita = null;
+try{ const t = Number(localStorage.getItem(CHIAVE_ULTIMO_ONLINE)); if(t) ultimoOnline = t; }catch(e){}
+function segnaOnline(){ if(!navigator.onLine) return; ultimoOnline = Date.now(); try{ localStorage.setItem(CHIAVE_ULTIMO_ONLINE, String(ultimoOnline)); }catch(e){} }
+setInterval(segnaOnline, 60000); segnaOnline();
+function oraBreve(t){
+  const d = new Date(t), oggi = new Date();
+  const ora = d.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
+  return d.toDateString() === oggi.toDateString() ? `alle ${ora}` : `il ${d.toLocaleDateString("it-IT", { day:"numeric", month:"long" })} alle ${ora}`;
+}
+function mostraPopOffline(){
+  document.getElementById("eq-pop-off-testo").innerHTML = TESTO_OFFLINE();
+  document.getElementById("eq-pop-off-ora").textContent = `Stai vedendo i dati aggiornati ${oraBreve(ultimoOnline)}.`;
+  document.getElementById("eq-pop-offline").classList.add("attivo");
+}
+function chiudiPop(q){
+  document.getElementById(q === "offline" ? "eq-pop-offline" : "eq-pop-agg").classList.remove("attivo");
+  if(q === "offline" && !navigator.onLine) document.getElementById("eq-pill-offline").classList.add("attivo");
+  if(q === "agg") document.getElementById("eq-pill-agg").classList.add("attivo");
+}
+function vaiOffline(){
+  document.getElementById("eq-pill-agg").classList.remove("attivo");
+  if(!popOfflineMostrato){ popOfflineMostrato = true; mostraPopOffline(); }
+  else document.getElementById("eq-pill-offline").classList.add("attivo");
+}
+function tornaOnline(){
+  segnaOnline();
+  document.getElementById("eq-pop-offline").classList.remove("attivo");
+  document.getElementById("eq-pill-offline").classList.remove("attivo");
+  if(popOfflineMostrato){ popOfflineMostrato = false; showToast("Sei di nuovo online: dati aggiornati."); }
+  if(typeof dopoRitornoOnline === "function") dopoRitornoOnline();
+}
+window.addEventListener("offline", vaiOffline);
+window.addEventListener("online", tornaOnline);
+if(!navigator.onLine) setTimeout(vaiOffline, 400);
+
+function mostraPopAggiornamento(){
+  document.getElementById("eq-pill-agg").classList.remove("attivo");
+  document.getElementById("eq-pop-agg-testo").textContent = TESTO_AGGIORNAMENTO;
+  const voci = Array.isArray(aggNovita?.voci) ? aggNovita.voci : [];
+  document.getElementById("eq-pop-agg-novita").style.display = voci.length ? "block" : "none";
+  document.getElementById("eq-pop-agg-lista").innerHTML = voci.map(v => `<li>${escapeHtml(v)}</li>`).join("");
+  document.getElementById("eq-pop-agg").classList.add("attivo");
+}
+function segnalaAggiornamento(dati){
+  aggNovita = dati || null;
+  if(document.getElementById("eq-pop-agg").classList.contains("attivo") || document.getElementById("eq-pill-agg").classList.contains("attivo")) return;
+  if(!navigator.onLine) return;
+  mostraPopAggiornamento();
+}
+function aggiornaOra(){
+  document.getElementById("eq-pop-agg").classList.remove("attivo");
+  location.reload();
+}
+
 // ---- Aggiornamento app: Netlify scrive il codice di build a ogni deploy (netlify/scrivi-build.js).
 // Se online c'è un deploy più nuovo compare il banner "Nuova versione disponibile → Aggiorna".
 // È un codice INTERNO, non la versione v1.0 mostrata nel menu.
@@ -4494,8 +4742,8 @@ async function controllaAggiornamentoApp(){
   try {
     const res = await fetch("/version.json?t=" + Date.now(), { cache: "no-store" });
     if(!res.ok) return;
-    const { build } = await res.json();
-    if(build && build !== EQUO_BUILD) document.getElementById("banner-aggiornamento")?.classList.add("attivo");
+    const dati = await res.json();
+    if(dati.build && dati.build !== EQUO_BUILD) segnalaAggiornamento(dati.novita);
   } catch(e){ /* offline: riproverà */ }
 }
 document.addEventListener("visibilitychange", () => {
@@ -4508,6 +4756,7 @@ async function caricaSwitchRiepilogo(){
   const swH = document.getElementById("riepilogo-hammer-switch");
   const boxH = document.getElementById("menu-hammer-riepilogo");
   if(boxH) boxH.style.display = agenteAiHammer() ? "block" : "none";
+  caricaRichiamiPredefiniti();
   if(sw) sw.checked = true;
   if(swH) swH.checked = true;
   if(DEMO_MODE || !currentUser) return;
@@ -4598,13 +4847,14 @@ function formattaRispostaAi(testo){
     .replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\*)/g, "$1<em>$2</em>")
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
     .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  // elenchi puntati e numerati (i passi delle procedure restano numerati)
   righe.forEach(r => {
-    const m = r.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
-    if(m){ if(!inLista){ html += "<ul>"; inLista = true; } html += `<li>${inline(m[1])}</li>`; return; }
-    if(inLista){ html += "</ul>"; inLista = false; }
+    const num = r.match(/^\s*\d+[.)]\s+(.*)$/), pun = r.match(/^\s*[-•*]\s+(.*)$/);
+    if(num || pun){ const t = num ? "ol" : "ul"; if(inLista !== t){ if(inLista) html += `</${inLista}>`; html += `<${t}>`; inLista = t; } html += `<li>${inline((num || pun)[1])}</li>`; return; }
+    if(inLista){ html += `</${inLista}>`; inLista = false; }
     if(r.trim()) html += `<p>${inline(r.replace(/^#+\s*/, ""))}</p>`;
   });
-  if(inLista) html += "</ul>";
+  if(inLista) html += `</${inLista}>`;
   return html || "<p></p>";
 }
 
@@ -5114,8 +5364,8 @@ function cardLezioneScuderia(l, futura){
   ].filter(Boolean).join(" · ");
   const azioni = futura && l.stato !== "annullata" && l.stato !== "completata" ? `
     <div style="display:flex;gap:8px;margin-top:10px">
-      ${l.stato === "prenotata" ? `<button class="btn btn-primary btn-sm" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
-      <button class="btn btn-outline btn-sm" style="flex:1" onclick="modificaLezioneScuderia('${l.id}')">Modifica</button>
+      ${l.stato === "prenotata" ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
+      <button class="btn btn-outline btn-sm btn-variazione" style="flex:1" onclick="modificaLezioneScuderia('${l.id}')">Modifica</button>
     </div>` : "";
   return `
     <div class="event-item" style="display:block;${futura ? "" : "opacity:.65"}">
@@ -5208,7 +5458,116 @@ let clientiMascalcia = [];
 let proUnreadTotal = 0;
 let currentClienteId = null;
 const TIPO_FERRATURA_LABELS = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
-const TIPO_FERRATURA_INTERVALLI = { ferratura: 35, mezza_ferratura: 35, pareggio: 56 }; // giorni alla prossima scadenza
+const TIPO_FERRATURA_INTERVALLI = { ferratura: 35, mezza_ferratura: 35, pareggio: 56 }; // giorni alla prossima scadenza (valori di partenza)
+
+/* ---------- RICHIAMO (prossimo intervento) — sempre in GIORNI ----------
+   Quando il maniscalco segna FATTO una ferratura/mezza ferratura/pareggio si apre il pop-up
+   "Inserisco il prossimo intervento tra N giorni" → OK oppure CAMBIA (ruota 1-60 giorni).
+   N = ultima scelta per quel cavallo → altrimenti i suoi "Richiami predefiniti" (profilo) → altrimenti 35/35/56.
+   Se il cavallo è "su Equo" l'intervento entra da solo nel libretto del proprietario (trigger nel database). */
+let richiamiPredefiniti = null, richiamoStato = null;
+async function caricaRichiamiPredefiniti(){
+  const box = document.getElementById("menu-richiami");
+  const pro = currentUser && (currentUser.ruolo === "maniscalco" || currentUser.ruoloSecondario === "maniscalco");
+  if(box) box.style.display = pro && vistaAi() === "professionista" ? "block" : "none";
+  if(!richiamiPredefiniti){
+    richiamiPredefiniti = { ...TIPO_FERRATURA_INTERVALLI };
+    if(!DEMO_MODE && currentUser){
+      const { data } = await sb.from("profiles").select("intervalli_richiamo").eq("id", currentUser.id).maybeSingle();
+      if(data?.intervalli_richiamo) richiamiPredefiniti = { ...richiamiPredefiniti, ...data.intervalli_richiamo };
+    }
+  }
+  Object.keys(TIPO_FERRATURA_INTERVALLI).forEach(k => { const el = document.getElementById("ric-def-" + k); if(el) el.value = richiamiPredefiniti[k]; });
+}
+async function salvaRichiamiPredefiniti(){
+  const v = {};
+  for(const k of Object.keys(TIPO_FERRATURA_INTERVALLI)){
+    const n = Math.round(Number(document.getElementById("ric-def-" + k).value));
+    if(!(n >= 1 && n <= 60)){ showToast("Scegli un numero di giorni tra 1 e 60."); return caricaRichiamiPredefiniti(); }
+    v[k] = n;
+  }
+  richiamiPredefiniti = v;
+  if(!DEMO_MODE && currentUser){
+    const { error } = await sb.from("profiles").update({ intervalli_richiamo: v }).eq("id", currentUser.id);
+    if(error){ showToast("Non sono riuscito a salvare, riprova."); return; }
+  }
+  showToast("Richiami predefiniti salvati");
+}
+function giorniTra(a, b){ const [y1,m1,d1] = a.split("-").map(Number), [y2,m2,d2] = b.split("-").map(Number); return Math.round((new Date(y2,m2-1,d2) - new Date(y1,m1-1,d1)) / 86400000); }
+// giorni proposti per un nuovo richiamo: ultima scelta per quel cavallo e tipo → predefiniti del maniscalco
+async function giorniRichiamoSuggeriti(tipo, cavallo_cliente_id, horse_id, escludiId){
+  if(!TIPO_FERRATURA_INTERVALLI[tipo]) return { giorni: null };
+  if(!richiamiPredefiniti) await caricaRichiamiPredefiniti();
+  const base = Number(richiamiPredefiniti?.[tipo]) || TIPO_FERRATURA_INTERVALLI[tipo];
+  if(!cavallo_cliente_id && !horse_id) return { giorni: base };
+  let prec = null;
+  if(DEMO_MODE){
+    prec = (demoState.interventiMascalcia || []).filter(i => i.id !== escludiId && i.stato === "fatto" && i.tipo_ferratura === tipo && i.prossima_scadenza
+      && ((cavallo_cliente_id && i.cavallo_cliente_id === cavallo_cliente_id) || (horse_id && i.horse_id === horse_id)))
+      .sort((a, b) => b.data_intervento.localeCompare(a.data_intervento))[0] || null;
+  } else {
+    let q = sb.from("interventi_mascalcia").select("id, data_intervento, prossima_scadenza").eq("maniscalco_id", currentUser.id)
+      .eq("stato", "fatto").eq("tipo_ferratura", tipo).not("prossima_scadenza", "is", null);
+    q = cavallo_cliente_id ? q.eq("cavallo_cliente_id", cavallo_cliente_id) : q.eq("horse_id", horse_id);
+    if(escludiId) q = q.neq("id", escludiId);
+    const { data } = await q.order("data_intervento", { ascending: false }).limit(1);
+    prec = (data || [])[0] || null;
+  }
+  const g = prec ? giorniTra(prec.data_intervento, prec.prossima_scadenza) : null;
+  return g >= 1 && g <= 60 ? { giorni: g, daCavallo: true } : { giorni: base };
+}
+function dataRichiamoTesto(iso, giorni){
+  const [y, m, d] = aggiungiGiorniIso(iso, giorni).split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+// apre il pop-up e restituisce i giorni scelti (Promise)
+function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo }){
+  return new Promise(resolve => {
+    richiamoStato = { resolve, giorni, data_intervento, etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "), daCavallo };
+    document.getElementById("ric-passo1").style.display = "block";
+    document.getElementById("ric-passo2").style.display = "none";
+    richiamoAggiornaTesti();
+    document.getElementById("eq-pop-richiamo").classList.add("attivo");
+  });
+}
+const TIPO_INTERVENTO_LABEL_APP = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio" };
+function richiamoAggiornaTesti(){
+  const r = richiamoStato; if(!r) return;
+  document.getElementById("ric-giorni-txt").textContent = r.giorni + (r.giorni === 1 ? " giorno" : " giorni");
+  const quando = dataRichiamoTesto(r.data_intervento, r.giorni);
+  document.getElementById("ric-dettaglio").textContent = `${r.etichetta} · ${quando}` + (r.daCavallo ? " (come l'ultima volta)" : "");
+  document.getElementById("ric-dettaglio2").textContent = `Prossimo intervento: ${quando}`;
+}
+function richiamoCambia(){
+  const ruota = document.getElementById("ric-ruota");
+  ruota.innerHTML = '<div class="pad"></div>' + Array.from({ length: 60 }, (_, i) => `<div class="n" data-g="${i + 1}" onclick="richiamoVaiA(${i + 1})">${i + 1}</div>`).join("") + '<div class="pad"></div>';
+  document.getElementById("ric-passo1").style.display = "none";
+  document.getElementById("ric-passo2").style.display = "block";
+  requestAnimationFrame(() => { ruota.scrollTop = (richiamoStato.giorni - 1) * 40; richiamoRuotaScroll(); });
+}
+function richiamoVaiA(g){ document.getElementById("ric-ruota").scrollTo({ top: (g - 1) * 40, behavior: "smooth" }); }
+function richiamoRuotaScroll(){
+  const ruota = document.getElementById("ric-ruota");
+  const g = Math.min(60, Math.max(1, Math.round(ruota.scrollTop / 40) + 1));
+  if(richiamoStato) richiamoStato.giorni = g;
+  ruota.querySelectorAll(".n").forEach(el => el.classList.toggle("sel", Number(el.dataset.g) === g));
+  richiamoAggiornaTesti();
+}
+function richiamoConferma(){
+  const r = richiamoStato; if(!r) return;
+  richiamoStato = null;
+  document.getElementById("eq-pop-richiamo").classList.remove("attivo");
+  r.resolve(r.giorni);
+}
+// flusso completo per un intervento che sta per diventare FATTO: chiede i giorni e restituisce la data del richiamo
+async function richiamoPerFatto(e){
+  const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+  if(!s.giorni) return e.prossima_scadenza || null;
+  const giorni = await chiediRichiamo({ tipo: e.tipo_ferratura, tipo_altro: e.tipo_altro, data_intervento: e.data_intervento,
+    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni, daCavallo: s.daCavallo });
+  return aggiungiGiorniIso(e.data_intervento, giorni);
+}
+function agNomeCavalloSicuro(e){ try{ return typeof agNomeCavallo === "function" ? agNomeCavallo(e) : ""; }catch(x){ return ""; } }
 
 async function loadClientiMascalcia(){
   clientiMascalcia = await DB.listClientiMascalcia();
@@ -5237,7 +5596,7 @@ function renderClientiList(){
     <div class="card" style="margin:-4px 0 12px;padding:12px 14px">
       <div style="font-size:13px;line-height:1.5;margin-bottom:10px"><strong>${escapeHtml(c.nome)}</strong> ti ha invitato a collegarti come maniscalco su Equo Scuderia: chat e appuntamenti con la struttura con doppia conferma.</div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-primary btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this)">Accetta</button>
+        <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this)">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this)">Rifiuta</button>
       </div>
     </div>` : ""}`;
@@ -5440,7 +5799,7 @@ async function openClienteDetail(id){
       : "Richiesta inviata: in attesa che la struttura accetti.";
     boxScud.innerHTML = `<div style="font-size:13.5px;line-height:1.6;margin-bottom:10px">${statoTxt}</div>
       ${c.collegamento_stato === "da_confermare_pro" ? `<div style="display:flex;gap:8px;margin-bottom:8px">
-        <button class="btn btn-primary btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
+        <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this).then(() => closeClienteDetail())">Rifiuta</button></div>` : ""}
       <button class="btn btn-ghost btn-sm" id="cliente-scollega-btn" style="width:100%;color:var(--red)" onclick="scollegaStrutturaCorrente()">${c.collegamento_stato === "attivo" ? "Scollega da Equo Scuderia" : "Annulla richiesta"}</button>`;
   } else if(isStruttura(c) && isManiscalcoUtente()){
@@ -6143,7 +6502,6 @@ async function salvaInterventoMascalcia(){
       ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(cliente_mascalcia_id, scelto));
     }
 
-    const prossima_scadenza = TIPO_FERRATURA_INTERVALLI[tipo_ferratura] ? aggiungiGiorniIso(data_intervento, TIPO_FERRATURA_INTERVALLI[tipo_ferratura]) : null;
     // stato: data/ora nel futuro = programmato; altrimenti fatto (in modifica non si "chiude" da solo un programmato)
     const quando = new Date(data_intervento + "T" + (ora || "00:00")); // senza ora: oggi = fatto
     const futuro = quando.getTime() > Date.now();
@@ -6155,6 +6513,20 @@ async function salvaInterventoMascalcia(){
     const stato = diGruppo ? statoPrec
       : eraRichiesta ? (data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto")
       : futuro ? "programmato" : (statoPrec || "fatto");
+    // RICHIAMO in giorni: se diventa FATTO ora → pop-up; se era già fatto → si mantiene l'intervallo scelto; se programmato → proposta silenziosa
+    let prossima_scadenza = null;
+    if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]){
+      const giaFatto = interventoInModifica && statoPrec === "fatto" && interventoInModifica.prossima_scadenza && interventoInModifica.tipo_ferratura === tipo_ferratura;
+      if(giaFatto){
+        prossima_scadenza = aggiungiGiorniIso(data_intervento, giorniTra(interventoInModifica.data_intervento, interventoInModifica.prossima_scadenza));
+      } else if(stato === "fatto"){
+        const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
+        prossima_scadenza = await richiamoPerFatto({ id: interventoInModifica?.id, tipo_ferratura, tipo_altro, data_intervento, cavallo_cliente_id, horse_id, cavallo: nomeCv });
+      } else {
+        const sg = await giorniRichiamoSuggeriti(tipo_ferratura, cavallo_cliente_id, horse_id, interventoInModifica?.id);
+        prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
+      }
+    }
 
     const payload = { cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
     const { error } = interventoInModifica
@@ -6355,7 +6727,7 @@ async function renderRichiestePendenti(){
           <div class="muted" style="font-size:12px">${formatDataBreve(r.data_intervento)}${r.ora ? " · " + String(r.ora).slice(0, 5) : ""} · ${escapeHtml(agDescrizioneTipo(r))}${r.note ? " · " + escapeHtml(r.note) : ""}</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="rifiutaRichiesta('${r.id}')">Rifiuta</button>
-        <button class="btn btn-primary btn-sm" onclick="accettaRichiesta('${r.id}')">Accetta</button>
+        <button class="btn btn-primary btn-sm btn-conferma" onclick="accettaRichiesta('${r.id}')">Accetta</button>
       </div>`).join("")}`;
 }
 
@@ -6498,7 +6870,10 @@ function fissaDaScadenza(id){
 }
 
 async function segnaFattoAgenda(id){
-  const { error } = await DB.segnaInterventoFatto(id);
+  const e = agEventiCache[id];
+  const upd = { stato: "fatto" };
+  if(e && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = await richiamoPerFatto(e);
+  const { error } = await DB.updateInterventoMascalcia(id, upd);
   if(error){ showToast("Errore: " + error.message); return; }
   showToast("Segnato come fatto");
   await renderAgendaSettimana();
@@ -6547,7 +6922,12 @@ async function azioneEvento(tipo){
     accettaRichiesta(e.id);
   } else if(tipo === "fatto"){
     const nuovo = e.stato === "fatto" ? "programmato" : "fatto";
-    const { error } = await DB.updateInterventoMascalcia(e.id, { stato: nuovo });
+    const upd = { stato: nuovo };
+    if(nuovo === "fatto" && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
+      closeModal("modal-azioni-evento");
+      upd.prossima_scadenza = await richiamoPerFatto(e);
+    }
+    const { error } = await DB.updateInterventoMascalcia(e.id, upd);
     if(error){ showToast("Errore: " + error.message); return; }
     closeModal("modal-azioni-evento");
     showToast(nuovo === "fatto" ? "Segnato come fatto" : "Rimesso da fare");
@@ -8490,7 +8870,7 @@ function renderAzioneAi(box, azione){
       ${righe.filter(Boolean).map(r => `<div class="event-proposal-row">${r}</div>`).join("")}
       <div class="event-proposal-actions">
         <button class="btn btn-ghost btn-sm" onclick="cancelEventProposal('${id}')">Annulla</button>
-        <button class="btn btn-primary btn-sm" onclick="confermaAzioneAi('${id}')">${ETICHETTA_CONFERMA_AI[azione.tipo] ? ETICHETTA_CONFERMA_AI[azione.tipo](x) : "Conferma"}</button>
+        <button class="btn btn-primary btn-sm btn-conferma" onclick="confermaAzioneAi('${id}')">${ETICHETTA_CONFERMA_AI[azione.tipo] ? ETICHETTA_CONFERMA_AI[azione.tipo](x) : "Conferma"}</button>
       </div>
     </div>`);
   box.scrollTop = box.scrollHeight;
@@ -8524,7 +8904,7 @@ async function confermaAzioneAi(id){
     }
     if(!error){
       const futuro = new Date(x.data + "T" + (x.ora || "00:00")).getTime() > Date.now();
-      const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo];
+      const giorni = (await giorniRichiamoSuggeriti(x.tipo, cavallo_cliente_id, horse_id)).giorni;
       ({ error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, cavallo_cliente_id, horse_id,
         tipo_ferratura: x.tipo, tipo_altro: x.tipo_altro, misura_sistema: null, numero_ferro: null, quantita_ferri: null,
         data_intervento: x.data, ora: x.ora, stato: futuro ? "programmato" : "fatto",
@@ -8538,7 +8918,7 @@ async function confermaAzioneAi(id){
     error = r.error || (r.data && !r.data.ok ? { message: r.data.errore } : null);
     if(!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la struttura riceve l'avviso in chat." : "✓ Richiesta rifiutata: la struttura riceve un messaggio in chat.";
   } else if(azione.tipo === "accetta_richiesta"){
-    const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura];
+    const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura] ? (await giorniRichiamoSuggeriti(x.tipo_ferratura, x.cavallo_cliente_id, x.horse_id, x.id)).giorni : null;
     const payload = { stato: x.data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto", prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null };
     if(x.importo != null) payload.importo = x.importo;
     ({ error } = await DB.updateInterventoMascalcia(x.id, payload));
@@ -8658,7 +9038,7 @@ function renderEventProposal(box, proposed){
       ${proposed.notes ? `<div class="event-proposal-row">${escapeHtml(proposed.notes)}</div>` : ""}
       <div class="event-proposal-actions">
         <button class="btn btn-ghost btn-sm" onclick="cancelEventProposal('${id}')">Annulla</button>
-        <button class="btn btn-primary btn-sm" onclick='confirmEventProposal("${id}", ${JSON.stringify(proposed).replace(/'/g,"&#39;")})'>Conferma</button>
+        <button class="btn btn-primary btn-sm btn-conferma" onclick='confirmEventProposal("${id}", ${JSON.stringify(proposed).replace(/'/g,"&#39;")})'>Conferma</button>
       </div>
     </div>
   `);

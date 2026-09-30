@@ -109,7 +109,25 @@ Ordine di priorità per arrivare da "codebase pronta" a "prodotto live e testabi
   - ✅ 30/09 FATTO su Pegasus e Hammer (e Equo AI neutro): regole comuni REGOLE_COMUNI in agent.js, strumenti riferisci_ai_boss + le_mie_segnalazioni, tabella segnalazioni_boss, email ai Boss (notify-segnalazione-boss.js), risposta con `select rispondi_segnalazione_boss('<id>', 'testo');` → messaggio nella chat dell'agente + push; domanda "cosa vorresti migliorare?" max ogni 14 giorni (profiles.ai_feedback_chiesto_at)
   - ✅ 30/09 Hammer proattivo: riepilogo del lunedì (riepilogo-hammer.js: agenda 7 gg, richieste da confermare, scaduti da richiamare, incassi, proposte alle strutture, consiglio Haiku; Premium push+email; switch nel menu pro)
   - [ ] Pagina admin per leggere e rispondere alle segnalazioni senza SQL
-  - [ ] Galeno/Ares/Athena/Merlino/Ermes: nascono già con REGOLE_COMUNI + riepilogo periodico proprio
+  - **Guida all'app (prerogativa di OGNI agente, presente e futuro)** — richiesta Simone 30/09/2026: ogni agente conosce alla perfezione l'app in cui lavora e, se richiesto, spiega ogni funzione: DOVE si trova, PASSI numerati con le etichette esatte, ESEMPIO concreto, note (permessi, limiti). Mai inventare pulsanti.
+    - ✅ 30/09 FATTO: regola "Guida all'app" in REGOLE_COMUNI (agent.js) + strumento `guida_app` (rpc `cerca_guida` / `indice_guida`) su schede `ai_conoscenze` categoria 'guida': 65 schede app Proprietario (Pegasus), 70 app Maniscalco (Hammer), 85 Equo Scuderia con Magazzino (Athena). Sorgenti JSON in `Claude outputs/guide/`.
+    - Quando si aggiunge o cambia una funzione dell'app: aggiornare la scheda guida corrispondente (stesso titolo = aggiornamento).
+    - Nuovo agente = nuove schede guida con il suo ambito + `guida_app` negli strumenti.
+  - ✅ 30/09 **Athena attiva** in Equo Scuderia (bolla con la civetta): guida del gestionale + `situazione_centro` (scadenze sanitarie, carnet, lezioni, sotto-scorta, ordini) + messaggero dei Boss; 300 messaggi/mese per utente; conversazione per centro (ai_messaggi vista 'scuderia', centro_id); chiamata via proxy `/api/agent` (equo-scuderia/netlify.toml)
+  - [ ] Athena: azioni con conferma (lezioni, promemoria ai clienti, movimenti di magazzino) e riepilogo del lunedì
+  - [ ] Galeno/Ares/Merlino/Ermes: nascono già con REGOLE_COMUNI (guida all'app compresa) + riepilogo periodico proprio
+- [x] **Ticket di assistenza in Home** (30/09/2026): card "Serve aiuto?" → "Apri un ticket" nell'app (vista proprietario e professionista) e in Equo Scuderia; tabella `ticket_assistenza` (numero progressivo da #1001, max 5/giorno) → email a gestione.equo@gmail.com con reply-to dell'utente + email di conferma all'utente (notify-ticket-assistenza.js)
+  - [ ] Pagina admin ticket (stato aperto / in lavorazione / chiuso)
+- [x] **Pacchetti Scuderia attivi** (30/09/2026): START/ADVANCE/PREMIUM con limiti lato server, lucchetti nel menu, "Il tuo pacchetto", sblocco totale per losportivocolleferro@gmail.com
+- [x] **Statistiche + Merlino** (30/09/2026): pagina Statistiche (base/complete), Merlino in chat, Radar settimanale della concorrenza
+  - [ ] Pagamenti Scuderia (checkout con IVA e fattura) che aggiornano centri.pacchetto in automatico
+  - [ ] Ermes (seconda scelta dell'agente incluso in PREMIUM)
+  - [ ] Promemoria automatici solo da ADVANCE (oggi i promemoria non distinguono il pacchetto)
+- [x] **Box / Stalla + semaforo + suggerimenti** (30/09/2026, Scuderia): box disegnati (verde/rosso/giallo), stato del cavallo, icone del giorno, modalità stalla, limiti START/ADVANCE/PREMIUM; pallino con preavviso per tipo; fumetti di aiuto
+  - [ ] Collegamento dispositivi (GPS, telecamera, display touch, sensori) → scuderia_box_attivita.fonte / scuderia_box.dispositivo_id
+  - [ ] Suggerimenti anche nell'app Equo
+  - [ ] Preavvisi delle scadenze modificabili da ogni centro
+- [ ] **Offline** (decisione 30/09/2026): Equo App livello 2 (si apre senza rete, ultimi dati visti, coda di chat/interventi/appuntamenti/spese/eventi inviata al ritorno della rete); Equo Scuderia livello 1 (si apre senza rete, barra "Sei offline", ultimi dati in sola lettura). Service worker unico con OneSignal importato.
 - [ ] **Ermes — Magazziniere & Responsabile Logistica (Equo Scuderia)** — scheda definita il 30/09/2026, prompt base in `prompt-agenti/ermes-system-prompt.txt`
   - Tono: sintetico, preciso, organizzato, proattivo, orientato al controllo delle scorte; risponde con tabelle ed elenchi puntati
   - Funzioni: mappatura dei depositi (scaffali, ripiani, zone di stoccaggio), tracciamento giacenze (mangimi, integratori, farmaci veterinari, ferri/chiodi, coperte, attrezzatura), alert di sotto-scorta, liste di riordino e gestione riordini con i fornitori

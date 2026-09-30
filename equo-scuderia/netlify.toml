@@ -1,2 +1,22 @@
 [build]
   publish = "."
+  # codice di build interno per il pop-up "È disponibile un aggiornamento" (non è un numero di versione mostrato)
+  command = "node scrivi-build.js"
+
+# Athena (segreteria AI): la funzione vive sul sito dell'app; il proxy la rende "stesso dominio" (niente CORS).
+[[redirects]]
+  from = "/api/agent"
+  to = "https://app.equohub.com/.netlify/functions/agent"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/radar"
+  to = "https://app.equohub.com/.netlify/functions/radar-merlino"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
