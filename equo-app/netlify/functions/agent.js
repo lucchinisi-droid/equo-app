@@ -785,6 +785,8 @@ exports.handler = async (event) => {
     const { data: m } = await admin.from("scuderia_membri").select("ruolo, livello, nome_visualizzato").eq("centro_id", centroId).eq("user_id", user.id).maybeSingle();
     const { data: c } = await admin.from("centri").select("id, nome, owner_id").eq("id", centroId).maybeSingle();
     if (!c || (!m && c.owner_id !== user.id)) return risposta(403, { error: "Non fai parte di questo centro" });
+    // clienti del centro (allievi/genitori, proprietari collegati): Athena e Merlino sono solo per lo staff
+    if (m && ["allievo", "proprietario"].includes(m.ruolo) && c.owner_id !== user.id) return risposta(403, { error: "Athena e Merlino sono riservati allo staff del centro" });
     centro = c; membro = m || { ruolo: "admin", livello: "admin" };
   }
 
@@ -802,6 +804,8 @@ exports.handler = async (event) => {
   if (scud) { const { data: lc } = await admin.rpc("centro_limiti", { p_centro_id: centro.id }); limitiCentro = lc || {}; }
   const merlino = scud && body.agente === "merlino";
   if (merlino && !(limitiCentro.agenti || []).includes("merlino")) return risposta(403, { error: "Merlino non è attivo per questo centro", bloccato: true });
+  // Merlino (numeri, incassi, strategia): solo titolare, amministratori e livelli 2-3
+  if (merlino && !(centro.owner_id === user.id || membro.ruolo === "admin" || ["admin", "2", "3"].includes(String(membro.livello)))) return risposta(403, { error: "Merlino è riservato al titolare e ai responsabili del centro (livello 2 o 3)" });
   const athena = scud && !merlino;
   const athenaBasic = athena && limitiCentro.athena_proattiva === false;
   const chiaveMese = merlino ? mese + "-merlino" : athena ? mese + "-athena" : mese;
@@ -822,6 +826,16 @@ exports.handler = async (event) => {
     usati = count || 0;
   }
   if (usati >= limite) return risposta(200, { limite_raggiunto: true, uso: { usati, limite, piano } });
+  // prenotazione ATOMICA del messaggio (SQL ai_prenota): richieste in parallelo non superano il limite
+  // e il messaggio resta contato anche se la risposta va in timeout. Se la funzione SQL manca, si prosegue come prima.
+  const chiavePren = scud ? `centro:${centro.id}:${merlino ? "merlino" : "athena"}` : `utente:${user.id}:${chiaveMese}`;
+  let prenotato = false;
+  {
+    const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: mese, p_limite: limite, p_base: usati });
+    if (ePren) console.warn("ai_prenota non disponibile:", ePren.message);
+    else if (Number(pren) < 0) return risposta(200, { limite_raggiunto: true, uso: { usati: limite, limite, piano } });
+    else { prenotato = true; usati = Math.max(usati, Number(pren) - 1); }
+  }
 
   // contesto: cavalli, memoria, cronologia
   const { data: cavalli } = scud ? { data: [] } : await db.from("horses").select("id, name, breed, birth_date, microchip, mantello, note, condiviso_ecosistema").eq("owner_id", user.id).order("created_at", { ascending: true });
@@ -913,6 +927,8 @@ exports.handler = async (event) => {
       messages.push({ role: "user", content: risultati });
     }
   } catch (e) {
+    // errore del servizio AI: il messaggio prenotato si restituisce
+    if (prenotato) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: mese }).then(() => {}, () => {});
     return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano } });
   }
 

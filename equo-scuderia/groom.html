@@ -255,14 +255,17 @@ function schermoPin(modo, errore){
     <div class="pin-punti" id="pin-punti">${"<i></i>".repeat(4)}</div><div class="err" id="pin-err">${errore ? esc(errore) : ""}</div>
     <div class="tast">${tasti}</div>${btnLinguaHtml()}</div>`;
 }
+let pinInVerifica = false;
 async function tastoPin(k, modo){
+  if(pinInVerifica) return;
   if(k === "⌫") pinIns = pinIns.slice(0, -1); else if(pinIns.length < 4) pinIns += k;
   document.querySelectorAll("#pin-punti i").forEach((p, i) => p.classList.toggle("on", i < pinIns.length));
   if(pinIns.length < 4) return;
-  const pin = pinIns;
+  const pin = pinIns; pinIns = "";
   if(modo === "crea" && !pinPrimo){ pinPrimo = pin; return schermoPin("crea"); }
   if(modo === "crea" && pinPrimo !== pin){ pinPrimo = null; return schermoPin("crea", tr("pin_diversi")); }
   pinPrimo = null;
+  pinInVerifica = true;
   try{
     const r = await rpc("groom_stalla", { p_token: S.t, p_pin: pin });
     if(r?.errore){ return schermoPin("entra", tr("pin_errato")); }
@@ -271,7 +274,7 @@ async function tastoPin(k, modo){
     if(/BLOCCATO/.test(e.message)) return schermoMsg("bloccato", true);
     if(/NON_VALIDO/.test(e.message)) return schermoMsg("non_valido", true);
     schermoPin(modo === "crea" ? "crea" : "entra", tr("errore"));
-  }
+  } finally { pinInVerifica = false; }
 }
 
 /* ---------- dati e sincronizzazione ---------- */
@@ -295,12 +298,19 @@ async function aggiorna(primaVolta){
   }
 }
 function avviaPoll(){ if(timerPoll) return; timerPoll = setInterval(() => { if(document.visibilityState === "visible" && !document.querySelector(".velo")) aggiorna(); }, 60000); }
-async function svuotaCoda(){
+// un solo invio alla volta: due invii in parallelo toglievano dalla coda spunte mai spedite
+let codaInVolo = null;
+function svuotaCoda(){ if(!codaInVolo) codaInVolo = inviaCoda().finally(() => { codaInVolo = null; }); return codaInVolo; }
+function togliDallaCoda(x){ const i = coda.indexOf(x); if(i >= 0){ coda.splice(i, 1); scrivi(K_CODA, coda); } }
+async function inviaCoda(){
   while(coda.length){
     const x = coda[0];
-    try{ await rpc("groom_segna", { p_token: S.t, p_pin: S.pin, p_box: x.box, p_tipo: x.tipo, p_fatto: x.fatto, p_quando: x.quando }); }
-    catch(e){ if(e.server && !/NON_VALIDO|BLOCCATO/.test(e.message)){ coda.shift(); scrivi(K_CODA, coda); continue; } return; }
-    coda.shift(); scrivi(K_CODA, coda);
+    let r;
+    try{ r = await rpc("groom_segna", { p_token: S.t, p_pin: S.pin, p_box: x.box, p_tipo: x.tipo, p_fatto: x.fatto, p_quando: x.quando }); }
+    catch(e){ if(e.server && !/NON_VALIDO|BLOCCATO/.test(e.message)){ togliDallaCoda(x); continue; } return; }
+    if(r?.errore === "GROOM_PIN_ERRATO"){ S.pin = null; scrivi(K_STATO, S); schermoPin("entra", tr("pin_errato")); return; }
+    if(r?.errore) toast(tr("errore"));
+    togliDallaCoda(x);
   }
 }
 window.addEventListener("online", () => aggiorna());

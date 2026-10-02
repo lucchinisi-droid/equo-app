@@ -2966,7 +2966,7 @@ function renderTeam(){
       <td><span class="badge-pill badge-gray">${livelloLabel}</span></td>
       <td style="text-align:right;white-space:nowrap">
         ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openMemberForm('${m.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
-        ${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember('${m.id}','${escapeHtml(m.nome_visualizzato || 'questo membro')}')"><i class="fa-solid fa-trash"></i></button>` : ""}
+        ${canRemove ? `<button class="btn btn-ghost btn-sm" onclick="askRemoveMember(${jsArg(m.id)}, ${jsArg(m.nome_visualizzato || 'questo membro')})"><i class="fa-solid fa-trash"></i></button>` : ""}
       </td>
     `;
     body.appendChild(tr);
@@ -3503,7 +3503,7 @@ function renderChatMessaggi(messaggi){
 function corpoMessaggioChat(msg, mine){
   const testo = msg.testo ? escapeHtml(msg.testo) : "";
   if(msg.tipo === "foto" && msg.file_url){
-    return `<a href="${escapeHtml(msg.file_url)}" target="_blank" rel="noopener"><img src="${escapeHtml(msg.file_url)}" alt="Foto" loading="lazy" style="max-width:220px;max-height:260px;border-radius:10px;display:block;object-fit:cover"></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
+    return `<a href="${escapeHtml(urlSicuro(msg.file_url))}" target="_blank" rel="noopener"><img src="${escapeHtml(urlSicuro(msg.file_url))}" alt="Foto" loading="lazy" style="max-width:220px;max-height:260px;border-radius:10px;display:block;object-fit:cover"></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
   }
   if(msg.tipo === "video" && msg.file_url){
     return `<video controls playsinline preload="metadata" src="${escapeHtml(msg.file_url)}" style="max-width:220px;max-height:260px;border-radius:10px;display:block"></video>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
@@ -3512,7 +3512,7 @@ function corpoMessaggioChat(msg, mine){
     return `<audio controls preload="none" src="${escapeHtml(msg.audio_url || msg.file_url)}" style="max-width:230px;height:36px;display:block"></audio>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
   }
   if(msg.tipo === "documento" && msg.file_url){
-    return `<a href="${escapeHtml(msg.file_url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none"><span style="background:#c0392b;color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:8px 5px">PDF</span><span style="text-decoration:underline">${escapeHtml(msg.file_nome || "Documento.pdf")}</span></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
+    return `<a href="${escapeHtml(urlSicuro(msg.file_url))}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none"><span style="background:#c0392b;color:#fff;font-size:9px;font-weight:800;border-radius:5px;padding:8px 5px">PDF</span><span style="text-decoration:underline">${escapeHtml(msg.file_nome || "Documento.pdf")}</span></a>${testo ? `<div style="margin-top:4px">${testo}</div>` : ""}`;
   }
   return testo;
 }
@@ -4139,7 +4139,7 @@ function magRenderHero(){
   inviati.forEach(o => { const f = mag.fornitori.find(x => x.id === o.fornitore_id); todo.push({ sem: "giallo", t: `Ordine in arrivo${f ? " da " + escapeHtml(f.nome) : ""}`, s: `${(o.righe || []).length} righe · inviato il ${magDataIt(o.inviato_at)}`, btn: `<button class="btn btn-sm btn-outline" onclick="magRiceviOrdine('${o.id}')">Ricevuto</button>` }); });
   todo.sort((x, y) => (x.sem === "rosso" ? 0 : 1) - (y.sem === "rosso" ? 0 : 1));
   document.getElementById("mag-todo").innerHTML = todo.length ? todo.slice(0, 12).map(x => `
-    <div class="mag-todo-item"><i class="mag-sem ${x.sem}${x.sem === "rosso" ? " pulse" : ""}"></i><div class="t"><b>${x.t}</b><small>${x.s}</small></div>${x.btn}</div>`).join("")
+    <div class="mag-todo-item"><i class="mag-sem ${x.sem}${x.sem === "rosso" ? " pulse" : ""}"></i><div class="t"><b>${x.t}</b><small>${escapeHtml(x.s)}</small></div>${x.btn}</div>`).join("")
     : `<div class="mag-todo-vuoto"><i class="fa-solid fa-circle-check" style="color:#2f8a4e;font-size:22px"></i> Tutto in ordine: nessuna scorta critica, nessun lotto in scadenza.</div>`;
 
   // grafico consumi (valore € a settimana, per categoria)
@@ -4150,7 +4150,7 @@ function magRenderHero(){
       <div class="col" style="height:${Math.max(3, s.totale / max * 100)}%">${catUsate.map(k => s.perCat[k] ? `<i style="height:${s.perCat[k] / (s.totale || 1) * 100}%;background:${magCats()[k].colore}"></i>` : "").join("")}</div>
       <small>${s.etichetta}</small></div>`).join("");
   document.getElementById("mag-bars-leg").innerHTML = catUsate.length
-    ? catUsate.map(k => `<span><i style="background:${magCats()[k].colore}"></i>${magCats()[k].nome}</span>`).join("")
+    ? catUsate.map(k => `<span><i style="background:${magCats()[k].colore}"></i>${escapeHtml(magCats()[k].nome)}</span>`).join("")
     : "<span>Registra gli scarichi per vedere i consumi (inserisci anche il costo unitario degli articoli).</span>";
 }
 function magConsumiSettimane(){
@@ -4193,7 +4193,7 @@ function magRenderCategorie(){
     const cnt = g.rosso ? `<span class="cnt">${g.rosso}</span>` : g.giallo ? `<span class="cnt g">${g.giallo}</span>` : "";
     return `<button class="mag-cat ${magUI.cat === key ? "active" : ""}" onclick="magSelCat('${key}')">
       <span class="ic" style="background:${colore}">${icona}</span>${cnt}<i class="mag-sem ${arts.length ? g.colore : "verde"}${g.rosso ? " pulse" : ""}"></i>
-      <div class="nome">${nome}</div><div class="info">${arts.length} ${arts.length === 1 ? "articolo" : "articoli"}</div>
+      <div class="nome">${escapeHtml(nome)}</div><div class="info">${arts.length} ${arts.length === 1 ? "articolo" : "articoli"}</div>
       <div class="salute"><i style="width:${g.verde / tot * 100}%;background:#2f8a4e"></i><i style="width:${g.giallo / tot * 100}%;background:#e0a100"></i><i style="width:${g.rosso / tot * 100}%;background:var(--danger)"></i></div>
     </button>`;
   };
@@ -5586,7 +5586,7 @@ function renderCavalliList(){
       div.onclick = () => openCavalloDetail(c.id);
       div.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-          ${c.foto_url ? `<div style="width:40px;height:40px;border-radius:8px;background-image:url('${c.foto_url}');background-size:cover;background-position:center;flex-shrink:0"></div>` : ""}
+          ${c.foto_url ? `<div style="width:40px;height:40px;border-radius:8px;background-image:${cssUrl(c.foto_url)};background-size:cover;background-position:center;flex-shrink:0"></div>` : ""}
           <div style="flex:1">
             <h3 style="margin:0 0 2px;display:flex;align-items:center;gap:8px">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}</h3>
             <div style="color:var(--muted);font-size:13px">${escapeHtml(sub)}</div>
@@ -5990,7 +5990,7 @@ function openCavalloForm(id){
     document.getElementById("cav-proprietario").value = c?.proprietario || "";
     document.getElementById("cav-codice-proprietario").value = "";
     document.getElementById("cav-note").value = c?.note || "";
-    preview.innerHTML = c?.foto_url ? `<img src="${c.foto_url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
+    preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
   } else {
     document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
     document.getElementById("cav-tipo-proprieta").value = "proprieta";
@@ -7821,7 +7821,7 @@ function stRadar(s){
   return `<div class="card st-card st-radar" id="st-radar"><h3><i class="fa-solid fa-satellite-dish" style="color:#6b4fa0"></i> Il radar di Merlino</h3>
     <p class="sub">Concorrenza e opportunità nella tua zona, solo da fonti pubbliche. Si aggiorna da solo ogni lunedì.</p>
     <div id="st-radar-corpo">${r ? `<div class="testo">${athenaFormatta(r.testo)}</div>
-      ${fonti.length ? `<div class="fonti"><b>Fonti:</b> ${fonti.map(f => `<a href="${escapeHtml(f.url)}" target="_blank" rel="noopener">${escapeHtml((f.titolo || f.url).slice(0, 60))}</a>`).join(" · ")}</div>` : ""}
+      ${fonti.length ? `<div class="fonti"><b>Fonti:</b> ${fonti.map(f => `<a href="${escapeHtml(urlSicuro(f.url))}" target="_blank" rel="noopener">${escapeHtml((f.titolo || f.url).slice(0, 60))}</a>`).join(" · ")}</div>` : ""}
       <div class="st-nota">Aggiornato il ${new Date(r.creato_il).toLocaleDateString("it-IT", { day:"numeric", month:"long" })}.</div>`
       : `<div class="st-vuoto">Nessun radar ancora: avvialo ora, Merlino impiega un paio di minuti a cercare.</div>`}</div>
     <div class="st-azioni" style="margin-top:10px"><button class="btn btn-primary btn-sm" id="st-radar-btn" onclick="stAggiornaRadar()"><i class="fa-solid fa-rotate"></i> Aggiorna il radar</button>
@@ -8167,7 +8167,7 @@ function boxCardHtml(b){
   let centro;
   if(c){
     const st = BOX_STATI[b.stato_cavallo] || BOX_STATI.in_box;
-    centro = `${c.foto_url ? `<div class="box-foto" style="background-image:url('${escapeHtml(c.foto_url)}')"></div>` : `<div class="box-nopic" data-tip="Nessuna foto: aggiungila dalla scheda del cavallo">NO<br>PICTURE</div>`}
+    centro = `${c.foto_url ? `<div class="box-foto" style="background-image:${cssUrl(c.foto_url)}"></div>` : `<div class="box-nopic" data-tip="Nessuna foto: aggiungila dalla scheda del cavallo">NO<br>PICTURE</div>`}
       <div class="box-nome"><span class="t">${escapeHtml(c.nome)}</span>${pallinoHtml(c.id)}</div>
       <span class="box-chip" data-tip="Dov'è ora: si cambia dal pannello del box">${iconHtml(st.icon)} ${st.nome}</span>
       ${sotto ? `<span class="box-ospite" data-tip="Il cavallo è in un box che non è il suo">${escapeHtml(sotto)}</span>` : ""}`;
@@ -8270,7 +8270,7 @@ function boxRenderPannello(){
   if(c){
     const liberi = boxList.filter(x => !x.cavallo_id && !x.manutenzione && x.id !== b.id);
     const nota = boxNote[c.id];
-    h = `<div class="bp-testa">${c.foto_url ? `<div class="box-foto" style="background-image:url('${escapeHtml(c.foto_url)}')"></div>` : `<div class="box-nopic" style="margin:0">NO<br>PICTURE</div>`}
+    h = `<div class="bp-testa">${c.foto_url ? `<div class="box-foto" style="background-image:${cssUrl(c.foto_url)}"></div>` : `<div class="box-nopic" style="margin:0">NO<br>PICTURE</div>`}
         <div style="min-width:0"><div style="font-weight:800;font-size:18px;display:flex;align-items:center;gap:8px">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}</div>
         <div style="color:var(--muted);font-size:12.5px">${escapeHtml([c.razza, c.proprietario ? "di " + c.proprietario : null].filter(Boolean).join(" · "))}</div>
         <div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(pallinoCavallo(c.id).testo)}</div></div></div>
@@ -8404,7 +8404,7 @@ document.addEventListener("pointerdown", e => {
     card.classList.add("in-trascinamento"); document.body.classList.add("box-trascina");
     const c = cavalliList.find(x => x.id === boxDrag.cav);
     const g = document.createElement("div"); g.className = "box-ghost";
-    g.innerHTML = `${c?.foto_url ? `<span class="f" style="background-image:url('${escapeHtml(c.foto_url)}')"></span>` : `<i class="fa-solid fa-horse-head"></i>`}<b>${escapeHtml(c?.nome || "")}</b>`;
+    g.innerHTML = `${c?.foto_url ? `<span class="f" style="background-image:${cssUrl(c.foto_url)}"></span>` : `<i class="fa-solid fa-horse-head"></i>`}<b>${escapeHtml(c?.nome || "")}</b>`;
     g.style.left = boxDrag.x0 + "px"; g.style.top = boxDrag.y0 + "px";
     document.body.appendChild(g); boxDrag.ghost = g;
     try{ navigator.vibrate?.(15); }catch(x){}
@@ -8806,8 +8806,8 @@ async function athenaInvia(){
     const data = await res.json().catch(() => ({}));
     pensa.classList.remove("pensa");
     if(res.status === 401) pensa.innerHTML = athenaFormatta("Sessione scaduta: esci e rientra per parlare con Athena.");
-    else if(res.status === 403) pensa.innerHTML = athenaFormatta("Non risulti nello staff di questo centro.");
     else if(res.status === 403 && data.bloccato) pensa.innerHTML = athenaFormatta(`${AGENTI_CHAT[agenteAttivo].nome} non è attivo per questo centro: lo trovi in "Agenti AI".`);
+    else if(res.status === 403) pensa.innerHTML = athenaFormatta(data.error ? data.error + "." : "Non risulti nello staff di questo centro.");
     else if(data.limite_raggiunto) pensa.innerHTML = athenaFormatta(`Il centro ha usato tutti i **${data.uso.limite} messaggi** di ${AGENTI_CHAT[agenteAttivo].nome} di questo mese: il contatore riparte il 1° del mese. Per un problema urgente usa "Serve aiuto?" → "Apri un ticket" in Home.`);
     else pensa.innerHTML = athenaFormatta(data.reply || "Non sono riuscita a rispondere, riprova.");
     if(data.uso) document.getElementById("athena-uso").textContent = `${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome} questo mese (tutto il centro)`;
@@ -8967,8 +8967,14 @@ function loadGoogleAnalytics(){
 }
 
 /* ---------- HELPERS ---------- */
+// argomento sicuro per gli onclick="..." scritti nell'HTML (nomi con apostrofi, virgolette, ecc.)
+function jsArg(v){ return escapeHtml(JSON.stringify(v ?? "")); }
+// solo link veri (https, o anteprime locali): niente javascript: o altri schemi dentro href/src
+function urlSicuro(u){ u = String(u || "").trim(); return /^(https:\/\/|blob:|data:image\/)/i.test(u) ? u : "#"; }
+// immagine di sfondo: url("...") con la stringa protetta
+function cssUrl(u){ return "url(" + escapeHtml(JSON.stringify(urlSicuro(u))) + ")"; }
 function escapeHtml(str){
-  return (str || "").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  return String(str ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
 /* ---------- BOOT ---------- */

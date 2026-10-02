@@ -63,7 +63,9 @@ exports.handler = async (event) => {
     <div style="padding:12px 14px;background:#f5f1e8;border-radius:10px;font-size:14px"><b>${esc(t.oggetto)}</b><br><span style="white-space:pre-wrap">${esc(t.descrizione.length > 600 ? t.descrizione.slice(0, 600) + "…" : t.descrizione)}</span></div>
     <p style="font-size:13px;color:#667;margin-top:14px">Vuoi aggiungere qualcosa? Rispondi semplicemente a questa email citando il numero ${numero}.</p>
     <p style="font-size:13px;color:#667">— Il team Equo</p></div>`;
-  if (t.email) await inviaEmail({ to: t.email, reply_to: "gestione.equo@gmail.com", subject: `Equo · abbiamo ricevuto il tuo ticket ${numero}`, html: htmlUtente });
+  // conferma SOLO all'email dell'account (verificata al login), mai all'indirizzo scritto nel modulo:
+  // altrimenti chiunque potrebbe far partire email Equo verso indirizzi di terzi
+  if (p?.email) await inviaEmail({ to: p.email, reply_to: "gestione.equo@gmail.com", subject: `Equo · abbiamo ricevuto il tuo ticket ${numero}`, html: htmlUtente });
 
   if (okBoss) await supabase.from("ticket_assistenza").update({ notificata_at: new Date().toISOString() }).eq("id", id);
   return { statusCode: 200, body: JSON.stringify({ esito: okBoss ? "email_inviata" : "errore_resend" }) };

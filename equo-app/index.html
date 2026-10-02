@@ -1530,8 +1530,8 @@ body.ai-aperta{overflow:hidden}
         <input class="input" id="cliente-nome" placeholder="es. Marco Bianchi">
       </div>
       <div class="input-group">
-        <label class="input-label">Nome cavallo (opzionale)</label>
-        <input class="input" id="cliente-cavallo" placeholder="es. Aurora">
+        <label class="input-label">Cavalli (opzionale)</label>
+        <input class="input" id="cliente-cavallo" placeholder="es. Aurora, Baia (separati da virgola)">
       </div>
       <div class="input-group">
         <label class="input-label">Telefono (opzionale)</label>
@@ -2640,6 +2640,47 @@ body.ai-aperta{overflow:hidden}
   </div>
 </div>
 
+<!-- Piano Free maniscalco: limite 10 clienti -->
+<div class="modal-overlay" id="modal-limite-clienti" onclick="closeOut(event,'modal-limite-clienti')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Hai raggiunto i 10 clienti del piano Free</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:10px">
+      I tuoi clienti, i cavalli e l'agenda restano tutti al loro posto. Per aggiungere altri clienti passa a <strong>Equo Premium</strong>:
+    </p>
+    <ul style="font-size:13.5px;line-height:1.7;margin:0 0 18px;padding-left:18px">
+      <li>clienti illimitati</li>
+      <li>giro della zona e messaggi pronti per i richiami</li>
+      <li>note vocali senza limiti e 500 messaggi al mese con Hammer</li>
+    </ul>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-limite-clienti')">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-limite-clienti');togglePiano()">Passa a Premium</button>
+    </div>
+  </div>
+</div>
+
+<!-- Piano Free proprietario: 1 cavallo -->
+<div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Il piano Free comprende 1 cavallo</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:10px">
+      Il tuo cavallo e tutti i suoi dati restano al loro posto. Per aggiungere altri cavalli passa a <strong>Equo Premium</strong>:
+    </p>
+    <ul style="font-size:13.5px;line-height:1.7;margin:0 0 18px;padding-left:18px">
+      <li>cavalli illimitati</li>
+      <li>promemoria automatici di vaccini, ferrature e sverminazioni</li>
+      <li>scheda PDF e QR del cavallo, storico spese completo</li>
+      <li>500 messaggi al mese con Pegasus</li>
+    </ul>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-limite-cavalli')">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-limite-cavalli');togglePiano()">Passa a Premium</button>
+    </div>
+  </div>
+</div>
+
 <!-- COOKIE BANNER -->
 <div class="cookie-banner" id="cookie-banner">
   <p>Usiamo cookie tecnici (necessari) e, solo con il tuo consenso, Google Analytics per capire come viene usato Equo.
@@ -2819,12 +2860,15 @@ const DB = {
     return error ? [] : (data || []);
   },
   async insertHorse(payload){
+    // piano Free del proprietario: 1 cavallo (il controllo vero è anche nel database)
+    if(!isPremium() && (horses || []).length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavallo." }, data: null }; }
     if(DEMO_MODE){
       const id = "demo-" + (++demoIdCounter);
       demoState.horses.push({ id, stable_id: null, ...payload });
       return { error: null, data: { id } };
     }
     const { data, error } = await sb.from("horses").insert({ owner_id: currentUser.id, ...payload }).select().single();
+    if(error && /LIMITE_CAVALLI_FREE/.test(error.message || "")){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavallo." }, data: null }; }
     return { error, data };
   },
   async updateHorse(id, payload){
@@ -3174,6 +3218,12 @@ const DB = {
     return error ? [] : (data || []);
   },
   async insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente = "proprietario" }){
+    // piano Free: massimo 10 clienti (il controllo vero è anche nel database)
+    if(!isPremium()){
+      let n = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia.length : 0);
+      if(!DEMO_MODE){ const { count } = await sb.from("clienti_mascalcia").select("id", { count: "exact", head: true }).eq("maniscalco_id", currentUser.id); if(typeof count === "number") n = count; }
+      if(n >= LIMITE_CLIENTI_FREE){ mostraLimiteClienti(); return { error: { message: "Hai raggiunto i " + LIMITE_CLIENTI_FREE + " clienti del piano Free." }, data: null }; }
+    }
     const codice_invito = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
     if(DEMO_MODE){
       const nuovo = { id: "dc-" + (++demoIdCounter), nome, nome_cavallo, telefono, note, cliente_user_id: null, codice_invito, tipo_cliente, created_at: new Date().toISOString() };
@@ -3181,6 +3231,7 @@ const DB = {
       return { error: null, data: nuovo };
     }
     const { data, error } = await sb.from("clienti_mascalcia").insert({ maniscalco_id: currentUser.id, nome, nome_cavallo, telefono, note, codice_invito, tipo_cliente }).select().single();
+    if(error && /LIMITE_CLIENTI_FREE/.test(error.message || "")){ mostraLimiteClienti(); return { error: { message: "Hai raggiunto i " + LIMITE_CLIENTI_FREE + " clienti del piano Free." }, data: null }; }
     return { error, data };
   },
   async updateClienteMascalcia(id, payload){
@@ -3322,8 +3373,17 @@ const DB = {
     ]);
     if(manRes.error) console.error("listCavalliCliente (manuali):", manRes.error);
     if(eqRes.error) console.error("listCavalliCliente (condivisi):", eqRes.error);
-    const manuali = manRes.data || [];
+    let manuali = manRes.data || [];
     const condivisi = eqRes.data || [];
+    if(!manRes.error && !eqRes.error && !manuali.length && !condivisi.length){
+      const cli = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find(x => x.id === clienteId);
+      if(cli && cli.nome_cavallo){
+        // una sola creazione anche se il modulo e la scheda cliente chiedono i cavalli insieme
+        window.__cavalliInCreazione = window.__cavalliInCreazione || {};
+        if(!window.__cavalliInCreazione[clienteId]) window.__cavalliInCreazione[clienteId] = creaCavalliDaTesto(clienteId, cli.nome_cavallo);
+        manuali = await window.__cavalliInCreazione[clienteId];
+      }
+    }
     const idCondivisi = new Set(condivisi.map(h => h.id));
     const out = condivisi.map(h => {
       const mirror = manuali.find(m => m.horse_id === h.id);
@@ -5219,7 +5279,9 @@ function renderHorsesList(){
 let editingHorseId = null;
 const TIPO_PROPRIETA_LABELS = { proprieta: "Cavallo di proprietà", noleggio: "Cavallo a noleggio" };
 
+const LIMITE_CAVALLI_FREE = 1;
 function openHorseForm(id){
+  if(!id && !isPremium() && horses.length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return; }
   editingHorseId = id || null;
   document.getElementById("horse-error").style.display = "none";
   document.getElementById("horse-form-title").textContent = editingHorseId ? "Modifica cavallo" : "Nuovo cavallo";
@@ -5959,7 +6021,11 @@ function messaggioErroreCollegaCliente(res){
   return ERRORI_COLLEGA_CLIENTE[res?.errore] || ("Collegamento non riuscito." + (res?.messaggio ? " (" + res.messaggio + ")" : ""));
 }
 
+const LIMITE_CLIENTI_FREE = 10;
+// si apre sopra eventuali altri moduli (che restano compilati sotto)
+function mostraLimiteClienti(){ openModal("modal-limite-clienti"); }
 function apriNuovoCliente(tipo){
+  if(!isPremium() && clientiMascalcia.length >= LIMITE_CLIENTI_FREE){ mostraLimiteClienti(); return; }
   ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("cliente-error").style.display = "none";
   document.getElementById("cliente-tipo").value = tipo === "struttura" ? "struttura" : "proprietario";
@@ -5971,6 +6037,20 @@ function aggiornaEtichetteNuovoCliente(){
   const struttura = document.getElementById("cliente-tipo").value === "struttura";
   document.getElementById("cliente-nome-label").textContent = struttura ? "Nome struttura" : "Nome cliente";
   document.getElementById("cliente-nome").placeholder = struttura ? "es. Scuderia Le Querce" : "es. Marco Bianchi";
+}
+
+// "Aurora, Baia" -> una scheda cavallo per nome (senza doppioni)
+function nomiCavalliDaTesto(testo){
+  const visti = new Set();
+  return String(testo || "").split(/[,;\n]+/).map(x => x.trim()).filter(x => x && !visti.has(x.toLowerCase()) && visti.add(x.toLowerCase())).slice(0, 30);
+}
+async function creaCavalliDaTesto(clienteId, testo){
+  const creati = [];
+  for(const nome of nomiCavalliDaTesto(testo)){
+    const { data, error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome });
+    if(!error && data) creati.push(data);
+  }
+  return creati;
 }
 
 async function createClienteMascalcia(){
@@ -5988,6 +6068,7 @@ async function createClienteMascalcia(){
   try {
     const { error, data: nuovo } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
     if(error || !nuovo){ errBox.textContent = "Errore: " + (error?.message || "salvataggio non riuscito"); errBox.style.display = "block"; return; }
+    await creaCavalliDaTesto(nuovo.id, nome_cavallo);
     let msgCollegamento = "";
     if(codiceEquo){
       const res = await DB.collegaClienteDaCodice(nuovo.id, codiceEquo);
@@ -7030,12 +7111,15 @@ async function openInterventoModal(clienteId, intervento, preset){
   const opzioniClienti = strutt.length
     ? `<optgroup label="Proprietari">${opzCli(propr)}</optgroup><optgroup label="Strutture">${opzCli(strutt)}</optgroup>`
     : opzCli(propr);
-  select.innerHTML = opzioniClienti + (inModifica ? "" : '<option value="__nuovo__">+ Nuovo cliente</option>');
+  // nessun cliente scelto in partenza: prima si preselezionava il primo della lista e, se era una struttura
+  // collegata, il modulo saltava subito alla proposta alla struttura (impossibile scegliere un altro cliente)
+  const scegli = !inModifica && !clienteId && clientiMascalcia.length ? '<option value="" disabled>Scegli il cliente…</option>' : "";
+  select.innerHTML = scegli + (inModifica ? "" : '<option value="__nuovo__">+ Nuovo cliente</option>') + opzioniClienti;
   select.disabled = inModifica;
   if(inModifica) select.value = interventoInModifica.cliente_mascalcia_id;
   else if(clienteId) select.value = clienteId;
   else if(clientiMascalcia.length === 0) select.value = "__nuovo__";
-  else select.value = clientiMascalcia[0].id;
+  else select.value = "";
 
   const i = interventoInModifica || preset || {};
   document.getElementById("intervento-nuovo-cliente-nome").value = "";
@@ -7099,6 +7183,13 @@ async function onInterventoClienteChange(){
   const isNuovo = clienteId === "__nuovo__";
   document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
   const sel = document.getElementById("intervento-cavallo-select");
+  if(!clienteId){
+    cavalliClienteCorrente = [];
+    sel.innerHTML = '<option value="">Scegli prima il cliente</option>';
+    sel.value = "";
+    toggleInterventoNuovoCavallo();
+    return;
+  }
   sel.innerHTML = '<option value="">Caricamento…</option>';
   cavalliClienteCorrente = isNuovo ? [] : await DB.listCavalliCliente(clienteId);
   const opzioni = cavalliClienteCorrente.map(c =>
@@ -7144,6 +7235,7 @@ async function salvaInterventoMascalcia(){
   const saveBtn = document.getElementById("intervento-save-btn");
 
   let cliente_mascalcia_id = document.getElementById("intervento-cliente-select").value;
+  if(!cliente_mascalcia_id) return errore("Scegli il cliente (oppure \"+ Nuovo cliente\").");
   const tipo_ferratura = document.getElementById("intervento-tipo").value;
   const tipo_altro = tipo_ferratura === "altro" ? (document.getElementById("intervento-tipo-altro").value.trim() || null) : null;
   const isFerraturaTipo = tipo_ferratura === "ferratura" || tipo_ferratura === "mezza_ferratura";
@@ -8472,7 +8564,7 @@ async function loadOwnerChatList(){
       previewBody = (m.mittente_id === currentUser.id ? "Tu: " : "") + previewBody;
     }
     return `
-    <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick="openOwnerChatThread('${c.id}', '${escapeHtml(nome).replace(/'/g, "\\'")}')">
+    <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick="openOwnerChatThread(${jsArg(c.id)}, ${jsArg(nome)})">
       <div class="horse-avatar"><i class="fa-solid fa-user" style="font-size:20px"></i></div>
       <div style="flex:1;min-width:0">
         <div class="inbox-name" style="font-size:14px">${escapeHtml(nome)}</div>
@@ -8499,7 +8591,7 @@ async function loadStableChatSection(){
     if(ultimo) preview = (ultimo.mittente_user_id === currentUser.id ? "Tu: " : "") + (ultimo.testo || previewAllegato(ultimo.tipo, ultimo.file_nome));
     const nonLetti = contaNonLettiScuderia(s.membro_id, s.messaggi);
     return `
-    <div class="inbox-item" onclick='openStableChatThread(${JSON.stringify(s.membro_id)}, ${JSON.stringify(s.centro_id)}, ${JSON.stringify(s.nome)})'>
+    <div class="inbox-item" onclick="openStableChatThread(${jsArg(s.membro_id)}, ${jsArg(s.centro_id)}, ${jsArg(s.nome)})">
       <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:20px"></i></div>
       <div style="flex:1;min-width:0">
         <div class="inbox-name" style="font-size:14px">${escapeHtml(s.nome)}</div>
@@ -8655,9 +8747,9 @@ let currentFarrier = null; // { cliente_mascalcia_id, nome }
 // Corpo di una bolla con allegato (foto o PDF), uguale in tutte le chat
 function bollaAllegato(tipo, url, nome, testo){
   const extra = testo ? `<div class="mchat-bubble-text">${escapeHtml(testo)}</div>` : "";
-  if(tipo === "foto") return `<a href="${escapeHtml(url || "#")}" target="_blank" rel="noopener"><img class="mchat-foto" src="${escapeHtml(url || "")}" alt="Foto" loading="lazy"></a>${extra}`;
+  if(tipo === "foto") return `<a href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><img class="mchat-foto" src="${escapeHtml(urlSicuro(url))}" alt="Foto" loading="lazy"></a>${extra}`;
   if(tipo === "video") return `<video class="mchat-foto" controls playsinline preload="metadata" src="${escapeHtml(url || "")}"></video>${extra}`;
-  return `<a class="mchat-doc" href="${escapeHtml(url || "#")}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
+  return `<a class="mchat-doc" href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
 }
 function previewAllegato(tipo, nome){
   if(tipo === "foto") return "📷 Foto";
@@ -8687,7 +8779,7 @@ async function loadFarrierChatSection(){
     let preview = "Inizia la conversazione col tuo maniscalco";
     if(f.ultimo_at) preview = (f.ultimo_mittente === "cliente" ? "Tu: " : "") + previewMessaggioMascalcia(f.ultimo_tipo, f.ultimo_testo, f.ultimo_file_nome);
     return `
-    <div class="inbox-item ${f.non_letti > 0 ? "unread" : ""}" onclick='openFarrierChatThread(${JSON.stringify(f.cliente_mascalcia_id)}, ${JSON.stringify(f.nome_maniscalco || "Il tuo maniscalco")}, ${f.certificato ? "true" : "false"})'>
+    <div class="inbox-item ${f.non_letti > 0 ? "unread" : ""}" onclick="openFarrierChatThread(${jsArg(f.cliente_mascalcia_id)}, ${jsArg(f.nome_maniscalco || "Il tuo maniscalco")}, ${f.certificato ? "true" : "false"})">
       <div class="horse-avatar"><i class="fa-solid fa-hammer" style="font-size:20px"></i></div>
       <div style="flex:1;min-width:0">
         <div class="inbox-name" style="font-size:14px">${escapeHtml(f.nome_maniscalco || "Il tuo maniscalco")}${f.certificato ? " " + BADGE_CERTIFIED_HTML : ""}</div>
@@ -9071,7 +9163,7 @@ async function loadColleghiList(){
     let preview = "Inizia la conversazione";
     if(m) preview = (m.mittente_id === currentUser.id ? "Tu: " : "") + ((m.tipo && m.tipo !== "testo") ? previewAllegato(m.tipo, m.file_nome) : (m.testo || ""));
     return `
-    <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick='apriChatCollega(${JSON.stringify(c.conversazione_id)}, ${JSON.stringify(nome)}, ${JSON.stringify(c.ruolo || "")})'>
+    <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick="apriChatCollega(${jsArg(c.conversazione_id)}, ${jsArg(nome)}, ${jsArg(c.ruolo || "")})">
       <div class="horse-avatar">${c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : '<i class="fa-solid fa-user-doctor" style="font-size:18px"></i>'}</div>
       <div style="flex:1;min-width:0">
         <div class="inbox-name" style="font-size:14px">${escapeHtml(nome)}${c.certificato ? " " + BADGE_CERTIFIED_HTML : ""}</div>
@@ -9192,7 +9284,7 @@ async function renderOwnerChatThread(conversazioneId){
     let body;
     if(m.tipo === "audio") body = `<div class="mchat-audio-bubble"><audio controls src="${escapeHtml(m.media_url)}"></audio></div>`;
     else if(m.tipo === "foto") body = `<img src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block">
-      <button class="btn btn-outline btn-sm" style="margin-top:6px;width:100%" onclick="shareContentExternally('${escapeHtml(m.media_url)}')">
+      <button class="btn btn-outline btn-sm" style="margin-top:6px;width:100%" onclick="shareContentExternally(${jsArg(urlSicuro(m.media_url))})">
         <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-share-nodes"></i></span> Condividi fuori da Equo
       </button>`;
     else if(m.tipo === "video") body = `<video controls src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block"></video>
@@ -9567,26 +9659,26 @@ function renderAzioneAi(box, azione){
   const x = azione.dati;
   let titolo = "", righe = [];
   if(azione.tipo === "spesa"){
-    titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || x.category}`;
+    titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
     righe = [`Importo: € ${Number(x.amount).toFixed(2)}`, `Data: ${formatDate(x.date)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.notes ? escapeHtml(x.notes) : ""];
   } else if(azione.tipo === "lezione"){
-    titolo = `Calendario · ${LEZIONE_TIPO_LABELS[x.tipo] || x.tipo}`;
+    titolo = `Calendario · ${LEZIONE_TIPO_LABELS[x.tipo] || escapeHtml(x.tipo)}`;
     righe = [`Data: ${formatDate(x.data)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.note ? escapeHtml(x.note) : ""];
   } else if(azione.tipo === "richiesta_maniscalco"){
     titolo = `Richiesta a ${escapeHtml(x.nome_maniscalco || "maniscalco")}`;
-    righe = [`${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}${x.horse_name ? " · " + escapeHtml(x.horse_name) : ""}`, `Data preferita: ${formatDate(x.data)}${x.ora ? " ore " + x.ora : ""}`, x.note ? escapeHtml(x.note) : ""];
+    righe = [`${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}${x.horse_name ? " · " + escapeHtml(x.horse_name) : ""}`, `Data preferita: ${formatDate(x.data)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`, x.note ? escapeHtml(x.note) : ""];
   } else if(azione.tipo === "appuntamento"){
     // --- Hammer (maniscalco) ---
     const nomeCv = x.cavallo?.nome || x.nuovo_cavallo_nome;
     titolo = `Agenda · ${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}`;
     righe = [`${escapeHtml(x.nome_cliente || "")}${nomeCv ? " · " + escapeHtml(nomeCv) : ""}${x.nuovo_cavallo_nome ? " (nuovo cavallo)" : ""}`,
-      `${formatDataBreve(x.data)}${x.ora ? " ore " + x.ora : ""}`,
+      `${formatDataBreve(x.data)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
       x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}` : "", x.note ? escapeHtml(x.note) : ""];
   } else if(azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta"){
     const acc = azione.tipo === "accetta_richiesta";
     titolo = acc ? "Accetta richiesta" : "Rifiuta richiesta";
     righe = [`${escapeHtml(x.nome_cliente || "")}${x.cavallo ? " · " + escapeHtml(x.cavallo) : ""}`,
-      `${escapeHtml(x.tipo_ferratura === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo_ferratura] || x.tipo_ferratura || ""))} · ${formatDataBreve(x.data_intervento)}${x.ora ? " ore " + x.ora : ""}`,
+      `${escapeHtml(x.tipo_ferratura === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo_ferratura] || x.tipo_ferratura || ""))} · ${formatDataBreve(x.data_intervento)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
       acc && x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)}` : "",
       acc && x.invia_riepilogo ? "Poi apro la chat con il PDF di riepilogo" : "",
       !acc ? "Il cliente riceve un messaggio per trovare un'altra data" : ""];
@@ -9771,7 +9863,7 @@ function renderEventProposal(box, proposed){
       ${proposed.notes ? `<div class="event-proposal-row">${escapeHtml(proposed.notes)}</div>` : ""}
       <div class="event-proposal-actions">
         <button class="btn btn-ghost btn-sm" onclick="cancelEventProposal('${id}')">Annulla</button>
-        <button class="btn btn-primary btn-sm btn-conferma" onclick='confirmEventProposal("${id}", ${JSON.stringify(proposed).replace(/'/g,"&#39;")})'>Conferma</button>
+        <button class="btn btn-primary btn-sm btn-conferma" onclick="confirmEventProposal(${jsArg(id)}, ${jsArg(proposed)})">Conferma</button>
       </div>
     </div>
   `);
@@ -9943,7 +10035,7 @@ function renderServicesList(){
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
-        ${s.telefono ? `<a class="btn btn-outline btn-sm" href="tel:${s.telefono}"><span class="fa-icon"><i class="fa-solid fa-phone"></i></span> Chiama</a>` : ""}
+        ${s.telefono ? `<a class="btn btn-outline btn-sm" href="tel:${escapeHtml(String(s.telefono).replace(/[^\d+]/g, ""))}"><span class="fa-icon"><i class="fa-solid fa-phone"></i></span> Chiama</a>` : ""}
         <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener"><span class="fa-icon"><i class="fa-solid fa-diamond-turn-right"></i></span> Indicazioni</a>
       </div>
     </div>
@@ -9960,8 +10052,12 @@ function focusServiceOnMap(id){
 
 /* ---------- HELPERS ---------- */
 function escapeHtml(str){
-  return (str || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  return String(str ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
+// argomento sicuro per gli onclick="..." scritti nell'HTML (nomi con apostrofi, virgolette, ecc.)
+function jsArg(v){ return escapeHtml(JSON.stringify(v ?? "")); }
+// solo link veri (https, o anteprime locali): niente javascript: o altri schemi dentro href/src
+function urlSicuro(u){ u = String(u || "").trim(); return /^(https:\/\/|blob:|data:image\/)/i.test(u) ? u : "#"; }
 function formatDate(dateStr){
   if(!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
