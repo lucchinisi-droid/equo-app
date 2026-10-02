@@ -169,6 +169,61 @@ select.input{cursor:pointer}
 .deadline-dot.ok{background:var(--green)}
 .deadline-dot.soon{background:var(--accent)}
 .deadline-dot.late{background:var(--red)}
+.rz-wrap{position:relative}
+.rz-riga{gap:6px;align-items:flex-start;padding:0 0 8px}.rz-riga .rz-wrap{flex:1}
+.cod-equo{font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em;color:var(--text)}
+.rz-lista{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:var(--surface,#fff);border:1px solid var(--border,#ddd);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.14);max-height:300px;overflow-y:auto;padding:5px}
+.rz-lista.aperta{display:block}
+.rz-lista button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;color:var(--text,#14312a);cursor:pointer}
+.rz-lista button:hover{background:var(--surface2,var(--muted-bg,#f3efe6))}
+.rz-lista button small{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted,#667);background:var(--surface2,var(--muted-bg,#f3efe6));padding:2px 6px;border-radius:6px}
+.rz-lista .rz-fissa{font-size:13px;color:var(--muted,#667)}
+.rz-lista .rz-altra{font-size:13px;color:#9a6b12;font-weight:700}
+.rz-sep{height:1px;background:var(--border,#ddd);margin:4px 6px}
+.rz-vuoto{font-size:12.5px;color:var(--muted,#667);padding:8px 10px}
+.rz-nota{font-size:12px;color:var(--muted,#667);margin-top:4px;min-height:0}
+.rz-errore input{border-color:#c0473d!important}
+.rz-errore .rz-nota{color:#c0473d;font-weight:600}
+
+/* Home pro: Prossimi appuntamenti + Da richiamare */
+.hp-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.hp-tit{font-weight:700;font-size:15px}
+.hp-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.hp-conta{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.hp-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--surface2);white-space:nowrap}
+.hp-pill i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.hp-gruppo{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.hp-gruppo:first-child{margin-top:4px}
+.hp-riga{display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer}
+.hp-riga + .hp-riga{border-top:1px solid var(--border)}
+.hp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.hp-dot.rosso{background:#c0473d}.hp-dot.ocra{background:#d9a13b}.hp-dot.verde{background:#3f7a45}
+.hp-ora{width:40px;font-weight:700;font-size:12.5px;flex-shrink:0}
+.hp-main{flex:1;min-width:0}
+.hp-main b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hp-main span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hp-main span.rosso{color:#c0473d;font-weight:600}.hp-main span.ocra{color:#9a6b12;font-weight:600}
+.hp-tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--surface2);color:var(--muted);margin-left:4px}
+.hp-vedi{width:100%;margin-top:8px}
+.hp-filtri{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}
+.hp-filtri button{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:99px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.hp-filtri button.on{background:#1d4a35;color:#fff;border-color:#1d4a35}
+.hp-giorni{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hp-giorni button{border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 4px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;color:var(--text)}
+#hp-lista-corpo{max-height:62vh;overflow-y:auto}
+.storico-cav{font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px;margin-bottom:1px}
+.storico-cav .fa-icon{color:var(--accent);font-size:13px}
+.storico-cav.vuoto{color:var(--muted);font-weight:600;font-size:13px}
+.int-richiesta-box{margin:4px 0 10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#e8b04b 15%,var(--surface));border:1.5px solid color-mix(in srgb,#e8b04b 55%,transparent);font-size:13px;line-height:1.45}
+.int-richiesta-box b{display:block;font-size:13.5px;margin-bottom:2px}
+.int-cambiata #intervento-data,.int-cambiata #intervento-ora{border-color:#e8b04b;box-shadow:0 0 0 2px color-mix(in srgb,#e8b04b 35%,transparent)}
+.hp-giro{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:2px 0 8px;border-radius:12px;background:color-mix(in srgb,#e8b04b 16%,var(--surface));border:1.5px solid color-mix(in srgb,#e8b04b 55%,transparent);cursor:pointer}
+.hp-giro-ic{width:34px;height:34px;border-radius:10px;background:#1d4a35;color:#e8b04b;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.hp-giro .hp-main span{white-space:normal}
+.hp-main .hp-prem,.hp-prem{display:inline-block!important;width:auto;color:#14312a!important;font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:99px;background:#e8b04b;color:#14312a;margin-left:6px;vertical-align:1px}
+.giro-cav{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:14px;border-bottom:1px solid var(--border)}
+.giro-cav:last-child{border-bottom:0}
+.giro-cav small{color:var(--muted);font-size:12px;margin-left:auto}
 
 /* CAVALLI */
 .horse-card{display:flex;align-items:center;gap:14px;cursor:pointer}
@@ -973,9 +1028,14 @@ body.ai-aperta{overflow:hidden}
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:14px;margin-bottom:8px">Prossime scadenze</div>
-      <div id="home-pro-deadlines"><div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div></div>
+    <div class="card hp-card" style="margin-bottom:14px">
+      <div class="hp-testa"><div><div class="hp-tit">Prossimi appuntamenti</div><div class="hp-sub">Il lavoro già in agenda</div></div><div class="hp-conta" id="hp-app-conta"></div></div>
+      <div id="home-pro-appuntamenti"><div class="muted" style="font-size:13px">Caricamento…</div></div>
+    </div>
+
+    <div class="card hp-card" style="margin-bottom:14px">
+      <div class="hp-testa"><div><div class="hp-tit">Da richiamare</div><div class="hp-sub">Cavalli che tra poco avranno bisogno di te</div></div><div class="hp-conta" id="hp-ric-conta"></div></div>
+      <div id="home-pro-deadlines"><div class="muted" style="font-size:13px">Caricamento…</div></div>
     </div>
 
     <div style="display:flex;gap:10px">
@@ -1355,7 +1415,7 @@ body.ai-aperta{overflow:hidden}
       </div>
       <div class="input-group">
         <label class="input-label">Razza (opzionale)</label>
-        <input class="input" id="horse-breed" placeholder="es. Maremmano">
+        <input class="input" id="horse-breed" placeholder="Scrivi per cercare, es. puros, maremm…">
       </div>
       <div class="input-group">
         <label class="input-label">Mantello (opzionale)</label>
@@ -1509,6 +1569,62 @@ body.ai-aperta{overflow:hidden}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-hp-lista" onclick="closeOut(event,'modal-hp-lista')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-hp-lista')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="hp-lista-titolo">Prossimi appuntamenti</div>
+    <div class="hp-filtri" id="hp-lista-filtri"></div>
+    <div id="hp-lista-corpo"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-giro" onclick="closeOut(event,'modal-giro')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-giro')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-route"></i></span> Giro da <span id="giro-nome"></span></div>
+    <div class="muted" style="font-size:13px;margin-bottom:10px">Un solo appuntamento per tutti i cavalli selezionati: in agenda trovi una riga per cavallo, alla stessa ora.</div>
+    <div class="auth-form">
+      <div style="display:flex;gap:8px">
+        <div class="input-group" style="flex:1"><label>Data</label><input type="date" class="input" id="giro-data"></div>
+        <div class="input-group" style="width:110px"><label>Ora</label><input type="time" class="input" id="giro-ora"></div>
+      </div>
+      <div class="input-group"><label>Cavalli</label><div id="giro-cavalli"></div></div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;margin:4px 0 2px"><input type="checkbox" id="giro-avvisa" checked style="width:18px;height:18px"> Avvisa il cliente in chat (messaggio già pronto)</label>
+      <div class="error-msg" id="giro-error" style="display:none"></div>
+      <button class="btn btn-primary btn-conferma" style="width:100%;margin-top:8px" onclick="confermaGiro()">Fissa il giro</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-richiamo-az" onclick="closeOut(event,'modal-richiamo-az')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-richiamo-az')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ricaz-titolo">Da richiamare</div>
+    <div class="muted" style="font-size:13px;line-height:1.6" id="ricaz-dettaglio"></div>
+    <div class="ag-azioni" id="ricaz-azioni">
+      <button class="btn btn-primary btn-conferma" onclick="richiamoAzione('fissa')"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span> Fissa appuntamento</button>
+      <button class="btn btn-outline" id="ricaz-scrivi" onclick="richiamoAzione('scrivi')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Scrivi al cliente</button>
+      <button class="btn btn-outline btn-variazione" onclick="richiamoAzione('rimanda')"><span class="fa-icon"><i class="fa-solid fa-clock"></i></span> Rimanda</button>
+      <button class="btn btn-outline" style="color:var(--red)" onclick="richiamoAzione('chiudi')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Non serve più</button>
+    </div>
+    <div id="ricaz-rimanda" style="display:none">
+      <div style="font-weight:700;font-size:13.5px;margin:6px 0 10px">Ricordamelo tra…</div>
+      <div class="hp-giorni">
+        <button onclick="richiamoRimanda(3)">3 giorni</button><button onclick="richiamoRimanda(7)">7 giorni</button>
+        <button onclick="richiamoRimanda(14)">14 giorni</button><button onclick="richiamoRimanda(30)">30 giorni</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+        <input type="date" class="input" id="ricaz-data" style="flex:1">
+        <button class="btn btn-primary btn-conferma btn-sm" onclick="richiamoRimanda(null)">OK</button>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;width:100%" onclick="richiamoMostraAzioni()">Indietro</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-edit-cliente" onclick="closeOut(event,'modal-edit-cliente')">
   <div class="modal">
     <button class="modal-close-x" onclick="closeModal('modal-edit-cliente')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
@@ -1550,6 +1666,7 @@ body.ai-aperta{overflow:hidden}
           <input class="input" id="edit-cliente-nuovo-cavallo" placeholder="Nome nuovo cavallo" style="flex:1.4">
           <input class="input" id="edit-cliente-nuovo-chip" placeholder="Microchip (opz.)" autocapitalize="characters" style="flex:1">
         </div>
+        <div style="margin-top:8px"><input class="input" id="edit-cliente-nuovo-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
         <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="aggiungiCavalloEditCliente()">+ Aggiungi cavallo</button>
       </div>
       <div class="auth-error" id="edit-cliente-error" style="display:none"></div>
@@ -1564,6 +1681,7 @@ body.ai-aperta{overflow:hidden}
     <button class="modal-close-x" onclick="closeModal('modal-add-intervento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="intervento-modal-title">Nuovo appuntamento</span></div>
+    <div class="int-richiesta-box" id="intervento-richiesta-box" style="display:none"></div>
     <div class="auth-form">
       <!-- 1. Cliente -->
       <div class="input-group" id="intervento-cliente-group">
@@ -2578,6 +2696,71 @@ let authMode = "login";
    finti in memoria (si perdono al refresh), così puoi provare tutti
    i flussi della UI prima di collegare il database vero. */
 let DEMO_MODE = false;
+
+/* ---------- REGISTRO DI UTILIZZO (interno, tabelle app_sessioni + app_eventi) ----------
+   Una sessione = da quando l'app è aperta a quando resta chiusa/in background per più di 30 minuti.
+   Ogni minuto in primo piano aggiorna "ultimo_segnale" → durata = ultimo_segnale - inizio.
+   Le schermate visitate vanno in app_eventi (a gruppi, per non fare una scrittura a ogni tocco).
+   In demo non registra nulla; un errore del registro non blocca mai l'app. */
+const Registro = {
+  app: "app", sid: null, timer: null, coda: [], ultimaPagina: null, nascostoDa: null, vista: null,
+  async avvia(vista){
+    try{
+      this.vista = vista || this.vista;
+      if(DEMO_MODE || !currentUser?.id || typeof sb === "undefined") return;
+      if(this.sid) return;
+      const ua = navigator.userAgent || "";
+      const disp = /iphone|ipad/i.test(ua) ? "iPhone/iPad" : /android/i.test(ua) ? "Android" : /mac/i.test(ua) ? "Mac" : /windows/i.test(ua) ? "Windows" : "altro";
+      const standalone = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone;
+      const { data } = await sb.from("app_sessioni").insert({ user_id: currentUser.id, app: this.app, vista: this.vista || null,
+        dispositivo: disp + (standalone ? " · app installata" : " · browser") }).select("id").single();
+      this.sid = data?.id || null;
+      if(!this.sid) return;
+      clearInterval(this.timer);
+      this.timer = setInterval(() => this.battito(), 60000);
+      if(this.ultimaPagina) this.pagina(this.ultimaPagina, true);
+    }catch(e){ console.warn("registro avvia:", e); }
+  },
+  battito(){
+    try{
+      if(!this.sid || document.hidden) return;
+      sb.from("app_sessioni").update({ ultimo_segnale: new Date().toISOString() }).eq("id", this.sid).then(() => {});
+      this.svuota();
+    }catch(e){}
+  },
+  pagina(nome, forza){
+    if(!nome || (nome === this.ultimaPagina && !forza)) return;
+    this.ultimaPagina = nome;
+    if(!this.sid) return;
+    this.coda.push({ sessione_id: this.sid, user_id: currentUser.id, app: this.app, tipo: "pagina", nome: String(nome).slice(0, 60) });
+    if(this.coda.length >= 8) this.svuota();
+  },
+  azione(nome){
+    if(!this.sid || !nome) return;
+    this.coda.push({ sessione_id: this.sid, user_id: currentUser.id, app: this.app, tipo: "azione", nome: String(nome).slice(0, 60) });
+    if(this.coda.length >= 8) this.svuota();
+  },
+  svuota(){
+    try{
+      if(!this.coda.length || typeof sb === "undefined") return;
+      const righe = this.coda.splice(0);
+      sb.from("app_eventi").insert(righe).then(() => {});
+    }catch(e){}
+  },
+  ferma(){
+    this.battito(); this.svuota();
+    clearInterval(this.timer); this.timer = null; this.sid = null; this.ultimaPagina = null;
+  }
+};
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden){ Registro.battito(); Registro.svuota(); Registro.nascostoDa = Date.now(); return; }
+  // tornato in primo piano dopo più di 30 minuti → nuova sessione
+  if(Registro.sid && Registro.nascostoDa && Date.now() - Registro.nascostoDa > 30 * 60000){ Registro.ferma(); Registro.avvia(); }
+  else Registro.battito();
+  Registro.nascostoDa = null;
+});
+window.addEventListener("pagehide", () => { Registro.battito(); Registro.svuota(); });
+
 let demoIdCounter = 1;
 const demoState = {
   horses: [
@@ -3010,6 +3193,11 @@ const DB = {
     if(error) console.error("updateClienteMascalcia:", error);
     return { error };
   },
+  async updateCavalloCliente(id, campi){
+    if(DEMO_MODE){ const c = demoState.cavalliClientiMascalcia.find(x => x.id === id); if(c) Object.assign(c, campi); return { error: null }; }
+    const { error } = await sb.from("cavalli_clienti_mascalcia").update(campi).eq("id", id);
+    return { error };
+  },
   async deleteCavalloCliente(id){
     if(DEMO_MODE){
       demoState.cavalliClientiMascalcia = demoState.cavalliClientiMascalcia.filter(x => x.id !== id);
@@ -3028,8 +3216,10 @@ const DB = {
     await sb.from("clienti_mascalcia").delete().eq("id", id);
   },
   async listInterventiMascalcia(clienteId){
-    if(DEMO_MODE) return demoState.interventiMascalcia.filter(i => i.cliente_mascalcia_id === clienteId && i.stato !== "rifiutato").slice().sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
-    const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).not("stato", "in", "(rifiutato,annullato)").order("data_intervento", { ascending: false });
+    if(DEMO_MODE) return demoState.interventiMascalcia.filter(i => i.cliente_mascalcia_id === clienteId && i.stato !== "rifiutato")
+      .map(i => { const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id); return { ...i, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null }; })
+      .sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
+    const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome)").eq("cliente_mascalcia_id", clienteId).not("stato", "in", "(rifiutato,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
   async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
@@ -3124,7 +3314,7 @@ const DB = {
     if(!clienteId) return [];
     if(DEMO_MODE){
       return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
-        .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id }));
+        .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null }));
     }
     const [manRes, eqRes] = await Promise.all([
       sb.from("cavalli_clienti_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("nome", { ascending: true }),
@@ -3137,15 +3327,16 @@ const DB = {
     const idCondivisi = new Set(condivisi.map(h => h.id));
     const out = condivisi.map(h => {
       const mirror = manuali.find(m => m.horse_id === h.id);
-      return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id };
+      return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || null, razza: h.breed || null };
     });
     manuali.filter(m => !m.horse_id || !idCondivisi.has(m.horse_id)).forEach(m => {
-      out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id });
+      out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id, codice_equo: m.codice_equo || null, razza: m.razza || null });
     });
     return out;
   },
-  async insertCavalloCliente({ cliente_mascalcia_id, nome, microchip = null, horse_id = null }){
+  async insertCavalloCliente({ cliente_mascalcia_id, nome, microchip = null, horse_id = null, razza = null }){
     const row = { cliente_mascalcia_id, nome, microchip: microchip ? microchip.trim().toUpperCase() : null, horse_id };
+    if(razza) row.razza = razza;
     if(DEMO_MODE){
       const nuovo = { id: "dcv-" + Date.now().toString(36) + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
       demoState.cavalliClientiMascalcia.push(nuovo);
@@ -3173,6 +3364,61 @@ const DB = {
     const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome)")
       .eq("maniscalco_id", currentUser.id).not("stato", "in", "(richiesto,rifiutato,proposto,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
+  },
+  // Home pro → "Da richiamare": l'ultimo richiamo aperto per ogni cavallo (vedi funzione SQL richiami_maniscalco)
+  async listRichiami(giorni = 60){
+    if(DEMO_MODE){
+      const oggi = isoLocale(new Date());
+      const chiave = i => i.cavallo_cliente_id || i.horse_id || ("c:" + i.cliente_mascalcia_id);
+      const tutti = demoState.interventiMascalcia;
+      const inAgenda = new Set(tutti.filter(i => ["programmato","richiesto","proposto"].includes(i.stato)).map(chiave));
+      const ultimi = {};
+      tutti.filter(i => i.stato === "fatto").forEach(i => { const k = chiave(i); if(!ultimi[k] || i.data_intervento > ultimi[k].data_intervento) ultimi[k] = i; });
+      const st = demoState.richiamiStato || (demoState.richiamiStato = {});
+      return Object.entries(ultimi).filter(([k, i]) => i.prossima_scadenza && !inAgenda.has(k) && !st[i.id]?.chiuso_il)
+        .map(([k, i]) => {
+          const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
+          const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
+          const scad = st[i.id]?.rimandato_al || i.prossima_scadenza;
+          return { intervento_id: i.id, cliente_mascalcia_id: i.cliente_mascalcia_id, cliente_nome: c?.nome, tipo_cliente: c?.tipo_cliente,
+            cavallo_cliente_id: i.cavallo_cliente_id, horse_id: i.horse_id, cavallo_nome: cv?.nome || c?.nome_cavallo || "",
+            tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, misura_sistema: i.misura_sistema, numero_ferro: i.numero_ferro, quantita_ferri: i.quantita_ferri,
+            data_intervento: i.data_intervento, prossima_scadenza: i.prossima_scadenza, scadenza: scad, rimandato: !!st[i.id]?.rimandato_al, giorni: giorniTra(oggi, scad) };
+        }).filter(r => r.giorni <= giorni).sort((a, b) => a.scadenza.localeCompare(b.scadenza));
+    }
+    const { data, error } = await sb.rpc("richiami_maniscalco", { p_giorni: giorni });
+    if(error){ console.error("listRichiami:", error); return []; }
+    return data || [];
+  },
+  async setRichiamoStato(interventoId, campi){
+    if(DEMO_MODE){
+      const st = demoState.richiamiStato || (demoState.richiamiStato = {});
+      st[interventoId] = { ...(st[interventoId] || {}), ...campi };
+      return { error: null };
+    }
+    const { error } = await sb.from("richiami_stato").upsert({ intervento_id: interventoId, maniscalco_id: currentUser.id, ...campi, updated_at: new Date().toISOString() });
+    return { error };
+  },
+  // Home pro → "Prossimi appuntamenti": da fare / da confermare, compresi quelli passati non ancora segnati come fatti (ultimi 60 giorni)
+  async listProssimiAppuntamenti(limit = 50){
+    const da = aggiungiGiorniIso(isoLocale(new Date()), -60);
+    if(DEMO_MODE){
+      return demoState.interventiMascalcia
+        .filter(i => ["programmato","richiesto","proposto"].includes(i.stato) && i.data_intervento >= da)
+        .map(i => {
+          const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
+          const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
+          return { ...i, clienti_mascalcia: { nome: c?.nome, nome_cavallo: c?.nome_cavallo, cliente_user_id: c?.cliente_user_id }, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null };
+        })
+        .sort((a,b) => (a.data_intervento + (a.ora || "99")).localeCompare(b.data_intervento + (b.ora || "99"))).slice(0, limit);
+    }
+    const { data, error } = await sb.from("interventi_mascalcia")
+      .select("*, clienti_mascalcia(nome, nome_cavallo, cliente_user_id), cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).in("stato", ["programmato","richiesto","proposto"])
+      .gte("data_intervento", da)
+      .order("data_intervento", { ascending: true }).order("ora", { ascending: true, nullsFirst: false }).limit(limit);
+    if(error){ console.error("listProssimiAppuntamenti:", error); return []; }
+    return data || [];
   },
   async listProssimeScadenzeMascalcia(limit){
     if(DEMO_MODE){
@@ -3736,6 +3982,7 @@ async function enterApp(ruolo){
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();
   currentUser.vistaAttiva = ruolo;
+  if(Registro.sid){ Registro.vista = ruolo; Registro.azione("vista:" + ruolo); } else Registro.avvia(ruolo);
   applicaPaletteVista(ruolo);
   avviaSpunte();
   try{ localStorage.setItem("equo-vista-" + currentUser.id, ruolo); }catch(e){}
@@ -4168,6 +4415,7 @@ async function submitAuth(){
 }
 
 async function logout(){
+  Registro.ferma();
   if(!DEMO_MODE) await sb.auth.signOut();
   currentUser = null;
   DEMO_MODE = false;
@@ -4575,6 +4823,7 @@ function renderPaymentMethods(){
 
 /* ---------- NAV ---------- */
 function showPage(page){
+  Registro.pagina(page);
   document.querySelectorAll(".page-content").forEach(el => el.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
@@ -4789,6 +5038,7 @@ if(window.visualViewport){
   window.visualViewport.addEventListener("scroll", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
 }
 async function openAiSheet(){
+  Registro.pagina("assistente-ai");
   aggiornaAltezzaAiSheet();
   document.body.classList.add("ai-aperta");
   document.getElementById("ai-sheet-overlay").classList.add("active");
@@ -4977,7 +5227,7 @@ function openHorseForm(id){
     const h = horses.find(x => x.id === editingHorseId);
     document.getElementById("horse-name").value = h?.name || "";
     document.getElementById("horse-tipo-proprieta").value = h?.tipo_proprieta || "proprieta";
-    document.getElementById("horse-breed").value = h?.breed || "";
+    razzaImposta("horse-breed", h?.breed || "");
     document.getElementById("horse-mantello").value = h?.mantello || "";
     document.getElementById("horse-birthdate").value = h?.birth_date || "";
     document.getElementById("horse-microchip").value = h?.microchip || "";
@@ -4985,7 +5235,8 @@ function openHorseForm(id){
     document.getElementById("horse-note").value = h?.note || "";
     document.getElementById("horse-condiviso").checked = h?.condiviso_ecosistema !== false;
   } else {
-    ["horse-name","horse-breed","horse-mantello","horse-birthdate","horse-microchip","horse-gruppo-sanguigno","horse-note"].forEach(id => document.getElementById(id).value = "");
+    ["horse-name","horse-mantello","horse-birthdate","horse-microchip","horse-gruppo-sanguigno","horse-note"].forEach(id => document.getElementById(id).value = "");
+    razzaImposta("horse-breed", "");
     document.getElementById("horse-tipo-proprieta").value = "proprieta";
     document.getElementById("horse-condiviso").checked = true;
   }
@@ -5009,6 +5260,7 @@ function raccogliDatiHorseForm(){
 async function saveHorse(){
   const errBox = document.getElementById("horse-error");
   errBox.style.display = "none";
+  if(razzaValore("horse-breed") === false) return;
   const payload = raccogliDatiHorseForm();
   if(!payload.name){ errBox.textContent = "Inserisci il nome del cavallo."; errBox.style.display = "block"; return; }
 
@@ -5062,6 +5314,7 @@ function renderHorseInfoBox(h){
   if(!box) return;
   const righe = [
     ["Categoria", TIPO_PROPRIETA_LABELS[h.tipo_proprieta] || "—"],
+    ["Codice Equo", h.codice_equo || "in assegnazione"],
     ["Razza", h.breed || "—"],
     ["Mantello", h.mantello || "—"],
     ["Data di nascita", h.birth_date ? formatDate(h.birth_date) : "—"],
@@ -5820,6 +6073,7 @@ async function openEditCliente(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
   document.getElementById("edit-cliente-tipo").value = isStruttura(c) ? "struttura" : "proprietario";
+  razzaImposta("edit-cliente-nuovo-razza", "");
   document.getElementById("edit-cliente-codice-equo").value = "";
   document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
   document.getElementById("edit-cliente-collegato").style.display = c.cliente_user_id ? "flex" : "none";
@@ -5833,18 +6087,43 @@ async function openEditCliente(){
   await renderCavalliEditCliente();
 }
 
+let cavalliEditCache = [];
 async function renderCavalliEditCliente(){
   const box = document.getElementById("edit-cliente-cavalli");
   box.innerHTML = '<div class="muted" style="font-size:13px">Caricamento…</div>';
   const cav = await DB.listCavalliCliente(currentClienteId);
+  cavalliEditCache = cav;
   box.innerHTML = cav.length ? cav.map(x => `
     <div class="event-item" style="padding:8px 0">
-      <div style="font-size:14px">${escapeHtml(x.nome)}${x.microchip ? ' <span class="muted" style="font-size:11.5px">· ' + escapeHtml(x.microchip) + '</span>' : ""}${x.tipo === "equo" ? ' <span class="badge badge-accent" style="font-size:10.5px">su Equo</span>' : ""}</div>
-      ${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button>` : ""}
+      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? ' <span class="badge badge-accent" style="font-size:10.5px">su Equo</span>' : ""}
+        <div class="muted" style="font-size:11.5px">${[x.codice_equo ? '<b class="cod-equo">' + escapeHtml(x.codice_equo) + '</b>' : "", x.razza ? escapeHtml(x.razza) : "", x.microchip ? "chip " + escapeHtml(x.microchip) : ""].filter(Boolean).join(" · ")}</div></div>
+      ${x.tipo === "manuale" ? `<div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button><button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button></div>` : ""}
+    </div>
+    <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
+      <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">
+      <button class="btn btn-primary btn-sm btn-conferma" onclick="salvaRazzaCavallo('${x.id}')">OK</button>
     </div>`).join("") : '<div class="muted" style="font-size:13px">Nessun cavallo.</div>';
   return cav;
 }
 
+function apriRazzaCavallo(id){
+  const riga = document.getElementById("rz-riga-" + id); if(!riga) return;
+  const aperta = riga.style.display !== "none";
+  riga.style.display = aperta ? "none" : "flex";
+  if(!aperta){
+    const cv = (cavalliEditCache || []).find(x => x.id === id);
+    razzaImposta("rz-cv-" + id, cv?.razza || "");
+    document.getElementById("rz-cv-" + id).focus();
+  }
+}
+async function salvaRazzaCavallo(id){
+  const razza = razzaValore("rz-cv-" + id);
+  if(razza === false) return;
+  const { error } = await DB.updateCavalloCliente(id, { razza });
+  if(error){ showToast("Errore: " + error.message); return; }
+  showToast(razza ? "Razza salvata: il codice del cavallo si aggiorna" : "Razza tolta");
+  await renderCavalliEditCliente();
+}
 // tiene allineato il vecchio campo testo nome_cavallo (usato in lista clienti/inbox)
 async function syncNomeCavalloCliente(){
   const cav = await DB.listCavalliCliente(currentClienteId);
@@ -5856,10 +6135,13 @@ async function aggiungiCavalloEditCliente(){
   const nome = document.getElementById("edit-cliente-nuovo-cavallo").value.trim();
   const chip = document.getElementById("edit-cliente-nuovo-chip").value.trim();
   if(!nome){ showToast("Inserisci il nome del cavallo"); return; }
-  const { error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: currentClienteId, nome, microchip: chip || null });
+  const razza = razzaValore("edit-cliente-nuovo-razza");
+  if(razza === false) return;
+  const { error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: currentClienteId, nome, microchip: chip || null, razza });
   if(error){ showToast("Errore: " + error.message); return; }
   document.getElementById("edit-cliente-nuovo-cavallo").value = "";
   document.getElementById("edit-cliente-nuovo-chip").value = "";
+  razzaImposta("edit-cliente-nuovo-razza", "");
   await renderCavalliEditCliente();
   await syncNomeCavalloCliente();
 }
@@ -5915,6 +6197,7 @@ async function deleteCurrentCliente(){
   await loadClientiMascalcia();
 }
 
+let storicoFiltroCavallo = "tutti";
 async function loadClienteInterventi(clienteId){
   const box = document.getElementById("cliente-interventi-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
@@ -5924,14 +6207,32 @@ async function loadClienteInterventi(clienteId){
     return;
   }
   clienteInterventiCache = data;
-  box.innerHTML = data.map(i => {
+  if(storicoClienteId !== clienteId){ storicoClienteId = clienteId; storicoFiltroCavallo = "tutti"; }
+  renderStoricoCliente();
+}
+let storicoClienteId = null;
+function storicoNomeCavallo(i){ return i.cavalli_clienti_mascalcia?.nome || ""; }
+function filtraStoricoCavallo(k){ storicoFiltroCavallo = k; renderStoricoCliente(); }
+function renderStoricoCliente(){
+  const box = document.getElementById("cliente-interventi-list");
+  const data = clienteInterventiCache || [];
+  const nomi = [...new Set(data.map(storicoNomeCavallo).filter(Boolean))].sort((a, b) => a.localeCompare(b, "it"));
+  const senza = data.some(i => !storicoNomeCavallo(i));
+  if(storicoFiltroCavallo !== "tutti" && storicoFiltroCavallo !== "__senza__" && !nomi.includes(storicoFiltroCavallo)) storicoFiltroCavallo = "tutti";
+  const filtri = nomi.length > 1 || (nomi.length && senza)
+    ? `<div class="hp-filtri" style="margin:0 0 8px">${[["tutti", "Tutti (" + data.length + ")"], ...nomi.map(n => [n, n + " (" + data.filter(i => storicoNomeCavallo(i) === n).length + ")"]), ...(senza ? [["__senza__", "Senza cavallo"]] : [])]
+        .map(([k, t]) => `<button class="${storicoFiltroCavallo === k ? "on" : ""}" onclick="filtraStoricoCavallo(${escapeHtml(JSON.stringify(k))})">${escapeHtml(t)}</button>`).join("")}</div>` : "";
+  const lista = data.filter(i => storicoFiltroCavallo === "tutti" || (storicoFiltroCavallo === "__senza__" ? !storicoNomeCavallo(i) : storicoNomeCavallo(i) === storicoFiltroCavallo));
+  box.innerHTML = filtri + lista.map(i => {
     const ferroInfo = (i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura") && (i.numero_ferro || i.quantita_ferri)
       ? " · " + [i.numero_ferro ? "n. " + escapeHtml(i.numero_ferro) + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : "") : null, i.quantita_ferri ? i.quantita_ferri + " ferri" : null].filter(Boolean).join(", ")
       : "";
+    const cav = storicoNomeCavallo(i);
     return `
     <div class="event-item" style="cursor:pointer" onclick="openInterventoModal(null, clienteInterventiCache.find(x => x.id === '${i.id}'))">
-      <div>
-        <div style="font-weight:600;font-size:14px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}${ferroInfo}</div>
+      <div style="min-width:0">
+        <div class="storico-cav${cav ? "" : " vuoto"}"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span> ${cav ? escapeHtml(cav) : "Cavallo non indicato"}</div>
+        <div style="font-weight:600;font-size:13.5px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}${ferroInfo}</div>
         <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.ora ? " · " + String(i.ora).slice(0,5) : ""}${i.stato === "programmato" ? " · da fare" : i.stato === "richiesto" ? " · richiesta da confermare" : ""}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
       </div>
       <span class="badge ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
@@ -5940,31 +6241,395 @@ async function loadClienteInterventi(clienteId){
   }).join("");
 }
 
-async function renderProDeadlines(){
-  const box = document.getElementById("pro-deadlines-list");
-  const homeBox = document.getElementById("home-pro-deadlines");
-  if(!box && !homeBox) return;
-  const data = await DB.listProssimeScadenzeMascalcia(20);
-  // Tiene solo la scadenza più recente per cliente (evita righe superate da un nuovo intervento)
-  const latestByCliente = {};
-  data.forEach(i => {
-    const key = i.cliente_mascalcia_id;
-    if(!latestByCliente[key] || new Date(i.data_intervento) > new Date(latestByCliente[key].data_intervento)) latestByCliente[key] = i;
+
+
+/* ---------- RAZZA: menu con ricerca (stesso codice in App e Scuderia) ----------
+   Si salva solo una razza scelta dall'elenco Equo (tabella equo_razze, sigla del codice cavallo).
+   Fuori elenco: "La mia razza non c'è" → "Altra razza (testo)" + segnalazione a Equo. */
+let RAZZE_EQUO = [["Avelignese", "AVE", 1, ["haflinger italiano"]], ["Bardigiano", "BAR", 1, []], ["Calabrese", "CAL", 1, []], ["Catria", "CTR", 1, []], ["Cavallo del Delta", "DEL", 1, ["delta"]], ["Cavallo del Ventasso", "VEN", 1, ["ventasso"]], ["Esperia", "ESP", 1, ["pony esperia"]], ["Cavallino della Giara", "GIA", 1, ["giara"]], ["Lipizzano", "LIP", 1, ["lipizzaner"]], ["Maremmano", "MAR", 1, ["maremma"]], ["Monterufolino", "MTR", 1, []], ["Murgese", "MUR", 1, []], ["Napoletano", "NAP", 1, []], ["Norico", "NOR", 1, ["noriker"]], ["Pentro", "PEN", 1, []], ["Persano", "PRS", 1, []], ["Salernitano", "SAL", 1, []], ["Sanfratellano", "SFT", 1, ["san fratellano"]], ["Sarcidano", "SRC", 1, []], ["Sella Italiano", "SIT", 1, ["sella italiana", "si"]], ["Purosangue Orientale Siciliano", "SIC", 1, ["siciliano", "orientale siciliano"]], ["Tolfetano", "TOL", 1, []], ["Trottatore Italiano", "TIT", 1, ["trottatore"]], ["Anglo-Arabo Sardo", "AAS", 1, ["anglo arabo sardo"]], ["Tiro Pesante Rapido", "TPR", 1, ["tpr"]], ["Purosangue Inglese", "PSI", 0, ["psi", "purosangue", "thoroughbred", "inglese"]], ["Purosangue Arabo", "PSA", 0, ["arabo", "psa", "arabian"]], ["Anglo-Arabo", "AAR", 0, ["anglo arabo"]], ["Shagya", "SHA", 0, ["arabo shagya"]], ["Akhal-Teke", "AKT", 0, ["akhal teke"]], ["Barbero", "BRB", 0, ["barbo"]], ["Standardbred", "STB", 0, ["trottatore americano"]], ["Trottatore Francese", "TFR", 0, ["trotteur francais"]], ["Orlov", "ORL", 0, ["trottatore russo"]], ["Hannover", "HAN", 0, ["hannoveraner", "annover"]], ["Holsteiner", "HOL", 0, ["holstein"]], ["Oldenburg", "OLD", 0, ["oldenburger"]], ["Westfalen", "WES", 0, ["westfalico"]], ["Trakehner", "TRK", 0, ["trakener"]], ["Hessen", "HES", 0, []], ["Brandenburg", "BRA", 0, []], ["Mecklenburg", "MEC", 0, []], ["Württemberg", "WUR", 0, ["wurttemberg"]], ["Bayerisches Warmblut", "BAY", 0, ["bavarese"]], ["Zangersheide", "ZAN", 0, []], ["KWPN", "KWP", 0, ["sella olandese", "dutch warmblood", "olandese"]], ["BWP", "BWP", 0, ["sella belga"]], ["Selle Français", "SFR", 0, ["sella francese", "selle francais"]], ["Sella Svedese", "SWB", 0, ["swb"]], ["Sella Danese", "DWB", 0, ["dwb"]], ["Irish Sport Horse", "ISH", 0, ["irlandese"]], ["Irish Draught", "IRD", 0, []], ["Wielkopolski", "WIE", 0, []], ["Małopolski", "MAL", 0, ["malopolski"]], ["Kisbéri", "KIS", 0, ["kisberi"]], ["Nonius", "NON", 0, []], ["Furioso-North Star", "FUR", 0, ["furioso"]], ["Lusitano", "LUS", 0, []], ["PRE (Pura Raza Española)", "PRE", 0, ["andaluso", "pura raza espanola", "spagnolo"]], ["Hispano-Arabo", "HIS", 0, []], ["Frisone", "FRI", 0, ["friesian"]], ["Gelderlander", "GEL", 0, []], ["Groninger", "GRO", 0, []], ["Kladruber", "KLA", 0, []], ["Cleveland Bay", "CLE", 0, []], ["Hackney", "HAC", 0, []], ["Quarter Horse", "QTR", 0, ["quarter", "qh"]], ["Paint Horse", "PNT", 0, ["paint"]], ["Appaloosa", "APP", 0, []], ["Mustang", "MUS", 0, []], ["Morgan", "MOR", 0, []], ["Tennessee Walking Horse", "TWH", 0, []], ["American Saddlebred", "ASB", 0, ["saddlebred"]], ["Missouri Fox Trotter", "MFT", 0, []], ["Rocky Mountain Horse", "RMH", 0, []], ["Palomino", "PAL", 0, []], ["Buckskin", "BUC", 0, []], ["Pinto", "PIN", 0, []], ["Criollo", "CRI", 0, []], ["Paso Fino", "PSF", 0, []], ["Paso Peruviano", "PSP", 0, []], ["Mangalarga Marchador", "MNG", 0, ["mangalarga"]], ["Campolina", "CMP", 0, []], ["Azteca", "AZT", 0, []], ["Bretone", "BRE", 0, []], ["Percheron", "PER", 0, []], ["Ardennese", "ARD", 0, ["ardennes"]], ["Comtois", "CMT", 0, []], ["Boulonnais", "BOU", 0, []], ["Belga da tiro", "BEL", 0, ["brabante"]], ["Clydesdale", "CLY", 0, []], ["Shire", "SHI", 0, []], ["Suffolk Punch", "SUF", 0, ["suffolk"]], ["Schwarzwälder Fuchs", "SWF", 0, ["schwarzwalder"]], ["Freiberger", "FRB", 0, ["franches-montagnes", "franches montagnes"]], ["Fjord", "FJO", 0, ["fiordo", "fjord norvegese"]], ["Döle", "DOL", 0, ["dole"]], ["Jutland", "JUT", 0, []], ["Vladimir", "VLA", 0, []], ["Shetland", "SHE", 0, []], ["Welsh", "WEL", 0, ["welsh pony", "welsh cob"]], ["Connemara", "CON", 0, []], ["New Forest", "NFO", 0, []], ["Dartmoor", "DAR", 0, []], ["Exmoor", "EXM", 0, []], ["Highland", "HIG", 0, []], ["Fell", "FEL", 0, []], ["Dales", "DAL", 0, []], ["Eriskay", "ERI", 0, []], ["Haflinger", "HAF", 0, ["avelignese haflinger"]], ["Islandese", "ISL", 0, ["icelandic"]], ["Pony Tedesco da Sella", "DRP", 0, ["deutsches reitpony"]], ["Pony Olandese", "PON", 0, []], ["Pony Francese da Sella", "PFS", 0, ["poney francais de selle"]], ["Falabella", "FAL", 0, []], ["Miniature Horse", "MIN", 0, ["cavallo miniatura", "mini horse"]], ["Pony Americano", "PAM", 0, []], ["Pony of the Americas", "POA", 0, ["poa"]], ["Bosniaco", "BOS", 0, []], ["Huzul", "HUZ", 0, ["hucul"]], ["Konik", "KON", 0, []], ["Landais", "LAN", 0, []], ["Pottok", "POT", 0, []], ["Caspio", "CAS", 0, []], ["Berbero", "BER", 0, ["barb"]], ["Arabo-Berbero", "ABB", 0, ["arabo berbero"]], ["Turkmeno", "TUR", 0, []], ["Marwari", "MRW", 0, []], ["Kathiawari", "KAT", 0, []], ["Mongolo", "MNL", 0, []], ["Przewalski", "PRZ", 0, []], ["Yakuto", "YAK", 0, []], ["Don", "DON", 0, []], ["Budyonny", "BUD", 0, ["budenny"]], ["Kabardino", "KAB", 0, []], ["Karabakh", "KRB", 0, []], ["Lokai", "LOK", 0, []], ["Kustanai", "KUS", 0, []], ["Waler", "WAL", 0, []], ["Brumby", "BRU", 0, []], ["Australian Stock Horse", "ASH", 0, []], ["Kiger Mustang", "KIG", 0, []], ["Camargue", "CAM", 0, []], ["Merens", "MER", 0, ["merens"]], ["Henson", "HEN", 0, []], ["Auxois", "AUX", 0, []], ["Poitevin", "POI", 0, []], ["Sorraia", "SOR", 0, []], ["Garrano", "GAR", 0, []], ["Asturcón", "AST", 0, ["asturcon"]], ["Losino", "LOS", 0, []], ["Marismeño", "MRS", 0, ["marismeno"]], ["Meticcio / Incrocio", "MET", 0, ["meticcio", "incrocio", "mezzosangue"]], ["Sella (razza non indicata)", "SEL", 0, ["sella", "cavallo da sella"]], ["Pony (razza non indicata)", "PNY", 0, ["pony"]]].map(([nome, sigla, italiana, alias]) => ({ nome, sigla, italiana: !!italiana, alias }));
+// le più diffuse in Italia compaiono per prime a parità di somiglianza
+const RAZZE_DIFFUSE = ["PSI","PSA","SIT","MAR","QTR","HAF","AVE","TIT","TFR","AAR","SFR","KWP","HAN","HOL","OLD","PRE","LUS","FRI","APP","PNT","SHE","WEL","MUR","BAR","MET","SEL","PNY"];
+const RAZZE_FISSE = ["Meticcio / Incrocio", "Sella (razza non indicata)", "Pony (razza non indicata)"];
+let razzeCaricate = false;
+async function caricaRazzeEquo(){
+  if(razzeCaricate || typeof DEMO_MODE === "undefined" || DEMO_MODE || typeof sb === "undefined") return;
+  razzeCaricate = true;
+  try{
+    const { data } = await sb.from("equo_razze").select("nome, sigla, italiana, alias, ordine").order("ordine");
+    if(data && data.length) RAZZE_EQUO = data.map(r => ({ nome: r.nome, sigla: r.sigla, italiana: r.italiana, alias: r.alias || [] }));
+  }catch(e){ razzeCaricate = false; }
+}
+function razzaNorm(t){ return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ł/g, "l").replace(/Ł/g, "L").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function razzaTrova(testo){
+  const n = razzaNorm(testo); if(!n) return null;
+  return RAZZE_EQUO.find(r => razzaNorm(r.nome) === n || (r.alias || []).some(a => razzaNorm(a) === n)) || null;
+}
+function razzaCerca(testo){
+  const n = razzaNorm(testo);
+  if(!n) return RAZZE_EQUO.filter(r => r.italiana).slice(0, 8);
+  const parole = String(testo).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter(Boolean);
+  const punteggio = r => {
+    const nome = razzaNorm(r.nome), w = r.nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/);
+    if(nome.startsWith(n)) return 0;
+    if(parole.every(p => w.some(x => x.startsWith(p)))) return 1;
+    if(nome.includes(n)) return 2;
+    if((r.alias || []).some(a => razzaNorm(a).startsWith(n))) return 3;
+    if((r.alias || []).some(a => razzaNorm(a).includes(n))) return 4;
+    return 9;
+  };
+  return RAZZE_EQUO.map((r, i) => ({ r, p: punteggio(r), i })).filter(x => x.p < 9)
+    .sort((a, b) => a.p - b.p || (RAZZE_DIFFUSE.indexOf(a.r.sigla) < 0) - (RAZZE_DIFFUSE.indexOf(b.r.sigla) < 0) || (b.r.italiana - a.r.italiana) || a.i - b.i).slice(0, 8).map(x => x.r);
+}
+// trasforma un <input> in campo razza con suggerimenti
+function razzaCampo(id){
+  const inp = document.getElementById(id);
+  if(!inp || inp.dataset.razza) return;
+  inp.dataset.razza = "1";
+  inp.setAttribute("autocomplete", "off");
+  const box = document.createElement("div"); box.className = "rz-wrap";
+  inp.parentNode.insertBefore(box, inp); box.appendChild(inp);
+  const lista = document.createElement("div"); lista.className = "rz-lista"; box.appendChild(lista);
+  const nota = document.createElement("div"); nota.className = "rz-nota"; box.appendChild(nota);
+  const mostra = () => {
+    caricaRazzeEquo();
+    const t = inp.value.trim();
+    const trov = razzaCerca(t);
+    const fisse = RAZZE_FISSE.filter(f => !trov.some(r => r.nome === f)).map(nome => ({ nome, fissa: true }));
+    lista.innerHTML = trov.map(r => `<button type="button" data-v="${escapeHtml(r.nome)}"><span>${escapeHtml(r.nome)}</span><small>${escapeHtml(r.sigla)}</small></button>`).join("")
+      + (trov.length ? "" : '<div class="rz-vuoto">Nessuna razza trovata con «' + escapeHtml(t) + '»</div>')
+      + '<div class="rz-sep"></div>' + fisse.map(f => `<button type="button" class="rz-fissa" data-v="${escapeHtml(f.nome)}">${escapeHtml(f.nome)}</button>`).join("")
+      + (t.length >= 3 && !trov.length ? `<button type="button" class="rz-altra" data-altra="${escapeHtml(t)}">La mia razza non c'è: «${escapeHtml(t)}»</button>` : "");
+    lista.classList.add("aperta");
+  };
+  const scegli = (valore, altra) => {
+    inp.value = valore; inp.dataset.ok = "1"; inp.dataset.altra = altra || "";
+    lista.classList.remove("aperta"); box.classList.remove("rz-errore"); nota.textContent = altra ? "Razza fuori elenco: avvisiamo Equo per aggiungerla." : "";
+    if(altra) razzaSegnala(altra);
+  };
+  inp.addEventListener("focus", mostra);
+  inp.addEventListener("input", () => { inp.dataset.ok = ""; inp.dataset.altra = ""; nota.textContent = ""; mostra(); });
+  lista.addEventListener("mousedown", e => e.preventDefault());
+  lista.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    if(b.dataset.altra) scegli("Altra razza (" + b.dataset.altra + ")", b.dataset.altra);
+    else scegli(b.dataset.v);
   });
-  const ordinate = Object.values(latestByCliente).sort((a,b) => new Date(a.prossima_scadenza) - new Date(b.prossima_scadenza));
+  inp.addEventListener("blur", () => setTimeout(() => {
+    lista.classList.remove("aperta");
+    // scritta per intero e uguale a una razza (o a un nome alternativo): la sistemo io
+    if(!inp.dataset.ok && inp.value.trim()){ const r = razzaTrova(inp.value); if(r) scegli(r.nome); }
+  }, 120));
+}
+// imposta il valore all'apertura della scheda (le razze già scritte in passato vengono ricondotte all'elenco se possibile)
+function razzaImposta(id, valore){
+  razzaCampo(id);
+  const inp = document.getElementById(id);
+  const r = razzaTrova(valore);
+  inp.value = r ? r.nome : (valore || "");
+  inp.dataset.ok = r || !valore ? "1" : "";
+  inp.dataset.iniziale = inp.value; inp.dataset.altra = "";
+  inp.parentNode.classList.remove("rz-errore");
+  inp.parentNode.querySelector(".rz-nota").textContent = "";
+}
+// al salvataggio: null = vuota, stringa = razza valida, false = da scegliere dall'elenco (mostra l'errore)
+function razzaValore(id){
+  const inp = document.getElementById(id);
+  const t = inp.value.trim();
+  if(!t) return null;
+  if(inp.dataset.ok === "1" || t === inp.dataset.iniziale) return t;
+  const r = razzaTrova(t); if(r){ inp.value = r.nome; return r.nome; }
+  inp.parentNode.classList.add("rz-errore");
+  inp.parentNode.querySelector(".rz-nota").textContent = "Scegli la razza dall'elenco (oppure «La mia razza non c'è»).";
+  inp.focus();
+  return false;
+}
+const razzeSegnalate = new Set();
+async function razzaSegnala(testo){
+  const k = razzaNorm(testo);
+  if(razzeSegnalate.has(k) || typeof DEMO_MODE === "undefined" || DEMO_MODE || !currentUser) return;
+  razzeSegnalate.add(k);
+  try{
+    await sb.from("ticket_assistenza").insert({ user_id: currentUser.id, app: "app", categoria: "suggerimento",
+      oggetto: "Nuova razza da aggiungere: " + testo.slice(0, 80),
+      descrizione: "Un utente ha inserito una razza che non è nell'elenco Equo: «" + testo + "». Se è una razza vera, aggiungila alla tabella equo_razze con la sua sigla di 3 lettere: i cavalli con quella razza prenderanno la sigla al prossimo salvataggio.",
+      email: currentUser.email || "gestione.equo@gmail.com" });
+  }catch(e){ console.warn("razzaSegnala:", e); }
+}
 
-  const renderList = (items) => items.map(i => `
-    <div class="deadline-item">
-      <div class="deadline-dot ${deadlineBadgeClass(i.prossima_scadenza) === 'badge-red' ? 'late' : deadlineBadgeClass(i.prossima_scadenza) === 'badge-accent' ? 'soon' : 'ok'}"></div>
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600">${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.clienti_mascalcia?.nome_cavallo ? " · " + escapeHtml(i.clienti_mascalcia.nome_cavallo) : ""}</div>
-        <div class="muted" style="font-size:12px">${formatDate(i.prossima_scadenza)}</div>
-      </div>
-    </div>
-  `).join("");
+/* ---------- HOME PRO: PROSSIMI APPUNTAMENTI + DA RICHIAMARE ----------
+   Appuntamenti = lavoro già in agenda (semaforo: rosso passato non segnato fatto, ocra da confermare, verde confermato).
+   Da richiamare = cavalli senza appuntamento la cui prossima ferratura/pareggio è vicina (rosso scaduto, ocra ≤7 gg, verde ≤30 gg). */
+let hpAppuntamenti = [], hpRichiami = {}, hpRichiamiLista = [], hpRichiamoId = null, hpListaTipo = null, hpListaFiltro = "tutti";
+const HP_IN_HOME = 5;
 
-  if(box) box.innerHTML = ordinate.length === 0 ? '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>' : renderList(ordinate.slice(0, 5));
-  if(homeBox) homeBox.innerHTML = ordinate.length === 0 ? '<div class="muted" style="font-size:13px">Nessuna scadenza in arrivo.</div>' : renderList(ordinate.slice(0, 3));
+function hpTipo(i){
+  if(i.tipo_ferratura === "altro" && i.tipo_altro) return i.tipo_altro;
+  return TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "Intervento";
+}
+function hpGiornoEtichetta(iso){
+  const oggi = isoLocale(new Date());
+  const g = giorniTra(oggi, iso);
+  if(g === 0) return "Oggi";
+  if(g === 1) return "Domani";
+  if(g < 0) return "Da chiudere";
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  return `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI[m - 1]}`;
+}
+function hpColoreApp(e){
+  if(e.data_intervento < isoLocale(new Date())) return "rosso";
+  return (e.stato === "richiesto" || e.stato === "proposto") ? "ocra" : "verde";
+}
+function hpColoreRic(r){ return r.giorni < 0 ? "rosso" : r.giorni <= 7 ? "ocra" : "verde"; }
+function hpQuando(r){
+  if(r.giorni < 0) return `in ritardo di ${-r.giorni} ${-r.giorni === 1 ? "giorno" : "giorni"}`;
+  if(r.giorni === 0) return "scade oggi";
+  if(r.giorni === 1) return "scade domani";
+  return `tra ${r.giorni} giorni`;
+}
+function hpPill(n, col, txt){ return n ? `<span class="hp-pill"><i style="background:${col}"></i>${n} ${txt}</span>` : ""; }
+
+function hpRigaApp(e){
+  const col = hpColoreApp(e);
+  const cav = agNomeCavallo(e);
+  const stato = col === "rosso" ? '<span class="rosso">' + formatDataBreve(e.data_intervento) + " · non ancora segnato fatto</span>"
+    : e.stato === "richiesto" ? '<span class="ocra">Richiesta del cliente · da confermare</span>'
+    : e.stato === "proposto" ? '<span class="ocra">In attesa della struttura</span>'
+    : `<span>${escapeHtml(agDescrizioneTipo(e))}</span>`;
+  const btn = e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="event.stopPropagation();accettaRichiesta('${e.id}')">Accetta</button>`
+    : e.stato === "proposto" ? "" : `<button class="ag-ev-fatto" onclick="event.stopPropagation();hpSegnaFatto('${e.id}')">Fatto</button>`;
+  return `<div class="hp-riga" onclick="apriAzioniEvento('${e.id}')">
+    <span class="hp-dot ${col}"></span>
+    <div class="hp-ora">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
+    <div class="hp-main"><b>${escapeHtml(e.clienti_mascalcia?.nome || "")}${cav ? " · " + escapeHtml(cav) : ""}</b>${stato}</div>
+    ${btn}</div>`;
+}
+function hpListaApp(lista){
+  let html = "", ultimo = null;
+  lista.forEach(e => {
+    const et = hpGiornoEtichetta(e.data_intervento);
+    if(et !== ultimo){ html += `<div class="hp-gruppo">${et}</div>`; ultimo = et; }
+    html += hpRigaApp(e);
+  });
+  return html;
+}
+function hpRigaRic(r){
+  const col = hpColoreRic(r);
+  return `<div class="hp-riga" onclick="apriRichiamo('${r.intervento_id}')">
+    <span class="hp-dot ${col}"></span>
+    <div class="hp-main"><b>${escapeHtml(r.cliente_nome || "")}${r.cavallo_nome ? " · " + escapeHtml(r.cavallo_nome) : ""}</b>
+      <span class="${col === "verde" ? "" : col}">${escapeHtml(hpTipo(r))} · ${hpQuando(r)}${r.rimandato ? '<span class="hp-tag">rimandato</span>' : ""}</span></div>
+    <span class="ag-chev" style="color:var(--muted)">›</span></div>`;
+}
+function hpGruppoRic(r){ return r.giorni < 0 ? "In ritardo" : r.giorni <= 7 ? "Questa settimana" : "Prossimi 30 giorni"; }
+function hpListaRic(lista){
+  let html = "", ultimo = null;
+  lista.forEach(r => {
+    const g = hpGruppoRic(r);
+    if(g !== ultimo){ html += `<div class="hp-gruppo">${g}</div>`; ultimo = g; }
+    html += hpRigaRic(r);
+  });
+  return html;
+}
+
+async function renderProDeadlines(){
+  const boxApp = document.getElementById("home-pro-appuntamenti");
+  const boxRic = document.getElementById("home-pro-deadlines");
+  if(!boxApp && !boxRic) return;
+  const [app, ric] = await Promise.all([DB.listProssimiAppuntamenti(50), DB.listRichiami(30)]);
+  hpAppuntamenti = app;
+  app.forEach(e => { agEventiCache[e.id] = e; });
+  hpRichiamiLista = ric;
+  hpRichiami = {}; ric.forEach(r => { hpRichiami[r.intervento_id] = r; });
+
+  if(boxApp){
+    const n = { rosso: 0, ocra: 0 }; app.forEach(e => { const c = hpColoreApp(e); if(n[c] != null) n[c]++; });
+    document.getElementById("hp-app-conta").innerHTML = hpPill(n.rosso, "#c0473d", "da chiudere") + hpPill(n.ocra, "#d9a13b", "da confermare");
+    boxApp.innerHTML = !app.length
+      ? '<div class="muted" style="font-size:13px">Nessun appuntamento in agenda. <a href="#" onclick="event.preventDefault();openInterventoModal(null)" style="color:var(--accent);font-weight:700">Aggiungine uno</a></div>'
+      : hpListaApp(app.slice(0, HP_IN_HOME)) + (app.length > HP_IN_HOME ? `<button class="btn btn-outline btn-sm hp-vedi" onclick="apriListaHome('app')">Vedi tutti (${app.length}${app.length >= 50 ? "+" : ""})</button>` : "");
+  }
+  if(boxRic){
+    const n = { rosso: 0, ocra: 0 }; ric.forEach(r => { const c = hpColoreRic(r); if(n[c] != null) n[c]++; });
+    document.getElementById("hp-ric-conta").innerHTML = hpPill(n.rosso, "#c0473d", "in ritardo") + hpPill(n.ocra, "#d9a13b", "questa settimana");
+    boxRic.innerHTML = !ric.length
+      ? '<div class="muted" style="font-size:13px">Nessun cavallo da richiamare nei prossimi 30 giorni.</div>'
+      : hpGiri().map(hpRigaGiro).join("") + hpListaRic(ric.slice(0, HP_IN_HOME)) + (ric.length > HP_IN_HOME ? `<button class="btn btn-outline btn-sm hp-vedi" onclick="apriListaHome('ric')">Vedi tutti (${ric.length})</button>` : "");
+  }
+  if(document.getElementById("modal-hp-lista")?.classList.contains("active")) renderListaHome();
+}
+
+/* ---------- GIRO DELLA ZONA (Premium) ----------
+   Più cavalli dello stesso cliente/struttura da richiamare entro GIRO_GIORNI → un appuntamento unico.
+   Struttura collegata a Equo Scuderia: proposta multi-cavallo (la struttura conferma).
+   Altri clienti: un intervento "programmato" per cavallo, stessa data e ora. */
+const GIRO_GIORNI = 14;
+function hpGiri(){
+  const per = {};
+  hpRichiamiLista.filter(r => r.giorni <= GIRO_GIORNI).forEach(r => { (per[r.cliente_mascalcia_id] = per[r.cliente_mascalcia_id] || []).push(r); });
+  return Object.values(per).filter(l => l.length >= 2).sort((a, b) => b.length - a.length);
+}
+function hpRigaGiro(l){
+  const nomi = l.map(r => r.cavallo_nome || "cavallo").join(", ");
+  const ritardo = l.some(r => r.giorni < 0);
+  return `<div class="hp-giro" onclick="apriGiro('${l[0].cliente_mascalcia_id}')">
+    <div class="hp-giro-ic"><i class="fa-solid fa-route"></i></div>
+    <div class="hp-main"><b>Giro · ${escapeHtml(l[0].cliente_nome || "")}</b>
+      <span>${l.length} cavalli ${ritardo ? "da fare (alcuni in ritardo)" : "entro " + GIRO_GIORNI + " giorni"}: ${escapeHtml(nomi)}</span></div>
+    ${isPremium() ? "" : '<span class="hp-prem">PREMIUM</span>'}<span class="ag-chev" style="color:var(--muted)">›</span></div>`;
+}
+function giroDataProposta(l){
+  const oggi = isoLocale(new Date());
+  const future = l.map(r => r.scadenza).filter(d => d >= oggi).sort();
+  return l.some(r => r.giorni < 0) || !future.length ? aggiungiGiorniIso(oggi, 1) : future[0];
+}
+function giroTipoPrevalente(l){
+  const n = {}; l.forEach(r => { n[r.tipo_ferratura] = (n[r.tipo_ferratura] || 0) + 1; });
+  return Object.entries(n).sort((a, b) => b[1] - a[1])[0][0];
+}
+let giroCorrente = null;
+async function apriGiro(clienteId){
+  if(!isPremium()){
+    showToast("Il giro della zona è incluso in Equo Premium");
+    togglePiano();
+    return;
+  }
+  const l = hpGiri().find(g => g[0].cliente_mascalcia_id === clienteId);
+  if(!l) return;
+  if(!clientiMascalcia || !clientiMascalcia.some(x => x.id === clienteId)) clientiMascalcia = await DB.listClientiMascalcia();
+  const tipo = giroTipoPrevalente(l);
+  if(isStrutturaCollegata(clienteId)){
+    const diversi = l.filter(r => r.tipo_ferratura !== tipo).map(r => `${r.cavallo_nome}: ${hpTipo(r).toLowerCase()}`);
+    await apriPropostaStruttura(clienteId, { tipo_ferratura: tipo, data_intervento: giroDataProposta(l), cavalli: l.map(r => r.cavallo_cliente_id).filter(Boolean) });
+    if(diversi.length) document.getElementById("prop-str-note").value = diversi.join(" · ");
+    return;
+  }
+  giroCorrente = { clienteId, lista: l };
+  document.getElementById("giro-nome").textContent = l[0].cliente_nome || "cliente";
+  document.getElementById("giro-data").value = giroDataProposta(l);
+  document.getElementById("giro-data").min = isoLocale(new Date());
+  document.getElementById("giro-ora").value = "";
+  document.getElementById("giro-error").style.display = "none";
+  document.getElementById("giro-cavalli").innerHTML = l.map(r => `<label class="giro-cav"><input type="checkbox" class="giro-cav-ck" value="${r.intervento_id}" checked style="width:18px;height:18px">
+    <span><b>${escapeHtml(r.cavallo_nome || "Cavallo")}</b> · ${escapeHtml(hpTipo(r))}</span><small class="${hpColoreRic(r) === "rosso" ? "" : ""}">${hpQuando(r)}</small></label>`).join("");
+  openModal("modal-giro");
+}
+async function confermaGiro(){
+  const g = giroCorrente; if(!g) return;
+  const err = document.getElementById("giro-error"); err.style.display = "none";
+  const data = document.getElementById("giro-data").value;
+  const ora = document.getElementById("giro-ora").value || null;
+  const scelti = Array.from(document.querySelectorAll(".giro-cav-ck:checked")).map(el => el.value);
+  if(!data){ err.textContent = "Scegli la data."; err.style.display = "block"; return; }
+  if(!scelti.length){ err.textContent = "Seleziona almeno un cavallo."; err.style.display = "block"; return; }
+  const righe = g.lista.filter(r => scelti.includes(r.intervento_id));
+  for(const r of righe){
+    const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: r.cliente_mascalcia_id, cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id,
+      tipo_ferratura: r.tipo_ferratura, tipo_altro: r.tipo_altro, misura_sistema: r.misura_sistema, numero_ferro: r.numero_ferro, quantita_ferri: r.quantita_ferri,
+      data_intervento: data, ora, stato: "programmato", prossima_scadenza: null, importo: null, stato_pagamento: "da_saldare", note: null });
+    if(error){ err.textContent = "Non sono riuscito a salvare: " + error.message; err.style.display = "block"; await renderProDeadlines(); return; }
+  }
+  closeModal("modal-giro");
+  showToast(`Giro fissato: ${righe.length} cavalli ${formatDataBreve(data)}${ora ? " ore " + ora : ""}`);
+  giroCorrente = null;
+  await renderProDeadlines();
+  if(document.getElementById("ag-week")) renderAgendaSettimana();
+  if(document.getElementById("giro-avvisa").checked){
+    const nome = (righe[0].cliente_nome || "").split(" ")[0];
+    const elenco = righe.map(r => `${r.cavallo_nome || "cavallo"} (${hpTipo(r).toLowerCase()})`).join(", ");
+    await openChatThread(g.clienteId);
+    const inp = document.getElementById("mchat-input");
+    if(inp){ inp.value = `Ciao${nome && righe[0].tipo_cliente !== "struttura" ? " " + nome : ""}, passo ${formatDataBreve(data)}${ora ? " alle " + ora : ""} per ${elenco}. Ti va bene?`; inp.focus(); }
+  }
+}
+
+async function hpSegnaFatto(id){
+  await segnaFattoAgenda(id);   // chiede i giorni del richiamo, aggiorna agenda, incassi e Home
+}
+
+function apriListaHome(tipo){
+  hpListaTipo = tipo; hpListaFiltro = "tutti";
+  document.getElementById("hp-lista-titolo").textContent = tipo === "app" ? "Prossimi appuntamenti" : "Da richiamare";
+  renderListaHome();
+  openModal("modal-hp-lista");
+}
+function hpFiltra(f){ hpListaFiltro = f; renderListaHome(); }
+function renderListaHome(){
+  const filtri = hpListaTipo === "app"
+    ? [["tutti", "Tutti"], ["rosso", "Da chiudere"], ["ocra", "Da confermare"], ["verde", "Confermati"]]
+    : [["tutti", "Tutti"], ["rosso", "In ritardo"], ["ocra", "Questa settimana"], ["verde", "Prossimi 30 giorni"]];
+  document.getElementById("hp-lista-filtri").innerHTML = filtri.map(([k, t]) => `<button class="${hpListaFiltro === k ? "on" : ""}" onclick="hpFiltra('${k}')">${t}</button>`).join("");
+  const corpo = document.getElementById("hp-lista-corpo");
+  if(hpListaTipo === "app"){
+    const l = hpAppuntamenti.filter(e => hpListaFiltro === "tutti" || hpColoreApp(e) === hpListaFiltro);
+    corpo.innerHTML = l.length ? hpListaApp(l) : '<div class="muted" style="font-size:13px;padding:10px 0">Nessun appuntamento.</div>';
+  } else {
+    const l = hpRichiamiLista.filter(r => hpListaFiltro === "tutti" || hpColoreRic(r) === hpListaFiltro);
+    corpo.innerHTML = l.length ? hpListaRic(l) : '<div class="muted" style="font-size:13px;padding:10px 0">Nessun cavallo in questo gruppo.</div>';
+  }
+}
+
+function apriRichiamo(id){
+  const r = hpRichiami[id]; if(!r) return;
+  hpRichiamoId = id;
+  document.getElementById("ricaz-titolo").textContent = (r.cliente_nome || "Cliente") + (r.cavallo_nome ? " · " + r.cavallo_nome : "");
+  document.getElementById("ricaz-dettaglio").innerHTML = [
+    `<span class="hp-dot ${hpColoreRic(r)}" style="display:inline-block;vertical-align:-1px;margin-right:6px"></span><b>${escapeHtml(hpTipo(r))}</b> · ${hpQuando(r)} (${formatDate(r.scadenza)})`,
+    `Ultimo intervento: ${formatDate(r.data_intervento)}`,
+    r.rimandato ? `Rimandato: in origine era il ${formatDate(r.prossima_scadenza)}` : "",
+    r.tipo_cliente === "struttura" ? '<span style="font-size:12px">Cliente struttura: l\'appuntamento va confermato dalla scuderia.</span>' : ""
+  ].filter(Boolean).join("<br>");
+  document.getElementById("ricaz-scrivi").innerHTML = '<span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Scrivi al cliente' + (isPremium() ? "" : '<span class="hp-prem">PREMIUM</span>');
+  richiamoMostraAzioni();
+  openModal("modal-richiamo-az");
+}
+function richiamoMostraAzioni(){
+  document.getElementById("ricaz-azioni").style.display = "";
+  document.getElementById("ricaz-rimanda").style.display = "none";
+}
+async function richiamoAzione(tipo){
+  const r = hpRichiami[hpRichiamoId]; if(!r) return;
+  if(tipo === "fissa"){
+    closeModal("modal-richiamo-az");
+    const oggi = isoLocale(new Date());
+    openInterventoModal(r.cliente_mascalcia_id, null, {
+      tipo_ferratura: r.tipo_ferratura, tipo_altro: r.tipo_altro, misura_sistema: r.misura_sistema, numero_ferro: r.numero_ferro, quantita_ferri: r.quantita_ferri,
+      data_intervento: r.scadenza > oggi ? r.scadenza : oggi, cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id
+    });
+  } else if(tipo === "scrivi"){
+    closeModal("modal-richiamo-az");
+    if(!isPremium()){
+      await openChatThread(r.cliente_mascalcia_id);
+      showToast("Con Equo Premium trovi il messaggio già pronto da inviare");
+      return;
+    }
+    const nome = (r.cliente_nome || "").split(" ")[0];
+    const testo = `Ciao${nome && r.tipo_cliente !== "struttura" ? " " + nome : ""}, ${r.giorni < 0 ? "è ora di rifare" : "si avvicina"} ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}${r.giorni < 0 ? "" : " (" + formatDataBreve(r.scadenza) + ")"}. Quando ti va bene che passi?`;
+    await openChatThread(r.cliente_mascalcia_id);
+    const inp = document.getElementById("mchat-input");
+    if(inp){ inp.value = testo; inp.focus(); }
+  } else if(tipo === "rimanda"){
+    document.getElementById("ricaz-azioni").style.display = "none";
+    document.getElementById("ricaz-rimanda").style.display = "block";
+    document.getElementById("ricaz-data").value = aggiungiGiorniIso(isoLocale(new Date()), 7);
+  } else if(tipo === "chiudi"){
+    if(!confirm(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
+    const { error } = await DB.setRichiamoStato(r.intervento_id, { chiuso_il: new Date().toISOString() });
+    if(error){ showToast("Errore: " + error.message); return; }
+    closeModal("modal-richiamo-az");
+    showToast("Fatto, non te lo ricordo più");
+    await renderProDeadlines();
+  }
+}
+async function richiamoRimanda(giorni){
+  const r = hpRichiami[hpRichiamoId]; if(!r) return;
+  const data = giorni ? aggiungiGiorniIso(isoLocale(new Date()), giorni) : document.getElementById("ricaz-data").value;
+  if(!data){ showToast("Scegli una data"); return; }
+  const { error } = await DB.setRichiamoStato(r.intervento_id, { rimandato_al: data });
+  if(error){ showToast("Errore: " + error.message); return; }
+  closeModal("modal-richiamo-az");
+  showToast("Te lo ricordo " + formatDataBreve(data));
+  await renderProDeadlines();
 }
 
 /* ---------- INCASSI (pro) ---------- */
@@ -6390,6 +7055,30 @@ async function openInterventoModal(clienteId, intervento, preset){
   document.getElementById("intervento-importo").value = i.importo ?? "";
   document.getElementById("intervento-pagamento").value = i.stato_pagamento || "da_saldare";
   document.getElementById("intervento-note").value = i.note || "";
+  // conferma di una richiesta: la data del cliente è solo una proposta, il maniscalco può cambiarla
+  const boxRich = document.getElementById("intervento-richiesta-box");
+  if(boxRich){
+    const rich = daConfermare && !interventoInModifica.gruppo_id;
+    boxRich.style.display = rich ? "block" : "none";
+    if(rich){
+      const dOrig = interventoInModifica.data_intervento, oOrig = interventoInModifica.ora ? String(interventoInModifica.ora).slice(0, 5) : "";
+      const aggiorna = () => {
+        const d = document.getElementById("intervento-data").value, o = document.getElementById("intervento-ora").value;
+        const cambiata = d !== dOrig || (o || "") !== oOrig;
+        document.getElementById("modal-add-intervento").classList.toggle("int-cambiata", cambiata);
+        boxRich.innerHTML = cambiata
+          ? `<b>📅 Nuova data: ${formatDataBreve(d)}${o ? " ore " + o : ""}</b>Il cliente aveva chiesto ${formatDataBreve(dOrig)}${oOrig ? " ore " + oOrig : ""}: riceverà in chat la data che salvi.`
+          : `<b>📅 Il cliente chiede ${formatDataBreve(dOrig)}${oOrig ? " ore " + oOrig : ""}</b>Puoi cambiare data e ora più in basso: il cliente riceve in chat la data che salvi.`;
+      };
+      document.getElementById("intervento-data").oninput = aggiorna;
+      document.getElementById("intervento-ora").oninput = aggiorna;
+      aggiorna();
+    } else {
+      document.getElementById("modal-add-intervento").classList.remove("int-cambiata");
+      document.getElementById("intervento-data").oninput = null;
+      document.getElementById("intervento-ora").oninput = null;
+    }
+  }
   document.getElementById("intervento-error").style.display = "none";
 
   openModal("modal-add-intervento");
@@ -6507,6 +7196,7 @@ async function salvaInterventoMascalcia(){
     const futuro = quando.getTime() > Date.now();
     const statoPrec = interventoInModifica ? (interventoInModifica.stato || "fatto") : null;
     const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id); // appuntamento con struttura Equo Scuderia
+    const precInfo = interventoInModifica ? { data: interventoInModifica.data_intervento, ora: interventoInModifica.ora ? String(interventoInModifica.ora).slice(0, 5) : "", cliente: interventoInModifica.cliente_mascalcia_id } : null;
     const eraRichiesta = !diGruppo && STATI_NON_CONFERMATI.includes(statoPrec);
     // una richiesta confermata per oggi o per il futuro diventa "programmato", mai "fatto" da sola
     // (appuntamenti con struttura: lo stato cambia solo con i tasti; se cambi data/ora la struttura deve riconfermare)
@@ -6538,9 +7228,18 @@ async function salvaInterventoMascalcia(){
     closeModal("modal-add-intervento");
     if(eraRichiesta){
       const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
+      const spostata = precInfo && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || ""));
       await DB.insertMessaggioMascalcia({ cliente_mascalcia_id, tipo: "testo",
-        testo: testoRichiesta("✅ Appuntamento confermato", { tipo_ferratura, tipo_altro, data_intervento, ora }, nomeCv) });
+        testo: spostata
+          ? testoRichiesta("✅ Appuntamento confermato con nuova data", { tipo_ferratura, tipo_altro, data_intervento, ora }, nomeCv).replace(/\.$/, "") + ` (avevi chiesto ${formatDataBreve(precInfo.data)}${precInfo.ora ? " ore " + precInfo.ora : ""}).`
+          : testoRichiesta("✅ Appuntamento confermato", { tipo_ferratura, tipo_altro, data_intervento, ora }, nomeCv) });
       showToast("Richiesta confermata: il cliente riceve un messaggio in chat");
+    } else if(precInfo && !diGruppo && statoPrec === "programmato" && stato === "programmato"
+        && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || precInfo.cliente !== cliente_mascalcia_id)){
+      // 1. appuntamento già confermato spostato: il cliente lo deve sapere
+      const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
+      await avvisaClienteAppuntamento("spostato", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv }, precInfo);
+      showToast("Appuntamento spostato: il cliente riceve l'avviso in chat");
     } else {
       showToast(interventoInModifica ? "Appuntamento aggiornato" : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
     }
@@ -6560,12 +7259,35 @@ async function salvaInterventoMascalcia(){
   }
 }
 
+/* Avviso automatico al cliente quando il maniscalco sposta o annulla un appuntamento già in agenda
+   (la chat genera anche la notifica sul telefono; il calendario del proprietario legge sempre la data aggiornata). */
+async function avvisaClienteAppuntamento(tipo, i, prec){
+  if(!i?.cliente_mascalcia_id) return;
+  const cav = i.cavallo || "";
+  let testo;
+  if(tipo === "spostato"){
+    const da = prec ? `${formatDataBreve(prec.data)}${prec.ora ? " ore " + prec.ora : ""}` : "";
+    testo = testoRichiesta("🔄 Appuntamento spostato", { tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, data_intervento: i.data_intervento, ora: i.ora }, cav).replace(/\.$/, "")
+      + (da ? ` (prima era ${da}).` : ".");
+  } else {
+    testo = testoRichiesta("❌ Appuntamento annullato", { tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, data_intervento: i.data_intervento, ora: i.ora }, cav)
+      + " Scrivimi qui se vuoi fissare un'altra data.";
+  }
+  const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: i.cliente_mascalcia_id, tipo: "testo", testo });
+  if(error) console.error("avvisaClienteAppuntamento:", error);
+}
+function deveAvvisareAnnullo(e){
+  return e && !e.gruppo_id && e.stato === "programmato" && e.data_intervento >= isoLocale(new Date());
+}
+
 async function eliminaInterventoInModifica(){
   if(!interventoInModifica) return;
-  if(!confirm("Eliminare questo appuntamento?")) return;
+  if(!confirm(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
   const clienteId = interventoInModifica.cliente_mascalcia_id;
+  const daAvvisare = deveAvvisareAnnullo(interventoInModifica) ? { ...interventoInModifica, cavallo: agNomeCavalloSicuro(interventoInModifica) || (cavalliClienteCorrente.find(c => c.id === interventoInModifica.cavallo_cliente_id) || {}).nome || "" } : null;
   const { error } = await DB.deleteInterventoMascalcia(interventoInModifica.id);
   if(error){ showToast("Errore: " + error.message); return; }
+  if(daAvvisare) await avvisaClienteAppuntamento("annullato", daAvvisare);
   interventoInModifica = null;
   closeModal("modal-add-intervento");
   showToast("Appuntamento eliminato");
@@ -6600,7 +7322,9 @@ function agEtichettaSettimana(lun){
   return `${lun.getDate()} ${AG_MESI[lun.getMonth()]} – ${dom.getDate()} ${AG_MESI[dom.getMonth()]} ${dom.getFullYear()}`;
 }
 function agNomeCavallo(i){
-  return i.cavalli_clienti_mascalcia?.nome || i.clienti_mascalcia?.nome_cavallo || "";
+  if(i.cavalli_clienti_mascalcia?.nome) return i.cavalli_clienti_mascalcia.nome;
+  const elenco = i.clienti_mascalcia?.nome_cavallo || "";
+  return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
 }
 function agDescrizioneTipo(i){
   let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
@@ -6630,6 +7354,7 @@ async function renderAgendaSettimana(direzione){
   ]);
   if(token !== agRenderToken) return; // un render più recente è già partito
   agEventiCache = {};
+  (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach(e => { agEventiCache[e.id] = e; });   // righe della Home pro
   eventi.forEach(e => { agEventiCache[e.id] = e; });
 
   box.innerHTML = giorni.map((g, k) => {
@@ -6737,6 +7462,7 @@ async function azioneGruppoStruttura(gruppoId, azione){
   if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita: " + (error?.message || "riprova")); return; }
   showToast(azione === "conferma" ? "Confermato: la struttura riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
   await renderAgendaSettimana();
+  await renderProDeadlines();
   if(currentClienteId) await loadClienteInterventi(currentClienteId);
 }
 
@@ -6761,7 +7487,7 @@ async function apriPropostaStruttura(clienteId, preset){
   const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
   const cav = data || [];
   box.innerHTML = cav.length
-    ? cav.map(x => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id ? " checked" : ""}> ${escapeHtml(x.nome)}</label>`).join("")
+    ? cav.map(x => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? ' <span class="muted" style="font-size:11.5px">(inserito da te, non nella scheda della scuderia)</span>' : ""}</label>`).join("")
     : '<div class="muted" style="font-size:13px">La struttura non ha ancora cavalli in scheda: l\'appuntamento sarà generico.</div>';
 }
 
@@ -6819,6 +7545,7 @@ async function rifiutaRichiesta(id){
     testo: testoRichiesta("❌ Non riesco per questa richiesta", r, agNomeCavallo(r)) + " Scrivimi qui per trovare un'altra data." });
   showToast("Richiesta rifiutata");
   await renderAgendaSettimana();
+  await renderProDeadlines();
   if(currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
 }
 
@@ -6935,9 +7662,10 @@ async function azioneEvento(tipo){
     await renderIncassi();
     await renderProDeadlines();
   } else if(tipo === "elimina"){
-    if(!confirm("Eliminare questo appuntamento?")) return;
+    if(!confirm(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
     const { error } = await DB.deleteInterventoMascalcia(e.id);
     if(error){ showToast("Errore: " + error.message); return; }
+    if(deveAvvisareAnnullo(e)) await avvisaClienteAppuntamento("annullato", { ...e, cavallo: agNomeCavallo(e) });
     closeModal("modal-azioni-evento");
     showToast("Appuntamento eliminato");
     await renderAgendaSettimana();
@@ -7004,6 +7732,11 @@ async function creaPdfEvento(e){
   let y = 48;
   doc.setTextColor(...verde); doc.setFont("helvetica", "bold"); doc.setFontSize(17);
   doc.text(e.stato === "fatto" ? "Riepilogo intervento" : "Conferma appuntamento", M, y);
+  if(agNomeCavallo(e)){
+    y += 9;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.setTextColor(...oro);
+    doc.text(agNomeCavallo(e), M, y);
+  }
   y += 6;
   const professionista = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "";
   if(professionista){
@@ -7025,8 +7758,8 @@ async function creaPdfEvento(e){
     if(idx >= 0) misuraTxt += " — IT " + MISURE_FERRO.italiana[idx] + " · NL " + MISURE_FERRO.olandese[idx] + " · DE " + MISURE_FERRO.tedesca[idx];
   }
   const righe = [
-    ["Cliente", e.clienti_mascalcia?.nome || "—"],
     ["Cavallo", agNomeCavallo(e) || "—"],
+    ["Cliente", e.clienti_mascalcia?.nome || "—"],
     ["Data", dataTxt],
     ["Ora", e.ora ? String(e.ora).slice(0, 5) : "—"],
     ["Tipo intervento", tipoTxt],

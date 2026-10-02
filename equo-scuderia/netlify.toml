@@ -16,6 +16,17 @@
   status = 200
   force = true
 
+# App Equo Groom (personale di stalla): /groom apre groom.html
+[[redirects]]
+  from = "/groom"
+  to = "/groom.html"
+  status = 200
+
+[[headers]]
+  for = "/groom.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
 [[headers]]
   for = "/version.json"
   [headers.values]

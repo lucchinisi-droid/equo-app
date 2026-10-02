@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Equo Groom</title>
+<meta name="theme-color" content="#0b341e">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Equo Groom">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest-groom.json">
+<link rel="apple-touch-icon" href="/assets/icona-equo.png">
+<link rel="icon" href="/assets/icona-equo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{ --verde:#0b341e; --verde2:#1d4a35; --sfondo:#f3f1ea; --card:#fff; --testo:#1b241f; --muted:#6b746e; --bordo:#e2ddd0; --rosso:#c0392b; --giallo:#e0a526; --ok:#2e8b57; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; background:var(--sfondo); color:var(--testo); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans","Noto Sans Bengali","Noto Sans Devanagari","Noto Sans Gurmukhi","Noto Sans Arabic",Arial,sans-serif; }
+body{ min-height:100vh; padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
+button{ font:inherit; color:inherit; cursor:pointer; }
+.hidden{ display:none !important; }
+
+/* testata */
+.top{ position:sticky; top:0; z-index:20; background:var(--verde); color:#fff; padding:calc(10px + env(safe-area-inset-top)) 16px 10px; }
+.top-riga{ display:flex; align-items:center; gap:10px; }
+.top img{ width:34px; height:34px; border-radius:9px; background:#fff; }
+.top .tit{ flex:1; min-width:0; }
+.top .tit b{ display:block; font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top .tit span{ font-size:12.5px; opacity:.8; }
+.top .ib{ width:42px; height:42px; border-radius:12px; border:0; background:rgba(255,255,255,.12); color:#fff; font-size:18px; display:grid; place-items:center; }
+.prog{ margin-top:10px; height:8px; border-radius:6px; background:rgba(255,255,255,.18); overflow:hidden; }
+.prog i{ display:block; height:100%; background:#8fd19e; border-radius:6px; width:0; transition:width .3s; }
+.prog-txt{ display:flex; justify-content:space-between; font-size:12.5px; margin-top:5px; opacity:.9; }
+
+.banner{ margin:10px 12px 0; padding:10px 12px; border-radius:12px; font-size:14px; display:flex; gap:10px; align-items:center; }
+.banner.off{ background:#fff4d6; color:#7a5300; border:1px solid #f0d78a; }
+.banner.inst{ background:#e8f3ec; color:var(--verde); border:1px solid #bfdcc9; }
+.banner.inst button{ margin-inline-start:auto; border:0; background:var(--verde); color:#fff; border-radius:10px; padding:8px 12px; font-weight:600; }
+
+.filtri{ display:flex; gap:8px; padding:12px 12px 0; }
+.filtri button{ flex:1; border:1px solid var(--bordo); background:#fff; border-radius:12px; padding:11px 8px; font-weight:600; font-size:15px; }
+.filtri button.on{ background:var(--verde2); color:#fff; border-color:var(--verde2); }
+.focus-bar{ display:flex; align-items:center; gap:10px; margin:12px 12px 0; }
+.focus-bar button{ border:0; background:var(--verde2); color:#fff; border-radius:12px; padding:12px 14px; font-weight:600; font-size:15px; }
+
+.lista{ padding:12px; display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
+.box{ background:var(--card); border-radius:18px; border:2px solid var(--bordo); overflow:hidden; scroll-margin-top:120px; }
+.box.evid{ border-color:var(--giallo); box-shadow:0 0 0 3px rgba(224,165,38,.35); }
+.box.finito{ border-color:#9fd2ae; }
+.box-h{ display:flex; align-items:center; gap:10px; padding:12px 14px 8px; }
+.box-num{ min-width:52px; height:52px; border-radius:14px; background:var(--verde); color:#fff; display:grid; place-items:center; font-weight:800; font-size:21px; padding:0 6px; }
+.box-num small{ display:block; font-size:9.5px; font-weight:600; opacity:.75; line-height:1; margin-bottom:-6px; }
+.box-cav{ flex:1; min-width:0; }
+.box-cav b{ display:block; font-size:19px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.box-cav span{ font-size:13px; color:var(--muted); }
+.nota-btn{ width:44px; height:44px; border-radius:50%; border:0; background:var(--rosso); color:#fff; font-weight:800; font-size:19px; flex:none; }
+.box-stato{ display:inline-flex; align-items:center; gap:5px; font-size:12.5px; background:#eef2ee; color:var(--verde2); border-radius:20px; padding:3px 9px; margin-top:3px; }
+.icone{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:6px 12px 14px; }
+.ic{ border:2px solid var(--bordo); background:#faf9f5; border-radius:14px; min-height:84px; padding:8px 4px 6px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:4px; position:relative; }
+.ic .g{ font-size:27px; line-height:1; height:30px; display:grid; place-items:center; color:var(--c); }
+.ic .g svg{ width:28px; height:28px; }
+.ic .n{ font-size:11.5px; line-height:1.15; text-align:center; font-weight:600; color:var(--testo); word-break:break-word; }
+.ic .chi{ font-size:10.5px; line-height:1.1; color:#fff; opacity:.95; text-align:center; }
+.ic.fatto{ background:var(--c); border-color:var(--c); }
+.ic.fatto .g, .ic.fatto .n{ color:#fff; }
+.ic.fatto::after{ content:"\f00c"; font-family:"Font Awesome 6 Free"; font-weight:900; position:absolute; top:5px; inset-inline-end:6px; font-size:12px; color:#fff; }
+.ic.attesa{ outline:2px dashed var(--giallo); outline-offset:2px; }
+.ic:active{ transform:scale(.96); }
+.box-vuoto{ padding:4px 14px 16px; color:var(--muted); font-size:15px; display:flex; align-items:center; gap:8px; }
+.box.manut{ background:#fff; border-color:#cfd6d9; }
+
+.fab{ position:fixed; z-index:30; bottom:calc(18px + env(safe-area-inset-bottom)); inset-inline-end:18px; border:0; border-radius:30px; background:var(--verde); color:#fff; font-weight:700; font-size:17px; padding:16px 22px; display:flex; gap:10px; align-items:center; box-shadow:0 6px 18px rgba(0,0,0,.25); }
+.fab i{ font-size:22px; }
+
+/* schermate di accesso */
+.schermo{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 22px; text-align:center; gap:14px; background:var(--verde); color:#fff; }
+.schermo img{ width:76px; height:76px; border-radius:20px; background:#fff; }
+.schermo h1{ margin:0; font-size:24px; }
+.schermo p{ margin:0; opacity:.88; font-size:16px; max-width:360px; line-height:1.4; }
+.pin-punti{ display:flex; gap:14px; margin:6px 0; direction:ltr; }
+.pin-punti i{ width:18px; height:18px; border-radius:50%; border:2px solid #fff; }
+.pin-punti i.on{ background:#fff; }
+.tast{ display:grid; grid-template-columns:repeat(3,78px); gap:12px; direction:ltr; }
+.tast button{ height:68px; border-radius:18px; border:0; background:rgba(255,255,255,.14); color:#fff; font-size:26px; font-weight:600; }
+.tast button:active{ background:rgba(255,255,255,.3); }
+.err{ color:#ffd2cc; font-weight:600; min-height:22px; font-size:15px; }
+.btn-chiaro{ border:0; background:#fff; color:var(--verde); border-radius:14px; padding:14px 20px; font-weight:700; font-size:16px; display:inline-flex; gap:10px; align-items:center; }
+.lnk{ border:0; background:none; color:#fff; opacity:.85; text-decoration:underline; font-size:14px; }
+
+/* fogli */
+.velo{ position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50; display:flex; align-items:flex-end; justify-content:center; }
+.foglio{ background:#fff; width:100%; max-width:520px; border-radius:22px 22px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom)); }
+.foglio h3{ margin:0 0 8px; font-size:19px; display:flex; gap:10px; align-items:center; }
+.foglio p{ margin:0 0 14px; color:var(--muted); font-size:15.5px; line-height:1.4; }
+.foglio .nota-testo{ background:#fdeceb; border:1px solid #f3c4bf; color:#5c1a13; border-radius:12px; padding:12px; font-size:17px; line-height:1.4; white-space:pre-wrap; }
+.foglio .azioni{ display:flex; gap:10px; margin-top:14px; }
+.foglio .azioni button{ flex:1; border-radius:14px; padding:15px; font-weight:700; font-size:16px; border:1px solid var(--bordo); background:#fff; }
+.foglio .azioni .pri{ background:var(--rosso); border-color:var(--rosso); color:#fff; }
+.foglio .azioni .ver{ background:var(--verde); border-color:var(--verde); color:#fff; }
+.lingue{ display:grid; gap:8px; }
+.lingue button{ border:1px solid var(--bordo); background:#fff; border-radius:14px; padding:14px; font-size:18px; text-align:start; display:flex; justify-content:space-between; align-items:center; }
+.lingue button.on{ border-color:var(--verde2); background:#eef5f0; font-weight:700; }
+.scan-wrap{ position:relative; border-radius:16px; overflow:hidden; background:#000; aspect-ratio:1; }
+.scan-wrap video{ width:100%; height:100%; object-fit:cover; }
+.scan-wrap .mirino{ position:absolute; inset:18%; border:3px solid #fff; border-radius:18px; }
+.toast{ position:fixed; z-index:60; left:50%; transform:translateX(-50%); bottom:calc(92px + env(safe-area-inset-bottom)); background:#1b241f; color:#fff; padding:12px 16px; border-radius:12px; font-size:15px; max-width:90vw; text-align:center; }
+.vuota{ text-align:center; color:var(--muted); padding:40px 20px; font-size:16px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===================== EQUO GROOM =====================
+   App semplificata per il personale di stalla: niente account, QR personale + PIN di 4 cifre.
+   Vede solo i box di oggi e segna le attività con un tocco. Funziona anche senza rete (coda). */
+const SB_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
+const SB_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
+const K_STATO = "equo-groom", K_CODA = "equo-groom-coda", K_CACHE = "equo-groom-cache";
+
+const ICONE = {
+  pasto_mattina:{ i:"fa-bowl-food", c:"#b7862b" }, pasto_sera:{ i:"fa-bowl-rice", c:"#8a5a2b" }, fieno:{ i:"fa-wheat-awn", c:"#9a7b2f" },
+  acqua:{ i:"fa-droplet", c:"#2f79b7" }, paddock:{ i:"fa-tree", c:"#3f7a45" }, lavorato:{ i:"fa-horse", c:"#1d4a35" },
+  farmaco:{ i:"fa-pills", c:"#c0473d" }, box_pulito:{ i:"fa-broom", c:"#6b4fa0" },
+  integratore:{ i:"fa-capsules", c:"#5d8f4e", extra:true }, coperta:{ i:"fa-rug", c:"#7a6a55", extra:true },
+  zoccoli:{ i:"svg", c:"#5f6b73", extra:true }, grooming:{ i:"fa-brush", c:"#b0567a", extra:true },
+};
+const FERRO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M6 20 L6 12 A6 6 0 0 1 18 12 L18 20"/><circle cx="6" cy="20.3" r="1.15" fill="currentColor" stroke="none"/><circle cx="18" cy="20.3" r="1.15" fill="currentColor" stroke="none"/></svg>';
+const STATI_ICONA = { in_box:"fa-house", paddock:"fa-tree", lavoro:"fa-horse", maniscalco:"svg", veterinario:"fa-stethoscope", riposo:"fa-bed", isolamento:"fa-shield-virus", fuori_sede:"fa-truck" };
+
+const LINGUE = { it:"Italiano", en:"English", ro:"Română", hi:"हिन्दी", pa:"ਪੰਜਾਬੀ", bn:"বাংলা", ar:"العربية" };
+const T = {
+it:{ app:"Equo Groom", benvenuto:"Inquadra con la fotocamera il QR personale che ti ha dato il responsabile della scuderia.", non_valido:"Questo QR non è più valido. Chiedi un nuovo QR al responsabile.", bloccato:"Troppi PIN sbagliati. Chiedi un nuovo QR al responsabile.",
+  ciao:"Ciao {n}", crea_pin:"Scegli un PIN di 4 cifre", ripeti_pin:"Ripeti lo stesso PIN", pin_diversi:"I due PIN non sono uguali. Riprova.", inserisci_pin:"Inserisci il tuo PIN", pin_errato:"PIN sbagliato",
+  fatti:"{a} di {b} fatte", tutti:"Tutti", da_fare:"Da fare", vuoto:"Box vuoto", manut:"In manutenzione", nota:"Nota", togli_q:"Togliere la spunta?", fatto_da:"Fatto da {n} alle {o}", si_togli:"Sì, togli", no:"No", chiudi:"Chiudi",
+  offline:"Senza rete: {n} spunte in attesa. Le invio appena torna la rete.", aggiornato:"Aggiornato alle {o}", scansiona:"Scansiona box", tutti_box:"Tutti i box", box_no:"Questo box non è della tua scuderia.", camera_no:"Non riesco ad aprire la fotocamera. Usa la fotocamera del telefono sul QR del box.",
+  inquadra:"Inquadra il QR attaccato al box", lingua:"Lingua", installa:"Metti Equo Groom nella schermata Home", installa_btn:"Installa", installa_ios:"Tocca Condividi e poi «Aggiungi alla schermata Home».", esci:"Esci", esci_q:"Vuoi uscire? Per rientrare servono di nuovo il QR e il PIN.",
+  nessun_box:"Nessun box ancora. Il responsabile li crea nel gestionale.", errore:"Problema di collegamento. Riprovo tra poco.", tutto_fatto:"Tutto fatto in questo box", box:"Box", oggi:"Oggi",
+  att:{ pasto_mattina:"Pasto mattina", pasto_sera:"Pasto sera", fieno:"Fieno", acqua:"Acqua", paddock:"Paddock", lavorato:"Lavorato", farmaco:"Farmaco", box_pulito:"Box pulito", integratore:"Integratore", coperta:"Coperta", zoccoli:"Zoccoli", grooming:"Grooming" },
+  st:{ in_box:"In box", paddock:"Al paddock", lavoro:"In lavoro", maniscalco:"Dal maniscalco", veterinario:"Visita veterinaria", riposo:"A riposo", isolamento:"In isolamento", fuori_sede:"Fuori sede" } },
+en:{ app:"Equo Groom", benvenuto:"Scan the personal QR code your stable manager gave you with the camera.", non_valido:"This QR code is no longer valid. Ask your manager for a new one.", bloccato:"Too many wrong PINs. Ask your manager for a new QR code.",
+  ciao:"Hi {n}", crea_pin:"Choose a 4-digit PIN", ripeti_pin:"Repeat the same PIN", pin_diversi:"The two PINs don't match. Try again.", inserisci_pin:"Enter your PIN", pin_errato:"Wrong PIN",
+  fatti:"{a} of {b} done", tutti:"All", da_fare:"To do", vuoto:"Empty box", manut:"Under maintenance", nota:"Note", togli_q:"Remove the tick?", fatto_da:"Done by {n} at {o}", si_togli:"Yes, remove", no:"No", chiudi:"Close",
+  offline:"No connection: {n} ticks waiting. They will be sent when the connection is back.", aggiornato:"Updated at {o}", scansiona:"Scan box", tutti_box:"All boxes", box_no:"This box is not in your stable.", camera_no:"Can't open the camera. Use the phone camera on the box QR code.",
+  inquadra:"Point at the QR code on the box", lingua:"Language", installa:"Put Equo Groom on your Home screen", installa_btn:"Install", installa_ios:"Tap Share, then “Add to Home Screen”.", esci:"Log out", esci_q:"Log out? You will need the QR code and PIN again to come back.",
+  nessun_box:"No boxes yet. The manager creates them in the management app.", errore:"Connection problem. Trying again shortly.", tutto_fatto:"Everything done in this box", box:"Box", oggi:"Today",
+  att:{ pasto_mattina:"Morning feed", pasto_sera:"Evening feed", fieno:"Hay", acqua:"Water", paddock:"Paddock", lavorato:"Worked", farmaco:"Medicine", box_pulito:"Box cleaned", integratore:"Supplement", coperta:"Rug", zoccoli:"Hooves", grooming:"Grooming" },
+  st:{ in_box:"In the box", paddock:"In the paddock", lavoro:"Working", maniscalco:"At the farrier", veterinario:"Vet visit", riposo:"Resting", isolamento:"In isolation", fuori_sede:"Away" } },
+ro:{ app:"Equo Groom", benvenuto:"Scanează cu camera codul QR personal primit de la responsabilul grajdului.", non_valido:"Acest cod QR nu mai este valabil. Cere un cod nou responsabilului.", bloccato:"Prea multe PIN-uri greșite. Cere un cod QR nou responsabilului.",
+  ciao:"Salut {n}", crea_pin:"Alege un PIN din 4 cifre", ripeti_pin:"Repetă același PIN", pin_diversi:"Cele două PIN-uri nu se potrivesc. Mai încearcă.", inserisci_pin:"Introdu PIN-ul tău", pin_errato:"PIN greșit",
+  fatti:"{a} din {b} făcute", tutti:"Toate", da_fare:"De făcut", vuoto:"Boxă goală", manut:"În reparație", nota:"Notă", togli_q:"Ștergi bifa?", fatto_da:"Făcut de {n} la {o}", si_togli:"Da, șterge", no:"Nu", chiudi:"Închide",
+  offline:"Fără internet: {n} bife în așteptare. Le trimit când revine conexiunea.", aggiornato:"Actualizat la {o}", scansiona:"Scanează boxa", tutti_box:"Toate boxele", box_no:"Această boxă nu este din grajdul tău.", camera_no:"Nu pot deschide camera. Folosește camera telefonului pe codul QR al boxei.",
+  inquadra:"Îndreaptă camera spre codul QR de pe boxă", lingua:"Limba", installa:"Pune Equo Groom pe ecranul principal", installa_btn:"Instalează", installa_ios:"Apasă Partajează, apoi „Adaugă pe ecranul principal”.", esci:"Ieșire", esci_q:"Ieși? Pentru a reveni îți trebuie din nou codul QR și PIN-ul.",
+  nessun_box:"Încă nu există boxe. Responsabilul le creează în aplicația de gestiune.", errore:"Problemă de conexiune. Reîncerc imediat.", tutto_fatto:"Totul este făcut la această boxă", box:"Boxa", oggi:"Azi",
+  att:{ pasto_mattina:"Masa de dimineață", pasto_sera:"Masa de seară", fieno:"Fân", acqua:"Apă", paddock:"Padoc", lavorato:"Lucrat", farmaco:"Medicament", box_pulito:"Boxă curățată", integratore:"Supliment", coperta:"Pătură", zoccoli:"Copite", grooming:"Țesălat" },
+  st:{ in_box:"În boxă", paddock:"La padoc", lavoro:"La lucru", maniscalco:"La potcovar", veterinario:"La veterinar", riposo:"În repaus", isolamento:"În izolare", fuori_sede:"Plecat" } },
+hi:{ app:"Equo Groom", benvenuto:"अस्तबल के मैनेजर ने जो निजी QR कोड दिया है, उसे कैमरे से स्कैन करें।", non_valido:"यह QR कोड अब मान्य नहीं है। मैनेजर से नया QR कोड माँगें।", bloccato:"बहुत बार गलत PIN डाला गया। मैनेजर से नया QR कोड माँगें।",
+  ciao:"नमस्ते {n}", crea_pin:"4 अंकों का PIN चुनें", ripeti_pin:"वही PIN फिर से डालें", pin_diversi:"दोनों PIN एक जैसे नहीं हैं। फिर से कोशिश करें।", inserisci_pin:"अपना PIN डालें", pin_errato:"गलत PIN",
+  fatti:"{b} में से {a} हो गए", tutti:"सभी", da_fare:"बाकी काम", vuoto:"खाली बॉक्स", manut:"मरम्मत में", nota:"नोट", togli_q:"निशान हटाएँ?", fatto_da:"{n} ने {o} बजे किया", si_togli:"हाँ, हटाएँ", no:"नहीं", chiudi:"बंद करें",
+  offline:"इंटरनेट नहीं है: {n} निशान बाकी हैं। इंटरनेट आते ही भेज दिए जाएँगे।", aggiornato:"{o} बजे अपडेट हुआ", scansiona:"बॉक्स स्कैन करें", tutti_box:"सभी बॉक्स", box_no:"यह बॉक्स आपके अस्तबल का नहीं है।", camera_no:"कैमरा नहीं खुल रहा। बॉक्स के QR कोड पर फ़ोन का कैमरा इस्तेमाल करें।",
+  inquadra:"बॉक्स पर लगे QR कोड की ओर कैमरा करें", lingua:"भाषा", installa:"Equo Groom को होम स्क्रीन पर रखें", installa_btn:"इंस्टॉल", installa_ios:"शेयर दबाएँ, फिर “होम स्क्रीन में जोड़ें”।", esci:"बाहर निकलें", esci_q:"बाहर निकलना है? वापस आने के लिए फिर से QR कोड और PIN चाहिए।",
+  nessun_box:"अभी कोई बॉक्स नहीं है। मैनेजर इन्हें प्रबंधन ऐप में बनाता है।", errore:"कनेक्शन की समस्या। थोड़ी देर में फिर कोशिश होगी।", tutto_fatto:"इस बॉक्स का सारा काम हो गया", box:"बॉक्स", oggi:"आज",
+  att:{ pasto_mattina:"सुबह का दाना", pasto_sera:"शाम का दाना", fieno:"सूखी घास", acqua:"पानी", paddock:"पैडॉक", lavorato:"काम कराया", farmaco:"दवा", box_pulito:"बॉक्स साफ़", integratore:"सप्लीमेंट", coperta:"कंबल", zoccoli:"खुर", grooming:"ग्रूमिंग" },
+  st:{ in_box:"बॉक्स में", paddock:"पैडॉक में", lavoro:"काम पर", maniscalco:"नालबंद के पास", veterinario:"डॉक्टर की जाँच", riposo:"आराम पर", isolamento:"अलग रखा गया", fuori_sede:"बाहर गया" } },
+pa:{ app:"Equo Groom", benvenuto:"ਤਬੇਲੇ ਦੇ ਮੈਨੇਜਰ ਵੱਲੋਂ ਦਿੱਤਾ ਨਿੱਜੀ QR ਕੋਡ ਕੈਮਰੇ ਨਾਲ ਸਕੈਨ ਕਰੋ।", non_valido:"ਇਹ QR ਕੋਡ ਹੁਣ ਨਹੀਂ ਚੱਲਦਾ। ਮੈਨੇਜਰ ਤੋਂ ਨਵਾਂ QR ਕੋਡ ਮੰਗੋ।", bloccato:"ਬਹੁਤ ਵਾਰ ਗਲਤ PIN ਪਾਇਆ ਗਿਆ। ਮੈਨੇਜਰ ਤੋਂ ਨਵਾਂ QR ਕੋਡ ਮੰਗੋ।",
+  ciao:"ਜੀ ਆਇਆਂ ਨੂੰ {n}", crea_pin:"4 ਅੰਕਾਂ ਦਾ PIN ਚੁਣੋ", ripeti_pin:"ਉਹੀ PIN ਦੁਬਾਰਾ ਪਾਓ", pin_diversi:"ਦੋਵੇਂ PIN ਇੱਕੋ ਜਿਹੇ ਨਹੀਂ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।", inserisci_pin:"ਆਪਣਾ PIN ਪਾਓ", pin_errato:"ਗਲਤ PIN",
+  fatti:"{b} ਵਿੱਚੋਂ {a} ਹੋ ਗਏ", tutti:"ਸਾਰੇ", da_fare:"ਬਾਕੀ ਕੰਮ", vuoto:"ਖਾਲੀ ਬਾਕਸ", manut:"ਮੁਰੰਮਤ ਵਿੱਚ", nota:"ਨੋਟ", togli_q:"ਨਿਸ਼ਾਨ ਹਟਾਉਣਾ ਹੈ?", fatto_da:"{n} ਨੇ {o} ਵਜੇ ਕੀਤਾ", si_togli:"ਹਾਂ, ਹਟਾਓ", no:"ਨਹੀਂ", chiudi:"ਬੰਦ ਕਰੋ",
+  offline:"ਇੰਟਰਨੈੱਟ ਨਹੀਂ: {n} ਨਿਸ਼ਾਨ ਬਾਕੀ ਹਨ। ਇੰਟਰਨੈੱਟ ਆਉਂਦੇ ਹੀ ਭੇਜ ਦਿੱਤੇ ਜਾਣਗੇ।", aggiornato:"{o} ਵਜੇ ਅੱਪਡੇਟ ਹੋਇਆ", scansiona:"ਬਾਕਸ ਸਕੈਨ ਕਰੋ", tutti_box:"ਸਾਰੇ ਬਾਕਸ", box_no:"ਇਹ ਬਾਕਸ ਤੁਹਾਡੇ ਤਬੇਲੇ ਦਾ ਨਹੀਂ ਹੈ।", camera_no:"ਕੈਮਰਾ ਨਹੀਂ ਖੁੱਲ੍ਹ ਰਿਹਾ। ਬਾਕਸ ਦੇ QR ਕੋਡ ਤੇ ਫ਼ੋਨ ਦਾ ਕੈਮਰਾ ਵਰਤੋ।",
+  inquadra:"ਬਾਕਸ ਤੇ ਲੱਗੇ QR ਕੋਡ ਵੱਲ ਕੈਮਰਾ ਕਰੋ", lingua:"ਭਾਸ਼ਾ", installa:"Equo Groom ਨੂੰ ਹੋਮ ਸਕ੍ਰੀਨ ਤੇ ਰੱਖੋ", installa_btn:"ਇੰਸਟਾਲ", installa_ios:"ਸ਼ੇਅਰ ਦਬਾਓ, ਫਿਰ “ਹੋਮ ਸਕ੍ਰੀਨ ਤੇ ਜੋੜੋ”।", esci:"ਬਾਹਰ ਨਿਕਲੋ", esci_q:"ਬਾਹਰ ਨਿਕਲਣਾ ਹੈ? ਵਾਪਸ ਆਉਣ ਲਈ ਫਿਰ QR ਕੋਡ ਅਤੇ PIN ਚਾਹੀਦਾ ਹੈ।",
+  nessun_box:"ਹਾਲੇ ਕੋਈ ਬਾਕਸ ਨਹੀਂ। ਮੈਨੇਜਰ ਇਹਨਾਂ ਨੂੰ ਪ੍ਰਬੰਧਨ ਐਪ ਵਿੱਚ ਬਣਾਉਂਦਾ ਹੈ।", errore:"ਕੁਨੈਕਸ਼ਨ ਦੀ ਸਮੱਸਿਆ। ਥੋੜ੍ਹੀ ਦੇਰ ਬਾਅਦ ਫਿਰ ਕੋਸ਼ਿਸ਼ ਹੋਵੇਗੀ।", tutto_fatto:"ਇਸ ਬਾਕਸ ਦਾ ਸਾਰਾ ਕੰਮ ਹੋ ਗਿਆ", box:"ਬਾਕਸ", oggi:"ਅੱਜ",
+  att:{ pasto_mattina:"ਸਵੇਰ ਦਾ ਦਾਣਾ", pasto_sera:"ਸ਼ਾਮ ਦਾ ਦਾਣਾ", fieno:"ਸੁੱਕਾ ਘਾਹ", acqua:"ਪਾਣੀ", paddock:"ਪੈਡੌਕ", lavorato:"ਕੰਮ ਕਰਾਇਆ", farmaco:"ਦਵਾਈ", box_pulito:"ਬਾਕਸ ਸਾਫ਼", integratore:"ਸਪਲੀਮੈਂਟ", coperta:"ਕੰਬਲ", zoccoli:"ਖੁਰ", grooming:"ਗਰੂਮਿੰਗ" },
+  st:{ in_box:"ਬਾਕਸ ਵਿੱਚ", paddock:"ਪੈਡੌਕ ਵਿੱਚ", lavoro:"ਕੰਮ ਤੇ", maniscalco:"ਨਾਲਬੰਦ ਕੋਲ", veterinario:"ਡਾਕਟਰ ਦੀ ਜਾਂਚ", riposo:"ਆਰਾਮ ਤੇ", isolamento:"ਵੱਖਰਾ ਰੱਖਿਆ", fuori_sede:"ਬਾਹਰ ਗਿਆ" } },
+bn:{ app:"Equo Groom", benvenuto:"আস্তাবলের ম্যানেজার যে ব্যক্তিগত QR কোড দিয়েছেন, ক্যামেরা দিয়ে সেটি স্ক্যান করুন।", non_valido:"এই QR কোড আর কাজ করে না। ম্যানেজারের কাছে নতুন QR কোড চান।", bloccato:"অনেকবার ভুল PIN দেওয়া হয়েছে। ম্যানেজারের কাছে নতুন QR কোড চান।",
+  ciao:"স্বাগতম {n}", crea_pin:"৪ অঙ্কের একটি PIN বেছে নিন", ripeti_pin:"একই PIN আবার দিন", pin_diversi:"দুটি PIN মিলছে না। আবার চেষ্টা করুন।", inserisci_pin:"আপনার PIN দিন", pin_errato:"ভুল PIN",
+  fatti:"{b}টির মধ্যে {a}টি হয়েছে", tutti:"সব", da_fare:"বাকি কাজ", vuoto:"খালি বক্স", manut:"মেরামত চলছে", nota:"নোট", togli_q:"টিক চিহ্ন সরাবেন?", fatto_da:"{n} {o}-এ করেছেন", si_togli:"হ্যাঁ, সরান", no:"না", chiudi:"বন্ধ করুন",
+  offline:"ইন্টারনেট নেই: {n}টি টিক অপেক্ষায়। ইন্টারনেট এলেই পাঠানো হবে।", aggiornato:"{o}-এ আপডেট হয়েছে", scansiona:"বক্স স্ক্যান করুন", tutti_box:"সব বক্স", box_no:"এই বক্সটি আপনার আস্তাবলের নয়।", camera_no:"ক্যামেরা খুলছে না। বক্সের QR কোডে ফোনের ক্যামেরা ব্যবহার করুন।",
+  inquadra:"বক্সে লাগানো QR কোডের দিকে ক্যামেরা ধরুন", lingua:"ভাষা", installa:"Equo Groom হোম স্ক্রিনে রাখুন", installa_btn:"ইনস্টল", installa_ios:"শেয়ার চাপুন, তারপর “হোম স্ক্রিনে যোগ করুন”।", esci:"বের হন", esci_q:"বের হবেন? ফিরে আসতে আবার QR কোড আর PIN লাগবে।",
+  nessun_box:"এখনও কোনো বক্স নেই। ম্যানেজার এগুলো ম্যানেজমেন্ট অ্যাপে তৈরি করেন।", errore:"সংযোগে সমস্যা। একটু পরে আবার চেষ্টা হবে।", tutto_fatto:"এই বক্সের সব কাজ হয়ে গেছে", box:"বক্স", oggi:"আজ",
+  att:{ pasto_mattina:"সকালের খাবার", pasto_sera:"সন্ধ্যার খাবার", fieno:"খড়", acqua:"পানি", paddock:"প্যাডক", lavorato:"কাজ করানো", farmaco:"ওষুধ", box_pulito:"বক্স পরিষ্কার", integratore:"সাপ্লিমেন্ট", coperta:"কম্বল", zoccoli:"খুর", grooming:"গ্রুমিং" },
+  st:{ in_box:"বক্সে", paddock:"প্যাডকে", lavoro:"কাজে", maniscalco:"নালবন্দের কাছে", veterinario:"ডাক্তারের চেকআপ", riposo:"বিশ্রামে", isolamento:"আলাদা রাখা", fuori_sede:"বাইরে গেছে" } },
+ar:{ app:"Equo Groom", benvenuto:"امسح بالكاميرا رمز QR الشخصي الذي أعطاك إياه مسؤول الإسطبل.", non_valido:"رمز QR هذا لم يعد صالحًا. اطلب رمزًا جديدًا من المسؤول.", bloccato:"أُدخل رقم PIN خاطئ مرات كثيرة. اطلب رمز QR جديدًا من المسؤول.",
+  ciao:"مرحبًا {n}", crea_pin:"اختر رقم PIN من 4 أرقام", ripeti_pin:"أعد إدخال نفس الرقم", pin_diversi:"الرقمان غير متطابقين. حاول مرة أخرى.", inserisci_pin:"أدخل رقم PIN", pin_errato:"رقم PIN خاطئ",
+  fatti:"تم {a} من {b}", tutti:"الكل", da_fare:"المتبقي", vuoto:"مربط فارغ", manut:"تحت الصيانة", nota:"ملاحظة", togli_q:"إزالة علامة الإنجاز؟", fatto_da:"أنجزه {n} الساعة {o}", si_togli:"نعم، أزل", no:"لا", chiudi:"إغلاق",
+  offline:"لا يوجد اتصال: {n} علامات في الانتظار. سترسل عند عودة الاتصال.", aggiornato:"آخر تحديث {o}", scansiona:"امسح المربط", tutti_box:"كل المرابط", box_no:"هذا المربط ليس في إسطبلك.", camera_no:"تعذر فتح الكاميرا. استخدم كاميرا الهاتف على رمز QR الخاص بالمربط.",
+  inquadra:"وجّه الكاميرا نحو رمز QR الملصق على المربط", lingua:"اللغة", installa:"ضع Equo Groom على الشاشة الرئيسية", installa_btn:"تثبيت", installa_ios:"اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية».", esci:"خروج", esci_q:"هل تريد الخروج؟ ستحتاج رمز QR ورقم PIN من جديد للعودة.",
+  nessun_box:"لا توجد مرابط بعد. ينشئها المسؤول في برنامج الإدارة.", errore:"مشكلة في الاتصال. سنحاول مرة أخرى بعد قليل.", tutto_fatto:"تم كل العمل في هذا المربط", box:"مربط", oggi:"اليوم",
+  att:{ pasto_mattina:"وجبة الصباح", pasto_sera:"وجبة المساء", fieno:"تبن", acqua:"ماء", paddock:"الحقل", lavorato:"تم تدريبه", farmaco:"دواء", box_pulito:"تنظيف المربط", integratore:"مكمل غذائي", coperta:"غطاء", zoccoli:"الحوافر", grooming:"تمشيط" },
+  st:{ in_box:"في المربط", paddock:"في الحقل", lavoro:"في التدريب", maniscalco:"عند الحداد", veterinario:"عند البيطري", riposo:"في راحة", isolamento:"في العزل", fuori_sede:"خارج المركز" } },
+};
+
+/* ---------- stato ---------- */
+const qs = new URLSearchParams(location.search);
+const DEMO = qs.has("demo");
+const leggi = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch(e){ return d; } };
+const scrivi = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+let S = DEMO ? { t:"demo", pin:"0000", lang: qs.get("lang") || "it" } : leggi(K_STATO, {});
+let coda = DEMO ? [] : leggi(K_CODA, []);
+let dati = DEMO ? null : leggi(K_CACHE, null);
+let filtro = "tutti", focusBox = qs.get("b") || null, ultimoAgg = null, timerPoll = null, pinIns = "", pinPrimo = null, installEvt = null;
+if(qs.get("t")){ if(qs.get("t") !== S.t){ S = { t: qs.get("t"), lang: S.lang }; dati = null; coda = []; scrivi(K_CODA, coda); scrivi(K_CACHE, null); } scrivi(K_STATO, S); }
+
+const L = () => T[S.lang] || T.it;
+const tr = (k, v = {}) => String(L()[k] ?? T.it[k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? "");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const oraAdesso = () => new Date().toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
+const oggiRoma = () => new Date().toLocaleDateString("sv-SE", { timeZone:"Europe/Rome" });
+function applicaLingua(){ document.documentElement.lang = S.lang || "it"; document.documentElement.dir = S.lang === "ar" ? "rtl" : "ltr"; }
+function toast(m){ const d = document.createElement("div"); d.className = "toast"; d.textContent = m; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
+
+/* ---------- chiamate ---------- */
+async function rpc(nome, args){
+  if(DEMO) return demoRpc(nome, args);
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${nome}`, { method:"POST", headers:{ "Content-Type":"application/json", apikey:SB_KEY, Authorization:"Bearer " + SB_KEY }, body: JSON.stringify(args) });
+  const j = await r.json().catch(() => null);
+  if(!r.ok){ const e = new Error(j?.message || ("HTTP " + r.status)); e.server = true; throw e; }
+  return j;
+}
+
+/* ---------- avvio ---------- */
+async function avvio(){
+  applicaLingua();
+  if(!S.t) return schermoBenvenuto();
+  if(S.pin && dati){ disegna(); aggiorna(); return; }
+  try{
+    const info = await rpc("groom_info", { p_token: S.t });
+    if(!info?.valido) return schermoMsg("non_valido", true);
+    if(!S.langScelta && info.lingua){ S.lang = info.lingua; scrivi(K_STATO, S); applicaLingua(); }
+    S.nome = info.nome; S.centro = info.centro;
+    if(info.bloccato) return schermoMsg("bloccato", true);
+    if(info.pin_da_creare){ S.pin = null; return schermoPin("crea"); }
+    if(!S.pin) return schermoPin("entra");
+    await aggiorna(true);
+  } catch(e){
+    if(S.pin && dati){ disegna(); return; }
+    schermoMsg("errore", false); setTimeout(avvio, 8000);
+  }
+}
+
+/* ---------- schermate di accesso ---------- */
+const LOGO = `<img src="/assets/icona-equo.png" alt="">`;
+function schermoBenvenuto(){
+  document.getElementById("app").innerHTML = `<div class="schermo">${LOGO}<h1>${tr("app")}</h1><p>${tr("benvenuto")}</p><i class="fa-solid fa-qrcode" style="font-size:70px;opacity:.9;margin:10px 0"></i>${btnLinguaHtml()}</div>`;
+}
+function btnLinguaHtml(){ return `<button class="lnk" onclick="apriLingue()"><i class="fa-solid fa-language"></i> ${LINGUE[S.lang] || "Italiano"}</button>`; }
+function schermoMsg(k, esci){
+  document.getElementById("app").innerHTML = `<div class="schermo">${LOGO}<h1>${tr("app")}</h1><p>${tr(k)}</p>${esci ? `<i class="fa-solid fa-circle-exclamation" style="font-size:46px;opacity:.85"></i>` : `<i class="fa-solid fa-wifi" style="font-size:46px;opacity:.85"></i>`}${btnLinguaHtml()}</div>`;
+}
+function schermoPin(modo, errore){
+  pinIns = "";
+  const titolo = modo === "crea" ? (pinPrimo ? tr("ripeti_pin") : tr("crea_pin")) : tr("inserisci_pin");
+  const tasti = [1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k => k === "" ? `<span></span>` : `<button onclick="tastoPin('${k}','${modo}')">${k}</button>`).join("");
+  document.getElementById("app").innerHTML = `<div class="schermo">${LOGO}<h1>${esc(tr("ciao", { n: S.nome || "" }))}</h1>
+    <p>${esc(S.centro || "")}</p><p style="font-weight:700;font-size:18px;opacity:1">${titolo}</p>
+    <div class="pin-punti" id="pin-punti">${"<i></i>".repeat(4)}</div><div class="err" id="pin-err">${errore ? esc(errore) : ""}</div>
+    <div class="tast">${tasti}</div>${btnLinguaHtml()}</div>`;
+}
+async function tastoPin(k, modo){
+  if(k === "⌫") pinIns = pinIns.slice(0, -1); else if(pinIns.length < 4) pinIns += k;
+  document.querySelectorAll("#pin-punti i").forEach((p, i) => p.classList.toggle("on", i < pinIns.length));
+  if(pinIns.length < 4) return;
+  const pin = pinIns;
+  if(modo === "crea" && !pinPrimo){ pinPrimo = pin; return schermoPin("crea"); }
+  if(modo === "crea" && pinPrimo !== pin){ pinPrimo = null; return schermoPin("crea", tr("pin_diversi")); }
+  pinPrimo = null;
+  try{
+    const r = await rpc("groom_stalla", { p_token: S.t, p_pin: pin });
+    if(r?.errore){ return schermoPin("entra", tr("pin_errato")); }
+    S.pin = pin; scrivi(K_STATO, S); ricevi(r); avviaPoll();
+  } catch(e){
+    if(/BLOCCATO/.test(e.message)) return schermoMsg("bloccato", true);
+    if(/NON_VALIDO/.test(e.message)) return schermoMsg("non_valido", true);
+    schermoPin(modo === "crea" ? "crea" : "entra", tr("errore"));
+  }
+}
+
+/* ---------- dati e sincronizzazione ---------- */
+function ricevi(r){
+  dati = r; ultimoAgg = oraAdesso();
+  if(r.groom) S.nome = r.groom; if(r.centro) S.centro = r.centro;
+  if(!DEMO){ scrivi(K_CACHE, dati); scrivi(K_STATO, S); }
+  disegna();
+}
+async function aggiorna(primaVolta){
+  await svuotaCoda();
+  if(coda.length && !primaVolta) return disegna();
+  try{
+    const r = await rpc("groom_stalla", { p_token: S.t, p_pin: S.pin });
+    if(r?.errore){ S.pin = null; scrivi(K_STATO, S); return schermoPin("entra", tr("pin_errato")); }
+    ricevi(r); avviaPoll();
+  } catch(e){
+    if(/NON_VALIDO/.test(e.message)){ esciDavvero(true); return schermoMsg("non_valido", true); }
+    if(/BLOCCATO/.test(e.message)) return schermoMsg("bloccato", true);
+    if(dati) disegna(); else if(primaVolta) throw e;
+  }
+}
+function avviaPoll(){ if(timerPoll) return; timerPoll = setInterval(() => { if(document.visibilityState === "visible" && !document.querySelector(".velo")) aggiorna(); }, 60000); }
+async function svuotaCoda(){
+  while(coda.length){
+    const x = coda[0];
+    try{ await rpc("groom_segna", { p_token: S.t, p_pin: S.pin, p_box: x.box, p_tipo: x.tipo, p_fatto: x.fatto, p_quando: x.quando }); }
+    catch(e){ if(e.server && !/NON_VALIDO|BLOCCATO/.test(e.message)){ coda.shift(); scrivi(K_CODA, coda); continue; } return; }
+    coda.shift(); scrivi(K_CODA, coda);
+  }
+}
+window.addEventListener("online", () => aggiorna());
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && S.pin && dati) aggiorna(); });
+
+/* ---------- vista box ---------- */
+function iconeAttive(){ const ex = dati?.icone_extra || []; return Object.keys(ICONE).filter(k => !ICONE[k].extra || ex.includes(k)); }
+function fattaIn(b, tipo){ return (b.fatte || []).find(a => a.tipo === tipo); }
+function inAttesa(b, tipo){ return coda.some(x => x.box === b.id && x.tipo === tipo); }
+function glifo(icona){ return icona === "svg" ? FERRO : `<i class="fa-solid ${icona}"></i>`; }
+function disegna(){
+  if(!dati) return;
+  if(dati.oggi && dati.oggi !== oggiRoma()){ dati.box.forEach(b => b.fatte = []); }
+  const ico = iconeAttive();
+  const conCav = dati.box.filter(b => b.cavallo && !b.manutenzione);
+  const tot = conCav.length * ico.length, fatte = conCav.reduce((s, b) => s + ico.filter(k => fattaIn(b, k)).length, 0);
+  let lista = dati.box;
+  if(focusBox) lista = lista.filter(b => b.id === focusBox);
+  else if(filtro === "da_fare") lista = lista.filter(b => b.cavallo && !b.manutenzione && ico.some(k => !fattaIn(b, k)));
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone;
+  const installato = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  document.getElementById("app").innerHTML = `
+  <div class="top"><div class="top-riga"><img src="/assets/icona-equo.png" alt="">
+    <div class="tit"><b>${esc(dati.centro || "")}</b><span>${esc(dati.groom || "")} · ${tr("oggi")}</span></div>
+    <button class="ib" onclick="apriLingue()" aria-label="${tr("lingua")}"><i class="fa-solid fa-language"></i></button>
+    <button class="ib" onclick="apriMenu()" aria-label="${tr("esci")}"><i class="fa-solid fa-ellipsis-vertical"></i></button></div>
+    <div class="prog"><i style="width:${tot ? Math.round(fatte / tot * 100) : 0}%"></i></div>
+    <div class="prog-txt"><span>${tr("fatti", { a: fatte, b: tot })}</span><span>${ultimoAgg ? tr("aggiornato", { o: ultimoAgg }) : ""}</span></div></div>
+  ${coda.length ? `<div class="banner off"><i class="fa-solid fa-wifi"></i><span>${tr("offline", { n: coda.length })}</span></div>` : ""}
+  ${!installato && !DEMO && (installEvt || isIos) ? `<div class="banner inst"><i class="fa-solid fa-mobile-screen"></i><span>${installEvt ? tr("installa") : tr("installa_ios")}</span>${installEvt ? `<button onclick="installa()">${tr("installa_btn")}</button>` : ""}</div>` : ""}
+  ${focusBox ? `<div class="focus-bar"><button onclick="focusBox=null;disegna()"><i class="fa-solid fa-table-cells-large"></i> ${tr("tutti_box")}</button></div>`
+    : `<div class="filtri"><button class="${filtro === "tutti" ? "on" : ""}" onclick="filtro='tutti';disegna()">${tr("tutti")}</button><button class="${filtro === "da_fare" ? "on" : ""}" onclick="filtro='da_fare';disegna()">${tr("da_fare")}</button></div>`}
+  <div class="lista">${lista.length ? lista.map(b => boxHtml(b, ico)).join("") : `<div class="vuota">${dati.box.length ? `<i class="fa-solid fa-circle-check" style="font-size:40px;color:var(--ok)"></i><br><br>${tr("tutto_fatto")}` : tr("nessun_box")}</div>`}</div>
+  <button class="fab" onclick="apriScanner()"><i class="fa-solid fa-qrcode"></i> ${tr("scansiona")}</button>`;
+  if(focusBox){ const el = document.querySelector(".box"); el?.classList.add("evid"); }
+}
+function boxHtml(b, ico){
+  const num = `<div class="box-num"><div><small>${tr("box")}</small>${esc(b.numero ?? "")}</div></div>`;
+  const sotto = [b.nome, b.zona].filter(Boolean).map(esc).join(" · ");
+  if(b.manutenzione) return `<div class="box manut" id="b-${b.id}"><div class="box-h">${num}<div class="box-cav"><b><i class="fa-solid fa-wrench"></i> ${tr("manut")}</b><span>${sotto}</span></div></div></div>`;
+  if(!b.cavallo) return `<div class="box" id="b-${b.id}"><div class="box-h">${num}<div class="box-cav"><b style="color:var(--muted)">${tr("vuoto")}</b><span>${sotto}</span></div></div></div>`;
+  const st = b.stato && L().st[b.stato] ? `<div class="box-stato">${glifo(STATI_ICONA[b.stato])} ${esc(L().st[b.stato])}</div>` : "";
+  const finito = ico.every(k => fattaIn(b, k));
+  return `<div class="box${finito ? " finito" : ""}" id="b-${b.id}"><div class="box-h">${num}<div class="box-cav"><b>${esc(b.cavallo)}</b>${sotto ? `<span>${sotto}</span>` : ""}${st}</div>
+    ${b.nota ? `<button class="nota-btn" onclick="apriNota('${b.id}')" aria-label="${tr("nota")}">N</button>` : ""}</div>
+    <div class="icone">${ico.map(k => { const a = fattaIn(b, k), d = ICONE[k];
+      return `<button class="ic${a ? " fatto" : ""}${inAttesa(b, k) ? " attesa" : ""}" style="--c:${d.c}" onclick="tocca('${b.id}','${k}')">
+        <span class="g">${glifo(d.i)}</span><span class="n">${esc(L().att[k])}</span>${a ? `<span class="chi">${esc((a.da || "").split(" ")[0])} ${esc(a.ora || "")}</span>` : ""}</button>`; }).join("")}</div></div>`;
+}
+
+/* ---------- azioni ---------- */
+function tocca(boxId, tipo){
+  const b = dati.box.find(x => x.id === boxId); if(!b) return;
+  const a = fattaIn(b, tipo);
+  if(a){
+    foglio(`<h3><span style="color:${ICONE[tipo].c}">${glifo(ICONE[tipo].i)}</span> ${esc(L().att[tipo])} · ${esc(b.cavallo)}</h3><p>${esc(tr("fatto_da", { n: a.da || "", o: a.ora || "" }))}</p>
+      <p style="color:var(--testo);font-weight:600">${tr("togli_q")}</p><div class="azioni"><button onclick="chiudiFoglio()">${tr("no")}</button><button class="pri" onclick="chiudiFoglio();segna('${boxId}','${tipo}',false)">${tr("si_togli")}</button></div>`);
+    return;
+  }
+  segna(boxId, tipo, true);
+}
+function segna(boxId, tipo, fatto){
+  const b = dati.box.find(x => x.id === boxId); if(!b) return;
+  if(navigator.vibrate) try{ navigator.vibrate(fatto ? 30 : [20, 40, 20]); } catch(e){}
+  b.fatte = (b.fatte || []).filter(a => a.tipo !== tipo);
+  const quando = new Date().toISOString();
+  if(fatto) b.fatte.push({ tipo, ora: oraAdesso(), da: dati.groom });
+  // una sola voce in coda per box+attività: vince l'ultimo tocco
+  coda = coda.filter(x => !(x.box === boxId && x.tipo === tipo));
+  coda.push({ box: boxId, tipo, fatto, quando });
+  if(!DEMO){ scrivi(K_CODA, coda); scrivi(K_CACHE, dati); }
+  disegna();
+  svuotaCoda().then(() => disegna());
+}
+function apriNota(boxId){
+  const b = dati.box.find(x => x.id === boxId);
+  foglio(`<h3><span class="nota-btn" style="width:34px;height:34px;display:grid;place-items:center;font-size:16px">N</span> ${esc(b.cavallo)}</h3><div class="nota-testo">${esc(b.nota)}</div>
+    <div class="azioni"><button class="ver" onclick="chiudiFoglio()">${tr("chiudi")}</button></div>`);
+}
+function foglio(html){ chiudiFoglio(); const v = document.createElement("div"); v.className = "velo"; v.onclick = e => { if(e.target === v) chiudiFoglio(); }; v.innerHTML = `<div class="foglio">${html}</div>`; document.body.appendChild(v); }
+function chiudiFoglio(){ fermaCamera(); document.querySelectorAll(".velo").forEach(v => v.remove()); }
+function apriLingue(){
+  foglio(`<h3><i class="fa-solid fa-language"></i> ${tr("lingua")}</h3><div class="lingue">${Object.entries(LINGUE).map(([k, n]) =>
+    `<button class="${S.lang === k ? "on" : ""}" onclick="scegliLingua('${k}')" dir="${k === "ar" ? "rtl" : "ltr"}"><span>${n}</span>${S.lang === k ? '<i class="fa-solid fa-check"></i>' : ""}</button>`).join("")}</div>`);
+}
+async function scegliLingua(k){
+  S.lang = k; S.langScelta = true; if(!DEMO) scrivi(K_STATO, S); applicaLingua(); chiudiFoglio();
+  if(dati && S.pin){ disegna(); if(!DEMO) rpc("groom_lingua", { p_token: S.t, p_pin: S.pin, p_lingua: k }).catch(() => {}); }
+  else avvio();
+}
+function apriMenu(){
+  foglio(`<h3><i class="fa-solid fa-user"></i> ${esc(dati?.groom || "")}</h3><p>${esc(dati?.centro || "")}</p>
+    <div class="azioni"><button onclick="chiudiFoglio()">${tr("chiudi")}</button><button class="pri" onclick="chiediEsci()"><i class="fa-solid fa-right-from-bracket"></i> ${tr("esci")}</button></div>`);
+}
+function chiediEsci(){ foglio(`<h3>${tr("esci")}</h3><p>${tr("esci_q")}</p><div class="azioni"><button onclick="chiudiFoglio()">${tr("no")}</button><button class="pri" onclick="esciDavvero()">${tr("esci")}</button></div>`); }
+function esciDavvero(silenzioso){ const lang = S.lang; S = { lang }; coda = []; dati = null; scrivi(K_STATO, S); scrivi(K_CODA, []); scrivi(K_CACHE, null); clearInterval(timerPoll); timerPoll = null; chiudiFoglio(); if(!silenzioso){ history.replaceState(null, "", "/groom"); schermoBenvenuto(); } }
+
+/* ---------- scanner QR del box ---------- */
+let stream = null, scanTimer = null, rilevatore = null;
+function fermaCamera(){ clearInterval(scanTimer); scanTimer = null; if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; } }
+function caricaJsQR(){ return new Promise(ok => { if(window.jsQR) return ok(true); const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"; s.onload = () => ok(true); s.onerror = () => ok(false); document.head.appendChild(s); }); }
+async function apriScanner(){
+  foglio(`<h3><i class="fa-solid fa-qrcode"></i> ${tr("scansiona")}</h3><p>${tr("inquadra")}</p><div class="scan-wrap"><video id="scan-v" playsinline muted></video><div class="mirino"></div></div>
+    <div class="azioni"><button onclick="chiudiFoglio()">${tr("chiudi")}</button></div>`);
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" }, audio:false });
+    const v = document.getElementById("scan-v"); if(!v){ fermaCamera(); return; } v.srcObject = stream; await v.play();
+    if("BarcodeDetector" in window){ try{ rilevatore = new BarcodeDetector({ formats:["qr_code"] }); } catch(e){ rilevatore = null; } }
+    if(!rilevatore) await caricaJsQR();
+    const c = document.createElement("canvas"), ctx = c.getContext("2d", { willReadFrequently:true });
+    scanTimer = setInterval(async () => {
+      if(!v.videoWidth) return;
+      let testo = null;
+      if(rilevatore){ try{ const r = await rilevatore.detect(v); testo = r[0]?.rawValue; } catch(e){} }
+      else if(window.jsQR){ c.width = v.videoWidth; c.height = v.videoHeight; ctx.drawImage(v, 0, 0); const r = jsQR(ctx.getImageData(0, 0, c.width, c.height).data, c.width, c.height); testo = r?.data; }
+      if(testo) letto(testo);
+    }, 250);
+  } catch(e){ chiudiFoglio(); toast(tr("camera_no")); }
+}
+function letto(testo){
+  let b = null, t = null;
+  try{ const u = new URL(testo, location.origin); b = u.searchParams.get("b"); t = u.searchParams.get("t"); } catch(e){}
+  if(t && t !== S.t){ chiudiFoglio(); location.href = "/groom?t=" + encodeURIComponent(t); return; }
+  if(!b) return;
+  chiudiFoglio();
+  if(!dati.box.some(x => x.id === b)){ toast(tr("box_no")); return; }
+  focusBox = b; disegna(); scrollTo(0, 0);
+}
+
+/* ---------- installazione ---------- */
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; if(dati) disegna(); });
+async function installa(){ if(!installEvt) return; installEvt.prompt(); try{ await installEvt.userChoice; } catch(e){} installEvt = null; disegna(); }
+window.addEventListener("appinstalled", () => { installEvt = null; if(dati) disegna(); });
+
+/* ---------- demo (anteprima dal gestionale: /groom?demo=1) ---------- */
+function demoRpc(nome, a){
+  if(!window.__demo){
+    const ora = (h, m) => String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+    window.__demo = { groom:"Rahim", centro:"Centro Ippico Demo", oggi: oggiRoma(), icone_extra:["coperta"], box:[
+      { id:"d1", numero:1, zona:"Scuderia A", cavallo:"Athos", stato:"in_box", nota:"Solo fieno bagnato, niente avena. Coperta leggera la notte.", fatte:[{ tipo:"pasto_mattina", ora:ora(7,10), da:"Rahim" }, { tipo:"acqua", ora:ora(7,12), da:"Rahim" }] },
+      { id:"d2", numero:2, zona:"Scuderia A", cavallo:"Luna Blu", stato:"paddock", fatte:[{ tipo:"pasto_mattina", ora:ora(7,15), da:"Ion" }, { tipo:"paddock", ora:ora(9,0), da:"Ion" }] },
+      { id:"d3", numero:3, zona:"Scuderia A", cavallo:"Zeus", stato:"in_box", nota:"Antibiotico alle 8 e alle 20.", fatte:[] },
+      { id:"d4", numero:4, zona:"Scuderia B", cavallo:null, fatte:[] },
+      { id:"d5", numero:5, zona:"Scuderia B", manutenzione:true, fatte:[] } ] };
+  }
+  if(nome === "groom_info") return { valido:true, nome:"Rahim", centro:"Centro Ippico Demo", lingua: S.lang, pin_da_creare:false };
+  if(nome === "groom_stalla") return JSON.parse(JSON.stringify(window.__demo));
+  if(nome === "groom_segna"){ const b = window.__demo.box.find(x => x.id === a.p_box); b.fatte = b.fatte.filter(x => x.tipo !== a.p_tipo); if(a.p_fatto) b.fatte.push({ tipo:a.p_tipo, ora:oraAdesso(), da:"Rahim" }); return { ok:true }; }
+  return {};
+}
+if(DEMO){ S.nome = "Rahim"; rpc("groom_stalla", {}).then(ricevi); applicaLingua(); } else avvio();
+</script>
+</body>
+</html>

@@ -50,3 +50,15 @@ Claude outputs/
 
 # copia temporanea di un altro progetto (non va nel repo)
 ROST 81/
+
+# materiale privato: non va su GitHub
+.chrome_temp/
+Brochure/
+Business plan/
+TESTI MASCALCIA/
+prompt-agenti/
+equo-memoria-progetto.md
+Equo_Presentazione_2026.pdf
+PRESENTAZIONE_EQUO.md
+presentazione_equo*.html
+test_slide.html

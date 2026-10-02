@@ -164,6 +164,20 @@ a{color:inherit}
 .btn.btn-variazione:hover{filter:brightness(1.04)}
 .athena-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 /* ---------- SEMAFORO SCADENZE DEL CAVALLO ---------- */
+.rz-wrap{position:relative}
+.rz-lista{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:var(--surface,#fff);border:1px solid var(--border,#ddd);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.14);max-height:300px;overflow-y:auto;padding:5px}
+.rz-lista.aperta{display:block}
+.rz-lista button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;color:var(--text,#14312a);cursor:pointer}
+.rz-lista button:hover{background:var(--surface2,var(--muted-bg,#f3efe6))}
+.rz-lista button small{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted,#667);background:var(--surface2,var(--muted-bg,#f3efe6));padding:2px 6px;border-radius:6px}
+.rz-lista .rz-fissa{font-size:13px;color:var(--muted,#667)}
+.rz-lista .rz-altra{font-size:13px;color:#9a6b12;font-weight:700}
+.rz-sep{height:1px;background:var(--border,#ddd);margin:4px 6px}
+.rz-vuoto{font-size:12.5px;color:var(--muted,#667);padding:8px 10px}
+.rz-nota{font-size:12px;color:var(--muted,#667);margin-top:4px;min-height:0}
+.rz-errore input{border-color:#c0473d!important}
+.rz-errore .rz-nota{color:#c0473d;font-weight:600}
+.cod-equo{font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em}
 .sem-dot{display:inline-block;width:11px;height:11px;border-radius:50%;flex-shrink:0;vertical-align:middle;box-shadow:0 0 0 2px var(--surface)}
 .sem-dot.rosso{background:#c0473d}.sem-dot.ocra{background:#d9a13b}.sem-dot.verde{background:#3f7a45}.sem-dot.grigio{background:#b9b3a5}
 
@@ -182,9 +196,34 @@ a{color:inherit}
   background:repeating-linear-gradient(90deg,var(--legno) 0 21px,var(--legno2) 21px 22px);
   border:2px solid var(--box-bordo,#c0473d);box-shadow:0 1px 0 rgba(0,0,0,.04);transition:transform .15s ease,box-shadow .15s ease}
 .box-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.10)}
-.box-card.vuoto{--box-bordo:color-mix(in srgb,#c0473d 70%,transparent)}
-.box-card.manut{--box-bordo:color-mix(in srgb,#d9a13b 85%,transparent)}
-.box-card.occupato{--box-bordo:color-mix(in srgb,#3f7a45 80%,transparent)}
+.box-card.verde{--box-bordo:#3f7a45}
+.box-card.rosso{--box-bordo:#c0473d}
+.box-card.giallo{--box-bordo:#e2b23c}
+.box-card.blu{--box-bordo:#3d7fc4}
+.box-card.manut{--box-bordo:#ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.box-conta i.l.bv{border-color:#3f7a45}.box-conta i.l.bg{border-color:#e2b23c}.box-conta i.l.br{border-color:#c0473d}.box-conta i.l.bb{border-color:#3d7fc4}.box-conta i.l.bm{border-color:#ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.box-nota{position:absolute;left:6px;top:8px;z-index:3;width:22px;height:22px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--muted) 55%,transparent);background:color-mix(in srgb,var(--surface) 60%,transparent);
+  color:var(--muted);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;opacity:.6;font-family:inherit;flex-shrink:0}
+.box-nota.on{background:#c0473d;border-color:#c0473d;color:#fff;opacity:1;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.box-sezione.stalla .box-nota{width:28px;height:28px;font-size:13px}
+.box-ospite{font-size:10.5px;font-weight:700;color:#9a6b12;background:color-mix(in srgb,#e2b23c 22%,transparent);padding:2px 8px;border-radius:99px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bp-nota{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin:0 0 12px;cursor:pointer;font-size:13.5px;line-height:1.4}
+.bp-avviso.giallo{padding:8px 12px;border-radius:10px;background:color-mix(in srgb,#e2b23c 18%,transparent);color:#7a5408;font-size:13px;font-weight:600;margin:0 0 10px}
+.bp-proprieta{margin-top:14px;border-top:1px solid var(--border);padding-top:10px}
+.bp-proprieta summary{cursor:pointer;font-weight:700;font-size:13.5px}
+.box-card.in-trascinamento{opacity:.45}
+.box-card.drop-ok{outline:3px dashed #3f7a45;outline-offset:2px}
+.box-card.drop-no{outline:3px dashed #c0473d;outline-offset:2px}
+body.box-trascina{user-select:none;-webkit-user-select:none;cursor:grabbing}
+.box-ghost{position:fixed;z-index:6000;pointer-events:none;transform:translate(-50%,-60%);display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:99px;
+  background:var(--surface);border:2px solid #e8b04b;box-shadow:0 10px 26px rgba(0,0,0,.3);font-size:13px}
+.box-ghost .f{width:30px;height:30px;border-radius:50%;background:center/cover}
+.box-ghost i{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.cav-sez-testa{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;margin:18px 0 10px}
+.cav-chev{display:inline-block;transition:transform .15s;font-size:13px;color:var(--muted);width:14px}
+.cavalli-sezione.chiusa .cav-chev{transform:rotate(-90deg)}
+.cavalli-sezione.chiusa .grid,.cavalli-sezione.chiusa .empty-state-sezione{display:none!important}
+.cav-sez-n{color:var(--muted);font-weight:600;font-size:.85em}
 .box-card.bloccato{--box-bordo:var(--border);cursor:pointer}
 .box-trave{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;
   background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 72%,#6b4f30),color-mix(in srgb,var(--surface) 80%,#6b4f30));
@@ -613,7 +652,38 @@ textarea.input{resize:vertical}
 .mag-sem.verde{background:#2f8a4e}.mag-sem.giallo{background:#e0a100}.mag-sem.rosso{background:var(--danger)}
 .mag-sem.pulse{animation:magPulse 1.8s ease-in-out infinite}
 @keyframes magPulse{0%,100%{box-shadow:0 0 0 0 rgba(179,38,30,.45)}60%{box-shadow:0 0 0 7px rgba(179,38,30,0)}}
-.mag-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mag-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.st-azioni{align-items:center}
+/* interruttore stile iPhone: Semplice / Completa */
+.vs-toggle{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;user-select:none;padding:4px 6px}
+.vs-toggle input{position:absolute;opacity:0;width:0;height:0}
+.vs-toggle i{position:relative;width:44px;height:26px;border-radius:99px;background:#d9d4c7;transition:background .2s;flex-shrink:0}
+.vs-toggle i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.vs-toggle input:checked + i{background:#1d4a35}
+.vs-toggle input:checked + i::after{transform:translateX(18px)}
+.vs-toggle input:not(:checked) ~ span:last-child,.vs-toggle input:checked ~ span:first-child{opacity:.55}
+.vs-toggle input:not(:checked) ~ span:first-child,.vs-toggle input:checked ~ span:last-child{color:var(--text)}
+/* magazzino semplice */
+.ms-testa{display:flex;gap:14px;align-items:center;padding:16px 18px;margin-bottom:14px;border-left:5px solid #2f8a4e}
+.ms-testa.rosso{border-left-color:var(--danger)}.ms-testa.giallo{border-left-color:#e0a100}
+.ms-testa>i{font-size:22px;color:#2f8a4e}.ms-testa.rosso>i{color:var(--danger)}.ms-testa.giallo>i{color:#e0a100}
+.ms-testa b{display:block;font-size:16px}.ms-testa span{font-size:13px;color:var(--muted)}
+.ms-sez{margin-bottom:14px}.ms-sez h3{margin:0 0 6px;font-size:15px;display:flex;gap:8px;align-items:center}
+.ms-riga{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--border)}
+.ms-sez h3 + .ms-riga,.mag-search + .ms-riga{border-top:0}
+.ms-t{flex:1;min-width:0;cursor:pointer}.ms-t b{display:block;font-size:14.5px}.ms-t span{font-size:12.5px;color:var(--muted)}
+.ms-btn{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);font-size:22px;font-weight:700;cursor:pointer;color:var(--text);flex-shrink:0;line-height:1}
+.ms-btn.meno{border-color:color-mix(in srgb,#c0473d 45%,var(--border))}.ms-btn.piu{background:#1d4a35;color:#fff;border-color:#e8b04b}
+/* statistiche semplici */
+.ss-nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+@media (max-width:900px){.ss-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ss-num{padding:18px}.ss-num .l{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.ss-num .v{font-size:30px;font-weight:800;margin:6px 0 2px}.ss-num .d{font-size:12.5px;color:var(--muted)}.ss-num .d.su{color:#2f8a4e}.ss-num .d.giu{color:var(--danger)}
+.ss-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}@media (max-width:900px){.ss-grid{grid-template-columns:1fr}}
+.ss-bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:10px}
+.ss-bars .b{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
+.ss-bars .b i{width:100%;max-width:42px;border-radius:6px 6px 2px 2px;background:var(--muted-bg,#e6e0d2)}
+.ss-bars .b.ora i{background:#1d4a35}.ss-bars small{font-size:11px;font-weight:700}.ss-bars span{font-size:11.5px;color:var(--muted)}
 /* colpo d'occhio */
 .mag-hero{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:16px;margin-bottom:16px}
 .mag-health{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;position:relative;overflow:hidden}
@@ -816,6 +886,21 @@ textarea.input{resize:vertical}
 .mag-unita-hint{margin:-4px 0 14px;padding:9px 12px;border-radius:10px;background:var(--muted-bg);font-size:12.5px;color:var(--muted);line-height:1.45}
 .mag-unita-hint b{color:var(--text)}
 .mag-art .equiv{font-size:12px;color:var(--muted);font-weight:600}
+
+/* Gestione Groom */
+.groom-testa{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+.groom-cont{ display:flex; flex-direction:column; min-width:120px; }
+.groom-cont b{ font-size:28px; color:var(--primary,#1d4a35); line-height:1.1; }
+.groom-cont span{ font-size:12px; color:var(--muted); }
+.groom-passi{ flex:1; display:grid; gap:6px; min-width:240px; font-size:13px; }
+.groom-passi div{ display:flex; gap:8px; align-items:flex-start; } .groom-passi i{ color:var(--primary,#1d4a35); width:16px; margin-top:2px; }
+.groom-riga{ display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.groom-riga:last-child{ border-bottom:0; } .groom-riga.off{ opacity:.6; } .groom-riga.mini{ padding:8px 0; }
+.groom-av{ width:40px; height:40px; border-radius:50%; background:#0b341e; color:#fff; display:grid; place-items:center; font-weight:700; flex:none; }
+.groom-riga.mini .groom-av{ width:32px; height:32px; font-size:13px; }
+.groom-info{ flex:1; min-width:160px; } .groom-info b{ display:block; } .groom-info span{ font-size:12.5px; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.groom-az{ display:flex; gap:6px; flex-wrap:wrap; }
+#groom-btn-agg.disabled{ opacity:.55; }
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa). -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -1012,6 +1097,9 @@ textarea.input{resize:vertical}
         <button class="nav-item" data-module="professionisti" onclick="showModule('professionisti')">
           <i class="fa-solid fa-user-doctor"></i> <span class="nav-label">Professionisti</span> <span class="nav-unread-badge sem-verde" id="pro-nav-badge" title="Professionisti: rosso = da confermare (collegamenti o appuntamenti), giallo = messaggi non letti">0</span>
         </button>
+        <button class="nav-item" data-module="groom" onclick="showModule('groom')">
+          <i class="fa-solid fa-id-badge"></i> <span class="nav-label">Gestione Groom</span>
+        </button>
         <button class="nav-item" data-module="store" onclick="showModule('store')">
           <i class="fa-solid fa-store"></i> <span class="nav-label">Store</span> <span class="badge">SOON</span>
         </button>
@@ -1117,6 +1205,10 @@ textarea.input{resize:vertical}
               <div class="empty-state" id="team-empty" style="display:none">
                 <i class="fa-solid fa-users"></i><div>Nessun altro membro nel team ancora.</div>
               </div>
+              <div id="team-groom" style="display:none;margin-top:18px">
+                <h3 style="margin:0 0 8px;font-size:15px">Groom (<span id="team-groom-count">0</span>) <button class="btn btn-ghost btn-sm" onclick="showModule('groom')" style="float:right">Gestisci</button></h3>
+                <div id="team-groom-lista"></div>
+              </div>
             </div>
           </div>
 
@@ -1202,17 +1294,17 @@ textarea.input{resize:vertical}
             </div>
             <div id="cavalli-sezioni">
               <div class="cavalli-sezione" data-sezione="proprieta">
-                <h3 style="margin:18px 0 10px">Cavalli di proprietà</h3>
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('proprieta')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli di proprietà<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
                 <div class="grid grid-3" id="cavalli-grid-proprieta"></div>
                 <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
               </div>
               <div class="cavalli-sezione" data-sezione="pensione">
-                <h3 style="margin:18px 0 10px">Cavalli in pensione</h3>
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('pensione')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli in pensione<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
                 <div class="grid grid-3" id="cavalli-grid-pensione"></div>
                 <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
               </div>
               <div class="cavalli-sezione" data-sezione="soci">
-                <h3 style="margin:18px 0 10px">Cavalli di soci/istruttori</h3>
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('soci')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli di soci/istruttori<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
                 <div class="grid grid-3" id="cavalli-grid-soci"></div>
                 <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
               </div>
@@ -1428,13 +1520,15 @@ textarea.input{resize:vertical}
               <p>Scorte, depositi e riordini del centro: il semaforo ti dice subito cosa manca, cosa sta finendo e cosa scade.</p>
             </div>
             <div class="mag-actions">
+              <label class="vs-toggle" data-tip="Semplice: solo cosa manca e cosa usi. Completa: depositi, lotti, consumi, fornitori."><span>Semplice</span><input type="checkbox" id="vs-magazzino" onchange="vistaCambia('magazzino', this.checked)"><i></i><span>Completa</span></label>
               <button class="btn btn-outline" id="mag-btn-articolo" onclick="magApriArticolo()"><i class="fa-solid fa-plus"></i> Articolo</button>
               <button class="btn btn-primary" onclick="magApriMovimento()"><i class="fa-solid fa-bolt"></i> Movimento rapido</button>
             </div>
           </div>
 
           <!-- COLPO D'OCCHIO -->
-          <section class="mag-hero">
+          <div id="mag-semplice" style="display:none"></div>
+          <section class="mag-hero" id="mag-hero">
             <div class="card mag-health">
               <div class="mag-ring" id="mag-ring"></div>
               <div style="font-weight:700;font-size:14px">Stato del magazzino</div>
@@ -1514,11 +1608,37 @@ textarea.input{resize:vertical}
               <p>I numeri del tuo centro, letti da Merlino: dove guadagni, chi rischi di perdere, cosa fa la concorrenza.</p>
             </div>
             <div class="st-azioni">
-              <button class="btn btn-outline" onclick="stReportPdf()"><i class="fa-solid fa-file-pdf"></i> Report PDF</button>
+              <label class="vs-toggle" data-tip="Semplice: 4 numeri e le cose da fare oggi. Completa: tutte le analisi."><span>Semplice</span><input type="checkbox" id="vs-statistiche" onchange="vistaCambia('statistiche', this.checked)"><i></i><span>Completa</span></label>
+              <button class="btn btn-outline" id="st-btn-pdf" onclick="stReportPdf()"><i class="fa-solid fa-file-pdf"></i> Report PDF</button>
               <button class="btn btn-primary" id="st-btn-merlino" onclick="apriAgente('merlino')"><i class="fa-solid fa-hat-wizard"></i> Chiedi a Merlino</button>
             </div>
           </div>
           <div id="st-body"></div>
+        </div>
+        <!-- MODULO: GESTIONE GROOM (app Equo Groom per il personale di stalla: QR personale + PIN) -->
+        <div class="module-page" id="module-groom" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-id-badge"></i></span> Gestione Groom</h1>
+              <p>Il personale di stalla segna pasti, fieno, paddock e le altre attività dal telefono, nella sua lingua. Niente account: un QR personale e un PIN di 4 cifre.</p>
+            </div>
+            <div class="st-azioni">
+              <button class="btn btn-outline" onclick="groomStampaBox()" data-tip="Un QR da attaccare su ogni box: il groom lo inquadra e apre subito quel cavallo."><i class="fa-solid fa-print"></i> Stampa QR dei box</button>
+              <button class="btn btn-primary" id="groom-btn-agg" onclick="groomApriNuovo()"><i class="fa-solid fa-plus"></i> Aggiungi groom</button>
+            </div>
+          </div>
+          <div class="card groom-testa">
+            <div class="groom-cont"><b id="groom-contatore">0 di 0</b><span>groom attivi nel tuo pacchetto</span></div>
+            <div class="groom-passi">
+              <div><i class="fa-solid fa-qrcode"></i><span><b>1.</b> Aggiungi il groom e mandagli il suo QR (o fallo inquadrare dal tuo schermo).</span></div>
+              <div><i class="fa-solid fa-key"></i><span><b>2.</b> Al primo accesso sceglie un PIN di 4 cifre e la sua lingua.</span></div>
+              <div><i class="fa-solid fa-hand-pointer"></i><span><b>3.</b> Tocca le icone del box: qui vedi chi l'ha fatto e a che ora.</span></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="window.open('/groom?demo=1','_blank')"><i class="fa-solid fa-mobile-screen"></i> Prova l'app Groom</button>
+          </div>
+          <div class="card"><div id="groom-lista"></div>
+            <div class="empty-state" id="groom-vuoto" style="display:none"><i class="fa-solid fa-id-badge"></i><div>Nessun groom ancora. Tocca "Aggiungi groom": in un minuto è operativo.</div></div>
+          </div>
         </div>
         <div class="module-page" id="module-store" style="display:none"></div>
         <div class="module-page" id="module-fatturazione" style="display:none"></div>
@@ -1857,7 +1977,7 @@ textarea.input{resize:vertical}
       </select>
     </div>
     <div class="grid grid-2">
-      <div class="field"><label>Razza</label><input class="input" id="cav-razza" placeholder="Es. Maremmano"></div>
+      <div class="field"><label>Razza</label><input class="input" id="cav-razza" placeholder="Scrivi per cercare, es. puros, maremm…"></div>
       <div class="field"><label>Mantello</label><input class="input" id="cav-mantello" placeholder="Es. Baio"></div>
     </div>
     <div class="grid grid-2">
@@ -1965,6 +2085,50 @@ textarea.input{resize:vertical}
   <div class="modal">
     <div class="modal-title"><span id="box-pannello-titolo">Box</span> <span class="x" onclick="closeModal('modal-box');boxPannelloId=null">✕</span></div>
     <div id="box-pannello-corpo"></div>
+  </div>
+</div>
+<!-- MODAL: conferma (box privato) -->
+<div class="modal-overlay" id="modal-box-conferma">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title"><span id="box-conf-titolo">Conferma</span></div>
+    <p id="box-conf-testo" style="font-size:14.5px;line-height:1.5;margin:0 0 16px"></p>
+    <div style="display:flex;gap:10px"><button class="btn btn-primary btn-conferma" id="box-conf-si" style="flex:1">Conferma</button><button class="btn btn-outline" id="box-conf-no" style="flex:1">Annulla</button></div>
+  </div>
+</div>
+<!-- MODAL: nuovo groom -->
+<div class="modal-overlay" id="modal-groom-nuovo" onclick="closeOut(event,'modal-groom-nuovo')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">Aggiungi groom <span class="x" onclick="closeModal('modal-groom-nuovo')">✕</span></div>
+    <div class="field"><label>Nome</label><input class="input" id="groom-nome" maxlength="60" placeholder="Es. Rahim"></div>
+    <div class="field"><label>Lingua dell'app</label><select class="input" id="groom-lingua">
+      <option value="it">Italiano</option><option value="en">English</option><option value="ro">Română (rumeno)</option><option value="hi">हिन्दी (hindi)</option>
+      <option value="pa">ਪੰਜਾਬੀ (punjabi)</option><option value="bn">বাংলা (bengalese)</option><option value="ar">العربية (arabo)</option></select>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Il groom può cambiarla quando vuole dall'app.</div></div>
+    <div id="groom-err" style="display:none;color:#a5281b;font-size:13px;margin:0 0 10px"></div>
+    <button class="btn btn-primary" style="width:100%" id="groom-salva" onclick="groomSalvaNuovo()"><i class="fa-solid fa-qrcode"></i> Crea e mostra il QR</button>
+  </div>
+</div>
+<!-- MODAL: QR personale del groom -->
+<div class="modal-overlay" id="modal-groom-qr" onclick="closeOut(event,'modal-groom-qr')">
+  <div class="modal" style="max-width:420px;text-align:center">
+    <div class="modal-title"><span id="groom-qr-titolo">QR</span> <span class="x" onclick="closeModal('modal-groom-qr')">✕</span></div>
+    <div id="groom-qr-img" style="display:flex;justify-content:center;margin:6px 0 10px"></div>
+    <p style="font-size:13.5px;line-height:1.5;margin:0 0 12px;color:var(--muted)">Il groom inquadra questo QR con la fotocamera del telefono, sceglie il suo PIN e mette l'app nella schermata Home. Il QR è personale: non condividerlo con altri.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-primary" onclick="groomCondividi()"><i class="fa-brands fa-whatsapp"></i> Invia link</button>
+      <button class="btn btn-outline" onclick="groomCopia()"><i class="fa-solid fa-copy"></i> Copia link</button>
+      <button class="btn btn-outline" onclick="groomStampaQr()"><i class="fa-solid fa-print"></i> Stampa</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL: nota del cavallo (N) -->
+<div class="modal-overlay" id="modal-box-nota" onclick="closeOut(event,'modal-box-nota')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title"><span id="box-nota-titolo">Nota</span> <span class="x" onclick="closeModal('modal-box-nota')">✕</span></div>
+    <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">La nota segue il cavallo: se lo sposti di box, la ritrovi con lui.</p>
+    <textarea class="input" id="box-nota-testo" rows="4" maxlength="300" placeholder="Es. zoppica dall'anteriore destro, solo fieno bagnato…"></textarea>
+    <div style="display:flex;gap:10px;margin-top:12px"><button class="btn btn-primary btn-conferma" style="flex:1" onclick="boxSalvaNota(false)">Salva nota</button>
+      <button class="btn btn-outline btn-variazione" id="box-nota-elimina" onclick="boxSalvaNota(true)">Elimina nota</button></div>
   </div>
 </div>
 <!-- MODAL: icone del giorno -->
@@ -2421,6 +2585,71 @@ function iconHtml(icon, extraStyle){
 }
 
 let DEMO_MODE = false;
+
+/* ---------- REGISTRO DI UTILIZZO (interno, tabelle app_sessioni + app_eventi) ----------
+   Una sessione = da quando l'app è aperta a quando resta chiusa/in background per più di 30 minuti.
+   Ogni minuto in primo piano aggiorna "ultimo_segnale" → durata = ultimo_segnale - inizio.
+   Le schermate visitate vanno in app_eventi (a gruppi, per non fare una scrittura a ogni tocco).
+   In demo non registra nulla; un errore del registro non blocca mai l'app. */
+const Registro = {
+  app: "scuderia", sid: null, timer: null, coda: [], ultimaPagina: null, nascostoDa: null, vista: null,
+  async avvia(vista){
+    try{
+      this.vista = vista || this.vista;
+      if(DEMO_MODE || !currentUser?.id || typeof sb === "undefined") return;
+      if(this.sid) return;
+      const ua = navigator.userAgent || "";
+      const disp = /iphone|ipad/i.test(ua) ? "iPhone/iPad" : /android/i.test(ua) ? "Android" : /mac/i.test(ua) ? "Mac" : /windows/i.test(ua) ? "Windows" : "altro";
+      const standalone = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone;
+      const { data } = await sb.from("app_sessioni").insert({ user_id: currentUser.id, app: this.app, vista: this.vista || null,
+        dispositivo: disp + (standalone ? " · app installata" : " · browser") }).select("id").single();
+      this.sid = data?.id || null;
+      if(!this.sid) return;
+      clearInterval(this.timer);
+      this.timer = setInterval(() => this.battito(), 60000);
+      if(this.ultimaPagina) this.pagina(this.ultimaPagina, true);
+    }catch(e){ console.warn("registro avvia:", e); }
+  },
+  battito(){
+    try{
+      if(!this.sid || document.hidden) return;
+      sb.from("app_sessioni").update({ ultimo_segnale: new Date().toISOString() }).eq("id", this.sid).then(() => {});
+      this.svuota();
+    }catch(e){}
+  },
+  pagina(nome, forza){
+    if(!nome || (nome === this.ultimaPagina && !forza)) return;
+    this.ultimaPagina = nome;
+    if(!this.sid) return;
+    this.coda.push({ sessione_id: this.sid, user_id: currentUser.id, app: this.app, tipo: "pagina", nome: String(nome).slice(0, 60) });
+    if(this.coda.length >= 8) this.svuota();
+  },
+  azione(nome){
+    if(!this.sid || !nome) return;
+    this.coda.push({ sessione_id: this.sid, user_id: currentUser.id, app: this.app, tipo: "azione", nome: String(nome).slice(0, 60) });
+    if(this.coda.length >= 8) this.svuota();
+  },
+  svuota(){
+    try{
+      if(!this.coda.length || typeof sb === "undefined") return;
+      const righe = this.coda.splice(0);
+      sb.from("app_eventi").insert(righe).then(() => {});
+    }catch(e){}
+  },
+  ferma(){
+    this.battito(); this.svuota();
+    clearInterval(this.timer); this.timer = null; this.sid = null; this.ultimaPagina = null;
+  }
+};
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden){ Registro.battito(); Registro.svuota(); Registro.nascostoDa = Date.now(); return; }
+  // tornato in primo piano dopo più di 30 minuti → nuova sessione
+  if(Registro.sid && Registro.nascostoDa && Date.now() - Registro.nascostoDa > 30 * 60000){ Registro.ferma(); Registro.avvia(); }
+  else Registro.battito();
+  Registro.nascostoDa = null;
+});
+window.addEventListener("pagehide", () => { Registro.battito(); Registro.svuota(); });
+
 let currentUser = null;   // { id, email }
 let currentCentro = null; // { id, nome, indirizzo, telefono, join_code, owner_id }
 let currentMembro = null; // { ruolo, nome_visualizzato }
@@ -2579,6 +2808,7 @@ function startDemo(){
 }
 
 async function logout(){
+  Registro.ferma();
   if(!DEMO_MODE){ try{ await sb.auth.signOut(); }catch(e){} }
   currentUser = null; currentCentro = null; currentMembro = null; teamList = [];
   athenaCaricata = false; pianoCentro = null; statDati = null; radarAttesa = null;
@@ -3354,6 +3584,7 @@ async function inviaChatMessaggio(){
 
 /* ---------- APP SHELL ---------- */
 function enterAppShell(){
+  Registro.avvia(currentMembro?.ruolo || null);
   document.getElementById("sidebar-centro-name").textContent = currentCentro?.nome || "—";
   document.getElementById("centro-view-nome").textContent = currentCentro?.nome || "—";
   document.getElementById("centro-view-indirizzo").textContent = currentCentro?.indirizzo || "Non impostato";
@@ -3770,7 +4001,77 @@ async function refreshMagazzinoModule(){
   document.getElementById("mag-btn-articolo").style.display = magPuoGestire() ? "" : "none";
   magRenderTutto();
 }
+/* ---------- VISTA SEMPLICE / COMPLETA (Magazzino e Statistiche) ----------
+   Scelta per persona (su questo dispositivo). All'inizio: Semplice per lo staff di livello 1, Completa per admin e livelli 2-3. */
+function vistaChiave(modulo){ return `equo-vista-${modulo}-${currentUser?.id || "demo"}`; }
+function vistaSemplice(modulo){
+  let v = null; try{ v = localStorage.getItem(vistaChiave(modulo)); }catch(e){}
+  if(v) return v === "semplice";
+  const staffBase = !(currentMembro?.ruolo === "admin" || ["admin","2","3"].includes(String(currentMembro?.livello)) || currentCentro?.owner_id === currentUser?.id);
+  return staffBase;
+}
+function vistaCambia(modulo, completa){
+  try{ localStorage.setItem(vistaChiave(modulo), completa ? "completa" : "semplice"); }catch(e){}
+  if(typeof Registro !== "undefined") Registro.azione(`vista-${modulo}:${completa ? "completa" : "semplice"}`);
+  if(modulo === "magazzino") magRenderTutto(); else if(statDati) renderStatistiche(statDati);
+}
+function vistaSincronizza(modulo){ const t = document.getElementById("vs-" + modulo); if(t) t.checked = !vistaSemplice(modulo); }
+
+let magSempliceCerca = "";
+function magRenderSemplice(){
+  const box = document.getElementById("mag-semplice");
+  const durevole = a => !!magCats()[a.categoria]?.durevole;
+  const ordine = { rosso: 0, giallo: 1, verde: 2 };
+  const daComprare = mag.articoli.filter(a => !durevole(a) && (mag.calc[a.id]?.daOrdinare > 0 || mag.calc[a.id]?.stato === "rosso"))
+    .sort((x, y) => ordine[mag.calc[x.id].stato] - ordine[mag.calc[y.id].stato]);
+  const g = magStatoGruppo(mag.articoli.filter(a => !durevole(a)));
+  const q = magSempliceCerca.trim().toLowerCase();
+  const lista = mag.articoli.filter(a => !q || [a.nome, a.marca, a.sottocategoria].filter(Boolean).join(" ").toLowerCase().includes(q))
+    .sort((x, y) => ordine[mag.calc[x.id].stato] - ordine[mag.calc[y.id].stato] || x.nome.localeCompare(y.nome, "it"));
+  const forn = id => mag.fornitori.find(f => f.id === id)?.nome;
+  const riga = a => { const c = mag.calc[a.id];
+    return `<div class="ms-riga"><i class="mag-sem ${c.stato}" data-tip="${escapeHtml(c.motivo)}"></i>
+      <div class="ms-t" onclick="magApriDettaglio('${a.id}')"><b>${escapeHtml(a.nome)}</b><span>${magFmt(c.giacenza)} ${escapeHtml(a.unita)}${c.stato !== "verde" ? " · " + escapeHtml(c.motivo) : ""}</span></div>
+      <button class="ms-btn meno" data-tip="Ne ho usato 1 ${escapeHtml(MAG_SINGOLARE[a.unita] || a.unita)}" onclick="magRapido('${a.id}','scarico')">−</button>
+      <button class="ms-btn piu" data-tip="Ne è arrivato 1 ${escapeHtml(MAG_SINGOLARE[a.unita] || a.unita)}" onclick="magRapido('${a.id}','carico')">+</button></div>`; };
+  box.innerHTML = `
+    <div class="card ms-testa ${g.rosso ? "rosso" : g.giallo ? "giallo" : "verde"}"><i class="fa-solid ${g.rosso ? "fa-triangle-exclamation" : g.giallo ? "fa-hourglass-half" : "fa-circle-check"}"></i>
+      <div><b>${g.rosso || g.giallo ? [g.rosso ? `${g.rosso} ${g.rosso === 1 ? "articolo" : "articoli"} da comprare` : "", g.giallo ? `${g.giallo} ${g.giallo === 1 ? "sta" : "stanno"} finendo` : ""].filter(Boolean).join(" · ") : "Il magazzino è a posto"}</b>
+      <span>Tocca − quando usi qualcosa, + quando arriva.</span></div></div>
+    ${daComprare.length ? `<div class="card ms-sez"><h3><i class="fa-solid fa-cart-shopping"></i> Da comprare</h3>${daComprare.map(a => { const c = mag.calc[a.id];
+      return `<div class="ms-riga"><i class="mag-sem ${c.stato}"></i><div class="ms-t"><b>${escapeHtml(a.nome)}</b><span>ne hai ${magFmt(c.giacenza)} ${escapeHtml(a.unita)}${c.daOrdinare ? ` · compra ${magFmt(c.daOrdinare)}` : ""}${forn(a.fornitore_id) ? " · " + escapeHtml(forn(a.fornitore_id)) : ""}</span></div>
+        <button class="btn btn-primary btn-conferma btn-sm" data-tip="Registra l'arrivo della merce" onclick="magComprato('${a.id}')"><i class="fa-solid fa-check"></i> Comprato</button></div>`; }).join("")}</div>` : ""}
+    <div class="card ms-sez"><div class="mag-search" style="margin-bottom:8px"><i class="fa-solid fa-magnifying-glass"></i><input class="input" id="ms-cerca" placeholder="Cerca un articolo…" value="${escapeHtml(magSempliceCerca)}" oninput="magSempliceCerca=this.value;magRenderSemplice();const i=document.getElementById('ms-cerca');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div>
+      ${lista.length ? lista.map(riga).join("") : `<div style="color:var(--muted);font-size:13.5px;padding:10px 0">${mag.articoli.length ? "Nessun articolo trovato." : "Ancora nessun articolo: passa alla vista Completa per aggiungerli."}</div>`}</div>`;
+}
+// un tocco = 1 unità (lo scarico usa prima i lotti che scadono prima)
+async function magRapido(id, tipo){
+  const a = mag.articoli.find(x => x.id === id), c = mag.calc[id]; if(!a) return;
+  if(tipo === "scarico" && c.giacenza <= 0){ showToast(`${a.nome}: non risulta disponibile.`); return; }
+  const base = { centro_id: currentCentro.id, articolo_id: id, quantita: 1, tipo };
+  if(tipo === "scarico"){ const l = c.lottiAttivi.find(x => x.qta >= 1); if(l){ base.lotto = l.lotto; base.scadenza = l.scadenza; } }
+  const errore = await magInserisciMovimenti([base]);
+  if(errore){ showToast("Non salvato: " + errore); return; }
+  magCalcola(); magRenderTutto();
+  const cn = mag.calc[id];
+  showToast(`${tipo === "scarico" ? "−1" : "+1"} ${MAG_SINGOLARE[a.unita] || a.unita} · ${a.nome}: ${magFmt(cn.giacenza)} ${a.unita}${cn.stato === "rosso" ? " ⚠️ da comprare" : ""}`);
+}
+function magComprato(id){
+  const q = mag.calc[id]?.daOrdinare || "";
+  magApriMovimento(id, "carico");
+  setTimeout(() => { const i = document.getElementById("mag-mov-qta"); if(i && q){ i.value = q; if(typeof magMovAnteprima === "function") magMovAnteprima(); } }, 60);
+}
+
 function magRenderTutto(){
+  vistaSincronizza("magazzino");
+  const semplice = vistaSemplice("magazzino");
+  document.getElementById("mag-semplice").style.display = semplice ? "" : "none";
+  ["mag-hero", "mag-subnav", "mag-v-giacenze", "mag-v-movimenti", "mag-v-ordini", "mag-v-depositi", "mag-v-fornitori"].forEach(id => {
+    const el = document.getElementById(id); if(!el) return;
+    if(semplice){ if(el.style.display !== "none") el.dataset.vsPrima = el.style.display || "show"; el.style.display = "none"; }
+    else if(el.dataset.vsPrima){ el.style.display = el.dataset.vsPrima === "show" ? "" : el.dataset.vsPrima; delete el.dataset.vsPrima; }
+  });
+  if(semplice){ magRenderSemplice(); return; }
   magRenderHero();
   magRenderCategorie();
   magRender();
@@ -5197,13 +5498,13 @@ async function refreshCavalliModule(){
 async function loadCavalli(){
   if(DEMO_MODE){ cavalliList = demoState.cavalli; return; }
   const { data, error } = await sb.from("scuderia_cavalli")
-    .select("id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id")
+    .select("id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo")
     .eq("centro_id", currentCentro.id)
     .order("nome", { ascending: true });
   if(!error){ cavalliList = data || []; return; }
   // ripiego se la colonna proprietario_membro_id non esistesse
   const r = await sb.from("scuderia_cavalli")
-    .select("id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at")
+    .select("id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, codice_equo")
     .eq("centro_id", currentCentro.id).order("nome", { ascending: true });
   if(!r.error) cavalliList = r.data || [];
 }
@@ -5251,6 +5552,13 @@ function worstStatus(cavalloId){
 
 const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", gray:"Da registrare" };
 
+// categorie apribili/chiudibili: lo stato resta su questo dispositivo
+let sezioniCavalliChiuse = (() => { try{ return JSON.parse(localStorage.getItem("equo-scud-sez-chiuse") || "[]"); }catch(e){ return []; } })();
+function toggleSezioneCavalli(sez){
+  sezioniCavalliChiuse = sezioniCavalliChiuse.includes(sez) ? sezioniCavalliChiuse.filter(x => x !== sez) : [...sezioniCavalliChiuse, sez];
+  try{ localStorage.setItem("equo-scud-sez-chiuse", JSON.stringify(sezioniCavalliChiuse)); }catch(e){}
+  renderCavalliList();
+}
 function renderCavalliList(){
   const empty = document.getElementById("cavalli-empty");
   empty.style.display = cavalliList.length === 0 ? "block" : "none";
@@ -5264,6 +5572,11 @@ function renderCavalliList(){
     grid.innerHTML = "";
     sezioneEl.style.display = cavalliList.length === 0 ? "none" : "block";
     emptySezione.style.display = list.length === 0 ? "block" : "none";
+    const chiusa = sezioniCavalliChiuse.includes(sezione);
+    sezioneEl.classList.toggle("chiusa", chiusa);
+    sezioneEl.querySelector(".cav-sez-n").textContent = " · " + list.length;
+    const urgenti = list.filter(c => pallinoCavallo(c.id).col === "rosso").length;
+    sezioneEl.querySelector(".cav-sez-alert").innerHTML = chiusa && urgenti ? `<span class="sem-dot rosso" data-tip="${urgenti} ${urgenti === 1 ? "cavallo ha" : "cavalli hanno"} scadenze superate"></span>` : "";
 
     list.forEach(c => {
       const worst = worstStatus(c.id);
@@ -5307,6 +5620,7 @@ function renderCavalloDetail(){
   const sub = [c.razza, c.mantello, TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null, c.proprietario ? "proprietario: " + c.proprietario : null].filter(Boolean).join(" · ");
   document.getElementById("detail-cavallo-sub").textContent = sub || "Nessun dettaglio aggiuntivo";
   const info = [
+    c.codice_equo ? "Codice Equo: " + c.codice_equo : null,
     c.data_nascita ? "Nato il " + formatDate(c.data_nascita) : null,
     c.microchip ? "Microchip: " + c.microchip : null,
     c.gruppo_sanguigno ? "Gruppo sanguigno: " + c.gruppo_sanguigno : null,
@@ -5559,6 +5873,7 @@ async function generateSchedaPdf(c){
   doc.text(c.nome || "Cavallo", L, y);
   doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(...PDF_GRIGIO);
   doc.text([c.razza, c.mantello, TIPO_PROPRIETA_LABELS[c.tipo_proprieta]].filter(Boolean).join("  ·  ") || " ", L, y + 7);
+  if(c.codice_equo){ doc.setFont("courier", "bold"); doc.setFontSize(11); doc.setTextColor(...PDF_VERDE_SCURO); doc.text("Codice Equo " + c.codice_equo, L, y + 13); doc.setFont("helvetica", "normal"); }
   const fx = R - 52, fy = 44;
   if(foto){
     doc.setFillColor(...PDF_ORO); doc.roundedRect(fx - 1.2, fy - 1.2, 54.4, 54.4, 3, 3, "F");
@@ -5667,7 +5982,7 @@ function openCavalloForm(id){
     document.getElementById("modal-cavallo-title").textContent = "Modifica cavallo";
     document.getElementById("cav-nome").value = c?.nome || "";
     document.getElementById("cav-tipo-proprieta").value = c?.tipo_proprieta || "proprieta";
-    document.getElementById("cav-razza").value = c?.razza || "";
+    razzaImposta("cav-razza", c?.razza || "");
     document.getElementById("cav-mantello").value = c?.mantello || "";
     document.getElementById("cav-nascita").value = c?.data_nascita || "";
     document.getElementById("cav-microchip").value = c?.microchip || "";
@@ -5679,7 +5994,8 @@ function openCavalloForm(id){
   } else {
     document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
     document.getElementById("cav-tipo-proprieta").value = "proprieta";
-    ["cav-nome","cav-razza","cav-mantello","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
+    razzaImposta("cav-razza", "");
+    ["cav-nome","cav-mantello","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
     preview.innerHTML = "";
   }
   openModal("modal-cavallo");
@@ -5694,11 +6010,127 @@ async function uploadCavalloFoto(file, cavalloId){
   return data.publicUrl + "?t=" + Date.now();
 }
 
+
+/* ---------- RAZZA: menu con ricerca (stesso codice in App e Scuderia) ----------
+   Si salva solo una razza scelta dall'elenco Equo (tabella equo_razze, sigla del codice cavallo).
+   Fuori elenco: "La mia razza non c'è" → "Altra razza (testo)" + segnalazione a Equo. */
+let RAZZE_EQUO = [["Avelignese", "AVE", 1, ["haflinger italiano"]], ["Bardigiano", "BAR", 1, []], ["Calabrese", "CAL", 1, []], ["Catria", "CTR", 1, []], ["Cavallo del Delta", "DEL", 1, ["delta"]], ["Cavallo del Ventasso", "VEN", 1, ["ventasso"]], ["Esperia", "ESP", 1, ["pony esperia"]], ["Cavallino della Giara", "GIA", 1, ["giara"]], ["Lipizzano", "LIP", 1, ["lipizzaner"]], ["Maremmano", "MAR", 1, ["maremma"]], ["Monterufolino", "MTR", 1, []], ["Murgese", "MUR", 1, []], ["Napoletano", "NAP", 1, []], ["Norico", "NOR", 1, ["noriker"]], ["Pentro", "PEN", 1, []], ["Persano", "PRS", 1, []], ["Salernitano", "SAL", 1, []], ["Sanfratellano", "SFT", 1, ["san fratellano"]], ["Sarcidano", "SRC", 1, []], ["Sella Italiano", "SIT", 1, ["sella italiana", "si"]], ["Purosangue Orientale Siciliano", "SIC", 1, ["siciliano", "orientale siciliano"]], ["Tolfetano", "TOL", 1, []], ["Trottatore Italiano", "TIT", 1, ["trottatore"]], ["Anglo-Arabo Sardo", "AAS", 1, ["anglo arabo sardo"]], ["Tiro Pesante Rapido", "TPR", 1, ["tpr"]], ["Purosangue Inglese", "PSI", 0, ["psi", "purosangue", "thoroughbred", "inglese"]], ["Purosangue Arabo", "PSA", 0, ["arabo", "psa", "arabian"]], ["Anglo-Arabo", "AAR", 0, ["anglo arabo"]], ["Shagya", "SHA", 0, ["arabo shagya"]], ["Akhal-Teke", "AKT", 0, ["akhal teke"]], ["Barbero", "BRB", 0, ["barbo"]], ["Standardbred", "STB", 0, ["trottatore americano"]], ["Trottatore Francese", "TFR", 0, ["trotteur francais"]], ["Orlov", "ORL", 0, ["trottatore russo"]], ["Hannover", "HAN", 0, ["hannoveraner", "annover"]], ["Holsteiner", "HOL", 0, ["holstein"]], ["Oldenburg", "OLD", 0, ["oldenburger"]], ["Westfalen", "WES", 0, ["westfalico"]], ["Trakehner", "TRK", 0, ["trakener"]], ["Hessen", "HES", 0, []], ["Brandenburg", "BRA", 0, []], ["Mecklenburg", "MEC", 0, []], ["Württemberg", "WUR", 0, ["wurttemberg"]], ["Bayerisches Warmblut", "BAY", 0, ["bavarese"]], ["Zangersheide", "ZAN", 0, []], ["KWPN", "KWP", 0, ["sella olandese", "dutch warmblood", "olandese"]], ["BWP", "BWP", 0, ["sella belga"]], ["Selle Français", "SFR", 0, ["sella francese", "selle francais"]], ["Sella Svedese", "SWB", 0, ["swb"]], ["Sella Danese", "DWB", 0, ["dwb"]], ["Irish Sport Horse", "ISH", 0, ["irlandese"]], ["Irish Draught", "IRD", 0, []], ["Wielkopolski", "WIE", 0, []], ["Małopolski", "MAL", 0, ["malopolski"]], ["Kisbéri", "KIS", 0, ["kisberi"]], ["Nonius", "NON", 0, []], ["Furioso-North Star", "FUR", 0, ["furioso"]], ["Lusitano", "LUS", 0, []], ["PRE (Pura Raza Española)", "PRE", 0, ["andaluso", "pura raza espanola", "spagnolo"]], ["Hispano-Arabo", "HIS", 0, []], ["Frisone", "FRI", 0, ["friesian"]], ["Gelderlander", "GEL", 0, []], ["Groninger", "GRO", 0, []], ["Kladruber", "KLA", 0, []], ["Cleveland Bay", "CLE", 0, []], ["Hackney", "HAC", 0, []], ["Quarter Horse", "QTR", 0, ["quarter", "qh"]], ["Paint Horse", "PNT", 0, ["paint"]], ["Appaloosa", "APP", 0, []], ["Mustang", "MUS", 0, []], ["Morgan", "MOR", 0, []], ["Tennessee Walking Horse", "TWH", 0, []], ["American Saddlebred", "ASB", 0, ["saddlebred"]], ["Missouri Fox Trotter", "MFT", 0, []], ["Rocky Mountain Horse", "RMH", 0, []], ["Palomino", "PAL", 0, []], ["Buckskin", "BUC", 0, []], ["Pinto", "PIN", 0, []], ["Criollo", "CRI", 0, []], ["Paso Fino", "PSF", 0, []], ["Paso Peruviano", "PSP", 0, []], ["Mangalarga Marchador", "MNG", 0, ["mangalarga"]], ["Campolina", "CMP", 0, []], ["Azteca", "AZT", 0, []], ["Bretone", "BRE", 0, []], ["Percheron", "PER", 0, []], ["Ardennese", "ARD", 0, ["ardennes"]], ["Comtois", "CMT", 0, []], ["Boulonnais", "BOU", 0, []], ["Belga da tiro", "BEL", 0, ["brabante"]], ["Clydesdale", "CLY", 0, []], ["Shire", "SHI", 0, []], ["Suffolk Punch", "SUF", 0, ["suffolk"]], ["Schwarzwälder Fuchs", "SWF", 0, ["schwarzwalder"]], ["Freiberger", "FRB", 0, ["franches-montagnes", "franches montagnes"]], ["Fjord", "FJO", 0, ["fiordo", "fjord norvegese"]], ["Döle", "DOL", 0, ["dole"]], ["Jutland", "JUT", 0, []], ["Vladimir", "VLA", 0, []], ["Shetland", "SHE", 0, []], ["Welsh", "WEL", 0, ["welsh pony", "welsh cob"]], ["Connemara", "CON", 0, []], ["New Forest", "NFO", 0, []], ["Dartmoor", "DAR", 0, []], ["Exmoor", "EXM", 0, []], ["Highland", "HIG", 0, []], ["Fell", "FEL", 0, []], ["Dales", "DAL", 0, []], ["Eriskay", "ERI", 0, []], ["Haflinger", "HAF", 0, ["avelignese haflinger"]], ["Islandese", "ISL", 0, ["icelandic"]], ["Pony Tedesco da Sella", "DRP", 0, ["deutsches reitpony"]], ["Pony Olandese", "PON", 0, []], ["Pony Francese da Sella", "PFS", 0, ["poney francais de selle"]], ["Falabella", "FAL", 0, []], ["Miniature Horse", "MIN", 0, ["cavallo miniatura", "mini horse"]], ["Pony Americano", "PAM", 0, []], ["Pony of the Americas", "POA", 0, ["poa"]], ["Bosniaco", "BOS", 0, []], ["Huzul", "HUZ", 0, ["hucul"]], ["Konik", "KON", 0, []], ["Landais", "LAN", 0, []], ["Pottok", "POT", 0, []], ["Caspio", "CAS", 0, []], ["Berbero", "BER", 0, ["barb"]], ["Arabo-Berbero", "ABB", 0, ["arabo berbero"]], ["Turkmeno", "TUR", 0, []], ["Marwari", "MRW", 0, []], ["Kathiawari", "KAT", 0, []], ["Mongolo", "MNL", 0, []], ["Przewalski", "PRZ", 0, []], ["Yakuto", "YAK", 0, []], ["Don", "DON", 0, []], ["Budyonny", "BUD", 0, ["budenny"]], ["Kabardino", "KAB", 0, []], ["Karabakh", "KRB", 0, []], ["Lokai", "LOK", 0, []], ["Kustanai", "KUS", 0, []], ["Waler", "WAL", 0, []], ["Brumby", "BRU", 0, []], ["Australian Stock Horse", "ASH", 0, []], ["Kiger Mustang", "KIG", 0, []], ["Camargue", "CAM", 0, []], ["Merens", "MER", 0, ["merens"]], ["Henson", "HEN", 0, []], ["Auxois", "AUX", 0, []], ["Poitevin", "POI", 0, []], ["Sorraia", "SOR", 0, []], ["Garrano", "GAR", 0, []], ["Asturcón", "AST", 0, ["asturcon"]], ["Losino", "LOS", 0, []], ["Marismeño", "MRS", 0, ["marismeno"]], ["Meticcio / Incrocio", "MET", 0, ["meticcio", "incrocio", "mezzosangue"]], ["Sella (razza non indicata)", "SEL", 0, ["sella", "cavallo da sella"]], ["Pony (razza non indicata)", "PNY", 0, ["pony"]]].map(([nome, sigla, italiana, alias]) => ({ nome, sigla, italiana: !!italiana, alias }));
+// le più diffuse in Italia compaiono per prime a parità di somiglianza
+const RAZZE_DIFFUSE = ["PSI","PSA","SIT","MAR","QTR","HAF","AVE","TIT","TFR","AAR","SFR","KWP","HAN","HOL","OLD","PRE","LUS","FRI","APP","PNT","SHE","WEL","MUR","BAR","MET","SEL","PNY"];
+const RAZZE_FISSE = ["Meticcio / Incrocio", "Sella (razza non indicata)", "Pony (razza non indicata)"];
+let razzeCaricate = false;
+async function caricaRazzeEquo(){
+  if(razzeCaricate || typeof DEMO_MODE === "undefined" || DEMO_MODE || typeof sb === "undefined") return;
+  razzeCaricate = true;
+  try{
+    const { data } = await sb.from("equo_razze").select("nome, sigla, italiana, alias, ordine").order("ordine");
+    if(data && data.length) RAZZE_EQUO = data.map(r => ({ nome: r.nome, sigla: r.sigla, italiana: r.italiana, alias: r.alias || [] }));
+  }catch(e){ razzeCaricate = false; }
+}
+function razzaNorm(t){ return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ł/g, "l").replace(/Ł/g, "L").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function razzaTrova(testo){
+  const n = razzaNorm(testo); if(!n) return null;
+  return RAZZE_EQUO.find(r => razzaNorm(r.nome) === n || (r.alias || []).some(a => razzaNorm(a) === n)) || null;
+}
+function razzaCerca(testo){
+  const n = razzaNorm(testo);
+  if(!n) return RAZZE_EQUO.filter(r => r.italiana).slice(0, 8);
+  const parole = String(testo).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter(Boolean);
+  const punteggio = r => {
+    const nome = razzaNorm(r.nome), w = r.nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/);
+    if(nome.startsWith(n)) return 0;
+    if(parole.every(p => w.some(x => x.startsWith(p)))) return 1;
+    if(nome.includes(n)) return 2;
+    if((r.alias || []).some(a => razzaNorm(a).startsWith(n))) return 3;
+    if((r.alias || []).some(a => razzaNorm(a).includes(n))) return 4;
+    return 9;
+  };
+  return RAZZE_EQUO.map((r, i) => ({ r, p: punteggio(r), i })).filter(x => x.p < 9)
+    .sort((a, b) => a.p - b.p || (RAZZE_DIFFUSE.indexOf(a.r.sigla) < 0) - (RAZZE_DIFFUSE.indexOf(b.r.sigla) < 0) || (b.r.italiana - a.r.italiana) || a.i - b.i).slice(0, 8).map(x => x.r);
+}
+// trasforma un <input> in campo razza con suggerimenti
+function razzaCampo(id){
+  const inp = document.getElementById(id);
+  if(!inp || inp.dataset.razza) return;
+  inp.dataset.razza = "1";
+  inp.setAttribute("autocomplete", "off");
+  const box = document.createElement("div"); box.className = "rz-wrap";
+  inp.parentNode.insertBefore(box, inp); box.appendChild(inp);
+  const lista = document.createElement("div"); lista.className = "rz-lista"; box.appendChild(lista);
+  const nota = document.createElement("div"); nota.className = "rz-nota"; box.appendChild(nota);
+  const mostra = () => {
+    caricaRazzeEquo();
+    const t = inp.value.trim();
+    const trov = razzaCerca(t);
+    const fisse = RAZZE_FISSE.filter(f => !trov.some(r => r.nome === f)).map(nome => ({ nome, fissa: true }));
+    lista.innerHTML = trov.map(r => `<button type="button" data-v="${escapeHtml(r.nome)}"><span>${escapeHtml(r.nome)}</span><small>${escapeHtml(r.sigla)}</small></button>`).join("")
+      + (trov.length ? "" : '<div class="rz-vuoto">Nessuna razza trovata con «' + escapeHtml(t) + '»</div>')
+      + '<div class="rz-sep"></div>' + fisse.map(f => `<button type="button" class="rz-fissa" data-v="${escapeHtml(f.nome)}">${escapeHtml(f.nome)}</button>`).join("")
+      + (t.length >= 3 && !trov.length ? `<button type="button" class="rz-altra" data-altra="${escapeHtml(t)}">La mia razza non c'è: «${escapeHtml(t)}»</button>` : "");
+    lista.classList.add("aperta");
+  };
+  const scegli = (valore, altra) => {
+    inp.value = valore; inp.dataset.ok = "1"; inp.dataset.altra = altra || "";
+    lista.classList.remove("aperta"); box.classList.remove("rz-errore"); nota.textContent = altra ? "Razza fuori elenco: avvisiamo Equo per aggiungerla." : "";
+    if(altra) razzaSegnala(altra);
+  };
+  inp.addEventListener("focus", mostra);
+  inp.addEventListener("input", () => { inp.dataset.ok = ""; inp.dataset.altra = ""; nota.textContent = ""; mostra(); });
+  lista.addEventListener("mousedown", e => e.preventDefault());
+  lista.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    if(b.dataset.altra) scegli("Altra razza (" + b.dataset.altra + ")", b.dataset.altra);
+    else scegli(b.dataset.v);
+  });
+  inp.addEventListener("blur", () => setTimeout(() => {
+    lista.classList.remove("aperta");
+    // scritta per intero e uguale a una razza (o a un nome alternativo): la sistemo io
+    if(!inp.dataset.ok && inp.value.trim()){ const r = razzaTrova(inp.value); if(r) scegli(r.nome); }
+  }, 120));
+}
+// imposta il valore all'apertura della scheda (le razze già scritte in passato vengono ricondotte all'elenco se possibile)
+function razzaImposta(id, valore){
+  razzaCampo(id);
+  const inp = document.getElementById(id);
+  const r = razzaTrova(valore);
+  inp.value = r ? r.nome : (valore || "");
+  inp.dataset.ok = r || !valore ? "1" : "";
+  inp.dataset.iniziale = inp.value; inp.dataset.altra = "";
+  inp.parentNode.classList.remove("rz-errore");
+  inp.parentNode.querySelector(".rz-nota").textContent = "";
+}
+// al salvataggio: null = vuota, stringa = razza valida, false = da scegliere dall'elenco (mostra l'errore)
+function razzaValore(id){
+  const inp = document.getElementById(id);
+  const t = inp.value.trim();
+  if(!t) return null;
+  if(inp.dataset.ok === "1" || t === inp.dataset.iniziale) return t;
+  const r = razzaTrova(t); if(r){ inp.value = r.nome; return r.nome; }
+  inp.parentNode.classList.add("rz-errore");
+  inp.parentNode.querySelector(".rz-nota").textContent = "Scegli la razza dall'elenco (oppure «La mia razza non c'è»).";
+  inp.focus();
+  return false;
+}
+const razzeSegnalate = new Set();
+async function razzaSegnala(testo){
+  const k = razzaNorm(testo);
+  if(razzeSegnalate.has(k) || typeof DEMO_MODE === "undefined" || DEMO_MODE || !currentUser) return;
+  razzeSegnalate.add(k);
+  try{
+    await sb.from("ticket_assistenza").insert({ user_id: currentUser.id, app: "scuderia", categoria: "suggerimento",
+      oggetto: "Nuova razza da aggiungere: " + testo.slice(0, 80),
+      descrizione: "Un utente ha inserito una razza che non è nell'elenco Equo: «" + testo + "». Se è una razza vera, aggiungila alla tabella equo_razze con la sua sigla di 3 lettere: i cavalli con quella razza prenderanno la sigla al prossimo salvataggio.",
+      email: currentUser.email || "gestione.equo@gmail.com" });
+  }catch(e){ console.warn("razzaSegnala:", e); }
+}
+
+
 async function saveCavallo(){
   const nome = document.getElementById("cav-nome").value.trim();
   const errBox = document.getElementById("cavallo-error");
   errBox.style.display = "none";
   if(!nome){ errBox.textContent = "Inserisci il nome del cavallo."; errBox.style.display = "block"; return; }
+  if(razzaValore("cav-razza") === false) return;
 
   const payload = {
     nome,
@@ -6940,7 +7372,7 @@ function comingSoonHtml(icon, titolo, testo, badgeText){
 const MODULE_TITLES = {
   home:"Home", centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
   pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Comunicazioni & Chat",
-  professionisti:"Professionisti", magazzino:"Magazzino", statistiche:"Statistiche", store:"Store", fatturazione:"Fatturazione SDI", ai:"Agenti AI",
+  professionisti:"Professionisti", groom:"Gestione Groom", magazzino:"Magazzino", statistiche:"Statistiche", store:"Store", fatturazione:"Fatturazione SDI", ai:"Agenti AI",
 };
 // foto di sfondo per pagina (FOTO/ originali → assets/sfondi, JPEG 1600px). Pagine SOON: nessuna foto.
 // Opacità calibrate foto per foto (contrasto e luminosità misurati) per avere la stessa intensità percepita
@@ -6980,7 +7412,8 @@ function aggiornaSfondoPagina(key){
 }
 
 function showModule(key){
-  if(moduloBloccato(key)){ apriUpsell(key); return; }
+  if(moduloBloccato(key)){ Registro.azione("bloccato:" + key); apriUpsell(key); return; }
+  Registro.pagina(key);
   aggiornaSfondoPagina(key);
   document.querySelectorAll(".module-page").forEach(p => p.style.display = "none");
   document.getElementById("module-" + key).style.display = "block";
@@ -6994,10 +7427,11 @@ function showModule(key){
   if(key === "pacchetti") refreshPacchettiModule();
   if(key === "comunicazioni") refreshComunicazioniModule();
   if(key === "professionisti") refreshProfessionistiModule();
+  if(key === "groom") refreshGroomModule();
   if(key === "magazzino") refreshMagazzinoModule();
   if(key === "statistiche") refreshStatisticheModule();
   if(key === "ai") renderModuloAgenti();
-  if(key === "centro"){ renderIlTuoPacchetto(); renderZonaCentro(); }
+  if(key === "centro"){ renderIlTuoPacchetto(); renderZonaCentro(); groomCaricaTeam(); }
 }
 
 function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebar-overlay").classList.add("active"); }
@@ -7012,7 +7446,7 @@ let pianoCentro = null;
 const PK_NOMI = { start:"START", advance:"ADVANCE", premium:"PREMIUM", enterprise:"ENTERPRISE", completo:"COMPLETO" };
 const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€29/mese · €290/anno + IVA", premium:"€59/mese · €590/anno + IVA", enterprise:"su misura", completo:"sblocco totale" };
 // moduli del menu legati a una funzione del pacchetto
-const MODULO_FUNZIONE = { pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
+const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
   pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet","Cruscotto scadenze e rinnovi"] },
   magazzino: { titolo:"Magazzino", icon:"fa-boxes-stacked", da:"advance", punti:["Scorte con semaforo per categoria","Carichi, scarichi e inventario in un tocco","Consumi delle ultime 8 settimane"] },
@@ -7021,12 +7455,13 @@ const FUNZIONI_INFO = {
   store: { titolo:"Store", icon:"fa-store", da:"premium", punti:["Vendita online di lezioni, pacchetti e prodotti"] },
   sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["Fatture elettroniche conformi SDI","Add-on in ADVANCE, inclusa in PREMIUM"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
+  groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
   agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia","Ermes: magazzino e logistica","In PREMIUM uno dei due è incluso"] },
 };
 const PK_CONFRONTO = [
   ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Professionisti esterni", "3", "9", "illimitati"],
   ["Lezioni & Prenotazioni", "base (1+1)", "✓ (3+3)", "✓"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
-  ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
+  ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
   ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "—", "add-on", "✓"],
   ["Supporto prioritario", "—", "—", "✓"],
 ];
@@ -7042,6 +7477,7 @@ async function caricaPianoCentro(){
     if(error || !data || data.errore){ console.warn("piano:", error || data); return; }
     pianoCentro = data;
   }
+  if(pianoCentro) pianoCentro.groom = pianoCentro.pacchetto !== "start";
   applicaPianoGating();
   renderIlTuoPacchetto();
   aggiornaVersioneScuderia();
@@ -7185,8 +7621,42 @@ function stBloccata(html, titolo){
     <button class="btn btn-outline btn-sm" onclick="apriUpsell('statistiche_complete')">Scopri cosa include</button></div></div>`;
 }
 
+function stSemplici(s){
+  const mesi = (s.incassi_mesi || []).slice(-6);
+  const tutti = s.incassi_mesi || [];
+  const cur = tutti[tutti.length - 1] || { incasso: 0 }, prev = tutti[tutti.length - 2] || { incasso: 0 };
+  const d = Number(prev.incasso) ? Math.round((Number(cur.incasso) - Number(prev.incasso)) / Number(prev.incasso) * 100) : null;
+  const rischio = s.clienti_a_rischio || [], carnet = s.carnet_in_esaurimento || [];
+  const num = (l, v, sub, cls, tip) => `<div class="card ss-num" data-tip="${tip}"><div class="l">${l}</div><div class="v">${v}</div>${sub ? `<div class="d ${cls || ""}">${sub}</div>` : ""}</div>`;
+  // le 3 cose più urgenti: salute dei cavalli, clienti che si stanno perdendo, pacchetti da rinnovare
+  const cose = [];
+  (cavalliList || []).filter(c => pallinoCavallo(c.id).col === "rosso").slice(0, 2).forEach(c =>
+    cose.push({ ic: "fa-heart-pulse", col: "#c0473d", t: `${c.nome}: ${pallinoCavallo(c.id).testo}`, b: "Apri", f: `showModule('cavalli');openCavalloDetail('${c.id}')` }));
+  rischio.slice(0, 2).forEach((c, i) => cose.push({ ic: "fa-user-clock", col: "#d9a13b", t: `${c.nome} non monta da ${c.giorni} giorni`, b: "Scrivi", f: `stScriviCliente(${i})` }));
+  carnet.slice(0, 2).forEach(p => cose.push({ ic: "fa-ticket", col: "#3d7fc4", t: p.tipo === "carnet" && p.unita_totali ? `Carnet di ${p.cliente}: ${p.unita_totali - (p.unita_usate || 0)} lezioni rimaste` : `${p.cliente}: ${p.tipo} in scadenza`, b: "Rinnova", f: `showModule('pacchetti')` }));
+  const max = Math.max(1, ...mesi.map(m => Number(m.incasso || 0)));
+  return `<div class="ss-nums">
+      ${num("Incassato questo mese", euro(cur.incasso), d == null ? "" : `${d >= 0 ? "▲" : "▼"} ${Math.abs(d)}% sul mese scorso`, d == null ? "" : d >= 0 ? "su" : "giu", "Carnet, abbonamenti e pensioni iniziati questo mese")}
+      ${num("Lezioni questa settimana", s.lezioni_settimana ?? 0, `${s.lezioni_prossime_7 ?? 0} in programma`, "", "Lezioni degli ultimi 7 giorni e dei prossimi 7")}
+      ${num("Box occupati", s.box && s.box.totale ? `${s.box.occupati} su ${s.box.totale}` : "—", s.box && s.box.liberi ? `${s.box.liberi} liberi` : "", "", "Box con un cavallo dentro")}
+      ${num("Clienti da ricontattare", rischio.length, rischio.length ? "non montano da 3 settimane" : "nessuno: ottimo!", rischio.length ? "giu" : "su", "Non montano da almeno 3 settimane e non hanno lezioni in programma")}
+    </div>
+    <div class="ss-grid">
+      <div class="card st-card"><h3><i class="fa-solid fa-list-check" style="color:var(--primary)"></i> Le cose da fare oggi</h3>
+        ${cose.length ? cose.slice(0, 3).map(c => `<div class="st-riga"><div class="t" style="display:flex;gap:10px;align-items:center"><i class="fa-solid ${c.ic}" style="color:${c.col};width:18px"></i><b style="font-weight:600">${escapeHtml(c.t)}</b></div>
+          <button class="btn btn-outline btn-sm" onclick="${c.f}">${c.b}</button></div>`).join("") : `<div class="st-vuoto">Niente di urgente oggi. 👏</div>`}</div>
+      <div class="card st-card"><h3><i class="fa-solid fa-chart-column" style="color:var(--primary)"></i> Incassi, ultimi 6 mesi</h3>
+        <div class="ss-bars">${mesi.map((m, i) => { const [a, mm] = m.mese.split("-"), h = Math.round(Number(m.incasso || 0) / max * 100);
+          return `<div class="b ${i === mesi.length - 1 ? "ora" : ""}" data-tip="${MESI_BREVI[+mm - 1]} ${a}: ${euro(m.incasso)}"><small>${Number(m.incasso) >= 1000 ? (Number(m.incasso) / 1000).toFixed(1) + "k" : Math.round(Number(m.incasso || 0))}</small><i style="height:${Math.max(2, h)}%"></i><span>${MESI_BREVI[+mm - 1]}</span></div>`; }).join("")}</div></div>
+    </div>`;
+}
+
 function renderStatistiche(s){
   const body = document.getElementById("st-body");
+  vistaSincronizza("statistiche");
+  const pdf = document.getElementById("st-btn-pdf");
+  if(vistaSemplice("statistiche")){ if(pdf) pdf.style.display = "none"; body.innerHTML = stSemplici(s); return; }
+  if(pdf) pdf.style.display = "";
   const mesi = s.incassi_mesi || [];
   const cur = mesi[mesi.length - 1] || { incasso: 0, lezioni: 0 }, prev = mesi[mesi.length - 2] || { incasso: 0, lezioni: 0 };
   const delta = (a, b) => b ? Math.round((a - b) / b * 100) : null;
@@ -7601,6 +8071,7 @@ function pallinoHtml(cavalloId){
    Pronto per GPS / telecamere / display touch: ogni azione ha una "fonte" (oggi manuale).
    Pacchetti: START visibili ma bloccati, ADVANCE 20 box, PREMIUM 100 (controllo anche nel database).
    ===================================================================== */
+let boxNote = {};   // cavallo_id -> nota "N" (segue il cavallo)
 let boxList = [], boxAttivita = [], boxCanale = null, boxRicaricaTimer = null, boxPannelloId = null, boxOrologioTimer = null;
 const BOX_ICONE = {
   pasto_mattina: { nome:"Pasto mattina", icon:"fa-bowl-food", col:"#b7862b", tip:"Pasto del mattino: tocca quando il cavallo ha mangiato." },
@@ -7639,17 +8110,22 @@ async function loadBox(){
       const [a, l] = demoState.cavalli;
       demoState.box = [1,2,3,4,5].map(n => ({ id:"bx" + n, centro_id:"demo-centro", numero:n, nome:null, zona:n <= 3 ? "Scuderia A" : "Scuderia B",
         cavallo_id: n === 1 ? a?.id : n === 2 ? l?.id : null, stato_cavallo: n === 2 ? "paddock" : "in_box", manutenzione: n === 4, manutenzione_motivo: n === 4 ? "pulizia" : null, manutenzione_nota:null, manutenzione_fino:null }));
-      demoState.boxAttivita = [{ box_id:"bx1", tipo:"pasto_mattina", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Marco" }, { box_id:"bx1", tipo:"acqua", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Marco" },
-        { box_id:"bx2", tipo:"pasto_mattina", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Sara" }, { box_id:"bx2", tipo:"paddock", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Sara" }];
+      demoState.box[0].assegnato_cavallo_id = a?.id || null;
+      demoState.boxAttivita = [{ box_id:"bx1", cavallo_id:a?.id, tipo:"pasto_mattina", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Marco" }, { box_id:"bx1", cavallo_id:a?.id, tipo:"acqua", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Marco" },
+        { box_id:"bx2", cavallo_id:l?.id, tipo:"pasto_mattina", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Sara" }, { box_id:"bx2", cavallo_id:l?.id, tipo:"paddock", giorno:oggiRoma(), fatto_il:new Date().toISOString(), fatto_da_nome:"Sara" }];
     }
-    boxList = demoState.box; boxAttivita = demoState.boxAttivita; return;
+    boxList = demoState.box; boxAttivita = demoState.boxAttivita;
+    boxNote = {}; (demoState.cavalli || []).forEach(c => { if(c.nota_box) boxNote[c.id] = c.nota_box; });
+    return;
   }
-  const [b, a] = await Promise.all([
+  const [b, a, n] = await Promise.all([
     sb.from("scuderia_box").select("*").eq("centro_id", currentCentro.id).order("numero"),
-    sb.from("scuderia_box_attivita").select("box_id, tipo, giorno, fatto_il, fatto_da_nome, fonte").eq("centro_id", currentCentro.id).eq("giorno", oggiRoma()),
+    sb.from("scuderia_box_attivita").select("box_id, cavallo_id, tipo, giorno, fatto_il, fatto_da_nome, fonte").eq("centro_id", currentCentro.id).eq("giorno", oggiRoma()),
+    sb.from("scuderia_cavalli").select("id, nota_box").eq("centro_id", currentCentro.id).not("nota_box", "is", null),
   ]);
   if(!b.error) boxList = b.data || [];
   if(!a.error) boxAttivita = a.data || [];
+  if(!n.error){ boxNote = {}; (n.data || []).forEach(c => { boxNote[c.id] = c.nota_box; }); }
 }
 function boxAscolta(){
   if(DEMO_MODE || !currentCentro?.id || boxCanale) return;
@@ -7661,38 +8137,68 @@ function boxAscolta(){
 }
 async function refreshBoxSezione(){ await loadBox(); renderBox(); boxAscolta(); }
 
-function boxAttivitaDi(boxId, tipo){ return boxAttivita.find(a => a.box_id === boxId && a.tipo === tipo && a.giorno === oggiRoma()); }
-function boxCardHtml(b){
+// le attività del giorno seguono il CAVALLO: spostandolo, le sue spunte vanno con lui
+function boxAttivitaDi(boxId, tipo){
+  const cav = boxList.find(x => x.id === boxId)?.cavallo_id;
+  return boxAttivita.find(a => (cav ? a.cavallo_id === cav : (a.box_id === boxId && !a.cavallo_id)) && a.tipo === tipo && a.giorno === oggiRoma());
+}
+// colore del bordo e testi del box
+function boxStato(b){
   const c = b.cavallo_id ? cavalliList.find(x => x.id === b.cavallo_id) : null;
-  const classe = boxBloccati() ? "bloccato" : c ? "occupato" : b.manutenzione ? "manut" : "vuoto";
-  const tipBordo = { occupato:"Bordo verde: box occupato", vuoto:"Bordo rosso: box vuoto, tocca per aggiungere un cavallo", manut:"Bordo giallo: box in manutenzione", bloccato:"Box / Stalla è incluso da ADVANCE" }[classe];
+  const ass = b.assegnato_cavallo_id ? cavalliList.find(x => x.id === b.assegnato_cavallo_id) : null;
+  const propAss = ass ? (ass.proprietario || "") : "";
+  let cls, tip, sotto = "";
+  if(b.manutenzione && !c){ cls = "manut"; tip = "Bordo bianco: box in manutenzione"; }
+  else if(ass){
+    if(c && c.id === ass.id){ cls = "verde"; tip = `Bordo verde: box di proprietà${propAss ? " di " + propAss : ""} con il suo cavallo dentro`; }
+    else if(c){ cls = "giallo"; tip = `Bordo giallo: box di ${propAss || ass.nome}, dentro c'è un cavallo non suo`; sotto = c.proprietario ? "Cavallo di " + c.proprietario : "Cavallo fuori dal suo box"; }
+    else { cls = "rosso"; tip = `Bordo rosso: box di proprietà${propAss ? " di " + propAss : ""}, ${ass.nome} non è dentro`; }
+  } else if(c){
+    const suo = boxList.find(x => x.assegnato_cavallo_id === c.id && x.id !== b.id);
+    if(suo){ cls = "giallo"; tip = `Bordo giallo: ${c.nome} non è nel suo box (box ${suo.numero})`; sotto = c.proprietario ? "Cavallo di " + c.proprietario : "Il suo box è il " + suo.numero; }
+    else { cls = "verde"; tip = "Bordo verde: cavallo nel suo posto"; }
+  } else { cls = "blu"; tip = "Bordo blu: box libero, tocca per aggiungere un cavallo"; }
+  const proprietario = ass ? (propAss ? "Proprietario " + propAss : "Box di " + ass.nome) : c?.proprietario ? "Proprietario " + c.proprietario : (b.nome || "");
+  return { c, ass, cls, tip, sotto, proprietario };
+}
+function boxCardHtml(b){
+  const { c, cls: stCls, tip: tipBordo, sotto, proprietario } = boxStato(b);
+  const classe = boxBloccati() ? "bloccato" : stCls;
   let centro;
   if(c){
     const st = BOX_STATI[b.stato_cavallo] || BOX_STATI.in_box;
     centro = `${c.foto_url ? `<div class="box-foto" style="background-image:url('${escapeHtml(c.foto_url)}')"></div>` : `<div class="box-nopic" data-tip="Nessuna foto: aggiungila dalla scheda del cavallo">NO<br>PICTURE</div>`}
       <div class="box-nome"><span class="t">${escapeHtml(c.nome)}</span>${pallinoHtml(c.id)}</div>
-      <span class="box-chip" data-tip="Dov'è ora: si cambia dal pannello del box">${iconHtml(st.icon)} ${st.nome}</span>`;
+      <span class="box-chip" data-tip="Dov'è ora: si cambia dal pannello del box">${iconHtml(st.icon)} ${st.nome}</span>
+      ${sotto ? `<span class="box-ospite" data-tip="Il cavallo è in un box che non è il suo">${escapeHtml(sotto)}</span>` : ""}`;
   } else if(b.manutenzione){
     centro = `<div class="box-manut-ic">${iconHtml("fa-screwdriver-wrench")}</div><div class="box-nome"><span class="t">In manutenzione</span></div>
       <div class="box-sub">${BOX_MOTIVI[b.manutenzione_motivo] || "Lavori"}${b.manutenzione_fino ? " · fino al " + formatDate(b.manutenzione_fino) : ""}</div>`;
   } else {
-    centro = `<div class="box-vuoto-ic">${iconHtml("fa-plus")}</div><div class="box-nome"><span class="t">Libero</span></div><div class="box-sub">Tocca per aggiungere un cavallo</div>`;
+    centro = `<div class="box-vuoto-ic">${iconHtml("fa-plus")}</div><div class="box-nome"><span class="t">Libero</span></div><div class="box-sub">${stCls === "rosso" ? "Box riservato: il suo cavallo non è qui" : "Tocca per aggiungere un cavallo"}</div>`;
   }
   const icone = c ? `<div class="box-icone">${boxIconeAttive().map(k => { const d = BOX_ICONE[k], a = boxAttivitaDi(b.id, k);
-      return `<button class="box-ic ${a ? "on" : ""}" style="--ic-col:${d.col}" data-tip="${escapeHtml(d.nome + (a ? " · fatto alle " + new Date(a.fatto_il).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" }) + (a.fatto_da_nome ? " da " + a.fatto_da_nome : "") : " · da fare oggi: tocca per segnarlo"))}"
+      return `<button class="box-ic ${a ? "on" : ""}" style="--ic-col:${d.col}" data-tip="${escapeHtml(d.nome + (a ? " · fatto alle " + new Date(a.fatto_il).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" }) + (a.fatto_da_nome ? " da " + a.fatto_da_nome + (a.fonte === "groom" ? " (groom)" : "") : "") : " · da fare oggi: tocca per segnarlo"))}"
         onclick="event.stopPropagation();boxToggleIcona('${b.id}','${k}')">${iconHtml(d.icon)}</button>`; }).join("")}</div>` : "";
-  return `<div class="box-card ${classe}" data-tip="${tipBordo}" onclick="${boxBloccati() ? "apriUpsell('box')" : `boxApri('${b.id}')`}">
-    <div class="box-trave"><span class="box-targa">BOX ${b.numero}</span><span class="box-zona">${escapeHtml(b.nome || b.zona || "")}</span></div>
-    <div class="box-corpo"><div class="box-centro">${centro}</div>${icone}</div>
+  const nota = c ? boxNote[c.id] : null;
+  const notaBtn = c ? `<button class="box-nota ${nota ? "on" : ""}" data-tip="${escapeHtml(nota ? "Nota su " + c.nome + ": " + nota : "Nessuna nota su " + c.nome + ": tocca per scriverne una")}" onclick="event.stopPropagation();boxApriNota('${c.id}')">N</button>` : "";
+  return `<div class="box-card ${classe}" data-box="${b.id}" ${c ? `data-cav="${c.id}"` : ""} data-tip="${escapeHtml(tipBordo + (c && boxPuoGestire() ? " · tieni premuto e trascina per spostarlo" : ""))}" onclick="${boxBloccati() ? "apriUpsell('box')" : `boxApri('${b.id}')`}">
+    <div class="box-trave"><span class="box-targa">BOX ${b.numero}</span><span class="box-zona">${escapeHtml(proprietario)}</span></div>
+    <div class="box-corpo">${notaBtn}<div class="box-centro">${centro}</div>${icone}</div>
     <div class="box-porta" aria-hidden="true"></div>
     ${boxBloccati() ? `<div class="box-lucchetto"><i class="fa-solid fa-lock"></i>Disponibile da ADVANCE</div>` : ""}
   </div>`;
 }
 function renderBox(){
   const el = document.getElementById("box-griglia"); if(!el) return;
-  const occ = boxList.filter(b => b.cavallo_id).length, man = boxList.filter(b => !b.cavallo_id && b.manutenzione).length, lib = boxList.length - occ - man;
+  const n = { verde: 0, giallo: 0, rosso: 0, blu: 0, manut: 0 };
+  boxList.forEach(b => { n[boxStato(b).cls]++; });
   document.getElementById("box-conta").innerHTML = `<span data-tip="Box creati / massimo del tuo pacchetto"><b>${boxList.length}</b> box${boxBloccati() ? "" : " su " + boxLimite()}</span>
-    <span><i class="l" style="border-color:#3f7a45"></i>${occ} occupati</span><span><i class="l" style="border-color:#c0473d"></i>${lib} liberi</span><span><i class="l" style="border-color:#d9a13b"></i>${man} in manutenzione</span>`;
+    <span data-tip="Box di proprietà con il suo cavallo, o cavallo nel suo posto"><i class="l bv"></i>${n.verde} al loro posto</span>
+    <span data-tip="Cavallo in un box che non è il suo"><i class="l bg"></i>${n.giallo} fuori posto</span>
+    <span data-tip="Box di proprietà senza il suo cavallo dentro"><i class="l br"></i>${n.rosso} riservati vuoti</span>
+    <span data-tip="Box libero, non assegnato"><i class="l bb"></i>${n.blu} liberi</span>
+    <span data-tip="Box in manutenzione"><i class="l bm"></i>${n.manut} in manutenzione</span>`;
   const puoAgg = !boxBloccati() && boxPuoGestire() && boxList.length < boxLimite();
   el.innerHTML = boxList.map(boxCardHtml).join("") + (puoAgg ? `<div class="box-card box-nuovo" onclick="boxNuovo()" data-tip="Crea un nuovo box con il primo numero libero (da 1 a 100)"><i class="fa-solid fa-plus" style="font-size:20px"></i> Nuovo box</div>` : "");
   document.getElementById("box-btn-impost").style.display = !boxBloccati() && boxPuoGestire() ? "" : "none";
@@ -7725,16 +8231,18 @@ async function boxToggleIcona(boxId, tipo){
   const esiste = boxAttivitaDi(boxId, tipo);
   if(DEMO_MODE){
     if(esiste) demoState.boxAttivita = demoState.boxAttivita.filter(a => a !== esiste);
-    else demoState.boxAttivita.push({ box_id: boxId, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "Tu" });
+    else demoState.boxAttivita.push({ box_id: boxId, cavallo_id: boxList.find(x => x.id === boxId)?.cavallo_id || null, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "Tu" });
     boxAttivita = demoState.boxAttivita;
   } else {
     // aggiornamento immediato a schermo, poi il database
     if(esiste) boxAttivita = boxAttivita.filter(a => a !== esiste);
-    else boxAttivita = [...boxAttivita, { box_id: boxId, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "" }];
+    const cav = boxList.find(x => x.id === boxId)?.cavallo_id || null;
+    if(!esiste) boxAttivita = [...boxAttivita, { box_id: boxId, cavallo_id: cav, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "" }];
     renderBox(); if(boxPannelloId) boxRenderPannello();
     const r = esiste
-      ? await sb.from("scuderia_box_attivita").delete().eq("box_id", boxId).eq("tipo", tipo).eq("giorno", oggiRoma())
-      : await sb.from("scuderia_box_attivita").insert({ centro_id: currentCentro.id, box_id: boxId, tipo });
+      ? (cav ? await sb.from("scuderia_box_attivita").delete().eq("cavallo_id", cav).eq("tipo", tipo).eq("giorno", oggiRoma())
+             : await sb.from("scuderia_box_attivita").delete().eq("box_id", boxId).is("cavallo_id", null).eq("tipo", tipo).eq("giorno", oggiRoma()))
+      : await sb.from("scuderia_box_attivita").insert({ centro_id: currentCentro.id, box_id: boxId, cavallo_id: cav, tipo });
     if(r.error){ showToast(r.error.message); }
     await loadBox();
   }
@@ -7747,14 +8255,27 @@ function boxRenderPannello(){
   const b = boxList.find(x => x.id === boxPannelloId); if(!b){ closeModal("modal-box"); return; }
   const c = b.cavallo_id ? cavalliList.find(x => x.id === b.cavallo_id) : null;
   const gest = boxPuoGestire();
-  document.getElementById("box-pannello-titolo").innerHTML = `<span class="box-targa">BOX ${b.numero}</span> ${escapeHtml(b.nome || b.zona || "")}`;
+  const stB = boxStato(b);
+  document.getElementById("box-pannello-titolo").innerHTML = `<span class="box-targa">BOX ${b.numero}</span> ${escapeHtml(stB.proprietario || b.zona || "")}`;
+  const ass = stB.ass;
+  const altriLiberiAss = cavalliList.filter(x => !boxList.some(bb => bb.assegnato_cavallo_id === x.id));
+  const sezioneProprieta = !gest ? (ass ? `<p style="font-size:13px;color:var(--muted);margin:10px 0 0">Box di proprietà: ${escapeHtml(ass.nome)}${ass.proprietario ? " · " + escapeHtml(ass.proprietario) : ""}</p>` : "")
+    : `<details class="bp-proprieta" ${ass ? "open" : ""}><summary data-tip="Un box di proprietà resta riservato a un cavallo e al suo proprietario, anche quando il cavallo è altrove">Box di proprietà</summary>
+      ${ass ? `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px"><span style="font-size:13.5px">Riservato a <b>${escapeHtml(ass.nome)}</b>${ass.proprietario ? " · " + escapeHtml(ass.proprietario) : ""}</span>
+          <button class="btn btn-outline btn-sm btn-variazione" onclick="boxRiserva('${b.id}', null)">Togli riserva</button></div>`
+        : altriLiberiAss.length ? `<div style="display:flex;gap:8px;margin-top:8px"><select class="input" id="box-riserva-cavallo">${altriLiberiAss.map(x => `<option value="${x.id}">${escapeHtml(x.nome)}${x.proprietario ? " · " + escapeHtml(x.proprietario) : ""}</option>`).join("")}</select>
+          <button class="btn btn-primary btn-conferma btn-sm" onclick="boxRiserva('${b.id}', document.getElementById('box-riserva-cavallo').value)">Riserva</button></div>`
+        : `<p style="font-size:13px;color:var(--muted);margin:8px 0 0">Tutti i cavalli hanno già un box di proprietà.</p>`}</details>`;
   let h = "";
   if(c){
     const liberi = boxList.filter(x => !x.cavallo_id && !x.manutenzione && x.id !== b.id);
+    const nota = boxNote[c.id];
     h = `<div class="bp-testa">${c.foto_url ? `<div class="box-foto" style="background-image:url('${escapeHtml(c.foto_url)}')"></div>` : `<div class="box-nopic" style="margin:0">NO<br>PICTURE</div>`}
         <div style="min-width:0"><div style="font-weight:800;font-size:18px;display:flex;align-items:center;gap:8px">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}</div>
         <div style="color:var(--muted);font-size:12.5px">${escapeHtml([c.razza, c.proprietario ? "di " + c.proprietario : null].filter(Boolean).join(" · "))}</div>
         <div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(pallinoCavallo(c.id).testo)}</div></div></div>
+      ${stB.sotto ? `<div class="bp-avviso giallo">${escapeHtml(stB.tip.replace(/^Bordo giallo: /, ""))}</div>` : ""}
+      <div class="bp-nota" onclick="boxApriNota('${c.id}')"><span class="box-nota ${nota ? "on" : ""}" style="position:static">N</span><span>${nota ? escapeHtml(nota) : '<span style="color:var(--muted)">Nessuna nota: tocca per scriverne una</span>'}</span></div>
       <div class="field"><label>Dov'è / come sta</label>
         <select class="input" onchange="boxAggiorna('${b.id}', { stato_cavallo: this.value })">${Object.entries(BOX_STATI).map(([k, s]) => `<option value="${k}" ${b.stato_cavallo === k ? "selected" : ""}>${s.nome}</option>`).join("")}</select></div>
       <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Oggi</label>
@@ -7763,7 +8284,7 @@ function boxRenderPannello(){
           <small>${a ? new Date(a.fatto_il).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" }) + (a.fatto_da_nome ? " · " + escapeHtml(a.fatto_da_nome.split(" ")[0]) : "") : "da fare"}</small></button>`; }).join("")}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" onclick="closeModal('modal-box');showModule('cavalli');openCavalloDetail('${c.id}')"><i class="fa-solid fa-horse-head"></i> Scheda cavallo</button>
-        ${gest && liberi.length ? `<select class="input" style="width:auto;flex:1;min-width:140px" onchange="if(this.value)boxSposta('${b.id}', this.value)"><option value="">Sposta in…</option>${liberi.map(x => `<option value="${x.id}">Box ${x.numero}${x.nome ? " · " + escapeHtml(x.nome) : ""}</option>`).join("")}</select>` : ""}
+        ${gest && liberi.length ? `<select class="input" style="width:auto;flex:1;min-width:140px" onchange="if(this.value)boxSposta('${b.id}', this.value)"><option value="">Sposta in…</option>${liberi.map(x => { const a2 = x.assegnato_cavallo_id ? cavalliList.find(y => y.id === x.assegnato_cavallo_id) : null; return `<option value="${x.id}">Box ${x.numero}${a2 && a2.id !== c.id ? " · riservato a " + escapeHtml(a2.nome) : x.nome ? " · " + escapeHtml(x.nome) : ""}</option>`; }).join("")}</select>` : ""}
         ${gest ? `<button class="btn btn-outline btn-sm" style="color:var(--danger)" onclick="boxLibera('${b.id}')"><i class="fa-solid fa-right-from-bracket"></i> Libera box</button>` : ""}
       </div>`;
   } else if(b.manutenzione){
@@ -7772,7 +8293,8 @@ function boxRenderPannello(){
         ${b.manutenzione_nota ? `<div style="font-size:13px;margin-top:4px">${escapeHtml(b.manutenzione_nota)}</div>` : ""}</div></div>
       ${gest ? `<button class="btn btn-primary btn-block" onclick="boxAggiorna('${b.id}', { manutenzione: false }).then(ok => ok && boxRenderPannello())"><i class="fa-solid fa-check"></i> Fine manutenzione: box libero</button>` : `<p style="color:var(--muted);font-size:13px">Può chiudere la manutenzione l'amministratore o un membro di livello 2-3.</p>`}`;
   } else {
-    const senzaBox = cavalliList.filter(x => !boxList.some(bb => bb.cavallo_id === x.id));
+    const senzaBox = cavalliList.filter(x => !boxList.some(bb => bb.cavallo_id === x.id))
+      .sort((x, y) => (y.id === b.assegnato_cavallo_id) - (x.id === b.assegnato_cavallo_id));
     h = gest ? `<div class="field"><label>Aggiungi un cavallo</label>
         ${senzaBox.length ? `<div style="display:flex;gap:8px"><select class="input" id="box-scegli-cavallo">${senzaBox.map(x => `<option value="${x.id}">${escapeHtml(x.nome)}</option>`).join("")}</select>
         <button class="btn btn-primary" onclick="boxAssegna('${b.id}')">Aggiungi</button></div>` : `<p style="color:var(--muted);font-size:13px;margin:0">Tutti i cavalli hanno già un box. Aggiungi un cavallo da "Nuovo cavallo".</p>`}</div>
@@ -7788,22 +8310,128 @@ function boxRenderPannello(){
       <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="boxElimina('${b.id}')"><i class="fa-solid fa-trash"></i> Elimina box</button>`
       : `<p style="color:var(--muted);font-size:13.5px">Box libero. Può assegnare i cavalli l'amministratore o un membro di livello 2-3.</p>`;
   }
-  document.getElementById("box-pannello-corpo").innerHTML = h;
+  document.getElementById("box-pannello-corpo").innerHTML = h + (b.manutenzione && !c ? "" : sezioneProprieta);
+}
+// Mette un cavallo in un box (da un altro box o da nessuno), con i controlli:
+// box occupato → bloccato · box in manutenzione → bloccato · box riservato a un altro cavallo → conferma
+async function boxMuovi(cavId, daId, aId){
+  const a = boxList.find(x => x.id === aId), c = cavalliList.find(x => x.id === cavId);
+  if(!a || !c || daId === aId) return false;
+  if(a.cavallo_id){ const o = cavalliList.find(x => x.id === a.cavallo_id); showToast(`Box ${a.numero} occupato${o ? " da " + o.nome : ""}: spostamento non possibile.`); return false; }
+  if(a.manutenzione){ showToast(`Box ${a.numero} in manutenzione: spostamento non possibile.`); return false; }
+  if(a.assegnato_cavallo_id && a.assegnato_cavallo_id !== cavId){
+    const ass = cavalliList.find(x => x.id === a.assegnato_cavallo_id);
+    const chi = ass ? (ass.proprietario ? `di ${ass.proprietario} (cavallo ${ass.nome})` : `riservato a ${ass.nome}`) : "di proprietà";
+    const ok = await boxConferma(`Box ${a.numero} privato`, `Questo box è ${chi}. Vuoi mettere comunque ${c.nome}?`);
+    if(!ok) return false;
+  }
+  const da = daId ? boxList.find(x => x.id === daId) : null;
+  const stato = da?.stato_cavallo || "in_box";
+  if(da && !(await boxAggiorna(daId, { cavallo_id: null }))) return false;
+  if(!(await boxAggiorna(aId, { cavallo_id: cavId, stato_cavallo: stato, manutenzione: false }))) return false;
+  showToast(da ? `${c.nome} spostato nel box ${a.numero}.` : `${c.nome} nel box ${a.numero}.`);
+  return true;
 }
 async function boxAssegna(id){
   const cav = document.getElementById("box-scegli-cavallo")?.value; if(!cav) return;
-  if(await boxAggiorna(id, { cavallo_id: cav, stato_cavallo: "in_box", manutenzione: false })){ showToast("Cavallo aggiunto al box."); boxRenderPannello(); }
+  if(await boxMuovi(cav, null, id)) boxRenderPannello();
 }
 async function boxLibera(id){
   if(!confirm("Liberare il box? Il cavallo resta nell'anagrafica.")) return;
   if(await boxAggiorna(id, { cavallo_id: null })){ showToast("Box liberato."); boxRenderPannello(); }
 }
 async function boxSposta(daId, aId){
-  const b = boxList.find(x => x.id === daId); if(!b) return;
-  const cav = b.cavallo_id, stato = b.stato_cavallo;
-  if(!(await boxAggiorna(daId, { cavallo_id: null }))) return;
-  if(await boxAggiorna(aId, { cavallo_id: cav, stato_cavallo: stato })){ const n = boxList.find(x => x.id === aId)?.numero; showToast(`Spostato nel box ${n}.`); boxPannelloId = aId; boxRenderPannello(); }
+  const b = boxList.find(x => x.id === daId); if(!b?.cavallo_id) return;
+  if(await boxMuovi(b.cavallo_id, daId, aId)){ boxPannelloId = aId; boxRenderPannello(); } else boxRenderPannello();
 }
+// riserva il box a un cavallo (e al suo proprietario); null = toglie la riserva
+async function boxRiserva(boxId, cavId){
+  if(await boxAggiorna(boxId, { assegnato_cavallo_id: cavId || null })){
+    showToast(cavId ? "Box riservato." : "Riserva tolta: il box è di nuovo libero per tutti."); boxRenderPannello();
+  }
+}
+// pop-up di conferma (verde = conferma, contorno = annulla)
+function boxConferma(titolo, testo){
+  return new Promise(resolve => {
+    document.getElementById("box-conf-titolo").textContent = titolo;
+    document.getElementById("box-conf-testo").textContent = testo;
+    const fine = v => { closeModal("modal-box-conferma"); resolve(v); };
+    document.getElementById("box-conf-si").onclick = () => fine(true);
+    document.getElementById("box-conf-no").onclick = () => fine(false);
+    openModal("modal-box-conferma");
+  });
+}
+// nota "N" del cavallo (la segue in ogni box)
+let boxNotaCavalloId = null;
+function boxApriNota(cavId){
+  const c = cavalliList.find(x => x.id === cavId); if(!c) return;
+  boxNotaCavalloId = cavId;
+  document.getElementById("box-nota-titolo").textContent = "Nota su " + c.nome;
+  document.getElementById("box-nota-testo").value = boxNote[cavId] || "";
+  document.getElementById("box-nota-elimina").style.display = boxNote[cavId] ? "" : "none";
+  openModal("modal-box-nota");
+  setTimeout(() => document.getElementById("box-nota-testo").focus(), 60);
+}
+async function boxSalvaNota(cancella){
+  const id = boxNotaCavalloId; if(!id) return;
+  const testo = cancella ? "" : document.getElementById("box-nota-testo").value.trim();
+  if(DEMO_MODE){ const c = demoState.cavalli.find(x => x.id === id); if(c) c.nota_box = testo || null; }
+  else { const { error } = await sb.rpc("box_nota_cavallo", { p_cavallo: id, p_nota: testo }); if(error){ showToast(error.message); return; } }
+  if(testo) boxNote[id] = testo; else delete boxNote[id];
+  closeModal("modal-box-nota"); renderBox(); if(boxPannelloId) boxRenderPannello();
+  showToast(testo ? "Nota salvata: segue il cavallo in ogni box." : "Nota eliminata.");
+}
+
+/* ---- trascinamento: tieni premuto un cavallo e portalo in un altro box ---- */
+const boxDrag = { timer: null, attivo: false, cav: null, da: null, x0: 0, y0: 0, ghost: null, target: null, blocca: false };
+function boxDragReset(){
+  clearTimeout(boxDrag.timer);
+  if(boxDrag.ghost) boxDrag.ghost.remove();
+  document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento").forEach(el => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
+  document.body.classList.remove("box-trascina");
+  Object.assign(boxDrag, { timer: null, attivo: false, cav: null, da: null, ghost: null, target: null });
+  window.__boxDrag = false;
+}
+document.addEventListener("pointerdown", e => {
+  const card = e.target.closest && e.target.closest(".box-card[data-cav]");
+  if(!card || e.target.closest(".box-ic, .box-nota") || !boxPuoGestire() || boxBloccati()) return;
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  boxDragReset();
+  Object.assign(boxDrag, { cav: card.dataset.cav, da: card.dataset.box, x0: e.clientX, y0: e.clientY });
+  boxDrag.timer = setTimeout(() => {
+    boxDrag.attivo = true; window.__boxDrag = true;
+    document.getElementById("eq-tip")?.classList.remove("vis");
+    card.classList.add("in-trascinamento"); document.body.classList.add("box-trascina");
+    const c = cavalliList.find(x => x.id === boxDrag.cav);
+    const g = document.createElement("div"); g.className = "box-ghost";
+    g.innerHTML = `${c?.foto_url ? `<span class="f" style="background-image:url('${escapeHtml(c.foto_url)}')"></span>` : `<i class="fa-solid fa-horse-head"></i>`}<b>${escapeHtml(c?.nome || "")}</b>`;
+    g.style.left = boxDrag.x0 + "px"; g.style.top = boxDrag.y0 + "px";
+    document.body.appendChild(g); boxDrag.ghost = g;
+    try{ navigator.vibrate?.(15); }catch(x){}
+  }, e.pointerType === "mouse" ? 260 : 420);
+});
+document.addEventListener("pointermove", e => {
+  if(!boxDrag.cav) return;
+  if(!boxDrag.attivo){ if(Math.hypot(e.clientX - boxDrag.x0, e.clientY - boxDrag.y0) > 8) boxDragReset(); return; }
+  boxDrag.ghost.style.left = e.clientX + "px"; boxDrag.ghost.style.top = e.clientY + "px";
+  const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box]");
+  document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no").forEach(x => { if(x !== el) x.classList.remove("drop-ok", "drop-no"); });
+  boxDrag.target = el && el.dataset.box !== boxDrag.da ? el.dataset.box : null;
+  if(boxDrag.target){ const b = boxList.find(x => x.id === boxDrag.target); el.classList.add(b && !b.cavallo_id && !b.manutenzione ? "drop-ok" : "drop-no"); }
+});
+document.addEventListener("touchmove", e => { if(boxDrag.attivo) e.preventDefault(); }, { passive: false });
+document.addEventListener("pointerup", async () => {
+  if(!boxDrag.cav) return;
+  const { attivo, cav, da, target } = boxDrag;
+  boxDragReset();
+  if(!attivo) return;
+  boxDrag.blocca = true; setTimeout(() => { boxDrag.blocca = false; }, 400);
+  if(target) await boxMuovi(cav, da, target);
+});
+document.addEventListener("pointercancel", () => { if(!boxDrag.attivo) boxDragReset(); });
+document.addEventListener("click", e => { if(boxDrag.blocca && e.target.closest && e.target.closest(".box-card")){ e.preventDefault(); e.stopPropagation(); boxDrag.blocca = false; } }, true);
+document.addEventListener("contextmenu", e => { if(e.target.closest && e.target.closest(".box-card[data-cav]") && boxPuoGestire()) e.preventDefault(); });
+
 async function boxManutenzione(id){
   const campi = { manutenzione: true, manutenzione_motivo: document.getElementById("box-man-motivo").value,
     manutenzione_fino: document.getElementById("box-man-fino").value || null, manutenzione_nota: document.getElementById("box-man-nota").value.trim() || null };
@@ -7853,9 +8481,10 @@ function boxModalitaStalla(on){
   const MODULI_TIP = { home:"Panoramica del centro, accesso rapido e promemoria", centro:"Dati del centro, team, codice invito e il tuo pacchetto",
     cavalli:"Anagrafica cavalli, scadenzario sanitario e Box / Stalla", lezioni:"Calendario delle lezioni e prenotazioni", pacchetti:"Carnet, abbonamenti e pensioni",
     comunicazioni:"Messaggi al team e chat con i clienti", magazzino:"Scorte, movimenti, riordini e fornitori", statistiche:"Incassi, clienti a rischio, margini e radar di Merlino",
-    professionisti:"Maniscalchi collegati: chat e appuntamenti", store:"Vendita online (in arrivo)", fatturazione:"Fatture elettroniche SDI (in arrivo)", ai:"Athena, Merlino e gli altri agenti" };
+    professionisti:"Maniscalchi collegati: chat e appuntamenti", groom:"App Equo Groom per il personale di stalla: QR, PIN e icone del giorno", store:"Vendita online (in arrivo)", fatturazione:"Fatture elettroniche SDI (in arrivo)", ai:"Athena, Merlino e gli altri agenti" };
   function crea(){ if(!tip){ tip = document.createElement("div"); tip.id = "eq-tip"; tip.setAttribute("role", "tooltip"); document.body.appendChild(tip); } return tip; }
   function mostra(el){
+    if(window.__boxDrag) return;
     const testo = el.getAttribute("data-tip"); if(!testo) return;
     const t = crea(); t.textContent = testo; t.classList.remove("sopra", "sotto"); t.style.left = "0px"; t.style.top = "0px"; t.classList.add("vis");
     const r = el.getBoundingClientRect(), w = t.offsetWidth, h = t.offsetHeight;
@@ -7903,6 +8532,167 @@ function boxModalitaStalla(on){
   if(document.readyState !== "loading"){ automatici(document); new MutationObserver(osserva).observe(document.body, { childList: true, subtree: true }); }
 })();
 
+/* =====================================================================
+   GESTIONE GROOM — app "Equo Groom" (/groom) per il personale di stalla.
+   Niente account: QR personale (token) + PIN di 4 cifre scelto al primo accesso.
+   Limiti: START 0 · ADVANCE 3 · PREMIUM 10 (separati dal limite del team).
+   ===================================================================== */
+let groomDati = { limite: 0, gestisce: false, groom: [] }, groomQrCorrente = null;
+const GROOM_LINGUE = { it:"Italiano", en:"English", ro:"Română", hi:"हिन्दी", pa:"ਪੰਜਾਬੀ", bn:"বাংলা", ar:"العربية" };
+const groomLimiteLocale = () => ({ start:0, advance:3, premium:10 })[pianoCentro?.pacchetto] ?? 50;
+const groomLink = token => `${location.origin}/groom?t=${token}`;
+async function groomCarica(){
+  if(DEMO_MODE){
+    if(!demoState.groom) demoState.groom = [
+      { id:"g1", nome:"Rahim", lingua:"bn", attivo:true, pin_creato:true, bloccato:false, ultimo_accesso:new Date(Date.now() - 36e5).toISOString(), token:"demo-rahim" },
+      { id:"g2", nome:"Ion", lingua:"ro", attivo:true, pin_creato:false, bloccato:false, ultimo_accesso:null, token:"demo-ion" } ];
+    groomDati = { limite: groomLimiteLocale(), gestisce: true, groom: demoState.groom }; return;
+  }
+  const { data, error } = await sb.rpc("groom_elenco", { p_centro_id: currentCentro.id });
+  if(error){ console.warn("groom:", error.message); groomDati = { limite: groomLimiteLocale(), gestisce: false, groom: [] }; return; }
+  groomDati = data;
+}
+async function refreshGroomModule(){ await groomCarica(); groomRender(); }
+async function groomCaricaTeam(){ if(pianoCentro && pianoCentro.groom === false) return; await groomCarica(); groomRenderTeam(); }
+function groomAttivi(){ return groomDati.groom.filter(g => g.attivo).length; }
+function groomQuando(iso){
+  if(!iso) return "mai entrato";
+  const d = new Date(iso), min = Math.round((Date.now() - d) / 6e4);
+  if(min < 2) return "attivo ora"; if(min < 60) return `${min} min fa`;
+  if(d.toDateString() === new Date().toDateString()) return "oggi alle " + d.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
+  return d.toLocaleDateString("it-IT", { day:"numeric", month:"short" });
+}
+function groomRender(){
+  const n = groomAttivi(), lim = groomDati.limite ?? groomLimiteLocale(), pieno = n >= lim;
+  document.getElementById("groom-contatore").textContent = `${n} di ${lim}`;
+  const btn = document.getElementById("groom-btn-agg");
+  btn.style.display = groomDati.gestisce ? "" : "none";
+  btn.classList.toggle("disabled", pieno);
+  btn.setAttribute("data-tip", pieno ? (lim < 10 ? "Hai raggiunto i 3 groom di ADVANCE: con PREMIUM arrivi a 10." : "Hai raggiunto il massimo di groom del tuo pacchetto.") : "Crea il QR personale per un nuovo groom");
+  const lista = document.getElementById("groom-lista");
+  document.getElementById("groom-vuoto").style.display = groomDati.groom.length ? "none" : "block";
+  lista.innerHTML = groomDati.groom.map(g => {
+    const stato = !g.attivo ? `<span class="badge-pill badge-gray">Disattivato</span>`
+      : g.bloccato ? `<span class="badge-pill" style="background:#fdeceb;color:#a5281b">PIN bloccato: genera un nuovo QR</span>`
+      : !g.pin_creato ? `<span class="badge-pill" style="background:#fff4d6;color:#7a5300">In attesa del primo accesso</span>`
+      : `<span class="badge-pill" style="background:#e8f3ec;color:#1d4a35">${escapeHtml(groomQuando(g.ultimo_accesso))}</span>`;
+    const az = !groomDati.gestisce ? "" : g.attivo
+      ? `<button class="btn btn-outline btn-sm" onclick="groomMostraQr('${g.id}')" data-tip="Mostra il QR personale da inquadrare"><i class="fa-solid fa-qrcode"></i> QR</button>
+         <button class="btn btn-ghost btn-sm" onclick="groomNuovoQr('${g.id}')" data-tip="Telefono cambiato o PIN dimenticato: il vecchio QR smette di funzionare"><i class="fa-solid fa-arrows-rotate"></i> Nuovo QR</button>
+         <button class="btn btn-ghost btn-sm" onclick="groomAttiva('${g.id}', false)" data-tip="Il groom non può più entrare nell'app"><i class="fa-solid fa-user-slash"></i> Disattiva</button>`
+      : `<button class="btn btn-outline btn-sm" onclick="groomAttiva('${g.id}', true)"><i class="fa-solid fa-user-check"></i> Riattiva</button>
+         <button class="btn btn-ghost btn-sm" onclick="groomElimina('${g.id}')"><i class="fa-solid fa-trash"></i></button>`;
+    return `<div class="groom-riga${g.attivo ? "" : " off"}"><div class="groom-av">${escapeHtml((g.nome || "?").slice(0, 1).toUpperCase())}</div>
+      <div class="groom-info"><b>${escapeHtml(g.nome)}</b><span>${escapeHtml(GROOM_LINGUE[g.lingua] || g.lingua)} · ${stato}</span></div><div class="groom-az">${az}</div></div>`;
+  }).join("");
+}
+function groomRenderTeam(){
+  const box = document.getElementById("team-groom"); if(!box) return;
+  box.style.display = groomDati.groom.length ? "block" : "none";
+  document.getElementById("team-groom-count").textContent = `${groomAttivi()} di ${groomDati.limite ?? groomLimiteLocale()}`;
+  document.getElementById("team-groom-lista").innerHTML = groomDati.groom.map(g => `<div class="groom-riga mini${g.attivo ? "" : " off"}"><div class="groom-av">${escapeHtml((g.nome || "?").slice(0, 1).toUpperCase())}</div>
+    <div class="groom-info"><b>${escapeHtml(g.nome)}</b><span>Groom · ${escapeHtml(GROOM_LINGUE[g.lingua] || "")} · ${g.attivo ? escapeHtml(g.pin_creato ? groomQuando(g.ultimo_accesso) : "in attesa del primo accesso") : "disattivato"}</span></div></div>`).join("");
+}
+function groomApriNuovo(){
+  const lim = groomDati.limite ?? groomLimiteLocale();
+  if(groomAttivi() >= lim){ if(lim < 10) return apriUpsell("groom"); return showToast("Hai raggiunto il massimo di groom del tuo pacchetto."); }
+  document.getElementById("groom-nome").value = ""; document.getElementById("groom-lingua").value = "it";
+  document.getElementById("groom-err").style.display = "none";
+  openModal("modal-groom-nuovo"); setTimeout(() => document.getElementById("groom-nome").focus(), 50);
+}
+async function groomSalvaNuovo(){
+  const nome = document.getElementById("groom-nome").value.trim(), lingua = document.getElementById("groom-lingua").value;
+  const err = document.getElementById("groom-err");
+  if(!nome){ err.textContent = "Scrivi il nome del groom."; err.style.display = "block"; return; }
+  let r;
+  if(DEMO_MODE){ r = { id:"g" + Date.now(), token:"demo-" + Date.now() }; demoState.groom.push({ id:r.id, nome, lingua, attivo:true, pin_creato:false, bloccato:false, ultimo_accesso:null, token:r.token }); }
+  else{
+    const { data, error } = await sb.rpc("groom_crea", { p_centro_id: currentCentro.id, p_nome: nome, p_lingua: lingua });
+    if(error){ err.textContent = error.message; err.style.display = "block"; return; }
+    r = data;
+  }
+  Registro.azione("groom:crea");
+  closeModal("modal-groom-nuovo");
+  await refreshGroomModule();
+  groomMostraQr(r.id, r.token);
+}
+function groomMostraQr(id, token){
+  const g = groomDati.groom.find(x => x.id === id);
+  token = token || g?.token; if(!token) return showToast("QR non disponibile.");
+  groomQrCorrente = { nome: g?.nome || "", link: groomLink(token) };
+  document.getElementById("groom-qr-titolo").textContent = "QR di " + (g?.nome || "");
+  const d = document.getElementById("groom-qr-img"); d.innerHTML = "";
+  try{ new QRCode(d, { text: groomQrCorrente.link, width: 220, height: 220, colorDark: "#0b341e", colorLight: "#ffffff" }); } catch(e){ d.textContent = groomQrCorrente.link; }
+  openModal("modal-groom-qr");
+}
+function groomCondividi(){
+  if(!groomQrCorrente) return;
+  const testo = `Ciao ${groomQrCorrente.nome}, questa è la tua app Equo Groom per ${currentCentro?.nome || "la scuderia"}. Apri il link, scegli il tuo PIN e la tua lingua: ${groomQrCorrente.link}`;
+  if(navigator.share){ navigator.share({ title:"Equo Groom", text: testo }).catch(() => {}); return; }
+  window.open("https://wa.me/?text=" + encodeURIComponent(testo), "_blank");
+}
+async function groomCopia(){ try{ await navigator.clipboard.writeText(groomQrCorrente.link); showToast("Link copiato."); } catch(e){ showToast(groomQrCorrente.link); } }
+async function groomStampaQr(){
+  const u = await qrDataUrl(groomQrCorrente.link);
+  groomFinestraStampa(`<div class="et grande"><img src="${u}"><b>${escapeHtml(groomQrCorrente.nome)}</b><span>Equo Groom · ${escapeHtml(currentCentro?.nome || "")}</span><small>QR personale: non condividerlo</small></div>`, "QR groom");
+}
+async function groomNuovoQr(id){
+  const g = groomDati.groom.find(x => x.id === id);
+  if(!await groomConferma("Nuovo QR", `Il QR attuale di ${g.nome} smetterà di funzionare e al prossimo accesso sceglierà un nuovo PIN. Procedo?`)) return;
+  let token;
+  if(DEMO_MODE){ token = "demo-" + Date.now(); Object.assign(g, { token, pin_creato:false, bloccato:false }); }
+  else{ const { data, error } = await sb.rpc("groom_nuovo_qr", { p_id: id }); if(error) return showToast(error.message); token = data.token; }
+  await refreshGroomModule(); groomMostraQr(id, token);
+}
+async function groomAttiva(id, attivo){
+  const g = groomDati.groom.find(x => x.id === id);
+  if(!attivo && !await groomConferma("Disattiva groom", `${g.nome} non potrà più entrare nell'app Groom. Le spunte che ha già fatto restano. Potrai riattivarlo con un nuovo QR.`)) return;
+  if(attivo && groomAttivi() >= (groomDati.limite ?? groomLimiteLocale())) return groomApriNuovo();
+  if(DEMO_MODE){ Object.assign(g, { attivo, pin_creato: attivo ? false : g.pin_creato }); }
+  else{ const { error } = await sb.rpc("groom_attiva", { p_id: id, p_attivo: attivo }); if(error) return showToast(error.message); }
+  await refreshGroomModule();
+  if(attivo) groomMostraQr(id);
+}
+async function groomElimina(id){
+  const g = groomDati.groom.find(x => x.id === id);
+  if(!await groomConferma("Elimina groom", `Elimino ${g.nome} dall'elenco? Le spunte che ha già fatto restano nello storico.`)) return;
+  if(DEMO_MODE) demoState.groom = demoState.groom.filter(x => x.id !== id);
+  else{ const { error } = await sb.rpc("groom_elimina", { p_id: id }); if(error) return showToast(error.message); }
+  await refreshGroomModule();
+}
+function groomConferma(titolo, testo){
+  return new Promise(ok => {
+    document.getElementById("box-conf-titolo").textContent = titolo; document.getElementById("box-conf-testo").textContent = testo;
+    const si = document.getElementById("box-conf-si"), no = document.getElementById("box-conf-no");
+    si.onclick = () => { closeModal("modal-box-conferma"); ok(true); }; no.onclick = () => { closeModal("modal-box-conferma"); ok(false); };
+    openModal("modal-box-conferma");
+  });
+}
+// etichette QR per i box: il groom inquadra e apre subito quel cavallo
+async function groomStampaBox(){
+  if(!boxList || !boxList.length){ try{ await loadBox(); } catch(e){} }
+  const lista = (boxList || []).slice().sort((a, b) => (a.numero || 0) - (b.numero || 0));
+  if(!lista.length) return showToast("Nessun box: creali prima in Cavalli & Salute → Box / Stalla.");
+  showToast("Preparo le etichette…");
+  const et = [];
+  for(const b of lista){
+    const u = await qrDataUrl(`${location.origin}/groom?b=${b.id}`);
+    et.push(`<div class="et"><img src="${u}"><b>Box ${escapeHtml(b.numero ?? "")}</b><span>${escapeHtml([b.nome, b.zona].filter(Boolean).join(" · ") || currentCentro?.nome || "")}</span><small>Equo Groom</small></div>`);
+  }
+  groomFinestraStampa(et.join(""), "QR dei box");
+}
+function groomFinestraStampa(corpo, titolo){
+  const w = window.open("", "_blank"); if(!w) return showToast("Consenti le finestre pop-up per stampare.");
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titolo}</title><style>
+    @page{ size:A4; margin:10mm } body{ font-family:Arial,sans-serif; margin:0; color:#0b341e }
+    .griglia{ display:grid; grid-template-columns:repeat(3,1fr); gap:6mm }
+    .et{ border:0.4mm solid #0b341e; border-radius:3mm; padding:4mm; text-align:center; break-inside:avoid; display:flex; flex-direction:column; align-items:center; gap:1mm }
+    .et img{ width:42mm; height:42mm } .et b{ font-size:16pt } .et span{ font-size:9pt; color:#444 } .et small{ font-size:7.5pt; color:#777 }
+    .et.grande{ width:90mm; margin:20mm auto } .et.grande img{ width:70mm; height:70mm }
+  </style></head><body><div class="${corpo.includes("grande") ? "" : "griglia"}">${corpo}</div><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);
+  w.document.close();
+}
+
 function openModal(id){ document.getElementById(id).classList.add("active"); }
 
 /* ---------- ATHENA (segreteria AI: guida del gestionale + situazione del centro) ---------- */
@@ -7916,6 +8706,7 @@ const AGENTI_CHAT = {
 };
 function apriAthena(){ apriAgente("athena"); }
 async function apriAgente(key, domanda){
+  Registro.pagina("agente-" + key);
   if(key === "merlino" && pianoCentro && !(pianoCentro.agenti || []).includes("merlino")){ apriUpsell("agenti"); return; }
   const a = AGENTI_CHAT[key] || AGENTI_CHAT.athena;
   if(agenteAttivo !== key){ agenteAttivo = key; athenaCaricata = false; }

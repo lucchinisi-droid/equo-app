@@ -1,0 +1,14 @@
+{
+  "id": "/groom",
+  "name": "Equo Groom",
+  "short_name": "Equo Groom",
+  "description": "Le attività di stalla di oggi, con un tocco",
+  "scope": "/groom",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b341e",
+  "theme_color": "#0b341e",
+  "icons": [
+    { "src": "/assets/icona-equo.png", "sizes": "160x160", "type": "image/png" }
+  ]
+}
