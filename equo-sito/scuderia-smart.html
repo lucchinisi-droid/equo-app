@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Scuderia smart · Equo</title>
+<meta name="description" content="Telecamere, GPS, display e monitor collegati a Equo Scuderia: richiedi un preventivo su misura.">
+<meta name="theme-color" content="#0b2a1b">
+<link rel="icon" href="img/icona-verde.png">
+<link rel="apple-touch-icon" href="img/icona-180.png">
+<link rel="canonical" href="https://equohub.com/scuderia-smart.html">
+<meta property="og:image" content="https://equohub.com/img/og.jpg">
+<meta property="og:site_name" content="Equo">
+<meta property="og:locale" content="it_IT">
+<link rel="stylesheet" href="css/sito.css">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-in">
+    <a class="nav-logo" href="index.html" aria-label="Equo, pagina iniziale"><img src="img/logo-bianco.png" alt="Equo"></a>
+    <div class="nav-cta" style="margin-left:auto;display:flex">
+      <a class="btn-nav vuoto" href="https://scuderia.equohub.com">Accedi a Scuderia</a>
+      <a class="btn-nav oro" href="https://app.equohub.com">Apri l'app</a>
+    </div>
+  </div>
+</header>
+<main class="legale">
+  <p class="occhiello">Scuderia smart</p>
+  <h1>Occhi sulla scuderia, <em>anche da lontano.</em></h1>
+  <p class="intro">Telecamere, GPS, display touch e monitor collegati a Equo Scuderia. Ogni kit si progetta su misura per la tua struttura: lasciaci i tuoi dati e ti ricontattiamo per un preventivo.</p>
+  <form class="modulo" data-modulo="scuderia_smart" novalidate>
+    <div class="riga">
+      <div class="campo"><label for="f-nome">Nome e cognome *</label><input type="text" id="f-nome" name="nome" maxlength="160" autocomplete="name" required></div>
+      <div class="campo"><label for="f-ruolo">Ruolo <span class="fac">(facoltativo)</span></label>
+        <select id="f-ruolo" name="ruolo"><option value="">—</option><option>Titolare</option><option>Gestore o direttore</option><option>Istruttore</option><option>Altro</option></select></div>
+    </div>
+    <div class="campo"><label for="f-strutt">Nome della struttura *</label><input type="text" id="f-strutt" name="struttura" maxlength="160" autocomplete="organization" placeholder="es. Centro Ippico Le Querce" required></div>
+    <div class="riga">
+      <div class="campo"><label for="f-citta">Città *</label><input type="text" id="f-citta" name="citta" maxlength="120" autocomplete="address-level2" required></div>
+      <div class="campo"><label for="f-prov">Provincia *</label><input type="text" id="f-prov" name="provincia" maxlength="30" placeholder="es. RM" required></div>
+    </div>
+    <div class="riga">
+      <div class="campo"><label for="f-email">Email *</label><input type="email" id="f-email" name="email" maxlength="200" autocomplete="email" required></div>
+      <div class="campo"><label for="f-tel">Telefono *</label><input type="tel" id="f-tel" name="telefono" maxlength="40" autocomplete="tel" placeholder="+39 …" required></div>
+    </div>
+    <div class="campo"><label for="f-box">Quanti box o cavalli? <span class="fac">(facoltativo)</span></label>
+      <select id="f-box" name="box"><option value="">—</option><option>Fino a 10</option><option>11–30</option><option>31–80</option><option>Più di 80</option></select></div>
+    <div class="campo"><span class="etichetta">Cosa ti interessa? <span class="fac" style="font-weight:400;color:var(--muted)">(facoltativo)</span></span>
+      <div class="scelte">
+        <label class="scelta"><input type="checkbox" name="interessi" value="telecamere"><span>Telecamere</span></label>
+        <label class="scelta"><input type="checkbox" name="interessi" value="gps"><span>GPS</span></label>
+        <label class="scelta"><input type="checkbox" name="interessi" value="display"><span>Display touch</span></label>
+        <label class="scelta"><input type="checkbox" name="interessi" value="monitor"><span>Monitor</span></label>
+        <label class="scelta"><input type="checkbox" name="interessi" value="altro"><span>Altro</span></label>
+      </div></div>
+    <div class="campo"><label for="f-msg">Messaggio <span class="fac">(facoltativo)</span></label><textarea id="f-msg" name="messaggio" maxlength="1500" placeholder="Raccontaci la tua struttura e cosa vorresti controllare."></textarea></div>
+      <label class="consenso"><input type="checkbox" name="privacy" required><span>Ho letto l'<a href="privacy.html" target="_blank">informativa privacy</a> e accetto che Equo usi questi dati per ricontattarmi. *</span></label>
+      <div class="trappola" aria-hidden="true"><label>Sito web <input type="text" name="sito_web" tabindex="-1" autocomplete="off"></label></div>
+      <div class="errore" role="alert"></div>
+    <button type="submit">Richiedi informazioni</button>
+    <p class="nota">* campi obbligatori · Il preventivo è gratuito e senza impegno.</p>
+  </form>
+  <div class="modulo-ok" role="status">
+    <div class="spunta">✓</div>
+    <h2>Richiesta inviata, grazie!</h2>
+    <p>Ti ricontattiamo presto per capire insieme cosa serve alla tua struttura. Intanto puoi dare un'occhiata a <a href="https://scuderia.equohub.com">Equo Scuderia</a>.</p>
+  </div>
+  <nav class="legale-link" style="margin-top:30px"><a href="termini.html">Termini e condizioni</a> · <a href="privacy.html">Privacy e cookie</a> · <a href="contatti.html">Contatti</a> · <a href="index.html">Torna alla home</a></nav>
+</main>
+<script src="js/modulo.js" defer></script>
+</body>
+</html>

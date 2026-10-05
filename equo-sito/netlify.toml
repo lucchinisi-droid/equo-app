@@ -24,6 +24,13 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
+# ---------- Moduli di contatto del sito → funzione dell'app (stesso dominio, niente CORS) ----------
+[[redirects]]
+  from = "/api/contatto"
+  to = "https://app.equohub.com/.netlify/functions/contatto-sito"
+  status = 200
+  force = true
+
 # ---------- Vecchio sito (Next.js): indirizzi rimandati alle pagine nuove ----------
 # (/contatti, /termini e /privacy funzionano da soli: Netlify serve contatti.html, termini.html, privacy.html)
 [[redirects]]

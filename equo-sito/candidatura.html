@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Veterinari e trainer · Equo</title>
+<meta name="description" content="Candidati per costruire con Equo gli strumenti per veterinari e istruttori.">
+<meta name="theme-color" content="#0b2a1b">
+<link rel="icon" href="img/icona-verde.png">
+<link rel="apple-touch-icon" href="img/icona-180.png">
+<link rel="canonical" href="https://equohub.com/candidatura.html">
+<meta property="og:image" content="https://equohub.com/img/og.jpg">
+<meta property="og:site_name" content="Equo">
+<meta property="og:locale" content="it_IT">
+<link rel="stylesheet" href="css/sito.css">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-in">
+    <a class="nav-logo" href="index.html" aria-label="Equo, pagina iniziale"><img src="img/logo-bianco.png" alt="Equo"></a>
+    <div class="nav-cta" style="margin-left:auto;display:flex">
+      <a class="btn-nav vuoto" href="https://scuderia.equohub.com">Accedi a Scuderia</a>
+      <a class="btn-nav oro" href="https://app.equohub.com">Apri l'app</a>
+    </div>
+  </div>
+</header>
+<main class="legale">
+  <p class="occhiello">Veterinari e trainer</p>
+  <h1>La tua app <em>la disegniamo insieme.</em></h1>
+  <p class="intro">Stiamo costruendo gli strumenti di Equo per veterinari e istruttori: agenda, clienti, schede dei cavalli e chat con i proprietari. Candidati per lavorarci con noi fin dal primo giorno.</p>
+  <div class="punti">
+    <div><b>Accesso in anteprima</b>Provi per primo le funzioni pensate per il tuo lavoro.</div>
+    <div><b>Decidi con noi</b>Ci dici cosa ti serve davvero e lo costruiamo insieme.</div>
+    <div><b>Ti ricontattiamo noi</b>Una chiamata per conoscerci e capire come lavori oggi.</div>
+  </div>
+  <form class="modulo" data-modulo="candidatura" novalidate>
+    <div class="campo"><span class="etichetta">Professione *</span>
+      <div class="scelte">
+        <label class="scelta"><input type="radio" name="professione" value="veterinario"><span>Veterinario</span></label>
+        <label class="scelta"><input type="radio" name="professione" value="istruttore"><span>Istruttore o trainer</span></label>
+      </div></div>
+    <div class="campo"><label for="f-nome">Nome e cognome *</label><input type="text" id="f-nome" name="nome" maxlength="160" autocomplete="name" required></div>
+    <div class="riga">
+      <div class="campo"><label for="f-email">Email *</label><input type="email" id="f-email" name="email" maxlength="200" autocomplete="email" required></div>
+      <div class="campo"><label for="f-tel">Telefono *</label><input type="tel" id="f-tel" name="telefono" maxlength="40" autocomplete="tel" placeholder="+39 …" required></div>
+    </div>
+    <div class="riga">
+      <div class="campo"><label for="f-citta">Città *</label><input type="text" id="f-citta" name="citta" maxlength="120" autocomplete="address-level2" required></div>
+      <div class="campo"><label for="f-prov">Provincia *</label><input type="text" id="f-prov" name="provincia" maxlength="30" placeholder="es. RM" required></div>
+    </div>
+    <div class="riga">
+      <div class="campo"><label for="f-spec">Specializzazione <span class="fac">(facoltativa)</span></label><input type="text" id="f-spec" name="specializzazione" maxlength="200" placeholder="es. ortopedia, salto ostacoli"></div>
+      <div class="campo"><label for="f-esp">Anni di esperienza <span class="fac">(facoltativo)</span></label>
+        <select id="f-esp" name="esperienza"><option value="">—</option><option>Meno di 3</option><option>3–10</option><option>Più di 10</option></select></div>
+    </div>
+    <div class="campo"><label for="f-msg">Raccontaci di te <span class="fac">(facoltativo)</span></label><textarea id="f-msg" name="messaggio" maxlength="1500" placeholder="Come lavori oggi, cosa ti farebbe risparmiare tempo…"></textarea></div>
+      <label class="consenso"><input type="checkbox" name="privacy" required><span>Ho letto l'<a href="privacy.html" target="_blank">informativa privacy</a> e accetto che Equo usi questi dati per ricontattarmi. *</span></label>
+      <div class="trappola" aria-hidden="true"><label>Sito web <input type="text" name="sito_web" tabindex="-1" autocomplete="off"></label></div>
+      <div class="errore" role="alert"></div>
+    <button type="submit">Invia la candidatura</button>
+    <p class="nota">* campi obbligatori · Ti rispondiamo entro pochi giorni.</p>
+  </form>
+  <div class="modulo-ok" role="status">
+    <div class="spunta">✓</div>
+    <h2>Candidatura inviata, grazie!</h2>
+    <p>Ti ricontattiamo presto all'email o al telefono che ci hai lasciato. Intanto, se hai anche un cavallo, puoi già usare <a href="https://app.equohub.com">Equo App</a>.</p>
+  </div>
+  <nav class="legale-link" style="margin-top:30px"><a href="termini.html">Termini e condizioni</a> · <a href="privacy.html">Privacy e cookie</a> · <a href="contatti.html">Contatti</a> · <a href="index.html">Torna alla home</a></nav>
+</main>
+<script src="js/modulo.js" defer></script>
+</body>
+</html>

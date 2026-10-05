@@ -239,3 +239,50 @@ h1 em,h2 em{font-style:italic;color:var(--oro);font-weight:600}
 .legale .tab tr:nth-child(even) td{background:var(--beige)}
 @media (max-width:600px){.legale .tab{font-size:13px}.legale .tab th,.legale .tab td{padding:8px}}
 .link-cta a.esaurito{background:#b9b2a2!important;color:#fff!important;cursor:default;pointer-events:none}
+
+/* ---------- moduli di contatto (Veterinari e trainer, Scuderia smart) ---------- */
+.modulo{background:#fff;border:1px solid var(--bordo);border-radius:20px;padding:22px 20px 20px;margin-top:22px}
+.modulo .riga{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modulo .campo{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;min-width:0}
+.modulo label,.modulo .etichetta{font-size:13px;font-weight:600;color:var(--verde)}
+.modulo label .fac{font-weight:400;color:var(--muted)}
+.modulo input[type=text],.modulo input[type=email],.modulo input[type=tel],.modulo select,.modulo textarea{
+  width:100%;font:inherit;font-size:16px;color:var(--testo);background:var(--beige);border:1px solid var(--bordo);border-radius:12px;padding:11px 13px;outline:none}
+.modulo textarea{min-height:96px;resize:vertical}
+.modulo input:focus,.modulo select:focus,.modulo textarea:focus{border-color:var(--oro);background:#fff}
+.modulo .scelte{display:flex;flex-wrap:wrap;gap:8px}
+.modulo .scelta{position:relative}
+.modulo .scelta input{position:absolute;opacity:0;pointer-events:none}
+.modulo .scelta span{display:inline-block;padding:9px 15px;border-radius:999px;border:1px solid var(--bordo);background:var(--beige);font-size:14.5px;cursor:pointer;color:var(--testo)}
+.modulo .scelta input:checked + span{background:var(--verde);border-color:var(--verde);color:#fff}
+.modulo .scelta input:focus-visible + span{outline:2px solid var(--oro);outline-offset:2px}
+.modulo .consenso{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5;margin:4px 0 16px;color:#3e4b43}
+.modulo .consenso input{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--verde)}
+.modulo .trappola{position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden}
+.modulo .errore{display:none;background:#fbeaea;color:#8a2323;border-radius:12px;padding:10px 13px;font-size:14px;margin-bottom:14px}
+.modulo button{width:100%;font:inherit;font-weight:700;font-size:16px;background:var(--verde);color:#fff;border:2px solid var(--oro);border-radius:999px;padding:13px 20px;cursor:pointer}
+.modulo button:disabled{opacity:.6;cursor:default}
+.modulo .nota{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.modulo-ok{display:none;text-align:center;background:#fff;border:1px solid var(--bordo);border-radius:20px;padding:30px 22px;margin-top:22px}
+.modulo-ok .spunta{width:56px;height:56px;border-radius:50%;background:var(--verde);color:var(--oro2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px}
+.modulo-ok h2{margin-top:0!important}
+.punti{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 4px}
+.punti div{background:#fff;border:1px solid var(--bordo);border-radius:16px;padding:14px;font-size:14px;line-height:1.5}
+.punti b{display:block;margin-bottom:3px}
+@media (max-width:600px){.modulo .riga{grid-template-columns:1fr;gap:0}.punti{grid-template-columns:1fr}.modulo{padding:18px 15px 16px}}
+
+/* ---------- pagina Proprietari ---------- */
+.prop-apertura{margin:var(--gap);min-height:640px;justify-content:center;padding-bottom:52px}
+.prop-apertura .titolo-xl{color:#fff}
+.prop-piani{background:var(--beige2)}
+.prop-piani .ea-card .ea-prezzo small{display:block;margin-top:4px}
+.prop-piani .cos-e a{color:#2f7d4f;text-decoration:underline}
+.faq{max-width:760px;margin:30px auto 0;text-align:left}
+.faq details{background:#fff;border:1px solid var(--bordo);border-radius:16px;margin-bottom:10px;padding:0 18px}
+.faq summary{cursor:pointer;list-style:none;font-weight:600;color:var(--verde);padding:16px 26px 16px 0;position:relative;font-size:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:0;top:12px;font-size:22px;color:var(--oro)}
+.faq details[open] summary::after{content:"–"}
+.faq p{padding:0 0 16px;font-size:15px;line-height:1.6;color:#3e4b43}
+.faq a{color:#2f7d4f;text-decoration:underline}
+.box.largo.prop-apertura .foto.piena::before{background:radial-gradient(ellipse 60% 55% at 50% 50%,rgba(11,42,27,.82) 0%,rgba(11,42,27,.6) 60%,rgba(11,42,27,.35) 100%)}
