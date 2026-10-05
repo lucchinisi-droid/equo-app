@@ -215,3 +215,27 @@ h1 em,h2 em{font-style:italic;color:var(--oro);font-weight:600}
 .box.largo .foto.piena::before{background:linear-gradient(180deg,rgba(11,42,27,.88) 0%,rgba(11,42,27,.45) 36%,rgba(11,42,27,0) 60%)}
 .contatore span span{display:inline;margin:0}
 @media (max-width:600px){.bandiera{position:relative;top:auto;right:auto;margin:-14px 0 14px}}
+
+.ea-risparmio{font-size:13px;line-height:1.45;margin-top:10px;color:#3e4b43}
+.ea-sconto{display:inline-block;background:var(--verde);color:var(--oro2);font-weight:700;font-size:12.5px;letter-spacing:.02em;padding:3px 10px;border-radius:999px;margin-right:6px;white-space:nowrap}
+
+/* ---------- pagine legali ---------- */
+.legale{max-width:760px;margin:0 auto;padding:48px 22px 60px;color:var(--testo)}
+.legale h1{font-size:clamp(32px,5vw,46px);color:var(--verde);margin-bottom:10px}
+.legale h1 em{color:var(--oro)}
+.legale .intro{font-size:17px;color:#3e4b43;margin-bottom:26px}
+.legale h2{font-size:22px;color:var(--verde);margin:30px 0 8px;scroll-margin-top:calc(var(--nav-h) + 12px)}
+.legale p,.legale li{font-size:15.5px;line-height:1.65}
+.legale ul{padding-left:20px;margin:6px 0}
+.legale li{margin:7px 0}
+.legale a{color:#2f7d4f;text-decoration:underline}
+.legale b{color:var(--verde)}
+.legale #early-adopter + ul{background:#fff;border:1px solid var(--bordo);border-radius:16px;padding:16px 18px 16px 34px}
+.legale .agg{margin-top:36px;font-size:13px;color:var(--muted)}
+.legale-link{margin-top:8px;font-size:14px}
+.legale .tab{width:100%;border-collapse:collapse;margin:10px 0 6px;font-size:14px;background:#fff;border:1px solid var(--bordo);border-radius:12px;overflow:hidden}
+.legale .tab th{background:var(--verde);color:#fff;text-align:left;font-weight:600;padding:9px 11px;font-size:13px}
+.legale .tab td{padding:9px 11px;border-top:1px solid var(--bordo);vertical-align:top;line-height:1.5}
+.legale .tab tr:nth-child(even) td{background:var(--beige)}
+@media (max-width:600px){.legale .tab{font-size:13px}.legale .tab th,.legale .tab td{padding:8px}}
+.link-cta a.esaurito{background:#b9b2a2!important;color:#fff!important;cursor:default;pointer-events:none}

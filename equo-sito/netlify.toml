@@ -23,3 +23,70 @@
   for = "/video/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# ---------- Vecchio sito (Next.js): indirizzi rimandati alle pagine nuove ----------
+# (/contatti, /termini e /privacy funzionano da soli: Netlify serve contatti.html, termini.html, privacy.html)
+[[redirects]]
+  from = "/login"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/signup"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/dashboard/*"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/dashboard"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/assistant"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/expenses"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/horses/*"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/horses"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/services"
+  to = "https://app.equohub.com/"
+  status = 301
+[[redirects]]
+  from = "/servizi/app"
+  to = "/prossimamente.html?s=proprietari"
+  status = 301
+[[redirects]]
+  from = "/servizi/scuderia"
+  to = "/prossimamente.html?s=scuderia"
+  status = 301
+[[redirects]]
+  from = "/servizi"
+  to = "/#ecosistema"
+  status = 301
+[[redirects]]
+  from = "/blog/*"
+  to = "/"
+  status = 301
+[[redirects]]
+  from = "/blog"
+  to = "/"
+  status = 301
+[[redirects]]
+  from = "/presentazione.html"
+  to = "/"
+  status = 301
+[[redirects]]
+  from = "/Equo_Presentazione_2026.pdf"
+  to = "/"
+  status = 301

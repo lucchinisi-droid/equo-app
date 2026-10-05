@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  // Link di accesso, conferma email o recupero password finiti sul sito: li passiamo all'app
+  if (/access_token=|type=recovery|type=signup|error_code=/.test(location.hash) || /[?&]code=/.test(location.search)) {
+    location.replace("https://app.equohub.com/" + location.search + location.hash);
+    return;
+  }
+
   // Menu su telefono
   var btn = document.querySelector(".nav-menu-btn");
   var tendina = document.getElementById("tendina");
@@ -68,6 +74,8 @@
     if (rim === 0) {
       nRim.textContent = "0";
       nota.textContent = "Posti esauriti. Grazie a tutti gli Early Adopter.";
+      var cta = document.querySelector('[data-cta="' + tipo + '"]');
+      if (cta) { cta.textContent = "Posti esauriti"; cta.removeAttribute("href"); cta.classList.add("esaurito"); cta.setAttribute("aria-disabled", "true"); }
     } else {
       anima(nRim, rim);
       nota.textContent = "Aggiornato in tempo reale. " + (Number(dati.riservati) || 0) + " posti sono già stati assegnati a tester e partner della beta.";

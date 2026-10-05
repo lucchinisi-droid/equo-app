@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Equo">
-<link rel="apple-touch-icon" href="/assets/icona-equo.png">
+<link rel="apple-touch-icon" href="/assets/icona-180.png">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -170,6 +170,64 @@ select.input{cursor:pointer}
 .deadline-dot.soon{background:var(--accent)}
 .deadline-dot.late{background:var(--red)}
 .rz-wrap{position:relative}
+/* Early Adopter */
+.early-avviso{display:flex;gap:12px;align-items:flex-start;width:100%;max-width:360px;margin:-14px 0 20px;padding:12px 14px;border-radius:14px;background:#14482c;color:#f4f1ea;text-align:left}
+.early-avviso b{display:block;font-size:14px}
+.early-avviso span:not(.early-medaglia){display:block;font-size:12.5px;color:#e8b04b;font-weight:600;margin-top:1px}
+.early-avviso small{display:block;font-size:12px;color:#cfdcd2;margin-top:4px;line-height:1.4}
+#onb-step-1 .early-avviso{margin:0 0 14px}
+.early-medaglia{width:30px;height:30px;border-radius:50%;background:#e8b04b;color:#14482c;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.early-medaglia.grande{width:44px;height:44px;font-size:22px}
+.role-card.early-scelta{outline:2px solid var(--accent);outline-offset:2px}
+.early-testa{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.early-prezzo{font-family:'Fraunces',serif;font-size:38px;font-weight:700;line-height:1;margin:6px 0 10px}
+.early-prezzo small{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted)}
+.early-punti{list-style:none;margin:0 0 12px;padding:0;font-size:13.5px}
+.early-punti li{position:relative;padding-left:20px;margin:6px 0;line-height:1.45}
+.early-punti li::before{content:"";position:absolute;left:3px;top:.5em;width:7px;height:7px;background:var(--accent);transform:rotate(45deg)}
+.early-posti{font-size:13px;margin-bottom:12px;color:var(--muted)}
+.early-posti b{color:var(--text)}
+.early-nota{font-size:12.5px;line-height:1.5;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:9px 11px;margin-bottom:12px}
+.early-txt{font-size:13.5px;line-height:1.6;margin-bottom:14px}
+/* Ricerca rapida */
+.cerca-barra{display:none;position:relative;margin:0 0 12px}
+.cerca-barra.on{display:block}
+.cerca-lente{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted);pointer-events:none;display:flex}
+.cerca-lente svg{width:100%;height:100%}
+.cerca-input{width:100%;padding-left:38px!important;padding-right:38px!important;-webkit-appearance:none;appearance:none}
+.cerca-input::-webkit-search-cancel-button{display:none}
+.cerca-x{display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;border-radius:50%;background:var(--surface2);color:var(--text);font-size:19px;line-height:1;cursor:pointer;align-items:center;justify-content:center;font-family:inherit}
+.cerca-barra.piena .cerca-x{display:flex}
+.cerca-vuoto{display:none;text-align:center;font-size:13px;color:var(--muted);padding:14px 6px}
+.cerca-vuoto.on{display:block}
+.cerca-nascosto{display:none!important}
+.int-cerca{margin-bottom:8px}
+.int-cerca .rz-lista button b{font-weight:700}
+.int-cerca .rz-lista button .muted{font-weight:400}
+.rz-vuoto{font-size:13px;color:var(--muted);padding:8px 10px}
+.topbar-cerca{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-right:8px;flex-shrink:0;padding:0}
+.topbar-cerca svg{width:17px;height:17px}
+.home-cerca{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font:inherit;font-size:14px;cursor:pointer;text-align:left}
+.home-cerca svg{width:18px;height:18px;flex-shrink:0;color:var(--accent)}
+.cerca-tutto{display:none;position:fixed;inset:0;z-index:95;background:var(--bg);flex-direction:column}
+.cerca-tutto.on{display:flex}
+body.ct-aperta{overflow:hidden}
+.ct-testa{display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--border)}
+.ct-campo{position:relative;flex:1}
+.ct-chiudi{border:0;background:none;color:var(--accent);font:inherit;font-weight:600;font-size:14px;cursor:pointer;padding:8px 4px}
+#ct-risultati{flex:1;overflow-y:auto;padding:6px 14px calc(24px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.ct-gruppo{margin-top:12px}
+.ct-titolo{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 6px}
+.ct-titolo span{font-weight:500}
+.ct-riga{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;text-align:left;font:inherit;color:var(--text);cursor:pointer}
+.ct-ico{width:32px;height:32px;border-radius:10px;background:var(--surface2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ct-testi{flex:1;min-width:0;display:flex;flex-direction:column}
+.ct-testi b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-testi small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-freccia{color:var(--muted);font-size:20px}
+.ct-altri,.ct-suggerimento{font-size:12px;color:var(--muted);padding:2px 4px 4px;line-height:1.5}
+.ct-suggerimento{margin-top:16px;text-align:center}
+.ct-nulla{text-align:center;color:var(--muted);font-size:13.5px;padding:40px 10px}
 .rz-riga{gap:6px;align-items:flex-start;padding:0 0 8px}.rz-riga .rz-wrap{flex:1}
 .cod-equo{font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em;color:var(--text)}
 .rz-lista{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:var(--surface,#fff);border:1px solid var(--border,#ddd);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.14);max-height:300px;overflow-y:auto;padding:5px}
@@ -815,6 +873,7 @@ body.ai-aperta{overflow:hidden}
   <div class="topbar">
     <img src="assets/icona-equo.png" alt="Equo" class="topbar-logo-img" onclick="goHome()">
     <div class="topbar-context" id="topbar-context">Nessun cavallo</div>
+    <button type="button" class="topbar-cerca ct-apri" onclick="apriCercaTutto()" aria-label="Cerca in Equo">{{lente}}</button>
     <div class="topbar-avatar" id="topbar-avatar" onclick="openMenu()">?</div>
   </div>
 
@@ -822,6 +881,7 @@ body.ai-aperta{overflow:hidden}
   <div class="page-content active" id="page-home">
     <div class="section-title" style="font-size:18px;margin-bottom:2px" id="home-greeting"></div>
     <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="home-date"></div>
+    <button type="button" class="home-cerca ct-apri" onclick="apriCercaTutto()">{{lente}}<span>Cerca cavalli, libretto, spese, chat…</span></button>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
         <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
@@ -1028,6 +1088,7 @@ body.ai-aperta{overflow:hidden}
   <div class="page-content" id="page-pro-home">
     <div class="section-title" style="font-size:18px;margin-bottom:2px" id="pro-home-greeting">Ciao</div>
     <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="pro-home-date"></div>
+    <button type="button" class="home-cerca ct-apri" onclick="apriCercaTutto()">{{lente}}<span>Cerca clienti, cavalli, appuntamenti…</span></button>
 
     <div class="card cert-card" id="certified-card" style="display:none;margin-bottom:14px"></div>
 
@@ -3107,6 +3168,17 @@ const DB = {
       .order("next_due_date", { ascending: true }).limit(limit);
     return error ? [] : (data || []);
   },
+  // Ricerca (lente): tutto il libretto sanitario dei cavalli del proprietario
+  async listEventiTutti(horseIds){
+    if(!horseIds || !horseIds.length) return [];
+    if(DEMO_MODE){
+      const out = [];
+      horseIds.forEach(hid => (demoState.events[hid] || []).forEach(ev => out.push({ ...ev, horse_id: ev.horse_id || hid })));
+      return out.sort((a,b) => new Date(b.date) - new Date(a.date));
+    }
+    const { data, error } = await sb.from("health_events").select("*").in("horse_id", horseIds).order("date", { ascending: false }).limit(500);
+    return error ? [] : (data || []);
+  },
   async listExpenses(){
     if(DEMO_MODE) return demoState.expenses.slice().sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => ({ ...e, horses: { name: e.horse_name } }));
     const { data, error } = await sb.from("expenses").select("*, horses(name)").eq("owner_id", currentUser.id).order("date", { ascending: false }).limit(50);
@@ -3587,13 +3659,20 @@ const DB = {
     if(error || !data) return { cavallo_cliente_id: null, horse_id: cavallo.horse_id || null };
     return { cavallo_cliente_id: data.id, horse_id: cavallo.horse_id || null };
   },
+  // Ricerca: tutti i cavalli dei clienti del professionista (per cercare un cliente dal nome del cavallo)
+  async listCavalliMiei(){
+    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null }));
+    const { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
+    if(error) console.error("listCavalliMiei:", error);
+    return error ? [] : (data || []);
+  },
   async listInterventiMascalciaTutti(){
     if(DEMO_MODE){
       return demoState.interventiMascalcia.filter(i => !STATI_NON_CONFERMATI.includes(i.stato))
-        .map(i => ({ ...i, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === i.cliente_mascalcia_id)?.nome } }))
+        .map(i => { const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id); return { ...i, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === i.cliente_mascalcia_id)?.nome }, cavalli_clienti_mascalcia: cv ? { nome: cv.nome } : null }; })
         .sort((a,b) => new Date(b.data_intervento) - new Date(a.data_intervento));
     }
-    const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome)")
+    const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)")
       .eq("maniscalco_id", currentUser.id).not("stato", "in", "(richiesto,rifiutato,proposto,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
@@ -4211,6 +4290,7 @@ function aggiornaThemeColorMeta(){
 
 async function enterApp(ruolo){
   setTimeout(invitoInstallaControlla, 4000);
+  setTimeout(() => { if(typeof earlyControlla === "function") earlyControlla(); }, 1200);
   document.getElementById("screen-onboarding").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();
@@ -4948,6 +5028,7 @@ async function handleCheckoutReturn(){
   if(!checkout) return;
   window.history.replaceState({}, "", window.location.pathname);
   if(checkout === "cancel"){
+    if(typeof earlyDopoRitorno === "function") earlyDopoRitorno("cancel", false);
     showToast("Pagamento annullato.");
     return;
   }
@@ -4959,8 +5040,9 @@ async function handleCheckoutReturn(){
       currentUser.piano = "premium";
       updatePianoUI();
       if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
-      showToast("Sei passato a Premium!");
+      if(!(typeof earlyDopoRitorno === "function" && earlyDopoRitorno("success", true))) showToast("Sei passato a Premium!");
     } else {
+      if(typeof earlyDopoRitorno === "function") earlyDopoRitorno("success", false);
       showToast("Pagamento ricevuto, l'attivazione arriva a momenti — riapri l'app tra poco se non la vedi subito.");
     }
   }
@@ -5465,7 +5547,7 @@ function renderHorsesList(){
   box.innerHTML = horses.map(h => {
     const sub = [h.breed, TIPO_LABELS[h.tipo_proprieta] || null].filter(Boolean).join(" · ") || "Razza non specificata";
     return `
-    <div class="card horse-card" onclick="openHorseDetail('${h.id}')">
+    <div class="card horse-card" data-cerca="${escapeHtml([h.microchip, h.mantello, h.codice_equo].filter(Boolean).join(" "))}" onclick="openHorseDetail('${h.id}')">
       <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:22px"></i></div>
       <div>
         <div style="font-weight:700">${escapeHtml(h.name)}</div>
@@ -5635,6 +5717,8 @@ const EVENT_LABELS = { vaccino: "Vaccino", coggins: "Test Coggins", ferratura: "
 async function loadHorseEvents(horseId){
   const box = document.getElementById("horse-events-list");
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
+  if(typeof cercaAzzera === "function" && loadHorseEvents.ultimo !== horseId) cercaAzzera("eventi");
+  loadHorseEvents.ultimo = horseId;
   const data = await DB.listEvents(horseId);
   currentHorseEventsData = data || [];
   if(!data || data.length === 0){
@@ -6084,7 +6168,8 @@ async function richiamoPerFatto(e){
 function agNomeCavalloSicuro(e){ try{ return typeof agNomeCavallo === "function" ? agNomeCavallo(e) : ""; }catch(x){ return ""; } }
 
 async function loadClientiMascalcia(){
-  clientiMascalcia = await DB.listClientiMascalcia();
+  const [cli] = await Promise.all([DB.listClientiMascalcia(), caricaCavalliMiei()]);
+  clientiMascalcia = cli;
   renderClientiList();
   await renderProDeadlines();
 }
@@ -6098,7 +6183,7 @@ function renderClientiList(){
   }
   const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
   const card = c => `
-    <div class="card horse-card" onclick="openClienteDetail('${c.id}')">
+    <div class="card horse-card" data-cerca="${escapeHtml(paroleCercaCliente(c))}" onclick="openClienteDetail('${c.id}')">
       <div class="horse-avatar"><i class="fa-solid ${isStruttura(c) ? "fa-building" : "fa-user"}" style="font-size:20px"></i></div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700">${escapeHtml(c.nome)}</div>
@@ -6972,6 +7057,7 @@ function togglePiano(){
     document.getElementById("upgrade-btn-mensile").textContent = prezzi.mensile;
     document.getElementById("upgrade-btn-annuale").textContent = prezzi.annuale;
     document.getElementById("upgrade-btn-lifetime").textContent = prezzi.lifetime;
+    if(typeof earlyAggiornaBottoneLifetime === "function") earlyAggiornaBottoneLifetime();
   }
   openModal("modal-upgrade-premium");
 }
@@ -7208,10 +7294,10 @@ async function renderIncassi(){
   daSaldareBox.innerHTML = daSaldare.length === 0
     ? '<div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div>'
     : daSaldare.map(i => `
-      <div class="deadline-item">
+      <div class="deadline-item" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
         <div style="flex:1">
           <div style="font-size:13px;font-weight:600">${escapeHtml(i.clienti_mascalcia?.nome || "")}</div>
-          <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}</div>
+          <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</div>
         </div>
         <div style="font-weight:700;font-size:14px">${formatEuro(i.importo)}</div>
       </div>
@@ -7319,6 +7405,7 @@ async function openInterventoModal(clienteId, intervento, preset){
   const scegli = !inModifica && !clienteId && clientiMascalcia.length ? '<option value="" disabled>Scegli il cliente…</option>' : "";
   select.innerHTML = scegli + (inModifica ? "" : '<option value="__nuovo__">+ Nuovo cliente</option>') + opzioniClienti;
   select.disabled = inModifica;
+  cercaClienteIntervento();
   if(inModifica) select.value = interventoInModifica.cliente_mascalcia_id;
   else if(clienteId) select.value = clienteId;
   else if(clientiMascalcia.length === 0) select.value = "__nuovo__";
@@ -10287,9 +10374,499 @@ document.querySelector('[data-page="prenotazioni"]').addEventListener("click", l
 /* Carica la lista chat quando si apre la tab Chat */
 document.querySelector('[data-page="chat"]').addEventListener("click", () => { loadOwnerChatList(); loadFarrierChatSection(); loadStableChatSection(); refreshChatBadge(); aggiornaBannerPush(); });
 
+/* ---------- RICERCA RAPIDA (ottobre 2026) ----------
+   1) Barre di ricerca sugli elenchi: compaiono quando l'elenco ha almeno CERCA_MIN elementi,
+      filtrano mentre si scrive, ignorano maiuscole e accenti, funzionano anche offline
+      (filtrano solo quello che è già sul telefono). Gli elenchi si ridisegnano da soli:
+      un osservatore riapplica il filtro dopo ogni aggiornamento.
+   2) Scelta del cliente nell'appuntamento: campo "cerca cliente o cavallo".
+   3) Lente: ricerca unica (Home e barra in alto) su cavalli, clienti, appuntamenti, spese, chat e sezioni. */
+const CERCA_MIN = 6;
+function cercaNorm(t){ return String(t ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
+function cercaParole(q){ return cercaNorm(q).split(" ").filter(Boolean); }
+function cercaCorrisponde(parole, testo){ const t = cercaNorm(testo); return parole.every(p => t.includes(p)); }
+const CERCA_LENTE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>';
+
+const cercaFiltri = {};
+function cercaFiltro(cfg){
+  if(cercaFiltri[cfg.id]) return cercaFiltri[cfg.id];
+  const rif = document.getElementById(cfg.prima);
+  if(!rif) return null;
+  const barra = document.createElement("div");
+  barra.className = "cerca-barra";
+  barra.id = "cerca-" + cfg.id;
+  barra.innerHTML = `<span class="cerca-lente">${CERCA_LENTE_SVG}</span><input class="input cerca-input" type="search" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search" aria-label="${escapeHtml(cfg.placeholder)}" placeholder="${escapeHtml(cfg.placeholder)}"><button type="button" class="cerca-x" aria-label="Cancella la ricerca">×</button>`;
+  rif.parentNode.insertBefore(barra, rif);
+  const vuoto = document.createElement("div");
+  vuoto.className = "cerca-vuoto";
+  const inp = barra.querySelector("input");
+  const boxes = cfg.boxes.map(id => document.getElementById(id)).filter(Boolean);
+  // il messaggio "nessun risultato" va dopo l'ultimo elenco (o dopo il suo contenitore)
+  const ultimo = boxes[boxes.length - 1];
+  const dopo = (cfg.contenitori && cfg.contenitori[cfg.boxes[cfg.boxes.length - 1]] && document.getElementById(cfg.contenitori[cfg.boxes[cfg.boxes.length - 1]])) || ultimo;
+  if(cfg.vuotoSopra) barra.after(vuoto); else dopo.after(vuoto);
+  const f = { cfg, barra, inp, boxes, vuoto };
+  f.applica = () => {
+    const parole = cercaParole(inp.value);
+    let totale = 0, visibili = 0;
+    boxes.forEach(box => {
+      let gruppoVisibile = true, ultimoItem = null, testa = null, visibiliBox = 0;
+      const figli = [...box.children];
+      const teste = [];
+      figli.forEach(el => {
+        if(el.classList.contains("cerca-ignora")) return;
+        if(cfg.testa && el.matches(cfg.testa)){
+          testa = { el, visibili: 0 }; teste.push(testa); ultimoItem = null;
+          return;
+        }
+        if(el.matches(cfg.item)){
+          totale++;
+          const ok = !parole.length || cercaCorrisponde(parole, el.textContent + " " + (el.dataset.cerca || ""));
+          el.classList.toggle("cerca-nascosto", !ok);
+          if(ok){ visibili++; visibiliBox++; if(testa) testa.visibili++; }
+          ultimoItem = ok;
+          return;
+        }
+        // elementi accessori (es. invito sotto un cliente, testo "nessun..."): seguono l'elemento prima di loro
+        const nascondi = parole.length && (ultimoItem === null ? !!testa : !ultimoItem);
+        el.classList.toggle("cerca-nascosto", !!nascondi && !el.classList.contains("hp-filtri"));
+      });
+      teste.forEach(t => t.el.classList.toggle("cerca-nascosto", !!parole.length && t.visibili === 0));
+      if(cfg.contenitori && cfg.contenitori[box.id]){
+        const c = document.getElementById(cfg.contenitori[box.id]);
+        if(c) c.classList.toggle("cerca-nascosto", !!parole.length && visibiliBox === 0);
+      }
+    });
+    const mostra = totale >= (cfg.min ?? CERCA_MIN) || !!parole.length;
+    barra.classList.toggle("on", mostra);
+    barra.classList.toggle("piena", !!inp.value);
+    vuoto.classList.toggle("on", !!parole.length && visibili === 0);
+    vuoto.textContent = parole.length ? `Nessun risultato per «${inp.value.trim()}»` : "";
+  };
+  inp.addEventListener("input", f.applica);
+  inp.addEventListener("keydown", e => { if(e.key === "Enter") inp.blur(); if(e.key === "Escape"){ inp.value = ""; f.applica(); } });
+  barra.querySelector(".cerca-x").addEventListener("click", () => { inp.value = ""; f.applica(); inp.focus(); });
+  const oss = new MutationObserver(() => f.applica());
+  boxes.forEach(b => oss.observe(b, { childList: true }));
+  cercaFiltri[cfg.id] = f;
+  f.applica();
+  return f;
+}
+// svuota la ricerca di un elenco (es. quando si apre un altro cavallo)
+function cercaAzzera(id){ const f = cercaFiltri[id]; if(f && f.inp.value){ f.inp.value = ""; f.applica(); } }
+
+function cercaInitElenchi(){
+  // Professionista
+  cercaFiltro({ id: "clienti", prima: "clienti-list", boxes: ["clienti-list"], item: ".horse-card", testa: ".clienti-sez-head", placeholder: "Cerca cliente, cavallo o telefono" });
+  cercaFiltro({ id: "incassi", prima: "incassi-da-saldare-list", boxes: ["incassi-da-saldare-list"], item: ".deadline-item", placeholder: "Cerca cliente o cavallo" });
+  cercaFiltro({ id: "inbox", prima: "inbox-card", boxes: ["inbox-list", "inbox-strutture-list", "colleghi-list"], item: ".inbox-item", vuotoSopra: true,
+    contenitori: { "inbox-list": "inbox-card", "inbox-strutture-list": "inbox-strutture-wrap" }, placeholder: "Cerca una conversazione" });
+  // Proprietario
+  cercaFiltro({ id: "eventi", prima: "horse-events-list", boxes: ["horse-events-list"], item: ".event-item", placeholder: "Cerca nel libretto: vaccino, ferratura, note…" });
+  cercaFiltro({ id: "spese", prima: "expenses-list", boxes: ["expenses-list"], item: ".event-item", placeholder: "Cerca spesa: fieno, maniscalco, cavallo…" });
+  cercaFiltro({ id: "cavalli", prima: "horses-list", boxes: ["horses-list"], item: ".horse-card", placeholder: "Cerca cavallo, razza o microchip" });
+}
+
+/* ---------- Indice dei cavalli dei clienti (professionista) ---------- */
+let cavalliMieiIndice = {}; // cliente_mascalcia_id → [nomi cavalli]
+let cavalliMieiLista = [];
+async function caricaCavalliMiei(){
+  try{
+    const lista = await DB.listCavalliMiei();
+    cavalliMieiLista = lista || [];
+    const idx = {};
+    cavalliMieiLista.forEach(c => { if(!c.cliente_mascalcia_id) return; (idx[c.cliente_mascalcia_id] = idx[c.cliente_mascalcia_id] || []).push(c.nome || ""); });
+    cavalliMieiIndice = idx;
+  }catch(e){ console.warn("caricaCavalliMiei:", e); }
+  return cavalliMieiLista;
+}
+function nomiCavalliCliente(c){
+  const da = cavalliMieiIndice[c.id] || [];
+  const testo = typeof nomiCavalliDaTesto === "function" ? nomiCavalliDaTesto(c.nome_cavallo || "") : [];
+  return [...new Set([...da, ...(Array.isArray(testo) ? testo : [])].map(n => String(n || "").trim()).filter(Boolean))];
+}
+function paroleCercaCliente(c){
+  return [c.nome_cavallo, ...nomiCavalliCliente(c), c.telefono, isStruttura(c) ? "struttura scuderia maneggio" : "proprietario"].filter(Boolean).join(" ");
+}
+
+/* ---------- 2) Scelta del cliente nell'appuntamento ---------- */
+function cercaClienteIntervento(){
+  const sel = document.getElementById("intervento-cliente-select");
+  const grp = document.getElementById("intervento-cliente-group");
+  if(!sel || !grp) return;
+  let wrap = document.getElementById("int-cerca-wrap");
+  if(!wrap){
+    wrap = document.createElement("div");
+    wrap.id = "int-cerca-wrap";
+    wrap.className = "rz-wrap int-cerca";
+    wrap.innerHTML = `<span class="cerca-lente">${CERCA_LENTE_SVG}</span><input class="input cerca-input" id="int-cerca-input" type="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Cerca cliente o cavallo…" aria-label="Cerca cliente o cavallo"><div class="rz-lista" id="int-cerca-lista"></div>`;
+    sel.parentNode.insertBefore(wrap, sel);
+    const inp = wrap.querySelector("input"), lista = wrap.querySelector(".rz-lista");
+    const mostra = () => {
+      const parole = cercaParole(inp.value);
+      if(!parole.length){ lista.classList.remove("aperta"); lista.innerHTML = ""; return; }
+      const righe = [];
+      clientiMascalcia.forEach(c => {
+        const cavalli = nomiCavalliCliente(c);
+        if(cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({ c, cav: null, p: cercaNorm(c.nome).startsWith(parole[0]) ? 0 : 1 });
+        cavalli.forEach(n => { if(cercaCorrisponde(parole, n + " " + c.nome)) righe.push({ c, cav: n, p: cercaNorm(n).startsWith(parole[0]) ? 0 : 2 }); });
+      });
+      const unici = []; const visti = new Set();
+      righe.sort((a, b) => a.p - b.p || (a.cav || a.c.nome).localeCompare(b.cav || b.c.nome, "it")).forEach(r => { const k = r.c.id + "|" + (r.cav || ""); if(!visti.has(k)){ visti.add(k); unici.push(r); } });
+      lista.innerHTML = unici.slice(0, 10).map(r => r.cav
+        ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>`
+        : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Struttura" : "Cliente"}</small></button>`).join("")
+        || `<div class="rz-vuoto">Nessun cliente con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
+      lista.classList.add("aperta");
+    };
+    inp.addEventListener("input", mostra);
+    inp.addEventListener("focus", mostra);
+    lista.addEventListener("mousedown", e => e.preventDefault());
+    lista.addEventListener("click", async e => {
+      const b = e.target.closest("button"); if(!b) return;
+      lista.classList.remove("aperta");
+      if(b.dataset.nuovo){
+        const nome = inp.value.trim();
+        sel.value = "__nuovo__"; inp.value = "";
+        await onInterventoClienteChange();
+        const campo = document.getElementById("intervento-nuovo-cliente-nome");
+        if(campo && nome && !campo.value) campo.value = nome;
+        return;
+      }
+      const c = clientiMascalcia.find(x => x.id === b.dataset.id);
+      if(!c) return;
+      sel.value = c.id;
+      inp.value = b.dataset.cav ? b.dataset.cav + " · " + c.nome : c.nome;
+      await onInterventoClienteChange();
+      // scelto un cavallo: lo preseleziono nel menu dei cavalli
+      if(b.dataset.cav){
+        const cs = document.getElementById("intervento-cavallo-select");
+        const k = cercaNorm(b.dataset.cav);
+        const opz = cs ? [...cs.options].find(o => cercaNorm(o.textContent.replace(/ · su Equo$/, "")) === k) : null;
+        if(opz){ cs.value = opz.value; cs.dispatchEvent(new Event("change")); }
+      }
+    });
+    inp.addEventListener("blur", () => setTimeout(() => lista.classList.remove("aperta"), 150));
+  }
+  const inp = document.getElementById("int-cerca-input");
+  inp.value = "";
+  document.getElementById("int-cerca-lista").classList.remove("aperta");
+  // solo per i nuovi appuntamenti e quando i clienti sono tanti
+  wrap.style.display = !sel.disabled && clientiMascalcia.length >= CERCA_MIN ? "block" : "none";
+}
+
+/* ---------- 3) Lente: ricerca in tutta l'app ---------- */
+let cercaTuttoDati = null, cercaTuttoTimer = null, cercaTuttoVista = null;
+function apriCercaTutto(){
+  const ov = document.getElementById("cerca-tutto");
+  if(!ov) return;
+  const vista = vistaAi();
+  if(cercaTuttoVista !== vista){ cercaTuttoDati = null; cercaTuttoVista = vista; }
+  ov.classList.add("on");
+  document.body.classList.add("ct-aperta");
+  const inp = document.getElementById("ct-input");
+  inp.placeholder = vista === "professionista" ? "Cerca clienti, cavalli, appuntamenti, chat…" : "Cerca cavalli, libretto, spese, chat…";
+  inp.value = "";
+  cercaTuttoMostra();
+  setTimeout(() => inp.focus(), 60);
+  // dati sempre freschi a ogni apertura (in rete: pochi secondi; offline: copia sul telefono)
+  cercaTuttoCarica().then(() => cercaTuttoMostra());
+}
+function chiudiCercaTutto(){
+  document.getElementById("cerca-tutto")?.classList.remove("on");
+  document.body.classList.remove("ct-aperta");
+}
+const CT_SEZIONI = {
+  proprietario: [
+    { t: "Home", k: "inizio scadenze", az: () => showPage("home") },
+    { t: "I miei cavalli", k: "cavalli scheda", az: () => { showPage("cavalli"); typeof closeHorseDetail === "function" && closeHorseDetail(); } },
+    { t: "Aggiungi un cavallo", k: "nuovo cavallo", az: () => openHorseForm() },
+    { t: "Chat", k: "messaggi maniscalco scuderia proprietari", az: () => document.querySelector('[data-page="chat"]')?.click() },
+    { t: "Calendario e lezioni", k: "prenotazioni lezioni calendario", az: () => document.querySelector('[data-page="prenotazioni"]')?.click() },
+    { t: "Registro spese", k: "spese costi", az: () => document.querySelector('[data-page="spese"]')?.click() },
+    { t: "Nuova spesa", k: "aggiungi spesa", az: () => { document.querySelector('[data-page="spese"]')?.click(); openAddExpenseModal(); } },
+    { t: "Profilo e impostazioni", k: "account menu piano premium esci", az: () => openMenu() },
+  ],
+  professionista: [
+    { t: "Home", k: "inizio richiami", az: () => showPage("pro-home") },
+    { t: "Agenda", k: "appuntamenti calendario settimana", az: () => showPage("pro-agenda") },
+    { t: "Nuovo appuntamento", k: "intervento ferratura pareggio", az: () => openInterventoModal() },
+    { t: "Clienti", k: "clienti elenco", az: () => { showPage("pro-clienti"); typeof closeClienteDetail === "function" && closeClienteDetail(); } },
+    { t: "Nuovo cliente", k: "aggiungi cliente", az: () => { showPage("pro-clienti"); apriNuovoCliente("proprietario"); } },
+    { t: "Messaggi", k: "chat inbox colleghi strutture", az: () => document.querySelector('[data-page="pro-inbox"]')?.click() },
+    { t: "Incassi", k: "pagamenti da saldare soldi", az: () => showPage("pro-incassi") },
+    { t: "Profilo e impostazioni", k: "account menu piano premium esci", az: () => openMenu() },
+  ],
+};
+async function cercaTuttoCarica(){
+  const vista = cercaTuttoVista;
+  const sicuro = p => Promise.resolve().then(p).catch(e => { console.warn("ricerca:", e); return []; });
+  const d = {};
+  if(vista === "professionista"){
+    const [clienti, cavalli, interventi, inbox, colleghi] = await Promise.all([
+      sicuro(() => clientiMascalcia.length ? clientiMascalcia : DB.listClientiMascalcia()),
+      sicuro(() => caricaCavalliMiei()),
+      sicuro(() => DB.listInterventiMascalciaTutti()),
+      sicuro(() => DB.listInboxMascalcia()),
+      sicuro(() => DB.listColleghi()),
+    ]);
+    if(!clientiMascalcia.length && clienti.length) clientiMascalcia = clienti;
+    d.clienti = clienti; d.cavalli = cavalli; d.interventi = interventi; d.inbox = inbox; d.colleghi = colleghi;
+  } else {
+    const ids = (horses || []).map(h => h.id);
+    const [eventi, spese, lezioni, conv, maniscalchi, scuderie] = await Promise.all([
+      sicuro(() => ids.length ? DB.listEventiTutti(ids) : []),
+      sicuro(() => DB.listExpenses()),
+      sicuro(() => DB.listLezioni()),
+      sicuro(() => DB.listConversazioniProprietario()),
+      sicuro(() => DB.listManiscalchiCollegati()),
+      sicuro(() => DB.listScuderieCollegate()),
+    ]);
+    d.eventi = eventi; d.spese = spese; d.lezioni = lezioni; d.conv = conv; d.maniscalchi = maniscalchi; d.scuderie = scuderie;
+  }
+  if(cercaTuttoVista === vista) cercaTuttoDati = d;
+}
+let ctAzioni = [];
+function ctRiga(icona, titolo, sotto, az){
+  ctAzioni.push(az);
+  return `<button type="button" class="ct-riga" data-i="${ctAzioni.length - 1}"><span class="ct-ico"><i class="fa-solid ${icona}"></i></span><span class="ct-testi"><b>${escapeHtml(titolo)}</b>${sotto ? `<small>${escapeHtml(sotto)}</small>` : ""}</span><span class="ct-freccia">›</span></button>`;
+}
+function ctGruppo(titolo, righe, max = 6){
+  if(!righe.length) return "";
+  return `<div class="ct-gruppo"><div class="ct-titolo">${escapeHtml(titolo)}${righe.length > max ? ` <span>(${righe.length})</span>` : ""}</div>${righe.slice(0, max).join("")}${righe.length > max ? `<div class="ct-altri">e altri ${righe.length - max}: aggiungi una parola per restringere</div>` : ""}</div>`;
+}
+function cercaTuttoMostra(){
+  const out = document.getElementById("ct-risultati");
+  if(!out) return;
+  const q = document.getElementById("ct-input").value;
+  const parole = cercaParole(q);
+  ctAzioni = [];
+  const vista = cercaTuttoVista;
+  const ok = (...campi) => cercaCorrisponde(parole, campi.filter(Boolean).join(" "));
+  const vai = fn => () => { chiudiCercaTutto(); fn(); };
+  if(!parole.length){
+    out.innerHTML = `<div class="ct-gruppo"><div class="ct-titolo">Vai a</div>${CT_SEZIONI[vista].map(s => ctRiga("fa-arrow-right", s.t, "", vai(s.az))).join("")}</div>
+      <div class="ct-suggerimento">${vista === "professionista" ? "Scrivi il nome di un cliente o di un cavallo, una data (es. 12/10) o una parola come «ferratura» o «da saldare»." : "Scrivi il nome di un cavallo, «vaccino», «fieno», il nome del maniscalco o della scuderia."}</div>`;
+    return;
+  }
+  const d = cercaTuttoDati || {};
+  let html = "";
+  const sezioni = CT_SEZIONI[vista].filter(s => ok(s.t, s.k)).map(s => ctRiga("fa-arrow-right", s.t, "Sezione", vai(s.az)));
+  if(vista === "professionista"){
+    const clienti = (d.clienti || clientiMascalcia || []).filter(c => ok(c.nome, c.telefono, paroleCercaCliente(c)))
+      .map(c => ctRiga(isStruttura(c) ? "fa-building" : "fa-user", c.nome, [nomiCavalliCliente(c).join(", "), c.telefono].filter(Boolean).join(" · ") || (isStruttura(c) ? "Struttura" : "Cliente"),
+        vai(() => { showPage("pro-clienti"); openClienteDetail(c.id); })));
+    const nomeCliente = id => ((d.clienti || clientiMascalcia || []).find(c => c.id === id) || {}).nome || "";
+    const cavalli = (d.cavalli || []).filter(c => ok(c.nome, c.microchip, nomeCliente(c.cliente_mascalcia_id)))
+      .map(c => ctRiga("fa-horse-head", c.nome || "Cavallo", "di " + (nomeCliente(c.cliente_mascalcia_id) || "cliente"), vai(() => { showPage("pro-clienti"); openClienteDetail(c.cliente_mascalcia_id); })));
+    const tipo = i => (TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "Intervento") + (i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + i.tipo_altro : "");
+    const interventi = (d.interventi || []).filter(i => ok(i.clienti_mascalcia?.nome, i.cavalli_clienti_mascalcia?.nome, tipo(i), formatDate(i.data_intervento), i.data_intervento, i.note,
+        i.stato === "programmato" ? "da fare programmato" : "fatto", i.stato_pagamento === "saldato" ? "saldato pagato" : "da saldare non pagato"))
+      .map(i => ctRiga(i.stato === "programmato" ? "fa-calendar-day" : "fa-check", [i.cavalli_clienti_mascalcia?.nome, i.clienti_mascalcia?.nome].filter(Boolean).join(" · ") || tipo(i),
+        `${tipo(i)} · ${formatDate(i.data_intervento)}${i.ora ? " " + String(i.ora).slice(0, 5) : ""}${i.stato === "programmato" ? " · da fare" : ""}${Number(i.importo) ? " · " + formatEuro(i.importo) + (i.stato_pagamento === "saldato" ? " saldato" : " da saldare") : ""}`,
+        vai(() => openInterventoModal(null, i))));
+    const visti = new Set();
+    const chat = (d.inbox || []).filter(m => { if(visti.has(m.cliente_mascalcia_id)) return false; visti.add(m.cliente_mascalcia_id); return true; })
+      .filter(m => ok(m.clienti_mascalcia?.nome || nomeCliente(m.cliente_mascalcia_id), m.testo))
+      .map(m => ctRiga("fa-comment", m.clienti_mascalcia?.nome || nomeCliente(m.cliente_mascalcia_id) || "Cliente", m.testo || "Conversazione", vai(() => { document.querySelector('[data-page="pro-inbox"]')?.click(); openChatThread(m.cliente_mascalcia_id); })))
+      .concat((d.colleghi || []).filter(c => ok(c.full_name || c.nome, ROLE_LABELS[c.ruolo], "collega"))
+        .map(c => ctRiga("fa-user-doctor", c.full_name || c.nome || "Collega", ROLE_LABELS[c.ruolo] || "Collega", vai(() => { document.querySelector('[data-page="pro-inbox"]')?.click(); apriChatCollega(c.conversazione_id, c.full_name || c.nome || "Collega", c.ruolo || ""); }))));
+    html = ctGruppo("Clienti", clienti) + ctGruppo("Cavalli dei clienti", cavalli) + ctGruppo("Appuntamenti e interventi", interventi, 8) + ctGruppo("Messaggi", chat) + ctGruppo("Sezioni", sezioni);
+  } else {
+    const cavalli = (horses || []).filter(h => ok(h.name, h.breed, h.microchip, h.mantello, h.note))
+      .map(h => ctRiga("fa-horse-head", h.name, [h.breed, h.microchip ? "chip " + h.microchip : ""].filter(Boolean).join(" · ") || "Scheda cavallo", vai(() => { showPage("cavalli"); openHorseDetail(h.id); })));
+    const nomeCav = id => ((horses || []).find(h => h.id === id) || {}).name || "";
+    const eventi = (d.eventi || []).filter(e => ok(EVENT_LABELS[e.type] || e.type, e.notes, nomeCav(e.horse_id), formatDate(e.date), e.date, "libretto"))
+      .map(e => ctRiga("fa-notes-medical", (EVENT_LABELS[e.type] || e.type) + " · " + nomeCav(e.horse_id), formatDate(e.date) + (e.next_due_date ? " · prossima " + formatDate(e.next_due_date) : "") + (e.notes ? " · " + e.notes : ""),
+        vai(async () => { showPage("cavalli"); await openHorseDetail(e.horse_id); if(typeof openEditEventModal === "function") openEditEventModal(e.id); })));
+    const spese = (d.spese || []).filter(s => ok(s.category, s.notes, s.horses?.name, formatDate(s.date), s.date, String(s.amount), "spesa"))
+      .map(s => ctRiga("fa-euro-sign", `${s.category ? s.category.charAt(0).toUpperCase() + s.category.slice(1) : "Spesa"} · € ${Number(s.amount || 0).toFixed(2)}`, [formatDate(s.date), s.horses?.name, s.notes].filter(Boolean).join(" · "),
+        vai(() => { document.querySelector('[data-page="spese"]')?.click(); currentExpensesData = d.spese || []; openEditExpenseModal(s.id); })));
+    const lezioni = (d.lezioni || []).filter(l => ok(l.tipo, l.note, l.horses?.name, formatDate(l.data), l.data, "lezione"))
+      .map(l => ctRiga("fa-person-chalkboard", (l.tipo ? l.tipo.charAt(0).toUpperCase() + l.tipo.slice(1) : "Lezione") + (l.horses?.name ? " · " + l.horses.name : ""), formatDate(l.data) + (l.note ? " · " + l.note : ""),
+        vai(() => document.querySelector('[data-page="prenotazioni"]')?.click())));
+    const chat = (d.maniscalchi || []).filter(m => ok(m.nome_maniscalco, "maniscalco", m.ultimo_testo))
+      .map(m => ctRiga("fa-hammer", m.nome_maniscalco || "Il tuo maniscalco", "Maniscalco" + (m.ultimo_testo ? " · " + m.ultimo_testo : ""), vai(() => { showPage("chat"); loadFarrierChatSection().then(() => openFarrierChatThread(m.cliente_mascalcia_id, m.nome_maniscalco || "Il tuo maniscalco")); })))
+      .concat((d.scuderie || []).filter(s => ok(s.nome, "scuderia maneggio"))
+        .map(s => ctRiga("fa-warehouse", s.nome, "Scuderia", vai(() => { showPage("chat"); loadStableChatSection().then(() => openStableChatThread(s.membro_id, s.centro_id, s.nome)); }))))
+      .concat((d.conv || []).filter(c => ok(c.altro?.full_name, c.ultimoMessaggio?.testo, "proprietario"))
+        .map(c => ctRiga("fa-comment", c.altro?.full_name || "Utente Equo", c.ultimoMessaggio?.testo || "Conversazione", vai(() => { showPage("chat"); loadOwnerChatList().then(() => openOwnerChatThread(c.id, c.altro?.full_name || "Utente Equo")); }))));
+    html = ctGruppo("Cavalli", cavalli) + ctGruppo("Libretto sanitario", eventi, 8) + ctGruppo("Spese", spese) + ctGruppo("Lezioni", lezioni) + ctGruppo("Chat", chat) + ctGruppo("Sezioni", sezioni);
+  }
+  out.innerHTML = html || (cercaTuttoDati
+    ? `<div class="ct-nulla">Nessun risultato per «${escapeHtml(q.trim())}»</div>`
+    : '<div class="ct-nulla"><div class="spinner" style="margin:0 auto 10px"></div>Sto cercando…</div>');
+}
+function cercaTuttoInit(){
+  const ov = document.getElementById("cerca-tutto");
+  if(!ov || ov.dataset.pronto) return;
+  ov.dataset.pronto = "1";
+  const inp = document.getElementById("ct-input");
+  inp.addEventListener("input", () => { clearTimeout(cercaTuttoTimer); cercaTuttoTimer = setTimeout(cercaTuttoMostra, 80); });
+  inp.addEventListener("keydown", e => {
+    if(e.key === "Escape") chiudiCercaTutto();
+    if(e.key === "Enter"){ const primo = document.querySelector("#ct-risultati .ct-riga"); if(primo) primo.click(); }
+  });
+  document.getElementById("ct-risultati").addEventListener("click", e => {
+    const b = e.target.closest(".ct-riga"); if(!b) return;
+    const az = ctAzioni[Number(b.dataset.i)];
+    if(az) az();
+  });
+  document.querySelectorAll(".ct-apri").forEach(el => el.innerHTML = el.innerHTML.replace("{{lente}}", CERCA_LENTE_SVG));
+}
+function cercaAvvio(){ try{ cercaInitElenchi(); cercaTuttoInit(); }catch(e){ console.warn("ricerca:", e); } }
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", cercaAvvio); else setTimeout(cercaAvvio, 0);
+
+/* ---------- EARLY ADOPTER: arrivo dal sito (ottobre 2026) ----------
+   equohub.com → app.equohub.com/?early=proprietario|professionista
+   1) la scelta viene ricordata sul telefono (48 ore) anche durante registrazione e onboarding;
+   2) dopo l'accesso si apre la finestra "Diventa Early Adopter" con il Lifetime del profilo giusto;
+   3) al ritorno da Stripe (?checkout=success) messaggio di benvenuto.
+   Controlli: profilo diverso dal pacchetto scelto, posti esauriti, già Premium a vita, abbonamento in corso. */
+const EARLY_KEY = "equo-early";
+const EARLY_PREZZO = { proprietario: 49, professionista: 99 };
+const EARLY_ANNUALE = { proprietario: 19, professionista: 59 };
+const EARLY_NOME = { proprietario: "Proprietari", professionista: "Professionisti" };
+const EARLY_RITORNO_STRIPE = new URLSearchParams(location.search).has("checkout");
+function earlyLeggi(){
+  try{
+    const v = JSON.parse(lsGet(EARLY_KEY) || "null");
+    if(v && EARLY_PREZZO[v.piano] && Date.now() - v.t < 2 * 86400000) return v;
+  }catch(e){}
+  return null;
+}
+function earlyCancella(){ lsDel(EARLY_KEY); document.querySelectorAll(".early-avviso").forEach(el => el.remove()); document.querySelectorAll(".early-scelta").forEach(el => el.classList.remove("early-scelta")); }
+(function earlyDaUrl(){
+  const p = new URLSearchParams(location.search);
+  const e = p.get("early");
+  if(e === "proprietario" || e === "professionista"){
+    lsSet(EARLY_KEY, JSON.stringify({ piano: e, t: Date.now() }));
+    p.delete("early");
+    history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
+  }
+})();
+function earlyAvvisoHtml(e, testo){
+  return `<div class="early-avviso"><span class="early-medaglia">★</span><div><b>Stai per diventare Early Adopter</b><span>Premium a vita · ${EARLY_NOME[e.piano]} · ${EARLY_PREZZO[e.piano]} € una volta sola</span><small>${testo}</small></div></div>`;
+}
+// avviso nella schermata di accesso e nella scelta del profilo
+function earlyMostraAvvisi(){
+  const e = earlyLeggi();
+  if(!e || (typeof DEMO_MODE !== "undefined" && DEMO_MODE)) return;
+  const tag = document.querySelector("#screen-auth .auth-tagline");
+  if(tag && !document.querySelector("#screen-auth .early-avviso")) tag.insertAdjacentHTML("afterend", earlyAvvisoHtml(e, "Accedi o crea il tuo account: subito dopo completi il pagamento."));
+  const lista = document.querySelector("#onb-step-1 .role-list");
+  if(lista && !document.querySelector("#onb-step-1 .early-avviso")){
+    lista.insertAdjacentHTML("beforebegin", earlyAvvisoHtml(e, e.piano === "proprietario" ? "Scegli «Ho un cavallo» per continuare." : "Scegli «Sono un professionista» e poi la tua professione."));
+    const bottoni = lista.querySelectorAll(".role-card");
+    const giusto = e.piano === "proprietario" ? bottoni[0] : bottoni[1];
+    if(giusto) giusto.classList.add("early-scelta");
+  }
+}
+let earlyInCorso = false;
+async function earlyControlla(){
+  const e = earlyLeggi();
+  if(!e || DEMO_MODE || !currentUser || EARLY_RITORNO_STRIPE || earlyInCorso) return;
+  if(document.getElementById("modal-early")?.classList.contains("active")) return;
+  if(document.getElementById("screen-onboarding")?.classList.contains("active")) return;
+  earlyInCorso = true;
+  try{
+    const { data: prof } = await sb.from("profiles").select("piano, stripe_subscription_id, stripe_customer_id").eq("id", currentUser.id).maybeSingle();
+    if(prof?.piano === "premium" && prof.stripe_customer_id && !prof.stripe_subscription_id){
+      earlyCancella();
+      showToast("Sei già Premium a vita: grazie per essere un Early Adopter!");
+      return;
+    }
+    // il pacchetto scelto sul sito è dell'altro profilo: se l'utente ha anche quel profilo ci passiamo
+    let ruoloVista = currentPianoRuolo();
+    let cambio = null;
+    if(e.piano !== ruoloVista){
+      const ruoli = [currentUser.ruolo, currentUser.ruoloSecondario].filter(Boolean);
+      const target = e.piano === "professionista" ? ruoli.find(r => PRO_ROLES.includes(r)) : (ruoli.includes("proprietario") ? "proprietario" : null);
+      if(target){ await enterApp(target); ruoloVista = currentPianoRuolo(); }
+      else cambio = { scelto: e.piano, giusto: ruoloVista };
+    }
+    let rimasti = null;
+    try{
+      const { data } = await sb.rpc("promo_posti");
+      const r = data && data[ruoloVista === "professionista" ? "professionisti" : "proprietari"];
+      if(r && typeof r.rimasti === "number") rimasti = r.rimasti;
+    }catch(_){}
+    earlyApriFinestra(ruoloVista, rimasti, !!(prof?.piano === "premium" && prof?.stripe_subscription_id), cambio);
+  } finally { earlyInCorso = false; }
+}
+function earlyApriFinestra(ruolo, rimasti, abbonato, cambio){
+  let ov = document.getElementById("modal-early");
+  if(!ov){
+    ov = document.createElement("div");
+    ov.className = "modal-overlay";
+    ov.id = "modal-early";
+    ov.addEventListener("click", ev => { if(ev.target === ov) earlyNonOra(); });
+    document.body.appendChild(ov);
+  }
+  const prezzo = EARLY_PREZZO[ruolo], annuale = EARLY_ANNUALE[ruolo];
+  const esauriti = rimasti === 0;
+  const risparmio = Math.round((1 - prezzo / (annuale * 10)) * 100);
+  ov.innerHTML = `<div class="modal early-finestra">
+    <div class="modal-handle"></div>
+    <div class="early-testa"><span class="early-medaglia grande">★</span><div><div class="modal-title" style="margin:0">Diventa Early Adopter</div><div class="muted" style="font-size:13px">Equo Premium a vita · ${EARLY_NOME[ruolo]}</div></div></div>
+    ${cambio ? `<div class="early-nota">Sul sito hai scelto il pacchetto <b>${EARLY_NOME[cambio.scelto]}</b>, ma il tuo profilo è <b>${cambio.giusto === "professionista" ? "professionista" : "proprietario"}</b>: per te c'è il pacchetto <b>${EARLY_NOME[ruolo]}</b> qui sotto.</div>` : ""}
+    ${esauriti
+      ? `<p class="early-txt">I posti Early Adopter per i ${EARLY_NOME[ruolo].toLowerCase()} sono <b>esauriti</b>. Grazie per l'interesse: puoi comunque passare a Premium con il piano mensile o annuale.</p>
+         <div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-primary" style="width:100%" onclick="earlyCancella();closeModal('modal-early');togglePiano()">Vedi i piani Premium</button><button class="btn btn-outline" style="width:100%" onclick="earlyNonOra()">Chiudi</button></div>`
+      : `<div class="early-prezzo">${prezzo} € <small>una volta sola</small></div>
+         <ul class="early-punti">
+           <li>Premium a vita, senza abbonamento e senza rinnovi</li>
+           <li>−${risparmio}% in 10 anni rispetto al piano annuale (${annuale}&nbsp;€/anno)</li>
+           <li>Accesso in anteprima alle nuove funzioni</li>
+         </ul>
+         ${rimasti != null ? `<div class="early-posti">Restano <b>${rimasti}</b> posti</div>` : ""}
+         ${abbonato ? `<div class="early-nota">Hai già un abbonamento Premium: dopo il pagamento lo chiudiamo noi in automatico, così non paghi più rinnovi.</div>` : ""}
+         <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px"><button class="btn btn-primary" style="width:100%" onclick="earlyPaga()">Paga ${prezzo} € e diventa Early Adopter</button><button class="btn btn-outline" style="width:100%" onclick="earlyNonOra()">Non ora</button></div>
+         <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:10px;text-align:center">Pagamento sicuro con Stripe: carta, Apple Pay, Google Pay, PayPal. Rimborso completo entro 14 giorni se cambi idea.</div>`}
+  </div>`;
+  openModal("modal-early");
+}
+function earlyNonOra(){ earlyCancella(); closeModal("modal-early"); }
+function earlyPaga(){
+  lsSet("equo-early-pagamento", "1");
+  startLifetimeCheckout();
+}
+// al ritorno da Stripe: benvenuto (chiamata da handleCheckoutReturn)
+function earlyDopoRitorno(esito, premiumAttivo){
+  const pagando = lsGet("equo-early-pagamento") === "1";
+  lsDel("equo-early-pagamento");
+  if(!pagando) return false;
+  earlyCancella();
+  if(esito === "success" && premiumAttivo){ showToast("Benvenuto tra gli Early Adopter! Il tuo Premium a vita è attivo."); return true; }
+  return false;
+}
+// nella finestra Premium: Lifetime con i posti rimasti, nascosto quando sono finiti
+async function earlyAggiornaBottoneLifetime(){
+  const btn = document.getElementById("upgrade-btn-lifetime");
+  if(!btn || DEMO_MODE) return;
+  try{
+    const ruolo = currentPianoRuolo();
+    const { data } = await sb.rpc("promo_posti");
+    const r = data && data[ruolo === "professionista" ? "professionisti" : "proprietari"];
+    if(!r || typeof r.rimasti !== "number") return;
+    if(r.rimasti === 0){ btn.style.display = "none"; return; }
+    btn.style.display = "";
+    btn.textContent = PREZZI_PREMIUM[ruolo].lifetime + " · Early Adopter, restano " + r.rimasti + " posti";
+  }catch(e){}
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", earlyMostraAvvisi); else setTimeout(earlyMostraAvvisi, 0);
+
 /* ---------- INIT ---------- */
 boot();
 </script>
+<!-- Ricerca in tutta l'app (lente) -->
+<div class="cerca-tutto" id="cerca-tutto" role="dialog" aria-label="Cerca in Equo">
+  <div class="ct-testa">
+    <div class="ct-campo"><span class="cerca-lente ct-apri">{{lente}}</span><input class="input cerca-input" id="ct-input" type="search" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search" placeholder="Cerca…" aria-label="Cerca in Equo"></div>
+    <button type="button" class="ct-chiudi" onclick="chiudiCercaTutto()">Chiudi</button>
+  </div>
+  <div id="ct-risultati"></div>
+</div>
 <!-- Invito a installare l'app (offline + notifiche) -->
 <div id="invito-installa" class="ii-velo" style="display:none" onclick="if(event.target === this) invitoInstallaChiudi()">
   <div class="ii-card">
@@ -10318,6 +10895,8 @@ window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); invi
 function invitoInstallaControlla(){
   const installata = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone;
   if(installata || (typeof DEMO_MODE !== "undefined" && DEMO_MODE)) return;
+  // durante l'acquisto Early Adopter non sovrapponiamo l'invito
+  if(document.getElementById("modal-early")?.classList.contains("active") || (typeof earlyLeggi === "function" && earlyLeggi())) return;
   let rimandato = 0; try{ rimandato = Number(localStorage.getItem("equo-invito-installa") || 0); }catch(e){}
   if(Date.now() - rimandato < 14 * 86400000) return;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);

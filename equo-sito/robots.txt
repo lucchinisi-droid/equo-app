@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /prossimamente.html
+
+Sitemap: https://equohub.com/sitemap.xml
