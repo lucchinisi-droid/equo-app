@@ -901,6 +901,18 @@ textarea.input{resize:vertical}
 .groom-info{ flex:1; min-width:160px; } .groom-info b{ display:block; } .groom-info span{ font-size:12.5px; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
 .groom-az{ display:flex; gap:6px; flex-wrap:wrap; }
 #groom-btn-agg.disabled{ opacity:.55; }
+
+/* invito a installare l'app */
+.ii-velo{position:fixed;inset:0;z-index:9000;background:rgba(10,24,18,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.ii-card{width:100%;max-width:440px;background:#fbf8f1;border:1.5px solid #e8b04b;border-radius:18px;padding:18px 18px 14px;color:#1d2b23;font-size:14px;line-height:1.45}
+.ii-testa{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.ii-testa img{width:46px;height:46px;border-radius:12px;flex:none}
+.ii-testa b{display:block;font-size:16px;color:#14482c;margin-bottom:2px}
+.ii-testa span{color:#5f6b63;font-size:13px}
+.ii-passo{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #ece4d3}
+.ii-passo span{width:24px;height:24px;border-radius:50%;background:#14482c;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.ii-btn{width:100%;background:#1d4a35;color:#fff;border:2px solid #e8b04b;border-radius:12px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
+.ii-dopo{display:block;margin:10px auto 0;background:none;border:0;color:#5f6b63;font-size:13px;text-decoration:underline;cursor:pointer}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa). -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -2552,7 +2564,54 @@ textarea.input{resize:vertical}
 
 const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* ---------- EQUO OFFLINE (passaggio B, Scuderia livello 1): ultimi dati visti in sola lettura ----------
+   Ogni lettura riuscita dal database viene copiata sul dispositivo (IndexedDB, per utente).
+   Senza rete le letture rispondono con l'ultima copia; i salvataggi rispondono "Sei offline" senza perdere la pagina. */
+const COPIA_LETTURE_RPC = /\/rest\/v1\/rpc\/(centro_piano|statistiche_centro|groom_elenco|has_equo_app_profile|scuderia_appuntamenti_professionista|scuderia_chat_professionista|scuderia_lista_professionisti|cavalli_da_importare)(\?|$)/;
+let copiaDb = null;
+function copiaApri(){
+  if(copiaDb) return copiaDb;
+  copiaDb = new Promise((ok) => {
+    try{
+      const r = indexedDB.open("equo-scuderia-copia", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("letture");
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => ok(null);
+    } catch(e){ ok(null); }
+  });
+  return copiaDb;
+}
+async function copiaLeggi(k){ const db = await copiaApri(); if(!db) return null; return new Promise((ok) => { try{ const q = db.transaction("letture").objectStore("letture").get(k); q.onsuccess = () => ok(q.result || null); q.onerror = () => ok(null); } catch(e){ ok(null); } }); }
+async function copiaScrivi(k, v){ const db = await copiaApri(); if(!db) return; try{ db.transaction("letture", "readwrite").objectStore("letture").put(v, k); } catch(e){} }
+async function copiaSvuota(){ const db = await copiaApri(); if(!db) return; try{ db.transaction("letture", "readwrite").objectStore("letture").clear(); } catch(e){} }
+function copiaUtente(h){
+  try{ const tok = String(h.get("Authorization") || "").replace(/^Bearer\s+/i, ""); return JSON.parse(atob(tok.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub || "anon"; } catch(e){ return "anon"; }
+}
+function copiaRisposta(stato, corpo){ return new Response(JSON.stringify(corpo), { status: stato, headers: { "Content-Type": "application/json" } }); }
+async function fetchConCopia(input, init = {}){
+  const url = typeof input === "string" ? input : input.url;
+  const metodo = (init.method || (typeof input === "string" ? "GET" : input.method) || "GET").toUpperCase();
+  const rest = url.includes("/rest/v1/"), storage = url.includes("/storage/v1/");
+  if(!rest && !storage) return fetch(input, init);
+  const lettura = rest && (metodo === "GET" || metodo === "HEAD" || (metodo === "POST" && COPIA_LETTURE_RPC.test(url)));
+  const h = new Headers(init.headers || (typeof input === "string" ? {} : input.headers));
+  const chiave = lettura ? [copiaUtente(h), metodo, url, metodo === "POST" ? String(init.body || "") : "", h.get("Prefer") || "", h.get("Accept") || "", h.get("Range") || ""].join("|") : null;
+  try{
+    const res = await fetch(input, init);
+    if(lettura && res.ok){
+      res.clone().text().then((corpo) => copiaScrivi(chiave, { t: Date.now(), stato: res.status, corpo, cr: res.headers.get("content-range"), ct: res.headers.get("content-type") })).catch(() => {});
+    }
+    return res;
+  } catch(err){
+    if(lettura){
+      const c = await copiaLeggi(chiave);
+      if(c){ const hh = { "Content-Type": c.ct || "application/json", "X-Equo-Copia": String(c.t) }; if(c.cr) hh["Content-Range"] = c.cr; return new Response(metodo === "HEAD" ? null : c.corpo, { status: c.stato, headers: hh }); }
+      return copiaRisposta(503, { message: "Sei offline e questi dati non sono ancora stati salvati sul dispositivo.", code: "OFFLINE" });
+    }
+    return copiaRisposta(503, { message: "Sei offline: per salvare serve la connessione. Riprova appena torna la rete.", error: "Sei offline", code: "OFFLINE" });
+  }
+}
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { global: { fetch: fetchConCopia } });
 
 const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore", collaboratore:"Collaboratore", proprietario:"Proprietario", segretario:"Segretario", giardiniere:"Giardiniere", altro:"Altro" };
 const LIVELLO_LABELS = { "1":"Livello 1", "2":"Livello 2", "3":"Livello 3", admin:"Admin" };
@@ -2684,10 +2743,13 @@ let contattoToDelete = null;
 
 let datiFiscali = null;
 
+// data "AAAA-MM-GG" del giorno locale (in Italia): toISOString() userebbe l'ora UTC e tra mezzanotte
+// e l'1-2 di notte darebbe ancora la data di ieri
+function isoLoc(d){ const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
 function isoDaysFromNow(n){
   const d = new Date();
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0,10);
+  return isoLoc(d);
 }
 
 let demoState = {
@@ -2809,6 +2871,7 @@ function startDemo(){
 
 async function logout(){
   Registro.ferma();
+  copiaSvuota(); // dispositivo condiviso: la copia offline dei dati non resta a chi entra dopo
   if(!DEMO_MODE){ try{ await sb.auth.signOut(); }catch(e){} }
   currentUser = null; currentCentro = null; currentMembro = null; teamList = [];
   athenaCaricata = false; pianoCentro = null; statDati = null; radarAttesa = null;
@@ -3584,6 +3647,7 @@ async function inviaChatMessaggio(){
 
 /* ---------- APP SHELL ---------- */
 function enterAppShell(){
+  setTimeout(invitoInstallaControlla, 4000);
   Registro.avvia(currentMembro?.ruolo || null);
   document.getElementById("sidebar-centro-name").textContent = currentCentro?.nome || "—";
   document.getElementById("centro-view-nome").textContent = currentCentro?.nome || "—";
@@ -4883,7 +4947,7 @@ function magDemoSeed(){
   ];
   const oggi = new Date();
   const g = (d, h = 9) => { const x = new Date(oggi); x.setDate(x.getDate() - d); x.setHours(h, (d * 7) % 60, 0, 0); return x.toISOString(); };
-  const sc = (d) => { const x = new Date(oggi); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
+  const sc = (d) => { const x = new Date(oggi); x.setDate(x.getDate() + d); return isoLoc(x); };
   const mv = []; let n = 0;
   const M = (articolo_id, tipo, quantita, giorni, extra = {}) => mv.push({ id: "m" + (++n), centro_id:"demo-centro", articolo_id, tipo, quantita, created_at: g(giorni, 8 + (n % 9)), creato_da_nome: ["Marco Bianchi","Tu (admin)","Giulia"][n % 3], ...extra });
   // giacenze iniziali (60 giorni fa)
@@ -5950,7 +6014,7 @@ async function generateSchedaPdf(c){
     doc.setFontSize(6); doc.setTextColor(...PDF_GRIGIO); doc.text("Scansiona: versione aggiornata", R - 14, fy2 + 15, { align: "center" }); }
   doc.setDrawColor(...PDF_ORO); doc.setLineWidth(0.3); doc.line(L, fy2 + 4, R - 30, fy2 + 4);
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...PDF_GRIGIO);
-  doc.text(`Generato con Equo Scuderia il ${formatDate(new Date().toISOString().slice(0, 10))}  ·  equohub.com`, L, fy2 + 9);
+  doc.text(`Generato con Equo Scuderia il ${formatDate(isoLoc(new Date()))}  ·  equohub.com`, L, fy2 + 9);
   doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_VERDE); doc.text("Prenditi cura del tuo cavallo", L, fy2 + 13.5);
 
   const blob = doc.output("blob");
@@ -6310,7 +6374,7 @@ function openEventoForm(id){
   } else {
     document.getElementById("ev-tipo").value = "vaccino";
     document.getElementById("ev-tipo-altro").value = "";
-    document.getElementById("ev-data").value = new Date().toISOString().slice(0,10);
+    document.getElementById("ev-data").value = isoLoc(new Date());
     document.getElementById("ev-scadenza").value = "";
     document.getElementById("ev-note").value = "";
   }
@@ -6415,7 +6479,7 @@ function setLezioniFilter(f){
 }
 
 function renderLezioni(){
-  const oggi = new Date().toISOString().slice(0,10);
+  const oggi = isoLoc(new Date());
   let list = [...lezioniList];
   if(lezioniFilter === "prossime") list = list.filter(l => l.data >= oggi);
   if(lezioniFilter === "passate") list = list.filter(l => l.data < oggi);
@@ -6485,7 +6549,7 @@ function openLezioneForm(id){
   editingLezioneId = l ? l.id : null;
   document.getElementById("lezione-modal-titolo").textContent = l ? "Modifica lezione" : "Nuova lezione";
   document.getElementById("lez-stato-field").style.display = l ? "block" : "none";
-  document.getElementById("lez-data").value = l ? l.data : new Date().toISOString().slice(0,10);
+  document.getElementById("lez-data").value = l ? l.data : isoLoc(new Date());
   document.getElementById("lez-ora").value = l?.ora_inizio ? String(l.ora_inizio).slice(0,5) : "10:00";
   document.getElementById("lez-note").value = l?.note || "";
   document.getElementById("lez-cavallo").value = l?.cavallo_id || "";
@@ -6697,7 +6761,7 @@ function openPacchettoForm(id){
     document.getElementById("pac-tipo").value = "carnet";
     document.getElementById("pac-unita-totali").value = "";
     document.getElementById("pac-unita-usate").value = "0";
-    document.getElementById("pac-inizio").value = new Date().toISOString().slice(0,10);
+    document.getElementById("pac-inizio").value = isoLoc(new Date());
     document.getElementById("pac-scadenza").value = "";
     document.getElementById("pac-prezzo").value = "";
     document.getElementById("pac-note").value = "";
@@ -7260,14 +7324,14 @@ async function deleteNota(id){
 }
 
 function renderHomeStats(){
-  const oggi = new Date().toISOString().slice(0,10);
+  const oggi = isoLoc(new Date());
   let scadRosse = 0, scadGialle = 0;
   cavalliList.forEach(c => {
     const s = worstStatus(c.id);
     if(s === "red") scadRosse++; else if(s === "yellow") scadGialle++;
   });
   const in7gg = new Date(); in7gg.setDate(in7gg.getDate() + 7);
-  const in7ggIso = in7gg.toISOString().slice(0,10);
+  const in7ggIso = isoLoc(in7gg);
   const lezioniProssime = lezioniList.filter(l => l.data >= oggi && l.data <= in7ggIso && l.stato !== "annullata").length;
   const pacchettiCritici = pacchettiList.filter(p => ["red","yellow"].includes(statusPacchetto(p))).length;
 
@@ -7309,9 +7373,9 @@ function openHomeDetail(type){
 
   if(type === "lezioni"){
     titleEl.textContent = "Lezioni nei prossimi 7 giorni";
-    const oggi = new Date().toISOString().slice(0,10);
+    const oggi = isoLoc(new Date());
     const in7gg = new Date(); in7gg.setDate(in7gg.getDate() + 7);
-    const in7ggIso = in7gg.toISOString().slice(0,10);
+    const in7ggIso = isoLoc(in7gg);
     lezioniList.filter(l => l.data >= oggi && l.data <= in7ggIso && l.stato !== "annullata")
       .sort((a,b) => (a.data + a.ora_inizio).localeCompare(b.data + b.ora_inizio))
       .forEach(l => {
@@ -7838,6 +7902,8 @@ async function stAggiornaRadar(){
     if(d.manca_zona){ showToast(d.error); apriModificaCentro(); if(btn) btn.disabled = false; return; }
     if(d.bloccato){ apriUpsell("statistiche_complete"); if(btn) btn.disabled = false; return; }
     if(d.gia_recente){ showToast(d.messaggio); if(btn) btn.disabled = false; return; }
+    // già avviato (da te o da un collega): si aspetta lo stesso radar invece di lanciarne un altro
+    if(d.in_corso){ showToast(d.messaggio); radarAttesa = { da: Date.now(), ultimo: statDati?.radar?.creato_il || null }; stMostraAttesaRadar(); stControllaRadar(); return; }
     if(!res.ok && !d.avviato){ showToast(d.error || "Non riesco ad avviare il radar."); if(btn) btn.disabled = false; return; }
     radarAttesa = { da: Date.now(), ultimo: statDati?.radar?.creato_il || null };
     stMostraAttesaRadar();
@@ -7897,7 +7963,7 @@ function stReportPdf(){
   if(marg.length){ y += 3; riga("Margine per cavallo (30 giorni)", 13, true);
     marg.forEach(c => { const costo = Number(c.costo_mese || 0) + Number(s.costo_comune_per_cavallo || 0); riga(`• ${c.nome}: incassi ${euro(c.ricavo_mese)} − costi ${euro(costo)} = ${euro(Number(c.ricavo_mese) - costo)}`, 10); }); }
   if(s.radar?.testo){ y += 3; riga("Il radar di Merlino", 13, true); riga(s.radar.testo.replace(/\*\*/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1"), 9.5); }
-  doc.save(`Report_${(currentCentro?.nome || "centro").replace(/[^\w]+/g, "_")}_${new Date().toISOString().slice(0, 7)}.pdf`);
+  doc.save(`Report_${(currentCentro?.nome || "centro").replace(/[^\w]+/g, "_")}_${isoLoc(new Date()).slice(0, 7)}.pdf`);
 }
 
 function statisticheDemo(){
@@ -7911,7 +7977,7 @@ function statisticheDemo(){
     tasso_rinnovo:0.78, previsione_90:{ rinnovi_attesi:4290, in_scadenza:21, valore_in_scadenza:5500 },
     margine_cavalli:[{ nome:"Ares", ricavo_mese:350, costo_mese:236 }, { nome:"Luna", ricavo_mese:380, costo_mese:212 }, { nome:"Tornado", ricavo_mese:320, costo_mese:298 }, { nome:"Brezza", ricavo_mese:300, costo_mese:318 }],
     costo_comune_per_cavallo:41.5,
-    carico_cavalli:[{ nome:"Luna", tipo_proprieta:"proprieta", lezioni_7:11, lezioni_28:38, max_giorno:3, ultima_lezione:oggi.toISOString().slice(0, 10) }, { nome:"Zeus", tipo_proprieta:"proprieta", lezioni_7:7, lezioni_28:26, max_giorno:2, ultima_lezione:oggi.toISOString().slice(0, 10) }, { nome:"Stella", tipo_proprieta:"proprieta", lezioni_7:4, lezioni_28:15, max_giorno:1, ultima_lezione:oggi.toISOString().slice(0, 10) }, { nome:"Ombra", tipo_proprieta:"proprieta", lezioni_7:0, lezioni_28:1, max_giorno:1, ultima_lezione:new Date(Date.now() - 19 * 864e5).toISOString().slice(0, 10) }],
+    carico_cavalli:[{ nome:"Luna", tipo_proprieta:"proprieta", lezioni_7:11, lezioni_28:38, max_giorno:3, ultima_lezione:isoLoc(oggi) }, { nome:"Zeus", tipo_proprieta:"proprieta", lezioni_7:7, lezioni_28:26, max_giorno:2, ultima_lezione:isoLoc(oggi) }, { nome:"Stella", tipo_proprieta:"proprieta", lezioni_7:4, lezioni_28:15, max_giorno:1, ultima_lezione:isoLoc(oggi) }, { nome:"Ombra", tipo_proprieta:"proprieta", lezioni_7:0, lezioni_28:1, max_giorno:1, ultima_lezione:new Date(Date.now() - 19 * 864e5).toISOString().slice(0, 10) }],
     occupazione:occ, prezzi_medi:{ lezione_da_carnet:25, pensione_mese:350, abbonamento:120 },
     box:{ totale:12, occupati:9, liberi:2, manutenzione:1, pensione_media:350 },
     salute:{ indice:78, componenti:{ incassi:88, occupazione:64, fedelta:81, sanitario:92, magazzino:67 }, incasso_mese:3380, media_3_mesi:2667 },
@@ -8989,6 +9055,57 @@ async function boot(){
   } catch(e){ /* nessuna sessione, resta su auth */ }
 }
 boot();
+</script>
+<!-- Invito a installare l'app (offline + notifiche) -->
+<div id="invito-installa" class="ii-velo" style="display:none" onclick="if(event.target === this) invitoInstallaChiudi()">
+  <div class="ii-card">
+    <div class="ii-testa"><img src="/assets/icona-equo.png" alt=""><div><b>Metti Equo sulla schermata Home</b><span>Si apre anche senza rete, ricevi le notifiche e i tuoi dati restano sempre sul telefono.</span></div></div>
+    <div id="invito-installa-passi"></div>
+    <button class="ii-dopo" onclick="invitoInstallaChiudi()">Più tardi</button>
+  </div>
+</div>
+<script>
+/* ---------- EQUO OFFLINE (passaggio A): service worker unico (push + copia dell'app) ----------
+   Lo stesso file delle notifiche: se OneSignal l'ha già registrato non si fa nulla, altrimenti lo registriamo noi. */
+(function(){
+  if(!("serviceWorker" in navigator) || location.protocol !== "https:") return;
+  window.addEventListener("load", async () => {
+    try{
+      const reg = await navigator.serviceWorker.getRegistration("/");
+      if(!reg) await navigator.serviceWorker.register("/OneSignalSDKWorker.js", { scope: "/" });
+    } catch(e){ console.warn("service worker:", e); }
+  });
+})();
+
+/* ---------- Invito a installare l'app (iPhone/iPad da Safari, Android con il pulsante del browser) ----------
+   Installata: si apre anche senza rete, riceve le notifiche e su iPhone non perde i dati salvati. */
+let invitoInstallaEvento = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); invitoInstallaEvento = e; });
+function invitoInstallaControlla(){
+  const installata = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone;
+  if(installata || (typeof DEMO_MODE !== "undefined" && DEMO_MODE)) return;
+  let rimandato = 0; try{ rimandato = Number(localStorage.getItem("equo-invito-installa") || 0); }catch(e){}
+  if(Date.now() - rimandato < 14 * 86400000) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if(!ios && !invitoInstallaEvento) return;
+  const box = document.getElementById("invito-installa"); if(!box) return;
+  document.getElementById("invito-installa-passi").innerHTML = ios
+    ? `<div class="ii-passo"><span>1</span><div>Tocca <b>Condividi</b> <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 11v9h14v-9"/></svg> in basso (o in alto su iPad)</div></div>
+       <div class="ii-passo"><span>2</span><div>Scegli <b>«Aggiungi alla schermata Home»</b></div></div>
+       <div class="ii-passo"><span>3</span><div>Apri Equo dall'icona sulla Home</div></div>`
+    : `<button class="ii-btn" onclick="invitoInstallaAndroid()">Installa l'app</button>`;
+  box.style.display = "flex";
+}
+async function invitoInstallaAndroid(){
+  if(!invitoInstallaEvento) return;
+  invitoInstallaEvento.prompt();
+  try{ await invitoInstallaEvento.userChoice; }catch(e){}
+  invitoInstallaEvento = null; invitoInstallaChiudi(false);
+}
+function invitoInstallaChiudi(ricorda = true){
+  if(ricorda){ try{ localStorage.setItem("equo-invito-installa", String(Date.now())); }catch(e){} }
+  const box = document.getElementById("invito-installa"); if(box) box.style.display = "none";
+}
 </script>
 </body>
 </html>

@@ -8,6 +8,9 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
+  // solo il database Equo può chiamare questa funzione (stesso segreto dei webhook della chat)
+  const segreto = event.headers["x-webhook-secret"] || event.headers["X-Webhook-Secret"];
+  if (!process.env.CHAT_WEBHOOK_SECRET || segreto !== process.env.CHAT_WEBHOOK_SECRET) return { statusCode: 401, body: "Non autorizzato" };
   let payload;
   try { payload = JSON.parse(event.body || "{}"); } catch (e) { return { statusCode: 400, body: "Payload non valido" }; }
   const id = payload?.record?.id;

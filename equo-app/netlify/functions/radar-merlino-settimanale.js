@@ -13,6 +13,9 @@ exports.handler = async () => {
     if (!l?.radar || !(l.agenti || []).includes("merlino")) continue;
     const { data: ult } = await admin.from("merlino_radar").select("created_at").eq("centro_id", c.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (ult && Date.now() - new Date(ult.created_at).getTime() < 6 * 86400000) continue;
+    // stesso blocco del pulsante: niente radar doppi se il giro parte due volte o uno è già in corso
+    const { data: libero, error: eLock } = await admin.rpc("radar_prenota", { p_centro_id: c.id, p_minuti: 20 });
+    if (!eLock && libero !== true) continue;
     if (await avviaRadar(c.id, null)) avviati++;
   }
   return { statusCode: 200, body: JSON.stringify({ avviati }) };

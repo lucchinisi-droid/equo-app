@@ -26,6 +26,9 @@ const TIPO_SOGGETTO = { persona_fisica: "Persona fisica", ditta_individuale: "Di
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
+  // solo il database Equo può chiamare questa funzione (stesso segreto dei webhook della chat)
+  const segreto = event.headers["x-webhook-secret"] || event.headers["X-Webhook-Secret"];
+  if (!process.env.CHAT_WEBHOOK_SECRET || segreto !== process.env.CHAT_WEBHOOK_SECRET) return { statusCode: 401, body: "Non autorizzato" };
 
   let payload;
   try { payload = JSON.parse(event.body || "{}"); } catch (e) { return { statusCode: 400, body: "Payload non valido" }; }
@@ -63,7 +66,7 @@ exports.handler = async (event) => {
     return { statusCode: 200, body: JSON.stringify({ esito: "nessuna_azione" }) };
   } catch (e) {
     console.error("notify-certificazione:", e);
-    return { statusCode: 500, body: JSON.stringify({ esito: "errore", messaggio: String(e?.message || e) }) };
+    return { statusCode: 500, body: JSON.stringify({ esito: "errore" }) };
   }
 };
 
@@ -136,7 +139,7 @@ async function inviaEmailAdmin(p, duplicati = []) {
   });
   const body = await res.text();
   if (!res.ok) console.error("Errore Resend:", body);
-  return { ok: res.ok, http_status: res.status, resend: body.slice(0, 300) };
+  return { ok: res.ok, http_status: res.status };
 }
 
 async function inviaPush(userId, titolo, corpo) {

@@ -41,9 +41,15 @@ exports.handler = async (event) => {
       try {
         await stripe.subscriptions.cancel(profile.stripe_subscription_id);
       } catch (e) {
-        // Se l'abbonamento su Stripe non esiste più (es. già cancellato manualmente),
-        // non blocchiamo comunque il downgrade lato Equo.
-        console.warn("Cancellazione abbonamento Stripe:", e.message);
+        // Abbonamento che su Stripe non esiste più (già cancellato a mano): si prosegue col downgrade.
+        // Qualsiasi altro errore (rete, limiti Stripe…): NON si torna a Free, altrimenti l'utente
+        // risulterebbe Free ma continuerebbe a pagare senza che nessuno se ne accorga.
+        const giaChiuso = e && (e.code === "resource_missing" || /No such subscription|canceled/i.test(e.message || ""));
+        if (!giaChiuso) {
+          console.error("Cancellazione abbonamento Stripe non riuscita:", e.message);
+          return { statusCode: 502, body: JSON.stringify({ error: "Non siamo riusciti ad annullare l'abbonamento. Il tuo piano Premium resta attivo: riprova tra poco o scrivici." }) };
+        }
+        console.warn("Abbonamento già chiuso su Stripe:", e.message);
       }
     }
 

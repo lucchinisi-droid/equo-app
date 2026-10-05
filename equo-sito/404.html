@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Prossimamente · Equo</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b2a1b">
+<link rel="icon" href="img/icona-verde.png">
+<link rel="stylesheet" href="css/sito.css">
+</head>
+<body style="background:var(--notte)">
+<header class="nav">
+  <div class="nav-in">
+    <a class="nav-logo" href="index.html" aria-label="Equo, pagina iniziale"><img src="img/logo-bianco.png" alt="Equo"></a>
+    <div class="nav-cta" style="margin-left:auto">
+      <a class="btn-nav vuoto" href="https://scuderia.equohub.com">Accedi a Scuderia</a>
+      <a class="btn-nav oro" href="https://app.equohub.com">Apri l'app</a>
+    </div>
+  </div>
+</header>
+<main style="padding:0">
+  <section class="presto" style="background-image:url(img/benessere.webp)">
+    <div>
+      <p class="occhiello" style="color:var(--oro2)" id="sezione">Equo</p>
+      <h1 class="titolo-xl">Coming <em style="color:var(--oro2)">Soon.</em></h1>
+      <p class="sotto" style="color:#e1e9e3;margin:14px auto 0">Stiamo preparando questa pagina con la stessa cura che mettiamo nel resto. Torna a trovarci presto.</p>
+      <div class="link-cta" style="margin-top:26px">
+        <a class="pieno" style="background:var(--oro);color:var(--notte)" href="index.html">Torna alla home</a>
+        <a style="color:var(--oro2)" href="index.html#early-adopter">Posti Early Adopter <span class="freccia">›</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+(function () {
+  var nomi = {
+    "proprietari": "Per i proprietari", "maniscalchi": "Per i maniscalchi", "scuderia": "Equo Scuderia",
+    "groom": "Equo Groom", "scuderia-smart": "Scuderia smart", "community": "Community", "benessere": "Benessere",
+    "candidatura": "Veterinari e trainer", "early-adopter-proprietari": "Early Adopter · Proprietari",
+    "early-adopter-professionisti": "Early Adopter · Professionisti", "chi-siamo": "Chi siamo",
+    "prezzi": "Piani e prezzi", "contatti": "Contatti", "privacy": "Privacy", "termini": "Termini"
+  };
+  var s = new URLSearchParams(location.search).get("s");
+  if (s && Object.prototype.hasOwnProperty.call(nomi, s)) {
+    document.getElementById("sezione").textContent = nomi[s];
+    document.title = nomi[s] + " · Prossimamente · Equo";
+  }
+})();
+</script>
+</body>
+</html>

@@ -26,6 +26,11 @@ exports.handler = async (event) => {
   if (ult && Date.now() - new Date(ult.created_at).getTime() < oreMin * 3600000) {
     return risposta(200, { gia_recente: true, messaggio: `Il radar è stato aggiornato da poco: si può rigenerare ogni ${oreMin} ${oreMin === 1 ? "ora" : "ore"}.` });
   }
+  // un solo avvio alla volta per centro: clic ripetuti, più persone dello staff o chiamate dirette
+  // non fanno partire più radar a pagamento (posto valido 20 minuti, la durata massima di una generazione)
+  const { data: libero, error: eLock } = await admin.rpc("radar_prenota", { p_centro_id: centroId, p_minuti: 20 });
+  if (eLock) console.warn("radar_prenota non disponibile:", eLock.message);
+  else if (libero !== true) return risposta(200, { in_corso: true, messaggio: "Merlino sta già preparando il radar del centro: arriva tra qualche minuto." });
   const ok = await avviaRadar(centroId, user.id);
   return risposta(ok ? 202 : 500, ok ? { avviato: true } : { error: "Non sono riuscito ad avviare il radar, riprova." });
 };

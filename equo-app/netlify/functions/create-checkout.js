@@ -46,11 +46,19 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: "Combinazione piano/periodo non valida" }) };
     }
 
+    // niente doppio abbonamento: chi ha già Premium non può aprirne un secondo
+    const { data: prof, error: eProf } = await supabase.from("profiles").select("piano, stripe_customer_id, stripe_subscription_id").eq("id", userId).maybeSingle();
+    if (eProf) throw eProf;
+    if (prof && prof.piano === "premium") {
+      return { statusCode: 409, body: JSON.stringify({ error: "Hai già Equo Premium attivo." }) };
+    }
+
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: email,
+      // stesso cliente Stripe di prima (storico pagamenti unico), altrimenti per email
+      ...(prof && prof.stripe_customer_id ? { customer: prof.stripe_customer_id } : { customer_email: email }),
       client_reference_id: userId,
       allow_promotion_codes: true,
       success_url: `${process.env.URL}/?checkout=success`,

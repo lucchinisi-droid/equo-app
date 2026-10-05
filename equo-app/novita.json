@@ -1,13 +1,17 @@
 {
   "titolo": "Le novità di questo aggiornamento",
   "voci": [
-    "Pegasus e Hammer ora conoscono tutta l'app: chiedi \"come si fa…\" e ti guidano passo passo, con un esempio.",
-    "Nuovo in Home: \"Serve aiuto?\" → \"Apri un ticket\" per scrivere al team Equo e ricevere risposta via email.",
-    "Per i maniscalchi: quando segni \"fatto\" una ferratura o un pareggio, scegli in un tocco tra quanti giorni fare il prossimo intervento (OK o CAMBIA). Equo ricorda la scelta per ogni cavallo.",
-    "Le ferrature e i pareggi fatti dal tuo maniscalco entrano da soli nel libretto sanitario del tuo cavallo, con la data del prossimo intervento.",
-    "Tasti più chiari: verde per confermare e salvare, giallo per modificare.",
-    "Risposte degli assistenti più chiare: le procedure ora sono elencate con i passaggi numerati.",
-    "Nuovo avviso quando sei senza connessione, per sapere sempre cosa puoi fare.",
-    "Nuova finestra degli aggiornamenti, con l'elenco delle novità come questo."
+    "Equo ora funziona anche senza connessione: consulti quello che hai già aperto e ciò che registri (messaggi, appuntamenti e interventi, spese, eventi sanitari) parte da solo appena torna la rete. In alto vedi quante modifiche sono in attesa.",
+    "Su iPhone ti mostriamo come aggiungere Equo alla schermata Home: così si apre sempre, anche offline, e ricevi le notifiche.",
+    "In Home trovi il saluto con il tuo nome.",
+    "Per i maniscalchi: in Home \"Prossimi appuntamenti\" e \"Da richiamare\", con il semaforo e le azioni a un tocco: Fissa, Scrivi, Rimanda, Non serve più.",
+    "In Premium: il giro della zona per fare più cavalli nello stesso posto e il messaggio pronto da mandare al cliente.",
+    "Quando sposti, confermi con un'altra data o annulli un appuntamento, il cliente riceve un messaggio in chat in automatico.",
+    "Nuovo appuntamento: scegli liberamente il cliente oppure creane uno nuovo, anche se lavori con una scuderia collegata.",
+    "Nuovo cliente: i cavalli che scrivi diventano subito schede, anche più di uno separati da virgola.",
+    "Storico degli interventi più chiaro: il nome del cavallo in evidenza e il filtro per cavallo, anche nel PDF.",
+    "Ogni cavallo ha il suo codice Equo e la razza si sceglie cercandola per nome.",
+    "Piano Free: fino a 10 clienti per i professionisti e 1 cavallo per i proprietari. I tuoi dati restano sempre tutti al loro posto.",
+    "Più affidabilità: pagamenti più sicuri, date giuste anche subito dopo mezzanotte, chat che si aprono anche con i nomi con l'apostrofo."
   ]
 }

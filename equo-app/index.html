@@ -373,6 +373,7 @@ select.input{cursor:pointer}
   padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .eq-pill-stato.attivo{display:flex}
+.eq-pill-stato.coda{top:calc(46px + env(safe-area-inset-top));background:#fff4d6;color:#7a5300}
 .eq-pill-stato.off{background:rgba(243,227,195,.92);color:#6d470c}.eq-pill-stato.agg{background:rgba(217,234,219,.94);color:#24502a}
 .eq-pop .ic.ric{background:#f3e3c3;color:#8a5a12}
 .eq-pop .grande{font-size:15.5px;margin:0 0 4px}
@@ -656,6 +657,18 @@ body.ai-aperta{overflow:hidden}
 .partner-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;margin-bottom:5px;background:rgba(255,189,89,.18);color:var(--gold,#ffbd59);width:fit-content}
 .partner-title{font-size:14px;font-weight:700;color:var(--text)}
 .partner-desc{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* invito a installare l'app */
+.ii-velo{position:fixed;inset:0;z-index:9000;background:rgba(10,24,18,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.ii-card{width:100%;max-width:440px;background:#fbf8f1;border:1.5px solid #e8b04b;border-radius:18px;padding:18px 18px 14px;color:#1d2b23;font-size:14px;line-height:1.45}
+.ii-testa{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.ii-testa img{width:46px;height:46px;border-radius:12px;flex:none}
+.ii-testa b{display:block;font-size:16px;color:#14482c;margin-bottom:2px}
+.ii-testa span{color:#5f6b63;font-size:13px}
+.ii-passo{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #ece4d3}
+.ii-passo span{width:24px;height:24px;border-radius:50%;background:#14482c;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.ii-btn{width:100%;background:#1d4a35;color:#fff;border:2px solid #e8b04b;border-radius:12px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
+.ii-dopo{display:block;margin:10px auto 0;background:none;border:0;color:#5f6b63;font-size:13px;text-decoration:underline;cursor:pointer}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
      su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
@@ -807,6 +820,8 @@ body.ai-aperta{overflow:hidden}
 
   <!-- HOME -->
   <div class="page-content active" id="page-home">
+    <div class="section-title" style="font-size:18px;margin-bottom:2px" id="home-greeting"></div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="home-date"></div>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
         <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
@@ -1205,6 +1220,7 @@ body.ai-aperta{overflow:hidden}
   <div class="toast" id="toast"></div>
   <!-- POP-UP DI SISTEMA: offline e aggiornamento disponibile -->
   <div class="eq-pill-stato off" id="eq-pill-offline" onclick="mostraPopOffline()"><i class="fa-solid fa-wifi"></i> Offline · Equo non ti abbandona</div>
+  <div class="eq-pill-stato coda" id="eq-pill-coda" onclick="offInviaCoda()"></div>
   <div class="eq-pill-stato agg" id="eq-pill-agg" onclick="mostraPopAggiornamento()"><i class="fa-solid fa-arrows-rotate"></i> Aggiornamento disponibile</div>
   <div class="eq-pop-overlay" id="eq-pop-offline" onclick="if(event.target.id==='eq-pop-offline')chiudiPop('offline')">
     <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-off-tit">
@@ -2725,7 +2741,163 @@ body.ai-aperta{overflow:hidden}
 
 const SUPABASE_URL = "https://ncbdrhbpgdcaentoxlfz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Qf-UTipNPe4Z8g6VpmW8Ag_8zCbNnBC";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* =====================================================================
+   EQUO OFFLINE — App livello 2 (passaggio C)
+   1) Copia delle letture: ogni lettura riuscita dal database viene salvata sul telefono (IndexedDB, per utente);
+      senza rete l'app mostra l'ultima copia.
+   2) Coda delle modifiche principali: messaggi (3 chat), appuntamenti e interventi del maniscalco, nuovi cavalli
+      dei clienti, spese, eventi sanitari, calendario lezioni. Senza rete la modifica va in coda (con un id creato
+      sul telefono, così un reinvio non crea doppioni), l'app la mostra subito e parte da sola al ritorno della rete.
+   Tutto il resto (pagamenti, collegamenti con codice, assistenti AI, foto/video/vocali) richiede la connessione.
+   ===================================================================== */
+const OFF_TABELLE_CODA = ["messaggi_proprietari", "chat_messaggi", "messaggi_mascalcia", "interventi_mascalcia", "cavalli_clienti_mascalcia", "expenses", "health_events", "lezioni_manuali", "richiami_stato"];
+const OFF_TABELLE_SCARTA = ["app_sessioni", "app_eventi"]; // statistiche d'uso interne: senza rete si saltano
+const OFF_RPC_LETTURA = /\/rest\/v1\/rpc\/(appuntamenti_maniscalco_cliente|cavalli_condivisi_cliente|cavalli_maniscalco_da_abbinare|get_nomi_conversazioni_proprietario|lista_colleghi|lista_maniscalchi_collegati|mie_lezioni_scuderia|mie_scuderie_collegate|miei_eventi_scuderia|pro_cavalli_struttura|richiami_maniscalco)(\?|$)/;
+const OFF_RPC_CODA = { invia_messaggio_mascalcia_cliente: { ok: true }, segna_letti_mascalcia_cliente: null, segna_letti_chat: null, segna_messaggi_consegnati: null };
+
+let offDb = null;
+function offApri(){
+  if(offDb) return offDb;
+  offDb = new Promise((ok) => {
+    try{
+      const r = indexedDB.open("equo-app-offline", 1);
+      r.onupgradeneeded = () => { r.result.createObjectStore("letture"); r.result.createObjectStore("coda", { keyPath: "n", autoIncrement: true }); };
+      r.onsuccess = () => ok(r.result); r.onerror = () => ok(null);
+    } catch(e){ ok(null); }
+  });
+  return offDb;
+}
+async function offOp(store, modo, fn){
+  const db = await offApri(); if(!db) return null;
+  return new Promise((ok) => { try{ const tx = db.transaction(store, modo); const q = fn(tx.objectStore(store)); tx.oncomplete = () => ok(q ? q.result : null); tx.onerror = () => ok(null); } catch(e){ ok(null); } });
+}
+const offLeggi = (k) => offOp("letture", "readonly", (s) => s.get(k));
+const offScrivi = (k, v) => offOp("letture", "readwrite", (s) => s.put(v, k));
+const offCodaTutta = () => offOp("coda", "readonly", (s) => s.getAll()).then((x) => x || []);
+const offCodaAggiungi = (v) => offOp("coda", "readwrite", (s) => s.add(v));
+const offCodaTogli = (n) => offOp("coda", "readwrite", (s) => s.delete(n));
+// all'uscita si cancella la copia dei dati; la coda resta (è divisa per utente e parte al suo prossimo accesso)
+async function offSvuotaLetture(){ await offOp("letture", "readwrite", (s) => s.clear()); }
+
+function offUtente(h){
+  try{ const tok = String(h.get("Authorization") || "").replace(/^Bearer\s+/i, ""); return JSON.parse(atob(tok.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub || "anon"; } catch(e){ return "anon"; }
+}
+const offJson = (stato, corpo, extra = {}) => new Response(corpo === undefined ? null : JSON.stringify(corpo), { status: stato, headers: { "Content-Type": "application/json", ...extra } });
+const offUuid = () => (crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); }));
+function offTabella(url){ const m = url.match(/\/rest\/v1\/([a-z_]+)(\?|$)/); return m ? m[1] : null; }
+function offRpc(url){ const m = url.match(/\/rest\/v1\/rpc\/([a-z_]+)/); return m ? m[1] : null; }
+
+// righe in coda della stessa tabella che rispettano i filtri "uguale a" della lettura (es. chat di un cliente)
+async function offRigheInCoda(url, utente){
+  const tab = offTabella(url); if(!tab) return [];
+  const p = new URL(url).searchParams, filtri = [];
+  p.forEach((v, k) => { if(!["select", "order", "limit", "offset", "or", "and", "on_conflict", "columns"].includes(k) && v.startsWith("eq.")) filtri.push([k, v.slice(3)]); });
+  const coda = await offCodaTutta();
+  return coda.filter((x) => x.utente === utente && x.tabella === tab && x.metodo === "POST" && x.riga)
+    .map((x) => ({ ...x.riga, _in_coda: true }))
+    .filter((r) => filtri.every(([k, v]) => r[k] === undefined || String(r[k]) === v));
+}
+
+async function fetchOffline(input, init = {}){
+  const url = typeof input === "string" ? input : input.url;
+  const metodo = (init.method || (typeof input === "string" ? "GET" : input.method) || "GET").toUpperCase();
+  const rest = url.includes("/rest/v1/"), storage = url.includes("/storage/v1/");
+  if(!rest && !storage) return fetch(input, init);
+  const h = new Headers(init.headers || (typeof input === "string" ? {} : input.headers));
+  const utente = offUtente(h), rpc = offRpc(url), tab = rpc ? null : offTabella(url);
+  const lettura = rest && (metodo === "GET" || metodo === "HEAD" || (metodo === "POST" && OFF_RPC_LETTURA.test(url)));
+  const chiave = lettura ? [utente, metodo, url, metodo === "POST" ? String(init.body || "") : "", h.get("Prefer") || "", h.get("Accept") || "", h.get("Range") || ""].join("|") : null;
+
+  // nuovi inserimenti delle tabelle in coda: l'id lo creiamo noi, così un secondo invio non fa doppioni
+  let corpo = init.body;
+  if(rest && metodo === "POST" && tab && OFF_TABELLE_CODA.includes(tab) && typeof corpo === "string"){
+    try{ const b = JSON.parse(corpo); const conId = (r) => (r && typeof r === "object" && !r.id && tab !== "richiami_stato" ? { ...r, id: offUuid() } : r);
+      corpo = JSON.stringify(Array.isArray(b) ? b.map(conId) : conId(b)); init = { ...init, body: corpo }; } catch(e){}
+  }
+
+  let res;
+  try{ res = await fetch(input, init); }
+  catch(err){ return offSenzaRete({ url, metodo, h, init, corpo, utente, rpc, tab, lettura, chiave }); }
+  if(lettura && res.ok){
+    res.clone().text().then((c) => offScrivi(chiave, { t: Date.now(), stato: res.status, corpo: c, cr: res.headers.get("content-range"), ct: res.headers.get("content-type") })).catch(() => {});
+  }
+  return res;
+}
+
+async function offSenzaRete({ url, metodo, h, init, corpo, utente, rpc, tab, lettura, chiave }){
+  if(lettura){
+    const c = await offLeggi(chiave);
+    if(c){
+      let testo = c.corpo;
+      if(metodo === "GET" && tab){ // aggiungi in coda alla lista quello che è in attesa di invio
+        try{ const extra = await offRigheInCoda(url, utente); const v = JSON.parse(testo); if(Array.isArray(v) && extra.length){ const ids = new Set(v.map((r) => r.id)); testo = JSON.stringify(v.concat(extra.filter((r) => !ids.has(r.id)))); } } catch(e){}
+      }
+      const hh = { "Content-Type": c.ct || "application/json", "X-Equo-Copia": String(c.t) }; if(c.cr) hh["Content-Range"] = c.cr;
+      return new Response(metodo === "HEAD" ? null : testo, { status: c.stato, headers: hh });
+    }
+    if(metodo === "GET" && tab){ const extra = await offRigheInCoda(url, utente); if(extra.length && !String(h.get("Accept") || "").includes("object")) return offJson(200, extra); }
+    return offJson(503, { message: "Sei offline e questi dati non sono ancora stati salvati sul telefono.", code: "OFFLINE" });
+  }
+  const rappresentazione = /return=representation/.test(h.get("Prefer") || ""), singolo = String(h.get("Accept") || "").includes("vnd.pgrst.object");
+  if(tab && OFF_TABELLE_SCARTA.includes(tab)){
+    let r = {}; try{ r = JSON.parse(corpo || "{}"); } catch(e){}
+    return rappresentazione ? offJson(201, singolo ? r : [r]) : offJson(201);
+  }
+  const inCoda = (tab && OFF_TABELLE_CODA.includes(tab)) || (rpc && Object.prototype.hasOwnProperty.call(OFF_RPC_CODA, rpc));
+  if(!inCoda) return offJson(503, { message: "Sei offline: questa operazione richiede la connessione. Riprova appena torna la rete.", code: "OFFLINE" });
+  let riga = null; try{ riga = corpo ? JSON.parse(corpo) : null; } catch(e){}
+  const intest = {}; ["Prefer", "Accept", "Content-Type", "Content-Profile", "Accept-Profile"].forEach((k) => { const v = h.get(k); if(v) intest[k] = v; });
+  await offCodaAggiungi({ utente, url, metodo, intest, corpo: corpo || null, tabella: tab, rpc, riga: metodo === "POST" && riga && !Array.isArray(riga) ? { ...riga, created_at: riga.created_at || new Date().toISOString() } : null, quando: Date.now() });
+  offAggiornaPill();
+  if(rpc) return offJson(200, OFF_RPC_CODA[rpc]);
+  if(!rappresentazione) return offJson(metodo === "DELETE" ? 204 : 201);
+  let out = riga && typeof riga === "object" ? riga : {};
+  if(metodo !== "POST"){ const id = new URL(url).searchParams.get("id"); if(id && id.startsWith("eq.")) out = { ...out, id: id.slice(3) }; }
+  if(metodo === "POST" && !Array.isArray(out)) out = { ...out, created_at: out.created_at || new Date().toISOString() };
+  return offJson(metodo === "DELETE" ? 200 : 201, singolo ? (Array.isArray(out) ? out[0] : out) : (Array.isArray(out) ? out : [out]));
+}
+
+// invio della coda, nell'ordine in cui le modifiche sono state fatte, con il login attuale
+let offInvioInCorso = null;
+function offInviaCoda(){ if(!offInvioInCorso) offInvioInCorso = offInvia().finally(() => { offInvioInCorso = null; }); return offInvioInCorso; }
+async function offInvia(){
+  if(!navigator.onLine) return;
+  const { data: sess } = await sb.auth.getSession().catch(() => ({ data: null }));
+  const token = sess?.session?.access_token, mio = sess?.session?.user?.id;
+  if(!token) return;
+  const coda = (await offCodaTutta()).filter((x) => x.utente === mio);
+  let inviati = 0, scartati = [];
+  for(const x of coda){
+    const intest = { ...x.intest, apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + token };
+    let url = x.url;
+    if(x.metodo === "POST" && x.tabella && x.tabella !== "richiami_stato"){ // già arrivato al primo tentativo? niente doppioni
+      intest.Prefer = [intest.Prefer, "resolution=ignore-duplicates"].filter(Boolean).join(",");
+      if(!/on_conflict=/.test(url)) url += (url.includes("?") ? "&" : "?") + "on_conflict=id";
+    }
+    let res;
+    try{ res = await fetch(url, { method: x.metodo, headers: intest, body: x.corpo }); }
+    catch(e){ break; } // rete ancora assente: si riprova dopo, nello stesso ordine
+    if(res.ok){ await offCodaTogli(x.n); inviati++; continue; }
+    if(res.status >= 500 || res.status === 401){ break; }
+    let msg = ""; try{ const j = await res.json(); msg = j.message || j.error || ""; } catch(e){}
+    console.warn("coda offline: modifica rifiutata", x.tabella || x.rpc, res.status, msg);
+    scartati.push(msg); await offCodaTogli(x.n);
+  }
+  offAggiornaPill();
+  if(inviati) showToast(inviati === 1 ? "La modifica fatta senza rete è stata inviata." : `Le ${inviati} modifiche fatte senza rete sono state inviate.`);
+  if(scartati.length) showToast(`${scartati.length === 1 ? "Una modifica" : scartati.length + " modifiche"} fatta senza rete non è stata accettata${scartati[0] ? ": " + scartati[0] : ""}. Controlla e rifalla.`);
+  if(inviati && typeof showPage === "function"){ try{ const att = document.querySelector(".page-content.active")?.id?.replace("page-", ""); if(att) showPage(att); } catch(e){} }
+}
+async function offAggiornaPill(n){
+  if(n === undefined){ const { data: sess } = await sb.auth.getSession().catch(() => ({ data: null })); const mio = sess?.session?.user?.id; n = (await offCodaTutta()).filter((x) => x.utente === mio).length; }
+  const p = document.getElementById("eq-pill-coda"); if(!p) return;
+  p.innerHTML = `<i class="fa-solid fa-clock"></i> ${n === 1 ? "1 modifica da inviare" : n + " modifiche da inviare"}`;
+  p.classList.toggle("attivo", n > 0);
+}
+function dopoRitornoOnline(){ offInviaCoda(); }
+setInterval(() => { if(navigator.onLine) offInviaCoda(); }, 45000);
+window.addEventListener("load", () => setTimeout(() => { offAggiornaPill(); offInviaCoda(); }, 3000));
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { global: { fetch: fetchOffline } });
 
 let currentUser = null;
 let horses = [];
@@ -4038,6 +4210,7 @@ function aggiornaThemeColorMeta(){
 }
 
 async function enterApp(ruolo){
+  setTimeout(invitoInstallaControlla, 4000);
   document.getElementById("screen-onboarding").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();
@@ -4088,11 +4261,23 @@ function renderProAgendaHeader(ruolo){
   document.getElementById("pro-action-btn").textContent = "+ Nuovo appuntamento";
 }
 
-function renderProHomeGreeting(){
+// "Buongiorno, Alessandro": saluto in base all'ora + nome di battesimo dell'utente (se lo conosciamo)
+function testoSaluto(){
   const h = new Date().getHours();
   const saluto = h < 12 ? "Buongiorno" : h < 18 ? "Buon pomeriggio" : "Buonasera";
-  document.getElementById("pro-home-greeting").textContent = saluto;
-  document.getElementById("pro-home-date").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+  const pieno = DEMO_MODE ? "" : String(currentUser?.fullName || "").trim();
+  const nome = pieno.split(/\s+/)[0] || "";
+  return nome ? saluto + ", " + nome.charAt(0).toUpperCase() + nome.slice(1) : saluto;
+}
+function dataDiOggi(){ return new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }); }
+function renderHomeGreeting(){
+  const g = document.getElementById("home-greeting"); if(!g) return;
+  g.textContent = testoSaluto();
+  document.getElementById("home-date").textContent = dataDiOggi();
+}
+function renderProHomeGreeting(){
+  document.getElementById("pro-home-greeting").textContent = testoSaluto();
+  document.getElementById("pro-home-date").textContent = dataDiOggi();
   renderCertifiedCard();
 }
 
@@ -4189,11 +4374,14 @@ function copyInviteLink(){
   }
 }
 
+let timerPartnerBanner = null, timerPromo = null;
 function startPartnerBannerRotation(){
+  clearInterval(timerPartnerBanner);
   let i = 0;
   const slides = document.querySelectorAll(".partner-slide");
+  slides.forEach((sl, k) => sl.classList.toggle("active", k === 0));
   if(slides.length < 2) return;
-  setInterval(() => {
+  timerPartnerBanner = setInterval(() => {
     slides[i].classList.remove("active");
     i = (i + 1) % slides.length;
     slides[i].classList.add("active");
@@ -4476,7 +4664,8 @@ async function submitAuth(){
 
 async function logout(){
   Registro.ferma();
-  if(!DEMO_MODE) await sb.auth.signOut();
+  offSvuotaLetture(); // telefono condiviso: la copia dei dati non resta a chi entra dopo
+  if(!DEMO_MODE){ try{ await sb.auth.signOut(); }catch(e){} }
   currentUser = null;
   DEMO_MODE = false;
   document.documentElement.removeAttribute("data-vista");
@@ -4535,6 +4724,10 @@ async function confirmReactivateAccount(){
   }
 }
 
+// lettura/scrittura della memoria del browser che non blocca l'app se è disattivata (alcune webview, privacy)
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
 function setAvatarInitial(letter){
   const topbar = document.getElementById("topbar-avatar");
   const menu = document.getElementById("menu-avatar");
@@ -4596,6 +4789,10 @@ async function boot(){
   try{
     const res = await sb.auth.getUser();
     user = res.data.user;
+    // senza rete il controllo del login non risponde: si usa la sessione salvata sul telefono
+    if(!user && (!navigator.onLine || /fetch|network|retryable/i.test(String(res.error?.name || "") + " " + String(res.error?.message || "")))){
+      const s2 = await sb.auth.getSession(); user = s2.data?.session?.user || null;
+    }
   } catch(e){
     console.warn("Supabase non ancora configurato:", e.message);
   }
@@ -4658,7 +4855,7 @@ async function continueBootAfterProfile(){
   }
   let vista = currentUser.ruolo;
   try{
-    const salvata = localStorage.getItem("equo-vista-" + currentUser.id);
+    const salvata = lsGet("equo-vista-" + currentUser.id);
     if(salvata && (salvata === currentUser.ruolo || salvata === currentUser.ruoloSecondario)) vista = salvata;
   }catch(e){}
   await enterApp(vista);
@@ -4681,6 +4878,7 @@ async function saveCompleteProfile(){
     const { error } = await sb.from("profiles").update({ full_name: nome }).eq("id", currentUser.id);
     if(error) throw error;
     document.getElementById("profile-name").textContent = nome;
+    currentUser.fullName = nome;
     closeModal("modal-completa-profilo");
     await continueBootAfterProfile();
   } catch(err){
@@ -4795,7 +4993,7 @@ function openMenu(){
 }
 
 function initTheme(){
-  const saved = localStorage.getItem("equo-theme");
+  const saved = lsGet("equo-theme");
   document.documentElement.setAttribute("data-theme", saved || "light");
   updateThemeMenuUI();
   initCookieConsent();
@@ -4805,7 +5003,7 @@ function toggleTheme(){
   const isLight = document.documentElement.getAttribute("data-theme") === "light";
   const next = isLight ? "dark" : "light";
   document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("equo-theme", next);
+  lsSet("equo-theme", next);
   updateThemeMenuUI();
   aggiornaThemeColorMeta();
 }
@@ -4976,7 +5174,7 @@ async function segnaNovitaLette(){
 // testi dei pop-up di sistema (vedi sotto)
 const CHIAVE_ULTIMO_ONLINE = "equo-ultimo-online";
 // diventa true quando è pronta la coda offline (livello 2): da lì il testo dice che si può lavorare offline e le modifiche partono dopo
-const OFFLINE_CODA_ATTIVA = false;
+const OFFLINE_CODA_ATTIVA = true;
 const TESTO_OFFLINE = () => OFFLINE_CODA_ATTIVA
   ? `Nessun problema: <b>puoi continuare a lavorare</b>. Tutto quello che registri (interventi, appuntamenti, spese, eventi sanitari e messaggi) viene salvato sul telefono e <b>inviato da solo</b> appena torna la connessione.`
   : `Nessun problema: <b>puoi continuare a usare Equo</b> e consultare tutto quello che hai già aperto. Per salvare nuove modifiche serve la connessione: appena torna te lo diciamo noi e tutto si aggiorna da solo.`;
@@ -5132,7 +5330,7 @@ async function aggiornaNotaUsoAi(uso){
   const el = document.getElementById("ai-usage-note");
   if(!el) return;
   if(!uso && !DEMO_MODE && currentUser){
-    const { data } = await sb.from("ai_utilizzo").select("conteggio").eq("user_id", currentUser.id).eq("mese", new Date().toISOString().slice(0, 7)).maybeSingle();
+    const { data } = await sb.from("ai_utilizzo").select("conteggio").eq("user_id", currentUser.id).eq("mese", new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" }).slice(0, 7)).maybeSingle();
     uso = { usati: data?.conteggio || 0, limite: isPremium() ? 500 : 5 };
   }
   if(!uso){ el.textContent = ""; return; }
@@ -5187,6 +5385,7 @@ async function loadHorses(){
 }
 
 function renderHome(){
+  renderHomeGreeting();
   const setupBox = document.getElementById("home-setup");
   const mainBox = document.getElementById("home-main");
   if(horses.length === 0){
@@ -6791,9 +6990,9 @@ async function startCheckout(periodo){
       headers: await authHeaders(),
       body: JSON.stringify({ piano: currentPianoRuolo(), periodo })
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if(data.url){ window.location.href = data.url; }
-    else { showToast("Non sono riuscito ad aprire il pagamento, riprova."); }
+    else { showToast(data.error || "Non sono riuscito ad aprire il pagamento, riprova."); }
   } catch(e){
     showToast("Errore di connessione, riprova.");
   }
@@ -6826,7 +7025,11 @@ async function confirmDowngradeFree(){
       headers: await authHeaders(),
       body: "{}"
     });
-    if(!res.ok) throw new Error("cancel-subscription fallita");
+    if(!res.ok){
+      const d = await res.json().catch(() => ({}));
+      showToast(d.error || "Non sono riuscito ad annullare l'abbonamento, riprova o scrivici.");
+      return;
+    }
     currentUser.piano = "free";
     updatePianoUI();
     if(typeof renderIncassi === "function" && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo)) await renderIncassi();
@@ -6935,25 +7138,25 @@ function closeLegalPage(){
 const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
 
 function initCookieConsent(){
-  const consent = localStorage.getItem("equo-cookie-consent");
+  const consent = lsGet("equo-cookie-consent");
   if(consent === "accepted") loadGoogleAnalytics();
   else if(consent !== "rejected") document.getElementById("cookie-banner").classList.add("active");
 }
 
 function acceptCookies(){
-  localStorage.setItem("equo-cookie-consent", "accepted");
+  lsSet("equo-cookie-consent", "accepted");
   document.getElementById("cookie-banner").classList.remove("active");
   loadGoogleAnalytics();
 }
 
 function rejectCookies(){
-  localStorage.setItem("equo-cookie-consent", "rejected");
+  lsSet("equo-cookie-consent", "rejected");
   document.getElementById("cookie-banner").classList.remove("active");
 }
 
 function reopenCookieBanner(){
   closeLegalPage();
-  localStorage.removeItem("equo-cookie-consent");
+  lsDel("equo-cookie-consent");
   document.getElementById("cookie-banner").classList.add("active");
 }
 
@@ -6984,7 +7187,7 @@ async function renderIncassi(){
   const box = document.getElementById("incassi-mese-incassato");
   if(!box) return;
   const interventi = await DB.listInterventiMascalciaTutti();
-  const meseCorrente = new Date().toISOString().slice(0, 7); // "2026-09"
+  const meseCorrente = isoLocale(new Date()).slice(0, 7); // "2026-09"
   const delMese = interventi.filter(i => (i.data_intervento || "").startsWith(meseCorrente));
   const incassatoMese = delMese.filter(i => i.stato_pagamento === "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
   const daIncassareMese = delMese.filter(i => i.stato_pagamento !== "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
@@ -9575,7 +9778,7 @@ function detectDemoEvent(text){
   const dateMatch = t.match(/(\d{4}-\d{2}-\d{2})|(\d{1,2}\/\d{1,2}\/\d{2,4})/);
   const horse = horses.find(h => t.includes((h.name || "").toLowerCase()));
   if(!horse) return null;
-  let date = new Date().toISOString().slice(0, 10);
+  let date = isoLocale(new Date());
   if(dateMatch){
     if(dateMatch[1]) date = dateMatch[1];
     else if(dateMatch[2]){
@@ -10063,10 +10266,12 @@ function formatDate(dateStr){
   return new Date(dateStr).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
 }
 function startPromoRotation(){
+  clearInterval(timerPromo);
   let i = 0;
   const slides = document.querySelectorAll(".promo-slide");
+  slides.forEach((sl, k) => sl.classList.toggle("active", k === 0));
   if(slides.length < 2) return;
-  setInterval(() => {
+  timerPromo = setInterval(() => {
     slides[i].classList.remove("active");
     i = (i + 1) % slides.length;
     slides[i].classList.add("active");
@@ -10084,6 +10289,57 @@ document.querySelector('[data-page="chat"]').addEventListener("click", () => { l
 
 /* ---------- INIT ---------- */
 boot();
+</script>
+<!-- Invito a installare l'app (offline + notifiche) -->
+<div id="invito-installa" class="ii-velo" style="display:none" onclick="if(event.target === this) invitoInstallaChiudi()">
+  <div class="ii-card">
+    <div class="ii-testa"><img src="/assets/icona-equo.png" alt=""><div><b>Metti Equo sulla schermata Home</b><span>Si apre anche senza rete, ricevi le notifiche e i tuoi dati restano sempre sul telefono.</span></div></div>
+    <div id="invito-installa-passi"></div>
+    <button class="ii-dopo" onclick="invitoInstallaChiudi()">Più tardi</button>
+  </div>
+</div>
+<script>
+/* ---------- EQUO OFFLINE (passaggio A): service worker unico (push + copia dell'app) ----------
+   Lo stesso file delle notifiche: se OneSignal l'ha già registrato non si fa nulla, altrimenti lo registriamo noi. */
+(function(){
+  if(!("serviceWorker" in navigator) || location.protocol !== "https:") return;
+  window.addEventListener("load", async () => {
+    try{
+      const reg = await navigator.serviceWorker.getRegistration("/");
+      if(!reg) await navigator.serviceWorker.register("/OneSignalSDKWorker.js", { scope: "/" });
+    } catch(e){ console.warn("service worker:", e); }
+  });
+})();
+
+/* ---------- Invito a installare l'app (iPhone/iPad da Safari, Android con il pulsante del browser) ----------
+   Installata: si apre anche senza rete, riceve le notifiche e su iPhone non perde i dati salvati. */
+let invitoInstallaEvento = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); invitoInstallaEvento = e; });
+function invitoInstallaControlla(){
+  const installata = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone;
+  if(installata || (typeof DEMO_MODE !== "undefined" && DEMO_MODE)) return;
+  let rimandato = 0; try{ rimandato = Number(localStorage.getItem("equo-invito-installa") || 0); }catch(e){}
+  if(Date.now() - rimandato < 14 * 86400000) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if(!ios && !invitoInstallaEvento) return;
+  const box = document.getElementById("invito-installa"); if(!box) return;
+  document.getElementById("invito-installa-passi").innerHTML = ios
+    ? `<div class="ii-passo"><span>1</span><div>Tocca <b>Condividi</b> <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 11v9h14v-9"/></svg> in basso (o in alto su iPad)</div></div>
+       <div class="ii-passo"><span>2</span><div>Scegli <b>«Aggiungi alla schermata Home»</b></div></div>
+       <div class="ii-passo"><span>3</span><div>Apri Equo dall'icona sulla Home</div></div>`
+    : `<button class="ii-btn" onclick="invitoInstallaAndroid()">Installa l'app</button>`;
+  box.style.display = "flex";
+}
+async function invitoInstallaAndroid(){
+  if(!invitoInstallaEvento) return;
+  invitoInstallaEvento.prompt();
+  try{ await invitoInstallaEvento.userChoice; }catch(e){}
+  invitoInstallaEvento = null; invitoInstallaChiudi(false);
+}
+function invitoInstallaChiudi(ricorda = true){
+  if(ricorda){ try{ localStorage.setItem("equo-invito-installa", String(Date.now())); }catch(e){} }
+  const box = document.getElementById("invito-installa"); if(box) box.style.display = "none";
+}
 </script>
 </body>
 </html>

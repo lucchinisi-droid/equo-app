@@ -1,19 +1,14 @@
 {
   "titolo": "Le novità di questo aggiornamento",
   "voci": [
-    "Nuova sezione Box / Stalla in Cavalli & Salute: box disegnati con bordo verde (occupato), rosso (vuoto) o giallo (manutenzione), foto del cavallo, stato (paddock, lavoro, riposo…) e icone del giorno (pasti, fieno, acqua, farmaco, box pulito…). Con la modalità stalla per tablet e display.",
-    "Pallino a semaforo accanto a ogni cavallo, con preavviso diverso per tipo: vaccino e Coggins 30 giorni, sverminazione 14, ferratura 10.",
-    "Suggerimenti ovunque: passa il mouse (o tieni premuto sul telefono) su pulsanti, icone e numeri per sapere cosa fanno.",
-    "Athena è attiva: tocca la civetta in basso a destra e chiedile come si fa qualsiasi cosa nel gestionale, Magazzino compreso.",
-    "Nuova pagina Statistiche: incassi e lezioni degli ultimi 12 mesi, clienti a rischio con messaggio pronto, carnet da rinnovare.",
-    "In PREMIUM: indice di salute del centro, margine per cavallo, benessere dei cavalli, mappa di occupazione, simulatore e report PDF.",
-    "Arriva Merlino, l'agente per numeri, conti e strategia, con il radar settimanale della concorrenza della tua zona.",
-    "\"Il tuo pacchetto\" in Il tuo Centro: cosa è incluso, quanto stai usando e il confronto tra START, ADVANCE e PREMIUM.",
-    "Pensioni e abbonamenti si possono collegare al cavallo; in Il tuo Centro puoi modificare i dati e la zona del centro.",
-    "Nuova scheda cavallo in PDF con la grafica Equo: si scarica, si invia in chat al proprietario o al team e si stampa con un tocco; la foto ora è sempre dritta.",
-    "Tasti più chiari: verde per confermare e salvare, giallo per modificare.",
-    "Magazzino: le quantità ora restano nell'unità scelta (per esempio sacchi) anche quando indichi il peso della confezione.",
-    "Nuovo in Home: \"Serve aiuto?\" → \"Apri un ticket\" per scrivere al team Equo e ricevere risposta via email.",
-    "Nuovo avviso quando sei senza connessione e nuova finestra degli aggiornamenti con le novità."
+    "Equo Scuderia ora si apre anche senza connessione: vedi gli ultimi dati consultati e torni a modificare appena rientra la rete.",
+    "Nuova Gestione Groom (in Altre funzioni): l'app per il personale di stalla in 7 lingue, con QR personale e PIN, e i QR da attaccare ai box. 3 groom in ADVANCE, 10 in PREMIUM.",
+    "Box / Stalla: il nome del proprietario sul box, la nota N e le attività del giorno che seguono il cavallo, e i cavalli si spostano tenendo premuto e trascinando.",
+    "Box di proprietà con i bordi a colori: verde al suo posto, giallo fuori posto, rosso riservato vuoto, blu libero, bianco con la chiave in manutenzione.",
+    "Le categorie dei cavalli si chiudono e si aprono con la freccia accanto al titolo.",
+    "Magazzino e Statistiche: interruttore Semplice / Completa in alto per scegliere la vista che preferisci.",
+    "Ogni cavallo ha il suo codice Equo e la razza si sceglie cercandola per nome.",
+    "Il radar di Merlino non parte due volte se viene avviato da più persone insieme.",
+    "Più affidabilità: date giuste anche subito dopo mezzanotte e più sicurezza su file, nomi e collegamenti."
   ]
 }

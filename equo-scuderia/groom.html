@@ -463,5 +463,19 @@ function demoRpc(nome, a){
 }
 if(DEMO){ S.nome = "Rahim"; rpc("groom_stalla", {}).then(ricevi); applicaLingua(); } else avvio();
 </script>
+<script>
+/* ---------- EQUO OFFLINE (passaggio A): service worker unico (push + copia dell'app) ----------
+   Lo stesso file delle notifiche: se OneSignal l'ha già registrato non si fa nulla, altrimenti lo registriamo noi. */
+(function(){
+  if(!("serviceWorker" in navigator) || location.protocol !== "https:") return;
+  window.addEventListener("load", async () => {
+    try{
+      const reg = await navigator.serviceWorker.getRegistration("/");
+      if(!reg) await navigator.serviceWorker.register("/OneSignalSDKWorker.js", { scope: "/" });
+    } catch(e){ console.warn("service worker:", e); }
+  });
+})();
+
+</script>
 </body>
 </html>
