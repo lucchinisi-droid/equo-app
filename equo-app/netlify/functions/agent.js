@@ -4,7 +4,7 @@
 //
 // Cosa fa:
 //  - verifica il LOGIN (token Supabase): niente token, niente risposta;
-//  - applica il limite mensile di messaggi LATO SERVER (Free 5, Premium 500);
+//  - applica il limite di messaggi LATO SERVER (Free 5 al GIORNO, azzerato a mezzanotte ora italiana; Premium 500 al mese);
 //  - legge i dati dell'utente con i SUOI permessi (RLS): cavalli, scadenze, storico, spese,
 //    appuntamenti col maniscalco, lezioni;
 //  - consulta le schede di conoscenza verificate (tabella ai_conoscenze) e ne cita la fonte;
@@ -63,6 +63,7 @@ const CORPO_PROPRIETARIO = `## Come lavori
 - Per domande su salute, normative, vaccinazioni, Coggins/AIE, anagrafe equina, sverminazione, ferratura, alimentazione, emergenze: prima cerca nelle schede verificate con lo strumento cerca_conoscenze. Se trovi una scheda pertinente basati su quella e alla fine scrivi "Fonte: <titolo fonte>". Se non c'è una scheda, rispondi con conoscenze generali prudenti e dillo ("indicazione generale").
 - Se l'utente ti dice qualcosa di utile da ricordare in futuro (abitudini, allergie o sensibilità del cavallo, preferenze, nome del veterinario o della scuderia), salvalo con salva_memoria, senza chiedere il permesso per cose ovvie. Non salvare dati sensibili sulla salute delle PERSONE.
 - Puoi PROPORRE queste azioni, che l'app mostra come schede da confermare con un tocco: proponi_evento_sanitario (vaccino, Coggins, ferratura, sverminazione), proponi_spesa, proponi_lezione (lezione, allenamento, gara) e proponi_richiesta_maniscalco (chiede un appuntamento al maniscalco collegato). Usale quando l'utente chiede di registrare, segnare, aggiungere, prenotare o chiedere qualcosa, anche con parole semplici ("ho speso 60 euro di fieno oggi", "segna una gara domenica", "chiedi al maniscalco di venire venerdì").
+- Indicazioni stradali: se l'utente vuole andare in scuderia o in un posto ("portami in scuderia", "come arrivo al maneggio?", "portami da …"), usa naviga_verso: l'app mostra una scheda «Naviga» che, toccata, apre Google Maps, Apple Mappe o Waze. Non scrivere indirizzi a memoria e non dire che stai già guidando: è l'utente che tocca la scheda.
 - Mai inventare dati: se manca qualcosa di essenziale (importo, data, cavallo quando ne ha più di uno) chiedilo in una domanda breve. Se ha un solo cavallo, usa quello. "Oggi", "ieri", "venerdì prossimo" convertili in data usando la data di oggi.
 - Puoi proporre più schede nella stessa risposta (es. una fattura con due voci, un certificato con due vaccini).
 - Non dire mai che hai già salvato o prenotato: di' che hai preparato la scheda da confermare qui sotto.
@@ -93,7 +94,7 @@ const CORPO_PROPRIETARIO = `## Come lavori
 - Calendario: lezioni, allenamenti e gare.
 - Chat: sezione "Il tuo maniscalco" → "+ Collega" con il codice che dà il maniscalco; poi "Prenota" per chiedere un appuntamento e l'icona del cavallo per abbinare i cavalli. Chat tra proprietari con il codice personale (menu profilo → "Il tuo codice per la chat") o scansionando il QR.
 - Home → "Servizi vicino a te": veterinari, centri ippici e negozi vicini, con chiamata e indicazioni.
-- Piano: Free (1 cavallo, 5 messaggi AI al mese) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
+- Piano: Free (1 cavallo, 5 messaggi AI al giorno, il contatore riparte a mezzanotte) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
 - Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
 
 ${REGOLE_COMUNI}`;
@@ -172,6 +173,13 @@ const STRUMENTI = [
     }, required: ["tipo", "riassunto"] } },
   { name: "le_mie_segnalazioni", description: "Richieste e segnalazioni che l'utente ha girato ai Boss tramite gli agenti, con stato e risposta.", input_schema: { type: "object", properties: {} } },
   {
+    name: "naviga_verso",
+    description: "Prepara la scheda «Naviga» (indicazioni stradali) verso una scuderia a cui l'utente è collegato su Equo, oppure verso un luogo indicato per nome. L'utente la tocca e sceglie Google Maps, Apple Mappe o Waze. Per \"la mia scuderia\" passa destinazione = \"scuderia\".",
+    input_schema: { type: "object", properties: {
+      destinazione: { type: "string", description: "Nome della scuderia o del luogo (es. \"Le Querce\", \"scuderia\", \"Clinica veterinaria San Marco, Velletri\")." },
+    }, required: ["destinazione"] },
+  },
+  {
     name: "proponi_richiesta_maniscalco",
     description: "Propone di inviare al maniscalco collegato una richiesta di appuntamento (il maniscalco poi conferma o rifiuta).",
     input_schema: { type: "object", properties: {
@@ -223,6 +231,7 @@ Il tuo focus è l'anatomia dello zoccolo, il pareggio, le tipologie di ferri (tr
   · proponi_accetta_richiesta / proponi_rifiuta_richiesta: prima leggi richieste_da_confermare e usa l'id giusto. Se chiede di mandare il PDF o il riepilogo, metti invia_riepilogo = true: dopo la conferma si apre la chat con il PDF allegato.
   · proponi_promemoria: messaggio in chat a un cliente (es. ferratura scaduta). Testo breve, cordiale, in prima persona come se scrivesse il maniscalco, con cavallo, cosa è scaduto e da quando, e l'invito a prenotare con il tasto "Prenota" della chat. Una scheda per cliente, al massimo 8 per risposta. Se il cliente non è su Equo la scheda permette di copiare il testo.
   · proponi_segna_saldato: segna come pagati uno o più interventi (leggi prima incassi per avere gli id).
+  · naviga_verso: "portami da …", "come arrivo da …" → scheda «Naviga» verso un cliente o una struttura (anche indicati col nome del cavallo). Se il cliente non ha l'indirizzo, la scheda fa cercare il luogo e il maniscalco sceglie quello giusto, che resta salvato. Non inventare mai indirizzi.
 - "Oggi", "domani", "giovedì" convertili in data usando la data di oggi. Se manca qualcosa di essenziale (cliente, data, quale richiesta) chiedilo in una domanda breve. Se il cliente ha un solo cavallo, usa quello.
 - Quando elenchi agenda o scadenze: prima le più vicine o le più in ritardo, data in italiano (es. gio 2 ottobre, ore 9:00), una riga per voce.
 - Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
@@ -249,6 +258,8 @@ const STRUMENTI_GESTIONE = [
   { name: "proponi_rifiuta_richiesta", description: "Propone di rifiutare una richiesta di appuntamento (id da richieste_da_confermare). Al cliente arriva un messaggio per trovare un'altra data.", input_schema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] } },
   { name: "proponi_promemoria", description: "Propone un messaggio da inviare nella chat Equo a un cliente (es. promemoria di ferratura scaduta). Una chiamata per cliente.", input_schema: { type: "object", properties: {
       cliente: { type: "string", description: "Nome del cliente." }, testo: { type: "string", description: "Testo del messaggio, max 600 caratteri." } }, required: ["cliente", "testo"] } },
+  { name: "naviga_verso", description: "Prepara la scheda «Naviga» (indicazioni stradali) verso un cliente o una struttura del maniscalco, indicati per nome del cliente o del cavallo. L'utente la tocca e sceglie Google Maps, Apple Mappe o Waze.", input_schema: { type: "object", properties: {
+      destinazione: { type: "string", description: "Nome del cliente, della struttura o del cavallo." } }, required: ["destinazione"] } },
   { name: "proponi_segna_saldato", description: "Propone di segnare come saldati uno o più interventi (id da incassi).", input_schema: { type: "object", properties: {
       ids: { type: "array", items: { type: "string" }, description: "Id degli interventi." } }, required: ["ids"] } },
 ];
@@ -426,10 +437,25 @@ function trovaCavallo(cavalli, nome) {
 }
 
 // ---------------------------------------------------------------- esecuzione strumenti
+// Con gli incassi nascosti togliamo importi, pagamenti e totali in euro da ogni risultato degli strumenti
+const CHIAVI_SOLDI = /importo|pagamento|euro|incass|saldat|valore/i;
+function senzaImporti(v) {
+  if (Array.isArray(v)) return v.map(senzaImporti);
+  if (v && typeof v === "object") {
+    const o = {};
+    for (const [k, x] of Object.entries(v)) if (!CHIAVI_SOLDI.test(k)) o[k] = senzaImporti(x);
+    return o;
+  }
+  return v;
+}
+
 async function eseguiStrumento(nome, input, ctx) {
+  if (ctx.incassiNascosti && ["incassi", "proponi_segna_saldato"].includes(nome)) {
+    return "L'utente ha nascosto gli incassi nell'app (interruttore con PIN): non parlare di importi, pagamenti o incassi. Se te li chiede, digli che può farli ricomparire dal menu profilo → Home → «Mostra gli incassi».";
+  }
   const { db, userId, cavalli } = ctx;
   input = input || {};
-  if (STRUMENTI_GESTIONE.some((t) => t.name === nome) && ctx.ambito !== "maniscalco") return "Strumento riservato ai maniscalchi.";
+  if (nome !== "naviga_verso" && STRUMENTI_GESTIONE.some((t) => t.name === nome) && ctx.ambito !== "maniscalco") return "Strumento riservato ai maniscalchi.";
   if (ctx.vista === "scuderia" && !(ctx.strumenti || []).some((t) => t.name === nome)) return "Strumento non disponibile.";
   if (["situazione_centro", "statistiche_centro", "ultimo_radar"].includes(nome) && ctx.vista !== "scuderia") return "Strumento disponibile solo in Equo Scuderia.";
   switch (nome) {
@@ -705,6 +731,56 @@ async function eseguiStrumento(nome, input, ctx) {
       return "Scheda di conferma mostrata" + (dati.invia_riepilogo ? ": dopo la conferma si apre la chat con il PDF di riepilogo." : ".");
     }
 
+    case "naviga_verso": {
+      const dest = String(input.destinazione || "").trim().slice(0, 150);
+      if (!dest) return "Chiedi dove vuole andare.";
+      if (ctx.azioni.some((x) => x.tipo === "naviga")) return "Scheda Naviga già mostrata in questa risposta.";
+      if (ctx.ambito === "maniscalco") {
+        const clienti = await clientiManiscalco(ctx);
+        let trovati = trovaPerNome(clienti, dest);
+        if (!trovati.length) {
+          // per nome del cavallo
+          const { data: cav } = await ctx.db.from("cavalli_clienti_mascalcia").select("cliente_mascalcia_id, nome").ilike("nome", `%${dest.replace(/[%_]/g, "")}%`).limit(10);
+          const ids = [...new Set((cav || []).map((c) => c.cliente_mascalcia_id))];
+          trovati = clienti.filter((c) => ids.includes(c.id));
+        }
+        if (!trovati.length) {
+          ctx.azioni.push({ tipo: "naviga", dati: { nome: dest, indirizzo: null, ricerca: dest } });
+          return `"${dest}" non è tra i clienti del maniscalco: scheda Naviga mostrata con ricerca per nome nelle mappe. Di' di controllare che sia il posto giusto; se intendeva un cliente, chiedigli il nome esatto.`;
+        }
+        if (trovati.length > 1) return `Più clienti corrispondono a "${dest}": ${trovati.slice(0, 6).map((c) => c.nome).join(", ")}. Chiedi quale.`;
+        const c = trovati[0];
+        let indirizzo = null;
+        const { data: ci, error: eInd } = await ctx.db.from("clienti_mascalcia").select("indirizzo, centro_id").eq("id", c.id).maybeSingle();
+        if (!eInd) indirizzo = (ci?.indirizzo || "").trim() || null;
+        if (!indirizzo && ci?.centro_id) {
+          const { data: st } = await ctx.db.rpc("pro_indirizzi_strutture");
+          const r = (st || []).find((x) => x.cliente_id === c.id);
+          if (r?.indirizzo) indirizzo = [r.indirizzo, [r.citta, r.provincia ? `(${r.provincia})` : ""].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+        }
+        ctx.azioni.push({ tipo: "naviga", dati: { cliente_mascalcia_id: c.id, nome: c.nome, indirizzo } });
+        return indirizzo ? `Scheda Naviga verso ${c.nome} (${indirizzo}) mostrata: il maniscalco la tocca e sceglie l'app di mappe.`
+          : `Scheda Naviga verso ${c.nome} mostrata. Non c'è ancora un indirizzo: toccandola cerca il luogo e il maniscalco sceglie quello giusto, che resta salvato nella scheda del cliente.`;
+      }
+      // proprietario: scuderie collegate (solo nome e indirizzo), altrimenti ricerca per nome nelle mappe
+      const { data: sc } = await ctx.db.rpc("prop_indirizzi_scuderie");
+      const scuderie = sc || [];
+      const generico = /^(la mia |il mio )?(scuderia|maneggio|centro( ippico)?|circolo)$/i.test(dest);
+      let trovate = generico ? scuderie : trovaPerNome(scuderie, dest);
+      if (generico && scuderie.length > 1) return `L'utente è collegato a più scuderie: ${scuderie.map((x) => x.nome).join(", ")}. Chiedi quale.`;
+      if (trovate.length > 1) return `Più scuderie corrispondono a "${dest}": ${trovate.map((x) => x.nome).join(", ")}. Chiedi quale.`;
+      if (trovate.length === 1) {
+        const r = trovate[0];
+        const indirizzo = r.indirizzo ? [r.indirizzo, [r.citta, r.provincia ? `(${r.provincia})` : ""].filter(Boolean).join(" ")].filter(Boolean).join(", ") : null;
+        const ricerca = indirizzo ? null : [r.nome, r.citta].filter(Boolean).join(", ");
+        ctx.azioni.push({ tipo: "naviga", dati: { nome: r.nome, indirizzo, ricerca } });
+        return indirizzo ? `Scheda Naviga verso ${r.nome} (${indirizzo}) mostrata.` : `Scheda Naviga verso ${r.nome} mostrata: la scuderia non ha indicato l'indirizzo, quindi le mappe cercano per nome${r.citta ? " e città" : ""}. Suggerisci di controllare che sia il posto giusto.`;
+      }
+      if (generico) return "L'utente non è collegato a nessuna scuderia su Equo. Chiedigli il nome del posto, oppure spiega che può collegarsi alla sua scuderia con il codice invito.";
+      ctx.azioni.push({ tipo: "naviga", dati: { nome: dest, indirizzo: null, ricerca: dest } });
+      return `"${dest}" non è una scuderia collegata: scheda Naviga mostrata con ricerca per nome nelle mappe. Di' all'utente di controllare che sia il posto giusto.`;
+    }
+
     case "proponi_promemoria": {
       const { cliente, errore } = await risolviCliente(ctx, input.cliente);
       if (errore) return errore;
@@ -808,8 +884,11 @@ exports.handler = async (event) => {
   if (merlino && !(centro.owner_id === user.id || membro.ruolo === "admin" || ["admin", "2", "3"].includes(String(membro.livello)))) return risposta(403, { error: "Merlino è riservato al titolare e ai responsabili del centro (livello 2 o 3)" });
   const athena = scud && !merlino;
   const athenaBasic = athena && limitiCentro.athena_proattiva === false;
-  const chiaveMese = merlino ? mese + "-merlino" : athena ? mese + "-athena" : mese;
   const piano = profilo?.piano === "premium" ? "premium" : "free";
+  // Free: 5 messaggi al GIORNO (chiave "AAAA-MM-GG", riparte a mezzanotte ora italiana); Premium: 500 al mese ("AAAA-MM")
+  const giornaliero = !scud && piano === "free";
+  const periodo = giornaliero ? oggiISO() : mese;
+  const chiaveMese = merlino ? mese + "-merlino" : athena ? mese + "-athena" : periodo;
   // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
   // Pegasus: vista proprietario. Veterinari/istruttori (vista professionista non maniscalco): Equo AI neutro
@@ -825,15 +904,15 @@ exports.handler = async (event) => {
     const { count } = await q;
     usati = count || 0;
   }
-  if (usati >= limite) return risposta(200, { limite_raggiunto: true, uso: { usati, limite, piano } });
+  if (usati >= limite) return risposta(200, { limite_raggiunto: true, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   // prenotazione ATOMICA del messaggio (SQL ai_prenota): richieste in parallelo non superano il limite
   // e il messaggio resta contato anche se la risposta va in timeout. Se la funzione SQL manca, si prosegue come prima.
   const chiavePren = scud ? `centro:${centro.id}:${merlino ? "merlino" : "athena"}` : `utente:${user.id}:${chiaveMese}`;
   let prenotato = false;
   {
-    const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: mese, p_limite: limite, p_base: usati });
+    const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: scud ? mese : periodo, p_limite: limite, p_base: usati });
     if (ePren) console.warn("ai_prenota non disponibile:", ePren.message);
-    else if (Number(pren) < 0) return risposta(200, { limite_raggiunto: true, uso: { usati: limite, limite, piano } });
+    else if (Number(pren) < 0) return risposta(200, { limite_raggiunto: true, uso: { usati: limite, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
     else { prenotato = true; usati = Math.max(usati, Number(pren) - 1); }
   }
 
@@ -855,7 +934,7 @@ exports.handler = async (event) => {
   const contesto = [
     `Oggi è ${new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome" })} (${oggiISO()}).`,
     scud ? `Utente: ${membro.nome_visualizzato || profilo?.full_name || "—"} · centro "${centro.nome}" · ruolo ${membro.ruolo}${membro.livello ? " (livello " + membro.livello + ")" : ""} · pacchetto ${String(limitiCentro.pacchetto || "").toUpperCase()} · messaggi a ${merlino ? "Merlino" : "Athena"} questo mese (tutto il centro): ${usati + 1} di ${limite}.`
-      : `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati questo mese: ${usati + 1} di ${limite}.`,
+      : `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati ${giornaliero ? "oggi" : "questo mese"}: ${usati + 1} di ${limite}.`,
     scud ? "" : listaCavalli.length ? `Cavalli: ${listaCavalli.map((c) => c.name).join(", ")}.` : "L'utente non ha ancora registrato cavalli (si aggiungono dal tab Cavalli).",
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
     hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
@@ -882,6 +961,12 @@ exports.handler = async (event) => {
     guida: scud ? "scuderia" : vista === "professionista" ? "maniscalco" : "proprietario",
     strumenti: merlino ? STRUMENTI_MERLINO : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
     centroId: centro?.id || null, agente, vista, contestoConversazione };
+  // incassi nascosti dal maniscalco (interruttore con PIN nell'app): niente importi nelle risposte.
+  // Letto a parte: se la colonna non esistesse ancora, il resto funziona uguale.
+  try {
+    const { data: inc } = await admin.from("profiles").select("incassi_nascosti").eq("id", user.id).maybeSingle();
+    ctx.incassiNascosti = !!inc?.incassi_nascosti;
+  } catch (_) { ctx.incassiNascosti = false; }
   const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0, ricerche: 0 };
   let link = [];
   let testoFinale = "";
@@ -922,14 +1007,15 @@ exports.handler = async (event) => {
       for (const t of chiamate) {
         let out;
         try { out = await eseguiStrumento(t.name, t.input, ctx); } catch (e) { console.error("tool", t.name, e); out = "Errore interno nello strumento."; }
+        if (ctx.incassiNascosti) out = senzaImporti(out);
         risultati.push({ type: "tool_result", tool_use_id: t.id, content: typeof out === "string" ? out : JSON.stringify(out) });
       }
       messages.push({ role: "user", content: risultati });
     }
   } catch (e) {
     // errore del servizio AI: il messaggio prenotato si restituisce
-    if (prenotato) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: mese }).then(() => {}, () => {});
-    return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano } });
+    if (prenotato) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: scud ? mese : periodo }).then(() => {}, () => {});
+    return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   }
 
   // se ha usato la ricerca web ma non ha scritto i link, aggiungiamo quelli citati
@@ -948,7 +1034,7 @@ exports.handler = async (event) => {
   if (chiediFeedback && /boss/i.test(testoFinale)) await admin.from("profiles").update({ ai_feedback_chiesto_at: new Date().toISOString() }).eq("id", user.id);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
-  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano } });
+  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
 };
 
 // esportati solo per i test

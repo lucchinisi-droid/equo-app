@@ -1,11 +1,18 @@
 {
   "titolo": "Le novità di questo aggiornamento",
   "voci": [
+    "Nuova Home a widget: appuntamenti di oggi, messaggi, incassi, scadenze e scorciatoie a colpo d'occhio. Se preferisci la Home classica, la scegli dal menu profilo (Vista widget).",
+    "Per i maniscalchi: dal prossimo appuntamento tocchi Naviga per arrivare dal cliente con Google Maps, Apple Maps o Waze. Con le strutture collegate l'indirizzo arriva da solo; se manca, cerchi il luogo, tocchi quello giusto e resta salvato nella scheda del cliente.",
+    "Chiedi «portami da…» agli assistenti AI: Hammer ti porta da un cliente o da una struttura (anche dal nome del cavallo), Pegasus nella tua scuderia. Compare la scheda Naviga, la tocchi e scegli le mappe.",
+    "Piano Free: gli assistenti AI ora rispondono a 5 messaggi al giorno (prima erano 5 al mese). Il contatore riparte ogni notte a mezzanotte.",
+    "Incassi riservati: dal menu profilo puoi nascondere gli incassi ovunque nell'app. La prima volta crei un PIN di 4 cifre, che serve per mostrarli di nuovo.",
+    "Su iPad e tablet l'app usa tutto lo schermo: menu laterale, widget affiancati, clienti e chat a due colonne.",
     "Nuova lente di ricerca: dalla Home o dall'icona in alto, su ogni pagina, trovi in un attimo cavalli, clienti, appuntamenti, spese e chat.",
     "Diventa Early Adopter: dal sito equohub.com scegli il pacchetto Premium a vita e completi il pagamento direttamente nell'app, con i posti rimasti sempre aggiornati.",
     "Per i professionisti: in Clienti cerchi per nome, telefono o nome del cavallo. Scrivi \"Furia\" ed esce il cliente che ha quel cavallo.",
     "Nuovo appuntamento: scrivi il nome del cliente o del cavallo e lo scegli al volo, il cavallo viene già selezionato.",
     "Ricerca anche in Incassi (da saldare), Messaggi, Libretto sanitario, Spese e nell'elenco dei cavalli.",
-    "La ricerca funziona anche senza rete, ignora maiuscole e accenti e compare solo quando l'elenco è lungo."
+    "La ricerca funziona anche senza rete, ignora maiuscole e accenti e compare solo quando l'elenco è lungo.",
+    "Veterinari e istruttori: scegliendo la professione al primo accesso ora puoi candidarti per progettare con noi gli strumenti dedicati e ricevere l'accesso in anteprima."
   ]
 }

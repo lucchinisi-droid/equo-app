@@ -151,6 +151,11 @@ async function elaboraUtente(admin, p, oggi, settimana) {
   const premium = p.piano === "premium";
   const d = await datiManiscalco(admin, p.id, oggi);
   if (!d.ha_clienti) return "senza_lavoro";
+  // incassi nascosti nell'app (interruttore con PIN): il riepilogo non riporta importi
+  try {
+    const { data: inc } = await admin.from("profiles").select("incassi_nascosti").eq("id", p.id).maybeSingle();
+    if (inc?.incassi_nascosti) { d.incassi = { da_incassare: 0, clienti: 0, senza_importo: 0 }; d.settimana_scorsa.valore = 0; }
+  } catch (_) { /* colonna non ancora creata */ }
   const ai = await consiglioAi(d, oggi);
   const testo = componiTesto(d, oggi, ai.testo, premium);
   const { error: errIns } = await admin.from("ai_riepiloghi").insert({ user_id: p.id, settimana, vista: "professionista", testo, costo_usd: ai.costo });

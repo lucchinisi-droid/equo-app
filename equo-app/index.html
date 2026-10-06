@@ -727,6 +727,157 @@ body.ai-aperta{overflow:hidden}
 .ii-passo span{width:24px;height:24px;border-radius:50%;background:#14482c;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
 .ii-btn{width:100%;background:#1d4a35;color:#fff;border:2px solid #e8b04b;border-radius:12px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
 .ii-dopo{display:block;margin:10px auto 0;background:none;border:0;color:#5f6b63;font-size:13px;text-decoration:underline;cursor:pointer}
+/* ---------- Home a widget ---------- */
+.wh{display:none}
+body.vista-widget .wh{display:grid}
+body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh),
+body.vista-widget #home-main{display:none!important}
+.wh{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;grid-auto-flow:row dense}
+.wg{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:13px 14px;position:relative;overflow:hidden;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wg:active{transform:scale(.985)}
+.wg-grande,.wg-medio{grid-column:1/-1}
+.wg-grande{cursor:default}
+.wg-piccolo{aspect-ratio:1/1;display:flex;flex-direction:column}
+.wg-et{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.wg-et svg{width:14px;height:14px;color:var(--accent);flex-shrink:0}
+.wg-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.wg-meta{font-size:12px;color:var(--muted)}
+.wg-num{font-family:'Fraunces',serif;font-weight:700;font-size:30px;line-height:1;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wg-num small{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted)}
+.wg-riga{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wg-riga b{color:var(--text);font-weight:600}
+.wg-riga.forte{font-size:13.5px;font-weight:700;color:inherit;text-align:center;-webkit-line-clamp:3}
+.wg-riga.forte small{font-weight:500;font-size:11.5px;opacity:.85}
+.wg-badge{position:absolute;top:12px;right:12px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--red);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.wg-premium{position:absolute;top:11px;right:11px;font-size:9.5px;font-weight:800;letter-spacing:.06em;background:#e8b04b;color:#14312a;padding:2px 7px;border-radius:999px}
+.wg-link{border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:0}
+.wg-vuoto{font-size:13px;color:var(--muted);text-align:center;padding:14px 6px;line-height:1.6}
+.wg-vuoto.piccolo{padding:8px 4px;text-align:left}
+.wg-nota{font-size:11.5px;color:var(--muted);margin-top:6px}
+.wg-tag{font-size:10.5px;font-weight:700;background:var(--surface2);color:var(--accent);padding:1px 7px;border-radius:999px;margin-left:4px}
+/* blocco evidenziato (prossimo appuntamento, scadenza più vicina) */
+.wg-prossimo{background:#14482c;color:#f4f1ea;border-radius:16px;padding:12px 13px;cursor:pointer}
+.wg-prossimo.rosso{background:#7d2b24}
+.wg-quando{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#e8b04b}
+.wg-chi{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-top:3px;line-height:1.2}
+.wg-dove{font-size:12.5px;color:#cfdcd2;margin-top:2px}
+.wg-azioni{display:flex;gap:8px;margin-top:10px}
+.wg-azioni button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.13);border:0;color:inherit;border-radius:11px;padding:9px 4px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-width:0}
+.wg-azioni button.oro{background:#e8b04b;color:#14312a}
+.wg-azioni svg{width:15px;height:15px;flex-shrink:0}
+.wg-azioni.chiaro button{background:var(--surface2);color:var(--text)}
+.wg-azioni.chiaro button.oro{background:#14482c;color:#fff}
+.wg-voce{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--border);font-size:13px;cursor:pointer}
+.wg-voce:first-of-type{margin-top:6px}
+.wg-ora{font-weight:700;min-width:44px;flex-shrink:0}
+.wg-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wg-t small{color:var(--muted)}
+.wg-ric{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--border);font-size:13px;cursor:pointer}
+.wg-testa + .wg-ric,.wg-prossimo + .wg-ric{border-top:0}
+.wg-prossimo + .wg-ric{margin-top:6px}
+.wg-ric .wg-t{white-space:normal}
+.wg-ric .wg-t small{display:block;font-size:11.5px}
+.wg-sem{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.wg-sem.rosso{background:var(--red)}.wg-sem.ocra{background:#d9a13b}.wg-sem.verde{background:var(--green)}
+.wg-scrivi{border:1px solid var(--border);background:var(--surface);color:var(--accent);font:inherit;font-size:12px;font-weight:700;border-radius:10px;padding:5px 10px;cursor:pointer;flex-shrink:0}
+/* widget pieni: verde con cerchio oro (chiaro) · oro con cerchio verde (scuro) */
+.wg-pieno{background:#14482c;border-color:#14482c;color:#fff}
+.wg-pieno .wg-riga{color:#d9e5dc}
+.wg-pieno .wg-riga.evid{color:#e8b04b;font-weight:700}
+.wg-pieno .wg-num small{color:#d9e5dc}
+.wg-cerchio{width:40px;height:40px;border-radius:50%;background:#e8b04b;color:#14482c;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wg-cerchio svg{width:20px;height:20px}
+.wg-cerchio.grande{width:58px;height:58px;margin:auto auto 8px}
+.wg-cerchio.grande svg{width:28px;height:28px}
+.wg-azione{align-items:center;justify-content:center}
+.wg-azione .wg-riga.forte{color:#fff;margin-bottom:auto}
+:root:not([data-theme="light"]) .wg-pieno{background:#e8b04b;border-color:#e8b04b;color:#14312a}
+:root:not([data-theme="light"]) .wg-pieno .wg-riga,:root:not([data-theme="light"]) .wg-pieno .wg-num small{color:#3d3013}
+:root:not([data-theme="light"]) .wg-pieno .wg-riga.evid{color:#14482c}
+:root:not([data-theme="light"]) .wg-pieno .wg-cerchio{background:#14482c;color:#e8b04b}
+:root:not([data-theme="light"]) .wg-azione .wg-riga.forte{color:#14312a}
+/* settimana */
+.wg-barre{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:end;height:78px}
+.wg-barra{display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.wg-barra i{display:block;width:100%;border-radius:6px;background:var(--accent);min-height:4px}
+.wg-barra.oggi i{background:#14482c}
+:root:not([data-theme="light"]) .wg-barra.oggi i{background:var(--green)}
+.wg-barra b{font-size:11px}
+.wg-barra small{font-size:10.5px;color:var(--muted);font-weight:600}
+.wg-barra.oggi small{color:var(--text)}
+/* proprietario */
+.wg-app-data{font-size:12px;font-weight:700;color:var(--accent);text-transform:capitalize}
+.wg-app-tit{font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-top:2px}
+.wg-cavalli{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.wg-cavalli::-webkit-scrollbar{display:none}
+.wg-cavallo{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:58px;font:inherit;color:var(--text);cursor:pointer;padding:0}
+.wg-cavallo span{width:46px;height:46px;border-radius:50%;background:var(--surface2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:19px}
+.wg-cavallo.nuovo span{background:#14482c;color:#e8b04b}
+.wg-cavallo span svg{width:20px;height:20px}
+.wg-cavallo small{font-size:11.5px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wg-app-mappa{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:14px;background:var(--surface2);margin-bottom:8px;font:inherit;font-weight:600;font-size:15px;color:var(--text);text-decoration:none;border:0;cursor:pointer;text-align:left}
+.wg-app-mappa i{width:34px;height:34px;border-radius:9px;display:block;flex-shrink:0;font-style:normal}
+.wg-app-mappa .wg-luogo-ico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--accent,#e8b04b);color:#fff;font-size:16px}
+.wg-app-mappa .wg-luogo-ico i{width:auto;height:auto;display:inline-block;border-radius:0}
+.wg-luogo{align-items:flex-start}
+
+/* ---------- Incassi nascosti ---------- */
+body.incassi-nascosti .solo-incassi,
+body.incassi-nascosti .nav-btn[data-page="pro-incassi"]{display:none!important}
+body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
+/* tastierino PIN */
+.pin-ov{display:none;position:fixed;inset:0;z-index:4000;background:var(--bg);align-items:stretch;justify-content:center}
+.pin-ov.on{display:flex}
+.pin-box{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;text-align:center;padding:calc(64px + env(safe-area-inset-top)) 26px calc(26px + env(safe-area-inset-bottom))}
+.pin-lucch{width:58px;height:58px;border-radius:50%;background:#14482c;color:#e8b04b;display:flex;align-items:center;justify-content:center}
+.pin-lucch svg{width:26px;height:26px}
+.pin-box h3{font-family:'Fraunces',serif;font-size:22px;margin-top:16px}
+.pin-box p{font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:6px;max-width:300px}
+.pin-pallini{display:flex;gap:16px;margin:24px 0 6px}
+.pin-pallini i{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent)}
+.pin-pallini i.p{background:var(--accent)}
+.pin-passo{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);min-height:16px}
+.pin-err{font-size:13px;color:var(--red);min-height:18px;margin-top:4px}
+.pin-tast{display:grid;grid-template-columns:repeat(3,72px);gap:14px 24px;margin-top:auto}
+.pin-tast button{width:72px;height:72px;border-radius:50%;background:var(--surface);border:1px solid var(--border);font:inherit;font-size:27px;font-weight:500;color:var(--text);cursor:pointer}
+.pin-tast button:active{background:var(--surface2)}
+.pin-tast button[data-t="⌫"]{background:none;border:0;font-size:22px;color:var(--muted)}
+.pin-link{border:0;background:none;font:inherit;font-size:14px;font-weight:700;color:var(--accent);margin-top:16px;cursor:pointer}
+.pin-link.grigio{color:var(--muted);font-weight:600;margin-top:8px}
+
+/* ---------- Tablet e computer (da 768 px) ---------- */
+@media (min-width:768px){
+  body{display:block;background:var(--bg)}
+  .screen{max-width:none;margin:0;box-shadow:none}
+  #screen-app .page-content{padding:22px 28px calc(40px + env(safe-area-inset-bottom)) 28px}
+  #screen-app .page-content > *{max-width:1040px;margin-left:auto;margin-right:auto}
+  #screen-app{padding-left:96px}
+  .bottom-nav{position:fixed;left:0;right:auto;top:0;bottom:0;width:96px;max-width:none;transform:none;height:auto;flex-direction:column;justify-content:flex-start;gap:6px;padding:calc(84px + env(safe-area-inset-top)) 0 20px;border-top:0;border-right:1px solid var(--border)}
+  .bottom-nav .nav-btn{flex:0 0 auto;width:100%;padding:12px 0}
+  .ai-fab{right:24px;bottom:24px}
+  .wh{grid-template-columns:repeat(4,1fr);gap:14px}
+  .wg-grande{grid-column:span 2;grid-row:span 2}
+  .wg-medio{grid-column:span 2}
+  .wg-piccolo{aspect-ratio:auto;min-height:170px}
+  .modal-overlay{align-items:center}
+  .modal{border-radius:20px;max-width:560px;max-height:88vh}
+  /* clienti e cavalli: elenco a sinistra, scheda a destra */
+  #page-pro-clienti.active{display:grid!important;grid-template-columns:minmax(300px,380px) 1fr;gap:22px;align-items:start}
+  #page-pro-clienti > *{max-width:none!important;margin:0!important}
+  #page-pro-clienti #clienti-list-view{display:block!important;position:sticky;top:0}
+  #page-pro-clienti #clienti-detail-view .back-btn{display:none}
+  #page-cavalli.active{display:grid!important;grid-template-columns:minmax(280px,360px) 1fr;gap:22px;align-items:start}
+  #page-cavalli > *{max-width:none!important;margin:0!important}
+  #page-cavalli #cavalli-list-view{display:block!important}
+  #page-cavalli #cavalli-detail-view .back-btn{display:none}
+  /* chat aperta come pannello a destra */
+  .mchat-overlay{left:auto;width:min(560px,58vw);border-left:1px solid var(--border);box-shadow:-10px 0 30px rgba(0,0,0,.12)}
+}
+@media (min-width:1200px){
+  .wh{grid-template-columns:repeat(6,1fr)}
+  .wg-grande{grid-column:span 2;grid-row:span 2}
+  .wg-medio{grid-column:span 2}
+}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa,
      su iPhone solo se l'app è stata aggiunta alla schermata Home). -->
@@ -850,13 +1001,13 @@ body.ai-aperta{overflow:hidden}
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
         <div><div class="role-card-title">Maniscalco</div><div class="role-card-desc">Ferrature, interventi e clienti</div></div>
       </button>
-      <button class="role-card" onclick="chooseMainRole('veterinario')">
+      <button class="role-card" onclick="apriCandidatura('veterinario','app_primo_accesso')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
-        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">Visite e clienti</div></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
       </button>
-      <button class="role-card" onclick="chooseMainRole('istruttore')">
+      <button class="role-card" onclick="apriCandidatura('istruttore','app_primo_accesso')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
-        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Lezioni e allievi</div></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
       </button>
       <button class="role-card disabled" disabled>
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-shop"></i></span></div>
@@ -882,6 +1033,7 @@ body.ai-aperta{overflow:hidden}
     <div class="section-title" style="font-size:18px;margin-bottom:2px" id="home-greeting"></div>
     <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="home-date"></div>
     <button type="button" class="home-cerca ct-apri" onclick="apriCercaTutto()">{{lente}}<span>Cerca cavalli, libretto, spese, chat…</span></button>
+    <div class="wh" id="wh-owner"></div>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
         <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
@@ -968,7 +1120,7 @@ body.ai-aperta{overflow:hidden}
         <span class="icon"><svg><use href="#i-mappin"/></svg></span> Servizi vicino a te
       </button>
     </div>
-    <div class="card aiuto-card" style="margin-top:14px" onclick="apriTicketAssistenza()">
+    <div class="card aiuto-card wh-keep" style="margin-top:14px" onclick="apriTicketAssistenza()">
       <div class="aiuto-ico"><i class="fa-solid fa-life-ring"></i></div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:14.5px">Serve aiuto?</div>
@@ -1086,13 +1238,14 @@ body.ai-aperta{overflow:hidden}
 
   <!-- PROFESSIONISTA: HOME (dashboard) -->
   <div class="page-content" id="page-pro-home">
-    <div class="section-title" style="font-size:18px;margin-bottom:2px" id="pro-home-greeting">Ciao</div>
-    <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="pro-home-date"></div>
-    <button type="button" class="home-cerca ct-apri" onclick="apriCercaTutto()">{{lente}}<span>Cerca clienti, cavalli, appuntamenti…</span></button>
+    <div class="section-title wh-keep" style="font-size:18px;margin-bottom:2px" id="pro-home-greeting">Ciao</div>
+    <div class="muted wh-keep" style="font-size:12.5px;margin-bottom:14px" id="pro-home-date"></div>
+    <button type="button" class="home-cerca ct-apri wh-keep" onclick="apriCercaTutto()">{{lente}}<span>Cerca clienti, cavalli, appuntamenti…</span></button>
+    <div class="wh" id="wh-pro"></div>
 
-    <div class="card cert-card" id="certified-card" style="display:none;margin-bottom:14px"></div>
+    <div class="card cert-card wh-keep" id="certified-card" style="display:none;margin-bottom:14px"></div>
 
-    <div class="card" style="margin-bottom:14px;cursor:pointer" onclick="showPage('pro-incassi')">
+    <div class="card solo-incassi" style="margin-bottom:14px;cursor:pointer" onclick="showPage('pro-incassi')">
       <div style="font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Incassi questo mese</div>
       <div class="stat-value" id="home-pro-incassi-mese" style="margin-top:4px">€ 0 incassati</div>
     </div>
@@ -1118,7 +1271,7 @@ body.ai-aperta{overflow:hidden}
       <button class="btn btn-primary" style="flex:1" onclick="openInterventoModal(null)">+ Nuovo intervento</button>
       <button class="btn btn-outline" style="flex:1" onclick="apriNuovoCliente('proprietario')">+ Aggiungi cliente</button>
     </div>
-    <div class="card aiuto-card" style="margin-top:14px" onclick="apriTicketAssistenza()">
+    <div class="card aiuto-card wh-keep" style="margin-top:14px" onclick="apriTicketAssistenza()">
       <div class="aiuto-ico"><i class="fa-solid fa-life-ring"></i></div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:14.5px">Serve aiuto?</div>
@@ -1615,6 +1768,10 @@ body.ai-aperta{overflow:hidden}
         <input class="input" id="cliente-telefono" placeholder="es. 333 1234567">
       </div>
       <div class="input-group">
+        <label class="input-label">Indirizzo (opzionale, per «Naviga»)</label>
+        <input class="input" id="cliente-indirizzo" autocomplete="street-address" placeholder="es. Via Casilina km 51, Colleferro">
+      </div>
+      <div class="input-group">
         <label class="input-label">Note (opzionale)</label>
         <input class="input" id="cliente-note" placeholder="es. scuderia, indicazioni">
       </div>
@@ -1722,6 +1879,10 @@ body.ai-aperta{overflow:hidden}
       <div class="input-group">
         <label class="input-label">Telefono</label>
         <input class="input" id="edit-cliente-telefono" type="tel" inputmode="tel" placeholder="es. 333 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Indirizzo (per «Naviga»)</label>
+        <input class="input" id="edit-cliente-indirizzo" autocomplete="street-address" placeholder="es. Via Casilina km 51, Colleferro">
       </div>
       <div class="input-group">
         <label class="input-label">Note</label>
@@ -1837,12 +1998,12 @@ body.ai-aperta{overflow:hidden}
         </div>
       </div>
       <!-- 10. Importo -->
-      <div class="input-group">
+      <div class="input-group solo-incassi">
         <label class="input-label">Importo (€)</label>
         <input class="input" id="intervento-importo" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
       </div>
       <!-- 11. Pagamento -->
-      <div class="input-group">
+      <div class="input-group solo-incassi">
         <label class="input-label">Pagamento</label>
         <select class="input" id="intervento-pagamento">
           <option value="da_saldare">Da saldare</option>
@@ -1996,6 +2157,28 @@ body.ai-aperta{overflow:hidden}
     <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
     <button class="link-altro-profilo" onclick="openRichiestaProfilo()">Hai bisogno di aggiungere un altro profilo? <u>Clicca qui</u></button>
 
+    <div class="menu-section-label">Home</div>
+    <div class="menu-row">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+        <span>Vista Widget<br><small class="muted" style="font-size:11px">Spenta: torni alla Home classica</small></span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="vista-widget-switch" onchange="cambiaVistaHome(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+    <div class="menu-row" id="menu-incassi-row" style="display:none;margin-top:8px">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-euro-sign"></i></span>
+        <span>Mostra gli incassi<br><small class="muted" style="font-size:11px">Spento: spariscono da tutta l'app. Per riaccenderli serve il PIN</small></span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="incassi-switch" onchange="cambiaIncassi(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+
     <div id="menu-pro-section" style="display:none">
       <div class="menu-section-label">Attività professionale</div>
       <div class="menu-row" style="cursor:pointer" onclick="openDatiPagamentoModal()">
@@ -2142,14 +2325,51 @@ body.ai-aperta{overflow:hidden}
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
         <div><div class="role-card-title">Maniscalco</div><div class="role-card-desc">Ferrature, interventi e clienti</div></div>
       </button>
-      <button class="role-card" onclick="confirmAddSecondaryRole('veterinario')">
+      <button class="role-card" onclick="closeModal('modal-add-pro-role');apriCandidatura('veterinario','app_aggiungi_profilo')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
-        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">Visite e clienti</div></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
       </button>
-      <button class="role-card" onclick="confirmAddSecondaryRole('istruttore')">
+      <button class="role-card" onclick="closeModal('modal-add-pro-role');apriCandidatura('istruttore','app_aggiungi_profilo')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
-        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Lezioni e allievi</div></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
       </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-candidatura" onclick="closeOut(event,'modal-candidatura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="cand-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-stethoscope" id="cand-ico"></i></span><span id="cand-titolo">Veterinari e trainer</span></div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Stiamo costruendo gli strumenti di Equo per veterinari e istruttori. Lasciaci i tuoi contatti: ti ricontattiamo per progettarli insieme e darti l'accesso in anteprima.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Professione *</label>
+          <select class="input" id="cand-professione" onchange="aggiornaCandidatura()"><option value="veterinario">Veterinario</option><option value="istruttore">Istruttore o trainer</option></select></div>
+        <div class="input-group"><label class="input-label">Nome e cognome *</label><input class="input" id="cand-nome" maxlength="160" autocomplete="name"></div>
+        <div class="input-group"><label class="input-label">Email *</label><input class="input" id="cand-email" type="email" maxlength="200" autocomplete="email"></div>
+        <div class="input-group"><label class="input-label">Telefono *</label><input class="input" id="cand-telefono" type="tel" maxlength="40" autocomplete="tel" placeholder="+39 …"></div>
+        <div style="display:grid;grid-template-columns:1fr 110px;gap:10px">
+          <div class="input-group"><label class="input-label">Città *</label><input class="input" id="cand-citta" maxlength="120" autocomplete="address-level2"></div>
+          <div class="input-group"><label class="input-label">Provincia *</label><input class="input" id="cand-provincia" maxlength="30" placeholder="es. RM"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Specializzazione <span class="muted" style="font-weight:400">(facoltativa)</span></label><input class="input" id="cand-spec" maxlength="200" placeholder="es. ortopedia, salto ostacoli"></div>
+        <div class="input-group"><label class="input-label">Raccontaci di te <span class="muted" style="font-weight:400">(facoltativo)</span></label><textarea class="input" id="cand-msg" maxlength="1500" rows="3" placeholder="Come lavori oggi, cosa ti farebbe risparmiare tempo…"></textarea></div>
+        <label class="consent-row" style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.5;margin:2px 0 4px"><input type="checkbox" id="cand-privacy" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"><span>Ho letto l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a> e accetto che Equo usi questi dati per ricontattarmi. *</span></label>
+        <div class="auth-error" id="cand-error" style="display:none"></div>
+        <button class="btn btn-primary" id="cand-btn" onclick="inviaCandidatura()" style="width:100%;margin-top:4px">Invia la candidatura</button>
+        <div class="muted" style="font-size:11.5px;text-align:center;margin-top:8px">* campi obbligatori</div>
+      </div>
+    </div>
+    <div id="cand-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">🩺</div>
+      <div class="section-title" style="margin-bottom:6px">Candidatura inviata, grazie!</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px" id="cand-ok-testo">Ti ricontattiamo presto all'email o al telefono che ci hai lasciato.</div>
+      <div id="cand-ok-onboarding" style="display:none">
+        <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="closeModal('modal-candidatura');chooseMainRole('proprietario')">Ho anche un cavallo: entro come proprietario</button>
+        <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-candidatura');logout()">Esci</button>
+      </div>
+      <button class="btn btn-primary" id="cand-ok-chiudi" style="width:100%" onclick="closeModal('modal-candidatura')">Ok</button>
     </div>
   </div>
 </div>
@@ -4072,6 +4292,55 @@ async function chooseMainRole(ruolo){
   }
 }
 
+/* ---------- CANDIDATURE VETERINARI E TRAINER (al primo accesso o da «+ Aggiungi profilo») ---------- */
+let candOrigine = "app_primo_accesso";
+function aggiornaCandidatura(){
+  const vet = document.getElementById("cand-professione").value === "veterinario";
+  document.getElementById("cand-titolo").textContent = vet ? "Equo per veterinari" : "Equo per istruttori e trainer";
+  document.getElementById("cand-ico").className = vet ? "fa-solid fa-stethoscope" : "fa-solid fa-graduation-cap";
+}
+function apriCandidatura(professione, origine){
+  candOrigine = origine || "app_primo_accesso";
+  document.getElementById("cand-professione").value = professione === "istruttore" ? "istruttore" : "veterinario";
+  aggiornaCandidatura();
+  ["cand-telefono","cand-citta","cand-provincia","cand-spec","cand-msg"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("cand-nome").value = currentUser?.fullName || "";
+  document.getElementById("cand-email").value = currentUser?.email || "";
+  // al primo accesso, se ha già accettato termini e privacy nella schermata, la casella è già spuntata
+  const consOnb = document.getElementById("onb-consent");
+  document.getElementById("cand-privacy").checked = candOrigine === "app_primo_accesso" && !!consOnb?.checked;
+  document.getElementById("cand-error").style.display = "none";
+  document.getElementById("cand-form").style.display = "block";
+  document.getElementById("cand-ok").style.display = "none";
+  openModal("modal-candidatura");
+}
+async function inviaCandidatura(){
+  const v = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById("cand-error");
+  const errore = t => { errBox.textContent = t; errBox.style.display = "block"; };
+  errBox.style.display = "none";
+  const row = { tipo: "candidatura", origine: candOrigine, professione: v("cand-professione"), nome: v("cand-nome"), email: v("cand-email"),
+    telefono: v("cand-telefono"), citta: v("cand-citta"), provincia: v("cand-provincia"), messaggio: v("cand-msg") || null,
+    dettagli: { specializzazione: v("cand-spec") || null }, consenso_privacy: document.getElementById("cand-privacy").checked ? new Date().toISOString() : null };
+  const manca = [["nome","nome e cognome"],["email","email"],["telefono","telefono"],["citta","città"],["provincia","provincia"]].filter(([k]) => !row[k]).map(([, n]) => n);
+  if(manca.length) return errore("Compila: " + manca.join(", ") + ".");
+  if(!EMAIL_RE.test(row.email)) return errore("Controlla l'indirizzo email.");
+  if(row.telefono.replace(/\D/g, "").length < 6) return errore("Controlla il numero di telefono.");
+  if(!row.consenso_privacy) return errore("Per inviare serve accettare l'Informativa Privacy.");
+  const btn = document.getElementById("cand-btn"); btn.disabled = true;
+  const error = await salvaRichiestaContatto(row);
+  btn.disabled = false;
+  if(error){ console.error("candidatura:", error); return errore(error.message || "Invio non riuscito, riprova."); }
+  const onb = candOrigine === "app_primo_accesso";
+  document.getElementById("cand-form").style.display = "none";
+  document.getElementById("cand-ok").style.display = "block";
+  document.getElementById("cand-ok-onboarding").style.display = onb ? "block" : "none";
+  document.getElementById("cand-ok-chiudi").style.display = onb ? "none" : "block";
+  document.getElementById("cand-ok-testo").textContent = onb
+    ? "Ti ricontattiamo presto all'email o al telefono che ci hai lasciato. Intanto, se hai anche un cavallo, puoi già usare Equo come proprietario."
+    : "Ti ricontattiamo presto all'email o al telefono che ci hai lasciato.";
+}
+
 /* ---------- RICHIESTE DI CONTATTO (struttura al primo accesso / altro profilo) ---------- */
 function openRichiestaStruttura(){
   ["rs-nome","rs-via","rs-citta","rs-telefono"].forEach(id => document.getElementById(id).value = "");
@@ -4094,7 +4363,7 @@ async function inviaContattoStruttura(){
   const v = id => document.getElementById(id).value.trim();
   const errBox = document.getElementById("rs-error");
   errBox.style.display = "none";
-  const row = { tipo: "struttura", nome_struttura: v("rs-nome"), via: v("rs-via"), citta: v("rs-citta"), email: v("rs-email"), telefono: v("rs-telefono") };
+  const row = { tipo: "struttura", origine: document.getElementById("screen-onboarding")?.classList.contains("active") ? "app_primo_accesso" : "app_menu", nome_struttura: v("rs-nome"), via: v("rs-via"), citta: v("rs-citta"), email: v("rs-email"), telefono: v("rs-telefono") };
   if(!row.nome_struttura || !row.via || !row.citta || !row.email || !row.telefono){
     errBox.textContent = "Compila tutti i campi."; errBox.style.display = "block"; return;
   }
@@ -4315,6 +4584,8 @@ async function enterApp(ruolo){
     startChatBadgePolling();
     if(ruolo === "gestore_struttura") showStableManagerBanner();
   }
+  if(typeof applicaVistaHome === "function") applicaVistaHome();
+  if(typeof wgControllaResetPin === "function") setTimeout(wgControllaResetPin, 800);
 }
 
 function setupOwnerNav(){
@@ -4892,6 +5163,9 @@ async function boot(){
   // campi badge letti a parte: se la colonna non esistesse ancora, il resto del profilo resta intatto
   const { data: cert, error: certErr } = await sb.from("profiles").select("certificazione_stato, certificazione_motivo").eq("id", user.id).maybeSingle();
   if(certErr) console.error("profilo certificazione:", certErr);
+  const { data: pref } = await sb.from("profiles").select("home_vista, incassi_nascosti").eq("id", user.id).maybeSingle();
+  currentUser.homeVista = pref?.home_vista || "widget";
+  currentUser.incassiNascosti = !!pref?.incassi_nascosti;
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
   currentUser.ruoloSecondario = profile?.ruolo_secondario || null;
@@ -5054,7 +5328,8 @@ async function signInWithGoogle(){
   try{
     const { error } = await sb.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin + window.location.pathname },
+      // select_account: Google chiede SEMPRE quale account usare (senza, rientra in automatico nell'ultimo scelto)
+      options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { prompt: "select_account" } },
     });
     if(error) throw error;
     // Supabase reindirizza a Google e poi torna qui: boot() gestisce la sessione al ritorno.
@@ -5071,6 +5346,7 @@ function openMenu(){
   updatePianoUI();
   caricaSwitchRiepilogo();
   aggiornaVersioniMenu();
+  if(typeof aggiornaSwitchHome === "function") aggiornaSwitchHome();
   openModal("modal-menu");
 }
 
@@ -5412,11 +5688,15 @@ async function aggiornaNotaUsoAi(uso){
   const el = document.getElementById("ai-usage-note");
   if(!el) return;
   if(!uso && !DEMO_MODE && currentUser){
-    const { data } = await sb.from("ai_utilizzo").select("conteggio").eq("user_id", currentUser.id).eq("mese", new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" }).slice(0, 7)).maybeSingle();
-    uso = { usati: data?.conteggio || 0, limite: isPremium() ? 500 : 5 };
+    // Free: 5 al giorno (chiave AAAA-MM-GG, riparte a mezzanotte); Premium: 500 al mese (AAAA-MM)
+    const oggi = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+    const prem = isPremium();
+    const { data } = await sb.from("ai_utilizzo").select("conteggio").eq("user_id", currentUser.id).eq("mese", prem ? oggi.slice(0, 7) : oggi).maybeSingle();
+    uso = { usati: data?.conteggio || 0, limite: prem ? 500 : 5, periodo: prem ? "mese" : "giorno" };
   }
   if(!uso){ el.textContent = ""; return; }
-  el.textContent = `${uso.usati} di ${uso.limite} messaggi AI questo mese` + (uso.limite <= 5 ? " · Premium: 500" : "");
+  const alGiorno = uso.periodo === "giorno" || (!uso.periodo && uso.limite <= 5);
+  el.textContent = `${uso.usati} di ${uso.limite} messaggi AI ${alGiorno ? "oggi" : "questo mese"}` + (alGiorno ? " · Premium: 500 al mese" : "");
 }
 async function nuovaConversazioneAi(){
   if(!confirm(`Cancellare la conversazione con ${nomeAgenteAi()}? Le note che ha memorizzato restano.`)) return;
@@ -5482,6 +5762,7 @@ function renderHome(){
   loadDeadlines();
   loadExpensesSummary();
   loadHomeLastMessage();
+  if(typeof wgCaricaOwner === "function" && typeof vistaWidgetAttiva === "function" && vistaWidgetAttiva()) wgCaricaOwner();
 }
 
 /* ---------- ULTIMO MESSAGGIO (home) ---------- */
@@ -5520,6 +5801,7 @@ async function loadHomeLastMessage(){
   document.getElementById("home-last-message-from").textContent = top.nome;
   document.getElementById("home-last-message-preview").textContent = top.testo;
   card.style.display = "block";
+  if(typeof wgRidisegna === "function" && vistaAi() === "proprietario") wgRidisegna();
 }
 
 function goToLastMessage(){
@@ -6310,7 +6592,7 @@ const LIMITE_CLIENTI_FREE = 10;
 function mostraLimiteClienti(){ openModal("modal-limite-clienti"); }
 function apriNuovoCliente(tipo){
   if(!isPremium() && clientiMascalcia.length >= LIMITE_CLIENTI_FREE){ mostraLimiteClienti(); return; }
-  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("cliente-error").style.display = "none";
   document.getElementById("cliente-tipo").value = tipo === "struttura" ? "struttura" : "proprietario";
   aggiornaEtichetteNuovoCliente();
@@ -6353,12 +6635,14 @@ async function createClienteMascalcia(){
     const { error, data: nuovo } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
     if(error || !nuovo){ errBox.textContent = "Errore: " + (error?.message || "salvataggio non riuscito"); errBox.style.display = "block"; return; }
     await creaCavalliDaTesto(nuovo.id, nome_cavallo);
+    const indirizzoNuovo = document.getElementById("cliente-indirizzo")?.value.trim();
+    if(indirizzoNuovo) await DB.updateClienteMascalcia(nuovo.id, { indirizzo: indirizzoNuovo });
     let msgCollegamento = "";
     if(codiceEquo){
       const res = await DB.collegaClienteDaCodice(nuovo.id, codiceEquo);
       msgCollegamento = res.ok ? " e collegato a Equo: gli è arrivato il tuo primo messaggio" : " — codice non collegato: " + messaggioErroreCollegaCliente(res);
     }
-    ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+    ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
     closeModal("modal-add-cliente");
     showToast("Cliente salvato" + msgCollegamento);
     await loadClientiMascalcia();
@@ -6444,6 +6728,7 @@ async function openEditCliente(){
   document.getElementById("edit-cliente-collegato").style.display = c.cliente_user_id ? "flex" : "none";
   document.getElementById("edit-cliente-nome").value = c.nome || "";
   document.getElementById("edit-cliente-telefono").value = c.telefono || "";
+  document.getElementById("edit-cliente-indirizzo").value = c.indirizzo || "";
   document.getElementById("edit-cliente-note").value = c.note || "";
   document.getElementById("edit-cliente-nuovo-cavallo").value = "";
   document.getElementById("edit-cliente-nuovo-chip").value = "";
@@ -6530,6 +6815,10 @@ async function salvaEditCliente(){
   const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
   const { error } = await DB.updateClienteMascalcia(currentClienteId, { nome, telefono, note, tipo_cliente });
   if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }
+  // indirizzo salvato a parte: se il database non avesse ancora la colonna, il resto è già salvo
+  const indirizzo = document.getElementById("edit-cliente-indirizzo").value.trim();
+  const cPrima = clientiMascalcia.find(x => x.id === currentClienteId);
+  if((cPrima?.indirizzo || "") !== indirizzo) await DB.updateClienteMascalcia(currentClienteId, { indirizzo: indirizzo || null });
   if(codiceEquo){
     const res = await DB.collegaClienteDaCodice(currentClienteId, codiceEquo);
     if(!res.ok){
@@ -6600,7 +6889,7 @@ function renderStoricoCliente(){
         <div style="font-weight:600;font-size:13.5px">${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}${ferroInfo}</div>
         <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.ora ? " · " + String(i.ora).slice(0,5) : ""}${i.stato === "programmato" ? " · da fare" : i.stato === "richiesto" ? " · richiesta da confermare" : ""}${i.note ? " · " + escapeHtml(i.note) : ""}</div>
       </div>
-      <span class="badge ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
+      <span class="badge solo-incassi ${i.stato_pagamento === 'saldato' ? 'badge-green' : 'badge-red'}">${i.stato_pagamento === 'saldato' ? 'Saldato' : 'Da saldare'}</span>
     </div>
   `;
   }).join("");
@@ -6822,6 +7111,7 @@ async function renderProDeadlines(){
       : hpGiri().map(hpRigaGiro).join("") + hpListaRic(ric.slice(0, HP_IN_HOME)) + (ric.length > HP_IN_HOME ? `<button class="btn btn-outline btn-sm hp-vedi" onclick="apriListaHome('ric')">Vedi tutti (${ric.length})</button>` : "");
   }
   if(document.getElementById("modal-hp-lista")?.classList.contains("active")) renderListaHome();
+  if(typeof wgRidisegna === "function") wgRidisegna();
 }
 
 /* ---------- GIRO DELLA ZONA (Premium) ----------
@@ -7282,6 +7572,7 @@ async function renderIncassi(){
   document.getElementById("incassi-mese-da-incassare").textContent = formatEuro(daIncassareMese);
   document.getElementById("incassi-mese-numero").textContent = delMese.length;
 
+  if(typeof wgPro !== "undefined"){ wgPro.incassatoMese = incassatoMese; wgPro.daIncassareMese = daIncassareMese; if(typeof wgRidisegna === "function") wgRidisegna(); }
   const homeTeaser = document.getElementById("home-pro-incassi-mese");
   if(homeTeaser) homeTeaser.textContent = formatEuro(incassatoMese) + " incassati";
 
@@ -8001,7 +8292,7 @@ function apriAzioniEvento(id){
   document.getElementById("azioni-evento-dettaglio").innerHTML = [
     `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
     escapeHtml(agDescrizioneTipo(e)),
-    (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"),
+    '<span class="solo-incassi">' + (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
     e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della struttura</span>' : "Da fare",
     e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con struttura Equo Scuderia: se cambi data o ora, la struttura deve riconfermare.</span>' : "",
     e.note ? escapeHtml(e.note) : ""
@@ -8754,6 +9045,12 @@ async function loadInboxMascalcia(){
 
   const totalUnread = Object.values(unreadByCliente).reduce((a,b) => a+b, 0);
   proUnreadTotal = totalUnread;
+  if(typeof wgPro !== "undefined"){
+    const u = conversazioni[0];
+    wgPro.unread = totalUnread;
+    wgPro.ultimo = u ? { nome: u.clienti_mascalcia?.nome || "Cliente", testo: u.testo || (u.tipo === "audio" ? "Nota vocale" : u.file_nome ? "Allegato: " + u.file_nome : "Allegato") } : null;
+    if(typeof wgRidisegna === "function") wgRidisegna();
+  }
   const navBadge = document.getElementById("inbox-nav-badge");
   if(navBadge) navBadge.style.display = totalUnread > 0 ? "block" : "none";
 
@@ -9947,6 +10244,20 @@ function renderAzioneAi(box, azione){
   const id = "azione-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
   aiAzioniInAttesa[id] = azione;
   const x = azione.dati;
+  if(azione.tipo === "naviga"){
+    // indicazioni stradali: nessuna conferma da salvare, il tocco apre la scelta delle mappe (resta riutilizzabile)
+    const riga = x.indirizzo ? escapeHtml(x.indirizzo) : x.ricerca ? `Ricerca nelle mappe: ${escapeHtml(x.ricerca)}` : "Indirizzo da cercare: scegli il posto giusto";
+    box.insertAdjacentHTML("beforeend", `
+    <div class="chat-bubble ai event-proposal" id="${id}">
+      <div class="event-proposal-title"><span class="fa-icon"><i class="fa-solid fa-location-dot"></i></span> Naviga verso ${escapeHtml(x.nome || "")}</div>
+      <div class="event-proposal-row">${riga}</div>
+      <div class="event-proposal-actions">
+        <button class="btn btn-primary btn-sm btn-conferma" onclick="aiNaviga('${id}')">Naviga</button>
+      </div>
+    </div>`);
+    box.scrollTop = box.scrollHeight;
+    return;
+  }
   let titolo = "", righe = [];
   if(azione.tipo === "spesa"){
     titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
@@ -9963,7 +10274,7 @@ function renderAzioneAi(box, azione){
     titolo = `Agenda · ${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}`;
     righe = [`${escapeHtml(x.nome_cliente || "")}${nomeCv ? " · " + escapeHtml(nomeCv) : ""}${x.nuovo_cavallo_nome ? " (nuovo cavallo)" : ""}`,
       `${formatDataBreve(x.data)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
-      x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}` : "", x.note ? escapeHtml(x.note) : ""];
+      x.importo != null ? `<span class="solo-incassi">Importo: € ${Number(x.importo).toFixed(2)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}</span>` : "", x.note ? escapeHtml(x.note) : ""];
   } else if(azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta"){
     const acc = azione.tipo === "accetta_richiesta";
     titolo = acc ? "Accetta richiesta" : "Rifiuta richiesta";
@@ -9989,6 +10300,16 @@ function renderAzioneAi(box, azione){
       </div>
     </div>`);
   box.scrollTop = box.scrollHeight;
+}
+async function aiNaviga(id){
+  const x = aiAzioniInAttesa[id]?.dati;
+  if(!x) return;
+  if(x.indirizzo) return wgMostraMappe({ nome: x.nome }, x.indirizzo);
+  if(x.cliente_mascalcia_id){
+    if(!wgClienteDi(x.cliente_mascalcia_id) && typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
+    if(wgClienteDi(x.cliente_mascalcia_id)) return wgNaviga(x.cliente_mascalcia_id);
+  }
+  wgMostraMappe({ nome: x.nome }, x.ricerca || x.nome, "Ricerca per nome: controlla nelle mappe che sia il posto giusto.");
 }
 async function confermaAzioneAi(id){
   const azione = aiAzioniInAttesa[id];
@@ -10124,9 +10445,10 @@ async function sendChatMessage(){
     } else if(res.status === 401){
       bolla.textContent = `Sessione scaduta: esci e rientra per usare ${nomeAgenteAi()}.`;
     } else if(data.limite_raggiunto){
-      bolla.innerHTML = `<p>Hai usato tutti i <strong>${data.uso.limite} messaggi AI</strong> di questo mese.</p>` +
-        (data.uso.piano === "premium" ? "<p>Il contatore riparte il 1° del mese.</p>" :
-          `<p>Con Premium ne hai 500 al mese, più cavalli illimitati e promemoria automatici.</p><button class="btn btn-primary btn-sm ai-limit-cta" onclick="closeAiSheet();togglePiano()">Passa a Premium</button>`);
+      const alGiorno = data.uso.periodo === "giorno" || (!data.uso.periodo && data.uso.piano !== "premium");
+      bolla.innerHTML = `<p>Hai usato tutti i <strong>${data.uso.limite} messaggi AI</strong> di ${alGiorno ? "oggi" : "questo mese"}.</p>` +
+        (!alGiorno ? "<p>Il contatore riparte il 1° del mese.</p>" :
+          `<p>Il contatore riparte a mezzanotte. Con Premium ne hai 500 al mese, più cavalli illimitati e promemoria automatici.</p><button class="btn btn-primary btn-sm ai-limit-cta" onclick="closeAiSheet();togglePiano()">Passa a Premium</button>`);
     } else {
       bolla.innerHTML = formattaRispostaAi(data.reply || "Non sono riuscito a rispondere, riprova.");
       if(Array.isArray(data.azioni) && data.azioni.length){
@@ -10645,13 +10967,13 @@ function cercaTuttoMostra(){
   const ok = (...campi) => cercaCorrisponde(parole, campi.filter(Boolean).join(" "));
   const vai = fn => () => { chiudiCercaTutto(); fn(); };
   if(!parole.length){
-    out.innerHTML = `<div class="ct-gruppo"><div class="ct-titolo">Vai a</div>${CT_SEZIONI[vista].map(s => ctRiga("fa-arrow-right", s.t, "", vai(s.az))).join("")}</div>
+    out.innerHTML = `<div class="ct-gruppo"><div class="ct-titolo">Vai a</div>${CT_SEZIONI[vista].filter(s => !(incassiNascosti() && s.t === "Incassi")).map(s => ctRiga("fa-arrow-right", s.t, "", vai(s.az))).join("")}</div>
       <div class="ct-suggerimento">${vista === "professionista" ? "Scrivi il nome di un cliente o di un cavallo, una data (es. 12/10) o una parola come «ferratura» o «da saldare»." : "Scrivi il nome di un cavallo, «vaccino», «fieno», il nome del maniscalco o della scuderia."}</div>`;
     return;
   }
   const d = cercaTuttoDati || {};
   let html = "";
-  const sezioni = CT_SEZIONI[vista].filter(s => ok(s.t, s.k)).map(s => ctRiga("fa-arrow-right", s.t, "Sezione", vai(s.az)));
+  const sezioni = CT_SEZIONI[vista].filter(s => !(incassiNascosti() && s.t === "Incassi")).filter(s => ok(s.t, s.k)).map(s => ctRiga("fa-arrow-right", s.t, "Sezione", vai(s.az)));
   if(vista === "professionista"){
     const clienti = (d.clienti || clientiMascalcia || []).filter(c => ok(c.nome, c.telefono, paroleCercaCliente(c)))
       .map(c => ctRiga(isStruttura(c) ? "fa-building" : "fa-user", c.nome, [nomiCavalliCliente(c).join(", "), c.telefono].filter(Boolean).join(" · ") || (isStruttura(c) ? "Struttura" : "Cliente"),
@@ -10661,9 +10983,9 @@ function cercaTuttoMostra(){
       .map(c => ctRiga("fa-horse-head", c.nome || "Cavallo", "di " + (nomeCliente(c.cliente_mascalcia_id) || "cliente"), vai(() => { showPage("pro-clienti"); openClienteDetail(c.cliente_mascalcia_id); })));
     const tipo = i => (TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "Intervento") + (i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + i.tipo_altro : "");
     const interventi = (d.interventi || []).filter(i => ok(i.clienti_mascalcia?.nome, i.cavalli_clienti_mascalcia?.nome, tipo(i), formatDate(i.data_intervento), i.data_intervento, i.note,
-        i.stato === "programmato" ? "da fare programmato" : "fatto", i.stato_pagamento === "saldato" ? "saldato pagato" : "da saldare non pagato"))
+        i.stato === "programmato" ? "da fare programmato" : "fatto", incassiNascosti() ? "" : (i.stato_pagamento === "saldato" ? "saldato pagato" : "da saldare non pagato")))
       .map(i => ctRiga(i.stato === "programmato" ? "fa-calendar-day" : "fa-check", [i.cavalli_clienti_mascalcia?.nome, i.clienti_mascalcia?.nome].filter(Boolean).join(" · ") || tipo(i),
-        `${tipo(i)} · ${formatDate(i.data_intervento)}${i.ora ? " " + String(i.ora).slice(0, 5) : ""}${i.stato === "programmato" ? " · da fare" : ""}${Number(i.importo) ? " · " + formatEuro(i.importo) + (i.stato_pagamento === "saldato" ? " saldato" : " da saldare") : ""}`,
+        `${tipo(i)} · ${formatDate(i.data_intervento)}${i.ora ? " " + String(i.ora).slice(0, 5) : ""}${i.stato === "programmato" ? " · da fare" : ""}${Number(i.importo) && !incassiNascosti() ? " · " + formatEuro(i.importo) + (i.stato_pagamento === "saldato" ? " saldato" : " da saldare") : ""}`,
         vai(() => openInterventoModal(null, i))));
     const visti = new Set();
     const chat = (d.inbox || []).filter(m => { if(visti.has(m.cliente_mascalcia_id)) return false; visti.add(m.cliente_mascalcia_id); return true; })
@@ -10855,6 +11177,565 @@ async function earlyAggiornaBottoneLifetime(){
   }catch(e){}
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", earlyMostraAvvisi); else setTimeout(earlyMostraAvvisi, 0);
+
+/* ==================== HOME A WIDGET (ottobre 2026) ====================
+   Vista Widget (predefinita) o Standard: interruttore nel menu profilo, salvato in profiles.home_vista.
+   Le Home Standard restano nella pagina; con body.vista-widget si vedono solo i widget.
+   Professionista: Oggi (grande) · Messaggi · Incassi · Da richiamare · Nuovo appuntamento · Giro · Settimana.
+   Proprietario: Prossime scadenze (grande) · Spese · Messaggi · Prossimo appuntamento · + Spesa · + Evento · I miei cavalli · Lezioni.
+   I dati arrivano dalle stesse funzioni della Home Standard: i widget si ridisegnano quando queste finiscono. */
+const WG_IC = {
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  msg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  euro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 6.5A6.5 6.5 0 1 0 17 17.5M4 10.5h9M4 13.5h9"/></svg>',
+  camp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5h4"/></svg>',
+  mappa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>',
+  giro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></svg>',
+  sett: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V12M10 20V6M15 20v-9M20 20V9"/></svg>',
+  scad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.5 12 21 12 21z"/></svg>',
+  cav: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20c0-5 1-8 4-11l-1-4 3 2 2-2 1 3c2 1 3 3 3 5l-2 1-2-1-1 7"/></svg>',
+  lez: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-5 9 5-9 5z"/><path d="M7 11v5c3 2 7 2 10 0v-5"/></svg>',
+  piu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+};
+const wgEsc = s => escapeHtml(String(s ?? ""));
+const wgEuro = n => "€ " + Math.round(Number(n) || 0).toLocaleString("it-IT");
+function vistaWidgetAttiva(){ return !currentUser || currentUser.homeVista !== "standard"; }
+function incassiNascosti(){ return !!(currentUser && currentUser.incassiNascosti); }
+
+/* ---------- vista: applica, cambia, salva ---------- */
+function applicaVistaHome(){
+  document.body.classList.toggle("vista-widget", vistaWidgetAttiva());
+  document.body.classList.toggle("incassi-nascosti", incassiNascosti());
+  if(incassiNascosti() && document.getElementById("page-pro-incassi")?.classList.contains("active")) showPage("pro-home");
+  if(vistaWidgetAttiva()) wgRidisegna();
+}
+function wgRidisegna(){
+  if(!currentUser || !vistaWidgetAttiva()) return;
+  if(vistaAi() === "professionista") renderWidgetPro(); else renderWidgetOwner();
+}
+async function cambiaVistaHome(widget){
+  if(!currentUser) return;
+  currentUser.homeVista = widget ? "widget" : "standard";
+  applicaVistaHome();
+  if(!DEMO_MODE){
+    const { error } = await sb.from("profiles").update({ home_vista: currentUser.homeVista }).eq("id", currentUser.id);
+    if(error) console.warn("home_vista:", error.message);
+  }
+  showToast(widget ? "Vista Widget attiva" : "Vista Standard attiva");
+}
+function aggiornaSwitchHome(){
+  const sw = document.getElementById("vista-widget-switch");
+  if(sw) sw.checked = vistaWidgetAttiva();
+  const pro = vistaAi() === "professionista";
+  const riga = document.getElementById("menu-incassi-row");
+  if(riga) riga.style.display = pro ? "" : "none";
+  const si = document.getElementById("incassi-switch");
+  if(si) si.checked = !incassiNascosti();
+}
+
+/* ---------- PROFESSIONISTA ---------- */
+let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, settimana: null, settimanaChiave: null };
+function wgTipoApp(e){ return (typeof agDescrizioneTipo === "function" ? agDescrizioneTipo(e) : hpTipo(e)); }
+function wgClienteDi(id){ return (clientiMascalcia || []).find(c => c.id === id) || null; }
+function renderWidgetPro(){
+  const box = document.getElementById("wh-pro");
+  if(!box || !currentUser) return;
+  const oggi = isoLocale(new Date());
+  const adesso = new Date().toTimeString().slice(0, 5);
+  const app = (hpAppuntamenti || []).filter(e => e.stato !== "annullato" && e.stato !== "rifiutato");
+  const diOggi = app.filter(e => e.data_intervento === oggi).sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")));
+  const prossimoOggi = diOggi.find(e => !e.ora || String(e.ora).slice(0, 5) >= adesso) || null;
+  const futuri = app.filter(e => e.data_intervento > oggi).sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+  const prossimo = prossimoOggi || futuri[0] || null;
+  const cavalliOggi = diOggi.length;
+  const strutture = new Set(diOggi.filter(e => isStruttura(wgClienteDi(e.cliente_mascalcia_id))).map(e => e.cliente_mascalcia_id)).size;
+  const ric = (hpRichiamiLista || []).slice().sort((a, b) => a.giorni - b.giorni);
+  const giri = typeof hpGiri === "function" ? hpGiri() : [];
+  const giro = giri[0] || null;
+
+  // OGGI (grande)
+  const quando = e => {
+    if(!e) return "";
+    const ora = e.ora ? String(e.ora).slice(0, 5) : "";
+    if(e.data_intervento === oggi && ora){
+      const [h, m] = ora.split(":").map(Number); const d = new Date(); d.setHours(h, m, 0, 0);
+      const min = Math.round((d - new Date()) / 60000);
+      return min > 0 && min < 180 ? `Prossimo · tra ${min} min · ${ora}` : `Prossimo · oggi ${ora}`;
+    }
+    return e.data_intervento === oggi ? "Prossimo · oggi" : `Prossimo · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
+  };
+  let oggiHtml;
+  if(prossimo){
+    const c = wgClienteDi(prossimo.cliente_mascalcia_id);
+    const cav = agNomeCavallo(prossimo);
+    const dove = [prossimo.clienti_mascalcia?.nome || c?.nome, c?.indirizzo].filter(Boolean).join(" · ");
+    const altri = diOggi.filter(e => e.id !== prossimo.id).slice(0, 3);
+    oggiHtml = `
+      <div class="wg-prossimo" onclick="apriAzioniEvento('${prossimo.id}')">
+        <div class="wg-quando">${wgEsc(quando(prossimo))}</div>
+        <div class="wg-chi">${wgEsc(cav || prossimo.clienti_mascalcia?.nome || "Appuntamento")} · ${wgEsc(wgTipoApp(prossimo).toLowerCase())}</div>
+        <div class="wg-dove">${wgEsc(dove)}</div>
+        <div class="wg-azioni">
+          <button class="oro" onclick="event.stopPropagation();wgNaviga('${prossimo.cliente_mascalcia_id}')">${WG_IC.mappa}Naviga</button>
+          <button onclick="event.stopPropagation();openChatThread('${prossimo.cliente_mascalcia_id}')">${WG_IC.msg}Chatta</button>
+          ${prossimo.stato === "programmato" ? `<button onclick="event.stopPropagation();hpSegnaFatto('${prossimo.id}')">${WG_IC.ok}Fatto</button>` : `<button onclick="event.stopPropagation();apriAzioniEvento('${prossimo.id}')">Apri</button>`}
+        </div>
+      </div>
+      ${altri.map(e => `<div class="wg-voce" onclick="apriAzioniEvento('${e.id}')"><span class="wg-ora">${e.ora ? String(e.ora).slice(0, 5) : "—"}</span><span class="wg-t">${wgEsc(agNomeCavallo(e) || "")} · ${wgEsc(wgTipoApp(e).toLowerCase())} <small>· ${wgEsc(e.clienti_mascalcia?.nome || "")}</small></span></div>`).join("")}
+      ${!prossimoOggi && prossimo ? '<div class="wg-nota">Oggi nessun appuntamento: questo è il prossimo in agenda.</div>' : ""}`;
+  } else {
+    oggiHtml = `<div class="wg-vuoto">Nessun appuntamento in agenda.<br><button class="wg-link" onclick="openInterventoModal(null)">+ Fissane uno</button></div>`;
+  }
+
+  // DA RICHIAMARE (medio)
+  const ricHtml = ric.length
+    ? ric.slice(0, 3).map(r => `<div class="wg-ric" onclick="apriRichiamo('${r.intervento_id}')"><span class="wg-sem ${hpColoreRic(r)}"></span><span class="wg-t"><b>${wgEsc(r.cavallo_nome || "Cavallo")}</b> · ${wgEsc(r.cliente_nome || "")}<small>${wgEsc(hpTipo(r).toLowerCase())} · ${wgEsc(hpQuando(r))}</small></span><button class="wg-scrivi" onclick="event.stopPropagation();wgScriviRichiamo('${r.intervento_id}')">Scrivi</button></div>`).join("")
+    : '<div class="wg-vuoto piccolo">Nessun cavallo da richiamare nei prossimi 30 giorni.</div>';
+
+  // SETTIMANA (medio)
+  const sett = wgPro.settimana;
+  const lun = wgLunedi(oggi);
+  const giorni = ["L", "M", "M", "G", "V", "S", "D"].map((g, i) => {
+    const iso = aggiungiGiorniIso(lun, i);
+    const n = sett ? (sett[iso] || 0) : 0;
+    return { g, iso, n };
+  });
+  const max = Math.max(4, ...giorni.map(x => x.n));
+  const totSett = giorni.reduce((t, x) => t + x.n, 0);
+  if(wgPro.settimanaChiave !== lun) wgCaricaSettimana(lun);
+
+  box.innerHTML = `
+    <div class="wg wg-grande">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.cal}Oggi</span><span class="wg-meta">${cavalliOggi ? `${cavalliOggi} ${cavalliOggi === 1 ? "appuntamento" : "appuntamenti"}${strutture ? " · " + strutture + (strutture === 1 ? " struttura" : " strutture") : ""}` : ""}</span></div>
+      ${oggiHtml}
+    </div>
+    <div class="wg wg-piccolo" onclick="document.querySelector('[data-page=&quot;pro-inbox&quot;]')?.click()">
+      <span class="wg-et">${WG_IC.msg}Messaggi</span>${wgPro.unread ? `<span class="wg-badge">${wgPro.unread}</span>` : ""}
+      <div class="wg-num">${wgPro.unread} <small>${wgPro.unread === 1 ? "non letto" : "non letti"}</small></div>
+      <div class="wg-riga">${wgPro.ultimo ? `<b>${wgEsc(wgPro.ultimo.nome)}:</b> ${wgEsc(wgPro.ultimo.testo)}` : "Nessun messaggio"}</div>
+    </div>
+    <div class="wg wg-piccolo wg-pieno solo-incassi" onclick="showPage('pro-incassi')">
+      <span class="wg-cerchio">${WG_IC.euro}</span>
+      <div class="wg-num">${wgEuro(wgPro.incassatoMese)}</div>
+      <div class="wg-riga">incassati a ${new Date().toLocaleDateString("it-IT", { month: "long" })}</div>
+      <div class="wg-riga evid">${wgPro.daIncassareMese ? wgEuro(wgPro.daIncassareMese) + " da incassare" : "Tutto incassato"}</div>
+    </div>
+    <div class="wg wg-medio">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.camp}Da richiamare</span>${ric.length > 3 ? `<button class="wg-link" onclick="apriListaHome('ric')">${ric.length} in tutto ›</button>` : ""}</div>
+      ${ricHtml}
+    </div>
+    <div class="wg wg-piccolo wg-pieno wg-azione" onclick="openInterventoModal(null)">
+      <span class="wg-cerchio grande">${WG_IC.piu}</span>
+      <div class="wg-riga forte">Nuovo appuntamento</div>
+    </div>
+    <div class="wg wg-piccolo" onclick="${giro ? `apriGiro('${giro[0].cliente_mascalcia_id}')` : "showToast('Nessun giro da organizzare: ti avvisiamo quando più cavalli dello stesso cliente scadono insieme')"}">
+      ${isPremium() ? "" : '<span class="wg-premium">PREMIUM</span>'}
+      <span class="wg-et">${WG_IC.giro}Giro</span>
+      <div class="wg-num">${giro ? giro.length : 0} <small>cavalli</small></div>
+      <div class="wg-riga">${giro ? `da <b>${wgEsc(giro[0].cliente_nome || "")}</b>: un solo appuntamento` : "Nessun giro da organizzare"}</div>
+    </div>
+    <div class="wg wg-medio" onclick="showPage('pro-agenda')">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.sett}Settimana</span><span class="wg-meta">${sett ? totSett + (totSett === 1 ? " appuntamento" : " appuntamenti") : ""}</span></div>
+      <div class="wg-barre">${giorni.map(x => `<div class="wg-barra${x.iso === oggi ? " oggi" : ""}"><b>${x.n || "–"}</b><i style="height:${x.n ? Math.max(12, Math.round(x.n / max * 100)) : 6}%"></i><small>${x.g}</small></div>`).join("")}</div>
+    </div>`;
+}
+function wgLunedi(iso){
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  return aggiungiGiorniIso(iso, -((dt.getDay() + 6) % 7));
+}
+let wgSettInCorso = false;
+async function wgCaricaSettimana(lun){
+  if(wgSettInCorso) return;
+  wgSettInCorso = true;
+  try{
+    const lista = await DB.listInterventiPeriodo(lun, aggiungiGiorniIso(lun, 6));
+    const per = {};
+    (lista || []).filter(i => !["rifiutato", "annullato"].includes(i.stato)).forEach(i => { per[i.data_intervento] = (per[i.data_intervento] || 0) + 1; });
+    wgPro.settimana = per; wgPro.settimanaChiave = lun;
+  } catch(e){ wgPro.settimana = wgPro.settimana || {}; wgPro.settimanaChiave = lun; }
+  finally { wgSettInCorso = false; }
+  if(vistaWidgetAttiva() && vistaAi() === "professionista") renderWidgetPro();
+}
+function wgScriviRichiamo(id){
+  apriRichiamo(id);
+  richiamoAzione("scrivi");
+}
+
+/* ---------- Naviga ---------- */
+/* Naviga: indirizzo in quest'ordine
+   1) quello scritto dal maniscalco nella scheda cliente
+   2) quello della struttura collegata in Equo Scuderia (rpc pro_indirizzi_strutture)
+   3) nessuno: ricerca del luogo (cerca-luogo → Google Places), il maniscalco sceglie e si salva nella scheda */
+let wgIndirizziStrutture = null;
+async function wgIndirizzoStruttura(c){
+  if(!c?.centro_id || DEMO_MODE) return null;
+  if(!wgIndirizziStrutture){
+    try{
+      const { data, error } = await sb.rpc("pro_indirizzi_strutture");
+      wgIndirizziStrutture = error ? [] : (data || []);
+    }catch(_){ wgIndirizziStrutture = []; }
+  }
+  return wgIndirizziStrutture.find(x => x.cliente_id === c.id) || null;
+}
+async function wgNaviga(clienteId){
+  const c = wgClienteDi(clienteId);
+  if(!c){ showToast("Cliente non trovato"); return; }
+  const proprio = (c.indirizzo || "").trim();
+  if(proprio) return wgMostraMappe(c, proprio);
+  const st = await wgIndirizzoStruttura(c);
+  const via = (st?.indirizzo || "").trim();
+  const citta = [st?.citta, st?.provincia ? "(" + st.provincia + ")" : ""].filter(Boolean).join(" ").trim();
+  if(via) return wgMostraMappe(c, [via, citta].filter(Boolean).join(", "), "Indirizzo indicato dalla struttura in Equo Scuderia");
+  wgCercaLuogo(c, [st?.nome || c.nome, st?.citta].filter(Boolean).join(", "));
+}
+function wgMappeOv(){
+  let ov = document.getElementById("modal-naviga");
+  if(!ov){
+    ov = document.createElement("div"); ov.className = "modal-overlay"; ov.id = "modal-naviga";
+    ov.addEventListener("click", ev => { if(ev.target === ov) closeModal("modal-naviga"); });
+    document.body.appendChild(ov);
+  }
+  return ov;
+}
+function wgMostraMappe(c, indirizzo, nota){
+  const q = encodeURIComponent(indirizzo);
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const app = [
+    ["Google Maps", `https://www.google.com/maps/dir/?api=1&destination=${q}`, "linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"],
+    ...(ios ? [["Apple Mappe", `https://maps.apple.com/?daddr=${q}`, "linear-gradient(160deg,#7fd27b,#3aa0f0)"]] : []),
+    ["Waze", `https://waze.com/ul?q=${q}&navigate=yes`, "#33ccff"],
+  ];
+  const ov = wgMappeOv();
+  ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:2px">Indicazioni per ${wgEsc(c?.nome || "il cliente")}</div>
+    <div class="muted" style="font-size:13px;margin-bottom:${nota ? 2 : 14}px">${wgEsc(indirizzo)}</div>
+    ${nota ? `<div class="muted" style="font-size:12px;margin-bottom:14px">${wgEsc(nota)}</div>` : ""}
+    ${app.map(([n, u, bg]) => `<a class="wg-app-mappa" href="${u}" target="_blank" rel="noopener" onclick="closeModal('modal-naviga')"><i style="background:${bg}"></i>${n}</a>`).join("")}
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeModal('modal-naviga')">Annulla</button></div>`;
+  openModal("modal-naviga");
+}
+let wgLuogo = { cliente: null, risultati: [] };
+function wgCercaLuogo(c, testo){
+  wgLuogo = { cliente: c, risultati: [] };
+  const ov = wgMappeOv();
+  ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:2px">Dove si trova ${wgEsc(c.nome || "il cliente")}?</div>
+    <div class="muted" style="font-size:13px;margin-bottom:12px">Manca l'indirizzo. Cerca il luogo e tocca quello giusto: lo salvo nella scheda del cliente.</div>
+    <form onsubmit="event.preventDefault();wgCercaLuogoVai()" style="display:flex;gap:8px;margin-bottom:12px">
+      <input class="input" id="wg-luogo-testo" style="flex:1" placeholder="Nome del maneggio o della via, città" value="${wgEsc(testo || "")}">
+      <button class="btn btn-primary" type="submit" style="flex-shrink:0">Cerca</button>
+    </form>
+    <div id="wg-luogo-esiti"></div>
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="wgLuogoAMano()">Scrivo l'indirizzo a mano</button>
+    <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="closeModal('modal-naviga')">Annulla</button></div>`;
+  openModal("modal-naviga");
+  if((testo || "").trim().length >= 3) wgCercaLuogoVai();
+  else setTimeout(() => document.getElementById("wg-luogo-testo")?.focus(), 250);
+}
+async function wgCercaLuogoVai(){
+  const testo = (document.getElementById("wg-luogo-testo")?.value || "").trim();
+  const box = document.getElementById("wg-luogo-esiti");
+  if(!box) return;
+  if(testo.length < 3){ box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Scrivi almeno 3 lettere.</div>`; return; }
+  box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Cerco…</div>`;
+  let d = {};
+  if(DEMO_MODE){
+    await new Promise(r => setTimeout(r, 400));
+    d = { risultati: [
+      { nome: testo.split(",")[0] + " (scuderia)", indirizzo: "Via Casilina km 51, 00034 Colleferro RM, Italia" },
+      { nome: testo.split(",")[0], indirizzo: "Via dei Prati 12, 00038 Valmontone RM, Italia" },
+      { nome: "Centro ippico " + testo.split(",")[0], indirizzo: "Strada provinciale 600, 03012 Anagni FR, Italia" },
+    ] };
+  } else {
+    try{
+      const res = await fetch("/.netlify/functions/cerca-luogo", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ testo }) });
+      d = await res.json().catch(() => ({}));
+      if(res.status === 401) d = { errore: true, sessione: true };
+    }catch(_){ d = { errore: true }; }
+  }
+  const mappe = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(testo)}`;
+  const apriMappe = `<a class="wg-app-mappa" href="${mappe}" target="_blank" rel="noopener"><i style="background:linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"></i>Cerca su Google Maps</a>`;
+  if(d.non_configurato || d.errore || d.limite_raggiunto){
+    const motivo = d.limite_raggiunto ? "Hai fatto molte ricerche oggi: riprova domani." : d.sessione ? "Sessione scaduta: esci e rientra." : !navigator.onLine ? "Sei offline: la ricerca riparte con la rete." : "La ricerca non è disponibile in questo momento.";
+    box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">${motivo} Puoi cercare il luogo direttamente nelle mappe.</div>${apriMappe}`;
+    return;
+  }
+  wgLuogo.risultati = d.risultati || [];
+  if(!wgLuogo.risultati.length){
+    box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Nessun luogo trovato. Prova con il nome del maneggio e la città, oppure scrivi l'indirizzo a mano.</div>${apriMappe}`;
+    return;
+  }
+  box.innerHTML = wgLuogo.risultati.map((r, i) => `<button class="wg-app-mappa wg-luogo" type="button" onclick="wgSceltaLuogo(${i})">
+      <span class="wg-luogo-ico"><i class="fa-solid fa-location-dot"></i></span>
+      <span style="min-width:0"><span style="display:block">${wgEsc(r.nome || r.indirizzo)}</span><span class="muted" style="display:block;font-weight:400;font-size:12.5px">${wgEsc(r.indirizzo)}</span></span></button>`).join("");
+}
+async function wgSceltaLuogo(i){
+  const r = wgLuogo.risultati[i], c = wgLuogo.cliente;
+  if(!r || !c) return;
+  if(!DEMO_MODE){
+    const { error } = await DB.updateClienteMascalcia(c.id, { indirizzo: r.indirizzo });
+    if(error){ showToast("Non sono riuscito a salvare l'indirizzo, ma ti porto lo stesso"); }
+    else showToast("Indirizzo salvato nella scheda del cliente");
+  }
+  c.indirizzo = r.indirizzo;
+  closeModal("modal-naviga");
+  setTimeout(() => wgMostraMappe(c, r.indirizzo), 200);
+}
+function wgLuogoAMano(){
+  const c = wgLuogo.cliente;
+  closeModal("modal-naviga");
+  if(!c) return;
+  showPage("pro-clienti");
+  openClienteDetail(c.id).then(() => { if(typeof openEditCliente === "function") openEditCliente().then(() => document.getElementById("edit-cliente-indirizzo")?.focus()); });
+}
+
+/* ---------- PROPRIETARIO ---------- */
+let wgOwn = { scadenze: null, spese: null, appuntamento: null, lezioni: null, unread: 0, caricato: 0 };
+async function wgCaricaOwner(){
+  if(!currentUser || DEMO_MODE && !demoState) return;
+  const ids = (horses || []).map(h => h.id);
+  const sicuro = p => Promise.resolve().then(p).catch(e => { console.warn("widget:", e); return null; });
+  const [scad, spese, man, lez, unread] = await Promise.all([
+    sicuro(() => ids.length ? DB.listUpcomingDeadlines(ids, 6) : []),
+    sicuro(() => DB.listExpenses()),
+    sicuro(() => DEMO_MODE ? [] : DB.listManiscalchiCollegati()),
+    sicuro(async () => { if(DEMO_MODE) return []; const r = await sb.rpc("mie_lezioni_scuderia"); return r.error ? [] : (r.data || []); }),
+    sicuro(() => DEMO_MODE ? 0 : computeChatUnreadTotal()),
+  ]);
+  wgOwn.scadenze = scad || [];
+  wgOwn.spese = spese || [];
+  wgOwn.lezioni = lez || [];
+  wgOwn.unread = Number(unread) || 0;
+  // prossimo appuntamento: ferrature dai maniscalchi collegati + lezioni della scuderia
+  const oggi = isoLocale(new Date());
+  const cand = [];
+  for(const f of (man || [])){
+    const lista = await sicuro(() => DB.listAppuntamentiCliente(f.cliente_mascalcia_id)) || [];
+    lista.filter(a => a.data_intervento >= oggi && ["programmato", "richiesto"].includes(a.stato)).forEach(a => cand.push({
+      tipo: "maniscalco", data: a.data_intervento, ora: a.ora ? String(a.ora).slice(0, 5) : "", titolo: (TIPO_FERRATURA_LABELS[a.tipo_ferratura] || "Appuntamento") + (a.nome_cavallo ? " · " + a.nome_cavallo : ""),
+      chi: f.nome_maniscalco || "Il tuo maniscalco", stato: a.stato, f }));
+  }
+  (wgOwn.lezioni || []).filter(l => l.data >= oggi && !["annullata", "completata"].includes(l.stato)).forEach(l => cand.push({
+    tipo: "lezione", data: l.data, ora: l.ora ? String(l.ora).slice(0, 5) : "", titolo: "Lezione" + (l.cavallo ? " · " + l.cavallo : ""),
+    chi: [l.scuderia, l.istruttore ? "con " + l.istruttore : ""].filter(Boolean).join(" · "), stato: l.stato, l }));
+  cand.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
+  wgOwn.appuntamento = cand[0] || null;
+  wgOwn.caricato = Date.now();
+  if(vistaWidgetAttiva() && vistaAi() === "proprietario") renderWidgetOwner(true);
+}
+function wgGiorniA(iso){ return giorniTra(isoLocale(new Date()), String(iso).slice(0, 10)); }
+function wgQuandoScad(g){ return g < 0 ? `scaduta da ${-g} ${-g === 1 ? "giorno" : "giorni"}` : g === 0 ? "scade oggi" : g === 1 ? "scade domani" : `tra ${g} giorni`; }
+function renderWidgetOwner(daCarica){
+  const box = document.getElementById("wh-owner");
+  if(!box || !currentUser) return;
+  if(!horses || !horses.length){ box.innerHTML = ""; return; }
+  if(!daCarica && Date.now() - wgOwn.caricato > 30000) wgCaricaOwner();
+  const scad = wgOwn.scadenze;
+  const oggi = isoLocale(new Date());
+  // SCADENZE (grande)
+  let scadHtml;
+  if(scad == null) scadHtml = '<div class="wg-vuoto piccolo">Caricamento…</div>';
+  else if(!scad.length) scadHtml = '<div class="wg-vuoto">Nessuna scadenza in arrivo.<br><button class="wg-link" onclick="wgNuovoEvento()">+ Registra un vaccino o una ferratura</button></div>';
+  else {
+    const p = scad[0], g = wgGiorniA(p.next_due_date);
+    const ferr = p.type === "ferratura";
+    const haMan = !!document.querySelector("#farrier-chat-list .inbox-item") || (wgOwn.appuntamento && wgOwn.appuntamento.tipo === "maniscalco");
+    scadHtml = `
+      <div class="wg-prossimo ${g < 0 ? "rosso" : ""}" onclick="showPage('cavalli');openHorseDetail('${p.horse_id}')">
+        <div class="wg-quando">${wgEsc(wgQuandoScad(g))} · ${formatDate(p.next_due_date)}</div>
+        <div class="wg-chi">${wgEsc(EVENT_LABELS[p.type] || p.type)} · ${wgEsc(p.horses?.name || "")}</div>
+        <div class="wg-azioni">
+          ${ferr ? `<button class="oro" onclick="event.stopPropagation();wgFissaManiscalco()">${WG_IC.cal}Fissa con il maniscalco</button>` : `<button class="oro" onclick="event.stopPropagation();showPage('cavalli');openHorseDetail('${p.horse_id}')">${WG_IC.scad}Apri il libretto</button>`}
+        </div>
+      </div>
+      ${scad.slice(1, 4).map(d => { const gg = wgGiorniA(d.next_due_date); return `<div class="wg-ric" onclick="showPage('cavalli');openHorseDetail('${d.horse_id}')"><span class="wg-sem ${gg < 0 ? "rosso" : gg <= 14 ? "ocra" : "verde"}"></span><span class="wg-t"><b>${wgEsc(EVENT_LABELS[d.type] || d.type)}</b> · ${wgEsc(d.horses?.name || "")}<small>${wgEsc(wgQuandoScad(gg))} · ${formatDate(d.next_due_date)}</small></span></div>`; }).join("")}`;
+  }
+  // SPESE
+  const spese = wgOwn.spese || [];
+  const inizio = new Date(); inizio.setDate(1); inizio.setHours(0, 0, 0, 0);
+  const inizioPrec = new Date(inizio); inizioPrec.setMonth(inizioPrec.getMonth() - 1);
+  const mese = spese.filter(e => new Date(e.date) >= inizio).reduce((t, e) => t + Number(e.amount || 0), 0);
+  const prec = spese.filter(e => new Date(e.date) >= inizioPrec && new Date(e.date) < inizio).reduce((t, e) => t + Number(e.amount || 0), 0);
+  const diff = mese - prec;
+  // APPUNTAMENTO
+  const a = wgOwn.appuntamento;
+  const quandoA = a ? (a.data === oggi ? "Oggi" : a.data === aggiungiGiorniIso(oggi, 1) ? "Domani" : hpGiornoEtichetta(a.data)) + (a.ora ? " · " + a.ora : "") : "";
+  // LEZIONI settimana
+  const fra7 = aggiungiGiorniIso(oggi, 7);
+  const lezSett = (wgOwn.lezioni || []).filter(l => l.data >= oggi && l.data <= fra7 && !["annullata"].includes(l.stato));
+  const ultimo = typeof homeLastMessageTarget !== "undefined" ? homeLastMessageTarget : null;
+
+  box.innerHTML = `
+    <div class="wg wg-grande">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.scad}Prossime scadenze</span><span class="wg-meta">${scad && scad.length ? scad.length + (scad.length === 1 ? " in arrivo" : " in arrivo") : ""}</span></div>
+      ${scadHtml}
+    </div>
+    <div class="wg wg-piccolo wg-pieno" onclick="document.querySelector('[data-page=&quot;spese&quot;]')?.click()">
+      <span class="wg-cerchio">${WG_IC.euro}</span>
+      <div class="wg-num">${wgEuro(mese)}</div>
+      <div class="wg-riga">spese di ${new Date().toLocaleDateString("it-IT", { month: "long" })}</div>
+      <div class="wg-riga evid">${prec ? (diff > 0 ? "+" : diff < 0 ? "−" : "") + wgEuro(Math.abs(diff)).replace("€ ", "€ ") + " sul mese scorso" : "Registra le spese con +"}</div>
+    </div>
+    <div class="wg wg-piccolo" onclick="${ultimo ? "goToLastMessage()" : "document.querySelector('[data-page=&quot;chat&quot;]')?.click()"}">
+      <span class="wg-et">${WG_IC.msg}Messaggi</span>${wgOwn.unread ? `<span class="wg-badge">${wgOwn.unread}</span>` : ""}
+      <div class="wg-num">${wgOwn.unread} <small>${wgOwn.unread === 1 ? "non letto" : "non letti"}</small></div>
+      <div class="wg-riga">${ultimo ? `<b>${wgEsc(ultimo.nome)}:</b> ${wgEsc(ultimo.testo || "")}` : "Nessun messaggio"}</div>
+    </div>
+    <div class="wg wg-medio">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.cal}Prossimo appuntamento</span></div>
+      ${a ? `<div class="wg-app">
+          <div class="wg-app-data">${wgEsc(quandoA)}${a.stato === "richiesto" || a.stato === "prenotata" ? ' <span class="wg-tag">da confermare</span>' : ""}</div>
+          <div class="wg-app-tit">${wgEsc(a.titolo)}</div>
+          <div class="wg-riga">${wgEsc(a.chi)}</div>
+          <div class="wg-azioni chiaro"><button class="oro" onclick="wgChattaAppuntamento()">${WG_IC.msg}Chatta</button><button onclick="${a.tipo === "lezione" ? "document.querySelector('[data-page=&quot;prenotazioni&quot;]')?.click()" : "wgFissaManiscalco()"}">Apri</button></div>
+        </div>` : '<div class="wg-vuoto piccolo">Nessun appuntamento in programma.</div>'}
+    </div>
+    <div class="wg wg-piccolo wg-pieno wg-azione" onclick="document.querySelector('[data-page=&quot;spese&quot;]')?.click();openAddExpenseModal()">
+      <span class="wg-cerchio grande">${WG_IC.piu}</span>
+      <div class="wg-riga forte">Nuova spesa</div>
+    </div>
+    <div class="wg wg-piccolo wg-pieno wg-azione" onclick="wgNuovoEvento()">
+      <span class="wg-cerchio grande">${WG_IC.piu}</span>
+      <div class="wg-riga forte">Nuovo evento<br><small>vaccino, ferratura…</small></div>
+    </div>
+    <div class="wg wg-medio">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.cav}I miei cavalli</span><button class="wg-link" onclick="showPage('cavalli');closeHorseDetail()">Tutti ›</button></div>
+      <div class="wg-cavalli">${horses.slice(0, 8).map(h => `<button class="wg-cavallo" onclick="showPage('cavalli');openHorseDetail('${h.id}')"><span>${wgEsc((h.name || "?").charAt(0).toUpperCase())}</span><small>${wgEsc(h.name)}</small></button>`).join("")}
+        <button class="wg-cavallo nuovo" onclick="openHorseForm()"><span>${WG_IC.piu}</span><small>Aggiungi</small></button></div>
+    </div>
+    ${(wgOwn.lezioni || []).length ? `<div class="wg wg-medio" onclick="document.querySelector('[data-page=&quot;prenotazioni&quot;]')?.click()">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.lez}Lezioni della settimana</span><span class="wg-meta">${lezSett.length}</span></div>
+      ${lezSett.length ? lezSett.slice(0, 3).map(l => `<div class="wg-voce"><span class="wg-ora">${wgEsc(hpGiornoEtichetta(l.data))}</span><span class="wg-t">${l.ora ? String(l.ora).slice(0, 5) + " · " : ""}${wgEsc(l.cavallo || "Lezione")} <small>${wgEsc(l.istruttore ? "· " + l.istruttore : "")}</small></span></div>`).join("") : '<div class="wg-vuoto piccolo">Nessuna lezione nei prossimi 7 giorni.</div>'}
+    </div>` : ""}`;
+}
+function wgFissaManiscalco(){
+  showPage("chat");
+  if(typeof loadFarrierChatSection === "function") loadFarrierChatSection().then(() => {
+    const a = wgOwn.appuntamento;
+    if(a && a.tipo === "maniscalco") openFarrierChatThread(a.f.cliente_mascalcia_id, a.f.nome_maniscalco || "Il tuo maniscalco");
+  });
+}
+function wgChattaAppuntamento(){
+  const a = wgOwn.appuntamento; if(!a) return;
+  showPage("chat");
+  if(a.tipo === "maniscalco") loadFarrierChatSection().then(() => openFarrierChatThread(a.f.cliente_mascalcia_id, a.f.nome_maniscalco || "Il tuo maniscalco"));
+  else loadStableChatSection().then(async () => {
+    const s = (await DB.listScuderieCollegate()).find(x => !a.l.scuderia || x.nome === a.l.scuderia) || null;
+    if(s) openStableChatThread(s.membro_id, s.centro_id, s.nome);
+  });
+}
+async function wgNuovoEvento(){
+  if(!horses || !horses.length){ openHorseForm(); return; }
+  if(horses.length === 1){ showPage("cavalli"); await openHorseDetail(horses[0].id); openAddEventModal(); return; }
+  let ov = document.getElementById("modal-scegli-cavallo");
+  if(!ov){
+    ov = document.createElement("div"); ov.className = "modal-overlay"; ov.id = "modal-scegli-cavallo";
+    ov.addEventListener("click", ev => { if(ev.target === ov) closeModal("modal-scegli-cavallo"); });
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `<div class="modal"><div class="modal-handle"></div><div class="modal-title">Per quale cavallo?</div>
+    ${horses.map(h => `<button class="wg-app-mappa" onclick="closeModal('modal-scegli-cavallo');showPage('cavalli');openHorseDetail('${h.id}').then(openAddEventModal)"><i style="background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700">${wgEsc((h.name || "?").charAt(0))}</i>${wgEsc(h.name)}</button>`).join("")}
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeModal('modal-scegli-cavallo')">Annulla</button></div>`;
+  openModal("modal-scegli-cavallo");
+}
+
+/* ==================== INCASSI NASCOSTI CON PIN ==================== */
+function wgPin({ titolo, testo, passo, dimenticato }){
+  return new Promise(resolve => {
+    let ov = document.getElementById("pin-ov");
+    if(!ov){ ov = document.createElement("div"); ov.id = "pin-ov"; document.body.appendChild(ov); }
+    let cifre = "";
+    const tasti = ["1","2","3","4","5","6","7","8","9","","0","⌫"];
+    ov.className = "pin-ov on";
+    ov.innerHTML = `<div class="pin-box">
+      <div class="pin-lucch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></div>
+      <h3>${wgEsc(titolo)}</h3><p>${wgEsc(testo || "")}</p>
+      <div class="pin-pallini"><i></i><i></i><i></i><i></i></div>
+      <div class="pin-passo">${wgEsc(passo || "")}</div>
+      <div class="pin-err" id="pin-err"></div>
+      <div class="pin-tast">${tasti.map(t => t ? `<button type="button" data-t="${t}">${t}</button>` : "<span></span>").join("")}</div>
+      ${dimenticato ? '<button type="button" class="pin-link" data-az="dim">PIN dimenticato?</button>' : ""}
+      <button type="button" class="pin-link grigio" data-az="annulla">Annulla</button></div>`;
+    const pallini = ov.querySelectorAll(".pin-pallini i");
+    const aggiorna = () => pallini.forEach((p, i) => p.classList.toggle("p", i < cifre.length));
+    const fine = v => { ov.className = "pin-ov"; document.removeEventListener("keydown", tastiera); resolve(v); };
+    const premi = t => {
+      if(t === "⌫"){ cifre = cifre.slice(0, -1); aggiorna(); return; }
+      if(cifre.length >= 4) return;
+      cifre += t; aggiorna();
+      if(cifre.length === 4) setTimeout(() => fine(cifre), 160);
+    };
+    const tastiera = e => { if(/^[0-9]$/.test(e.key)) premi(e.key); else if(e.key === "Backspace") premi("⌫"); else if(e.key === "Escape") fine(null); };
+    document.addEventListener("keydown", tastiera);
+    ov.onclick = e => {
+      const b = e.target.closest("button"); if(!b) return;
+      if(b.dataset.t) premi(b.dataset.t);
+      else if(b.dataset.az === "annulla") fine(null);
+      else if(b.dataset.az === "dim") fine("__dimenticato__");
+    };
+  });
+}
+function wgPinErrore(msg){ showToast(msg); }
+async function cambiaIncassi(mostra){
+  const sw = document.getElementById("incassi-switch");
+  const ripristina = () => { if(sw) sw.checked = !incassiNascosti(); };
+  if(DEMO_MODE){ currentUser.incassiNascosti = !mostra; applicaVistaHome(); showToast(mostra ? "Incassi visibili" : "Incassi nascosti"); return; }
+  try{
+    if(!mostra){
+      const { data: st } = await sb.rpc("incassi_stato");
+      let pin = null;
+      if(!st?.ha_pin){
+        const p1 = await wgPin({ titolo: "Crea un PIN per gli incassi", testo: "Ti servirà per farli ricomparire. Scegli 4 cifre che ricordi facilmente.", passo: "Passo 1 di 2 · scegli il PIN" });
+        if(!p1){ ripristina(); return; }
+        const p2 = await wgPin({ titolo: "Ripeti il PIN", testo: "Per sicurezza scrivilo un'altra volta.", passo: "Passo 2 di 2 · ripeti il PIN" });
+        if(!p2){ ripristina(); return; }
+        if(p1 !== p2){ showToast("I due PIN non coincidono, riprova."); ripristina(); return; }
+        pin = p1;
+      }
+      const { data, error } = await sb.rpc("incassi_nascondi", { p_pin: pin });
+      if(error || !data?.ok) throw error || new Error("non riuscito");
+      currentUser.incassiNascosti = true;
+      applicaVistaHome();
+      closeModal("modal-menu");
+      showToast("Incassi nascosti in tutta l'app");
+    } else {
+      const p = await wgPin({ titolo: "Mostra gli incassi", testo: "Inserisci il PIN di 4 cifre che hai scelto quando li hai nascosti.", dimenticato: true });
+      if(!p){ ripristina(); return; }
+      if(p === "__dimenticato__"){ ripristina(); return wgPinDimenticato(); }
+      const { data, error } = await sb.rpc("incassi_mostra", { p_pin: p });
+      if(error) throw error;
+      if(data?.ok){ currentUser.incassiNascosti = false; applicaVistaHome(); showToast("Incassi di nuovo visibili"); if(typeof renderIncassi === "function") renderIncassi(); return; }
+      ripristina();
+      if(data?.bloccato_fino) showToast("Troppi tentativi: riprova tra 5 minuti.");
+      else showToast(`PIN errato. ${data?.rimasti != null ? "Tentativi rimasti: " + data.rimasti : ""}`);
+    }
+  } catch(e){
+    console.error("incassi:", e);
+    ripristina();
+    showToast("Funzione non ancora attiva: serve l'aggiornamento del database.");
+  }
+}
+async function wgPinDimenticato(){
+  const ok = confirm("Per scegliere un nuovo PIN devi rientrare nel tuo account. Ti facciamo uscire: dopo l'accesso ti chiediamo subito il nuovo PIN. Continuare?");
+  if(!ok) return;
+  lsSet("equo-pin-reset", "1");
+  await logout();
+}
+async function wgControllaResetPin(){
+  if(DEMO_MODE || lsGet("equo-pin-reset") !== "1" || vistaAi() !== "professionista") return;
+  const p1 = await wgPin({ titolo: "Scegli il nuovo PIN", testo: "Hai appena fatto l'accesso: scegli 4 nuove cifre per gli incassi.", passo: "Passo 1 di 2" });
+  if(!p1){ lsDel("equo-pin-reset"); return; }
+  const p2 = await wgPin({ titolo: "Ripeti il nuovo PIN", testo: "", passo: "Passo 2 di 2" });
+  if(p1 !== p2){ showToast("I due PIN non coincidono: riprova dal menu."); lsDel("equo-pin-reset"); return; }
+  const { data, error } = await sb.rpc("incassi_nuovo_pin", { p_pin: p1 });
+  lsDel("equo-pin-reset");
+  if(error || !data?.ok){ showToast(data?.serve_accesso ? "Per sicurezza rifai l'accesso e riprova subito." : "Non sono riuscito a salvare il PIN."); return; }
+  currentUser.incassiNascosti = false;
+  applicaVistaHome();
+  showToast("Nuovo PIN salvato: gli incassi sono di nuovo visibili");
+}
 
 /* ---------- INIT ---------- */
 boot();
