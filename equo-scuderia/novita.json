@@ -1,6 +1,10 @@
 {
   "titolo": "Le novità di questo aggiornamento",
   "voci": [
+    "Codici QR (groom, schede cavallo) generati direttamente dall'app, senza servizi esterni: più affidabili su tutti i dispositivi.",
+    "Testi più chiari: «Promemoria del centro ippico», contatto «Manutenzione centro ippico», cavallo «di proprietà del centro ippico», categoria di magazzino «Pulizia scuderia».",
+    "Scheda cavallo unica: se il proprietario ha in App lo stesso cavallo (stesso microchip, o conferma sua quando coincide solo il nome), le due schede diventano un unico cavallo con un solo codice Equo (resta il numero più vecchio; quello vecchio vale ancora). Ricevi l'avviso nella chat con il proprietario.",
+    "Eventi sanitari condivisi con proprietario e maniscalco: le loro voci arrivano nella scheda del cavallo e può cancellarle solo chi le ha scritte (niente cestino).",
     "Athena e Merlino sanno il meteo del centro e delle località: chiedi «che tempo fa sabato pomeriggio?» per decidere se fare lezione all'aperto.",
     "Home: data e ora attuali accanto a «Bentornato».",
     "Home: meteo dei prossimi 7 giorni all'indirizzo del centro (tocca per il dettaglio ora per ora) e nuova lente per cercare cavalli, persone, lezioni e articoli di magazzino da qualsiasi pagina (anche Ctrl+K).",

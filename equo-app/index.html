@@ -13,7 +13,912 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* QR Code encoder — (c) 2009 Kazuhiko Arase, MIT license (http://www.d-project.com/). Inlined for Equo: no external CDN. */
+(function(){var M={};function R(n){return M[n.replace("./","")];}
+(function(){M["QRMode"]= {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+})();
+(function(){M["QRErrorCorrectLevel"]= {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+})();
+(function(){M["QRMaskPattern"]= {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+})();
+(function(){var QRMath = {
+	glog : function(n) {
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		return QRMath.LOG_TABLE[n];
+	},
+	gexp : function(n) {
+		while (n < 0) {
+			n += 255;
+		}
+		while (n >= 256) {
+			n -= 255;
+		}
+		return QRMath.EXP_TABLE[n];
+	},
+	EXP_TABLE : new Array(256),
+	LOG_TABLE : new Array(256)
+};
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+M["QRMath"]= QRMath;
+})();
+(function(){var QRMath = R('./QRMath');
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+	var offset = 0;
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+QRPolynomial.prototype = {
+	get : function(index) {
+		return this.num[index];
+	},
+	getLength : function() {
+		return this.num.length;
+	},
+	multiply : function(e) {
+		var num = new Array(this.getLength() + e.getLength() - 1);
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+		return new QRPolynomial(num, 0);
+	},
+	mod : function(e) {
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+		var num = new Array(this.getLength() );
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+M["QRPolynomial"]= QRPolynomial;
+})();
+(function(){var QRErrorCorrectLevel = R('./QRErrorCorrectLevel');
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+QRRSBlock.RS_BLOCK_TABLE = [
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+	var length = rsBlock.length / 3;
+	var list = [];
+	for (var i = 0; i < length; i++) {
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	return list;
+};
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+M["QRRSBlock"]= QRRSBlock;
+})();
+(function(){function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+QRBitBuffer.prototype = {
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	getLengthInBits : function() {
+		return this.length;
+	},
+	putBit : function(bit) {
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+		this.length++;
+	}
+};
+M["QRBitBuffer"]= QRBitBuffer;
+})();
+(function(){var QRMode = R('./QRMode');
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = unescape(encodeURIComponent(String(data)));
+}
+QR8bitByte.prototype = {
+	getLength : function() {
+		return this.data.length;
+	},
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+M["QR8bitByte"]= QR8bitByte;
+})();
+(function(){var QRMode = R('./QRMode');
+var QRPolynomial = R('./QRPolynomial');
+var QRMath = R('./QRMath');
+var QRMaskPattern = R('./QRMaskPattern');
+var QRUtil = {
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+    getBCHDigit : function(data) {
+        var digit = 0;
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+        return digit;
+    },
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+    getMask : function(maskPattern, i, j) {
+        switch (maskPattern) {
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+        var a = new QRPolynomial([1], 0);
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+        return a;
+    },
+    getLengthInBits : function(mode, type) {
+        if (1 <= type && type < 10) {
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+        } else if (type < 27) {
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+        } else if (type < 41) {
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+    getLostPoint : function(qrCode) {
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount; col++) {
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+                for (var r = -1; r <= 1; r++) {
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+                    for (var c = -1; c <= 1; c++) {
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+        var darkCount = 0;
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+        return lostPoint;       
+    }
+};
+M["QRUtil"]= QRUtil;
+})();
+(function(){
+var QR8bitByte = R('./QR8bitByte');
+var QRUtil = R('./QRUtil');
+var QRPolynomial = R('./QRPolynomial');
+var QRRSBlock = R('./QRRSBlock');
+var QRBitBuffer = R('./QRBitBuffer');
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+QRCode.prototype = {
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	make : function() {
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	makeImpl : function(test, maskPattern) {
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		for (var row = 0; row < this.moduleCount; row++) {
+			this.modules[row] = new Array(this.moduleCount);
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;
+			}
+		}
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+		this.mapData(this.dataCache, maskPattern);
+	},
+	setupPositionProbePattern : function(row, col)  {
+		for (var r = -1; r <= 7; r++) {
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			for (var c = -1; c <= 7; c++) {
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	getBestMaskPattern : function() {
+		var minLostPoint = 0;
+		var pattern = 0;
+		for (var i = 0; i < 8; i++) {
+			this.makeImpl(true, i);
+			var lostPoint = QRUtil.getLostPoint(this);
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+		return pattern;
+	},
+	createMovieClip : function(target_mc, instance_name, depth) {
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+		this.make();
+		for (var row = 0; row < this.modules.length; row++) {
+			var y = row * cs;
+			for (var col = 0; col < this.modules[row].length; col++) {
+				var x = col * cs;
+				var dark = this.modules[row][col];
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		return qr_mc;
+	},
+	setupTimingPattern : function() {
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	setupPositionAdjustPattern : function() {
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		for (var i = 0; i < pos.length; i++) {
+			for (var j = 0; j < pos.length; j++) {
+				var row = pos[i];
+				var col = pos[j];
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				for (var r = -2; r <= 2; r++) {
+					for (var c = -2; c <= 2; c++) {
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	setupTypeNumber : function(test) {
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	setupTypeInfo : function(test, maskPattern) {
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+		for (var v = 0; v < 15; v++) {
+			mod = (!test && ( (bits >> v) & 1) === 1);
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+		for (var h = 0; h < 15; h++) {
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+		this.modules[this.moduleCount - 8][8] = (!test);
+	},
+	mapData : function(data, maskPattern) {
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+			if (col === 6) col--;
+			while (true) {
+				for (var c = 0; c < 2; c++) {
+					if (this.modules[row][col - c] === null) {
+						var dark = false;
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+						if (mask) {
+							dark = !dark;
+						}
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+				row += inc;
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+	}
+};
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	var buffer = new QRBitBuffer();
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+	while (true) {
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+QRCode.createBytes = function(buffer, rsBlocks) {
+	var offset = 0;
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	for (var r = 0; r < rsBlocks.length; r++) {
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		dcdata[r] = new Array(dcCount);
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+	}
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+	var data = new Array(totalCodeCount);
+	var index = 0;
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+	return data;
+};
+M["index"]= QRCode;
+})();
+var QR=M["index"],EC=M["QRErrorCorrectLevel"];
+function QRCode(el,o){if(typeof el==="string")el=document.getElementById(el);if(typeof o==="string")o={text:o};o=o||{};
+this._el=el;this._o={width:o.width||256,height:o.height||o.width||256,colorDark:o.colorDark||"#000000",colorLight:o.colorLight||"#ffffff",correctLevel:o.correctLevel==null?EC.M:o.correctLevel};
+if(o.text)this.makeCode(o.text);}
+QRCode.prototype.clear=function(){if(this._el)this._el.innerHTML="";};
+QRCode.prototype.makeCode=function(text){var o=this._o,q=new QR(-1,o.correctLevel);q.addData(text);q.make();var n=q.getModuleCount(),r,c,p="";
+for(r=0;r<n;r++)for(c=0;c<n;c++)if(q.isDark(r,c))p+="M"+c+","+r+"h1v1h-1z";
+var ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");svg.setAttribute("viewBox","0 0 "+n+" "+n);svg.setAttribute("width",o.width);svg.setAttribute("height",o.height);svg.setAttribute("shape-rendering","crispEdges");svg.setAttribute("role","img");svg.setAttribute("aria-label","Codice QR");svg.style.display="block";
+var bg=document.createElementNS(ns,"rect");bg.setAttribute("width",n);bg.setAttribute("height",n);bg.setAttribute("fill",o.colorLight);svg.appendChild(bg);
+var path=document.createElementNS(ns,"path");path.setAttribute("d",p);path.setAttribute("fill",o.colorDark);svg.appendChild(path);
+var k=Math.max(1,Math.ceil(o.width*2/n)),cv=document.createElement("canvas");cv.width=cv.height=n*k;cv.style.display="none";
+try{var x=cv.getContext("2d");x.fillStyle=o.colorLight;x.fillRect(0,0,n*k,n*k);x.fillStyle=o.colorDark;for(r=0;r<n;r++)for(c=0;c<n;c++)if(q.isDark(r,c))x.fillRect(c*k,r*k,k,k);}catch(e){}
+this.clear();this._el.appendChild(svg);this._el.appendChild(cv);};
+QRCode.CorrectLevel={L:EC.L,M:EC.M,Q:EC.Q,H:EC.H};
+window.QRCode=QRCode;})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -656,6 +1561,40 @@ body.ai-aperta{overflow:hidden}
 .misura-wheel-fade.top{top:0;background:linear-gradient(var(--surface),transparent)}
 .misura-wheel-fade.bot{bottom:0;background:linear-gradient(transparent,var(--surface))}
 .misura-equivalenze{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.ds-riga-corta{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:10px 14px;margin-bottom:12px;font:inherit;font-size:13.5px;font-weight:700;color:var(--text);cursor:pointer}
+.ds-card{margin-bottom:14px;padding:14px 16px}
+.ds-testa{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px;margin-bottom:6px}
+.ds-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;vertical-align:middle}
+.ds-man{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 2px}
+.ds-voce{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);font-size:13.5px}
+.ds-dx{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.ds-dx button,.ds-link,.ds-ok{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:underline;cursor:pointer}
+.ds-link{margin-top:6px}
+.ds-ok{display:block;margin:10px auto 0;color:var(--muted);font-weight:600}
+.ds-paga{display:grid;gap:6px;margin-top:6px;padding:10px 12px;border-radius:12px;background:var(--surface2);font-size:13px;word-break:break-all}
+.ds-copia{cursor:pointer;font-weight:600}
+.int-cav-multi{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:2px 12px;max-height:230px;overflow-y:auto}
+.int-cav{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:14px;cursor:pointer;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+.int-cav:last-child{border-bottom:0}
+.int-cav input{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)}
+.int-cav small{color:var(--muted);font-size:11.5px}
+.int-cav.nuovo{color:var(--accent);font-weight:600}
+.ferro-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);margin-bottom:6px;font-size:13.5px}
+.ferro-riga .fr-nome{font-weight:700}
+.ferro-riga .fr-dett{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.ferro-riga .fr-dett.diverso{color:var(--accent);font-weight:600}
+.ferro-riga .fr-az{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.ferro-riga button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:underline;cursor:pointer}
+.ferro-riga button.sec{color:var(--muted);font-weight:500}
+.ferro-editor{border:1px dashed var(--accent);border-radius:14px;padding:10px 12px;margin-top:4px}
+.ferro-editor-tit{font-size:12.5px;font-weight:700;margin-bottom:8px}
+.q-wheel .misura-wheel-item{font-size:16px}
+.ric-importi{margin:0 auto 10px;max-width:280px;text-align:left}
+.ric-imp-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:14px}
+.ric-imp-riga span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ric-imp-riga label{display:flex;align-items:center;gap:4px;flex-shrink:0;color:var(--muted)}
+.ric-imp-riga input{width:92px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;font:inherit;font-size:15px;text-align:right;background:var(--surface);color:var(--text)}
+.ric-imp-tot{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:6px;font-weight:800;font-size:14px}
 .input-row-2{display:flex;gap:10px}
 .input-row-2 > .input-group{flex:1;min-width:0}
 
@@ -761,6 +1700,7 @@ body.vista-widget #home-main{display:none!important}
 .wg-meteo small{font-size:11.5px;font-weight:600;color:var(--muted)}
 .wg-voce .wg-meteo{margin:0 4px 0 6px}
 .wg-prossimo .wg-meteo small{color:rgba(255,255,255,.85)}
+.cod-cav-box{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px dashed var(--accent);background:var(--surface)}
 .wh{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;grid-auto-flow:row dense}
 .wg{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:13px 14px;position:relative;overflow:hidden;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wg:active{transform:scale(.985)}
@@ -1052,6 +1992,10 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   </div>
 
   <div class="auth-error" id="onb-error" style="display:none;max-width:360px;margin-top:14px"></div>
+  <div class="muted" style="max-width:360px;width:100%;text-align:center;font-size:12.5px;line-height:1.6;margin-top:22px">
+    Sei entrato come <b id="onb-account">—</b><br>
+    <button type="button" class="btn btn-ghost" style="margin-top:4px" onclick="logout()"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-right-from-bracket"></i></span> Email sbagliata? Esci e accedi con un altro account</button>
+  </div>
 </div>
 
 <!-- ═══ APP ═══ -->
@@ -1068,6 +2012,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
     <div class="section-title" style="font-size:18px;margin-bottom:2px" id="home-greeting"></div>
     <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="home-date"></div>
     <div class="meteo-box" id="meteo-owner" aria-label="Meteo dei prossimi 7 giorni"></div>
+    <div id="home-da-saldare" style="display:none"></div>
     <div class="wh" id="wh-owner"></div>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
@@ -1436,7 +2381,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
     <div id="inbox-strutture-wrap" style="display:none">
-      <div class="section-title" style="margin:22px 0 10px">Strutture</div>
+      <div class="section-title" style="margin:22px 0 10px">Scuderie</div>
       <div class="card" style="margin-bottom:14px">
         <div id="inbox-strutture-list"></div>
       </div>
@@ -1497,9 +2442,10 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div class="ic ric"><i class="fa-solid fa-calendar-plus"></i></div>
       <h3 id="ric-tit">Prossimo intervento</h3>
       <div id="ric-passo1">
-        <p class="grande">Inserisco il prossimo intervento tra<b id="ric-giorni-txt">35 giorni</b></p>
+        <p class="grande" id="ric-grande">Inserisco il prossimo intervento tra<b id="ric-giorni-txt">35 giorni</b></p>
         <p class="piccolo" id="ric-dettaglio"></p>
         <div class="ric-pag solo-incassi" id="ric-pag" style="display:none">
+          <div class="ric-importi" id="ric-importi"></div>
           <span id="ric-pag-imp"></span>
           <div class="ric-pag-scelte">
             <button type="button" data-p="da_saldare" onclick="richiamoPagamento('da_saldare')">Da saldare</button>
@@ -1508,7 +2454,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         </div>
         <div class="az-riga">
           <button class="btn-equo-ok" onclick="richiamoConferma()">OK</button>
-          <button class="btn-equo-cambia" onclick="richiamoCambia()">CAMBIA</button>
+          <button class="btn-equo-cambia" id="ric-btn-cambia" onclick="richiamoCambia()">CAMBIA</button>
         </div>
       </div>
       <div id="ric-passo2" style="display:none">
@@ -1524,6 +2470,17 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
           <button class="btn-equo-ok" onclick="richiamoConferma(true)">CONFERMO</button>
           <button class="btn-equo-cambia" onclick="richiamoCambia()">MODIFICA</button>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-sino">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="sino-tit">
+      <div class="ic ric"><i class="fa-solid fa-hammer" id="sino-ic"></i></div>
+      <h3 id="sino-tit"></h3>
+      <p class="piccolo" id="sino-testo"></p>
+      <div class="az-riga">
+        <button class="btn-equo-ok" onclick="rispondiSiNo(true)">SÌ</button>
+        <button class="btn-equo-cambia" onclick="rispondiSiNo(false)">NO</button>
       </div>
     </div>
   </div>
@@ -1814,7 +2771,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <label class="input-label">Tipo di cliente</label>
         <select class="input" id="cliente-tipo" onchange="aggiornaEtichetteNuovoCliente()">
           <option value="proprietario">Proprietario</option>
-          <option value="struttura">Struttura (scuderia, maneggio, centro)</option>
+          <option value="struttura">Scuderia o centro ippico</option>
         </select>
       </div>
       <div class="input-group">
@@ -1859,7 +2816,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <button class="btn btn-outline btn-variazione" onclick="azioneEvento('modifica')"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
       <button class="btn btn-outline" onclick="azioneEvento('pdf')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Stampa PDF</button>
       <button class="btn btn-outline" onclick="azioneEvento('chat')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat</button>
-      <button class="btn btn-outline" id="azioni-evento-annulla-struttura" style="display:none;color:var(--red)" onclick="azioneEvento('annulla_struttura')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla con la struttura</button>
+      <button class="btn btn-outline" id="azioni-evento-annulla-struttura" style="display:none;color:var(--red)" onclick="azioneEvento('annulla_struttura')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla con la scuderia</button>
       <button class="btn btn-danger" id="azioni-evento-elimina" onclick="azioneEvento('elimina')"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span> Elimina</button>
     </div>
   </div>
@@ -1931,7 +2888,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <label class="input-label">Tipo di cliente</label>
         <select class="input" id="edit-cliente-tipo">
           <option value="proprietario">Proprietario</option>
-          <option value="struttura">Struttura (scuderia, maneggio, centro)</option>
+          <option value="struttura">Scuderia o centro ippico</option>
         </select>
       </div>
       <div class="input-group">
@@ -1958,11 +2915,24 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div class="input-group" id="edit-cliente-collegato" style="display:none">
         <label class="input-label">Equo App</label>
         <div style="font-size:13.5px"><strong style="color:var(--green)">✓ Collegato a Equo</strong> — puoi scrivergli dalla chat.</div>
+        <label class="gia-fatto-row" style="margin-top:8px">
+          <input type="checkbox" id="edit-cliente-promemoria">
+          <span><b>Promemoria pagamenti</b><br><small class="muted">Se un lavoro resta «Da saldare», il cliente riceve un avviso e ogni 5 giorni un promemoria discreto in Equo. Toglila per un cliente di fiducia.</small></span>
+        </label>
       </div>
       <div class="input-group">
         <label class="input-label">Cavalli</label>
         <div id="edit-cliente-cavalli"></div>
-        <div class="input-row-2" style="margin-top:8px">
+        <div class="cod-cav-box">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:2px">Codice Equo del cavallo</div>
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Il cavallo ha già un codice Equo (es. MAR-000005)? Aggiungilo qui: arriva con tutto il suo storico, anche se ora è tra i cavalli di un altro cliente.</div>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="edit-cliente-codice-cavallo" placeholder="es. MAR-000005" autocapitalize="characters" style="flex:1;text-transform:uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiCavalloCodice()}">
+            <button class="btn btn-primary btn-sm" style="flex:none" onclick="aggiungiCavalloCodice(this)">Aggiungi</button>
+          </div>
+        </div>
+        <div class="muted" style="font-size:12px;margin:10px 0 0">Oppure un cavallo nuovo:</div>
+        <div class="input-row-2" style="margin-top:6px">
           <input class="input" id="edit-cliente-nuovo-cavallo" placeholder="Nome nuovo cavallo" style="flex:1.4">
           <input class="input" id="edit-cliente-nuovo-chip" placeholder="Microchip (opz.)" autocapitalize="characters" style="flex:1">
         </div>
@@ -1994,13 +2964,14 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <input class="input" id="intervento-nuovo-cliente-nome" placeholder="es. Marco Rossi">
         <select class="input" id="intervento-nuovo-cliente-tipo" style="margin-top:8px">
           <option value="proprietario">Proprietario</option>
-          <option value="struttura">Struttura (scuderia, maneggio, centro)</option>
+          <option value="struttura">Scuderia o centro ippico</option>
         </select>
       </div>
       <!-- 3. Cavallo -->
       <div class="input-group" id="intervento-cavallo-group">
-        <label class="input-label">Cavallo</label>
+        <label class="input-label" id="intervento-cavallo-label">Cavallo</label>
         <select class="input" id="intervento-cavallo-select" onchange="toggleInterventoNuovoCavallo()"></select>
+        <div class="int-cav-multi" id="intervento-cavalli-multi" style="display:none"></div>
       </div>
       <div class="input-row-2" id="intervento-nuovo-cavallo-group" style="display:none">
         <div class="input-group">
@@ -2027,9 +2998,12 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <label class="input-label">Specifica</label>
         <input class="input" id="intervento-tipo-altro" placeholder="es. controllo zoccoli">
       </div>
-      <!-- 6. Misura ferro (sistema + ruota) -->
+      <!-- 6. Ferro: quello standard della scheda del cavallo; «Cambia ferro» solo per questo appuntamento -->
       <div class="input-group" id="intervento-ferro-group" style="display:none">
-        <label class="input-label">Misura ferro</label>
+        <label class="input-label">Ferro</label>
+        <div id="intervento-ferro-righe"></div>
+        <div class="ferro-editor" id="intervento-ferro-editor" style="display:none">
+        <div class="ferro-editor-tit" id="intervento-ferro-editor-tit"></div>
         <select class="input" id="intervento-misura-sistema" onchange="onMisuraSistemaChange()" style="margin-bottom:8px">
           <option value="olandese">Olandese / Internazionale</option>
           <option value="italiana">Italiana</option>
@@ -2042,12 +3016,26 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
           <div class="misura-wheel-fade bot"></div>
         </div>
         <div class="misura-equivalenze" id="intervento-misura-equivalenze"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="button" class="btn btn-outline btn-sm" style="flex:1" onclick="chiudiEditorFerro(false)">Annulla</button>
+          <button type="button" class="btn btn-primary btn-sm" style="flex:1" onclick="chiudiEditorFerro(true)">Usa questo ferro</button>
+        </div>
+        </div>
       </div>
-      <!-- 7. Quantità -->
+      <!-- 7. Quantità: rotella 1-4 -->
       <div class="input-group" id="intervento-quantita-group" style="display:none">
-        <label class="input-label">Quantità ferri</label>
-        <input class="input" id="intervento-ferro-quantita" type="number" min="1" inputmode="numeric" placeholder="es. 4">
+        <label class="input-label">Ferri <span id="intervento-quantita-per" style="font-weight:400;text-transform:none"></span></label>
+        <div class="misura-wheel-wrap q-wheel">
+          <div class="misura-wheel-band"></div>
+          <div class="misura-wheel" id="intervento-quantita-wheel"></div>
+          <div class="misura-wheel-fade top"></div>
+          <div class="misura-wheel-fade bot"></div>
+        </div>
       </div>
+      <label class="gia-fatto-row" id="intervento-ferri-nuovi-row" style="display:none">
+        <input type="checkbox" id="intervento-ferri-nuovi" checked>
+        <span><b>Ferri nuovi utilizzati</b><br><small class="muted">Togli la spunta se è una rimessa (stessi ferri riutilizzati). Lo vedi solo tu: i clienti e le scuderie non lo vedono.</small></span>
+      </label>
       <!-- 8-9. Data + Ora -->
       <div class="input-row-2">
         <div class="input-group">
@@ -2063,7 +3051,8 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <input type="checkbox" id="intervento-gia-fatto">
         <span><b>L'ho già fatto</b><br><small class="muted">Lascialo spento se è un appuntamento di oggi ancora da fare: lo segnerai «Fatto» dopo.</small></span>
       </label>
-      <!-- 10. Importo -->
+      <!-- 10-11. Importo e pagamento: visibili solo modificando un intervento già fatto -->
+      <div id="intervento-incasso-group" style="display:none">
       <div class="input-group solo-incassi">
         <label class="input-label">Importo (€)</label>
         <input class="input" id="intervento-importo" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
@@ -2076,6 +3065,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
           <option value="saldato">Saldato</option>
         </select>
       </div>
+      </div>
       <!-- 12. Note -->
       <div class="input-group">
         <label class="input-label">Note (opzionale)</label>
@@ -2085,6 +3075,31 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <button class="btn btn-primary" id="intervento-save-btn" onclick="salvaInterventoMascalcia()" style="width:100%;margin-top:6px">Salva appuntamento</button>
       <button class="btn btn-danger" id="intervento-delete-btn" onclick="eliminaInterventoInModifica()" style="width:100%;margin-top:10px;display:none">Elimina appuntamento</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ferro-cavallo" onclick="closeOut(event,'modal-ferro-cavallo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span><span id="ferro-cav-titolo">Ferro standard</span></div>
+    <div class="muted" style="font-size:12.5px;line-height:1.55;margin-bottom:12px">Vale per tutti gli appuntamenti di questo cavallo. Ogni appuntamento conserva il ferro usato quel giorno; ogni cambio resta nello storico del cavallo.</div>
+    <div class="input-group">
+      <label class="input-label">Sistema</label>
+      <select class="input" id="ferro-misura-sistema" onchange="onMisuraSistemaChange('ferro')" style="margin-bottom:8px">
+        <option value="olandese">Olandese / Internazionale</option>
+        <option value="italiana">Italiana</option>
+        <option value="tedesca">Tedesca</option>
+      </select>
+      <div class="misura-wheel-wrap">
+        <div class="misura-wheel-band"></div>
+        <div class="misura-wheel" id="ferro-misura-wheel"></div>
+        <div class="misura-wheel-fade top"></div>
+        <div class="misura-wheel-fade bot"></div>
+      </div>
+      <div class="misura-equivalenze" id="ferro-misura-equivalenze"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" id="ferro-cav-salva" onclick="salvaFerroCavallo()">Salva ferro standard</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px;display:none" id="ferro-cav-togli" onclick="salvaFerroCavallo(true)">Togli il ferro standard</button>
   </div>
 </div>
 
@@ -2241,6 +3256,17 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       </div>
       <label class="switch">
         <input type="checkbox" id="incassi-switch" onchange="cambiaIncassi(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+
+    <div class="menu-row" id="menu-promemoria-row" style="display:none;margin-top:8px">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-bell"></i></span>
+        <span>Promemoria pagamenti ai clienti<br><small class="muted" style="font-size:11px">Lavori «Da saldare»: un avviso al cliente su Equo, poi un promemoria discreto ogni 5 giorni</small></span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="promemoria-switch" onchange="cambiaPromemoriaPagamenti(this.checked)">
         <span class="switch-track"><span class="switch-thumb"></span></span>
       </label>
     </div>
@@ -2444,13 +3470,13 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   <div class="modal">
     <div class="modal-handle"></div>
     <div id="rs-form">
-      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Equo per la tua struttura</div>
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Equo per il tuo centro ippico</div>
       <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Lasciaci i dati del tuo centro o della tua scuderia: ti ricontattiamo noi per attivare Equo Scuderia, il gestionale dedicato.</div>
       <div class="auth-form" style="max-width:none">
-        <div class="input-group"><label class="input-label">Nome struttura</label><input class="input" id="rs-nome" maxlength="160" placeholder="es. Centro Ippico Le Querce"></div>
+        <div class="input-group"><label class="input-label">Nome del centro ippico</label><input class="input" id="rs-nome" maxlength="160" placeholder="es. Centro Ippico Le Querce"></div>
         <div class="input-group"><label class="input-label">Via</label><input class="input" id="rs-via" maxlength="200" placeholder="Via e numero civico"></div>
         <div class="input-group"><label class="input-label">Città</label><input class="input" id="rs-citta" maxlength="120" placeholder="Città (provincia)"></div>
-        <div class="input-group"><label class="input-label">Email</label><input class="input" id="rs-email" type="email" maxlength="200" placeholder="email@struttura.it"></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input" id="rs-email" type="email" maxlength="200" placeholder="email@centroippico.it"></div>
         <div class="input-group"><label class="input-label">Telefono</label><input class="input" id="rs-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
         <div class="muted" style="font-size:11.5px;line-height:1.5">Useremo questi dati solo per ricontattarti, come previsto dall'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.</div>
         <div class="auth-error" id="rs-error" style="display:none"></div>
@@ -2477,7 +3503,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
           <select class="input" id="rp-richiesta" onchange="aggiornaFormRichiestaProfilo()">
             <option value="seconda_professione">Aggiungere una seconda professione</option>
             <option value="cambio_professione">Cambiare la mia professione</option>
-            <option value="struttura">Aggiungere un profilo struttura (centro/scuderia)</option>
+            <option value="struttura">Aggiungere un profilo scuderia o centro ippico</option>
             <option value="altro">Altro</option>
           </select></div>
         <div class="input-group" id="rp-prof-group"><label class="input-label">Professione</label>
@@ -2487,7 +3513,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
             <option value="istruttore">Istruttore/Trainer</option>
           </select></div>
         <div id="rp-struttura-group" style="display:none;flex-direction:column;gap:12px">
-          <div class="input-group"><label class="input-label">Nome struttura</label><input class="input" id="rp-nome-struttura" maxlength="160"></div>
+          <div class="input-group"><label class="input-label">Nome del centro ippico</label><input class="input" id="rp-nome-struttura" maxlength="160"></div>
           <div class="input-group"><label class="input-label">Città</label><input class="input" id="rp-citta" maxlength="120"></div>
         </div>
         <div class="input-group"><label class="input-label">Nome e cognome</label><input class="input" id="rp-nome" maxlength="160"></div>
@@ -2654,15 +3680,15 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
 <div class="modal-overlay" id="modal-proponi-struttura" onclick="closeOut(event,'modal-proponi-struttura')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Proponi a <span id="prop-str-nome" style="margin-left:4px">struttura</span></div>
-    <div class="muted" style="font-size:12.5px;margin-bottom:12px;line-height:1.5">La struttura riceve la proposta e la conferma, propone un'altra data o la annulla.</div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Proponi a <span id="prop-str-nome" style="margin-left:4px">scuderia</span></div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px;line-height:1.5">La scuderia riceve la proposta e la conferma, propone un'altra data o la annulla.</div>
     <div class="auth-form">
       <div class="input-group"><label class="input-label">Tipo</label>
         <select class="input" id="prop-str-tipo" onchange="document.getElementById('prop-str-tipo-altro-group').style.display = this.value === 'altro' ? 'flex' : 'none'">
           <option value="ferratura">Ferratura</option><option value="mezza_ferratura">Mezza ferratura</option><option value="pareggio">Pareggio</option><option value="altro">Altro</option>
         </select></div>
       <div class="input-group" id="prop-str-tipo-altro-group" style="display:none"><label class="input-label">Specifica</label><input class="input" id="prop-str-tipo-altro" maxlength="60"></div>
-      <div class="input-group"><label class="input-label">Cavalli della struttura</label><div id="prop-str-cavalli" style="max-height:210px;overflow-y:auto"></div></div>
+      <div class="input-group"><label class="input-label">Cavalli della scuderia</label><div id="prop-str-cavalli" style="max-height:210px;overflow-y:auto"></div></div>
       <div style="display:flex;gap:10px">
         <div class="input-group" style="flex:1"><label class="input-label">Data</label><input class="input" type="date" id="prop-str-data"></div>
         <div class="input-group" style="flex:1"><label class="input-label">Ora</label><input class="input" type="time" id="prop-str-ora"></div>
@@ -2678,13 +3704,13 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
 <div class="modal-overlay" id="modal-collega-struttura" onclick="closeOut(event,'modal-collega-struttura')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Collega una struttura</div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Collega una scuderia</div>
     <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
-      Inserisci il <strong>codice della struttura</strong> (lo trova in Equo Scuderia → Il tuo Centro → Codice invito). La struttura riceve la richiesta e la conferma.
+      Inserisci il <strong>codice della scuderia</strong> (lo trova in Equo Scuderia → Il tuo Centro → Codice invito). La scuderia riceve la richiesta e la conferma.
     </div>
     <div class="auth-form">
       <div class="input-group">
-        <label class="input-label">Codice della struttura</label>
+        <label class="input-label">Codice della scuderia</label>
         <input class="input" id="collega-struttura-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaRichiestaStruttura()">
       </div>
       <div class="auth-error" id="collega-struttura-error" style="display:none"></div>
@@ -2702,6 +3728,19 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-scollega-struttura')">Annulla</button>
       <button class="btn btn-danger" style="flex:1" id="scollega-struttura-ok" onclick="confermaScollegaStruttura()">Chiudi collegamento</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-stesso-cavallo" onclick="closeOut(event,'modal-stesso-cavallo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span>È lo stesso cavallo?</span></div>
+    <div class="muted" id="stesso-cavallo-testo" style="font-size:13.5px;margin-bottom:16px;line-height:1.55"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="rispondiStessoCavallo(false)">No, è un altro</button>
+      <button class="btn btn-primary" style="flex:1" id="stesso-cavallo-ok" onclick="rispondiStessoCavallo(true)">Sì, è lui</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeModal('modal-stesso-cavallo')">Decido più tardi</button>
   </div>
 </div>
 
@@ -2844,7 +3883,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
     <div class="muted" style="font-size:12px;margin-bottom:14px">Conosci un maneggio o un centro ippico non ancora su Equo? Segnalacelo: se si registra, tu ricevi 1 mese di Premium gratis.</div>
     <div class="auth-form">
       <div class="input-group">
-        <label class="input-label">Nome struttura</label>
+        <label class="input-label">Nome del centro ippico</label>
         <input class="input" id="segnala-nome-struttura" placeholder="es. Centro Ippico Le Querce">
       </div>
       <div class="input-group">
@@ -2856,7 +3895,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <input class="input" id="segnala-via" placeholder="es. Via Roma 10">
       </div>
       <div class="input-group">
-        <label class="input-label">Telefono struttura (opzionale)</label>
+        <label class="input-label">Telefono del centro ippico (opzionale)</label>
         <input class="input" id="segnala-telefono-struttura" type="tel" placeholder="es. 06 1234567">
       </div>
       <div class="input-group">
@@ -2900,7 +3939,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
 <div class="modal-overlay" id="modal-completa-profilo">
   <div class="modal">
     <div class="modal-title">Completa il tuo profilo</div>
-    <p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Per il corretto funzionamento dell'app, e per farti riconoscere e connettere con amici e strutture, è indispensabile inserire il tuo nome e cognome corretti.</p>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Per il corretto funzionamento dell'app, e per farti riconoscere e connettere con amici e centri ippici, è indispensabile inserire il tuo nome e cognome corretti.</p>
     <div class="field">
       <label>Nome e cognome</label>
       <input class="input" id="cp-nome-cognome" placeholder="Es. Mario Rossi">
@@ -3448,7 +4487,8 @@ const DB = {
       demoState.events[horse_id] = (demoState.events[horse_id] || []).filter(e => e.id !== id);
       return;
     }
-    await sb.from("health_events").delete().eq("id", id);
+    const { error } = await sb.from("health_events").delete().eq("id", id);
+    if(error) showToast(error.message || "Eliminazione non riuscita");
   },
   async listUpcomingDeadlines(horseIds, limit){
     if(DEMO_MODE){
@@ -3817,8 +4857,9 @@ const DB = {
     const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome)").eq("cliente_mascalcia_id", clienteId).not("stato", "in", "(rifiutato,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
-  async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
+  async insertInterventoMascalcia({ cliente_mascalcia_id, cavallo_cliente_id = null, horse_id = null, tipo_ferratura, tipo_altro, misura_sistema = null, numero_ferro, quantita_ferri, ferri_nuovi = null, data_intervento, ora = null, stato = "fatto", prossima_scadenza, importo, stato_pagamento, note }){
     const row = { cliente_mascalcia_id, cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
+    if(ferri_nuovi !== null) row.ferri_nuovi = ferri_nuovi;
     if(DEMO_MODE){
       const nuovo = { id: "di-" + Date.now().toString(36) + (++demoIdCounter), ...row, created_at: new Date().toISOString() };
       demoState.interventiMascalcia.push(nuovo);
@@ -3909,7 +4950,7 @@ const DB = {
     if(!clienteId) return [];
     if(DEMO_MODE){
       return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
-        .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null }));
+        .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null }));
     }
     const [manRes, eqRes] = await Promise.all([
       sb.from("cavalli_clienti_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("nome", { ascending: true }),
@@ -3929,12 +4970,19 @@ const DB = {
       }
     }
     const idCondivisi = new Set(condivisi.map(h => h.id));
+    const senzaCopia = condivisi.filter(h => !manuali.some(m => m.horse_id === h.id)).map(h => h.id);
+    let altrove = [];
+    if(senzaCopia.length){
+      const r = await sb.from("cavalli_clienti_mascalcia").select("id, horse_id, codice_equo, ferro_sistema, ferro_numero, cliente_mascalcia_id, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
+      altrove = r.data || [];
+    }
     const out = condivisi.map(h => {
-      const mirror = manuali.find(m => m.horse_id === h.id);
-      return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || null, razza: h.breed || null };
+      const mirror = manuali.find(m => m.horse_id === h.id) || altrove.find(m => m.horse_id === h.id);
+      const presso = mirror && mirror.cliente_mascalcia_id && mirror.cliente_mascalcia_id !== clienteId ? (mirror.clienti_mascalcia?.nome || "un altro cliente") : null;
+      return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || null, razza: h.breed || null, presso, ferro_sistema: mirror?.ferro_sistema || null, ferro_numero: mirror?.ferro_numero || null };
     });
     manuali.filter(m => !m.horse_id || !idCondivisi.has(m.horse_id)).forEach(m => {
-      out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id, codice_equo: m.codice_equo || null, razza: m.razza || null });
+      out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id, codice_equo: m.codice_equo || null, razza: m.razza || null, ferro_sistema: m.ferro_sistema || null, ferro_numero: m.ferro_numero || null });
     });
     return out;
   },
@@ -4318,7 +5366,7 @@ const ROLE_LABELS = {
   maniscalco: "Maniscalco",
   veterinario: "Veterinario",
   istruttore: "Istruttore/Trainer",
-  gestore_struttura: "Gestore struttura",
+  gestore_struttura: "Gestore centro ippico",
 };
 const PRO_ROLES = ["maniscalco", "veterinario", "istruttore"];
 const PRO_ACTION_LABELS = {
@@ -4487,7 +5535,7 @@ async function inviaRichiestaProfilo(){
     nome_struttura: richiesta === "struttura" ? v("rp-nome-struttura") : null, citta: richiesta === "struttura" ? v("rp-citta") : null };
   if(!row.nome || !row.email || !row.telefono){ errBox.textContent = "Inserisci nome, email e telefono."; errBox.style.display = "block"; return; }
   if(!EMAIL_RE.test(row.email)){ errBox.textContent = "Controlla l'indirizzo email."; errBox.style.display = "block"; return; }
-  if(richiesta === "struttura" && (!row.nome_struttura || !row.citta)){ errBox.textContent = "Inserisci nome e città della struttura."; errBox.style.display = "block"; return; }
+  if(richiesta === "struttura" && (!row.nome_struttura || !row.citta)){ errBox.textContent = "Inserisci nome e città del centro ippico."; errBox.style.display = "block"; return; }
   if(richiesta === "altro" && !row.messaggio){ errBox.textContent = "Scrivici in breve di cosa hai bisogno."; errBox.style.display = "block"; return; }
   const btn = document.getElementById("rp-btn"); btn.disabled = true;
   const error = await salvaRichiestaContatto(row);
@@ -4842,7 +5890,7 @@ async function submitSegnalazioneManeggio(){
   const telefono_struttura = document.getElementById("segnala-telefono-struttura").value.trim();
   const contatto_premio = document.getElementById("segnala-contatto-premio").value.trim();
   if(!nome_struttura || !citta || !contatto_premio){
-    showToast("Compila almeno nome struttura, città e il tuo contatto.");
+    showToast("Compila almeno nome del centro ippico, città e il tuo contatto.");
     return;
   }
   const payload = {
@@ -4864,7 +5912,7 @@ async function submitSegnalazioneManeggio(){
 }
 
 function showStableManagerBanner(){
-  showToast("Per gestire la tua struttura usa Equo Scuderia su scuderia.equohub.com");
+  showToast("Per gestire il tuo centro ippico usa Equo Scuderia su scuderia.equohub.com");
 }
 
 /* ---------- DATI PER I PAGAMENTI (profilo professionista) ---------- */
@@ -5119,6 +6167,7 @@ async function logout(){
   aggiornaThemeColorMeta();
   closeModal("modal-menu");
   document.getElementById("screen-app").classList.remove("active");
+  document.getElementById("screen-onboarding").classList.remove("active");
   document.getElementById("screen-auth").classList.add("active");
 }
 
@@ -5262,6 +6311,8 @@ async function boot(){
   const { data: pref } = await sb.from("profiles").select("home_vista, incassi_nascosti").eq("id", user.id).maybeSingle();
   currentUser.homeVista = pref?.home_vista || "widget";
   currentUser.incassiNascosti = !!pref?.incassi_nascosti;
+  // letto a parte: se la colonna non esistesse ancora, le altre preferenze restano intatte
+  try{ const { data: pp } = await sb.from("profiles").select("promemoria_pagamenti").eq("id", user.id).maybeSingle(); currentUser.promemoriaPagamenti = pp ? pp.promemoria_pagamenti !== false : true; }catch(e){ currentUser.promemoriaPagamenti = true; }
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;
   currentUser.ruoloSecondario = profile?.ruolo_secondario || null;
@@ -5300,6 +6351,8 @@ async function continueBootAfterProfile(){
   if(!currentUser.ruolo){
     document.getElementById("screen-app").classList.remove("active");
     document.getElementById("screen-onboarding").classList.add("active");
+    const onbAcc = document.getElementById("onb-account");
+    if(onbAcc) onbAcc.textContent = currentUser.email || "questo account";
     showOnboardingStep(1);
     return;
   }
@@ -5860,6 +6913,55 @@ async function loadHorses(){
   horses = await DB.listHorses();
   renderHome();
   renderHorsesList();
+  controllaStessoCavallo();
+}
+
+/* ---------- SCHEDA UNICA: stesso nome in scuderia → decide il proprietario ---------- */
+let stessoCavalloCoda = null, stessoCavalloAttuale = null;
+async function controllaStessoCavallo(){
+  if(DEMO_MODE || stessoCavalloCoda !== null || !horses.length) return;
+  stessoCavalloCoda = [];
+  try{
+    const { data, error } = await sb.rpc("equo_proposte_collegamento");
+    if(error || !data) return;
+    stessoCavalloCoda = data;
+    mostraStessoCavallo();
+  } catch(e){}
+}
+function mostraStessoCavallo(){
+  stessoCavalloAttuale = stessoCavalloCoda.shift() || null;
+  if(!stessoCavalloAttuale){ closeModal("modal-stesso-cavallo"); return; }
+  const p = stessoCavalloAttuale;
+  document.getElementById("stesso-cavallo-testo").innerHTML =
+    escapeHtml(p.centro_nome || "La tua scuderia") + " ha una scheda <b>«" + escapeHtml(p.scheda_nome) + "»</b>" +
+    (p.codice_scheda ? " (" + escapeHtml(p.codice_scheda) + ")" : "") +
+    ". È il tuo cavallo <b>" + escapeHtml(p.horse_nome) + "</b>?<br><br>Se sì, le due schede diventano un unico cavallo con un solo codice Equo (resta il numero più vecchio) e condividete registro sanitario e appuntamenti. Spese e note personali restano solo tue.";
+  openModal("modal-stesso-cavallo");
+}
+async function rispondiStessoCavallo(stesso){
+  const p = stessoCavalloAttuale;
+  if(!p) return;
+  const btn = document.getElementById("stesso-cavallo-ok");
+  btn.disabled = true;
+  try{
+    const { data, error } = await sb.rpc("equo_conferma_collegamento", { p_horse: p.horse_id, p_scheda: p.scuderia_cavallo_id, p_stesso: stesso });
+    if(error) throw error;
+    if(stesso && data && data.ok){
+      showToast(p.horse_nome + " ora è un unico cavallo: codice Equo n. " + data.numero);
+      horses = await DB.listHorses();
+      renderHorsesList();
+      if(currentHorseId === p.horse_id) await openHorseDetail(p.horse_id);
+    } else if(!stesso){
+      showToast("Ok, restano due cavalli diversi");
+    } else {
+      showToast("Non è stato possibile unire le schede");
+    }
+  } catch(e){
+    showToast(e.message || "Errore, riprova");
+  } finally {
+    btn.disabled = false;
+  }
+  mostraStessoCavallo();
 }
 
 function renderHome(){
@@ -5878,6 +6980,7 @@ function renderHome(){
   loadDeadlines();
   loadExpensesSummary();
   loadHomeLastMessage();
+  caricaDaSaldare();
   if(typeof wgCaricaOwner === "function" && typeof vistaWidgetAttiva === "function" && vistaWidgetAttiva()) wgCaricaOwner();
 }
 
@@ -6144,6 +7247,7 @@ function openAddEventModal(){
   document.getElementById("event-next-date").value = "";
   document.getElementById("event-notes").value = "";
   document.getElementById("event-delete-btn").style.display = "none";
+  const notaAltrui = document.getElementById("event-altrui-nota"); if(notaAltrui) notaAltrui.style.display = "none";
   openModal("modal-add-event");
 }
 
@@ -6156,7 +7260,14 @@ function openEditEventModal(id){
   document.getElementById("event-date").value = ev.date;
   document.getElementById("event-next-date").value = ev.next_due_date || "";
   document.getElementById("event-notes").value = ev.notes || "";
-  document.getElementById("event-delete-btn").style.display = "block";
+  // voce scritta da altri (scuderia o maniscalco): può cancellarla solo chi l'ha registrata
+  const altrui = ev.origine && ev.origine !== "proprietario";
+  const btnDel = document.getElementById("event-delete-btn");
+  btnDel.style.display = altrui ? "none" : "block";
+  let nota = document.getElementById("event-altrui-nota");
+  if(!nota){ nota = document.createElement("div"); nota.id = "event-altrui-nota"; nota.className = "muted"; nota.style.cssText = "font-size:12px;line-height:1.5;margin-top:8px;text-align:center"; btnDel.after(nota); }
+  nota.textContent = altrui ? (ev.origine === "scuderia" ? "Voce registrata dalla scuderia: può cancellarla solo la scuderia." : "Voce registrata dal maniscalco: può cancellarla solo il maniscalco.") : "";
+  nota.style.display = altrui ? "block" : "none";
   openModal("modal-add-event");
 }
 
@@ -6516,20 +7627,66 @@ function dataRichiamoTesto(iso, giorni){
   const [y, m, d] = aggiungiGiorniIso(iso, giorni).split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 }
-// apre il pop-up e restituisce i giorni scelti (Promise)
-function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, pagamento, importo }){
+// apre il pop-up e restituisce i giorni scelti (Promise). giorni = null → solo importo e pagamento (es. «Altro»)
+function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, pagamento, importo, importi }){
   return new Promise(resolve => {
     richiamoStato = { resolve, giorni, data_intervento, etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "), daCavallo, pagamento };
-    // Saldato / Da saldare insieme al richiamo (solo se gli incassi sono visibili)
+    const conRichiamo = giorni != null;
+    document.getElementById("ric-tit").textContent = conRichiamo ? "Prossimo intervento" : "Intervento fatto";
+    document.getElementById("ric-grande").style.display = conRichiamo ? "" : "none";
+    document.getElementById("ric-btn-cambia").style.display = conRichiamo ? "" : "none";
+    // importo di ogni cavallo + Saldato / Da saldare (solo se gli incassi sono visibili)
     const conPag = pagamento !== undefined && !incassiNascosti();
     document.getElementById("ric-pag").style.display = conPag ? "block" : "none";
-    document.getElementById("ric-pag-imp").textContent = importo != null && importo !== "" ? "Pagamento · " + formatEuro(Number(importo)) : "Pagamento";
+    const righe = importi && importi.length ? importi : [{ nome: cavallo || "Importo", importo }];
+    richiamoStato.nImporti = righe.length;
+    const fmt = v => v != null && v !== "" && !isNaN(Number(v)) ? String(Number(v)) : "";
+    document.getElementById("ric-importi").innerHTML = righe.map((r, i) =>
+      `<div class="ric-imp-riga"><span>${escapeHtml(righe.length > 1 ? (r.nome || "Cavallo " + (i + 1)) : "Importo")}</span><label>€ <input type="number" step="0.01" min="0" inputmode="decimal" class="ric-imp" data-i="${i}" value="${fmt(r.importo)}" placeholder="0" oninput="richiamoTotale()"></label></div>`).join("")
+      + (righe.length > 1 ? '<div class="ric-imp-tot"><span>Totale</span><span id="ric-imp-tot"></span></div>' : "");
+    richiamoTotale();
+    document.getElementById("ric-pag-imp").textContent = "Pagamento";
     if(conPag) richiamoPagamento(pagamento === "saldato" ? "saldato" : "da_saldare");
     document.getElementById("ric-passo1").style.display = "block";
     document.getElementById("ric-passo2").style.display = "none";
     document.getElementById("ric-passo3").style.display = "none";
-    richiamoAggiornaTesti();
+    if(conRichiamo) richiamoAggiornaTesti();
+    else document.getElementById("ric-dettaglio").textContent = `${richiamoStato.etichetta} · ${formatDataBreve(data_intervento)}`;
     document.getElementById("eq-pop-richiamo").classList.add("attivo");
+  });
+}
+function richiamoTotale(){
+  const el = document.getElementById("ric-imp-tot"); if(!el) return;
+  const tot = [...document.querySelectorAll("#ric-importi .ric-imp")].reduce((t, x) => t + (Number(x.value) || 0), 0);
+  el.textContent = formatEuro(tot);
+}
+// importi scelti nel pop-up (uno per cavallo; null = vuoto), letti una volta sola
+let richiamoImportiScelti = null;
+function prendiImportiScelti(){ const v = richiamoImportiScelti; richiamoImportiScelti = null; return v; }
+// prezzo proposto: l'ultimo di quel cavallo per lo stesso tipo, altrimenti l'ultimo del cliente per lo stesso tipo
+async function importiSuggeriti(e, cavalli){
+  let storico = [];
+  try{
+    if(DEMO_MODE){
+      storico = (demoState.interventiMascalcia || []).filter(i => i.cliente_mascalcia_id === e.cliente_mascalcia_id && i.tipo_ferratura === e.tipo_ferratura && i.importo != null && i.id !== e.id)
+        .sort((a, b) => b.data_intervento.localeCompare(a.data_intervento));
+    } else if(e.cliente_mascalcia_id || cavalli.some(c => c.cavallo_cliente_id)){
+      let q = sb.from("interventi_mascalcia").select("id, cliente_mascalcia_id, cavallo_cliente_id, horse_id, importo, data_intervento")
+        .eq("maniscalco_id", currentUser.id).eq("tipo_ferratura", e.tipo_ferratura).not("importo", "is", null);
+      const ids = cavalli.map(c => c.cavallo_cliente_id).filter(Boolean);
+      q = e.cliente_mascalcia_id && ids.length ? q.or(`cliente_mascalcia_id.eq.${e.cliente_mascalcia_id},cavallo_cliente_id.in.(${ids.join(",")})`)
+        : e.cliente_mascalcia_id ? q.eq("cliente_mascalcia_id", e.cliente_mascalcia_id) : q.in("cavallo_cliente_id", ids);
+      if(e.id) q = q.neq("id", e.id);
+      const { data } = await q.order("data_intervento", { ascending: false }).limit(60);
+      storico = data || [];
+    }
+  }catch(x){ storico = []; }
+  const delCliente = storico.find(i => i.cliente_mascalcia_id === e.cliente_mascalcia_id);
+  return cavalli.map(c => {
+    if(c.importo != null && c.importo !== "") return Number(c.importo);
+    const delCavallo = storico.find(i => (c.cavallo_cliente_id && i.cavallo_cliente_id === c.cavallo_cliente_id) || (c.horse_id && i.horse_id === c.horse_id));
+    const v = (delCavallo || delCliente || {}).importo;
+    return v != null ? Number(v) : null;
   });
 }
 const TIPO_INTERVENTO_LABEL_APP = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio" };
@@ -6567,7 +7724,7 @@ function richiamoRuotaScroll(){
 const RICHIAMO_MIN_GIORNI = 10;
 function richiamoConferma(confermatoPoco){
   const r = richiamoStato; if(!r) return;
-  if(!confermatoPoco && r.giorni < RICHIAMO_MIN_GIORNI){
+  if(!confermatoPoco && r.giorni != null && r.giorni < RICHIAMO_MIN_GIORNI){
     document.getElementById("ric-poco-txt").textContent = r.giorni + (r.giorni === 1 ? " giorno" : " giorni");
     document.getElementById("ric-poco-dett").textContent = `${r.etichetta} · ${dataRichiamoTesto(r.data_intervento, r.giorni)}. Di solito tra un intervento e l'altro passano almeno ${RICHIAMO_MIN_GIORNI} giorni: confermi?`;
     document.getElementById("ric-passo1").style.display = "none";
@@ -6577,18 +7734,26 @@ function richiamoConferma(confermatoPoco){
   }
   richiamoStato = null;
   richiamoPagamentoScelto = r.pagamento !== undefined && !incassiNascosti() ? (r.pagamento || null) : null;
+  richiamoImportiScelti = r.pagamento !== undefined && !incassiNascosti()
+    ? [...document.querySelectorAll("#ric-importi .ric-imp")].map(x => x.value === "" || isNaN(Number(x.value)) ? null : Math.round(Number(x.value) * 100) / 100)
+    : null;
   document.getElementById("eq-pop-richiamo").classList.remove("attivo");
   r.resolve(r.giorni);
 }
-// flusso completo per un intervento che sta per diventare FATTO: chiede i giorni e restituisce la data del richiamo
+// flusso completo per un intervento che sta per diventare FATTO: chiede i giorni del richiamo (se il tipo li prevede),
+// l'importo di ogni cavallo e il pagamento; restituisce la data del richiamo (gli importi con prendiImportiScelti)
 async function richiamoPerFatto(e){
   const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
-  if(!s.giorni) return e.prossima_scadenza || null;
-  richiamoPagamentoScelto = null;
+  richiamoPagamentoScelto = null; richiamoImportiScelti = null;
+  if(!s.giorni && incassiNascosti()) return e.prossima_scadenza || null;
+  const cavalli = e.cavalli && e.cavalli.length ? e.cavalli
+    : [{ nome: e.cavallo || agNomeCavalloSicuro(e), cavallo_cliente_id: e.cavallo_cliente_id, horse_id: e.horse_id, importo: e.importo }];
+  const proposti = incassiNascosti() ? cavalli.map(() => null) : await importiSuggeriti(e, cavalli);
   const giorni = await chiediRichiamo({ tipo: e.tipo_ferratura, tipo_altro: e.tipo_altro, data_intervento: e.data_intervento,
-    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni, daCavallo: s.daCavallo,
-    pagamento: e.stato_pagamento || "da_saldare", importo: e.importo });
-  return aggiungiGiorniIso(e.data_intervento, giorni);
+    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni || null, daCavallo: s.daCavallo,
+    pagamento: e.stato_pagamento || "da_saldare",
+    importi: cavalli.map((c, i) => ({ nome: c.nome, importo: proposti[i] })) });
+  return giorni != null ? aggiungiGiorniIso(e.data_intervento, giorni) : (e.prossima_scadenza || null);
 }
 function agNomeCavalloSicuro(e){ try{ return typeof agNomeCavallo === "function" ? agNomeCavallo(e) : ""; }catch(x){ return ""; } }
 
@@ -6602,10 +7767,8 @@ async function loadClientiMascalcia(){
 function renderClientiList(){
   const box = document.getElementById("clienti-list");
   if(!box) return;
-  if(clientiMascalcia.length === 0){
-    box.innerHTML = '<div class="empty-state"><div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px;color:var(--muted)"><i class="fa-solid fa-users"></i></div><div style="font-size:13.5px;line-height:1.6">Non hai ancora clienti.<br>Aggiungine uno per iniziare a registrare gli interventi.</div></div>';
-    return;
-  }
+  // anche senza clienti si vedono le sezioni con «+ Aggiungi» (prima il tasto mancava proprio al primo accesso)
+  const intro = clientiMascalcia.length === 0 ? '<div class="empty-state" style="padding:18px 10px 8px"><div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px;color:var(--muted)"><i class="fa-solid fa-users"></i></div><div style="font-size:13.5px;line-height:1.6">Non hai ancora clienti.<br>Tocca <b>+ Aggiungi</b> qui sotto: un proprietario oppure una scuderia o un centro ippico.</div></div>' : "";
   const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
   const card = c => `
     <div class="card horse-card" data-cerca="${escapeHtml(paroleCercaCliente(c))}" onclick="openClienteDetail('${c.id}')">
@@ -6618,7 +7781,7 @@ function renderClientiList(){
     </div>
     ${c.collegamento_stato === "da_confermare_pro" ? `
     <div class="card" style="margin:-4px 0 12px;padding:12px 14px">
-      <div style="font-size:13px;line-height:1.5;margin-bottom:10px"><strong>${escapeHtml(c.nome)}</strong> ti ha invitato a collegarti come maniscalco su Equo Scuderia: chat e appuntamenti con la struttura con doppia conferma.</div>
+      <div style="font-size:13px;line-height:1.5;margin-bottom:10px"><strong>${escapeHtml(c.nome)}</strong> ti ha invitato a collegarti come maniscalco su Equo Scuderia: chat e appuntamenti con la scuderia con doppia conferma.</div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this)">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this)">Rifiuta</button>
@@ -6636,8 +7799,8 @@ function renderClientiList(){
       </div>
       ${lista.length ? lista.map(card).join("") : `<div class="muted" style="font-size:13px;margin-bottom:6px">${vuoto}</div>`}`;
   };
-  box.innerHTML = sezione("proprietario", "PROPRIETARI", "Nessun proprietario ancora.")
-    + sezione("struttura", "STRUTTURE", "Nessuna struttura ancora. Aggiungi scuderie, maneggi e centri in cui lavori.");
+  box.innerHTML = intro + sezione("proprietario", "PROPRIETARI", "Nessun proprietario ancora.")
+    + sezione("struttura", "SCUDERIE E CENTRI IPPICI", "Nessuna scuderia ancora. Aggiungi le scuderie e i centri ippici in cui lavori.");
 }
 
 function isStruttura(c){ return c && c.tipo_cliente === "struttura"; }
@@ -6668,7 +7831,7 @@ async function rispondiInvitoStruttura(clienteId, accetta, btn){
     if(btn) btn.disabled = false;
     return;
   }
-  showToast(accetta ? "Struttura collegata: trovi la chat in Messaggi → Strutture." : "Invito rifiutato.");
+  showToast(accetta ? "Scuderia collegata: trovi la chat in Messaggi → Scuderie." : "Invito rifiutato.");
   await loadClientiMascalcia();
 }
 
@@ -6685,7 +7848,7 @@ async function inviaRichiestaStruttura(){
   const err = document.getElementById("collega-struttura-error");
   const codice = input.value.trim().toUpperCase();
   err.style.display = "none";
-  if(!codice){ err.textContent = "Inserisci il codice della struttura."; err.style.display = "block"; return; }
+  if(!codice){ err.textContent = "Inserisci il codice della scuderia."; err.style.display = "block"; return; }
   if(DEMO_MODE){ closeModal("modal-collega-struttura"); showToast("In demo il collegamento non è disponibile."); return; }
   const { data, error } = await sb.rpc("pro_richiedi_collegamento_struttura", { p_codice: codice, p_cliente_id: collegaStrutturaClienteId });
   if(error || !data?.ok){
@@ -6696,7 +7859,7 @@ async function inviaRichiestaStruttura(){
   closeModal("modal-collega-struttura");
   showToast(data.gia
     ? (data.stato === "attivo" ? `Sei già collegato a ${data.nome}.` : `C'è già una richiesta in corso con ${data.nome}.`)
-    : `Richiesta inviata a ${data.nome}: la struttura deve accettarla.`);
+    : `Richiesta inviata a ${data.nome}: la scuderia deve accettarla.`);
   // P.IVA non obbligatoria: solo un consiglio (serve per il badge Equo Certified)
   if(data.senza_piva && !data.gia) setTimeout(() => showToast("Consiglio: aggiungi la P.IVA in menu profilo → Dati per i pagamenti per avere il badge Equo Certified."), 3200);
   await loadClientiMascalcia();
@@ -6708,10 +7871,10 @@ function scollegaStrutturaCorrente(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c || !c.centro_id) return;
   const attivo = c.collegamento_stato === "attivo";
-  const nome = escapeHtml(c.nome || "la struttura");
+  const nome = escapeHtml(c.nome || "la scuderia");
   document.getElementById("scollega-struttura-titolo").textContent = attivo ? "Chiudi collegamento" : "Annulla richiesta";
   document.getElementById("scollega-struttura-testo").innerHTML = attivo
-    ? `Vuoi chiudere il collegamento con <strong>${nome}</strong>?<br>Lo staff non vedrà più la chat e gli appuntamenti con te. La scheda cliente, gli interventi e i messaggi restano tuoi. Per ricollegarti servirà di nuovo il codice della struttura e la sua conferma.`
+    ? `Vuoi chiudere il collegamento con <strong>${nome}</strong>?<br>Lo staff non vedrà più la chat e gli appuntamenti con te. La scheda cliente, gli interventi e i messaggi restano tuoi. Per ricollegarti servirà di nuovo il codice della scuderia e la sua conferma.`
     : `Vuoi annullare la richiesta di collegamento con <strong>${nome}</strong>?`;
   const ok = document.getElementById("scollega-struttura-ok");
   ok.textContent = attivo ? "Chiudi collegamento" : "Annulla richiesta"; ok.disabled = false;
@@ -6757,7 +7920,7 @@ function apriNuovoCliente(tipo){
 
 function aggiornaEtichetteNuovoCliente(){
   const struttura = document.getElementById("cliente-tipo").value === "struttura";
-  document.getElementById("cliente-nome-label").textContent = struttura ? "Nome struttura" : "Nome cliente";
+  document.getElementById("cliente-nome-label").textContent = struttura ? "Nome scuderia o centro ippico" : "Nome cliente";
   document.getElementById("cliente-nome").placeholder = struttura ? "es. Scuderia Le Querce" : "es. Marco Bianchi";
 }
 
@@ -6816,7 +7979,7 @@ async function openClienteDetail(id){
   document.getElementById("detail-cliente-nome").textContent = c.nome;
   document.getElementById("detail-cliente-info").innerHTML = `
     <div style="font-size:13.5px;line-height:1.8">
-      <div><strong>Tipo:</strong> ${isStruttura(c) ? "Struttura" : "Proprietario"}</div>
+      <div><strong>Tipo:</strong> ${isStruttura(c) ? "Scuderia / centro ippico" : "Proprietario"}</div>
       <div id="detail-cliente-cavalli"><strong>Cavalli:</strong> <span class="muted">…</span></div>
       ${c.telefono ? `<div><strong>Telefono:</strong> <a href="tel:${escapeHtml(c.telefono)}" style="color:inherit">${escapeHtml(c.telefono)}</a></div>` : ""}
       ${c.note ? `<div><strong>Note:</strong> ${escapeHtml(c.note)}</div>` : ""}
@@ -6833,7 +7996,7 @@ async function openClienteDetail(id){
     linkHint.innerHTML = c.cliente_user_id
       ? '<strong style="color:var(--primary)">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell\'app.'
       : isStruttura(c)
-        ? 'Dai questo codice alla struttura: può collegarsi da Equo App (Chat → "Il tuo maniscalco" → Collega), presto anche da Equo Scuderia.'
+        ? 'Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → "Il tuo maniscalco" → Collega), presto anche da Equo Scuderia.'
         : 'Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.';
   }
   const qrBox = document.getElementById("detail-cliente-qr");
@@ -6852,9 +8015,9 @@ async function openClienteDetail(id){
   if(isStruttura(c) && c.centro_id){
     if(qrCard) qrCard.style.display = "none";
     boxScud.style.display = "block";
-    const statoTxt = c.collegamento_stato === "attivo" ? '<strong style="color:var(--green)">✓ Collegata a Equo Scuderia</strong> — chat e appuntamenti con la struttura con doppia conferma.'
-      : c.collegamento_stato === "da_confermare_pro" ? "La struttura ti ha invitato: accetta per collegarti."
-      : "Richiesta inviata: in attesa che la struttura accetti.";
+    const statoTxt = c.collegamento_stato === "attivo" ? '<strong style="color:var(--green)">✓ Collegata a Equo Scuderia</strong> — chat e appuntamenti con la scuderia con doppia conferma.'
+      : c.collegamento_stato === "da_confermare_pro" ? "La scuderia ti ha invitato: accetta per collegarti."
+      : "Richiesta inviata: in attesa che la scuderia accetti.";
     boxScud.innerHTML = `<div style="font-size:13.5px;line-height:1.6;margin-bottom:10px">${statoTxt}</div>
       ${c.collegamento_stato === "da_confermare_pro" ? `<div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
@@ -6863,7 +8026,7 @@ async function openClienteDetail(id){
   } else if(isStruttura(c) && isManiscalcoUtente()){
     if(qrCard) qrCard.style.display = "";
     boxScud.style.display = "block";
-    boxScud.innerHTML = `<div style="font-size:13.5px;line-height:1.6;margin-bottom:10px">La struttura usa <strong>Equo Scuderia</strong>? Collegala per chattare con lo staff e fissare gli appuntamenti con doppia conferma.</div>
+    boxScud.innerHTML = `<div style="font-size:13.5px;line-height:1.6;margin-bottom:10px">La scuderia usa <strong>Equo Scuderia</strong>? Collegala per chattare con lo staff e fissare gli appuntamenti con doppia conferma.</div>
       <button class="btn btn-outline btn-sm" style="width:100%" onclick="apriCollegaStruttura('${c.id}')"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-link"></i></span> Collega a Equo Scuderia</button>`;
   } else {
     if(qrCard) qrCard.style.display = "";
@@ -6882,6 +8045,7 @@ async function openEditCliente(){
   document.getElementById("edit-cliente-codice-equo").value = "";
   document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
   document.getElementById("edit-cliente-collegato").style.display = c.cliente_user_id ? "flex" : "none";
+  document.getElementById("edit-cliente-promemoria").checked = c.promemoria_pagamenti !== false;
   document.getElementById("edit-cliente-nome").value = c.nome || "";
   document.getElementById("edit-cliente-telefono").value = c.telefono || "";
   document.getElementById("edit-cliente-indirizzo").value = c.indirizzo || "";
@@ -6902,8 +8066,8 @@ async function renderCavalliEditCliente(){
   box.innerHTML = cav.length ? cav.map(x => `
     <div class="event-item" style="padding:8px 0">
       <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? ' <span class="badge badge-accent" style="font-size:10.5px">su Equo</span>' : ""}
-        <div class="muted" style="font-size:11.5px">${[x.codice_equo ? '<b class="cod-equo">' + escapeHtml(x.codice_equo) + '</b>' : "", x.razza ? escapeHtml(x.razza) : "", x.microchip ? "chip " + escapeHtml(x.microchip) : ""].filter(Boolean).join(" · ")}</div></div>
-      ${x.tipo === "manuale" ? `<div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button><button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button></div>` : ""}
+        <div class="muted" style="font-size:11.5px">${[x.codice_equo ? '<b class="cod-equo">' + escapeHtml(x.codice_equo) + '</b>' : "", x.razza ? escapeHtml(x.razza) : "", x.microchip ? "chip " + escapeHtml(x.microchip) : "", x.presso ? "📍 presso " + escapeHtml(x.presso) : "", x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""].filter(Boolean).join(" · ")}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button><button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button>` : ""}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">
@@ -6930,11 +8094,70 @@ async function salvaRazzaCavallo(id){
   showToast(razza ? "Razza salvata: il codice del cavallo si aggiorna" : "Razza tolta");
   await renderCavalliEditCliente();
 }
+// FERRO STANDARD nella scheda del cavallo (vale per tutti gli appuntamenti; ogni cambio resta nello storico del cavallo)
+let ferroCavalloKey = null;
+function apriFerroCavallo(key){
+  const cv = (cavalliEditCache || []).find(x => x.key === key);
+  if(!cv) return;
+  ferroCavalloKey = key;
+  document.getElementById("ferro-cav-titolo").textContent = "Ferro standard · " + cv.nome;
+  const f = ferroStd(cv) || { s: "olandese", n: null };
+  document.getElementById("ferro-misura-sistema").value = f.s;
+  const idx = f.n ? MISURE_FERRO[f.s].indexOf(String(f.n)) : -1;
+  misuraIndiceFerro = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
+  document.getElementById("ferro-cav-togli").style.display = cv.ferro_numero ? "block" : "none";
+  openModal("modal-ferro-cavallo");
+  renderMisuraWheel("ferro");
+}
+async function salvaFerroCavallo(togli){
+  const cv = (cavalliEditCache || []).find(x => x.key === ferroCavalloKey);
+  if(!cv) return;
+  const btn = document.getElementById("ferro-cav-salva"); btn.disabled = true;
+  try{
+    let id = cv.id;
+    if(!id){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(currentClienteId, cv)); }
+    if(!id){ showToast("Non riuscito, riprova."); return; }
+    const s = document.getElementById("ferro-misura-sistema").value;
+    const campi = togli ? { ferro_sistema: null, ferro_numero: null } : { ferro_sistema: s, ferro_numero: MISURE_FERRO[s][misuraIndiceFerro] };
+    const { error } = await DB.updateCavalloCliente(id, campi);
+    if(error){ showToast("Errore: " + error.message); return; }
+    closeModal("modal-ferro-cavallo");
+    showToast(togli ? "Ferro standard tolto" : `Ferro standard di ${cv.nome}: ${siglaFerro(campi.ferro_sistema, campi.ferro_numero)}`);
+    await renderCavalliEditCliente();
+  } finally { btn.disabled = false; }
+}
+
 // tiene allineato il vecchio campo testo nome_cavallo (usato in lista clienti/inbox)
 async function syncNomeCavalloCliente(){
   const cav = await DB.listCavalliCliente(currentClienteId);
   const nome_cavallo = cav.map(x => x.nome).join(", ");
   await DB.updateClienteMascalcia(currentClienteId, { nome_cavallo });
+}
+
+// aggiunge (o sposta qui) un cavallo con il suo codice Equo: una sola scheda per cavallo, storico a vita
+async function aggiungiCavalloCodice(btn){
+  const inp = document.getElementById("edit-cliente-codice-cavallo");
+  const codice = inp.value.trim();
+  if(!codice){ showToast("Scrivi il codice Equo del cavallo"); inp.focus(); return; }
+  if(DEMO_MODE){ showToast("In demo l'aggiunta con codice non è disponibile."); return; }
+  if(btn) btn.disabled = true;
+  try{
+    let { data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: false });
+    if(error){ showToast("Errore: " + error.message); return; }
+    if(data && data.chiedi){
+      if(!confirm(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
+      ({ data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: true }));
+      if(error){ showToast("Errore: " + error.message); return; }
+    }
+    if(!data?.ok){ showToast(data?.errore || "Non riuscito, riprova."); return; }
+    inp.value = "";
+    showToast(data.azione === "gia" ? `${data.nome} è già tra i cavalli di questo cliente.`
+      : data.azione === "spostato" ? `${data.nome} spostato qui da ${data.da} (codice ${data.codice}).`
+      : `${data.nome} aggiunto (codice ${data.codice}).`);
+    await renderCavalliEditCliente();
+    await syncNomeCavalloCliente();
+    try{ await loadClientiMascalcia(); }catch(e){}
+  } finally { if(btn) btn.disabled = false; }
 }
 
 async function aggiungiCavalloEditCliente(){
@@ -6975,6 +8198,11 @@ async function salvaEditCliente(){
   const indirizzo = document.getElementById("edit-cliente-indirizzo").value.trim();
   const cPrima = clientiMascalcia.find(x => x.id === currentClienteId);
   if((cPrima?.indirizzo || "") !== indirizzo) await DB.updateClienteMascalcia(currentClienteId, { indirizzo: indirizzo || null });
+  // promemoria pagamenti (solo clienti collegati su Equo); a parte, così il resto resta salvo anche senza la colonna
+  if(cPrima?.cliente_user_id){
+    const prom = !!document.getElementById("edit-cliente-promemoria").checked;
+    if((cPrima.promemoria_pagamenti !== false) !== prom) await DB.updateClienteMascalcia(currentClienteId, { promemoria_pagamenti: prom });
+  }
   if(codiceEquo){
     const res = await DB.collegaClienteDaCodice(currentClienteId, codiceEquo);
     if(!res.ok){
@@ -7035,7 +8263,7 @@ function renderStoricoCliente(){
   const lista = data.filter(i => storicoFiltroCavallo === "tutti" || (storicoFiltroCavallo === "__senza__" ? !storicoNomeCavallo(i) : storicoNomeCavallo(i) === storicoFiltroCavallo));
   box.innerHTML = filtri + lista.map(i => {
     const ferroInfo = (i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura") && (i.numero_ferro || i.quantita_ferri)
-      ? " · " + [i.numero_ferro ? "n. " + escapeHtml(i.numero_ferro) + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : "") : null, i.quantita_ferri ? i.quantita_ferri + " ferri" : null].filter(Boolean).join(", ")
+      ? " · " + [i.numero_ferro ? "n. " + escapeHtml(i.numero_ferro) + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : "") : null, i.quantita_ferri ? i.quantita_ferri + (i.ferri_nuovi === true ? " ferri nuovi" : " ferri") : null, i.ferri_nuovi === false ? "rimessa" : null].filter(Boolean).join(", ")
       : "";
     const cav = storicoNomeCavallo(i);
     return `
@@ -7204,8 +8432,8 @@ function hpRigaApp(e){
   const cav = agNomeCavallo(e);
   const stato = col === "rosso" ? '<span class="rosso">' + formatDataBreve(e.data_intervento) + " · non ancora segnato fatto</span>"
     : e.stato === "richiesto" ? '<span class="ocra">Richiesta del cliente · da confermare</span>'
-    : e.stato === "proposto" ? '<span class="ocra">In attesa della struttura</span>'
-    : `<span>${escapeHtml(agDescrizioneTipo(e))}</span>`;
+    : e.stato === "proposto" ? '<span class="ocra">In attesa della scuderia</span>'
+    : `<span>${escapeHtml(agDescrizioneTipoPro(e))}</span>`;
   const btn = e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="event.stopPropagation();accettaRichiesta('${e.id}')">Accetta</button>`
     : e.stato === "proposto" ? "" : `<button class="ag-ev-fatto" onclick="event.stopPropagation();hpSegnaFatto('${e.id}')">Fatto</button>`;
   return `<div class="hp-riga" onclick="apriAzioniEvento('${e.id}')">
@@ -7388,7 +8616,7 @@ function apriRichiamo(id){
     `<span class="hp-dot ${hpColoreRic(r)}" style="display:inline-block;vertical-align:-1px;margin-right:6px"></span><b>${escapeHtml(hpTipo(r))}</b> · ${hpQuando(r)} (${formatDate(r.scadenza)})`,
     `Ultimo intervento: ${formatDate(r.data_intervento)}`,
     r.rimandato ? `Rimandato: in origine era il ${formatDate(r.prossima_scadenza)}` : "",
-    r.tipo_cliente === "struttura" ? '<span style="font-size:12px">Cliente struttura: l\'appuntamento va confermato dalla scuderia.</span>' : ""
+    r.tipo_cliente === "struttura" ? '<span style="font-size:12px">Cliente scuderia: l\'appuntamento va confermato dalla scuderia.</span>' : ""
   ].filter(Boolean).join("<br>");
   document.getElementById("ricaz-scrivi").innerHTML = '<span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Scrivi al cliente' + (isPremium() ? "" : '<span class="hp-prem">PREMIUM</span>');
   richiamoMostraAzioni();
@@ -7819,35 +9047,39 @@ function aggiungiGiorniIso(iso, giorni){
   return isoLocale(new Date(y, m - 1, d + giorni));
 }
 
-function renderMisuraWheel(){
-  const sistema = document.getElementById("intervento-misura-sistema").value;
-  const wheel = document.getElementById("intervento-misura-wheel");
+// rotella della misura: p = "intervento" (cambio solo per un appuntamento) o "ferro" (ferro standard nella scheda del cavallo)
+let misuraIndiceFerro = MISURA_INDICE_PARTENZA;
+function misuraIdx(p){ return p === "ferro" ? misuraIndiceFerro : misuraIndiceCorrente; }
+function renderMisuraWheel(p = "intervento"){
+  const sistema = document.getElementById(p + "-misura-sistema").value;
+  const wheel = document.getElementById(p + "-misura-wheel");
+  const cur = misuraIdx(p);
   wheel.innerHTML = MISURE_FERRO[sistema].map((v, i) =>
-    `<div class="misura-wheel-item${i === misuraIndiceCorrente ? " sel" : ""}" data-i="${i}" onclick="selezionaMisura(${i}, true)">${v}</div>`).join("");
-  requestAnimationFrame(() => { wheel.scrollTop = misuraIndiceCorrente * 44; });
-  aggiornaEquivalenzeMisura();
+    `<div class="misura-wheel-item${i === cur ? " sel" : ""}" data-i="${i}" onclick="selezionaMisura(${i}, true, '${p}')">${v}</div>`).join("");
+  requestAnimationFrame(() => { wheel.scrollTop = cur * 44; });
+  aggiornaEquivalenzeMisura(p);
   wheel.onscroll = () => {
     clearTimeout(misuraScrollTimer);
     misuraScrollTimer = setTimeout(() => {
       const i = Math.max(0, Math.min(8, Math.round(wheel.scrollTop / 44)));
-      selezionaMisura(i, false);
+      selezionaMisura(i, false, p);
     }, 80);
   };
 }
-function selezionaMisura(i, scroll){
-  misuraIndiceCorrente = i;
-  const wheel = document.getElementById("intervento-misura-wheel");
+function selezionaMisura(i, scroll, p = "intervento"){
+  if(p === "ferro") misuraIndiceFerro = i; else misuraIndiceCorrente = i;
+  const wheel = document.getElementById(p + "-misura-wheel");
   wheel.querySelectorAll(".misura-wheel-item").forEach(el => el.classList.toggle("sel", Number(el.dataset.i) === i));
   if(scroll) wheel.scrollTo({ top: i * 44, behavior: "smooth" });
-  aggiornaEquivalenzeMisura();
+  aggiornaEquivalenzeMisura(p);
 }
-function aggiornaEquivalenzeMisura(){
-  const sistema = document.getElementById("intervento-misura-sistema").value;
+function aggiornaEquivalenzeMisura(p = "intervento"){
+  const sistema = document.getElementById(p + "-misura-sistema").value;
   const altri = Object.keys(MISURE_FERRO).filter(k => k !== sistema)
-    .map(k => MISURA_SISTEMA_LABEL[k] + " " + MISURE_FERRO[k][misuraIndiceCorrente]);
-  document.getElementById("intervento-misura-equivalenze").textContent = "Equivale a: " + altri.join(" · ");
+    .map(k => MISURA_SISTEMA_LABEL[k] + " " + MISURE_FERRO[k][misuraIdx(p)]);
+  document.getElementById(p + "-misura-equivalenze").textContent = "Equivale a: " + altri.join(" · ");
 }
-function onMisuraSistemaChange(){ renderMisuraWheel(); } // mantiene la misura equivalente
+function onMisuraSistemaChange(p = "intervento"){ renderMisuraWheel(p); } // mantiene la misura equivalente
 
 // «L'ho già fatto»: solo per un appuntamento NUOVO con la data di oggi (passato = fatto, futuro = da fare)
 function aggiornaGiaFatto(){
@@ -7858,6 +9090,107 @@ function aggiornaGiaFatto(){
   riga.style.display = vedi ? "flex" : "none";
   if(!vedi) document.getElementById("intervento-gia-fatto").checked = false;
 }
+
+/* ---------- FERRO (standard nella scheda del cavallo) E QUANTITÀ (rotella 1-4) ---------- */
+let ferroOverride = {};      // chiave cavallo → { s, n, origine } ferro diverso solo per questo appuntamento
+let ferroEditKey = null;
+let quantitaCorrente = 4, quantitaToccata = false, quantitaTimer = null, quantitaRenderAt = 0;
+function siglaFerro(s, n){ return n ? "n. " + n + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : ""; }
+function ferroStd(c){ return c && c.ferro_numero ? { s: c.ferro_sistema || "italiana", n: String(c.ferro_numero) } : null; }
+function ferroUguale(a, b){
+  if(!a || !b) return !a && !b;
+  const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(String(a.n)) : -1;
+  const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(String(b.n)) : -1;
+  return a.s === b.s ? String(a.n) === String(b.n) : (ia >= 0 && ia === ib);
+}
+function tipoConFerri(){ const t = document.getElementById("intervento-tipo").value; return t === "ferratura" || t === "mezza_ferratura"; }
+// cavalli scelti nel modulo: chiavi di cavalliClienteCorrente, "__nuovo_cavallo__" o "" (nessun cavallo)
+function cavalliSceltiIntervento(){
+  if(interventoInModifica) return [document.getElementById("intervento-cavallo-select").value || ""];
+  return [...document.querySelectorAll("#intervento-cavalli-multi .int-cav-chk:checked")].map(x => x.value);
+}
+function nomeCavalloKey(k){
+  if(k === "__nuovo_cavallo__") return document.getElementById("intervento-nuovo-cavallo-nome").value.trim() || "Nuovo cavallo";
+  return (cavalliClienteCorrente.find(c => c.key === k) || {}).nome || "Cavallo";
+}
+function renderFerroRighe(){
+  const box = document.getElementById("intervento-ferro-righe");
+  if(!box) return;
+  const scelti = cavalliSceltiIntervento().filter(Boolean);
+  if(!scelti.length){ box.innerHTML = '<div class="muted" style="font-size:12.5px">Scegli il cavallo per vedere il suo ferro.</div>'; return; }
+  box.innerHTML = scelti.map(k => {
+    const std = ferroStd(cavalliClienteCorrente.find(c => c.key === k));
+    const ov = ferroOverride[k];
+    let dett, cls = "";
+    if(ov && !ferroUguale(ov, std)){
+      dett = siglaFerro(ov.s, ov.n) + (ov.origine === "intervento" ? " · usato in questo appuntamento" : " · solo per questo appuntamento");
+      cls = " diverso";
+    } else if(std){
+      dett = siglaFerro(std.s, std.n) + " · ferro standard";
+    } else {
+      dett = k === "__nuovo_cavallo__" ? "nessun ferro: lo imposti qui e resta nella sua scheda" : "nessun ferro standard nella scheda";
+    }
+    const az = `<button type="button" onclick="apriEditorFerro('${k}')">${std || ov ? "Cambia ferro" : "Imposta ferro"}</button>`
+      + (ov && !ferroUguale(ov, std) && std ? `<button type="button" class="sec" onclick="ripristinaFerro('${k}')">Usa lo standard</button>` : "");
+    return `<div class="ferro-riga"><div><span class="fr-nome">${escapeHtml(nomeCavalloKey(k))}</span><span class="fr-dett${cls}">${escapeHtml(dett)}</span></div><div class="fr-az">${az}</div></div>`;
+  }).join("");
+}
+function apriEditorFerro(k){
+  ferroEditKey = k;
+  const f = ferroOverride[k] || ferroStd(cavalliClienteCorrente.find(c => c.key === k)) || { s: "olandese", n: null };
+  document.getElementById("intervento-misura-sistema").value = f.s || "olandese";
+  const idx = f.n ? MISURE_FERRO[f.s || "olandese"].indexOf(String(f.n)) : -1;
+  misuraIndiceCorrente = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
+  document.getElementById("intervento-ferro-editor-tit").textContent = `Ferro per ${nomeCavalloKey(k)}` + (k === "__nuovo_cavallo__" ? "" : " · solo per questo appuntamento");
+  document.getElementById("intervento-ferro-editor").style.display = "block";
+  renderMisuraWheel("intervento");
+}
+function chiudiEditorFerro(usa){
+  const k = ferroEditKey; ferroEditKey = null;
+  document.getElementById("intervento-ferro-editor").style.display = "none";
+  if(usa && k){
+    const s = document.getElementById("intervento-misura-sistema").value;
+    const nuovo = { s, n: MISURE_FERRO[s][misuraIndiceCorrente] };
+    const std = ferroStd(cavalliClienteCorrente.find(c => c.key === k));
+    if(ferroUguale(nuovo, std)) delete ferroOverride[k];
+    else ferroOverride[k] = nuovo;
+  }
+  renderFerroRighe();
+}
+function ripristinaFerro(k){ delete ferroOverride[k]; renderFerroRighe(); }
+
+function renderQuantitaWheel(){
+  const w = document.getElementById("intervento-quantita-wheel");
+  if(!w) return;
+  w.innerHTML = [1, 2, 3, 4].map(v => `<div class="misura-wheel-item${v === quantitaCorrente ? " sel" : ""}" data-v="${v}" onclick="selezionaQuantita(${v}, true)">${v} ${v === 1 ? "ferro" : "ferri"}</div>`).join("");
+  quantitaRenderAt = Date.now();
+  requestAnimationFrame(() => { w.scrollTop = (quantitaCorrente - 1) * 44; });
+  w.onscroll = () => {
+    clearTimeout(quantitaTimer);
+    quantitaTimer = setTimeout(() => {
+      const v = Math.max(1, Math.min(4, Math.round(w.scrollTop / 44) + 1));
+      if(Date.now() - quantitaRenderAt > 400) quantitaToccata = true;
+      selezionaQuantita(v, false);
+    }, 80);
+  };
+}
+function selezionaQuantita(v, scroll){
+  quantitaCorrente = v;
+  const w = document.getElementById("intervento-quantita-wheel");
+  w.querySelectorAll(".misura-wheel-item").forEach(el => el.classList.toggle("sel", Number(el.dataset.v) === v));
+  if(scroll){ quantitaToccata = true; w.scrollTo({ top: (v - 1) * 44, behavior: "smooth" }); }
+}
+function aggiornaQuantitaPer(){
+  const n = cavalliSceltiIntervento().filter(Boolean).length;
+  document.getElementById("intervento-quantita-per").textContent = n > 1 ? "· per ogni cavallo" : "";
+}
+
+// importo e pagamento nel modulo solo per correggere un intervento già fatto
+function aggiornaIncassoForm(){
+  const g = document.getElementById("intervento-incasso-group");
+  if(g) g.style.display = interventoInModifica && interventoInModifica.stato === "fatto" ? "block" : "none";
+}
+
 async function openInterventoModal(clienteId, intervento, preset){
   interventoInModifica = intervento || null;
   interventoPreset = intervento ? null : (preset || null);
@@ -7872,10 +9205,10 @@ async function openInterventoModal(clienteId, intervento, preset){
     .map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
   const propr = clientiMascalcia.filter(c => !isStruttura(c)), strutt = clientiMascalcia.filter(isStruttura);
   const opzioniClienti = strutt.length
-    ? `<optgroup label="Proprietari">${opzCli(propr)}</optgroup><optgroup label="Strutture">${opzCli(strutt)}</optgroup>`
+    ? `<optgroup label="Proprietari">${opzCli(propr)}</optgroup><optgroup label="Scuderie e centri ippici">${opzCli(strutt)}</optgroup>`
     : opzCli(propr);
-  // nessun cliente scelto in partenza: prima si preselezionava il primo della lista e, se era una struttura
-  // collegata, il modulo saltava subito alla proposta alla struttura (impossibile scegliere un altro cliente)
+  // nessun cliente scelto in partenza: prima si preselezionava il primo della lista e, se era una scuderia
+  // collegata, il modulo saltava subito alla proposta alla scuderia (impossibile scegliere un altro cliente)
   const scegli = !inModifica && !clienteId && clientiMascalcia.length ? '<option value="" disabled>Scegli il cliente…</option>' : "";
   select.innerHTML = scegli + (inModifica ? "" : '<option value="__nuovo__">+ Nuovo cliente</option>') + opzioniClienti;
   select.disabled = inModifica;
@@ -7892,16 +9225,18 @@ async function openInterventoModal(clienteId, intervento, preset){
   document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
   document.getElementById("intervento-tipo").value = i.tipo_ferratura || "ferratura";
   document.getElementById("intervento-tipo-altro").value = i.tipo_altro || "";
-  document.getElementById("intervento-ferro-quantita").value = i.quantita_ferri ?? "";
-  // misura: sistema salvato (o olandese di default) + indice della riga
-  const sistema = i.misura_sistema || "olandese";
-  document.getElementById("intervento-misura-sistema").value = sistema;
-  const idx = i.numero_ferro ? MISURE_FERRO[sistema].indexOf(String(i.numero_ferro)) : -1;
-  misuraIndiceCorrente = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
+  // ferri: quantità salvata o proposta (4 ferratura, 2 mezza); il ferro arriva dalla scheda del cavallo
+  ferroOverride = {}; ferroEditKey = null;
+  document.getElementById("intervento-ferro-editor").style.display = "none";
+  const q = Number(i.quantita_ferri);
+  quantitaToccata = q >= 1 && q <= 4;
+  quantitaCorrente = quantitaToccata ? q : ((i.tipo_ferratura || "ferratura") === "mezza_ferratura" ? 2 : 4);
+  document.getElementById("intervento-ferri-nuovi").checked = interventoInModifica ? interventoInModifica.ferri_nuovi !== false : true;
   document.getElementById("intervento-data").value = i.data_intervento || isoLocale(new Date());
   document.getElementById("intervento-ora").value = i.ora ? String(i.ora).slice(0, 5) : "";
-  document.getElementById("intervento-importo").value = i.importo ?? "";
-  document.getElementById("intervento-pagamento").value = i.stato_pagamento || "da_saldare";
+  document.getElementById("intervento-importo").value = interventoInModifica?.importo ?? "";
+  document.getElementById("intervento-pagamento").value = interventoInModifica?.stato_pagamento || "da_saldare";
+  aggiornaIncassoForm();
   document.getElementById("intervento-note").value = i.note || "";
   // conferma di una richiesta: la data del cliente è solo una proposta, il maniscalco può cambiarla
   const boxRich = document.getElementById("intervento-richiesta-box");
@@ -7931,8 +9266,8 @@ async function openInterventoModal(clienteId, intervento, preset){
 
   document.getElementById("intervento-gia-fatto").checked = false; aggiornaGiaFatto();
   openModal("modal-add-intervento");
-  toggleInterventoTipoFields();
   await onInterventoClienteChange();
+  toggleInterventoTipoFields();
 }
 
 async function onInterventoClienteChange(){
@@ -7948,38 +9283,67 @@ async function onInterventoClienteChange(){
   const isNuovo = clienteId === "__nuovo__";
   document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
   const sel = document.getElementById("intervento-cavallo-select");
+  const multi = document.getElementById("intervento-cavalli-multi");
+  const inMod = !!interventoInModifica;
+  sel.style.display = inMod ? "" : "none";
+  multi.style.display = inMod ? "none" : "block";
+  document.getElementById("intervento-cavallo-label").textContent = inMod ? "Cavallo" : "Cavalli";
+  ferroOverride = {};
   if(!clienteId){
     cavalliClienteCorrente = [];
     sel.innerHTML = '<option value="">Scegli prima il cliente</option>';
     sel.value = "";
+    multi.innerHTML = '<div class="muted" style="font-size:13px;padding:9px 0">Scegli prima il cliente</div>';
     toggleInterventoNuovoCavallo();
     return;
   }
   sel.innerHTML = '<option value="">Caricamento…</option>';
+  multi.innerHTML = '<div class="muted" style="font-size:13px;padding:9px 0">Caricamento…</div>';
   cavalliClienteCorrente = isNuovo ? [] : await DB.listCavalliCliente(clienteId);
   const opzioni = cavalliClienteCorrente.map(c =>
     `<option value="${c.key}">${escapeHtml(c.nome)}${c.tipo === "equo" ? " · su Equo" : ""}</option>`).join("");
   sel.innerHTML = (cavalliClienteCorrente.length ? "" : '<option value="">— nessun cavallo —</option>') + opzioni + '<option value="__nuovo_cavallo__">+ Aggiungi cavallo</option>';
-  // preselezione: cavallo dell'intervento in modifica, altrimenti il primo (se c'è), altrimenti "aggiungi" per un cliente nuovo
+  // preselezione: cavallo dell'intervento in modifica / del preset, altrimenti il primo (se c'è), altrimenti "aggiungi" per un cliente nuovo
   let valore = "";
   const rif = interventoInModifica || interventoPreset;
   const mRif = rif && (rif.cavallo_cliente_id || rif.horse_id) ? cavalliClienteCorrente.find(c =>
       (rif.cavallo_cliente_id && c.id === rif.cavallo_cliente_id) ||
       (rif.horse_id && c.horse_id === rif.horse_id)) : null;
-  if(interventoInModifica || mRif){
+  if(inMod || mRif){
     if(mRif) valore = mRif.key;
-  } else if(isNuovo){
+  } else if(isNuovo || !cavalliClienteCorrente.length){
     valore = "__nuovo_cavallo__";
-  } else if(cavalliClienteCorrente.length){
+  } else if(cavalliClienteCorrente.length === 1){
     valore = cavalliClienteCorrente[0].key;
   }
   sel.value = valore;
+  const presetCavalli = new Set([valore].concat(interventoPreset?.cavalli || []).filter(Boolean));
+  multi.innerHTML = cavalliClienteCorrente.map(c =>
+    `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}</span></label>`).join("")
+    + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
+  // in modifica: il ferro salvato nell'appuntamento, se diverso dallo standard, resta «usato in questo appuntamento»
+  if(inMod && mRif && interventoInModifica.numero_ferro){
+    const usato = { s: interventoInModifica.misura_sistema || "italiana", n: String(interventoInModifica.numero_ferro), origine: "intervento" };
+    if(!ferroUguale(usato, ferroStd(mRif))) ferroOverride[mRif.key] = usato;
+  }
   toggleInterventoNuovoCavallo();
 }
+// scelto dalla ricerca (cavallo · cliente): lo spunta / lo seleziona
+function selezionaCavalloIntervento(nome){
+  const k = cercaNorm(nome);
+  const c = cavalliClienteCorrente.find(x => cercaNorm(x.nome) === k);
+  if(!c) return;
+  const sel = document.getElementById("intervento-cavallo-select");
+  if(sel) sel.value = c.key;
+  document.querySelectorAll("#intervento-cavalli-multi .int-cav-chk").forEach(x => { x.checked = x.value === c.key; });
+  toggleInterventoNuovoCavallo();
+}
+function onCavalliMultiChange(){ toggleInterventoNuovoCavallo(); }
 
 function toggleInterventoNuovoCavallo(){
-  const v = document.getElementById("intervento-cavallo-select").value;
-  document.getElementById("intervento-nuovo-cavallo-group").style.display = v === "__nuovo_cavallo__" ? "flex" : "none";
+  const scelti = cavalliSceltiIntervento();
+  document.getElementById("intervento-nuovo-cavallo-group").style.display = scelti.includes("__nuovo_cavallo__") ? "flex" : "none";
+  if(tipoConFerri()){ renderFerroRighe(); aggiornaQuantitaPer(); }
 }
 // compatibilità con eventuali vecchie chiamate
 function toggleInterventoNuovoCliente(){ onInterventoClienteChange(); }
@@ -7990,7 +9354,27 @@ function toggleInterventoTipoFields(){
   const isFerratura = tipo === "ferratura" || tipo === "mezza_ferratura";
   document.getElementById("intervento-ferro-group").style.display = isFerratura ? "flex" : "none";
   document.getElementById("intervento-quantita-group").style.display = isFerratura ? "flex" : "none";
-  if(isFerratura) renderMisuraWheel();
+  document.getElementById("intervento-ferri-nuovi-row").style.display = isFerratura ? "flex" : "none";
+  if(isFerratura){
+    if(!quantitaToccata) quantitaCorrente = tipo === "mezza_ferratura" ? 2 : 4;
+    renderFerroRighe(); aggiornaQuantitaPer(); renderQuantitaWheel();
+  }
+}
+
+/* Pop-up Sì / No (stile Equo) — restituisce true/false */
+let sinoResolve = null;
+function chiediSiNo(titolo, testo){
+  return new Promise(resolve => {
+    sinoResolve = resolve;
+    document.getElementById("sino-tit").textContent = titolo;
+    document.getElementById("sino-testo").textContent = testo || "";
+    document.getElementById("eq-pop-sino").classList.add("attivo");
+  });
+}
+function rispondiSiNo(si){
+  document.getElementById("eq-pop-sino").classList.remove("attivo");
+  const r = sinoResolve; sinoResolve = null;
+  if(r) r(!!si);
 }
 
 async function salvaInterventoMascalcia(){
@@ -8004,27 +9388,54 @@ async function salvaInterventoMascalcia(){
   const tipo_ferratura = document.getElementById("intervento-tipo").value;
   const tipo_altro = tipo_ferratura === "altro" ? (document.getElementById("intervento-tipo-altro").value.trim() || null) : null;
   const isFerraturaTipo = tipo_ferratura === "ferratura" || tipo_ferratura === "mezza_ferratura";
-  const misura_sistema = isFerraturaTipo ? document.getElementById("intervento-misura-sistema").value : null;
-  const numero_ferro = isFerraturaTipo ? MISURE_FERRO[misura_sistema][misuraIndiceCorrente] : null;
-  const quantitaRaw = isFerraturaTipo ? document.getElementById("intervento-ferro-quantita").value : "";
-  const quantita_ferri = quantitaRaw === "" ? null : Number(quantitaRaw);
+  const quantita_ferri = isFerraturaTipo ? quantitaCorrente : null;
+  const ferri_nuovi = isFerraturaTipo ? !!document.getElementById("intervento-ferri-nuovi").checked : null; // solo per il maniscalco
   const data_intervento = document.getElementById("intervento-data").value;
   const ora = document.getElementById("intervento-ora").value || null;
-  const importoRaw = document.getElementById("intervento-importo").value;
-  const importo = importoRaw === "" ? null : Number(importoRaw);
-  let statoPagamento = document.getElementById("intervento-pagamento").value;
+  // importo/pagamento dal modulo solo modificando un intervento già fatto; altrimenti li chiede il riquadro del «Fatto»
+  const conIncassoForm = !!(interventoInModifica && interventoInModifica.stato === "fatto");
+  const importoRaw = conIncassoForm ? document.getElementById("intervento-importo").value : "";
+  let importoForm = importoRaw === "" ? (interventoInModifica && !conIncassoForm ? interventoInModifica.importo ?? null : null) : Number(importoRaw);
+  let statoPagamento = conIncassoForm ? document.getElementById("intervento-pagamento").value : (interventoInModifica?.stato_pagamento || "da_saldare");
   const note = document.getElementById("intervento-note").value.trim();
-  const cavalloVal = document.getElementById("intervento-cavallo-select").value;
+  let scelti = cavalliSceltiIntervento();
+  if(!scelti.length) scelti = [""];                 // appuntamento senza cavallo indicato
+  if(scelti.length > 1) scelti = scelti.filter(Boolean);
 
   if(!cliente_mascalcia_id || !data_intervento) return errore("Seleziona cliente e data.");
   if(tipo_ferratura === "altro" && !tipo_altro) return errore("Specifica il tipo di intervento.");
   const nuovoCavalloNome = document.getElementById("intervento-nuovo-cavallo-nome").value.trim();
   const nuovoCavalloChip = document.getElementById("intervento-nuovo-cavallo-microchip").value.trim();
-  if(cavalloVal === "__nuovo_cavallo__" && !nuovoCavalloNome) return errore("Inserisci il nome del cavallo.");
+  if(scelti.includes("__nuovo_cavallo__") && !nuovoCavalloNome) return errore("Inserisci il nome del cavallo.");
+  if(ferroEditKey) chiudiEditorFerro(true);
+
+  // ferro di ogni cavallo: quello cambiato per questo appuntamento, altrimenti lo standard della scheda.
+  // Cambiato a mano? Chiedo se aggiornare anche la scheda del cavallo (prima di salvare qualsiasi cosa).
+  const ferri = {};
+  if(isFerraturaTipo){
+    for(const k of scelti){
+      if(!k) continue;
+      const std = ferroStd(cavalliClienteCorrente.find(c => c.key === k));
+      const ov = ferroOverride[k];
+      if(ov && !ferroUguale(ov, std)){
+        let aggiornaScheda = false;
+        if(k === "__nuovo_cavallo__") aggiornaScheda = true;
+        else if(ov.origine !== "intervento"){
+          const nome = nomeCavalloKey(k);
+          aggiornaScheda = await chiediSiNo(std ? `Vuoi modificare il ferro standard di ${nome}?` : `Salvare il ferro standard di ${nome}?`,
+            std ? `Da ${siglaFerro(std.s, std.n)} a ${siglaFerro(ov.s, ov.n)}. Sì: cambia anche la scheda del cavallo. No: solo per questo appuntamento.`
+                : `${siglaFerro(ov.s, ov.n)}. Sì: resta nella scheda del cavallo per i prossimi appuntamenti. No: solo per questo appuntamento.`);
+        }
+        ferri[k] = { s: ov.s, n: ov.n, aggiornaScheda };
+      } else if(std){
+        ferri[k] = { s: std.s, n: std.n, aggiornaScheda: false };
+      }
+    }
+  }
 
   saveBtn.disabled = true;
   let clienteCreatoOra = false;
-  let salvato = false;
+  let salvati = 0;
   try {
     // cliente nuovo
     if(cliente_mascalcia_id === "__nuovo__"){
@@ -8037,16 +9448,28 @@ async function salvaInterventoMascalcia(){
       clienteCreatoOra = true;
     }
 
-    // cavallo: nuovo / esistente (manuale o "su Equo")
-    let cavallo_cliente_id = null, horse_id = null;
-    if(cavalloVal === "__nuovo_cavallo__"){
-      const { error: cvErr, data: cv } = await DB.insertCavalloCliente({ cliente_mascalcia_id, nome: nuovoCavalloNome, microchip: nuovoCavalloChip || null });
-      if(cvErr || !cv) return errore("Errore nel salvare il cavallo: " + (cvErr?.message || ""));
-      cavallo_cliente_id = cv.id;
-    } else if(cavalloVal){
-      const scelto = cavalliClienteCorrente.find(c => c.key === cavalloVal);
-      ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(cliente_mascalcia_id, scelto));
+    // cavalli: nuovo / esistenti (manuali o "su Equo")
+    const righe = [];
+    for(const k of scelti){
+      let cavallo_cliente_id = null, horse_id = null, nome = "";
+      if(k === "__nuovo_cavallo__"){
+        const { error: cvErr, data: cv } = await DB.insertCavalloCliente({ cliente_mascalcia_id, nome: nuovoCavalloNome, microchip: nuovoCavalloChip || null });
+        if(cvErr || !cv) return errore("Errore nel salvare il cavallo: " + (cvErr?.message || ""));
+        cavallo_cliente_id = cv.id; nome = nuovoCavalloNome;
+      } else if(k){
+        const scelto = cavalliClienteCorrente.find(c => c.key === k);
+        ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(cliente_mascalcia_id, scelto));
+        nome = scelto?.nome || "";
+      }
+      const f = ferri[k];
+      if(f && f.aggiornaScheda && cavallo_cliente_id){
+        const { error: fErr } = await DB.updateCavalloCliente(cavallo_cliente_id, { ferro_sistema: f.s, ferro_numero: f.n });
+        if(fErr) console.error("ferro standard:", fErr);
+        const c = cavalliClienteCorrente.find(x => x.key === k); if(c){ c.ferro_sistema = f.s; c.ferro_numero = f.n; }
+      }
+      righe.push({ key: k, cavallo_cliente_id, horse_id, nome, misura_sistema: f ? f.s : null, numero_ferro: f ? f.n : null });
     }
+    const nomiCavalli = righe.map(r => r.nome).filter(Boolean).join(", ");
 
     // stato: data/ora nel futuro = programmato; altrimenti fatto (in modifica non si "chiude" da solo un programmato)
     // nuovo appuntamento: passato = fatto, oggi = da fare (salvo «L'ho già fatto»), futuro = da fare
@@ -8056,53 +9479,70 @@ async function salvaInterventoMascalcia(){
       ? new Date(data_intervento + "T" + (ora || "00:00")).getTime() > Date.now()
       : (data_intervento > oggiIso || (data_intervento === oggiIso && !giaFatto));
     const statoPrec = interventoInModifica ? (interventoInModifica.stato || "fatto") : null;
-    const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id); // appuntamento con struttura Equo Scuderia
+    const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id); // appuntamento con scuderia Equo Scuderia
     const precInfo = interventoInModifica ? { data: interventoInModifica.data_intervento, ora: interventoInModifica.ora ? String(interventoInModifica.ora).slice(0, 5) : "", cliente: interventoInModifica.cliente_mascalcia_id,
       tipo_ferratura: interventoInModifica.tipo_ferratura, tipo_altro: interventoInModifica.tipo_altro || "" } : null;
     const eraRichiesta = !diGruppo && STATI_NON_CONFERMATI.includes(statoPrec);
     // una richiesta confermata per oggi o per il futuro diventa "programmato", mai "fatto" da sola
-    // (appuntamenti con struttura: lo stato cambia solo con i tasti; se cambi data/ora la struttura deve riconfermare)
+    // (appuntamenti con scuderia: lo stato cambia solo con i tasti; se cambi data/ora la scuderia deve riconfermare)
     const stato = diGruppo ? statoPrec
       : eraRichiesta ? (data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto")
       : futuro ? "programmato" : (statoPrec || "fatto");
-    // RICHIAMO in giorni: se diventa FATTO ora → pop-up; se era già fatto → si mantiene l'intervallo scelto; se programmato → proposta silenziosa
-    let prossima_scadenza = null;
-    if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]){
-      const giaFatto = interventoInModifica && statoPrec === "fatto" && interventoInModifica.prossima_scadenza && interventoInModifica.tipo_ferratura === tipo_ferratura;
-      if(giaFatto){
-        prossima_scadenza = aggiungiGiorniIso(data_intervento, giorniTra(interventoInModifica.data_intervento, interventoInModifica.prossima_scadenza));
-      } else if(stato === "fatto"){
-        const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
-        prossima_scadenza = await richiamoPerFatto({ id: interventoInModifica?.id, tipo_ferratura, tipo_altro, data_intervento, cavallo_cliente_id, horse_id, cavallo: nomeCv, stato_pagamento: statoPagamento, importo });
-        statoPagamento = prendiPagamentoScelto() || statoPagamento;
-      } else {
-        const sg = await giorniRichiamoSuggeriti(tipo_ferratura, cavallo_cliente_id, horse_id, interventoInModifica?.id);
-        prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
-      }
+    const diventaFatto = stato === "fatto" && statoPrec !== "fatto";
+
+    // diventa FATTO ora → un solo riquadro per tutti i cavalli: giorni del richiamo, importo di ogni cavallo, pagamento
+    let scadenzaComune = null, importi = null;
+    if(diventaFatto){
+      const r0 = righe[0] || {};
+      const ps = await richiamoPerFatto({ id: interventoInModifica?.id, cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento,
+        cavallo_cliente_id: r0.cavallo_cliente_id, horse_id: r0.horse_id, cavallo: nomiCavalli,
+        stato_pagamento: statoPagamento, importo: importoForm,
+        cavalli: righe.map(r => ({ nome: r.nome || "Intervento", cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, importo: interventoInModifica ? interventoInModifica.importo : null })) });
+      if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]) scadenzaComune = ps;
+      statoPagamento = prendiPagamentoScelto() || statoPagamento;
+      importi = prendiImportiScelti();
     }
 
     // stesso cliente, stesso cavallo, stesso giorno e stesso tipo: probabilmente salvato due volte
     if(!interventoInModifica){
       const stessoGiorno = await DB.listInterventiPeriodo(data_intervento, data_intervento).catch(() => []);
-      const doppio = (stessoGiorno || []).find(i => i.cliente_mascalcia_id === cliente_mascalcia_id && i.tipo_ferratura === tipo_ferratura
-        && ((cavallo_cliente_id && i.cavallo_cliente_id === cavallo_cliente_id) || (horse_id && i.horse_id === horse_id) || (!cavallo_cliente_id && !horse_id && !i.cavallo_cliente_id && !i.horse_id)));
-      if(doppio){
-        const cv = doppio.cavalli_clienti_mascalcia?.nome || agNomeCavallo(doppio) || "questo cavallo";
-        if(!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}${doppio.ora ? " alle " + String(doppio.ora).slice(0, 5) : ""}.\n\nVuoi salvarne comunque un altro?`))
+      const doppi = righe.map(r => (stessoGiorno || []).find(i => i.cliente_mascalcia_id === cliente_mascalcia_id && i.tipo_ferratura === tipo_ferratura
+        && ((r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id) || (r.horse_id && i.horse_id === r.horse_id) || (!r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id)))).filter(Boolean);
+      if(doppi.length){
+        const cv = doppi.map(d => d.cavalli_clienti_mascalcia?.nome || agNomeCavallo(d) || "questo cavallo").join(", ");
+        if(!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`))
           return errore("Non salvato: c'era già lo stesso appuntamento.");
       }
     }
-    const stato_pagamento = statoPagamento;
-    const payload = { cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
-    const { error } = interventoInModifica
-      ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
-      : await DB.insertInterventoMascalcia({ cliente_mascalcia_id, ...payload });
-    if(error) return errore("Errore: " + error.message);
-    salvato = true;
+
+    for(let n = 0; n < righe.length; n++){
+      const r = righe[n];
+      // RICHIAMO in giorni: diventa fatto → giorni del riquadro; già fatto → si mantiene l'intervallo; programmato → proposta silenziosa
+      let prossima_scadenza = null;
+      if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]){
+        const eraFatto = interventoInModifica && statoPrec === "fatto" && interventoInModifica.prossima_scadenza && interventoInModifica.tipo_ferratura === tipo_ferratura;
+        if(eraFatto) prossima_scadenza = aggiungiGiorniIso(data_intervento, giorniTra(interventoInModifica.data_intervento, interventoInModifica.prossima_scadenza));
+        else if(diventaFatto) prossima_scadenza = scadenzaComune;
+        else if(stato === "fatto") prossima_scadenza = interventoInModifica?.prossima_scadenza || null;
+        else {
+          const sg = await giorniRichiamoSuggeriti(tipo_ferratura, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id);
+          prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
+        }
+      }
+      const importo = importi ? (importi[n] ?? null) : importoForm;
+      const payload = { cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, tipo_ferratura, tipo_altro,
+        misura_sistema: isFerraturaTipo ? r.misura_sistema : null, numero_ferro: isFerraturaTipo ? r.numero_ferro : null, quantita_ferri, ferri_nuovi,
+        data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento: statoPagamento, note };
+      const { error } = interventoInModifica
+        ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
+        : await DB.insertInterventoMascalcia({ cliente_mascalcia_id, ...payload });
+      if(error) return errore("Errore: " + error.message + (salvati ? ` (salvati ${salvati} su ${righe.length})` : ""));
+      salvati++;
+    }
 
     closeModal("modal-add-intervento");
+    const nomeCv = nomiCavalli;
     if(eraRichiesta){
-      const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
       const spostata = precInfo && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || ""));
       await DB.insertMessaggioMascalcia({ cliente_mascalcia_id, tipo: "testo",
         testo: spostata
@@ -8111,20 +9551,20 @@ async function salvaInterventoMascalcia(){
       showToast("Richiesta confermata: il cliente riceve un messaggio in chat");
     } else if(precInfo && diGruppo && ["programmato","richiesto","proposto"].includes(statoPrec)
         && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || servizioCambiato(precInfo, { tipo_ferratura, tipo_altro }))){
-      showToast("Appuntamento modificato: la struttura riceve l'avviso e deve riconfermarlo");
+      showToast("Appuntamento modificato: la scuderia riceve l'avviso e deve riconfermarlo");
     } else if(precInfo && !diGruppo && statoPrec === "programmato" && stato === "programmato"
         && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || precInfo.cliente !== cliente_mascalcia_id || servizioCambiato(precInfo, { tipo_ferratura, tipo_altro }))){
       // 1. appuntamento già confermato cambiato (data, ora o servizio): il cliente lo deve sapere
-      const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
       await avvisaClienteAppuntamento("modificato", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv }, precInfo);
       showToast(clienteCollegatoEquo(cliente_mascalcia_id) ? "Appuntamento modificato: il cliente riceve l'avviso e lo conferma con «Ok, ho visto»" : "Appuntamento modificato: avviso salvato nella chat del cliente");
     } else if(!interventoInModifica && stato === "programmato" && clienteCollegatoEquo(cliente_mascalcia_id)){
-      // nuovo appuntamento fissato dal maniscalco: il cliente su Equo riceve il messaggio in chat (e la notifica)
-      const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || nuovoCavalloNome || "";
+      // nuovo appuntamento fissato dal maniscalco: il cliente su Equo riceve un solo messaggio in chat (anche con più cavalli)
       await avvisaClienteAppuntamento("nuovo", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv });
-      showToast("Appuntamento salvato: il cliente riceve l'avviso in chat");
+      showToast(righe.length > 1 ? `${righe.length} appuntamenti salvati: il cliente riceve l'avviso in chat` : "Appuntamento salvato: il cliente riceve l'avviso in chat");
     } else {
-      showToast(interventoInModifica ? "Appuntamento aggiornato" : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
+      showToast(interventoInModifica ? "Appuntamento aggiornato"
+        : righe.length > 1 ? `${righe.length} ${stato === "programmato" ? "appuntamenti salvati" : "interventi registrati"} (uno per cavallo)`
+        : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
     }
     interventoInModifica = null;
     if(clienteCreatoOra) await loadClientiMascalcia();
@@ -8134,8 +9574,8 @@ async function salvaInterventoMascalcia(){
     if(currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
   } finally {
     saveBtn.disabled = false;
-    // se il cliente è stato creato ora ma l'intervento non è stato salvato, lo rimuoviamo (niente clienti duplicati)
-    if(clienteCreatoOra && !salvato && cliente_mascalcia_id && cliente_mascalcia_id !== "__nuovo__"){
+    // se il cliente è stato creato ora ma nessun intervento è stato salvato, lo rimuoviamo (niente clienti duplicati)
+    if(clienteCreatoOra && !salvati && cliente_mascalcia_id && cliente_mascalcia_id !== "__nuovo__"){
       await DB.deleteClienteMascalcia(cliente_mascalcia_id);
       document.getElementById("intervento-cliente-select").value = "__nuovo__";
     }
@@ -8177,7 +9617,7 @@ function testoPrimaModifica(m){
 function notaModificaMan(e, lungo){
   if(!e || !e.modifica || !e.modifica.prima || e.stato === "fatto") return "";
   const daStruttura = e.modifica.da === "struttura";
-  const chi = e.gruppo_id ? (daStruttura ? "Proposta della struttura" : "In attesa della struttura") : (clienteCollegatoEquo(e.cliente_mascalcia_id) ? "Il cliente non l'ha ancora visto" : "");
+  const chi = e.gruppo_id ? (daStruttura ? "Proposta della scuderia" : "In attesa della scuderia") : (clienteCollegatoEquo(e.cliente_mascalcia_id) ? "Il cliente non l'ha ancora visto" : "");
   if(!e.gruppo_id && !clienteCollegatoEquo(e.cliente_mascalcia_id)) return "";
   return `<div class="nota-modifica${lungo ? " lunga" : ""}">✏️ Modificato · prima: ${escapeHtml(testoPrimaModifica(e.modifica))}${chi ? " · " + chi : ""}</div>`;
 }
@@ -8235,6 +9675,13 @@ function agNomeCavallo(i){
   const elenco = i.clienti_mascalcia?.nome_cavallo || "";
   return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
 }
+// solo per le schermate del maniscalco: aggiunge «ferri nuovi» / «rimessa» (i testi per i clienti usano agDescrizioneTipo)
+function agDescrizioneTipoPro(i){
+  const t = agDescrizioneTipo(i);
+  if(i.ferri_nuovi === false) return t + " · rimessa";
+  if(i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri$/, "$1 ferri nuovi");
+  return t;
+}
 function agDescrizioneTipo(i){
   let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
   if(i.tipo_ferratura === "altro" && i.tipo_altro) t = i.tipo_altro;
@@ -8277,7 +9724,7 @@ async function renderAgendaSettimana(direzione){
         <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
         <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
           <div class="ag-ev-title">${escapeHtml(e.clienti_mascalcia?.nome || "")}${agNomeCavallo(e) ? " · " + escapeHtml(agNomeCavallo(e)) : ""}</div>
-          <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della struttura · " : ""}${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
           ${notaModificaMan(e)}
         </div>
         ${e.stato === "fatto"
@@ -8359,7 +9806,7 @@ async function renderRichiestePendenti(){
       <div class="rich-item">
         <div style="flex:1;min-width:0;cursor:pointer" onclick="vaiAllaDataAgenda('${r.data_intervento}')">
           <div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(r.clienti_mascalcia?.nome || "")}${(r._cavalli ? r._cavalli.filter(Boolean).join(", ") : agNomeCavallo(r)) ? " · " + escapeHtml(r._cavalli ? r._cavalli.filter(Boolean).join(", ") : agNomeCavallo(r)) : ""}</div>
-          <div class="muted" style="font-size:12px">${formatDataBreve(r.data_intervento)}${r.ora ? " · " + String(r.ora).slice(0, 5) : ""} · ${escapeHtml(agDescrizioneTipo(r))}${r.note ? " · " + escapeHtml(r.note) : ""}</div>
+          <div class="muted" style="font-size:12px">${formatDataBreve(r.data_intervento)}${r.ora ? " · " + String(r.ora).slice(0, 5) : ""} · ${escapeHtml(agDescrizioneTipoPro(r))}${r.note ? " · " + escapeHtml(r.note) : ""}</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="rifiutaRichiesta('${r.id}')">Rifiuta</button>
         <button class="btn btn-primary btn-sm btn-conferma" onclick="accettaRichiesta('${r.id}')">Accetta</button>
@@ -8370,7 +9817,7 @@ async function renderRichiestePendenti(){
 async function azioneGruppoStruttura(gruppoId, azione){
   const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: gruppoId, p_azione: azione });
   if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita: " + (error?.message || "riprova")); return; }
-  showToast(azione === "conferma" ? "Confermato: la struttura riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
+  showToast(azione === "conferma" ? "Confermato: la scuderia riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
   await renderAgendaSettimana();
   await renderProDeadlines();
   if(currentClienteId) await loadClienteInterventi(currentClienteId);
@@ -8380,7 +9827,7 @@ let propStrutturaClienteId = null;
 async function apriPropostaStruttura(clienteId, preset){
   propStrutturaClienteId = clienteId;
   const c = clientiMascalcia.find(x => x.id === clienteId);
-  document.getElementById("prop-str-nome").textContent = c?.nome || "Struttura";
+  document.getElementById("prop-str-nome").textContent = c?.nome || "Scuderia";
   const p = preset || {};
   document.getElementById("prop-str-tipo").value = p.tipo_ferratura || "ferratura";
   document.getElementById("prop-str-tipo-altro").value = p.tipo_altro || "";
@@ -8398,7 +9845,7 @@ async function apriPropostaStruttura(clienteId, preset){
   const cav = data || [];
   box.innerHTML = cav.length
     ? cav.map(x => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? ' <span class="muted" style="font-size:11.5px">(inserito da te, non nella scheda della scuderia)</span>' : ""}</label>`).join("")
-    : '<div class="muted" style="font-size:13px">La struttura non ha ancora cavalli in scheda: l\'appuntamento sarà generico.</div>';
+    : '<div class="muted" style="font-size:13px">La scuderia non ha ancora cavalli in scheda: l\'appuntamento sarà generico.</div>';
 }
 
 async function inviaPropostaStruttura(){
@@ -8418,7 +9865,7 @@ async function inviaPropostaStruttura(){
     p_cavalli: cavalli, p_note: note || null, p_importo: importo ? Number(importo) : null });
   if(error || !res?.ok){ err.textContent = (res && res.errore) || ("Invio non riuscito: " + (error?.message || "riprova")); err.style.display = "block"; return; }
   closeModal("modal-proponi-struttura");
-  showToast("Proposta inviata: la struttura deve confermarla.");
+  showToast("Proposta inviata: la scuderia deve confermarla.");
   if(document.getElementById("ag-week")) await renderAgendaSettimana();
   if(currentClienteId) await loadClienteInterventi(currentClienteId);
 }
@@ -8437,7 +9884,7 @@ function accettaRichiesta(id){
   const r = richiesteCache[id] || agEventiCache[id];
   if(!r) return;
   if(r.gruppo_id) return azioneGruppoStruttura(r.gruppo_id, "conferma");
-  // apre il form già compilato: il maniscalco aggiunge importo/misura e conferma
+  // apre il form già compilato (il ferro arriva dalla scheda del cavallo): il maniscalco controlla e conferma
   openInterventoModal(null, r);
 }
 
@@ -8445,7 +9892,7 @@ async function rifiutaRichiesta(id){
   const r = richiesteCache[id] || agEventiCache[id];
   if(!r) return;
   if(r.gruppo_id){
-    if(!confirm("Rifiutare la richiesta della struttura? Riceve un messaggio in chat per trovare un'altra data.")) return;
+    if(!confirm("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
     return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
   }
   if(!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
@@ -8511,7 +9958,7 @@ function fissaDaScadenza(id){
 function fattoInAnticipo(e){
   const oggi = isoLocale(new Date());
   if(!e || !e.data_intervento || e.data_intervento <= oggi) return {};
-  if(e.gruppo_id){ showToast("È un appuntamento con la struttura: segnalo fatto il giorno dell'intervento."); return null; }
+  if(e.gruppo_id){ showToast("È un appuntamento con la scuderia: segnalo fatto il giorno dell'intervento."); return null; }
   const quando = formatDataBreve(e.data_intervento);
   if(!confirm(`Questo appuntamento è per ${quando}. L'hai già fatto oggi?\n\nSe confermi lo segno fatto con la data di oggi.`)) return null;
   return { data_intervento: oggi };
@@ -8521,9 +9968,12 @@ async function segnaFattoAgenda(id){
   const anticipo = fattoInAnticipo(e);
   if(anticipo === null) return;
   const upd = { stato: "fatto", ...anticipo };
-  if(e && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
-    upd.prossima_scadenza = await richiamoPerFatto({ ...e, ...anticipo });
+  if(e){
+    // riquadro del «Fatto»: richiamo (se previsto), importo proposto e pagamento
+    const ps = await richiamoPerFatto({ ...e, ...anticipo });
+    if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
     const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
+    const imp = prendiImportiScelti(); if(imp) upd.importo = imp[0];
   }
   const { error } = await DB.updateInterventoMascalcia(id, upd);
   if(error){ showToast("Errore: " + error.message); return; }
@@ -8543,11 +9993,11 @@ function apriAzioniEvento(id){
     (e.clienti_mascalcia?.nome || "Appuntamento") + (agNomeCavallo(e) ? " · " + agNomeCavallo(e) : "");
   document.getElementById("azioni-evento-dettaglio").innerHTML = [
     `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
-    escapeHtml(agDescrizioneTipo(e)),
+    escapeHtml(agDescrizioneTipoPro(e)),
     '<span class="solo-incassi">' + (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
-    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della struttura</span>' : "Da fare",
+    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della scuderia</span>' : "Da fare",
     notaModificaMan(e, true),
-    e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con struttura Equo Scuderia: se cambi servizio, data o ora, la struttura deve riconfermare.</span>' : "",
+    e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>' : "",
     e.note ? escapeHtml(e.note) : ""
   ].filter(Boolean).join("<br>");
   const btnFatto = document.getElementById("azioni-evento-fatto");
@@ -8567,7 +10017,7 @@ async function azioneEvento(tipo){
     closeModal("modal-azioni-evento");
     openInterventoModal(null, e);
   } else if(tipo === "annulla_struttura" && e.gruppo_id){
-    if(!confirm("Annullare l'appuntamento con la struttura (tutti i cavalli)? La struttura riceve un avviso in chat.")) return;
+    if(!confirm("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
     closeModal("modal-azioni-evento");
     await azioneGruppoStruttura(e.gruppo_id, "annulla");
   } else if(tipo === "fatto" && e.stato === "richiesto"){
@@ -8578,10 +10028,12 @@ async function azioneEvento(tipo){
     const anticipo = nuovo === "fatto" ? fattoInAnticipo(e) : {};
     if(anticipo === null) return;
     const upd = { stato: nuovo, ...anticipo };
-    if(nuovo === "fatto" && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
+    if(nuovo === "fatto"){
       closeModal("modal-azioni-evento");
-      upd.prossima_scadenza = await richiamoPerFatto({ ...e, ...anticipo });
+      const ps = await richiamoPerFatto({ ...e, ...anticipo });
+      if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
       const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
+      const imp = prendiImportiScelti(); if(imp) upd.importo = imp[0];
     }
     const { error } = await DB.updateInterventoMascalcia(e.id, upd);
     if(error){ showToast("Errore: " + error.message); return; }
@@ -8796,7 +10248,7 @@ async function openChatThread(clienteId){
   const c = clientiMascalcia.find(x => x.id === clienteId);
   document.getElementById("mchat-cliente-nome").textContent = c?.nome || "Cliente";
   const strutturaColl = isStrutturaCollegata(clienteId);
-  document.getElementById("mchat-cliente-sub").textContent = strutturaColl ? "Struttura · Equo Scuderia" : (c?.nome_cavallo || "");
+  document.getElementById("mchat-cliente-sub").textContent = strutturaColl ? "Scuderia collegata · Equo Scuderia" : (c?.nome_cavallo || "");
   const btnCodice = document.querySelector('#mchat-overlay [onclick="shareInviteCodeFromChat()"]');
   if(btnCodice) btnCodice.style.display = strutturaColl ? "none" : "";
   const btnInt = document.getElementById("mchat-btn-intervento");
@@ -9427,13 +10879,13 @@ function renderInboxStrutture(strutture, unreadByCliente){
   wrap.style.display = mostra ? "block" : "none";
   if(!mostra) return;
   if(strutture.length === 0){
-    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6">Nessuna struttura collegata. Da <strong>Clienti → Strutture → Collega</strong> inserisci il codice del centro, oppure accetta l\'invito di una struttura che usa Equo Scuderia.</div>';
+    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6">Nessuna scuderia collegata. Da <strong>Clienti → Scuderie e centri ippici → Collega</strong> inserisci il codice della scuderia, oppure accetta l\'invito di una scuderia che usa Equo Scuderia.</div>';
     return;
   }
   box.innerHTML = strutture.map(m => {
     const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
     const c = m.clienti_mascalcia || {};
-    const stato = c.collegamento_stato === "attivo" ? "" : c.collegamento_stato === "da_confermare_pro" ? "Invito da accettare · " : "In attesa della struttura · ";
+    const stato = c.collegamento_stato === "attivo" ? "" : c.collegamento_stato === "da_confermare_pro" ? "Invito da accettare · " : "In attesa della scuderia · ";
     const chi = m.mittente_tipo === "maniscalco" ? "Tu: " : (m.mittente_nome ? m.mittente_nome + ": " : "");
     const preview = stato + chi + previewMessaggioMascalcia(m.tipo, m.testo, m.file_nome);
     const azione = c.collegamento_stato === "da_confermare_pro"
@@ -9443,7 +10895,7 @@ function renderInboxStrutture(strutture, unreadByCliente){
     <div class="inbox-item ${unread > 0 ? "unread" : ""}" onclick="${azione}">
       <div class="horse-avatar"><i class="fa-solid fa-building" style="font-size:19px"></i></div>
       <div style="flex:1;min-width:0">
-        <div class="inbox-name" style="font-size:14px">${escapeHtml(c.nome || "Struttura")}</div>
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(c.nome || "Scuderia")}</div>
         <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
       </div>
       ${unread > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
@@ -9568,7 +11020,74 @@ async function refreshChatBadge(){
   if(DEMO_MODE || !currentUser) return;
   const total = await computeChatUnreadTotal();
   const badge = document.getElementById("owner-chat-nav-badge");
-  if(badge) badge.style.display = total > 0 ? "block" : "none";
+  if(badge) badge.style.display = total > 0 || daSaldareStato.daRicordare ? "block" : "none";
+}
+
+/* ---------- PAGAMENTI DA SALDARE AL MANISCALCO (proprietario) ----------
+   Riquadro discreto in Home: aperto (con pallino anche su Chat) la prima volta e poi ogni 5 giorni,
+   altrimenti una riga sola. «Ho già pagato» avvisa il maniscalco in chat e ferma il promemoria. */
+let daSaldareStato = { righe: [], daRicordare: false, aperto: false, pagaAperto: null };
+async function caricaDaSaldare(){
+  const box = document.getElementById("home-da-saldare");
+  if(!box) return;
+  if(DEMO_MODE || !currentUser){ box.style.display = "none"; return; }
+  try{
+    const { data, error } = await sb.rpc("prop_pagamenti_da_saldare");
+    if(error) throw error;
+    daSaldareStato.righe = data?.righe || [];
+    daSaldareStato.daRicordare = !!data?.da_ricordare;
+  }catch(e){ daSaldareStato.righe = []; daSaldareStato.daRicordare = false; }
+  renderDaSaldare();
+  const badge = document.getElementById("owner-chat-nav-badge");
+  if(badge && daSaldareStato.daRicordare) badge.style.display = "block";
+}
+function euroIt(v){ return "€ " + Number(v || 0).toFixed(2).replace(".", ","); }
+function renderDaSaldare(){
+  const box = document.getElementById("home-da-saldare");
+  const righe = daSaldareStato.righe;
+  if(!righe.length){ box.style.display = "none"; box.innerHTML = ""; return; }
+  box.style.display = "block";
+  const tot = righe.filter(r => !r.segnalato).reduce((t, r) => t + Number(r.importo || 0), 0);
+  const aperto = daSaldareStato.daRicordare || daSaldareStato.aperto;
+  if(!aperto){
+    box.innerHTML = `<button type="button" class="ds-riga-corta" onclick="daSaldareStato.aperto=true;renderDaSaldare()"><span>💶 Da saldare${tot ? " · " + euroIt(tot) : ""}</span><span class="muted">Vedi ›</span></button>`;
+    return;
+  }
+  const perMan = {};
+  righe.forEach(r => { (perMan[r.maniscalco_id] = perMan[r.maniscalco_id] || { nome: r.maniscalco, iban: r.iban, paypal: r.paypal, pag_nome: r.pag_nome, righe: [] }).righe.push(r); });
+  box.innerHTML = `<div class="card ds-card">
+    <div class="ds-testa"><span>${daSaldareStato.daRicordare ? '<i class="ds-dot"></i>' : ""}💶 Da saldare</span><b>${euroIt(tot)}</b></div>
+    ${Object.entries(perMan).map(([mid, m]) => `
+      <div class="ds-man">${escapeHtml(m.nome || "Il tuo maniscalco")}</div>
+      ${m.righe.map(r => `<div class="ds-voce">
+        <div><div>${escapeHtml([r.tipo, r.cavallo].filter(Boolean).join(" · "))}</div><small class="muted">${formatDataBreve(r.data)}${r.segnalato ? " · segnalato come pagato, in attesa del maniscalco" : ""}</small></div>
+        <div class="ds-dx"><b>${euroIt(r.importo)}</b>${r.segnalato ? "" : `<button type="button" onclick="segnalaGiaPagato('${r.id}', this)">Ho già pagato</button>`}</div>
+      </div>`).join("")}
+      ${m.iban || m.paypal ? `<button type="button" class="ds-link" onclick="daSaldareStato.pagaAperto = daSaldareStato.pagaAperto === '${mid}' ? null : '${mid}'; renderDaSaldare()">Come pagare ${daSaldareStato.pagaAperto === mid ? "▴" : "▾"}</button>
+        ${daSaldareStato.pagaAperto === mid ? `<div class="ds-paga">${m.pag_nome ? `<div><small class="muted">Intestatario</small><br>${escapeHtml(m.pag_nome)}</div>` : ""}${m.iban ? `<div><small class="muted">IBAN</small><br><span class="ds-copia" onclick="copiaTestoDs('${escapeHtml(m.iban)}')">${escapeHtml(m.iban)} <i class="fa-regular fa-copy"></i></span></div>` : ""}${m.paypal ? `<div><small class="muted">PayPal</small><br><span class="ds-copia" onclick="copiaTestoDs('${escapeHtml(m.paypal)}')">${escapeHtml(m.paypal)} <i class="fa-regular fa-copy"></i></span></div>` : ""}</div>` : ""}` : ""}
+    `).join("")}
+    ${daSaldareStato.daRicordare ? `<button type="button" class="ds-ok" onclick="daSaldareVisto()">Ok, ricordamelo tra 5 giorni</button>` : `<button type="button" class="ds-ok" onclick="daSaldareStato.aperto=false;renderDaSaldare()">Chiudi</button>`}
+  </div>`;
+}
+function copiaTestoDs(t){
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => showToast("Copiato")).catch(() => showToast(t));
+  else showToast(t);
+}
+async function daSaldareVisto(){
+  daSaldareStato.daRicordare = false; daSaldareStato.aperto = false;
+  renderDaSaldare();
+  try{ await sb.rpc("prop_pagamenti_visti"); }catch(e){}
+  refreshChatBadge();
+}
+async function segnalaGiaPagato(id, btn){
+  if(!confirm("Confermi di aver già pagato? Il maniscalco riceve un messaggio in chat e il promemoria si ferma.")) return;
+  if(btn) btn.disabled = true;
+  try{
+    const { data, error } = await sb.rpc("prop_segnala_pagato", { p_intervento: id });
+    if(error || !data?.ok) throw error || new Error("non riuscito");
+    showToast("Fatto: il maniscalco riceve il tuo messaggio in chat");
+    await caricaDaSaldare();
+  }catch(e){ showToast("Non riuscito, riprova."); if(btn) btn.disabled = false; }
 }
 
 /* ---------- NOTIFICHE PUSH (OneSignal) ---------- */
@@ -10708,7 +12227,7 @@ async function confermaAzioneAi(id){
     // richiesta di una struttura Equo Scuderia: si conferma/rifiuta tutto il gruppo con la doppia conferma
     const r = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: x.gruppo_id, p_azione: azione.tipo === "accetta_richiesta" ? "conferma" : "rifiuta" });
     error = r.error || (r.data && !r.data.ok ? { message: r.data.errore } : null);
-    if(!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la struttura riceve l'avviso in chat." : "✓ Richiesta rifiutata: la struttura riceve un messaggio in chat.";
+    if(!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la scuderia riceve l'avviso in chat." : "✓ Richiesta rifiutata: la scuderia riceve un messaggio in chat.";
   } else if(azione.tipo === "accetta_richiesta"){
     const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura] ? (await giorniRichiamoSuggeriti(x.tipo_ferratura, x.cavallo_cliente_id, x.horse_id, x.id)).giorni : null;
     const payload = { stato: x.data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto", prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null };
@@ -11193,7 +12712,7 @@ function cercaClienteIntervento(){
       righe.sort((a, b) => a.p - b.p || (a.cav || a.c.nome).localeCompare(b.cav || b.c.nome, "it")).forEach(r => { const k = r.c.id + "|" + (r.cav || ""); if(!visti.has(k)){ visti.add(k); unici.push(r); } });
       lista.innerHTML = unici.slice(0, 10).map(r => r.cav
         ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>`
-        : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Struttura" : "Cliente"}</small></button>`).join("")
+        : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Scuderia" : "Cliente"}</small></button>`).join("")
         || `<div class="rz-vuoto">Nessun cliente con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
       lista.classList.add("aperta");
     };
@@ -11217,12 +12736,7 @@ function cercaClienteIntervento(){
       inp.value = b.dataset.cav ? b.dataset.cav + " · " + c.nome : c.nome;
       await onInterventoClienteChange();
       // scelto un cavallo: lo preseleziono nel menu dei cavalli
-      if(b.dataset.cav){
-        const cs = document.getElementById("intervento-cavallo-select");
-        const k = cercaNorm(b.dataset.cav);
-        const opz = cs ? [...cs.options].find(o => cercaNorm(o.textContent.replace(/ · su Equo$/, "")) === k) : null;
-        if(opz){ cs.value = opz.value; cs.dispatchEvent(new Event("change")); }
-      }
+      if(b.dataset.cav) selezionaCavalloIntervento(b.dataset.cav);
     });
     inp.addEventListener("blur", () => setTimeout(() => lista.classList.remove("aperta"), 150));
   }
@@ -11332,7 +12846,7 @@ function cercaTuttoMostra(){
   const sezioni = CT_SEZIONI[vista].filter(s => !(incassiNascosti() && s.t === "Incassi")).filter(s => ok(s.t, s.k)).map(s => ctRiga("fa-arrow-right", s.t, "Sezione", vai(s.az)));
   if(vista === "professionista"){
     const clienti = (d.clienti || clientiMascalcia || []).filter(c => ok(c.nome, c.telefono, paroleCercaCliente(c)))
-      .map(c => ctRiga(isStruttura(c) ? "fa-building" : "fa-user", c.nome, [nomiCavalliCliente(c).join(", "), c.telefono].filter(Boolean).join(" · ") || (isStruttura(c) ? "Struttura" : "Cliente"),
+      .map(c => ctRiga(isStruttura(c) ? "fa-building" : "fa-user", c.nome, [nomiCavalliCliente(c).join(", "), c.telefono].filter(Boolean).join(" · ") || (isStruttura(c) ? "Scuderia" : "Cliente"),
         vai(() => { showPage("pro-clienti"); openClienteDetail(c.id); })));
     const nomeCliente = id => ((d.clienti || clientiMascalcia || []).find(c => c.id === id) || {}).nome || "";
     const cavalli = (d.cavalli || []).filter(c => ok(c.nome, c.microchip, nomeCliente(c.cliente_mascalcia_id)))
@@ -11588,11 +13102,22 @@ function aggiornaSwitchHome(){
   if(riga) riga.style.display = pro ? "" : "none";
   const si = document.getElementById("incassi-switch");
   if(si) si.checked = !incassiNascosti();
+  const rp = document.getElementById("menu-promemoria-row");
+  if(rp) rp.style.display = pro ? "" : "none";
+  const sp = document.getElementById("promemoria-switch");
+  if(sp) sp.checked = currentUser?.promemoriaPagamenti !== false;
+}
+async function cambiaPromemoriaPagamenti(on){
+  if(DEMO_MODE){ currentUser.promemoriaPagamenti = on; showToast(on ? "Promemoria pagamenti attivi" : "Promemoria pagamenti spenti"); return; }
+  const { error } = await sb.from("profiles").update({ promemoria_pagamenti: on }).eq("id", currentUser.id);
+  if(error){ showToast("Errore: " + error.message); const sp = document.getElementById("promemoria-switch"); if(sp) sp.checked = !on; return; }
+  currentUser.promemoriaPagamenti = on;
+  showToast(on ? "Promemoria pagamenti attivi: i clienti su Equo ricevono un avviso per i lavori da saldare" : "Promemoria pagamenti spenti per tutti i clienti");
 }
 
 /* ---------- PROFESSIONISTA ---------- */
 let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, settimana: null, settimanaChiave: null };
-function wgTipoApp(e){ return (typeof agDescrizioneTipo === "function" ? agDescrizioneTipo(e) : hpTipo(e)); }
+function wgTipoApp(e){ return (typeof agDescrizioneTipoPro === "function" ? agDescrizioneTipoPro(e) : hpTipo(e)); }
 function wgClienteDi(id){ return (clientiMascalcia || []).find(c => c.id === id) || null; }
 // appuntamento messo in evidenza dal maniscalco (tocco su una riga di «Oggi»): resta finché non è fatto
 let wgScelto = null;
@@ -11671,7 +13196,7 @@ function renderWidgetPro(){
 
   box.innerHTML = `
     <div class="wg wg-grande">
-      <div class="wg-testa"><span class="wg-et">${WG_IC.cal}Oggi</span><span class="wg-meta">${cavalliOggi ? `${cavalliOggi} ${cavalliOggi === 1 ? "appuntamento" : "appuntamenti"}${strutture ? " · " + strutture + (strutture === 1 ? " struttura" : " strutture") : ""}` : ""}</span></div>
+      <div class="wg-testa"><span class="wg-et">${WG_IC.cal}Oggi</span><span class="wg-meta">${cavalliOggi ? `${cavalliOggi} ${cavalliOggi === 1 ? "appuntamento" : "appuntamenti"}${strutture ? " · " + strutture + (strutture === 1 ? " scuderia" : " scuderie") : ""}` : ""}</span></div>
       ${oggiHtml}
     </div>
     <div class="wg wg-piccolo" onclick="document.querySelector('[data-page=&quot;pro-inbox&quot;]')?.click()">
@@ -11791,7 +13316,7 @@ async function wgNaviga(clienteId){
   const st = await wgIndirizzoStruttura(c);
   const via = (st?.indirizzo || "").trim();
   const citta = [st?.citta, st?.provincia ? "(" + st.provincia + ")" : ""].filter(Boolean).join(" ").trim();
-  if(via) return wgMostraMappe(c, [via, citta].filter(Boolean).join(", "), "Indirizzo indicato dalla struttura in Equo Scuderia");
+  if(via) return wgMostraMappe(c, [via, citta].filter(Boolean).join(", "), "Indirizzo indicato dalla scuderia in Equo Scuderia");
   wgCercaLuogo(c, [st?.nome || c.nome, st?.citta].filter(Boolean).join(", "));
 }
 function wgMappeOv(){
