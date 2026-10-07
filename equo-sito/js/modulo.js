@@ -10,6 +10,11 @@
   var prof = q.get("professione");
   if (prof) { var r = form.querySelector('input[name=professione][value="' + prof.replace(/[^a-z]/g, "") + '"]'); if (r) r.checked = true; }
 
+  // «Scegli START/ADVANCE/PREMIUM» nella pagina Scuderia: preseleziona il pacchetto nel modulo
+  document.querySelectorAll("[data-pacchetto]").forEach(function (l) {
+    l.addEventListener("click", function () { var s = form.elements.pacchetto; if (s) s.value = l.getAttribute("data-pacchetto"); });
+  });
+
   function val(n) { var el = form.elements[n]; return el ? String(el.value || "").trim() : ""; }
   function errore(t, campo) {
     errBox.textContent = t; errBox.style.display = "block";
@@ -32,6 +37,9 @@
       dati.professione = p ? p.value : "";
       dati.specializzazione = val("specializzazione"); dati.esperienza = val("esperienza");
       if (!dati.professione) return errore("Scegli la tua professione.");
+    } else if (modulo === "scuderia") {
+      dati.struttura = val("struttura"); dati.cavalli = val("cavalli"); dati.pacchetto = val("pacchetto");
+      obbl.push(["struttura", "il nome della struttura"]);
     } else {
       dati.struttura = val("struttura"); dati.ruolo = val("ruolo"); dati.box = val("box");
       dati.interessi = Array.prototype.map.call(form.querySelectorAll("input[name=interessi]:checked"), function (x) { return x.value; });

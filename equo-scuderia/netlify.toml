@@ -10,6 +10,13 @@
   status = 200
   force = true
 
+# Meteo della Home (indirizzo del centro): funzione sul sito dell'app
+[[redirects]]
+  from = "/api/meteo"
+  to = "https://app.equohub.com/.netlify/functions/meteo"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/api/radar"
   to = "https://app.equohub.com/.netlify/functions/radar-merlino"

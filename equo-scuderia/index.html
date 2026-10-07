@@ -642,8 +642,20 @@ textarea.input{resize:vertical}
 /* ferri di lettura nelle bolle della chat: su bolla verde una piccola pillola chiara li rende leggibili */
 .bolla-ora{display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:10px;margin-top:3px}
 .bolla-ora .t{opacity:.7}
+.sbolla{transition:transform .15s}
+.sbolla.lampeggia{animation:sLampo 1.2s}
+@keyframes sLampo{0%,60%{box-shadow:0 0 0 3px rgba(232,176,75,.85)}100%{box-shadow:none}}
+.scit{display:block;border-left:3px solid #e8b04b;background:rgba(0,0,0,.08);border-radius:8px;padding:5px 8px;margin:-2px 0 6px;cursor:pointer;white-space:normal}
+.sbolla.mia .scit{background:rgba(255,255,255,.16)}
+.scit b{display:block;font-size:11.5px}
+.scit span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;opacity:.85}
+.srisposta-bar{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.srisposta-bar .rb-cit{flex:1;min-width:0;border-left:3px solid #e8b04b;background:var(--muted-bg);border-radius:8px;padding:6px 9px}
+.srisposta-bar .rb-cit b{display:block;font-size:12px}
+.srisposta-bar .rb-cit span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srisposta-bar button{border:0;background:transparent;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 6px}
 .ferri{display:inline-flex;align-items:center;line-height:0;background:rgba(253,252,248,.92);border-radius:8px;padding:2px 5px}
-.ferri svg{height:11px;width:auto;display:block}
+.ferri svg{height:7px;width:auto;display:block}
 .ferri-inviato,.ferri-consegnato{color:#8b8f86}
 .ferri-letto{color:#0b4a2c}
 
@@ -1142,18 +1154,21 @@ textarea.input{resize:vertical}
       <div class="topbar">
         <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
         <div class="topbar-title" id="topbar-title">Home</div>
+        <button type="button" class="scud-lente" onclick="apriCercaScud()" aria-label="Cerca nel gestionale"><i class="fa-solid fa-magnifying-glass"></i></button>
         <div class="avatar" id="user-avatar-mobile" onclick="openUserMenu()">U</div>
       </div>
       <div class="content">
 
         <!-- MODULO: HOME -->
         <div class="module-page" id="module-home">
-          <div class="page-header">
+          <div class="page-header home-testa">
             <div>
-              <p class="home-hello">Bentornato</p>
+              <p class="home-hello">Bentornato<span id="home-dataora"></span></p>
               <h1><span class="page-icon"><i class="fa-solid fa-gauge-high"></i></span> <span id="home-centro-name">Il tuo centro</span></h1>
               <p>Panoramica rapida di tutto il gestionale.</p>
             </div>
+            <div class="meteo-box" id="meteo-scud" aria-label="Meteo dei prossimi 7 giorni"></div>
+            <button type="button" class="scud-lente home" onclick="apriCercaScud()" aria-label="Cerca nel gestionale" title="Cerca (Ctrl+K)"><i class="fa-solid fa-magnifying-glass"></i></button>
           </div>
           <div class="grid grid-3" id="home-stats" style="margin-bottom:26px"></div>
           <h3 style="margin:0 0 10px">Accesso rapido</h3>
@@ -3524,16 +3539,17 @@ async function loadAndRenderChat(){
   renderChatMessaggi(messaggi);
 }
 
-/* ---------- SPUNTE DI LETTURA (mini ferri di cavallo, come in Equo App) ----------
-   1 ferro = inviato · 2 ferri grigi = consegnato · 2 ferri verde scuro = letto */
+/* ---------- SPUNTE DI LETTURA (pallini, come in Equo App) ----------
+   1 pallino grigio = inviato · 2 grigi = consegnato · 2 verde scuro = letto */
 const FERRO_D = "M0.8 11.6V6A5.2 5.2 0 0 1 11.2 6V11.6H8.5V6.2A2.5 2.5 0 0 0 3.5 6.2V11.6Z M1.8 7.4h1v1.1h-1Z M1.8 9.6h1v1.1h-1Z M9.2 7.4h1v1.1h-1Z M9.2 9.6h1v1.1h-1Z M2.4 3.9l.8-.8.8.8-.8.8Z M7.9 3.9l.8-.8.8.8-.8.8Z";
 function statoSpunta(m){ return m.letto ? "letto" : (m.consegnato_at ? "consegnato" : "inviato"); }
 function ferriHtml(stato){
   const titoli = { inviato: "Inviato", consegnato: "Consegnato", letto: "Letto" };
-  const uno = x => `<path transform="translate(${x} 0)" fill="currentColor" fill-rule="evenodd" d="${FERRO_D}"/>`;
+  // pallini: 1 grigio = inviato · 2 grigi = consegnato · 2 verde scuro = letto
+  const uno = x => `<circle cx="${x}" cy="4" r="3.4" fill="currentColor"/>`;
   const svg = stato === "inviato"
-    ? `<svg viewBox="0 0 12 12" aria-hidden="true">${uno(0)}</svg>`
-    : `<svg viewBox="0 0 25 12" aria-hidden="true">${uno(0)}${uno(13)}</svg>`;
+    ? `<svg viewBox="0 0 8 8" aria-hidden="true">${uno(4)}</svg>`
+    : `<svg viewBox="0 0 19 8" aria-hidden="true">${uno(4)}${uno(15)}</svg>`;
   return `<span class="ferri ferri-${stato}" title="${titoli[stato]}" aria-label="${titoli[stato]}">${svg}</span>`;
 }
 function oraBollaScuderia(m, mine){
@@ -3552,8 +3568,9 @@ function renderChatMessaggi(messaggi){
   const wasAtBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 40;
   const html = messaggi.map(msg => {
     const mine = msg.mittente_user_id === currentUser.id;
-    return `<div style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%;background:${mine ? "var(--primary)" : "var(--muted-bg)"};color:${mine ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">`
-      + corpoMessaggioChat(msg, mine)
+    registraMsgCit(msg, mine ? "Tu" : (msg.mittente_user_id === currentChatMembro?.user_id ? (currentChatMembro?.nome_visualizzato || "Cliente") : "Staff del centro"));
+    return `<div class="sbolla${mine ? " mia" : ""}" data-id="${escapeHtml(msg.id || "")}" style="align-self:${mine ? "flex-end" : "flex-start"};max-width:80%;background:${mine ? "var(--primary)" : "var(--muted-bg)"};color:${mine ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">`
+      + citazioneHtml(msg) + corpoMessaggioChat(msg, mine)
       + oraBollaScuderia(msg, mine) + `</div>`;
   }).join("") || `<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Nessun messaggio ancora. Scrivi il primo!</p>`;
   if(box.dataset.html === html) return; // nulla di nuovo: non si ridisegna
@@ -3563,6 +3580,73 @@ function renderChatMessaggi(messaggi){
 }
 
 // Foto e PDF nella chat con i clienti (stesso contenitore "chat-allegati" di Equo App)
+/* ---------- RISPOSTA A UN MESSAGGIO (stile WhatsApp, come in Equo App) ----------
+   Scorri una bolla verso destra (o doppio clic) → barra «Rispondi a …» sopra il campo di testo. */
+const ETICHETTE_TIPO_CIT = { audio: "🎤 Nota vocale", foto: "📷 Foto", video: "🎬 Video", documento: "📄 Documento" };
+const msgCit = {};
+let rispostaInCorso = null; // { box, id, nome, testo, tipo }
+function registraMsgCit(m, nome){
+  if(!m || !m.id) return;
+  msgCit[m.id] = { nome, tipo: m.tipo || "testo", testo: (m.testo || ETICHETTE_TIPO_CIT[m.tipo] || "Messaggio").slice(0, 160) };
+}
+function citazioneHtml(m){
+  const r = m && m.risposta;
+  if(!r || typeof r !== "object" || !r.id) return "";
+  const testo = r.testo || ETICHETTE_TIPO_CIT[r.tipo] || "Messaggio";
+  return `<div class="scit" onclick="event.stopPropagation();vaiAlMessaggio('${String(r.id).replace(/[^a-zA-Z0-9_-]/g, "")}', this)"><b>${escapeHtml(r.nome || "")}</b><span>${escapeHtml(testo)}</span></div>`;
+}
+function vaiAlMessaggio(id, da){
+  const box = da && da.closest("#chat-messages, #chat-pro-messages");
+  const b = (box || document).querySelector(`.sbolla[data-id="${id}"]`);
+  if(!b){ showToast("Messaggio non più nella chat"); return; }
+  b.scrollIntoView({ behavior: "smooth", block: "center" });
+  b.classList.remove("lampeggia"); void b.offsetWidth; b.classList.add("lampeggia");
+}
+const INPUT_DI_BOX = { "chat-messages": "chat-input", "chat-pro-messages": "chat-pro-input" };
+function avviaRisposta(b){
+  const box = b.closest("#chat-messages, #chat-pro-messages");
+  const info = msgCit[b.dataset.id];
+  if(!box || !info) return;
+  rispostaInCorso = { box: box.id, id: b.dataset.id, ...info };
+  document.querySelectorAll(".srisposta-bar").forEach(x => x.remove());
+  const inp = document.getElementById(INPUT_DI_BOX[box.id]);
+  if(!inp) return;
+  inp.parentElement.insertAdjacentHTML("beforebegin", `<div class="srisposta-bar"><div class="rb-cit"><b>Rispondi a ${escapeHtml(info.nome)}</b><span>${escapeHtml(info.testo)}</span></div><button type="button" aria-label="Annulla risposta" onclick="annullaRisposta()">✕</button></div>`);
+  setTimeout(() => inp.focus(), 50);
+}
+function annullaRisposta(){ rispostaInCorso = null; document.querySelectorAll(".srisposta-bar").forEach(x => x.remove()); }
+function consumaRisposta(boxId){
+  const r = rispostaInCorso;
+  if(!r || r.box !== boxId) return null;
+  annullaRisposta();
+  if(!document.getElementById(boxId)?.offsetParent) return null;
+  return { id: r.id, nome: r.nome, testo: r.testo, tipo: r.tipo };
+}
+(function(){
+  let x0 = 0, y0 = 0, bolla = null, dx = 0;
+  document.addEventListener("touchstart", e => {
+    const b = e.target.closest && e.target.closest(".sbolla[data-id]");
+    if(!b || e.target.closest("audio, video, a, button")){ bolla = null; return; }
+    bolla = b; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0;
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if(!bolla) return;
+    dx = e.touches[0].clientX - x0;
+    const dy = Math.abs(e.touches[0].clientY - y0);
+    if(dy > 30 && dy > Math.abs(dx)){ bolla.style.transform = ""; bolla = null; return; }
+    if(dx > 0) bolla.style.transform = `translateX(${Math.min(dx, 80)}px)`;
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if(!bolla) return;
+    const b = bolla; bolla = null; b.style.transform = "";
+    if(dx > 60) avviaRisposta(b);
+  });
+  document.addEventListener("dblclick", e => {
+    const b = e.target.closest && e.target.closest(".sbolla[data-id]");
+    if(b && !e.target.closest("audio, video, a, button")){ e.preventDefault(); avviaRisposta(b); }
+  });
+})();
+
 function corpoMessaggioChat(msg, mine){
   const testo = msg.testo ? escapeHtml(msg.testo) : "";
   if(msg.tipo === "foto" && msg.file_url){
@@ -3631,10 +3715,11 @@ async function inviaChatMessaggio(){
     if(DEMO_MODE){
       demoState.chat = demoState.chat || {};
       if(!demoState.chat[currentChatMembro.id]) demoState.chat[currentChatMembro.id] = [];
-      demoState.chat[currentChatMembro.id].push({ id:"chat" + (demoIdCounter++ + 900), mittente_user_id: currentUser.id, testo, created_at: new Date().toISOString() });
+      demoState.chat[currentChatMembro.id].push({ id:"chat" + (demoIdCounter++ + 900), mittente_user_id: currentUser.id, testo, risposta: consumaRisposta("chat-messages"), created_at: new Date().toISOString() });
     } else {
+      const risposta = consumaRisposta("chat-messages");
       const { error } = await sb.from("chat_messaggi").insert({
-        centro_id: currentCentro.id, membro_id: currentChatMembro.id, mittente_user_id: currentUser.id, testo,
+        centro_id: currentCentro.id, membro_id: currentChatMembro.id, mittente_user_id: currentUser.id, testo, ...(risposta ? { risposta } : {}),
       });
       if(error) throw error;
     }
@@ -3680,7 +3765,26 @@ function enterAppShell(){
 }
 
 /* ---------- APERTURA DA NOTIFICA: porta direttamente alla chat di chi ha scritto ---------- */
+// appunto lasciato dal service worker al tocco della notifica (serve su iPhone, che riapre l'app sulla Home)
+async function notificaSalvata(){
+  try{
+    if(!("caches" in window)) return null;
+    const c = await caches.open("equo-notifica");
+    const r = await c.match("/__ultima-notifica");
+    if(!r) return null;
+    await c.delete("/__ultima-notifica");
+    const j = await r.json();
+    return j && j.d && Date.now() - (j.t || 0) < 3 * 60 * 1000 ? j.d : null;
+  }catch(_){ return null; }
+}
+async function controllaNotificaSalvata(){
+  const d = await notificaSalvata();
+  if(d) apriDaNotifica(d);
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(controllaNotificaSalvata, 300); });
+window.addEventListener("focus", () => setTimeout(controllaNotificaSalvata, 300));
 function apriChatDaUrl(){
+  setTimeout(controllaNotificaSalvata, 500);
   const p = new URLSearchParams(window.location.search);
   if(p.get("apri") === "statistiche"){
     window.history.replaceState({}, "", window.location.pathname);
@@ -5262,8 +5366,9 @@ async function caricaChatProfessionista(segna){
     const mio = m.mittente_tipo === "cliente";
     const firma = mio && m.mittente_user_id !== currentUser.id && m.mittente_nome
       ? `<div style="font-size:10.5px;font-weight:700;opacity:.8;margin-bottom:2px">${escapeHtml(m.mittente_nome)}</div>` : "";
-    return `<div style="align-self:${mio ? "flex-end" : "flex-start"};max-width:80%;background:${mio ? "var(--primary)" : "var(--muted-bg)"};color:${mio ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">`
-      + firma + corpoMessaggioChat(m, mio)
+    registraMsgCit(m, mio ? (m.mittente_user_id === currentUser.id ? "Tu" : (m.mittente_nome || "Centro")) : (data.nome || "Maniscalco"));
+    return `<div class="sbolla${mio ? " mia" : ""}" data-id="${escapeHtml(m.id || "")}" style="align-self:${mio ? "flex-end" : "flex-start"};max-width:80%;background:${mio ? "var(--primary)" : "var(--muted-bg)"};color:${mio ? "#fff" : "var(--text)"};padding:8px 12px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">`
+      + firma + citazioneHtml(m) + corpoMessaggioChat(m, mio)
       + oraBollaScuderia(m, mio) + `</div>`;
   }).join("") || '<p style="color:var(--muted);font-size:12.5px;text-align:center;margin:auto">Nessun messaggio ancora. Scrivi il primo!</p>';
   if(box.dataset.html !== html){ box.dataset.html = html; box.innerHTML = html; }
@@ -5274,8 +5379,9 @@ async function caricaChatProfessionista(segna){
 }
 
 async function inviaMessaggioPro(tipo, testo, file_url, file_nome){
+  const risposta = consumaRisposta("chat-pro-messages");
   const { data, error } = await sb.rpc("scuderia_invia_messaggio_professionista", {
-    p_cliente_id: chatProCorrente, p_tipo: tipo, p_testo: testo || null, p_file_url: file_url || null, p_file_nome: file_nome || null });
+    p_cliente_id: chatProCorrente, p_tipo: tipo, p_testo: testo || null, p_file_url: file_url || null, p_file_nome: file_nome || null, ...(risposta ? { p_risposta: risposta } : {}) });
   if(error || !data?.ok){ showToast((data && data.errore) || ("Invio non riuscito: " + (error?.message || "riprova"))); return false; }
   await caricaChatProfessionista(true);
   return true;
@@ -5427,6 +5533,21 @@ async function caricaAppuntamentiPro(){
   renderAppuntamentiPro();
 }
 
+// appuntamento cambiato dopo l'accordo: riquadro «prima → ora» ben visibile
+function notaModificaPro(g){
+  const p = g.modifica.prima || {};
+  const lab = (t, altro) => t === "altro" && altro ? altro : (APP_TIPO_LABELS[t] || t || "");
+  const tipoOra = g.tipo === "altro" && g.tipo_altro ? g.tipo_altro : (APP_TIPO_LABELS[g.tipo] || g.tipo);
+  const servizi = (g.cavalli || []).filter(c => c.tipo && (c.tipo !== p.tipo || (c.tipo_altro || "") !== (p.tipo_altro || "")));
+  const righe = [];
+  if(servizi.length) servizi.forEach(c => righe.push(`Servizio${c.nome && c.nome !== "Cavallo" ? " (" + escapeHtml(c.nome) + ")" : ""}: <s>${escapeHtml(lab(p.tipo, p.tipo_altro))}</s> → <b>${escapeHtml(lab(c.tipo, c.tipo_altro))}</b>`));
+  else if(p.tipo && (p.tipo !== g.tipo || (p.tipo_altro || "") !== (g.tipo_altro || ""))) righe.push(`Servizio: <s>${escapeHtml(lab(p.tipo, p.tipo_altro))}</s> → <b>${escapeHtml(tipoOra)}</b>`);
+  if(p.data && (p.data !== g.data_intervento || (p.ora || "") !== (g.ora || ""))) righe.push(`Data: <s>${escapeHtml(dataAppIt(p.data, p.ora))}</s> → <b>${escapeHtml(dataAppIt(g.data_intervento, g.ora))}</b>`);
+  const chi = g.modifica.da === "struttura" ? "Modificato dalla struttura · in attesa del maniscalco" : "Modificato dal maniscalco · da riconfermare";
+  return `<div style="margin-top:6px;padding:7px 10px;border-radius:9px;background:rgba(232,176,75,.18);border:1px solid rgba(232,176,75,.6);font-size:12.5px;line-height:1.5">
+    <div style="font-weight:800;color:#8a5a00">✏️ ${chi}</div>${righe.map(r => `<div>${r}</div>`).join("")}</div>`;
+}
+
 function renderAppuntamentiPro(){
   const box = document.getElementById("app-pro-lista");
   const oggi = oggiIsoScud();
@@ -5446,7 +5567,7 @@ function renderAppuntamentiPro(){
     const tipo = g.tipo === "altro" && g.tipo_altro ? g.tipo_altro : (APP_TIPO_LABELS[g.tipo] || g.tipo);
     const cavalli = (g.cavalli || []).filter(c => c.scuderia_cavallo_id || c.nome !== "Cavallo")
       .map(c => `<span class="badge-pill badge-gray" style="font-size:11px;padding:2px 8px">${c.fatto ? "✓ " : ""}${escapeHtml(c.nome)}</span>`).join(" ");
-    const azioni = attivo ? `
+    const azioni = attivo && !g.con_proprietario ? `
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
         ${g.stato === "proposto" ? `<button class="btn btn-primary btn-sm btn-conferma" onclick="azioneAppPro('${g.gruppo_id}','conferma',this)">Conferma</button>` : ""}
         <button class="btn btn-outline btn-sm btn-variazione" onclick="modificaAppPro('${g.gruppo_id}')">Modifica</button>
@@ -5457,11 +5578,13 @@ function renderAppuntamentiPro(){
         <div style="display:flex;justify-content:space-between;gap:6px 10px;align-items:flex-start;flex-wrap:wrap">
           <div style="min-width:0;flex:1 1 200px">
             <div style="font-weight:700;font-size:14px">${escapeHtml(dataAppIt(g.data_intervento, g.ora))} · ${escapeHtml(tipo)}</div>
-            ${g.stato === "proposto" ? '<div style="font-size:12px;color:var(--muted)">Proposta del maniscalco: conferma o proponi un\'altra data</div>' : ""}
+            ${g.stato === "proposto" && !(g.modifica && g.modifica.prima) ? '<div style="font-size:12px;color:var(--muted)">Proposta del maniscalco: conferma o proponi un\'altra data</div>' : ""}
+            ${g.con_proprietario ? `<div style="font-size:12px;color:var(--muted)"><i class="fa-solid fa-user"></i> Fissato dal maniscalco con il proprietario <b>${escapeHtml(g.con_proprietario)}</b> · solo da leggere</div>` : ""}
+            ${attivo && g.modifica && g.modifica.prima && !g.con_proprietario ? notaModificaPro(g) : ""}
             ${cavalli ? `<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${cavalli}</div>` : ""}
             ${g.note ? `<div style="color:var(--muted);font-size:12.5px;margin-top:4px">${escapeHtml(g.note)}</div>` : ""}
           </div>
-          <span class="badge-pill ${cls}" style="flex-shrink:0;font-size:11px">${txt}</span>
+          <span class="badge-pill ${g.con_proprietario ? "badge-gray" : cls}" style="flex-shrink:0;font-size:11px">${g.con_proprietario ? (g.stato === "fatto" ? "Fatto" : "Con il proprietario") : txt}</span>
         </div>
         ${azioni}
       </div>`;
@@ -5836,14 +5959,21 @@ async function stampaSchedaPdf(){
     document.body.appendChild(fr);
   } catch(e){ console.error(e); showToast("Stampa non riuscita, riprova."); }
 }
-function apriInviaSchedaChat(){
+async function apriInviaSchedaChat(){
   const c = cavalliList.find(x => x.id === currentCavalloId); if(!c) return;
   const sel = document.getElementById("pdf-chat-dest");
+  if(!DEMO_MODE && !professionistiList.length) await loadProfessionisti();
   const persone = teamList.filter(m => m.user_id && m.user_id !== currentUser?.id);
-  const gruppo = (titolo, lista) => lista.length ? `<optgroup label="${titolo}">${lista.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo] || "Membro")}</option>`).join("")}</optgroup>` : "";
-  sel.innerHTML = gruppo("Clienti / proprietari", persone.filter(m => m.ruolo === "proprietario")) + gruppo("Team", persone.filter(m => m.ruolo !== "proprietario"));
-  if(!sel.options.length){ showToast("Nessuna persona collegata a cui inviarla: collega il proprietario o il team."); return; }
-  if(c.proprietario_membro_id && [...sel.options].some(o => o.value === c.proprietario_membro_id)) sel.value = c.proprietario_membro_id;
+  const pro = professionistiList.filter(p => p.categoria === "maniscalco" && p.stato === "attivo");
+  // chi ha due ruoli (es. proprietario e maniscalco) compare due volte: l'etichetta dice in quale chat arriva
+  const nomiPro = new Set(pro.map(p => (p.nome || "").trim().toLowerCase()));
+  const nomiTeam = new Set(persone.map(m => (m.nome_visualizzato || "").trim().toLowerCase()));
+  const etichetta = (nome, ruolo, doppio) => escapeHtml(nome) + (doppio ? ` · come ${ruolo}` : "");
+  const gruppo = (titolo, lista, ruolo) => lista.length ? `<optgroup label="${titolo}">${lista.map(m => { const nome = m.nome_visualizzato || RUOLO_LABELS[m.ruolo] || "Membro"; return `<option value="m:${m.id}">${etichetta(nome, ruolo, nomiPro.has(nome.trim().toLowerCase()))}</option>`; }).join("")}</optgroup>` : "";
+  const gruppoPro = pro.length ? `<optgroup label="Maniscalchi collegati">${pro.map(p => `<option value="p:${p.cliente_id}">${etichetta(p.nome || "Maniscalco", "maniscalco", nomiTeam.has((p.nome || "").trim().toLowerCase()))}</option>`).join("")}</optgroup>` : "";
+  sel.innerHTML = gruppo("Clienti / proprietari", persone.filter(m => m.ruolo === "proprietario"), "proprietario") + gruppo("Team", persone.filter(m => m.ruolo !== "proprietario"), "membro del team") + gruppoPro;
+  if(!sel.options.length){ showToast("Nessuna persona collegata a cui inviarla: collega il proprietario, il team o un maniscalco."); return; }
+  if(c.proprietario_membro_id && [...sel.options].some(o => o.value === "m:" + c.proprietario_membro_id)) sel.value = "m:" + c.proprietario_membro_id;
   document.getElementById("pdf-chat-testo").value = `Ecco la scheda aggiornata di ${c.nome} 🐴`;
   openModal("modal-pdf-chat");
 }
@@ -5851,9 +5981,30 @@ async function inviaSchedaChat(){
   const btn = document.getElementById("pdf-chat-btn"); btn.disabled = true;
   try{
     const c = await pdfCavalloAggiornato(); if(!c) return;
-    const m = teamList.find(x => x.id === document.getElementById("pdf-chat-dest").value);
-    if(!m){ showToast("Scegli a chi inviarla."); return; }
+    const scelta = document.getElementById("pdf-chat-dest").value || "";
     const testo = document.getElementById("pdf-chat-testo").value.trim();
+    if(scelta.startsWith("p:")){
+      // chat professionale con il maniscalco: il file deve stare negli allegati chat di chi invia
+      const pro = professionistiList.find(p => p.cliente_id === scelta.slice(2));
+      if(!pro){ showToast("Scegli a chi inviarla."); return; }
+      if(DEMO_MODE){ showToast("Nella demo la chat con i maniscalchi non è attiva."); return; }
+      const res = await fetch(urlPdfPulito(c.pdf_url) + "?v=" + Date.now());
+      if(!res.ok) throw new Error("PDF non disponibile");
+      const url = await caricaFileChatPro(await res.blob(), "pdf", "application/pdf");
+      {
+        const invia = async (tipo, t, fu, fn) => {
+          const { data, error } = await sb.rpc("scuderia_invia_messaggio_professionista", { p_cliente_id: pro.cliente_id, p_tipo: tipo, p_testo: t || null, p_file_url: fu || null, p_file_nome: fn || null });
+          if(error || !data?.ok) throw new Error((data && data.errore) || error?.message || "riprova");
+        };
+        if(testo) await invia("testo", testo);
+        await invia("documento", null, url, nomeFilePdf(c));
+      }
+      closeModal("modal-pdf-chat");
+      showToast(`Scheda inviata nella chat con ${pro.nome || "il maniscalco"} (Professionisti).`);
+      return;
+    }
+    const m = teamList.find(x => x.id === scelta.replace(/^m:/, ""));
+    if(!m){ showToast("Scegli a chi inviarla."); return; }
     const file_url = DEMO_MODE ? c.pdf_url : urlPdfPulito(c.pdf_url) + "?v=" + Date.now();
     if(DEMO_MODE){
       demoState.chat = demoState.chat || {}; demoState.chat[m.id] = demoState.chat[m.id] || [];
@@ -7169,6 +7320,7 @@ const QUICK_ACCESS_ITEMS = [
 ];
 
 async function refreshHomeModule(){
+  try{ meteoScud(); }catch(e){ console.warn("meteo:", e); }
   await Promise.all([
     cavalliList.length === 0 ? loadCavalli() : Promise.resolve(),
     loadEventiAll(), loadLezioni(), loadPacchetti(), loadMessaggi(), loadNote(),
@@ -7646,6 +7798,7 @@ async function salvaDatiCentro(){
     if(error){ err.textContent = error.message || "Salvataggio non riuscito."; err.style.display = "block"; return; }
   }
   Object.assign(currentCentro, payload);
+  try{ meteoScud(true); }catch(e){}
   document.getElementById("centro-view-nome").textContent = payload.nome;
   document.getElementById("centro-view-indirizzo").textContent = payload.indirizzo || "Non impostato";
   document.getElementById("centro-view-telefono").textContent = payload.telefono || "Non impostato";
@@ -9106,6 +9259,420 @@ function invitoInstallaChiudi(ricorda = true){
   if(ricorda){ try{ localStorage.setItem("equo-invito-installa", String(Date.now())); }catch(e){} }
   const box = document.getElementById("invito-installa"); if(box) box.style.display = "none";
 }
+</script>
+<script>
+window.EQUO_INDIETRO_CHIUDI = {
+  "modal-chat": () => closeChatModal(),
+  "modal-chat-pro": () => chiudiChatProfessionista(),
+};
+window.EQUO_INDIETRO_PAGINA = function(){
+  if(document.getElementById("sidebar")?.classList.contains("open")){ closeSidebar(); return true; }
+  if(!currentUser || !currentCentro) return false;
+  const det = document.getElementById("cavalli-detail-view");
+  if(det && det.style.display !== "none" && det.offsetParent !== null){ closeCavalloDetail(); return true; }
+  const aperto = [...document.querySelectorAll(".module-page")].find(p => p.style.display === "block");
+  if(aperto && aperto.id !== "module-home"){ showModule("home"); return true; }
+  return false;
+};
+</script>
+<script>
+/* ---------- TASTO INDIETRO DI ANDROID ----------
+   La freccia/il gesto «indietro» del telefono non fa più uscire dall'app di colpo:
+   1) chiude la finestra o la chat aperta; 2) torna all'elenco o alla Home;
+   3) in Home mostra «Premi di nuovo indietro per uscire»: solo il secondo indietro (entro 2,5 s) esce.
+   Funziona con una voce «sentinella» nella cronologia, rimessa a ogni tocco (Chrome ignora le voci create senza un tocco). */
+(function(){
+  if(!/Android/i.test(navigator.userAgent)) return;
+  let armato = false, avvisoAl = 0;
+  const arma = () => {
+    if(armato || Date.now() - avvisoAl < 2500) return;
+    try{ history.pushState({ equoIndietro: 1 }, "", location.href); armato = true; } catch(e){}
+  };
+  ["click", "touchend", "keydown"].forEach(ev => addEventListener(ev, arma, { capture: true, passive: true }));
+  const visibile = el => !!el && getComputedStyle(el).display !== "none";
+  function overlayInCima(){
+    const aperti = [...document.querySelectorAll(".modal-overlay.active, [id$='-overlay'].active")].filter(visibile);
+    if(!aperti.length) return null;
+    const z = el => parseInt(getComputedStyle(el).zIndex, 10) || 0;
+    return aperti.reduce((a, b) => z(b) >= z(a) ? b : a);
+  }
+  function indietroDentroApp(){
+    const ov = overlayInCima();
+    if(ov){
+      const speciale = (window.EQUO_INDIETRO_CHIUDI || {})[ov.id];
+      if(speciale){ try{ speciale(); } catch(e){ console.warn("indietro:", e); } }
+      else ov.dispatchEvent(new MouseEvent("click", { bubbles: true }));   // come un tocco fuori: chiude solo le finestre che si possono chiudere così
+      return true;   // anche se la finestra è obbligatoria, l'indietro non fa uscire
+    }
+    try{ return !!(window.EQUO_INDIETRO_PAGINA && window.EQUO_INDIETRO_PAGINA()); } catch(e){ return false; }
+  }
+  addEventListener("popstate", () => {
+    if(!armato) return;
+    armato = false;
+    if(indietroDentroApp()){ arma(); return; }
+    avvisoAl = Date.now();
+    try{ showToast("Premi di nuovo indietro per uscire"); } catch(e){}
+  });
+})();
+</script>
+<div class="sc-cerca" id="sc-cerca" role="dialog" aria-label="Cerca nel gestionale">
+  <div class="sc-box">
+    <div class="sc-testa"><i class="fa-solid fa-magnifying-glass"></i><input id="sc-input" type="search" autocomplete="off" spellcheck="false" placeholder="Cerca cavalli, persone, lezioni, magazzino…" aria-label="Cerca"><button type="button" class="sc-chiudi" onclick="chiudiCercaScud()">Chiudi</button></div>
+    <div class="sc-ris" id="sc-ris"></div>
+  </div>
+</div>
+<style>
+/* ---------- METEO 7 giorni (Home App + Equo Scuderia) ---------- */
+.meteo-box{--m-acc:var(--meteo-acc,var(--accent));display:flex;align-items:stretch;gap:2px;width:100%;margin:0 0 14px;padding:8px 6px;border-radius:16px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font:inherit;min-height:66px;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+.meteo-box:active{transform:scale(.99)}
+.meteo-g{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:2px 0;border-radius:10px}
+.meteo-g b{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:capitalize;white-space:nowrap}
+.meteo-g.oggi b{color:var(--m-acc)}
+.meteo-g .mi{width:30px;height:30px;display:block}
+.meteo-g small{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.meteo-msg{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--muted);text-align:center;padding:4px 8px;line-height:1.35}
+.meteo-msg i{color:var(--m-acc)}
+.meteo-msg u{color:var(--m-acc);font-weight:700;text-decoration:none}
+.meteo-scheletro{flex:1;height:42px;margin:4px 3px;border-radius:10px;background:linear-gradient(90deg,var(--surface2,var(--muted-bg,#f1ece0)) 0%,var(--border) 50%,var(--surface2,var(--muted-bg,#f1ece0)) 100%);background-size:200% 100%;animation:meteoScorri 1.2s linear infinite;opacity:.6}
+@keyframes meteoScorri{from{background-position:200% 0}to{background-position:0 0}}
+/* colori icone */
+.mi-sereno{color:#e8a317}.mi-sereno.notte{color:#8d97b5}.mi-variabile{color:#d99a1e}.mi-nubi,.mi-nebbia{color:#8f969c}
+.mi-pioviggine,.mi-pioggia{color:#4a8fc7}.mi-pioggia_forte{color:#2e6aa8}.mi-temporale{color:#7458b0}.mi-neve,.mi-nevischio{color:#6fb1d6}
+/* dettaglio */
+.meteo-velo{position:fixed;inset:0;z-index:120;background:rgba(10,10,6,.45);display:flex;align-items:flex-end;justify-content:center}
+.meteo-sheet{--m-acc:var(--meteo-acc,var(--accent));background:var(--bg,var(--surface));color:var(--text);width:100%;max-width:560px;max-height:88vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(0,0,0,.25);padding-bottom:env(safe-area-inset-bottom)}
+@media (min-width:700px){.meteo-velo{align-items:center}.meteo-sheet{border-radius:20px;max-height:84vh}}
+.meteo-testa{display:flex;align-items:center;gap:10px;padding:16px 18px 8px}
+.meteo-testa h3{margin:0;font-size:17px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meteo-testa h3 i{color:var(--m-acc);margin-right:6px}
+.meteo-x{border:0;background:var(--surface2,var(--muted-bg,#f1ece0));color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex:none}
+.meteo-giorni{display:flex;gap:6px;overflow-x:auto;padding:4px 18px 10px;scrollbar-width:none}
+.meteo-giorni::-webkit-scrollbar{display:none}
+.meteo-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:62px;padding:8px 6px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+.meteo-chip b{font-size:12px;text-transform:capitalize}
+.meteo-chip .mi{width:30px;height:30px;flex:none}
+.meteo-testa,.meteo-giorni,.meteo-nota{flex:none}
+.meteo-ore{flex:1 1 auto;min-height:0}
+.meteo-chip small{font-size:11px;color:var(--muted)}
+.meteo-chip.sel{border-color:var(--m-acc);box-shadow:0 0 0 2px var(--m-acc) inset}
+.meteo-ore{overflow-y:auto;padding:0 18px 10px;-webkit-overflow-scrolling:touch}
+.meteo-riga{display:grid;grid-template-columns:52px 34px 1fr auto auto;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);font-size:14px}
+.meteo-riga .h{font-weight:700;font-variant-numeric:tabular-nums}
+.meteo-riga .mi{width:30px;height:30px;justify-self:center}
+.meteo-riga .p i,.meteo-riga .v i{font-size:11px}
+.meteo-riga .t{font-weight:700;font-size:15px}
+.meteo-riga .p{font-size:12.5px;color:#3d7fb8;white-space:nowrap}
+.meteo-riga .v{font-size:12.5px;color:var(--muted);white-space:nowrap;min-width:58px;text-align:right}
+.meteo-nota{font-size:11.5px;color:var(--muted);padding:8px 18px 14px;line-height:1.5}
+.meteo-sezione{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 2px 2px}
+</style>
+<script>
+/* METEO 7 giorni — modulo condiviso App / Scuderia.
+   EquoMeteo.monta(el, { posizione: async () => ({lat, lon, luogo} | {indirizzo, citta, luogo} | null), endpoint, token: async () => "..." ,
+                         senzaPosizione: { testo, azione } })
+   Previsione salvata sul dispositivo per 30 minuti. In demo i dati sono di esempio. */
+(function(){
+  const ICONE = {
+    sereno: ["fa-sun", "fa-moon"], variabile: ["fa-cloud-sun", "fa-cloud-moon"], nubi: ["fa-cloud", "fa-cloud"], nebbia: ["fa-smog", "fa-smog"],
+    pioviggine: ["fa-cloud-sun-rain", "fa-cloud-moon-rain"], pioggia: ["fa-cloud-rain", "fa-cloud-rain"], pioggia_forte: ["fa-cloud-showers-heavy", "fa-cloud-showers-heavy"],
+    temporale: ["fa-cloud-bolt", "fa-cloud-bolt"], neve: ["fa-snowflake", "fa-snowflake"], nevischio: ["fa-cloud-meatball", "fa-cloud-meatball"],
+  };
+  const NOMI = { sereno: "Sereno", variabile: "Poco nuvoloso", nubi: "Nuvoloso", nebbia: "Nebbia", pioviggine: "Pioggia debole", pioggia: "Pioggia",
+    pioggia_forte: "Pioggia forte", temporale: "Temporale", neve: "Neve", nevischio: "Neve mista a pioggia" };
+  const CON_NOTTE = { sereno: 1, variabile: 1, pioviggine: 1 };
+  const icona = (k, notte) => { k = NOMI[k] ? k : "nubi"; const id = "mi-" + k + (notte && CON_NOTTE[k] ? "-n" : ""); return `<svg class="mi" role="img" aria-label="${NOMI[k]}"><title>${NOMI[k]}</title><use href="#${id}"/></svg>`; };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const oggiIso = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+  const etichettaGiorno = (iso, i) => {
+    if(iso === oggiIso()) return "Oggi";
+    const d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("it-IT", { weekday: "short" }).replace(".", "");
+  };
+  const lungaGiorno = iso => iso === oggiIso() ? "Oggi" : new Date(iso + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
+  const ora = t => new Date(t).toLocaleTimeString("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
+  const giornoDi = t => new Date(t).toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+  const leggi = k => { try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(e){ return null; } };
+  const scrivi = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+
+  // dati di esempio (demo e prove): 7 giorni, ora per ora i primi 2, poi ogni 6 ore
+  function datiDemo(){
+    const ore = [], base = new Date(); base.setMinutes(0, 0, 0);
+    const seq = ["sereno","variabile","nubi","pioviggine","variabile","sereno","pioggia"];
+    for(let h = 0; h < 7 * 24; h += (h < 48 ? 1 : 6)){
+      const t = new Date(base.getTime() + h * 3600e3), hh = t.getHours(), g = Math.floor(h / 24);
+      ore.push({ t: t.toISOString(), passo: h < 48 ? 1 : 6, temp: Math.round(13 + 6 * Math.sin((hh - 9) / 24 * 6.28) + g % 3), sim: hh < 7 || hh > 19 ? (seq[g] === "sereno" ? "sereno" : "nubi") : seq[g],
+        notte: hh < 7 || hh > 19, mm: seq[g].includes("piog") && hh > 11 && hh < 17 ? 0.6 : 0, vento: 8 + (hh % 5) * 2, umid: 65 });
+    }
+    const giorni = [];
+    ore.forEach(o => { const d = giornoDi(o.t); let x = giorni.find(z => z.data === d); if(!x){ x = { data: d, min: o.temp, max: o.temp, mm: 0, sim: o.sim }; giorni.push(x); }
+      x.min = Math.min(x.min, o.temp); x.max = Math.max(x.max, o.temp); x.mm += o.mm; const hh = Number(ora(o.t).slice(0, 2)); if(hh === 12 || hh === 14) x.sim = o.sim; });
+    return { luogo: "Esempio", fonte: "dati di esempio", aggiornato: new Date().toISOString(), giorni: giorni.slice(0, 7), ore, demo: true };
+  }
+
+  const SPRITE = '<svg id="meteo-sprite" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">  <defs>    <radialGradient id="mg-sole" cx="40%" cy="38%" r="70%"><stop offset="0" stop-color="#FFE68A"/><stop offset=".55" stop-color="#FFC52E"/><stop offset="1" stop-color="#F59E0B"/></radialGradient>    <linearGradient id="mg-luna" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3F6FD"/><stop offset="1" stop-color="#B7C3E3"/></linearGradient>    <linearGradient id="mg-nube" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D9E1EA"/></linearGradient>    <linearGradient id="mg-nube2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6EBF1"/><stop offset="1" stop-color="#BCC7D3"/></linearGradient>    <linearGradient id="mg-scura" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#AEB9C6"/><stop offset="1" stop-color="#7A8899"/></linearGradient>    <linearGradient id="mg-goccia" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6CB8FF"/><stop offset="1" stop-color="#2F7FD8"/></linearGradient>    <linearGradient id="mg-fulmine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE066"/><stop offset="1" stop-color="#FFA41B"/></linearGradient>    <g id="mp-raggi" stroke="#FFB81C" stroke-width="3.6" stroke-linecap="round">      <path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/>    </g>    <g id="mp-sole"><use href="#mp-raggi"/><circle cx="32" cy="32" r="12.5" fill="url(#mg-sole)"/></g>    <path id="mp-luna" d="M38.5 12.5A20 20 0 1 0 51.5 41 16.5 16.5 0 0 1 38.5 12.5z" fill="url(#mg-luna)" stroke="#9FAED6" stroke-width="1.2"/>    <path id="mp-nube" d="M19 50h27.5a10.5 10.5 0 0 0 1.2-20.9A14.5 14.5 0 0 0 20.2 25.6 12.2 12.2 0 0 0 19 50z"/>    <g id="mp-gocce" stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M24 54l-2 5M33 54l-2 5M42 54l-2 5"/></g>  </defs>  <!-- sereno -->  <symbol id="mi-sereno" viewBox="0 0 64 64"><use href="#mp-sole"/></symbol>  <symbol id="mi-sereno-n" viewBox="0 0 64 64"><use href="#mp-luna"/><circle cx="50" cy="14" r="1.6" fill="#C9D3EE"/><circle cx="56" cy="24" r="1.1" fill="#C9D3EE"/></symbol>  <!-- poco nuvoloso -->  <symbol id="mi-variabile" viewBox="0 0 64 64"><g transform="translate(0 -1) scale(.72)"><use href="#mp-sole"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(4 4)"/></symbol>  <symbol id="mi-variabile-n" viewBox="0 0 64 64"><g transform="translate(-2 -4) scale(.72)"><use href="#mp-luna"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(4 4)"/></symbol>  <!-- nuvoloso -->  <symbol id="mi-nubi" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" transform="translate(10 -8) scale(.8)"/><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(-2 4)"/></symbol>  <!-- nebbia -->  <symbol id="mi-nebbia" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" transform="translate(0 -8)"/><g stroke="#9AA6B4" stroke-width="3.6" stroke-linecap="round"><path d="M12 48h40M18 56h30"/></g></symbol>  <!-- pioggia debole -->  <symbol id="mi-pioviggine" viewBox="0 0 64 64"><g transform="translate(0 -3) scale(.66)"><use href="#mp-sole"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(2 -4)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M28 52l-1.5 4M38 52l-1.5 4"/></g></symbol>  <symbol id="mi-pioviggine-n" viewBox="0 0 64 64"><g transform="translate(-2 -6) scale(.66)"><use href="#mp-luna"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(2 -4)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M28 52l-1.5 4M38 52l-1.5 4"/></g></symbol>  <!-- pioggia -->  <symbol id="mi-pioggia" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" stroke="#A9B5C2" stroke-width="1.2" transform="translate(0 -8)"/><use href="#mp-gocce" transform="translate(0 -6)"/></symbol>  <!-- pioggia forte -->  <symbol id="mi-pioggia_forte" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-scura)" transform="translate(0 -10)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M20 46l-3 8M29 46l-3 8M38 46l-3 8M47 46l-3 8"/></g></symbol>  <!-- temporale -->  <symbol id="mi-temporale" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-scura)" transform="translate(0 -10)"/><path d="M34 38l-8 12h7l-4 11 12-15h-7l4-8z" fill="url(#mg-fulmine)" stroke="#F08C00" stroke-width="1" stroke-linejoin="round"/><g stroke="url(#mg-goccia)" stroke-width="3.4" stroke-linecap="round"><path d="M20 46l-2 5M48 46l-2 5"/></g></symbol>  <!-- neve -->  <symbol id="mi-neve" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(0 -10)"/><g stroke="#7CC4F2" stroke-width="2.6" stroke-linecap="round"><path d="M22 47v8M18.5 49l7 4M18.5 53l7-4M42 47v8M38.5 49l7 4M38.5 53l7-4M32 54v7M29 55.5l6 4M29 59.5l6-4"/></g></symbol>  <!-- neve mista a pioggia -->  <symbol id="mi-nevischio" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" stroke="#A9B5C2" stroke-width="1.2" transform="translate(0 -10)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M24 46l-2 6M42 52l-2 6"/></g><g stroke="#7CC4F2" stroke-width="2.6" stroke-linecap="round"><path d="M33 47v8M29.5 49l7 4M29.5 53l7-4"/></g></symbol>  <!-- meteo non disponibile: sole grigio sbarrato -->  <symbol id="mi-nd" viewBox="0 0 64 64"><g stroke="#AEB4BB" stroke-width="3.6" stroke-linecap="round"><path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/></g><circle cx="32" cy="32" r="12.5" fill="#C9CED4"/><path d="M10 54L54 10" stroke="#7F8790" stroke-width="4.6" stroke-linecap="round"/></symbol>  <!-- meteo non disponibile: sole grigio sbarrato -->  <symbol id="mi-nd" viewBox="0 0 64 64"><g stroke="#AEB4BB" stroke-width="3.6" stroke-linecap="round"><path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/></g><circle cx="32" cy="32" r="12.5" fill="#C9CED4"/><path d="M10 54L54 10" stroke="#7F8790" stroke-width="4.6" stroke-linecap="round"/></symbol></svg>';
+  function sprite(){ if(!document.getElementById("meteo-sprite")) document.body.insertAdjacentHTML("afterbegin", SPRITE); }
+  const stati = new WeakMap();
+  async function carica(el, forza){
+    const cfg = stati.get(el); if(!cfg) return;
+    el.innerHTML = cfg.dati ? el.innerHTML : Array.from({ length: 7 }, () => '<span class="meteo-scheletro"></span>').join("");
+    let pos = null;
+    try{ pos = await cfg.posizione(); }catch(e){ pos = null; }
+    if(!pos || pos.messaggio){ cfg.dati = null; mostraMsg(el, (pos && pos.messaggio) || cfg.senzaPosizione); return; }
+    if(pos.demo){ cfg.dati = datiDemo(); disegna(el); return; }
+    const chiave = "equo-meteo:" + (pos.lat != null ? Number(pos.lat).toFixed(2) + "," + Number(pos.lon).toFixed(2) : String(pos.indirizzo || "") + "|" + String(pos.citta || ""));
+    const salv = leggi(chiave);
+    if(salv && !forza && Date.now() - salv.salvato < 30 * 60e3){ cfg.dati = salv.dati; disegna(el); return; }
+    if(salv) { cfg.dati = salv.dati; disegna(el); }
+    try{
+      const tk = await cfg.token();
+      const r = await fetch(cfg.endpoint, { method: "POST", headers: { "Content-Type": "application/json", ...(tk ? { Authorization: "Bearer " + tk } : {}) }, body: JSON.stringify(pos) });
+      const d = await r.json().catch(() => ({}));
+      if(d && d.giorni && d.giorni.length){ if(pos.luogo && !d.luogo) d.luogo = pos.luogo; cfg.dati = d; scrivi(chiave, { salvato: Date.now(), dati: d }); disegna(el); return; }
+      if(!cfg.dati) mostraMsg(el, d && d.non_trovato ? cfg.nonTrovato || { testo: "Indirizzo non trovato per il meteo" } : { testo: "Meteo non disponibile ora", icona: "fa-cloud" });
+    }catch(e){ if(!cfg.dati) mostraMsg(el, { testo: "Meteo non disponibile offline", icona: "fa-wifi" }); }
+  }
+  function mostraMsg(el, m){
+    m = m || { testo: "Meteo non disponibile" };
+    el.innerHTML = `<span class="meteo-msg"><i class="fa-solid ${m.icona || "fa-location-dot"}"></i><span>${esc(m.testo)}${m.link ? ` <u>${esc(m.link)}</u>` : ""}</span></span>`;
+    el.dataset.azione = m.azione ? "1" : "";
+    stati.get(el).azioneMsg = m.azione || null;
+  }
+  function disegna(el){
+    const cfg = stati.get(el), d = cfg.dati;
+    const oggi = oggiIso();
+    el.innerHTML = d.giorni.slice(0, 7).map((g, i) => `<span class="meteo-g${g.data === oggi ? " oggi" : ""}"><b>${esc(etichettaGiorno(g.data, i))}</b>${icona(g.sim, false)}</span>`).join("");
+    el.setAttribute("aria-label", "Meteo dei prossimi 7 giorni" + (d.luogo ? " a " + d.luogo : "") + ": tocca per il dettaglio ora per ora");
+    stati.get(el).azioneMsg = null;
+  }
+  function apriDettaglio(el, giorno){
+    sprite();
+    const cfg = stati.get(el), d = cfg && cfg.dati; if(!d) return;
+    let sel = giorno || d.giorni[0].data;
+    const velo = document.createElement("div");
+    velo.className = "meteo-velo";
+    velo.innerHTML = `<div class="meteo-sheet" role="dialog" aria-label="Previsioni meteo">
+      <div class="meteo-testa"><h3><i class="fa-solid fa-location-dot"></i>${esc(d.luogo || "Meteo")}</h3><button class="meteo-x" aria-label="Chiudi">✕</button></div>
+      <div class="meteo-giorni"></div><div class="meteo-ore"></div>
+      <div class="meteo-nota"></div></div>`;
+    const chiudi = () => { velo.remove(); document.removeEventListener("keydown", esc_); };
+    const esc_ = e => { if(e.key === "Escape") chiudi(); };
+    velo.addEventListener("click", e => { if(e.target === velo || e.target.closest(".meteo-x")) chiudi(); });
+    document.addEventListener("keydown", esc_);
+    const giorniEl = velo.querySelector(".meteo-giorni"), oreEl = velo.querySelector(".meteo-ore");
+    const rendi = () => {
+      giorniEl.innerHTML = d.giorni.slice(0, 7).map(g => `<button class="meteo-chip${g.data === sel ? " sel" : ""}" data-g="${g.data}"><b>${esc(etichettaGiorno(g.data))}</b>${icona(g.sim, false)}<small>${g.min != null ? g.min + "° / " + g.max + "°" : ""}</small></button>`).join("");
+      const ore = d.ore.filter(o => giornoDi(o.t) === sel && new Date(o.t) >= new Date(Date.now() - 3600e3));
+      const g = d.giorni.find(x => x.data === sel) || {};
+      const sei = ore.length && ore.every(o => o.passo === 6);
+      oreEl.innerHTML = `<div class="meteo-sezione">${esc(lungaGiorno(sel))} · ${NOMI[g.sim] || ""}${g.mm ? " · " + String(g.mm).replace(".", ",") + " mm" : ""}${sei ? " · ogni 6 ore" : ""}</div>`
+        + (ore.length ? ore.map(o => `<div class="meteo-riga"><span class="h">${ora(o.t)}</span>${icona(o.sim, o.notte)}<span class="t">${o.temp != null ? o.temp + "°" : "–"}</span>`
+          + `<span class="p">${Number(o.mm) > 0 ? '<i class="fa-solid fa-droplet" style="font-size:11px"></i> ' + String(Math.round(o.mm * 10) / 10).replace(".", ",") + " mm" : ""}</span>`
+          + `<span class="v">${o.vento != null ? '<i class="fa-solid fa-wind" style="font-size:11px"></i> ' + o.vento + " km/h" : ""}</span></div>`).join("")
+          : '<div class="meteo-msg" style="padding:20px 0">Nessun dettaglio per questo giorno.</div>');
+      giorniEl.querySelector(".sel")?.scrollIntoView({ block: "nearest", inline: "center" });
+    };
+    giorniEl.addEventListener("click", e => { const b = e.target.closest(".meteo-chip"); if(b){ sel = b.dataset.g; rendi(); oreEl.scrollTop = 0; } });
+    velo.querySelector(".meteo-nota").textContent = (d.demo ? "Dati di esempio. " : "") + "Fonte dati: " + (d.fonte || "") + (d.aggiornato ? " · aggiornato alle " + ora(d.aggiornato) : "") + ". Le previsioni oltre 2-3 giorni sono meno precise.";
+    document.body.appendChild(velo);
+    rendi();
+  }
+  window.EquoMeteo = {
+    monta(el, cfg){
+      if(!el) return;
+      sprite();
+      const gia = stati.get(el);
+      stati.set(el, Object.assign(gia || {}, cfg));
+      if(!gia){
+        el.setAttribute("role", "button"); el.tabIndex = 0;
+        const tocco = () => { const c = stati.get(el); if(c.azioneMsg){ c.azioneMsg(); return; } if(c.dati) apriDettaglio(el); else carica(el, true); };
+        el.addEventListener("click", tocco);
+        el.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); tocco(); } });
+      }
+      const c = stati.get(el);
+      if(!c.dati || !c.caricatoIl || Date.now() - c.caricatoIl > 30 * 60e3){ c.caricatoIl = Date.now(); carica(el); }
+    },
+    // previsione senza riquadro (es. icona accanto a un appuntamento): stessa cache del riquadro
+    async previsione(pos, cfg){
+      if(!pos) return null;
+      if(pos.demo) return datiDemo();
+      const chiave = "equo-meteo:" + (pos.lat != null ? Number(pos.lat).toFixed(2) + "," + Number(pos.lon).toFixed(2) : String(pos.indirizzo || "") + "|" + String(pos.citta || ""));
+      const salv = leggi(chiave);
+      if(salv && Date.now() - salv.salvato < 30 * 60e3) return salv.dati;
+      try{
+        const tk = await cfg.token();
+        const r = await fetch(cfg.endpoint, { method: "POST", headers: { "Content-Type": "application/json", ...(tk ? { Authorization: "Bearer " + tk } : {}) }, body: JSON.stringify(pos) });
+        const d = await r.json().catch(() => ({}));
+        if(d && d.giorni && d.giorni.length){ scrivi(chiave, { salvato: Date.now(), dati: d }); return d; }
+        return d && d.non_trovato ? { non_trovato: true } : (salv ? salv.dati : null);
+      }catch(e){ return salv ? salv.dati : null; }
+    },
+    // il tempo previsto a una certa ora di un giorno (ora più vicina)
+    alle(dati, giorno, oraHHMM){
+      if(!dati || !dati.ore) return null;
+      const ore = dati.ore.filter(o => giornoDi(o.t) === giorno);
+      if(!ore.length){ const g = (dati.giorni || []).find(x => x.data === giorno); return g ? { sim: g.sim, notte: false, temp: g.max, mm: g.mm } : null; }
+      const [h, m] = String(oraHHMM || "10:00").split(":").map(Number);
+      const obiettivo = h * 60 + (m || 0);
+      const min = o => { const t = ora(o.t).split(":").map(Number); return t[0] * 60 + t[1]; };
+      return ore.reduce((a, b) => Math.abs(min(b) - obiettivo) < Math.abs(min(a) - obiettivo) ? b : a);
+    },
+    icona(k, notte){ sprite(); return icona(k, notte); },
+    iconaNd(titolo){ sprite(); const t = esc(titolo || "Meteo non disponibile"); return `<svg class="mi mi-nd" role="img" aria-label="${t}"><title>${t}</title><use href="#mi-nd"/></svg>`; },
+    nome: k => NOMI[k] || "",
+    ricarica(el){ const c = stati.get(el); if(c){ c.caricatoIl = Date.now(); carica(el, true); } },
+    datiDemo,
+  };
+})();
+</script>
+<style>
+/* ---------- RICERCA GENERALE (lente) ---------- */
+.scud-lente{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:15px;padding:0}
+.scud-lente:hover{border-color:var(--primary);color:var(--primary)}
+.topbar .scud-lente{width:34px;height:34px;margin-left:auto;margin-right:10px}
+.home-testa{display:flex;align-items:center;gap:18px;flex-wrap:nowrap;width:100%}
+.home-testa > div:first-child{flex:none;min-width:0}
+.home-testa .meteo-box{--meteo-acc:var(--primary);flex:1;max-width:560px;margin:0 auto}
+@media (max-width:900px){.home-testa{flex-wrap:wrap}.home-testa .meteo-box{order:3;flex:1 1 100%;max-width:none}.home-testa .scud-lente.home{margin-left:auto}}
+@media (max-width:900px){.home-testa .scud-lente.home{display:none}}
+.sc-cerca{display:none;position:fixed;inset:0;z-index:140;background:rgba(10,10,6,.45);align-items:flex-start;justify-content:center;padding:6vh 14px 14px}
+.sc-cerca.on{display:flex}
+.sc-box{background:var(--bg);color:var(--text);width:100%;max-width:640px;max-height:84vh;border-radius:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border)}
+.sc-testa{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.sc-testa i{color:var(--muted)}
+.sc-testa input{flex:1;border:0;background:none;color:var(--text);font:inherit;font-size:16px;outline:none;padding:6px 0}
+.sc-chiudi{border:0;background:none;color:var(--primary);font:inherit;font-weight:600;cursor:pointer;padding:6px}
+.sc-ris{overflow-y:auto;padding:4px 12px 14px}
+.sc-gruppo{margin-top:12px}
+.sc-titolo{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 6px}
+.sc-titolo span{font-weight:500}
+.sc-riga{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;text-align:left;font:inherit;color:var(--text);cursor:pointer}
+.sc-riga:hover,.sc-riga:focus{outline:2px solid var(--primary);outline-offset:-2px}
+.sc-ico{width:32px;height:32px;border-radius:10px;background:var(--muted-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+.sc-testi{flex:1;min-width:0;display:flex;flex-direction:column}
+.sc-testi b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-testi small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-altri,.sc-sugg{font-size:12px;color:var(--muted);padding:2px 4px 4px;line-height:1.5}
+.sc-sugg{margin-top:14px;text-align:center}
+.sc-nulla{text-align:center;color:var(--muted);font-size:13.5px;padding:34px 10px}
+</style>
+<script>
+/* Ricerca generale di Equo Scuderia: cavalli, persone (team, clienti, maniscalchi, rubrica), lezioni, magazzino, sezioni.
+   Cerca nei dati già caricati dal gestionale (li carica se mancano) e rispetta i moduli del pacchetto. */
+let scCercaAzioni = [], scCercaTimer = null, scCercaPronto = false;
+const scNorm = t => String(t ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+function scModuloOk(k){
+  const nav = document.querySelector(`.nav-item[data-module="${k}"]`);
+  if(!nav || nav.style.display === "none" || nav.hidden) return false;
+  return !(typeof moduloBloccato === "function" && moduloBloccato(k));
+}
+async function apriCercaScud(){
+  const ov = document.getElementById("sc-cerca"); if(!ov) return;
+  if(!scCercaPronto){
+    scCercaPronto = true;
+    const inp = document.getElementById("sc-input");
+    inp.addEventListener("input", () => { clearTimeout(scCercaTimer); scCercaTimer = setTimeout(scCercaMostra, 80); });
+    inp.addEventListener("keydown", e => { if(e.key === "Escape") chiudiCercaScud(); if(e.key === "Enter"){ document.querySelector("#sc-ris .sc-riga")?.click(); } });
+    document.getElementById("sc-ris").addEventListener("click", e => { const b = e.target.closest(".sc-riga"); if(!b) return; const az = scCercaAzioni[Number(b.dataset.i)]; if(az){ chiudiCercaScud(); az(); } });
+    ov.addEventListener("click", e => { if(e.target === ov) chiudiCercaScud(); });
+  }
+  ov.classList.add("on");
+  const inp = document.getElementById("sc-input"); inp.value = "";
+  scCercaMostra();
+  setTimeout(() => inp.focus(), 50);
+  // dati: si caricano solo quelli che mancano
+  try{
+    await Promise.all([
+      !cavalliList.length && scModuloOk("cavalli") ? loadCavalli() : null,
+      !lezioniList.length && scModuloOk("lezioni") ? loadLezioni() : null,
+      typeof mag !== "undefined" && !mag.caricato && scModuloOk("magazzino") ? loadMagazzino() : null,
+      !professionistiList.length && scModuloOk("professionisti") ? loadProfessionisti() : null,
+      !contattiList.length ? loadContatti() : null,
+    ].filter(Boolean));
+  }catch(e){ console.warn("ricerca:", e); }
+  if(ov.classList.contains("on")) scCercaMostra();
+}
+function chiudiCercaScud(){ document.getElementById("sc-cerca")?.classList.remove("on"); }
+function scRiga(icona, titolo, sotto, az){
+  scCercaAzioni.push(az);
+  return `<button type="button" class="sc-riga" data-i="${scCercaAzioni.length - 1}"><span class="sc-ico"><i class="fa-solid ${icona}"></i></span><span class="sc-testi"><b>${escapeHtml(titolo)}</b>${sotto ? `<small>${escapeHtml(sotto)}</small>` : ""}</span><i class="fa-solid fa-chevron-right" style="color:var(--muted);font-size:12px"></i></button>`;
+}
+function scGruppo(titolo, righe, max = 6){
+  if(!righe.length) return "";
+  return `<div class="sc-gruppo"><div class="sc-titolo">${escapeHtml(titolo)}${righe.length > max ? ` <span>(${righe.length})</span>` : ""}</div>${righe.slice(0, max).join("")}${righe.length > max ? `<div class="sc-altri">e altri ${righe.length - max}: aggiungi una parola per restringere</div>` : ""}</div>`;
+}
+function scCercaMostra(){
+  const out = document.getElementById("sc-ris"); if(!out) return;
+  const parole = scNorm(document.getElementById("sc-input").value).split(" ").filter(Boolean);
+  scCercaAzioni = [];
+  const ok = (...campi) => { const t = scNorm(campi.filter(Boolean).join(" ")); return parole.every(p => t.includes(p)); };
+  const sezioni = Object.entries(MODULE_TITLES).filter(([k]) => scModuloOk(k));
+  if(!parole.length){
+    out.innerHTML = `<div class="sc-gruppo"><div class="sc-titolo">Vai a</div>${sezioni.map(([k, t]) => scRiga("fa-arrow-right", t, "", () => showModule(k))).join("")}</div>
+      <div class="sc-sugg">Scrivi il nome di un cavallo, di una persona, un microchip, una data (es. 12/10) o un articolo come «fieno».</div>`;
+    return;
+  }
+  const nomeMembro = id => (typeof membroNome === "function" ? membroNome(id) : "") || "";
+  const cavalli = scModuloOk("cavalli") ? cavalliList.filter(c => ok(c.nome, c.codice_equo, c.microchip, c.razza, c.mantello, c.proprietario, nomeMembro(c.proprietario_membro_id), c.note))
+    .map(c => scRiga("fa-horse-head", c.nome || "Cavallo", [c.proprietario || nomeMembro(c.proprietario_membro_id), c.codice_equo, c.microchip ? "chip " + c.microchip : ""].filter(Boolean).join(" · ") || "Scheda cavallo",
+      () => { showModule("cavalli"); openCavalloDetail(c.id); })) : [];
+  const persone = teamList.filter(m => ok(m.nome_visualizzato, RUOLO_LABELS[m.ruolo], m.ruolo === "proprietario" ? "cliente proprietario" : "team staff"))
+    .map(m => scRiga(m.ruolo === "proprietario" ? "fa-user" : "fa-user-tie", m.nome_visualizzato || RUOLO_LABELS[m.ruolo] || "Membro", (RUOLO_LABELS[m.ruolo] || m.ruolo || "") + (m.user_id && m.user_id !== currentUser?.id ? " · tocca per la chat" : ""),
+      () => { if(m.user_id && m.user_id !== currentUser?.id && typeof chattaConMembro === "function") chattaConMembro(m.id); else showModule("centro"); }))
+    .concat(scModuloOk("professionisti") ? professionistiList.filter(p => ok(p.nome, p.categoria, "maniscalco professionista")).map(p =>
+      scRiga("fa-hammer", p.nome || "Professionista", (p.categoria === "maniscalco" ? "Maniscalco" : p.categoria || "Professionista") + (p.stato === "attivo" ? " · collegato" : " · in attesa"),
+        () => { showModule("professionisti"); if(p.stato === "attivo" && typeof apriChatProfessionista === "function") apriChatProfessionista(p.cliente_id); })) : [])
+    .concat(contattiList.filter(c => ok(c.nome, c.ruolo, c.categoria, c.tipo, c.telefono, c.email, c.azienda, "contatto rubrica fornitore")).map(c =>
+      scRiga("fa-address-book", c.nome || c.azienda || "Contatto", [c.ruolo || c.categoria || c.tipo, c.telefono].filter(Boolean).join(" · ") || "Rubrica",
+        () => { showModule("centro"); openContattoForm(c.id); })));
+  const lezioni = scModuloOk("lezioni") ? lezioniList.filter(l => ok(nomeMembro(l.allievo_id), nomeMembro(l.istruttore_id), l.cavaliere, typeof cavalloNome === "function" ? cavalloNome(l.cavallo_id) : "", formatDate(l.data), l.data, l.note, l.stato, "lezione"))
+    .sort((a, b) => String(b.data).localeCompare(String(a.data)))
+    .map(l => scRiga("fa-person-chalkboard", `${formatDate(l.data)} · ${l.ora_inizio || ""} — ${nomeMembro(l.allievo_id) || l.cavaliere || "Lezione"}`,
+      [nomeMembro(l.istruttore_id) ? "con " + nomeMembro(l.istruttore_id) : "", typeof cavalloNome === "function" ? cavalloNome(l.cavallo_id) : "", l.stato].filter(Boolean).join(" · "),
+      () => { showModule("lezioni"); openLezioneForm(l.id); })) : [];
+  const articoli = scModuloOk("magazzino") && typeof mag !== "undefined" ? (mag.articoli || []).filter(a => ok(a.nome, a.marca, a.categoria, a.sottocategoria, "magazzino articolo"))
+    .map(a => scRiga("fa-boxes-stacked", a.nome || "Articolo", [a.marca, a.sottocategoria || a.categoria].filter(Boolean).join(" · ") || "Magazzino",
+      () => { showModule("magazzino"); if(typeof magApriDettaglio === "function") magApriDettaglio(a.id); })) : [];
+  const sez = sezioni.filter(([k, t]) => ok(t, k)).map(([k, t]) => scRiga("fa-arrow-right", t, "Sezione", () => showModule(k)));
+  const html = scGruppo("Cavalli", cavalli) + scGruppo("Persone", persone) + scGruppo("Lezioni", lezioni, 8) + scGruppo("Magazzino", articoli) + scGruppo("Sezioni", sez);
+  out.innerHTML = html || `<div class="sc-nulla">Nessun risultato per «${escapeHtml(parole.join(" "))}»</div>`;
+}
+document.addEventListener("keydown", e => {
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && document.getElementById("screen-app")?.style.display !== "none"){ e.preventDefault(); apriCercaScud(); }
+});
+</script>
+<script>
+/* Meteo del centro in Home (indirizzo di «Il tuo Centro») */
+function meteoScud(forza){
+  const el = document.getElementById("meteo-scud");
+  if(!el || typeof EquoMeteo === "undefined") return;
+  EquoMeteo.monta(el, {
+    endpoint: "/api/meteo",
+    token: async () => { try{ return (await sb.auth.getSession()).data.session?.access_token || ""; }catch(e){ return ""; } },
+    posizione: async () => {
+      if(DEMO_MODE) return { demo: true };
+      const c = currentCentro || {};
+      if(!c.indirizzo && !c.citta) return { messaggio: { testo: "Aggiungi l'indirizzo del centro per vedere il meteo:", link: "Il tuo Centro", icona: "fa-location-dot", azione: () => showModule("centro") } };
+      return { indirizzo: c.indirizzo || "", citta: [c.citta, c.provincia].filter(Boolean).join(", "), luogo: c.citta || c.nome || "" };
+    },
+    nonTrovato: { testo: "Indirizzo del centro non trovato per il meteo:", link: "controllalo", icona: "fa-location-dot", azione: () => showModule("centro") },
+  });
+  if(forza) EquoMeteo.ricarica(el);
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && document.getElementById("module-home")?.style.display !== "none") try{ meteoScud(); }catch(e){} });
+</script>
+<script>
+/* Data e ora attuali nella riga «Bentornato» della Home (si aggiornano a ogni minuto) */
+function aggiornaDataOraScud(){
+  const el = document.getElementById("home-dataora"); if(!el) return;
+  const d = new Date();
+  el.textContent = " · " + d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }) + " · " + d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+}
+(function(){
+  aggiornaDataOraScud();
+  const prossimo = () => setTimeout(() => { aggiornaDataOraScud(); prossimo(); }, 60000 - (Date.now() % 60000) + 50);
+  prossimo();
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") aggiornaDataOraScud(); });
+})();
 </script>
 </body>
 </html>

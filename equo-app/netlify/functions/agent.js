@@ -53,7 +53,11 @@ const REGOLE_RELAZIONE = `## Proattività
 - Se accetta (o se ti chiede lui di dirlo ai Boss, al team, all'assistenza o agli sviluppatori), usa riferisci_ai_boss con: tipo, un riassunto chiaro in 1-3 frasi, le sue parole e, per i problemi, cosa stava facendo, cosa si aspettava e cosa è successo (se mancano, chiedili prima con UNA sola domanda). Poi conferma: "Fatto, l'ho girato ai Boss: appena mi rispondono te lo scrivo qui."
 - Non promettere tempi né che la cosa verrà fatta, e non inventare mai risposte al posto dei Boss. Per sapere a che punto è una richiesta usa le_mie_segnalazioni.
 - Le risposte dei Boss arrivano in questa chat con il titolo "📬 Risposta dai Boss": se l'utente ci risponde e vuole aggiungere qualcosa, gira anche quello.`;
-const REGOLE_COMUNI = REGOLA_GUIDA + "\n\n" + REGOLE_RELAZIONE;
+const REGOLA_METEO = `## Meteo
+- Per il tempo ("che tempo fa oggi da …?", "piove domani in scuderia?", "posso fare lezione / ferrare all'aperto giovedì?") usa SEMPRE lo strumento meteo con il luogo nominato (cliente, struttura, cavallo, scuderia, centro o località) e il giorno. Mai previsioni a memoria.
+- Rispondi in 2-4 righe: com'è il giorno (cielo, minima/massima, pioggia, vento) e le ore che contano; poi un consiglio pratico per lavorare con i cavalli (es. "pioggia dalle 14: meglio ferrare la mattina", "vento forte: lezione in campo coperto"). Oltre 2-3 giorni dì che la previsione è meno precisa.
+- Se il luogo non ha un indirizzo, dillo e indica dove aggiungerlo (scheda cliente, Il tuo Centro) oppure chiedi la località.`;
+const REGOLE_COMUNI = REGOLA_GUIDA + "\n\n" + REGOLE_RELAZIONE + "\n\n" + REGOLA_METEO;
 
 // ---------------------------------------------------------------- istruzioni fisse (in cache)
 // Corpo comune (dati, azioni, foto, sicurezza, guida all'app). Sopra ci va l'identità:
@@ -119,6 +123,10 @@ Parli in italiano, in modo cordiale, diretto e pratico.
 ${CORPO_PROPRIETARIO}`;
 
 // ---------------------------------------------------------------- strumenti
+const STRUMENTO_METEO = { name: "meteo", description: "Previsioni del tempo di oggi e dei prossimi 7 giorni (ora per ora per i primi 2-3 giorni, poi ogni 6 ore) per un cliente o una struttura del maniscalco, per un cavallo, per la scuderia dell'utente, per il centro (in Equo Scuderia) o per una località italiana. Restituisce cielo, temperature, pioggia e vento.", input_schema: { type: "object", properties: {
+  luogo: { type: "string", description: "Cliente, struttura, cavallo, scuderia o località (es. \"Scuderia Colleferro\", \"Aurora\", \"Velletri\"). Vuoto = dove si trova l'utente, o il centro in Equo Scuderia." },
+  giorno: { type: "string", description: "YYYY-MM-DD (default oggi)." },
+} } };
 const STRUMENTI = [
   { name: "elenco_cavalli", description: "Elenca i cavalli dell'utente con razza, data di nascita, microchip, mantello e note.", input_schema: { type: "object", properties: {} } },
   { name: "scadenze", description: "Prossime scadenze sanitarie (vaccini, Coggins, ferratura, sverminazione) di tutti i cavalli, comprese quelle già scadute. Una riga per cavallo e tipo: la più recente.", input_schema: { type: "object", properties: { giorni_avanti: { type: "integer", description: "Quanti giorni nel futuro guardare (default 90)." } } } },
@@ -191,8 +199,8 @@ const STRUMENTI = [
       ora: { type: "string", description: "HH:MM facoltativa." },
       note: { type: "string" },
     }, required: ["tipo", "data"] },
-    cache_control: { type: "ephemeral" },
   },
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 
 // ---------------------------------------------------------------- HAMMER (maniscalchi)
@@ -272,8 +280,8 @@ const STRUMENTI_HAMMER = [
   clonaStrumento("salva_memoria"),
   clonaStrumento("riferisci_ai_boss"),
   clonaStrumento("le_mie_segnalazioni"),
-  ...STRUMENTI_GESTIONE.slice(0, -1),
-  { ...STRUMENTI_GESTIONE[STRUMENTI_GESTIONE.length - 1], cache_control: { type: "ephemeral" } },
+  ...STRUMENTI_GESTIONE,
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 
 // ---------------------------------------------------------------- ATHENA (Equo Scuderia: gestori, staff, istruttori)
@@ -301,20 +309,21 @@ const STRUMENTI_ATHENA = [
   clonaStrumento("guida_app"),
   { name: "situazione_centro", description: "Situazione attuale del centro: scadenze sanitarie entro 30 giorni (e già scadute), pacchetti/carnet da rinnovare, lezioni di oggi e domani, articoli di magazzino sotto la soglia minima, ordini aperti, box (occupati, liberi, in manutenzione, cavalli fuori dal box e, dopo le 11, cavalli in box senza pasto del mattino segnato).", input_schema: { type: "object", properties: {} } },
   clonaStrumento("riferisci_ai_boss"),
-  { ...clonaStrumento("le_mie_segnalazioni"), cache_control: { type: "ephemeral" } },
+  clonaStrumento("le_mie_segnalazioni"),
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 // Athena BASIC (pacchetto START): solo guida al gestionale, niente proattività, niente segnalazioni ai Boss
 const ISTRUZIONI_ATHENA_BASIC = ISTRUZIONI_ATHENA
   .replace(REGOLE_COMUNI, "")
   .replace(/- Domande sulla situazione del centro[^\n]*\n/, "")
   .replace(/- Chiudi, se utile, con UNA proposta concreta[^\n]*\n/, "")
-  + REGOLA_GUIDA_BASIC + `
+  + REGOLA_GUIDA_BASIC + "\n\n" + REGOLA_METEO + `
 
 ## Versione Athena Basic (pacchetto START)
 - Rispondi solo alle domande: niente avvisi o consigli non richiesti, niente riepiloghi, niente domande sul miglioramento dell'app.
 - Non puoi girare segnalazioni ai Boss: per problemi, richieste o idee indica "Serve aiuto?" → "Apri un ticket" in Home.
 - Se l'utente chiede funzioni non incluse nel suo pacchetto (Pacchetti & Abbonamenti, Magazzino, Statistiche, Store, Fatturazione, altri agenti), spiega in una riga cosa fanno e che sono incluse da ADVANCE in su.`;
-const STRUMENTI_ATHENA_BASIC = [{ ...clonaStrumento("guida_app"), cache_control: { type: "ephemeral" } }];
+const STRUMENTI_ATHENA_BASIC = [clonaStrumento("guida_app"), { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } }];
 
 // ---------------------------------------------------------------- MERLINO (Equo Scuderia: analista, contabile e stratega del centro)
 const MERLINO_MAX_RICERCHE = 4;
@@ -346,7 +355,8 @@ const STRUMENTI_MERLINO = [
   { name: "situazione_centro", description: "Situazione attuale: scadenze sanitarie entro 30 giorni, pacchetti da rinnovare, lezioni di oggi e domani, articoli sotto soglia, ordini aperti, box (occupati/liberi/manutenzione, cavalli fuori box, senza pasto del mattino).", input_schema: { type: "object", properties: {} } },
   { name: "ultimo_radar", description: "Ultimo 'Radar di Merlino' sulla concorrenza della zona (offerte, prezzi, eventi, recensioni, opportunità, mosse consigliate) con data e fonti.", input_schema: { type: "object", properties: {} } },
   clonaStrumento("riferisci_ai_boss"),
-  { ...clonaStrumento("le_mie_segnalazioni"), cache_control: { type: "ephemeral" } },
+  clonaStrumento("le_mie_segnalazioni"),
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 
 // ---- supporto strumenti gestionali (sempre con il client dell'utente: RLS del maniscalco)
@@ -447,6 +457,89 @@ function senzaImporti(v) {
     return o;
   }
   return v;
+}
+
+// ---- METEO (stessa fonte e cache della funzione meteo della Home)
+const { previsione: meteoPrevisione } = require("./meteo");
+const METEO_NOMI = { sereno: "sereno", variabile: "poco nuvoloso", nubi: "nuvoloso", nebbia: "nebbia", pioviggine: "pioggia debole", pioggia: "pioggia",
+  pioggia_forte: "pioggia forte", temporale: "temporale", neve: "neve", nevischio: "neve mista a pioggia" };
+const meteoGiorno = (iso) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+const meteoOra = (iso) => new Date(iso).toLocaleTimeString("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
+const meteoGiornoIt = (d) => new Date(d + "T12:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
+const indirizzoCompleto = (r) => r?.indirizzo ? [r.indirizzo, [r.citta, r.provincia ? `(${r.provincia})` : ""].filter(Boolean).join(" ")].filter(Boolean).join(", ") : null;
+
+// luogo → posizione per il meteo (stesse regole di naviga_verso)
+async function luogoMeteo(dest, ctx) {
+  const generico = !dest || /^(qui|oggi|la mia |il mio )?(scuderia|maneggio|centro( ippico)?|circolo|struttura)?$/i.test(dest);
+  if (ctx.vista === "scuderia") {
+    const { data: c } = await ctx.admin.from("centri").select("nome, indirizzo, citta, provincia").eq("id", ctx.centroId).maybeSingle();
+    const nomeCentro = String(c?.nome || "").toLowerCase();
+    if (generico || (nomeCentro && (nomeCentro.includes(dest.toLowerCase()) || dest.toLowerCase().includes(nomeCentro)))) {
+      if (!c?.indirizzo && !c?.citta) return { messaggio: `Il centro ${c?.nome || ""} non ha l'indirizzo: va inserito in "Il tuo Centro" (indirizzo, città, provincia). Intanto chiedi la località.` };
+      return { pos: { indirizzo: c.indirizzo || "", citta: [c.citta, c.provincia].filter(Boolean).join(", "), luogo: c.citta || c.nome }, nome: c.nome };
+    }
+    return { pos: { citta: dest, luogo: dest }, nome: dest };
+  }
+  if (ctx.ambito === "maniscalco") {
+    if (generico) return ctx.posizione ? { pos: { ...ctx.posizione }, nome: "dove ti trovi" } : { messaggio: "Non conosco la posizione del maniscalco: chiedi di quale cliente, struttura o località vuole il meteo." };
+    const clienti = await clientiManiscalco(ctx);
+    let trovati = trovaPerNome(clienti, dest);
+    if (!trovati.length) {
+      const { data: cav } = await ctx.db.from("cavalli_clienti_mascalcia").select("cliente_mascalcia_id").ilike("nome", `%${dest.replace(/[%_]/g, "")}%`).limit(10);
+      const ids = [...new Set((cav || []).map((x) => x.cliente_mascalcia_id))];
+      trovati = clienti.filter((x) => ids.includes(x.id));
+    }
+    if (trovati.length > 1) return { messaggio: `Più clienti corrispondono a "${dest}": ${trovati.slice(0, 6).map((x) => x.nome).join(", ")}. Chiedi quale.` };
+    if (trovati.length === 1) {
+      const c = trovati[0];
+      const { data: ci } = await ctx.db.from("clienti_mascalcia").select("indirizzo, centro_id").eq("id", c.id).maybeSingle();
+      let indirizzo = (ci?.indirizzo || "").trim() || null;
+      if (!indirizzo && ci?.centro_id) {
+        const { data: st } = await ctx.db.rpc("pro_indirizzi_strutture");
+        indirizzo = indirizzoCompleto((st || []).find((x) => x.cliente_id === c.id));
+      }
+      if (!indirizzo) return { messaggio: `${c.nome} non ha un indirizzo: il maniscalco può aggiungerlo in Clienti → ${c.nome} → "Modifica" → Indirizzo (o con "Naviga", che lo salva). Intanto chiedi la località.` };
+      return { pos: { indirizzo, luogo: c.nome }, nome: c.nome };
+    }
+    return { pos: { citta: dest, luogo: dest }, nome: dest };
+  }
+  // proprietario: scuderie collegate, altrimenti posizione del telefono o località
+  const { data: sc } = await ctx.db.rpc("prop_indirizzi_scuderie");
+  const scuderie = sc || [];
+  const vuoto = !dest;
+  if (vuoto && ctx.posizione) return { pos: { ...ctx.posizione }, nome: "dove ti trovi" };
+  let trovate = generico ? scuderie : trovaPerNome(scuderie, dest);
+  if (trovate.length > 1) return { messaggio: `Più scuderie corrispondono: ${trovate.map((x) => x.nome).join(", ")}. Chiedi quale.` };
+  if (trovate.length === 1) {
+    const r = trovate[0];
+    if (!r.indirizzo && !r.citta) return { messaggio: `La scuderia ${r.nome} non ha inserito l'indirizzo in Equo Scuderia. Chiedi la località.` };
+    return { pos: { indirizzo: r.indirizzo || "", citta: [r.citta, r.provincia].filter(Boolean).join(", "), luogo: r.citta || r.nome }, nome: r.nome };
+  }
+  if (generico) return { messaggio: "Non so dove si trova: chiedi la località (o di consentire la posizione nell'app)." };
+  return { pos: { citta: dest, luogo: dest }, nome: dest };
+}
+
+async function strumentoMeteo(input, ctx) {
+  const dest = String(input.luogo || "").trim().slice(0, 120);
+  const l = await luogoMeteo(dest, ctx);
+  if (l.messaggio) return l.messaggio;
+  const r = await meteoPrevisione(l.pos);
+  if (r.non_trovato) return `Non trovo "${dest}" sulla mappa: chiedi la località precisa (comune e provincia).`;
+  if (!r.giorni) return "Il servizio meteo non risponde in questo momento: riprova tra poco.";
+  const oggi = meteoGiorno(new Date().toISOString());
+  const giorno = /^\d{4}-\d{2}-\d{2}$/.test(String(input.giorno || "")) ? input.giorno : oggi;
+  const g = r.giorni.find((x) => x.data === giorno);
+  const righe = [`Meteo per ${l.nome}${r.luogo && r.luogo !== l.nome ? " (" + r.luogo + ")" : ""}. Fonte: ${r.fonte}.`];
+  if (!g) righe.push(`Nessuna previsione per il ${giorno}: disponibili solo i prossimi 7 giorni.`);
+  else {
+    righe.push(`${giorno === oggi ? "Oggi" : meteoGiornoIt(giorno)}: ${METEO_NOMI[g.sim] || g.sim}, min ${g.min}° max ${g.max}°, pioggia totale ${g.mm} mm.`);
+    const ore = r.ore.filter((o) => meteoGiorno(o.t) === giorno).filter((o) => { const h = Number(meteoOra(o.t).slice(0, 2)); return h >= 6 && h <= 21; });
+    const passo = ore.length > 8 ? 2 : 1;
+    const dettagli = ore.filter((o, i) => i % passo === 0 || Number(o.mm) > 0 || ["temporale", "pioggia_forte", "neve"].includes(o.sim)).map((o) => `${meteoOra(o.t)} ${METEO_NOMI[o.sim] || o.sim} ${o.temp}°${Number(o.mm) > 0 ? " " + o.mm + "mm" : ""}${o.vento != null ? " vento " + o.vento + "km/h" : ""}`);
+    if (dettagli.length) righe.push("Ore: " + dettagli.join("; ") + (ore.every((o) => o.passo === 6) ? " (previsione ogni 6 ore)" : ""));
+  }
+  righe.push("Prossimi giorni: " + r.giorni.filter((x) => x.data !== giorno).map((x) => `${meteoGiornoIt(x.data)} ${METEO_NOMI[x.sim] || x.sim} ${x.min}/${x.max}°${x.mm ? " " + x.mm + "mm" : ""}`).join("; "));
+  return righe.join("\n");
 }
 
 async function eseguiStrumento(nome, input, ctx) {
@@ -731,6 +824,8 @@ async function eseguiStrumento(nome, input, ctx) {
       return "Scheda di conferma mostrata" + (dati.invia_riepilogo ? ": dopo la conferma si apre la chat con il PDF di riepilogo." : ".");
     }
 
+    case "meteo": return await strumentoMeteo(input, ctx);
+
     case "naviga_verso": {
       const dest = String(input.destinazione || "").trim().slice(0, 150);
       if (!dest) return "Chiedi dove vuole andare.";
@@ -961,6 +1056,9 @@ exports.handler = async (event) => {
     guida: scud ? "scuderia" : vista === "professionista" ? "maniscalco" : "proprietario",
     strumenti: merlino ? STRUMENTI_MERLINO : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
     centroId: centro?.id || null, agente, vista, contestoConversazione };
+  // ultima posizione nota del telefono (solo per il meteo, arrotondata a ~1 km dall'app)
+  if (body.posizione && Number.isFinite(Number(body.posizione.lat)) && Number.isFinite(Number(body.posizione.lon)))
+    ctx.posizione = { lat: Math.round(Number(body.posizione.lat) * 100) / 100, lon: Math.round(Number(body.posizione.lon) * 100) / 100 };
   // incassi nascosti dal maniscalco (interruttore con PIN nell'app): niente importi nelle risposte.
   // Letto a parte: se la colonna non esistesse ancora, il resto funziona uguale.
   try {

@@ -1,6 +1,24 @@
 // OneSignal Web SDK v16: il worker DEVE importare OneSignalSDK.sw.js (non il vecchio worker v15 /sdks/OneSignalSDKWorker.js).
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
+/* Tocco su una notifica: salviamo quale chat aprire. Su iPhone l'app installata a volte si riapre
+   sulla Home senza i parametri della notifica: la pagina legge questo appunto all'avvio e quando torna in primo piano. */
+self.addEventListener("notificationclick", (e) => {
+  try {
+    const trova = (o, liv) => {
+      if (!o || typeof o !== "object" || liv > 6) return null;
+      if (o.apri === "chat") return o;
+      for (const k in o) { const r = trova(o[k], liv + 1); if (r) return r; }
+      return null;
+    };
+    let dati = e.notification && e.notification.data;
+    if (typeof dati === "string") { try { dati = JSON.parse(dati); } catch (_) {} }
+    const d = trova(dati, 0);
+    if (d) e.waitUntil(caches.open("equo-notifica").then((c) => c.put("/__ultima-notifica",
+      new Response(JSON.stringify({ d, t: Date.now() }), { headers: { "Content-Type": "application/json" } }))));
+  } catch (_) {}
+});
+
 /* =====================================================================
    EQUO OFFLINE — stesso service worker delle notifiche push (uno solo per sito, niente conflitti).
    - Pagine (index.html, /groom): prima la rete, senza rete l'ultima copia salvata → l'app si apre sempre.

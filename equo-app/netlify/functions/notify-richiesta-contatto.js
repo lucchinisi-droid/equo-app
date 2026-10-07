@@ -12,11 +12,12 @@ const RICHIESTE = { seconda_professione: "Aggiungere una seconda professione", c
 const ORIGINI = {
   sito_candidatura: "Sito equohub.com · modulo «Veterinari e trainer»",
   sito_scuderia_smart: "Sito equohub.com · modulo «Scuderia smart»",
+  sito_scuderia: "Sito equohub.com · pagina Scuderia · «Richiedi una demo»",
   app_primo_accesso: "Equo App · primo accesso (scelta del profilo)",
   app_aggiungi_profilo: "Equo App · menu profilo → «+ Aggiungi profilo»",
   app_menu: "Equo App · menu profilo",
 };
-const ORIGINE_BREVE = { sito_candidatura: "Sito", sito_scuderia_smart: "Sito", app_primo_accesso: "App", app_aggiungi_profilo: "App", app_menu: "App" };
+const ORIGINE_BREVE = { sito_scuderia: "Sito", sito_candidatura: "Sito", sito_scuderia_smart: "Sito", app_primo_accesso: "App", app_aggiungi_profilo: "App", app_menu: "App" };
 const INTERESSI = { telecamere: "Telecamere", gps: "GPS", display: "Display touch", monitor: "Monitor", altro: "Altro" };
 const RUOLI = { proprietario: "Proprietario", maniscalco: "Maniscalco", veterinario: "Veterinario", istruttore: "Istruttore/Trainer", gestore_struttura: "Gestore struttura" };
 
@@ -63,10 +64,16 @@ exports.handler = async (event) => {
       (r.messaggio ? riga("Messaggio", esc(r.messaggio)) : "") + (d.pagina ? riga("Pagina", esc(d.pagina)) : "") +
       riga("Consenso privacy", esc(r.consenso_privacy ? new Date(r.consenso_privacy).toLocaleString("it-IT", { timeZone: "Europe/Rome" }) : "—"));
   } else if (r.tipo === "struttura") {
-    titolo = "Nuova struttura da ricontattare";
-    subject = `Struttura da ricontattare: ${r.nome_struttura || "—"} (${r.citta || "—"})`;
-    righe = riga("Provenienza", esc(provenienza)) + riga("Struttura", esc(r.nome_struttura)) + riga("Via", esc(r.via || "—")) + riga("Città", esc(r.citta)) +
-      riga("Email", esc(r.email)) + riga("Telefono", esc(r.telefono)) + (r.messaggio ? riga("Note", esc(r.messaggio)) : "") + riga("Account Equo", esc(account));
+    const dalSito = origineKey === "sito_scuderia";
+    titolo = dalSito ? "Richiesta demo · Equo Scuderia" : "Nuova struttura da ricontattare";
+    subject = dalSito ? `[Sito] Demo Scuderia: ${r.nome_struttura || "—"} (${luogo || "—"})${d.pacchetto ? " · " + d.pacchetto : ""}`
+      : `Struttura da ricontattare: ${r.nome_struttura || "—"} (${r.citta || "—"})`;
+    righe = riga("Provenienza", esc(provenienza)) + (r.nome ? riga("Nome e cognome", esc(r.nome)) : "") + riga("Struttura", esc(r.nome_struttura)) +
+      (r.via ? riga("Via", esc(r.via)) : "") + riga("Città", esc(luogo || "—")) + riga("Email", mail) + riga("Telefono", tel) +
+      (d.cavalli ? riga("Cavalli", esc(d.cavalli)) : "") + (d.pacchetto ? riga("Pacchetto", esc(d.pacchetto)) : "") +
+      (r.messaggio ? riga(dalSito ? "Messaggio" : "Note", esc(r.messaggio)) : "") + riga("Account Equo", esc(account)) +
+      (d.pagina ? riga("Pagina", esc(d.pagina)) : "") +
+      (r.consenso_privacy ? riga("Consenso privacy", esc(new Date(r.consenso_privacy).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))) : "");
   } else {
     titolo = "Richiesta di un altro profilo";
     subject = `Richiesta profilo: ${RICHIESTE[r.richiesta] || "altro"} · ${r.nome || p?.full_name || "utente"}`;

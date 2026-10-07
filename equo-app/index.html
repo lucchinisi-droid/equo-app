@@ -404,6 +404,8 @@ body.ct-aperta{overflow:hidden}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:60}
 .ai-fab .icon{width:24px;height:24px}
+.ai-fab{transition:opacity .2s,transform .2s}
+body.fab-via .ai-fab{opacity:0;transform:scale(.7);pointer-events:none}
 .ai-fab-dot{display:none;position:absolute;top:4px;right:4px;width:13px;height:13px;border-radius:50%;background:#e5484d;border:2px solid var(--bg,#fff)}
 .ai-fab.con-novita .ai-fab-dot{display:block}
 /* icona dell'agente (Pegasus = testa di cavallo, Hammer = martello) con piccola rotazione sx/dx + zoom */
@@ -438,6 +440,14 @@ body.ct-aperta{overflow:hidden}
 .eq-pop .grande b{font-size:26px;display:block;margin-top:4px;letter-spacing:-.01em}
 .eq-pop .az-riga{display:flex;gap:10px;margin-top:6px}
 .eq-pop .az-riga button{flex:1}
+.ric-pag{margin:2px 0 12px;text-align:center}
+.ric-pag #ric-pag-imp{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.ric-pag-scelte{display:inline-flex;background:var(--surface2);border-radius:999px;padding:3px;gap:3px}
+.ric-pag-scelte button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer}
+.ric-pag-scelte button.on[data-p="saldato"]{background:#1d4a35;color:#fff}
+.ric-pag-scelte button.on[data-p="da_saldare"]{background:#e8b04b;color:#14231b}
+.nota-modifica{display:inline-block;margin-top:3px;font-size:11.5px;font-weight:700;color:#8a5a00;background:rgba(232,176,75,.22);border:1px solid rgba(232,176,75,.55);border-radius:8px;padding:2px 7px;line-height:1.35}
+.nota-modifica.lunga{display:block;font-size:12.5px;padding:6px 9px;margin-top:2px}
 .btn-equo-ok{background:#1d4a35;color:#fff;border:2.5px solid #e8b04b;border-radius:14px;padding:12px 10px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit}
 .btn-equo-cambia{background:#e8b04b;color:#14312a;border:2.5px solid #fff;border-radius:14px;padding:12px 10px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
 .btn-equo-ok:active,.btn-equo-cambia:active{transform:scale(.98)}
@@ -537,6 +547,19 @@ body.ai-aperta{overflow:hidden}
   display:flex;flex-direction:column;gap:2px}
 .mchat-bubble.out{align-self:flex-end;background:var(--accent);color:#14231b;border-bottom-right-radius:3px}
 .mchat-bubble.in{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
+/* risposta a un messaggio (stile WhatsApp): citazione nella bolla + barra sopra il campo di testo */
+.mchat-cit{display:block;border-left:3px solid #1d4a35;background:rgba(20,35,27,.07);border-radius:8px;padding:5px 8px;margin:-2px 0 6px;cursor:pointer;max-width:100%}
+.mchat-bubble.out .mchat-cit{background:rgba(255,255,255,.35)}
+.mchat-cit b{display:block;font-size:12px;color:#1d4a35}
+.mchat-cit span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;opacity:.85;word-break:break-word}
+.mchat-bubble{transition:transform .15s}
+.mchat-bubble.lampeggia{animation:mchatLampo 1.2s}
+@keyframes mchatLampo{0%,60%{box-shadow:0 0 0 3px rgba(232,176,75,.85)}100%{box-shadow:none}}
+.risposta-bar{display:flex;align-items:center;gap:10px;padding:8px 12px 0;background:var(--surface);flex-shrink:0}
+.risposta-bar .rb-cit{flex:1;min-width:0;border-left:3px solid #1d4a35;background:var(--surface2);border-radius:8px;padding:6px 9px}
+.risposta-bar .rb-cit b{display:block;font-size:12px;color:#1d4a35}
+.risposta-bar .rb-cit span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.risposta-bar button{border:0;background:transparent;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 6px}
 .mchat-bubble-text{white-space:pre-wrap;word-break:break-word}
 .mchat-messages{overscroll-behavior:contain;position:relative}
 .mchat-bubble.nuovo{animation:bollaIn .18s ease-out}
@@ -550,9 +573,10 @@ body.ai-aperta{overflow:hidden}
 @media (prefers-reduced-motion: reduce){.mchat-bubble.nuovo{animation:none}}
 .mchat-bubble-time{font-size:10.5px;align-self:flex-end;display:flex;align-items:center;gap:4px}
 .mchat-bubble-time .t{opacity:.65}
-/* spunte di lettura con mini ferri di cavallo: 1 = inviato, 2 grigi = consegnato, 2 verde scuro = letto */
+/* spunte di lettura a pallini: 1 grigio = inviato, 2 grigi = consegnato, 2 verde scuro = letto */
 .ferri{display:inline-flex;align-items:center;line-height:0}
-.ferri svg{height:12px;width:auto;display:block}
+.ferri svg{height:7px;width:auto;display:block}
+.ferri-invio svg{height:11px}
 .ferri-inviato,.ferri-consegnato{color:rgba(20,35,27,.45)}
 .ferri-letto{color:#0b4a2c}
 .mchat-day-sep{align-self:center;font-size:11px;color:var(--muted);background:var(--surface);
@@ -732,6 +756,11 @@ body.ai-aperta{overflow:hidden}
 body.vista-widget .wh{display:grid}
 body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh),
 body.vista-widget #home-main{display:none!important}
+.wg-meteo{display:inline-flex;align-items:center;gap:2px;margin-left:8px;vertical-align:middle;flex:none}
+.wg-meteo .mi{width:22px;height:22px}
+.wg-meteo small{font-size:11.5px;font-weight:600;color:var(--muted)}
+.wg-voce .wg-meteo{margin:0 4px 0 6px}
+.wg-prossimo .wg-meteo small{color:rgba(255,255,255,.85)}
 .wh{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;grid-auto-flow:row dense}
 .wg{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:13px 14px;position:relative;overflow:hidden;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wg:active{transform:scale(.985)}
@@ -769,6 +798,12 @@ body.vista-widget #home-main{display:none!important}
 .wg-azioni.chiaro button.oro{background:#14482c;color:#fff}
 .wg-voce{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--border);font-size:13px;cursor:pointer}
 .wg-voce:first-of-type{margin-top:6px}
+.wg-voce .wg-t{flex:1;min-width:0}
+.gia-fatto-row{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border-radius:12px;padding:10px 12px;margin:-4px 0 12px;font-size:13.5px;line-height:1.4;cursor:pointer}
+.gia-fatto-row input{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--green,#1d4a35)}
+.gia-fatto-row small{font-size:11.5px}
+.wg-piu{flex-shrink:0;border:0;background:var(--surface2);color:var(--muted);border-radius:10px;width:34px;height:30px;font-size:18px;line-height:1;cursor:pointer}
+.wg-voce:active{background:var(--surface2)}
 .wg-ora{font-weight:700;min-width:44px;flex-shrink:0}
 .wg-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wg-t small{color:var(--muted)}
@@ -1032,7 +1067,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   <div class="page-content active" id="page-home">
     <div class="section-title" style="font-size:18px;margin-bottom:2px" id="home-greeting"></div>
     <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="home-date"></div>
-    <button type="button" class="home-cerca ct-apri" onclick="apriCercaTutto()">{{lente}}<span>Cerca cavalli, libretto, spese, chat…</span></button>
+    <div class="meteo-box" id="meteo-owner" aria-label="Meteo dei prossimi 7 giorni"></div>
     <div class="wh" id="wh-owner"></div>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
@@ -1240,7 +1275,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   <div class="page-content" id="page-pro-home">
     <div class="section-title wh-keep" style="font-size:18px;margin-bottom:2px" id="pro-home-greeting">Ciao</div>
     <div class="muted wh-keep" style="font-size:12.5px;margin-bottom:14px" id="pro-home-date"></div>
-    <button type="button" class="home-cerca ct-apri wh-keep" onclick="apriCercaTutto()">{{lente}}<span>Cerca clienti, cavalli, appuntamenti…</span></button>
+    <div class="meteo-box wh-keep" id="meteo-pro" aria-label="Meteo dei prossimi 7 giorni"></div>
     <div class="wh" id="wh-pro"></div>
 
     <div class="card cert-card wh-keep" id="certified-card" style="display:none;margin-bottom:14px"></div>
@@ -1317,15 +1352,27 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div class="stat-card">
         <div class="stat-label">Da incassare</div>
         <div class="stat-value" id="incassi-mese-da-incassare">€ 0</div>
+        <div class="muted" style="font-size:11px;margin-top:2px">interventi già fatti</div>
       </div>
+    </div>
+    <div class="stat-card incassi-previsto" style="margin-top:10px">
+      <div class="stat-label">Previsto dagli appuntamenti in agenda</div>
+      <div class="stat-value" id="incassi-previsto">€ 0</div>
     </div>
     <div class="muted" style="font-size:12.5px;margin:8px 0 14px" id="incassi-mese-numero-wrap">
       <span id="incassi-mese-numero">0</span> interventi questo mese
     </div>
 
     <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:14px;margin-bottom:8px">Da saldare</div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:2px">Da saldare</div>
+      <div class="muted" style="font-size:12px;margin-bottom:8px">Solo cavalli già ferrati o trattati.</div>
       <div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:2px">Previsti</div>
+      <div class="muted" style="font-size:12px;margin-bottom:8px">Importi degli appuntamenti ancora da fare.</div>
+      <div id="incassi-previsti-list"><div class="muted" style="font-size:13px">Nessun importo previsto.</div></div>
     </div>
 
     <div id="incassi-premium-box" style="display:none">
@@ -1452,6 +1499,13 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div id="ric-passo1">
         <p class="grande">Inserisco il prossimo intervento tra<b id="ric-giorni-txt">35 giorni</b></p>
         <p class="piccolo" id="ric-dettaglio"></p>
+        <div class="ric-pag solo-incassi" id="ric-pag" style="display:none">
+          <span id="ric-pag-imp"></span>
+          <div class="ric-pag-scelte">
+            <button type="button" data-p="da_saldare" onclick="richiamoPagamento('da_saldare')">Da saldare</button>
+            <button type="button" data-p="saldato" onclick="richiamoPagamento('saldato')">Saldato</button>
+          </div>
+        </div>
         <div class="az-riga">
           <button class="btn-equo-ok" onclick="richiamoConferma()">OK</button>
           <button class="btn-equo-cambia" onclick="richiamoCambia()">CAMBIA</button>
@@ -1462,6 +1516,14 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <div class="ric-ruota-box"><div class="ric-ruota" id="ric-ruota" onscroll="richiamoRuotaScroll()"></div></div>
         <p class="piccolo" id="ric-dettaglio2"></p>
         <div class="az-riga"><button class="btn-equo-ok" onclick="richiamoConferma()">OK</button></div>
+      </div>
+      <div id="ric-passo3" style="display:none">
+        <p class="grande" style="color:#b0473a">Richiamo molto vicino:<b id="ric-poco-txt">5 giorni</b></p>
+        <p class="piccolo" id="ric-poco-dett">Di solito tra una ferratura e l'altra passano almeno 10 giorni. Controlla che sia giusto.</p>
+        <div class="az-riga">
+          <button class="btn-equo-ok" onclick="richiamoConferma(true)">CONFERMO</button>
+          <button class="btn-equo-cambia" onclick="richiamoCambia()">MODIFICA</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1990,13 +2052,17 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div class="input-row-2">
         <div class="input-group">
           <label class="input-label">Data</label>
-          <input class="input" id="intervento-data" type="date">
+          <input class="input" id="intervento-data" type="date" onchange="aggiornaGiaFatto()">
         </div>
         <div class="input-group">
           <label class="input-label">Ora</label>
           <input class="input" id="intervento-ora" type="time">
         </div>
       </div>
+      <label class="gia-fatto-row" id="intervento-gia-fatto-row" style="display:none">
+        <input type="checkbox" id="intervento-gia-fatto">
+        <span><b>L'ho già fatto</b><br><small class="muted">Lascialo spento se è un appuntamento di oggi ancora da fare: lo segnerai «Fatto» dopo.</small></span>
+      </label>
       <!-- 10. Importo -->
       <div class="input-group solo-incassi">
         <label class="input-label">Importo (€)</label>
@@ -2623,6 +2689,18 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       </div>
       <div class="auth-error" id="collega-struttura-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="inviaRichiestaStruttura()" style="width:100%;margin-top:6px">Invia richiesta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-scollega-struttura" onclick="closeOut(event,'modal-scollega-struttura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-link-slash"></i></span><span id="scollega-struttura-titolo">Chiudi collegamento</span></div>
+    <div class="muted" id="scollega-struttura-testo" style="font-size:13.5px;margin-bottom:16px;line-height:1.55"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-scollega-struttura')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" id="scollega-struttura-ok" onclick="confermaScollegaStruttura()">Chiudi collegamento</button>
     </div>
   </div>
 </div>
@@ -3569,11 +3647,12 @@ const DB = {
   async insertMessaggioProprietario({ conversazione_id, tipo, testo, media_url, file_nome }){
     tipo = tipo || "testo";
     const extra = file_nome ? { file_nome } : {};
+    const risposta = consumaRisposta();
     if(DEMO_MODE){
-      demoState.messaggiProprietari.push({ id: "mo-" + (++demoIdCounter), conversazione_id, mittente_id: "demo-user", tipo, testo: testo || null, media_url: media_url || null, ...extra, letto: true, created_at: new Date().toISOString() });
+      demoState.messaggiProprietari.push({ id: "mo-" + (++demoIdCounter), conversazione_id, mittente_id: "demo-user", tipo, testo: testo || null, media_url: media_url || null, ...extra, risposta, letto: true, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_proprietari").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, ...extra, letto: true });
+    const { error } = await sb.from("messaggi_proprietari").insert({ conversazione_id, mittente_id: currentUser.id, tipo, testo: testo || null, media_url: media_url || null, ...extra, ...(risposta ? { risposta } : {}), letto: true });
     if(error) console.error("insertMessaggioProprietario:", error);
     return { error };
   },
@@ -3629,6 +3708,7 @@ const DB = {
   async inviaMessaggioScuderia({ centro_id, membro_id, testo, tipo = "testo", file_url = null, file_nome = null }){
     if(DEMO_MODE) return { error: null };
     const row = { centro_id, membro_id, mittente_user_id: currentUser.id, testo: testo || null };
+    const risposta = consumaRisposta(); if(risposta) row.risposta = risposta;
     if(tipo !== "testo") Object.assign(row, { tipo, file_url, file_nome });
     const { error } = await sb.from("chat_messaggi").insert(row);
     if(error) console.error("inviaMessaggioScuderia:", error);
@@ -3991,11 +4071,12 @@ const DB = {
     return Array.isArray(data) ? data : [];
   },
   async inviaMessaggioAlManiscalco(clienteId, testo){
+    const risposta = consumaRisposta();
     if(DEMO_MODE){
-      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id: clienteId, mittente_tipo: "cliente", tipo: "testo", testo, letto: false, created_at: new Date().toISOString() });
+      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id: clienteId, mittente_tipo: "cliente", tipo: "testo", testo, risposta, letto: false, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { data, error } = await sb.rpc("invia_messaggio_mascalcia_cliente", { p_cliente_id: clienteId, p_testo: testo });
+    const { data, error } = await sb.rpc("invia_messaggio_mascalcia_cliente", { p_cliente_id: clienteId, p_testo: testo, ...(risposta ? { p_risposta: risposta } : {}) });
     if(error){ console.error("inviaMessaggioAlManiscalco:", error); return { error }; }
     if(data && data.ok === false){ console.error("inviaMessaggioAlManiscalco:", data); return { error: { message: data.errore || "invio non riuscito" } }; }
     return { error: null };
@@ -4157,11 +4238,12 @@ const DB = {
   async insertMessaggioMascalcia({ cliente_mascalcia_id, tipo, testo, audio_url, file_url, file_nome }){
     tipo = tipo || "testo";
     const extra = file_url ? { file_url, file_nome: file_nome || null } : {};
+    const risposta = consumaRisposta();
     if(DEMO_MODE){
-      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: false, created_at: new Date().toISOString() });
+      demoState.messaggiMascalcia.push({ id: "dm-" + Date.now().toString(36) + (++demoIdCounter), cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, risposta, letto: false, created_at: new Date().toISOString() });
       return { error: null };
     }
-    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, letto: false });
+    const { error } = await sb.from("messaggi_mascalcia").insert({ maniscalco_id: currentUser.id, cliente_mascalcia_id, mittente_tipo: "maniscalco", tipo, testo: testo || null, audio_url: audio_url || null, ...extra, ...(risposta ? { risposta } : {}), letto: false });
     if(error) console.error("insertMessaggioMascalcia:", error);
     return { error };
   },
@@ -4621,14 +4703,28 @@ function testoSaluto(){
   return nome ? saluto + ", " + nome.charAt(0).toUpperCase() + nome.slice(1) : saluto;
 }
 function dataDiOggi(){ return new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }); }
+// data + ora attuale in Home (l'ora si aggiorna da sola a ogni minuto, anche il saluto)
+function dataOraDiOggi(){ const d = new Date(); return dataDiOggi() + " · " + d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }); }
+function aggiornaOrologioHome(){
+  const a = document.getElementById("home-date"), b = document.getElementById("pro-home-date");
+  if(a && a.textContent) a.textContent = dataOraDiOggi();
+  if(b && b.textContent) b.textContent = dataOraDiOggi();
+  const g1 = document.getElementById("home-greeting"), g2 = document.getElementById("pro-home-greeting");
+  if(currentUser){ if(g1 && g1.textContent) g1.textContent = testoSaluto(); if(g2 && g2.textContent) g2.textContent = testoSaluto(); }
+}
+(function avviaOrologioHome(){
+  const prossimo = () => setTimeout(() => { aggiornaOrologioHome(); prossimo(); }, 60000 - (Date.now() % 60000) + 50);
+  prossimo();
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") aggiornaOrologioHome(); });
+})();
 function renderHomeGreeting(){
   const g = document.getElementById("home-greeting"); if(!g) return;
   g.textContent = testoSaluto();
-  document.getElementById("home-date").textContent = dataDiOggi();
+  document.getElementById("home-date").textContent = dataOraDiOggi();
 }
 function renderProHomeGreeting(){
   document.getElementById("pro-home-greeting").textContent = testoSaluto();
-  document.getElementById("pro-home-date").textContent = dataDiOggi();
+  document.getElementById("pro-home-date").textContent = dataOraDiOggi();
   renderCertifiedCard();
 }
 
@@ -5245,7 +5341,26 @@ async function saveCompleteProfile(){
    impiegare qualche istante ad aggiornare profiles.piano: aspettiamo un attimo e
    ricontrolliamo, poi ripuliamo l'URL per non ritriggerare al refresh. */
 /* ---------- APERTURA DA NOTIFICA: porta direttamente alla chat di chi ha scritto ---------- */
+// appunto lasciato dal service worker al tocco della notifica (serve su iPhone, che riapre l'app sulla Home)
+async function notificaSalvata(){
+  try{
+    if(!("caches" in window)) return null;
+    const c = await caches.open("equo-notifica");
+    const r = await c.match("/__ultima-notifica");
+    if(!r) return null;
+    await c.delete("/__ultima-notifica");
+    const j = await r.json();
+    return j && j.d && Date.now() - (j.t || 0) < 3 * 60 * 1000 ? j.d : null;
+  }catch(_){ return null; }
+}
+async function controllaNotificaSalvata(){
+  const d = await notificaSalvata();
+  if(d) apriDaNotifica(d);
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") setTimeout(controllaNotificaSalvata, 300); });
+window.addEventListener("focus", () => setTimeout(controllaNotificaSalvata, 300));
 function apriChatDaUrl(){
+  setTimeout(controllaNotificaSalvata, 500);
   const p = new URLSearchParams(window.location.search);
   if(p.get("apri") === "chat"){
     const d = Object.fromEntries(p.entries());
@@ -5439,6 +5554,7 @@ function renderPaymentMethods(){
 
 /* ---------- NAV ---------- */
 function showPage(page){
+  if(page === "home" || page === "pro-home") setTimeout(() => { try{ meteoHome(); }catch(e){} }, 0);
   Registro.pagina(page);
   document.querySelectorAll(".page-content").forEach(el => el.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
@@ -6401,16 +6517,29 @@ function dataRichiamoTesto(iso, giorni){
   return new Date(y, m - 1, d).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 }
 // apre il pop-up e restituisce i giorni scelti (Promise)
-function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo }){
+function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, pagamento, importo }){
   return new Promise(resolve => {
-    richiamoStato = { resolve, giorni, data_intervento, etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "), daCavallo };
+    richiamoStato = { resolve, giorni, data_intervento, etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "), daCavallo, pagamento };
+    // Saldato / Da saldare insieme al richiamo (solo se gli incassi sono visibili)
+    const conPag = pagamento !== undefined && !incassiNascosti();
+    document.getElementById("ric-pag").style.display = conPag ? "block" : "none";
+    document.getElementById("ric-pag-imp").textContent = importo != null && importo !== "" ? "Pagamento · " + formatEuro(Number(importo)) : "Pagamento";
+    if(conPag) richiamoPagamento(pagamento === "saldato" ? "saldato" : "da_saldare");
     document.getElementById("ric-passo1").style.display = "block";
     document.getElementById("ric-passo2").style.display = "none";
+    document.getElementById("ric-passo3").style.display = "none";
     richiamoAggiornaTesti();
     document.getElementById("eq-pop-richiamo").classList.add("attivo");
   });
 }
 const TIPO_INTERVENTO_LABEL_APP = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio" };
+function richiamoPagamento(v){
+  if(richiamoStato) richiamoStato.pagamento = v;
+  document.querySelectorAll("#ric-pag .ric-pag-scelte button").forEach(b => b.classList.toggle("on", b.dataset.p === v));
+}
+// scelta fatta nel pop-up (letta una volta sola da chi ha chiesto il richiamo)
+let richiamoPagamentoScelto = null;
+function prendiPagamentoScelto(){ const v = richiamoPagamentoScelto; richiamoPagamentoScelto = null; return v; }
 function richiamoAggiornaTesti(){
   const r = richiamoStato; if(!r) return;
   document.getElementById("ric-giorni-txt").textContent = r.giorni + (r.giorni === 1 ? " giorno" : " giorni");
@@ -6422,6 +6551,7 @@ function richiamoCambia(){
   const ruota = document.getElementById("ric-ruota");
   ruota.innerHTML = '<div class="pad"></div>' + Array.from({ length: 60 }, (_, i) => `<div class="n" data-g="${i + 1}" onclick="richiamoVaiA(${i + 1})">${i + 1}</div>`).join("") + '<div class="pad"></div>';
   document.getElementById("ric-passo1").style.display = "none";
+  document.getElementById("ric-passo3").style.display = "none";
   document.getElementById("ric-passo2").style.display = "block";
   requestAnimationFrame(() => { ruota.scrollTop = (richiamoStato.giorni - 1) * 40; richiamoRuotaScroll(); });
 }
@@ -6433,9 +6563,20 @@ function richiamoRuotaScroll(){
   ruota.querySelectorAll(".n").forEach(el => el.classList.toggle("sel", Number(el.dataset.g) === g));
   richiamoAggiornaTesti();
 }
-function richiamoConferma(){
+// sotto i 10 giorni non si blocca: si avvisa e si chiede di confermare o modificare
+const RICHIAMO_MIN_GIORNI = 10;
+function richiamoConferma(confermatoPoco){
   const r = richiamoStato; if(!r) return;
+  if(!confermatoPoco && r.giorni < RICHIAMO_MIN_GIORNI){
+    document.getElementById("ric-poco-txt").textContent = r.giorni + (r.giorni === 1 ? " giorno" : " giorni");
+    document.getElementById("ric-poco-dett").textContent = `${r.etichetta} · ${dataRichiamoTesto(r.data_intervento, r.giorni)}. Di solito tra un intervento e l'altro passano almeno ${RICHIAMO_MIN_GIORNI} giorni: confermi?`;
+    document.getElementById("ric-passo1").style.display = "none";
+    document.getElementById("ric-passo2").style.display = "none";
+    document.getElementById("ric-passo3").style.display = "block";
+    return;
+  }
   richiamoStato = null;
+  richiamoPagamentoScelto = r.pagamento !== undefined && !incassiNascosti() ? (r.pagamento || null) : null;
   document.getElementById("eq-pop-richiamo").classList.remove("attivo");
   r.resolve(r.giorni);
 }
@@ -6443,8 +6584,10 @@ function richiamoConferma(){
 async function richiamoPerFatto(e){
   const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
   if(!s.giorni) return e.prossima_scadenza || null;
+  richiamoPagamentoScelto = null;
   const giorni = await chiediRichiamo({ tipo: e.tipo_ferratura, tipo_altro: e.tipo_altro, data_intervento: e.data_intervento,
-    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni, daCavallo: s.daCavallo });
+    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni, daCavallo: s.daCavallo,
+    pagamento: e.stato_pagamento || "da_saldare", importo: e.importo });
   return aggiungiGiorniIso(e.data_intervento, giorni);
 }
 function agNomeCavalloSicuro(e){ try{ return typeof agNomeCavallo === "function" ? agNomeCavallo(e) : ""; }catch(x){ return ""; } }
@@ -6554,25 +6697,38 @@ async function inviaRichiestaStruttura(){
   showToast(data.gia
     ? (data.stato === "attivo" ? `Sei già collegato a ${data.nome}.` : `C'è già una richiesta in corso con ${data.nome}.`)
     : `Richiesta inviata a ${data.nome}: la struttura deve accettarla.`);
+  // P.IVA non obbligatoria: solo un consiglio (serve per il badge Equo Certified)
+  if(data.senza_piva && !data.gia) setTimeout(() => showToast("Consiglio: aggiungi la P.IVA in menu profilo → Dati per i pagamenti per avere il badge Equo Certified."), 3200);
   await loadClientiMascalcia();
   if(currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") openClienteDetail(currentClienteId);
 }
 
-async function scollegaStrutturaCorrente(){
+// chiusura del collegamento con Equo Scuderia: finestra di conferma (prima bastava un doppio tocco)
+function scollegaStrutturaCorrente(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c || !c.centro_id) return;
-  const btn = document.getElementById("cliente-scollega-btn");
-  if(btn && btn.dataset.conferma !== "1"){
-    btn.dataset.conferma = "1";
-    btn.textContent = "Tocca di nuovo per confermare";
-    setTimeout(() => { if(btn){ btn.dataset.conferma = ""; btn.textContent = "Scollega da Equo Scuderia"; } }, 4000);
-    return;
-  }
-  const { data, error } = await sb.rpc("pro_scollega_struttura", { p_cliente_id: c.id });
-  if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita. Riprova."); return; }
-  showToast("Collegamento chiuso. La scheda cliente resta tua.");
-  await loadClientiMascalcia();
-  openClienteDetail(c.id);
+  const attivo = c.collegamento_stato === "attivo";
+  const nome = escapeHtml(c.nome || "la struttura");
+  document.getElementById("scollega-struttura-titolo").textContent = attivo ? "Chiudi collegamento" : "Annulla richiesta";
+  document.getElementById("scollega-struttura-testo").innerHTML = attivo
+    ? `Vuoi chiudere il collegamento con <strong>${nome}</strong>?<br>Lo staff non vedrà più la chat e gli appuntamenti con te. La scheda cliente, gli interventi e i messaggi restano tuoi. Per ricollegarti servirà di nuovo il codice della struttura e la sua conferma.`
+    : `Vuoi annullare la richiesta di collegamento con <strong>${nome}</strong>?`;
+  const ok = document.getElementById("scollega-struttura-ok");
+  ok.textContent = attivo ? "Chiudi collegamento" : "Annulla richiesta"; ok.disabled = false;
+  openModal("modal-scollega-struttura");
+}
+async function confermaScollegaStruttura(){
+  const c = clientiMascalcia.find(x => x.id === currentClienteId);
+  if(!c || !c.centro_id){ closeModal("modal-scollega-struttura"); return; }
+  const ok = document.getElementById("scollega-struttura-ok"); ok.disabled = true;
+  try{
+    const { data, error } = await sb.rpc("pro_scollega_struttura", { p_cliente_id: c.id });
+    if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita. Riprova."); return; }
+    closeModal("modal-scollega-struttura");
+    showToast("Collegamento chiuso. La scheda cliente resta tua.");
+    await loadClientiMascalcia();
+    openClienteDetail(c.id);
+  } finally { ok.disabled = false; }
 }
 
 const ERRORI_COLLEGA_CLIENTE = {
@@ -7566,13 +7722,31 @@ async function renderIncassi(){
   const meseCorrente = isoLocale(new Date()).slice(0, 7); // "2026-09"
   const delMese = interventi.filter(i => (i.data_intervento || "").startsWith(meseCorrente));
   const incassatoMese = delMese.filter(i => i.stato_pagamento === "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
-  const daIncassareMese = delMese.filter(i => i.stato_pagamento !== "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
+  // «Da incassare» = solo interventi già FATTI e non saldati; gli appuntamenti da fare vanno in «Previsti»
+  const fattiNonSaldati = interventi.filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato");
+  const daIncassareMese = fattiNonSaldati.reduce((s, i) => s + (Number(i.importo) || 0), 0);
+  const previsti = interventi.filter(i => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0)
+    .sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+  const previstoTot = previsti.reduce((s, i) => s + (Number(i.importo) || 0), 0);
+  const prevEl = document.getElementById("incassi-previsto");
+  if(prevEl) prevEl.textContent = formatEuro(previstoTot);
+  const prevBox = document.getElementById("incassi-previsti-list");
+  if(prevBox) prevBox.innerHTML = previsti.length === 0
+    ? '<div class="muted" style="font-size:13px">Nessun importo previsto.</div>'
+    : previsti.map(i => `
+      <div class="deadline-item" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${escapeHtml(i.clienti_mascalcia?.nome || "")}</div>
+          <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.ora ? " · " + String(i.ora).slice(0, 5) : ""}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</div>
+        </div>
+        <div style="font-weight:700;font-size:14px;color:var(--muted)">${formatEuro(i.importo)}</div>
+      </div>`).join("");
 
   document.getElementById("incassi-mese-incassato").textContent = formatEuro(incassatoMese);
   document.getElementById("incassi-mese-da-incassare").textContent = formatEuro(daIncassareMese);
   document.getElementById("incassi-mese-numero").textContent = delMese.length;
 
-  if(typeof wgPro !== "undefined"){ wgPro.incassatoMese = incassatoMese; wgPro.daIncassareMese = daIncassareMese; if(typeof wgRidisegna === "function") wgRidisegna(); }
+  if(typeof wgPro !== "undefined"){ wgPro.incassatoMese = incassatoMese; wgPro.daIncassareMese = daIncassareMese; wgPro.previsto = previstoTot; if(typeof wgRidisegna === "function") wgRidisegna(); }
   const homeTeaser = document.getElementById("home-pro-incassi-mese");
   if(homeTeaser) homeTeaser.textContent = formatEuro(incassatoMese) + " incassati";
 
@@ -7580,7 +7754,7 @@ async function renderIncassi(){
   const homeUnread = document.getElementById("home-pro-unread");
   if(homeUnread) homeUnread.textContent = totalUnread > 0 ? `${totalUnread} messagg${totalUnread === 1 ? "io" : "i"} non lett${totalUnread === 1 ? "o" : "i"}` : "Nessun messaggio non letto";
 
-  const daSaldare = interventi.filter(i => i.stato_pagamento !== "saldato").sort((a, b) => new Date(b.data_intervento) - new Date(a.data_intervento));
+  const daSaldare = fattiNonSaldati.slice().sort((a, b) => new Date(b.data_intervento) - new Date(a.data_intervento));
   const daSaldareBox = document.getElementById("incassi-da-saldare-list");
   daSaldareBox.innerHTML = daSaldare.length === 0
     ? '<div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div>'
@@ -7675,6 +7849,15 @@ function aggiornaEquivalenzeMisura(){
 }
 function onMisuraSistemaChange(){ renderMisuraWheel(); } // mantiene la misura equivalente
 
+// «L'ho già fatto»: solo per un appuntamento NUOVO con la data di oggi (passato = fatto, futuro = da fare)
+function aggiornaGiaFatto(){
+  const riga = document.getElementById("intervento-gia-fatto-row");
+  if(!riga) return;
+  const d = document.getElementById("intervento-data").value;
+  const vedi = !interventoInModifica && d === isoLocale(new Date());
+  riga.style.display = vedi ? "flex" : "none";
+  if(!vedi) document.getElementById("intervento-gia-fatto").checked = false;
+}
 async function openInterventoModal(clienteId, intervento, preset){
   interventoInModifica = intervento || null;
   interventoPreset = intervento ? null : (preset || null);
@@ -7746,6 +7929,7 @@ async function openInterventoModal(clienteId, intervento, preset){
   }
   document.getElementById("intervento-error").style.display = "none";
 
+  document.getElementById("intervento-gia-fatto").checked = false; aggiornaGiaFatto();
   openModal("modal-add-intervento");
   toggleInterventoTipoFields();
   await onInterventoClienteChange();
@@ -7828,7 +8012,7 @@ async function salvaInterventoMascalcia(){
   const ora = document.getElementById("intervento-ora").value || null;
   const importoRaw = document.getElementById("intervento-importo").value;
   const importo = importoRaw === "" ? null : Number(importoRaw);
-  const stato_pagamento = document.getElementById("intervento-pagamento").value;
+  let statoPagamento = document.getElementById("intervento-pagamento").value;
   const note = document.getElementById("intervento-note").value.trim();
   const cavalloVal = document.getElementById("intervento-cavallo-select").value;
 
@@ -7865,11 +8049,16 @@ async function salvaInterventoMascalcia(){
     }
 
     // stato: data/ora nel futuro = programmato; altrimenti fatto (in modifica non si "chiude" da solo un programmato)
-    const quando = new Date(data_intervento + "T" + (ora || "00:00")); // senza ora: oggi = fatto
-    const futuro = quando.getTime() > Date.now();
+    // nuovo appuntamento: passato = fatto, oggi = da fare (salvo «L'ho già fatto»), futuro = da fare
+    const oggiIso = isoLocale(new Date());
+    const giaFatto = !!document.getElementById("intervento-gia-fatto")?.checked;
+    const futuro = interventoInModifica
+      ? new Date(data_intervento + "T" + (ora || "00:00")).getTime() > Date.now()
+      : (data_intervento > oggiIso || (data_intervento === oggiIso && !giaFatto));
     const statoPrec = interventoInModifica ? (interventoInModifica.stato || "fatto") : null;
     const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id); // appuntamento con struttura Equo Scuderia
-    const precInfo = interventoInModifica ? { data: interventoInModifica.data_intervento, ora: interventoInModifica.ora ? String(interventoInModifica.ora).slice(0, 5) : "", cliente: interventoInModifica.cliente_mascalcia_id } : null;
+    const precInfo = interventoInModifica ? { data: interventoInModifica.data_intervento, ora: interventoInModifica.ora ? String(interventoInModifica.ora).slice(0, 5) : "", cliente: interventoInModifica.cliente_mascalcia_id,
+      tipo_ferratura: interventoInModifica.tipo_ferratura, tipo_altro: interventoInModifica.tipo_altro || "" } : null;
     const eraRichiesta = !diGruppo && STATI_NON_CONFERMATI.includes(statoPrec);
     // una richiesta confermata per oggi o per il futuro diventa "programmato", mai "fatto" da sola
     // (appuntamenti con struttura: lo stato cambia solo con i tasti; se cambi data/ora la struttura deve riconfermare)
@@ -7884,13 +8073,26 @@ async function salvaInterventoMascalcia(){
         prossima_scadenza = aggiungiGiorniIso(data_intervento, giorniTra(interventoInModifica.data_intervento, interventoInModifica.prossima_scadenza));
       } else if(stato === "fatto"){
         const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
-        prossima_scadenza = await richiamoPerFatto({ id: interventoInModifica?.id, tipo_ferratura, tipo_altro, data_intervento, cavallo_cliente_id, horse_id, cavallo: nomeCv });
+        prossima_scadenza = await richiamoPerFatto({ id: interventoInModifica?.id, tipo_ferratura, tipo_altro, data_intervento, cavallo_cliente_id, horse_id, cavallo: nomeCv, stato_pagamento: statoPagamento, importo });
+        statoPagamento = prendiPagamentoScelto() || statoPagamento;
       } else {
         const sg = await giorniRichiamoSuggeriti(tipo_ferratura, cavallo_cliente_id, horse_id, interventoInModifica?.id);
         prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
       }
     }
 
+    // stesso cliente, stesso cavallo, stesso giorno e stesso tipo: probabilmente salvato due volte
+    if(!interventoInModifica){
+      const stessoGiorno = await DB.listInterventiPeriodo(data_intervento, data_intervento).catch(() => []);
+      const doppio = (stessoGiorno || []).find(i => i.cliente_mascalcia_id === cliente_mascalcia_id && i.tipo_ferratura === tipo_ferratura
+        && ((cavallo_cliente_id && i.cavallo_cliente_id === cavallo_cliente_id) || (horse_id && i.horse_id === horse_id) || (!cavallo_cliente_id && !horse_id && !i.cavallo_cliente_id && !i.horse_id)));
+      if(doppio){
+        const cv = doppio.cavalli_clienti_mascalcia?.nome || agNomeCavallo(doppio) || "questo cavallo";
+        if(!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}${doppio.ora ? " alle " + String(doppio.ora).slice(0, 5) : ""}.\n\nVuoi salvarne comunque un altro?`))
+          return errore("Non salvato: c'era già lo stesso appuntamento.");
+      }
+    }
+    const stato_pagamento = statoPagamento;
     const payload = { cavallo_cliente_id, horse_id, tipo_ferratura, tipo_altro, misura_sistema, numero_ferro, quantita_ferri, data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento, note };
     const { error } = interventoInModifica
       ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
@@ -7907,12 +8109,20 @@ async function salvaInterventoMascalcia(){
           ? testoRichiesta("✅ Appuntamento confermato con nuova data", { tipo_ferratura, tipo_altro, data_intervento, ora }, nomeCv).replace(/\.$/, "") + ` (avevi chiesto ${formatDataBreve(precInfo.data)}${precInfo.ora ? " ore " + precInfo.ora : ""}).`
           : testoRichiesta("✅ Appuntamento confermato", { tipo_ferratura, tipo_altro, data_intervento, ora }, nomeCv) });
       showToast("Richiesta confermata: il cliente riceve un messaggio in chat");
+    } else if(precInfo && diGruppo && ["programmato","richiesto","proposto"].includes(statoPrec)
+        && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || servizioCambiato(precInfo, { tipo_ferratura, tipo_altro }))){
+      showToast("Appuntamento modificato: la struttura riceve l'avviso e deve riconfermarlo");
     } else if(precInfo && !diGruppo && statoPrec === "programmato" && stato === "programmato"
-        && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || precInfo.cliente !== cliente_mascalcia_id)){
-      // 1. appuntamento già confermato spostato: il cliente lo deve sapere
+        && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || precInfo.cliente !== cliente_mascalcia_id || servizioCambiato(precInfo, { tipo_ferratura, tipo_altro }))){
+      // 1. appuntamento già confermato cambiato (data, ora o servizio): il cliente lo deve sapere
       const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || "";
-      await avvisaClienteAppuntamento("spostato", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv }, precInfo);
-      showToast("Appuntamento spostato: il cliente riceve l'avviso in chat");
+      await avvisaClienteAppuntamento("modificato", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv }, precInfo);
+      showToast(clienteCollegatoEquo(cliente_mascalcia_id) ? "Appuntamento modificato: il cliente riceve l'avviso e lo conferma con «Ok, ho visto»" : "Appuntamento modificato: avviso salvato nella chat del cliente");
+    } else if(!interventoInModifica && stato === "programmato" && clienteCollegatoEquo(cliente_mascalcia_id)){
+      // nuovo appuntamento fissato dal maniscalco: il cliente su Equo riceve il messaggio in chat (e la notifica)
+      const nomeCv = (cavalliClienteCorrente.find(c => c.id === cavallo_cliente_id || (horse_id && c.horse_id === horse_id)) || {}).nome || nuovoCavalloNome || "";
+      await avvisaClienteAppuntamento("nuovo", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv });
+      showToast("Appuntamento salvato: il cliente riceve l'avviso in chat");
     } else {
       showToast(interventoInModifica ? "Appuntamento aggiornato" : (stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato"));
     }
@@ -7938,16 +8148,42 @@ async function avvisaClienteAppuntamento(tipo, i, prec){
   if(!i?.cliente_mascalcia_id) return;
   const cav = i.cavallo || "";
   let testo;
-  if(tipo === "spostato"){
-    const da = prec ? `${formatDataBreve(prec.data)}${prec.ora ? " ore " + prec.ora : ""}` : "";
-    testo = testoRichiesta("🔄 Appuntamento spostato", { tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, data_intervento: i.data_intervento, ora: i.ora }, cav).replace(/\.$/, "")
-      + (da ? ` (prima era ${da}).` : ".");
+  if(tipo === "nuovo"){
+    testo = testoRichiesta("📅 Nuovo appuntamento", { tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, data_intervento: i.data_intervento, ora: i.ora }, cav).replace(/\.$/, "")
+      + ". Se non ti va bene scrivimi qui.";
+  } else if(tipo === "spostato" || tipo === "modificato"){
+    const righe = [];
+    if(prec && servizioCambiato(prec, i)) righe.push(`• Servizio: ${etichettaServizio(prec.tipo_ferratura, prec.tipo_altro)} → ${etichettaServizio(i.tipo_ferratura, i.tipo_altro)}`);
+    if(prec && (prec.data !== i.data_intervento || (prec.ora || "") !== (i.ora ? String(i.ora).slice(0, 5) : "")))
+      righe.push(`• Data: ${formatDataBreve(prec.data)}${prec.ora ? " ore " + prec.ora : ""} → ${formatDataBreve(i.data_intervento)}${i.ora ? " ore " + String(i.ora).slice(0, 5) : ""}`);
+    testo = `✏️ APPUNTAMENTO MODIFICATO${cav ? " · " + cav : ""}` + (righe.length ? "\n" + righe.join("\n") : "")
+      + "\n" + testoRichiesta("Ora", { tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, data_intervento: i.data_intervento, ora: i.ora }, "")
+      + (clienteCollegatoEquo(i.cliente_mascalcia_id) ? "\n👉 Tocca «Ok, ho visto» nell'appuntamento per confermare, o scrivimi qui se non ti va bene." : "\nSe non ti va bene scrivimi qui.");
   } else {
     testo = testoRichiesta("❌ Appuntamento annullato", { tipo_ferratura: i.tipo_ferratura, tipo_altro: i.tipo_altro, data_intervento: i.data_intervento, ora: i.ora }, cav)
       + " Scrivimi qui se vuoi fissare un'altra data.";
   }
   const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: i.cliente_mascalcia_id, tipo: "testo", testo });
   if(error) console.error("avvisaClienteAppuntamento:", error);
+}
+function etichettaServizio(t, altro){ return t === "altro" && altro ? altro : (TIPO_FERRATURA_LABELS[t] || t || "Appuntamento"); }
+function servizioCambiato(a, b){ return (a.tipo_ferratura || "") !== (b.tipo_ferratura || "") || (a.tipo_altro || "") !== (b.tipo_altro || ""); }
+// «Modificato · prima: Ferratura, gio 8 ott»: testo breve dalla colonna «modifica» (com'era prima)
+function testoPrimaModifica(m){
+  const p = m && m.prima; if(!p) return "";
+  return `${etichettaServizio(p.tipo, p.tipo_altro)}, ${formatDataBreve(p.data)}${p.ora ? " ore " + p.ora : ""}`;
+}
+// lato maniscalco: l'appuntamento è stato modificato e chi deve saperlo non l'ha ancora confermato/visto
+function notaModificaMan(e, lungo){
+  if(!e || !e.modifica || !e.modifica.prima || e.stato === "fatto") return "";
+  const daStruttura = e.modifica.da === "struttura";
+  const chi = e.gruppo_id ? (daStruttura ? "Proposta della struttura" : "In attesa della struttura") : (clienteCollegatoEquo(e.cliente_mascalcia_id) ? "Il cliente non l'ha ancora visto" : "");
+  if(!e.gruppo_id && !clienteCollegatoEquo(e.cliente_mascalcia_id)) return "";
+  return `<div class="nota-modifica${lungo ? " lunga" : ""}">✏️ Modificato · prima: ${escapeHtml(testoPrimaModifica(e.modifica))}${chi ? " · " + chi : ""}</div>`;
+}
+function clienteCollegatoEquo(id){
+  const c = (clientiMascalcia || []).find(x => x.id === id);
+  return !!(c && c.cliente_user_id && !c.centro_id);
 }
 function deveAvvisareAnnullo(e){
   return e && !e.gruppo_id && e.stato === "programmato" && e.data_intervento >= isoLocale(new Date());
@@ -8042,6 +8278,7 @@ async function renderAgendaSettimana(direzione){
         <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
           <div class="ag-ev-title">${escapeHtml(e.clienti_mascalcia?.nome || "")}${agNomeCavallo(e) ? " · " + escapeHtml(agNomeCavallo(e)) : ""}</div>
           <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della struttura · " : ""}${escapeHtml(agDescrizioneTipo(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          ${notaModificaMan(e)}
         </div>
         ${e.stato === "fatto"
           ? '<span class="ag-ev-done">✓ Fatto</span>'
@@ -8269,10 +8506,25 @@ function fissaDaScadenza(id){
   });
 }
 
+// «Fatto» su un appuntamento di un giorno futuro: si chiede conferma e la data diventa oggi
+// (null = annullato dall'utente; {} = nessun cambio; { data_intervento } = anticipato a oggi)
+function fattoInAnticipo(e){
+  const oggi = isoLocale(new Date());
+  if(!e || !e.data_intervento || e.data_intervento <= oggi) return {};
+  if(e.gruppo_id){ showToast("È un appuntamento con la struttura: segnalo fatto il giorno dell'intervento."); return null; }
+  const quando = formatDataBreve(e.data_intervento);
+  if(!confirm(`Questo appuntamento è per ${quando}. L'hai già fatto oggi?\n\nSe confermi lo segno fatto con la data di oggi.`)) return null;
+  return { data_intervento: oggi };
+}
 async function segnaFattoAgenda(id){
   const e = agEventiCache[id];
-  const upd = { stato: "fatto" };
-  if(e && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = await richiamoPerFatto(e);
+  const anticipo = fattoInAnticipo(e);
+  if(anticipo === null) return;
+  const upd = { stato: "fatto", ...anticipo };
+  if(e && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
+    upd.prossima_scadenza = await richiamoPerFatto({ ...e, ...anticipo });
+    const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
+  }
   const { error } = await DB.updateInterventoMascalcia(id, upd);
   if(error){ showToast("Errore: " + error.message); return; }
   showToast("Segnato come fatto");
@@ -8294,7 +8546,8 @@ function apriAzioniEvento(id){
     escapeHtml(agDescrizioneTipo(e)),
     '<span class="solo-incassi">' + (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
     e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della struttura</span>' : "Da fare",
-    e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con struttura Equo Scuderia: se cambi data o ora, la struttura deve riconfermare.</span>' : "",
+    notaModificaMan(e, true),
+    e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con struttura Equo Scuderia: se cambi servizio, data o ora, la struttura deve riconfermare.</span>' : "",
     e.note ? escapeHtml(e.note) : ""
   ].filter(Boolean).join("<br>");
   const btnFatto = document.getElementById("azioni-evento-fatto");
@@ -8322,10 +8575,13 @@ async function azioneEvento(tipo){
     accettaRichiesta(e.id);
   } else if(tipo === "fatto"){
     const nuovo = e.stato === "fatto" ? "programmato" : "fatto";
-    const upd = { stato: nuovo };
+    const anticipo = nuovo === "fatto" ? fattoInAnticipo(e) : {};
+    if(anticipo === null) return;
+    const upd = { stato: nuovo, ...anticipo };
     if(nuovo === "fatto" && TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
       closeModal("modal-azioni-evento");
-      upd.prossima_scadenza = await richiamoPerFatto(e);
+      upd.prossima_scadenza = await richiamoPerFatto({ ...e, ...anticipo });
+      const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
     }
     const { error } = await DB.updateInterventoMascalcia(e.id, upd);
     if(error){ showToast("Errore: " + error.message); return; }
@@ -8576,15 +8832,96 @@ function formatChatDay(iso){
   return d.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
 }
 
-/* ---------- SPUNTE DI LETTURA (mini ferri di cavallo) ---------- */
+/* ---------- RISPOSTA A UN MESSAGGIO (stile WhatsApp) ----------
+   Scorri una bolla verso destra (o doppio clic) → barra «Rispondi a …» sopra il campo di testo.
+   Il messaggio inviato porta con sé una copia breve di quello citato (colonna risposta: id, nome, testo, tipo). */
+let rispostaInCorso = null; // { ov, id, nome, testo, tipo }
+const ETICHETTE_TIPO_CIT = { audio: "🎤 Nota vocale", foto: "📷 Foto", video: "🎬 Video", documento: "📄 Documento", immagine: "📷 Foto" };
+function citazioneHtml(m){
+  const r = m && m.risposta;
+  if(!r || typeof r !== "object" || !r.id) return "";
+  const testo = r.testo || ETICHETTE_TIPO_CIT[r.tipo] || "Messaggio";
+  return `<div class="mchat-cit" onclick="event.stopPropagation();vaiAlMessaggio('${String(r.id).replace(/[^a-zA-Z0-9_-]/g, "")}', this)"><b>${escapeHtml(r.nome || "")}</b><span>${escapeHtml(testo)}</span></div>`;
+}
+function vaiAlMessaggio(id, da){
+  const box = da && da.closest(".mchat-overlay");
+  const b = (box || document).querySelector(`.mchat-bubble[data-id="${id}"]`);
+  if(!b){ showToast("Messaggio non più nella chat"); return; }
+  b.scrollIntoView({ behavior: "smooth", block: "center" });
+  b.classList.remove("lampeggia"); void b.offsetWidth; b.classList.add("lampeggia");
+}
+function avviaRisposta(bolla){
+  const ov = bolla.closest(".mchat-overlay");
+  if(!ov || !bolla.dataset.id || bolla.dataset.id.startsWith("tmp")) return;
+  const out = bolla.classList.contains("out");
+  const titolo = ov.querySelector(".mchat-header-name")?.textContent?.trim() || "";
+  const firma = bolla.querySelector(":scope > div[style*='font-weight:700']")?.textContent?.trim();
+  const testoEl = bolla.querySelector(".mchat-bubble-text");
+  let tipo = "testo", testo = testoEl ? testoEl.textContent.trim() : "";
+  if(!testo){
+    if(bolla.querySelector("audio")) tipo = "audio";
+    else if(bolla.querySelector("video")) tipo = "video";
+    else if(bolla.querySelector("img")) tipo = "foto";
+    else tipo = "documento";
+    testo = ETICHETTE_TIPO_CIT[tipo];
+  }
+  rispostaInCorso = { ov: ov.id, id: bolla.dataset.id, nome: out ? "Tu" : (firma || titolo || "Messaggio"), testo: testo.slice(0, 160), tipo };
+  mostraBarraRisposta();
+  const inp = ov.querySelector(".mchat-input-bar input, .mchat-input-bar textarea");
+  if(inp) setTimeout(() => inp.focus(), 50);
+}
+function mostraBarraRisposta(){
+  document.querySelectorAll(".risposta-bar").forEach(x => x.remove());
+  const r = rispostaInCorso; if(!r) return;
+  const ov = document.getElementById(r.ov);
+  const barra = ov && ov.querySelector(".mchat-input-bar");
+  if(!barra) return;
+  barra.insertAdjacentHTML("beforebegin", `<div class="risposta-bar"><div class="rb-cit"><b>Rispondi a ${escapeHtml(r.nome)}</b><span>${escapeHtml(r.testo)}</span></div><button type="button" aria-label="Annulla risposta" onclick="annullaRisposta()">✕</button></div>`);
+}
+function annullaRisposta(){ rispostaInCorso = null; document.querySelectorAll(".risposta-bar").forEach(x => x.remove()); }
+// usata dagli invii: restituisce la citazione solo se la chat della risposta è ancora aperta
+function consumaRisposta(){
+  const r = rispostaInCorso;
+  if(!r) return null;
+  annullaRisposta();
+  if(!document.getElementById(r.ov)?.classList.contains("active")) return null;
+  return { id: r.id, nome: r.nome, testo: r.testo, tipo: r.tipo };
+}
+(function(){
+  let x0 = 0, y0 = 0, bolla = null, dx = 0;
+  document.addEventListener("touchstart", e => {
+    const b = e.target.closest && e.target.closest(".mchat-overlay .mchat-bubble[data-id]");
+    if(!b || e.target.closest("audio, video, a, button")){ bolla = null; return; }
+    bolla = b; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0;
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if(!bolla) return;
+    dx = e.touches[0].clientX - x0;
+    const dy = Math.abs(e.touches[0].clientY - y0);
+    if(dy > 30 && dy > Math.abs(dx)){ bolla.style.transform = ""; bolla = null; return; }
+    if(dx > 0) bolla.style.transform = `translateX(${Math.min(dx, 80)}px)`;
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if(!bolla) return;
+    const b = bolla; bolla = null; b.style.transform = "";
+    if(dx > 60) avviaRisposta(b);
+  });
+  document.addEventListener("dblclick", e => {
+    const b = e.target.closest && e.target.closest(".mchat-overlay .mchat-bubble[data-id]");
+    if(b && !e.target.closest("audio, video, a, button")){ e.preventDefault(); avviaRisposta(b); }
+  });
+})();
+
+/* ---------- SPUNTE DI LETTURA (pallini) ---------- */
 const FERRO_D = "M0.8 11.6V6A5.2 5.2 0 0 1 11.2 6V11.6H8.5V6.2A2.5 2.5 0 0 0 3.5 6.2V11.6Z M1.8 7.4h1v1.1h-1Z M1.8 9.6h1v1.1h-1Z M9.2 7.4h1v1.1h-1Z M9.2 9.6h1v1.1h-1Z M2.4 3.9l.8-.8.8.8-.8.8Z M7.9 3.9l.8-.8.8.8-.8.8Z";
 function statoSpunta(m){ return m.letto ? "letto" : (m.consegnato_at ? "consegnato" : "inviato"); }
 function ferriHtml(stato){
   const titoli = { inviato: "Inviato", consegnato: "Consegnato", letto: "Letto" };
-  const uno = x => `<path transform="translate(${x} 0)" fill="currentColor" fill-rule="evenodd" d="${FERRO_D}"/>`;
+  // pallini: 1 grigio = inviato · 2 grigi = consegnato · 2 verde scuro = letto
+  const uno = x => `<circle cx="${x}" cy="4" r="3.4" fill="currentColor"/>`;
   const svg = stato === "inviato"
-    ? `<svg viewBox="0 0 12 12" aria-hidden="true">${uno(0)}</svg>`
-    : `<svg viewBox="0 0 25 12" aria-hidden="true">${uno(0)}${uno(13)}</svg>`;
+    ? `<svg viewBox="0 0 8 8" aria-hidden="true">${uno(4)}</svg>`
+    : `<svg viewBox="0 0 19 8" aria-hidden="true">${uno(4)}${uno(15)}</svg>`;
   return `<span class="ferri ferri-${stato}" title="${titoli[stato]}" aria-label="${titoli[stato]}">${svg}</span>`;
 }
 // riga ora + ferri (i ferri solo sui messaggi inviati da me)
@@ -8717,7 +9054,7 @@ function bollaInAttesa(boxId, testo){
   if(box.dataset.vuoto){ box.innerHTML = ""; }
   const el = document.createElement("div");
   el.className = "mchat-bubble out pending nuovo";
-  el.innerHTML = `<div class="mchat-bubble-text">${escapeHtml(testo)}</div><div class="mchat-bubble-time"><span class="t">${formatChatTime(new Date().toISOString())}</span><span class="ferri ferri-invio" title="Invio in corso">${ICONA_OROLOGIO}</span></div>`;
+  el.innerHTML = `${rispostaInCorso ? citazioneHtml({ risposta: rispostaInCorso }) : ""}<div class="mchat-bubble-text">${escapeHtml(testo)}</div><div class="mchat-bubble-time"><span class="t">${formatChatTime(new Date().toISOString())}</span><span class="ferri ferri-invio" title="Invio in corso">${ICONA_OROLOGIO}</span></div>`;
   box.appendChild(el);
   box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
   return el;
@@ -8813,7 +9150,7 @@ async function renderChatThread(clienteId){
     const firma = !out && m.mittente_nome ? `<div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">${escapeHtml(m.mittente_nome)}</div>` : "";
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_mascalcia")}>
-        ${firma}${body}
+        ${firma}${citazioneHtml(m)}${body}
         ${oraBolla(m, out)}
       </div>`;
   });
@@ -9308,7 +9645,7 @@ async function renderStableChatThread(){
       : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "chat_messaggi")}>
-        ${body}
+        ${citazioneHtml(m)}${body}
         ${oraBolla(m, out)}
       </div>`;
   });
@@ -9551,7 +9888,7 @@ async function renderFarrierChatThread(){
         : `<div class="mchat-bubble-text">${escapeHtml(m.testo || "")}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_mascalcia")}>
-        ${body}
+        ${citazioneHtml(m)}${body}
         ${oraBolla(m, out)}
       </div>`;
   });
@@ -9622,8 +9959,25 @@ async function renderAppuntamentiManiscalco(){
       </div>
       <span class="app-man-stato" style="${stile}">${lbl}</span>
       ${a.stato === "richiesto" ? `<button class="btn btn-outline btn-sm" onclick="annullaRichiestaAppuntamento('${a.id}')">Annulla</button>` : ""}
-    </div>`;
+    </div>${a.modifica && a.modifica.prima ? `
+    <div class="nota-modifica lunga" style="margin:-4px 0 10px">✏️ Modificato dal maniscalco · prima era: ${escapeHtml(testoPrimaModifica(a.modifica))}
+      <button class="btn btn-primary btn-sm" style="display:block;margin-top:6px" onclick="vistoModificaAppuntamento('${a.id}', this)">Ok, ho visto</button></div>` : ""}`;
   }).join("");
+}
+
+// il proprietario conferma di aver visto la modifica: sparisce l'avviso e il maniscalco lo legge in chat
+async function vistoModificaAppuntamento(id, btn){
+  if(btn) btn.disabled = true;
+  if(DEMO_MODE){
+    const i = demoState.interventiMascalcia.find(x => x.id === id); if(i) i.modifica = null;
+  } else {
+    const { data, error } = await sb.rpc("prop_visto_modifica_appuntamento", { p_intervento_id: id });
+    if(error || !data?.ok){ if(btn) btn.disabled = false; showToast((data && data.errore) || "Non riuscito, riprova."); return; }
+  }
+  showToast("Fatto: il maniscalco sa che hai visto la modifica.");
+  wgOwn.caricato = 0;
+  if(currentFarrier){ await renderAppuntamentiManiscalco(); try{ await renderFarrierChatThread(); } catch(e){} }
+  if(vistaWidgetAttiva() && vistaAi() === "proprietario") wgCaricaOwner();
 }
 
 async function inviaRichiestaAppuntamento(){
@@ -9880,7 +10234,7 @@ async function renderOwnerChatThread(conversazioneId){
     else body = `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_proprietari")}>
-        ${body}
+        ${citazioneHtml(m)}${body}
         ${oraBolla(m, out)}
       </div>`;
   });
@@ -9925,7 +10279,7 @@ let ownerRecordingSeconds = 0;
 let ownerRecordingStream = null;
 
 async function startOwnerVoiceRecording(){
-  if(bloccaPremiumColleghi("Le note vocali")) return;
+  // tra colleghi con il piano Free: note vocali come con i clienti (30 secondi, 5 al giorno in totale, controllo lato server)
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined"){
     showToast("Il tuo browser non supporta la registrazione vocale.");
     return;
@@ -9953,7 +10307,9 @@ async function startOwnerVoiceRecording(){
   document.getElementById("ochat-emoji-picker").classList.remove("active");
   ownerRecordingTimer = setInterval(() => {
     ownerRecordingSeconds++;
-    document.getElementById("ochat-rec-timer").textContent = formatRecTimer(ownerRecordingSeconds);
+    const limiteFree = chatColleghiAperta && !isPremium();
+    document.getElementById("ochat-rec-timer").textContent = formatRecTimer(ownerRecordingSeconds) + (limiteFree ? " / 0:30" : "");
+    if(limiteFree && ownerRecordingSeconds >= 30){ showToast("Piano Free: note vocali fino a 30 secondi."); stopAndSendOwnerVoiceRecording(); }
   }, 1000);
 }
 
@@ -9987,7 +10343,7 @@ async function stopAndSendOwnerVoiceRecording(){
     const { url, error } = await DB.uploadMediaProprietario(blob, conversazioneId, "audio", "webm");
     if(error || !url){ showToast("Errore nel caricamento della nota vocale."); return; }
     const { error: insertError } = await DB.insertMessaggioProprietario({ conversazione_id: conversazioneId, tipo: "audio", media_url: url });
-    if(insertError){ showToast("Errore: " + insertError.message); return; }
+    if(insertError){ showToast(/Premium|piano Free/i.test(insertError.message || "") ? insertError.message : "Errore: " + insertError.message); return; }
     await renderOwnerChatThread(conversazioneId);
     await loadOwnerChatList();
   };
@@ -10436,7 +10792,7 @@ async function sendChatMessage(){
     const res = await fetch("/.netlify/functions/agent", {
       method: "POST",
       headers: await authHeaders(),
-      body: JSON.stringify({ message: text, vista: vistaAi(), allegati: allegati.map(a => ({ media_type: a.media_type, data: a.data })) })
+      body: JSON.stringify({ message: text, vista: vistaAi(), allegati: allegati.map(a => ({ media_type: a.media_type, data: a.data })), posizione: (typeof meteoUltimaPos === "function" ? meteoUltimaPos() : null) })
     });
     const data = await res.json().catch(() => ({}));
     const bolla = document.getElementById(thinkingId);
@@ -11238,6 +11594,9 @@ function aggiornaSwitchHome(){
 let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, settimana: null, settimanaChiave: null };
 function wgTipoApp(e){ return (typeof agDescrizioneTipo === "function" ? agDescrizioneTipo(e) : hpTipo(e)); }
 function wgClienteDi(id){ return (clientiMascalcia || []).find(c => c.id === id) || null; }
+// appuntamento messo in evidenza dal maniscalco (tocco su una riga di «Oggi»): resta finché non è fatto
+let wgScelto = null;
+function wgScegli(id){ wgScelto = id; renderWidgetPro(); }
 function renderWidgetPro(){
   const box = document.getElementById("wh-pro");
   if(!box || !currentUser) return;
@@ -11247,7 +11606,9 @@ function renderWidgetPro(){
   const diOggi = app.filter(e => e.data_intervento === oggi).sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")));
   const prossimoOggi = diOggi.find(e => !e.ora || String(e.ora).slice(0, 5) >= adesso) || null;
   const futuri = app.filter(e => e.data_intervento > oggi).sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
-  const prossimo = prossimoOggi || futuri[0] || null;
+  const scelto = wgScelto ? app.find(e => e.id === wgScelto && e.data_intervento >= oggi) : null;
+  if(wgScelto && !scelto) wgScelto = null;
+  const prossimo = scelto || prossimoOggi || futuri[0] || null;
   const cavalliOggi = diOggi.length;
   const strutture = new Set(diOggi.filter(e => isStruttura(wgClienteDi(e.cliente_mascalcia_id))).map(e => e.cliente_mascalcia_id)).size;
   const ric = (hpRichiamiLista || []).slice().sort((a, b) => a.giorni - b.giorni);
@@ -11258,6 +11619,7 @@ function renderWidgetPro(){
   const quando = e => {
     if(!e) return "";
     const ora = e.ora ? String(e.ora).slice(0, 5) : "";
+    if(scelto && e.id === scelto.id) return e.data_intervento === oggi ? `In evidenza · oggi${ora ? " " + ora : ""}` : `In evidenza · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
     if(e.data_intervento === oggi && ora){
       const [h, m] = ora.split(":").map(Number); const d = new Date(); d.setHours(h, m, 0, 0);
       const min = Math.round((d - new Date()) / 60000);
@@ -11265,16 +11627,17 @@ function renderWidgetPro(){
     }
     return e.data_intervento === oggi ? "Prossimo · oggi" : `Prossimo · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
   };
+  wgMeteoCarica([...new Set([...diOggi, prossimo].filter(Boolean).map(e => e.cliente_mascalcia_id))]);
   let oggiHtml;
   if(prossimo){
     const c = wgClienteDi(prossimo.cliente_mascalcia_id);
     const cav = agNomeCavallo(prossimo);
     const dove = [prossimo.clienti_mascalcia?.nome || c?.nome, c?.indirizzo].filter(Boolean).join(" · ");
-    const altri = diOggi.filter(e => e.id !== prossimo.id).slice(0, 3);
+    const altri = diOggi.filter(e => e.id !== prossimo.id).slice(0, 6);
     oggiHtml = `
       <div class="wg-prossimo" onclick="apriAzioniEvento('${prossimo.id}')">
         <div class="wg-quando">${wgEsc(quando(prossimo))}</div>
-        <div class="wg-chi">${wgEsc(cav || prossimo.clienti_mascalcia?.nome || "Appuntamento")} · ${wgEsc(wgTipoApp(prossimo).toLowerCase())}</div>
+        <div class="wg-chi">${wgEsc(cav || prossimo.clienti_mascalcia?.nome || "Appuntamento")} · ${wgEsc(wgTipoApp(prossimo).toLowerCase())}${wgMeteoIcona(prossimo)}</div>
         <div class="wg-dove">${wgEsc(dove)}</div>
         <div class="wg-azioni">
           <button class="oro" onclick="event.stopPropagation();wgNaviga('${prossimo.cliente_mascalcia_id}')">${WG_IC.mappa}Naviga</button>
@@ -11282,7 +11645,8 @@ function renderWidgetPro(){
           ${prossimo.stato === "programmato" ? `<button onclick="event.stopPropagation();hpSegnaFatto('${prossimo.id}')">${WG_IC.ok}Fatto</button>` : `<button onclick="event.stopPropagation();apriAzioniEvento('${prossimo.id}')">Apri</button>`}
         </div>
       </div>
-      ${altri.map(e => `<div class="wg-voce" onclick="apriAzioniEvento('${e.id}')"><span class="wg-ora">${e.ora ? String(e.ora).slice(0, 5) : "—"}</span><span class="wg-t">${wgEsc(agNomeCavallo(e) || "")} · ${wgEsc(wgTipoApp(e).toLowerCase())} <small>· ${wgEsc(e.clienti_mascalcia?.nome || "")}</small></span></div>`).join("")}
+      ${altri.map(e => `<div class="wg-voce" onclick="wgScegli('${e.id}')">${e.ora ? `<span class="wg-ora">${String(e.ora).slice(0, 5)}</span>` : ""}<span class="wg-t">${wgEsc(agNomeCavallo(e) || "")} · ${wgEsc(wgTipoApp(e).toLowerCase())} <small>· ${wgEsc(e.clienti_mascalcia?.nome || "")}</small></span>${wgMeteoIcona(e)}<button class="wg-piu" aria-label="Modifica appuntamento" onclick="event.stopPropagation();apriAzioniEvento('${e.id}')">⋯</button></div>`).join("")}
+      ${altri.length ? '<div class="wg-nota">Tocca un appuntamento per metterlo in evidenza con Naviga, Chatta e Fatto.</div>' : ""}
       ${!prossimoOggi && prossimo ? '<div class="wg-nota">Oggi nessun appuntamento: questo è il prossimo in agenda.</div>' : ""}`;
   } else {
     oggiHtml = `<div class="wg-vuoto">Nessun appuntamento in agenda.<br><button class="wg-link" onclick="openInterventoModal(null)">+ Fissane uno</button></div>`;
@@ -11320,6 +11684,7 @@ function renderWidgetPro(){
       <div class="wg-num">${wgEuro(wgPro.incassatoMese)}</div>
       <div class="wg-riga">incassati a ${new Date().toLocaleDateString("it-IT", { month: "long" })}</div>
       <div class="wg-riga evid">${wgPro.daIncassareMese ? wgEuro(wgPro.daIncassareMese) + " da incassare" : "Tutto incassato"}</div>
+      ${wgPro.previsto ? `<div class="wg-riga">${wgEuro(wgPro.previsto)} previsti in agenda</div>` : ""}
     </div>
     <div class="wg wg-medio">
       <div class="wg-testa"><span class="wg-et">${WG_IC.camp}Da richiamare</span>${ric.length > 3 ? `<button class="wg-link" onclick="apriListaHome('ric')">${ric.length} in tutto ›</button>` : ""}</div>
@@ -11361,6 +11726,45 @@ async function wgCaricaSettimana(lun){
 function wgScriviRichiamo(id){
   apriRichiamo(id);
   richiamoAzione("scrivi");
+}
+
+/* ---------- Meteo accanto agli appuntamenti (indirizzo del cliente o della struttura collegata) ---------- */
+const wgMeteo = {};   // cliente_id → { stato: "carico" | "ok" | "nd", d, motivo, t }
+async function wgMeteoPos(c){
+  if(DEMO_MODE) return { demo: true };
+  const proprio = (c?.indirizzo || "").trim();
+  if(proprio) return { indirizzo: proprio, luogo: c.nome };
+  const st = await wgIndirizzoStruttura(c);
+  if(st && (st.indirizzo || st.citta)) return { indirizzo: st.indirizzo || "", citta: [st.citta, st.provincia].filter(Boolean).join(", "), luogo: st.citta || c?.nome || "" };
+  return null;
+}
+function wgMeteoCarica(ids){
+  if(typeof EquoMeteo === "undefined") return;
+  ids.forEach(id => {
+    const m = wgMeteo[id];
+    if(m && Date.now() - m.t < 30 * 60e3) return;
+    wgMeteo[id] = { stato: "carico", t: Date.now() };
+    (async () => {
+      const c = wgClienteDi(id);
+      const pos = c ? await wgMeteoPos(c) : null;
+      if(!pos) wgMeteo[id] = { stato: "nd", motivo: "Meteo non disponibile: manca l'indirizzo del cliente (Clienti → Modifica → Indirizzo)", t: Date.now() };
+      else {
+        const d = await EquoMeteo.previsione(pos, { endpoint: "/.netlify/functions/meteo", token: async () => { try{ return (await sb.auth.getSession()).data.session?.access_token || ""; }catch(e){ return ""; } } });
+        wgMeteo[id] = d && d.giorni ? { stato: "ok", d, t: Date.now() }
+          : { stato: "nd", motivo: d && d.non_trovato ? "Meteo non disponibile: indirizzo del cliente non trovato" : "Meteo non disponibile in questo momento", t: d ? Date.now() : Date.now() - 25 * 60e3 };
+      }
+      try{ if(document.getElementById("wh-pro")) renderWidgetPro(); }catch(e){}
+    })();
+  });
+}
+function wgMeteoIcona(e){
+  if(!e || typeof EquoMeteo === "undefined") return "";
+  const m = wgMeteo[e.cliente_mascalcia_id];
+  if(!m || m.stato === "carico") return "";
+  if(m.stato === "nd") return `<span class="wg-meteo">${EquoMeteo.iconaNd(m.motivo)}</span>`;
+  const o = EquoMeteo.alle(m.d, e.data_intervento, e.ora ? String(e.ora).slice(0, 5) : "10:00");
+  if(!o) return `<span class="wg-meteo">${EquoMeteo.iconaNd("Meteo non disponibile per questa data")}</span>`;
+  return `<span class="wg-meteo">${EquoMeteo.icona(o.sim, o.notte)}${o.temp != null ? `<small>${o.temp}°</small>` : ""}</span>`;
 }
 
 /* ---------- Naviga ---------- */
@@ -11515,13 +11919,14 @@ async function wgCaricaOwner(){
     const lista = await sicuro(() => DB.listAppuntamentiCliente(f.cliente_mascalcia_id)) || [];
     lista.filter(a => a.data_intervento >= oggi && ["programmato", "richiesto"].includes(a.stato)).forEach(a => cand.push({
       tipo: "maniscalco", data: a.data_intervento, ora: a.ora ? String(a.ora).slice(0, 5) : "", titolo: (TIPO_FERRATURA_LABELS[a.tipo_ferratura] || "Appuntamento") + (a.nome_cavallo ? " · " + a.nome_cavallo : ""),
-      chi: f.nome_maniscalco || "Il tuo maniscalco", stato: a.stato, f }));
+      chi: f.nome_maniscalco || "Il tuo maniscalco", stato: a.stato, modifica: a.modifica && a.modifica.prima ? a.modifica : null, f }));
   }
   (wgOwn.lezioni || []).filter(l => l.data >= oggi && !["annullata", "completata"].includes(l.stato)).forEach(l => cand.push({
     tipo: "lezione", data: l.data, ora: l.ora ? String(l.ora).slice(0, 5) : "", titolo: "Lezione" + (l.cavallo ? " · " + l.cavallo : ""),
     chi: [l.scuderia, l.istruttore ? "con " + l.istruttore : ""].filter(Boolean).join(" · "), stato: l.stato, l }));
   cand.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
   wgOwn.appuntamento = cand[0] || null;
+  wgOwn.appMan = cand.filter(c => c.tipo === "maniscalco");
   wgOwn.caricato = Date.now();
   if(vistaWidgetAttiva() && vistaAi() === "proprietario") renderWidgetOwner(true);
 }
@@ -11534,23 +11939,30 @@ function renderWidgetOwner(daCarica){
   if(!daCarica && Date.now() - wgOwn.caricato > 30000) wgCaricaOwner();
   const scad = wgOwn.scadenze;
   const oggi = isoLocale(new Date());
+  // appuntamenti già fissati con il maniscalco: compaiono anche tra le prossime scadenze
+  const appMan = (wgOwn.appMan || []).slice(0, 4);
+  const rigaAppMan = a => `<div class="wg-ric" onclick="wgApriAppMan('${a.f.cliente_mascalcia_id}')"><span class="wg-sem ${a.stato === "richiesto" || a.modifica ? "ocra" : "verde"}"></span><span class="wg-t"><b>${a.modifica ? "✏️ " : ""}${wgEsc(a.titolo)}</b><small>${a.modifica ? "<b>Modificato</b> (prima: " + wgEsc(testoPrimaModifica(a.modifica)) + ") · " : ""}${a.stato === "richiesto" ? "richiesto a " : "fissato con "}${wgEsc(a.chi)} · ${wgEsc(a.data === oggi ? "oggi" : hpGiornoEtichetta(a.data).toLowerCase())}${a.ora ? " " + a.ora : ""}</small></span></div>`;
   // SCADENZE (grande)
   let scadHtml;
   if(scad == null) scadHtml = '<div class="wg-vuoto piccolo">Caricamento…</div>';
+  else if(!scad.length && appMan.length) scadHtml = appMan.map(rigaAppMan).join("");
   else if(!scad.length) scadHtml = '<div class="wg-vuoto">Nessuna scadenza in arrivo.<br><button class="wg-link" onclick="wgNuovoEvento()">+ Registra un vaccino o una ferratura</button></div>';
   else {
     const p = scad[0], g = wgGiorniA(p.next_due_date);
     const ferr = p.type === "ferratura";
+    const nomeP = String(p.horses?.name || "").toLowerCase();
+    const giaFissato = ferr && nomeP ? appMan.find(x => String(x.titolo).toLowerCase().endsWith("· " + nomeP)) : null;
     const haMan = !!document.querySelector("#farrier-chat-list .inbox-item") || (wgOwn.appuntamento && wgOwn.appuntamento.tipo === "maniscalco");
     scadHtml = `
       <div class="wg-prossimo ${g < 0 ? "rosso" : ""}" onclick="showPage('cavalli');openHorseDetail('${p.horse_id}')">
         <div class="wg-quando">${wgEsc(wgQuandoScad(g))} · ${formatDate(p.next_due_date)}</div>
         <div class="wg-chi">${wgEsc(EVENT_LABELS[p.type] || p.type)} · ${wgEsc(p.horses?.name || "")}</div>
         <div class="wg-azioni">
-          ${ferr ? `<button class="oro" onclick="event.stopPropagation();wgFissaManiscalco()">${WG_IC.cal}Fissa con il maniscalco</button>` : `<button class="oro" onclick="event.stopPropagation();showPage('cavalli');openHorseDetail('${p.horse_id}')">${WG_IC.scad}Apri il libretto</button>`}
+          ${ferr && giaFissato ? `<button class="oro" onclick="event.stopPropagation();wgApriAppMan('${giaFissato.f.cliente_mascalcia_id}')">${WG_IC.cal}Fissato: ${wgEsc(giaFissato.data === oggi ? "oggi" : hpGiornoEtichetta(giaFissato.data).toLowerCase())}${giaFissato.ora ? " " + giaFissato.ora : ""}</button>` : ferr ? `<button class="oro" onclick="event.stopPropagation();wgFissaManiscalco()">${WG_IC.cal}Fissa con il maniscalco</button>` : `<button class="oro" onclick="event.stopPropagation();showPage('cavalli');openHorseDetail('${p.horse_id}')">${WG_IC.scad}Apri il libretto</button>`}
         </div>
       </div>
-      ${scad.slice(1, 4).map(d => { const gg = wgGiorniA(d.next_due_date); return `<div class="wg-ric" onclick="showPage('cavalli');openHorseDetail('${d.horse_id}')"><span class="wg-sem ${gg < 0 ? "rosso" : gg <= 14 ? "ocra" : "verde"}"></span><span class="wg-t"><b>${wgEsc(EVENT_LABELS[d.type] || d.type)}</b> · ${wgEsc(d.horses?.name || "")}<small>${wgEsc(wgQuandoScad(gg))} · ${formatDate(d.next_due_date)}</small></span></div>`; }).join("")}`;
+      ${[...scad.slice(1, 4).map(d => ({ k: d.next_due_date, h: (() => { const gg = wgGiorniA(d.next_due_date); return `<div class="wg-ric" onclick="showPage('cavalli');openHorseDetail('${d.horse_id}')"><span class="wg-sem ${gg < 0 ? "rosso" : gg <= 14 ? "ocra" : "verde"}"></span><span class="wg-t"><b>${wgEsc(EVENT_LABELS[d.type] || d.type)}</b> · ${wgEsc(d.horses?.name || "")}<small>${wgEsc(wgQuandoScad(gg))} · ${formatDate(d.next_due_date)}</small></span></div>`; })() })),
+          ...appMan.map(a => ({ k: a.data, h: rigaAppMan(a) }))].sort((x, y) => String(x.k).localeCompare(String(y.k))).slice(0, 4).map(x => x.h).join("")}`;
   }
   // SPESE
   const spese = wgOwn.spese || [];
@@ -11569,7 +11981,7 @@ function renderWidgetOwner(daCarica){
 
   box.innerHTML = `
     <div class="wg wg-grande">
-      <div class="wg-testa"><span class="wg-et">${WG_IC.scad}Prossime scadenze</span><span class="wg-meta">${scad && scad.length ? scad.length + (scad.length === 1 ? " in arrivo" : " in arrivo") : ""}</span></div>
+      <div class="wg-testa"><span class="wg-et">${WG_IC.scad}Prossime scadenze</span><span class="wg-meta">${(scad && scad.length) || appMan.length ? ((scad ? scad.length : 0) + appMan.length) + " in arrivo" : ""}</span></div>
       ${scadHtml}
     </div>
     <div class="wg wg-piccolo wg-pieno" onclick="document.querySelector('[data-page=&quot;spese&quot;]')?.click()">
@@ -11609,6 +12021,11 @@ function renderWidgetOwner(daCarica){
       <div class="wg-testa"><span class="wg-et">${WG_IC.lez}Lezioni della settimana</span><span class="wg-meta">${lezSett.length}</span></div>
       ${lezSett.length ? lezSett.slice(0, 3).map(l => `<div class="wg-voce"><span class="wg-ora">${wgEsc(hpGiornoEtichetta(l.data))}</span><span class="wg-t">${l.ora ? String(l.ora).slice(0, 5) + " · " : ""}${wgEsc(l.cavallo || "Lezione")} <small>${wgEsc(l.istruttore ? "· " + l.istruttore : "")}</small></span></div>`).join("") : '<div class="wg-vuoto piccolo">Nessuna lezione nei prossimi 7 giorni.</div>'}
     </div>` : ""}`;
+}
+function wgApriAppMan(clienteId){
+  showPage("chat");
+  const f = (wgOwn.appMan || []).find(a => a.f.cliente_mascalcia_id === clienteId)?.f;
+  if(typeof loadFarrierChatSection === "function") loadFarrierChatSection().then(() => { if(f) openFarrierChatThread(f.cliente_mascalcia_id, f.nome_maniscalco || "Il tuo maniscalco"); });
 }
 function wgFissaManiscalco(){
   showPage("chat");
@@ -11737,6 +12154,16 @@ async function wgControllaResetPin(){
   showToast("Nuovo PIN salvato: gli incassi sono di nuovo visibili");
 }
 
+/* Il pulsante dell'assistente si fa da parte mentre si scorre (non copre i riquadri) e torna appena ci si ferma */
+(function(){
+  let t = null;
+  document.addEventListener("scroll", ev => {
+    if(!ev.target || !ev.target.classList || !ev.target.classList.contains("page-content")) return;
+    document.body.classList.add("fab-via");
+    clearTimeout(t); t = setTimeout(() => document.body.classList.remove("fab-via"), 700);
+  }, true);
+})();
+
 /* ---------- INIT ---------- */
 boot();
 </script>
@@ -11800,6 +12227,305 @@ function invitoInstallaChiudi(ricorda = true){
   if(ricorda){ try{ localStorage.setItem("equo-invito-installa", String(Date.now())); }catch(e){} }
   const box = document.getElementById("invito-installa"); if(box) box.style.display = "none";
 }
+</script>
+<script>
+window.EQUO_INDIETRO_CHIUDI = {
+  "ai-sheet-overlay": () => closeAiSheet(),
+  "mchat-overlay": () => closeChatThread(),
+  "fchat-overlay": () => closeFarrierChatThread(),
+  "schat-overlay": () => closeStableChatThread(),
+  "ochat-overlay": () => closeOwnerChatThread(),
+  "legal-overlay": () => closeLegalPage(),
+  "allegati-overlay": () => chiudiMenuAllegati(),
+};
+window.EQUO_INDIETRO_PAGINA = function(){
+  if(!currentUser) return false;
+  const pag = (document.querySelector(".page-content.active")?.id || "").replace("page-", "");
+  const vis = id => { const el = document.getElementById(id); return !!el && el.style.display !== "none" && el.offsetParent !== null; };
+  if(pag === "clienti" && vis("clienti-detail-view")){ closeClienteDetail(); return true; }
+  if(vis("cavalli-detail-view")){ closeHorseDetail(); return true; }
+  const home = PRO_ROLES.includes(currentUser.ruolo) ? "pro-home" : "home";
+  if(pag && pag !== home){ goHome(); return true; }
+  return false;
+};
+</script>
+<script>
+/* ---------- TASTO INDIETRO DI ANDROID ----------
+   La freccia/il gesto «indietro» del telefono non fa più uscire dall'app di colpo:
+   1) chiude la finestra o la chat aperta; 2) torna all'elenco o alla Home;
+   3) in Home mostra «Premi di nuovo indietro per uscire»: solo il secondo indietro (entro 2,5 s) esce.
+   Funziona con una voce «sentinella» nella cronologia, rimessa a ogni tocco (Chrome ignora le voci create senza un tocco). */
+(function(){
+  if(!/Android/i.test(navigator.userAgent)) return;
+  let armato = false, avvisoAl = 0;
+  const arma = () => {
+    if(armato || Date.now() - avvisoAl < 2500) return;
+    try{ history.pushState({ equoIndietro: 1 }, "", location.href); armato = true; } catch(e){}
+  };
+  ["click", "touchend", "keydown"].forEach(ev => addEventListener(ev, arma, { capture: true, passive: true }));
+  const visibile = el => !!el && getComputedStyle(el).display !== "none";
+  function overlayInCima(){
+    const aperti = [...document.querySelectorAll(".modal-overlay.active, [id$='-overlay'].active")].filter(visibile);
+    if(!aperti.length) return null;
+    const z = el => parseInt(getComputedStyle(el).zIndex, 10) || 0;
+    return aperti.reduce((a, b) => z(b) >= z(a) ? b : a);
+  }
+  function indietroDentroApp(){
+    const ov = overlayInCima();
+    if(ov){
+      const speciale = (window.EQUO_INDIETRO_CHIUDI || {})[ov.id];
+      if(speciale){ try{ speciale(); } catch(e){ console.warn("indietro:", e); } }
+      else ov.dispatchEvent(new MouseEvent("click", { bubbles: true }));   // come un tocco fuori: chiude solo le finestre che si possono chiudere così
+      return true;   // anche se la finestra è obbligatoria, l'indietro non fa uscire
+    }
+    try{ return !!(window.EQUO_INDIETRO_PAGINA && window.EQUO_INDIETRO_PAGINA()); } catch(e){ return false; }
+  }
+  addEventListener("popstate", () => {
+    if(!armato) return;
+    armato = false;
+    if(indietroDentroApp()){ arma(); return; }
+    avvisoAl = Date.now();
+    try{ showToast("Premi di nuovo indietro per uscire"); } catch(e){}
+  });
+})();
+</script>
+<style>
+/* ---------- METEO 7 giorni (Home App + Equo Scuderia) ---------- */
+.meteo-box{--m-acc:var(--meteo-acc,var(--accent));display:flex;align-items:stretch;gap:2px;width:100%;margin:0 0 14px;padding:8px 6px;border-radius:16px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font:inherit;min-height:66px;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+.meteo-box:active{transform:scale(.99)}
+.meteo-g{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:2px 0;border-radius:10px}
+.meteo-g b{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:capitalize;white-space:nowrap}
+.meteo-g.oggi b{color:var(--m-acc)}
+.meteo-g .mi{width:30px;height:30px;display:block}
+.meteo-g small{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.meteo-msg{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--muted);text-align:center;padding:4px 8px;line-height:1.35}
+.meteo-msg i{color:var(--m-acc)}
+.meteo-msg u{color:var(--m-acc);font-weight:700;text-decoration:none}
+.meteo-scheletro{flex:1;height:42px;margin:4px 3px;border-radius:10px;background:linear-gradient(90deg,var(--surface2,var(--muted-bg,#f1ece0)) 0%,var(--border) 50%,var(--surface2,var(--muted-bg,#f1ece0)) 100%);background-size:200% 100%;animation:meteoScorri 1.2s linear infinite;opacity:.6}
+@keyframes meteoScorri{from{background-position:200% 0}to{background-position:0 0}}
+/* colori icone */
+.mi-sereno{color:#e8a317}.mi-sereno.notte{color:#8d97b5}.mi-variabile{color:#d99a1e}.mi-nubi,.mi-nebbia{color:#8f969c}
+.mi-pioviggine,.mi-pioggia{color:#4a8fc7}.mi-pioggia_forte{color:#2e6aa8}.mi-temporale{color:#7458b0}.mi-neve,.mi-nevischio{color:#6fb1d6}
+/* dettaglio */
+.meteo-velo{position:fixed;inset:0;z-index:120;background:rgba(10,10,6,.45);display:flex;align-items:flex-end;justify-content:center}
+.meteo-sheet{--m-acc:var(--meteo-acc,var(--accent));background:var(--bg,var(--surface));color:var(--text);width:100%;max-width:560px;max-height:88vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(0,0,0,.25);padding-bottom:env(safe-area-inset-bottom)}
+@media (min-width:700px){.meteo-velo{align-items:center}.meteo-sheet{border-radius:20px;max-height:84vh}}
+.meteo-testa{display:flex;align-items:center;gap:10px;padding:16px 18px 8px}
+.meteo-testa h3{margin:0;font-size:17px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meteo-testa h3 i{color:var(--m-acc);margin-right:6px}
+.meteo-x{border:0;background:var(--surface2,var(--muted-bg,#f1ece0));color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex:none}
+.meteo-giorni{display:flex;gap:6px;overflow-x:auto;padding:4px 18px 10px;scrollbar-width:none}
+.meteo-giorni::-webkit-scrollbar{display:none}
+.meteo-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:62px;padding:8px 6px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+.meteo-chip b{font-size:12px;text-transform:capitalize}
+.meteo-chip .mi{width:30px;height:30px;flex:none}
+.meteo-testa,.meteo-giorni,.meteo-nota{flex:none}
+.meteo-ore{flex:1 1 auto;min-height:0}
+.meteo-chip small{font-size:11px;color:var(--muted)}
+.meteo-chip.sel{border-color:var(--m-acc);box-shadow:0 0 0 2px var(--m-acc) inset}
+.meteo-ore{overflow-y:auto;padding:0 18px 10px;-webkit-overflow-scrolling:touch}
+.meteo-riga{display:grid;grid-template-columns:52px 34px 1fr auto auto;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);font-size:14px}
+.meteo-riga .h{font-weight:700;font-variant-numeric:tabular-nums}
+.meteo-riga .mi{width:30px;height:30px;justify-self:center}
+.meteo-riga .p i,.meteo-riga .v i{font-size:11px}
+.meteo-riga .t{font-weight:700;font-size:15px}
+.meteo-riga .p{font-size:12.5px;color:#3d7fb8;white-space:nowrap}
+.meteo-riga .v{font-size:12.5px;color:var(--muted);white-space:nowrap;min-width:58px;text-align:right}
+.meteo-nota{font-size:11.5px;color:var(--muted);padding:8px 18px 14px;line-height:1.5}
+.meteo-sezione{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 2px 2px}
+</style>
+<script>
+/* METEO 7 giorni — modulo condiviso App / Scuderia.
+   EquoMeteo.monta(el, { posizione: async () => ({lat, lon, luogo} | {indirizzo, citta, luogo} | null), endpoint, token: async () => "..." ,
+                         senzaPosizione: { testo, azione } })
+   Previsione salvata sul dispositivo per 30 minuti. In demo i dati sono di esempio. */
+(function(){
+  const ICONE = {
+    sereno: ["fa-sun", "fa-moon"], variabile: ["fa-cloud-sun", "fa-cloud-moon"], nubi: ["fa-cloud", "fa-cloud"], nebbia: ["fa-smog", "fa-smog"],
+    pioviggine: ["fa-cloud-sun-rain", "fa-cloud-moon-rain"], pioggia: ["fa-cloud-rain", "fa-cloud-rain"], pioggia_forte: ["fa-cloud-showers-heavy", "fa-cloud-showers-heavy"],
+    temporale: ["fa-cloud-bolt", "fa-cloud-bolt"], neve: ["fa-snowflake", "fa-snowflake"], nevischio: ["fa-cloud-meatball", "fa-cloud-meatball"],
+  };
+  const NOMI = { sereno: "Sereno", variabile: "Poco nuvoloso", nubi: "Nuvoloso", nebbia: "Nebbia", pioviggine: "Pioggia debole", pioggia: "Pioggia",
+    pioggia_forte: "Pioggia forte", temporale: "Temporale", neve: "Neve", nevischio: "Neve mista a pioggia" };
+  const CON_NOTTE = { sereno: 1, variabile: 1, pioviggine: 1 };
+  const icona = (k, notte) => { k = NOMI[k] ? k : "nubi"; const id = "mi-" + k + (notte && CON_NOTTE[k] ? "-n" : ""); return `<svg class="mi" role="img" aria-label="${NOMI[k]}"><title>${NOMI[k]}</title><use href="#${id}"/></svg>`; };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const oggiIso = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+  const etichettaGiorno = (iso, i) => {
+    if(iso === oggiIso()) return "Oggi";
+    const d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("it-IT", { weekday: "short" }).replace(".", "");
+  };
+  const lungaGiorno = iso => iso === oggiIso() ? "Oggi" : new Date(iso + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
+  const ora = t => new Date(t).toLocaleTimeString("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
+  const giornoDi = t => new Date(t).toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+  const leggi = k => { try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(e){ return null; } };
+  const scrivi = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+
+  // dati di esempio (demo e prove): 7 giorni, ora per ora i primi 2, poi ogni 6 ore
+  function datiDemo(){
+    const ore = [], base = new Date(); base.setMinutes(0, 0, 0);
+    const seq = ["sereno","variabile","nubi","pioviggine","variabile","sereno","pioggia"];
+    for(let h = 0; h < 7 * 24; h += (h < 48 ? 1 : 6)){
+      const t = new Date(base.getTime() + h * 3600e3), hh = t.getHours(), g = Math.floor(h / 24);
+      ore.push({ t: t.toISOString(), passo: h < 48 ? 1 : 6, temp: Math.round(13 + 6 * Math.sin((hh - 9) / 24 * 6.28) + g % 3), sim: hh < 7 || hh > 19 ? (seq[g] === "sereno" ? "sereno" : "nubi") : seq[g],
+        notte: hh < 7 || hh > 19, mm: seq[g].includes("piog") && hh > 11 && hh < 17 ? 0.6 : 0, vento: 8 + (hh % 5) * 2, umid: 65 });
+    }
+    const giorni = [];
+    ore.forEach(o => { const d = giornoDi(o.t); let x = giorni.find(z => z.data === d); if(!x){ x = { data: d, min: o.temp, max: o.temp, mm: 0, sim: o.sim }; giorni.push(x); }
+      x.min = Math.min(x.min, o.temp); x.max = Math.max(x.max, o.temp); x.mm += o.mm; const hh = Number(ora(o.t).slice(0, 2)); if(hh === 12 || hh === 14) x.sim = o.sim; });
+    return { luogo: "Esempio", fonte: "dati di esempio", aggiornato: new Date().toISOString(), giorni: giorni.slice(0, 7), ore, demo: true };
+  }
+
+  const SPRITE = '<svg id="meteo-sprite" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">  <defs>    <radialGradient id="mg-sole" cx="40%" cy="38%" r="70%"><stop offset="0" stop-color="#FFE68A"/><stop offset=".55" stop-color="#FFC52E"/><stop offset="1" stop-color="#F59E0B"/></radialGradient>    <linearGradient id="mg-luna" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3F6FD"/><stop offset="1" stop-color="#B7C3E3"/></linearGradient>    <linearGradient id="mg-nube" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D9E1EA"/></linearGradient>    <linearGradient id="mg-nube2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6EBF1"/><stop offset="1" stop-color="#BCC7D3"/></linearGradient>    <linearGradient id="mg-scura" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#AEB9C6"/><stop offset="1" stop-color="#7A8899"/></linearGradient>    <linearGradient id="mg-goccia" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6CB8FF"/><stop offset="1" stop-color="#2F7FD8"/></linearGradient>    <linearGradient id="mg-fulmine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE066"/><stop offset="1" stop-color="#FFA41B"/></linearGradient>    <g id="mp-raggi" stroke="#FFB81C" stroke-width="3.6" stroke-linecap="round">      <path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/>    </g>    <g id="mp-sole"><use href="#mp-raggi"/><circle cx="32" cy="32" r="12.5" fill="url(#mg-sole)"/></g>    <path id="mp-luna" d="M38.5 12.5A20 20 0 1 0 51.5 41 16.5 16.5 0 0 1 38.5 12.5z" fill="url(#mg-luna)" stroke="#9FAED6" stroke-width="1.2"/>    <path id="mp-nube" d="M19 50h27.5a10.5 10.5 0 0 0 1.2-20.9A14.5 14.5 0 0 0 20.2 25.6 12.2 12.2 0 0 0 19 50z"/>    <g id="mp-gocce" stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M24 54l-2 5M33 54l-2 5M42 54l-2 5"/></g>  </defs>  <!-- sereno -->  <symbol id="mi-sereno" viewBox="0 0 64 64"><use href="#mp-sole"/></symbol>  <symbol id="mi-sereno-n" viewBox="0 0 64 64"><use href="#mp-luna"/><circle cx="50" cy="14" r="1.6" fill="#C9D3EE"/><circle cx="56" cy="24" r="1.1" fill="#C9D3EE"/></symbol>  <!-- poco nuvoloso -->  <symbol id="mi-variabile" viewBox="0 0 64 64"><g transform="translate(0 -1) scale(.72)"><use href="#mp-sole"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(4 4)"/></symbol>  <symbol id="mi-variabile-n" viewBox="0 0 64 64"><g transform="translate(-2 -4) scale(.72)"><use href="#mp-luna"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(4 4)"/></symbol>  <!-- nuvoloso -->  <symbol id="mi-nubi" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" transform="translate(10 -8) scale(.8)"/><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(-2 4)"/></symbol>  <!-- nebbia -->  <symbol id="mi-nebbia" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" transform="translate(0 -8)"/><g stroke="#9AA6B4" stroke-width="3.6" stroke-linecap="round"><path d="M12 48h40M18 56h30"/></g></symbol>  <!-- pioggia debole -->  <symbol id="mi-pioviggine" viewBox="0 0 64 64"><g transform="translate(0 -3) scale(.66)"><use href="#mp-sole"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(2 -4)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M28 52l-1.5 4M38 52l-1.5 4"/></g></symbol>  <symbol id="mi-pioviggine-n" viewBox="0 0 64 64"><g transform="translate(-2 -6) scale(.66)"><use href="#mp-luna"/></g><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(2 -4)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M28 52l-1.5 4M38 52l-1.5 4"/></g></symbol>  <!-- pioggia -->  <symbol id="mi-pioggia" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" stroke="#A9B5C2" stroke-width="1.2" transform="translate(0 -8)"/><use href="#mp-gocce" transform="translate(0 -6)"/></symbol>  <!-- pioggia forte -->  <symbol id="mi-pioggia_forte" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-scura)" transform="translate(0 -10)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M20 46l-3 8M29 46l-3 8M38 46l-3 8M47 46l-3 8"/></g></symbol>  <!-- temporale -->  <symbol id="mi-temporale" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-scura)" transform="translate(0 -10)"/><path d="M34 38l-8 12h7l-4 11 12-15h-7l4-8z" fill="url(#mg-fulmine)" stroke="#F08C00" stroke-width="1" stroke-linejoin="round"/><g stroke="url(#mg-goccia)" stroke-width="3.4" stroke-linecap="round"><path d="M20 46l-2 5M48 46l-2 5"/></g></symbol>  <!-- neve -->  <symbol id="mi-neve" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube)" stroke="#C5CFDA" stroke-width="1.2" transform="translate(0 -10)"/><g stroke="#7CC4F2" stroke-width="2.6" stroke-linecap="round"><path d="M22 47v8M18.5 49l7 4M18.5 53l7-4M42 47v8M38.5 49l7 4M38.5 53l7-4M32 54v7M29 55.5l6 4M29 59.5l6-4"/></g></symbol>  <!-- neve mista a pioggia -->  <symbol id="mi-nevischio" viewBox="0 0 64 64"><use href="#mp-nube" fill="url(#mg-nube2)" stroke="#A9B5C2" stroke-width="1.2" transform="translate(0 -10)"/><g stroke="url(#mg-goccia)" stroke-width="3.6" stroke-linecap="round"><path d="M24 46l-2 6M42 52l-2 6"/></g><g stroke="#7CC4F2" stroke-width="2.6" stroke-linecap="round"><path d="M33 47v8M29.5 49l7 4M29.5 53l7-4"/></g></symbol>  <!-- meteo non disponibile: sole grigio sbarrato -->  <symbol id="mi-nd" viewBox="0 0 64 64"><g stroke="#AEB4BB" stroke-width="3.6" stroke-linecap="round"><path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/></g><circle cx="32" cy="32" r="12.5" fill="#C9CED4"/><path d="M10 54L54 10" stroke="#7F8790" stroke-width="4.6" stroke-linecap="round"/></symbol>  <!-- meteo non disponibile: sole grigio sbarrato -->  <symbol id="mi-nd" viewBox="0 0 64 64"><g stroke="#AEB4BB" stroke-width="3.6" stroke-linecap="round"><path d="M32 6v6M32 52v6M6 32h6M52 32h6M13.6 13.6l4.2 4.2M46.2 46.2l4.2 4.2M13.6 50.4l4.2-4.2M46.2 17.8l4.2-4.2"/></g><circle cx="32" cy="32" r="12.5" fill="#C9CED4"/><path d="M10 54L54 10" stroke="#7F8790" stroke-width="4.6" stroke-linecap="round"/></symbol></svg>';
+  function sprite(){ if(!document.getElementById("meteo-sprite")) document.body.insertAdjacentHTML("afterbegin", SPRITE); }
+  const stati = new WeakMap();
+  async function carica(el, forza){
+    const cfg = stati.get(el); if(!cfg) return;
+    el.innerHTML = cfg.dati ? el.innerHTML : Array.from({ length: 7 }, () => '<span class="meteo-scheletro"></span>').join("");
+    let pos = null;
+    try{ pos = await cfg.posizione(); }catch(e){ pos = null; }
+    if(!pos || pos.messaggio){ cfg.dati = null; mostraMsg(el, (pos && pos.messaggio) || cfg.senzaPosizione); return; }
+    if(pos.demo){ cfg.dati = datiDemo(); disegna(el); return; }
+    const chiave = "equo-meteo:" + (pos.lat != null ? Number(pos.lat).toFixed(2) + "," + Number(pos.lon).toFixed(2) : String(pos.indirizzo || "") + "|" + String(pos.citta || ""));
+    const salv = leggi(chiave);
+    if(salv && !forza && Date.now() - salv.salvato < 30 * 60e3){ cfg.dati = salv.dati; disegna(el); return; }
+    if(salv) { cfg.dati = salv.dati; disegna(el); }
+    try{
+      const tk = await cfg.token();
+      const r = await fetch(cfg.endpoint, { method: "POST", headers: { "Content-Type": "application/json", ...(tk ? { Authorization: "Bearer " + tk } : {}) }, body: JSON.stringify(pos) });
+      const d = await r.json().catch(() => ({}));
+      if(d && d.giorni && d.giorni.length){ if(pos.luogo && !d.luogo) d.luogo = pos.luogo; cfg.dati = d; scrivi(chiave, { salvato: Date.now(), dati: d }); disegna(el); return; }
+      if(!cfg.dati) mostraMsg(el, d && d.non_trovato ? cfg.nonTrovato || { testo: "Indirizzo non trovato per il meteo" } : { testo: "Meteo non disponibile ora", icona: "fa-cloud" });
+    }catch(e){ if(!cfg.dati) mostraMsg(el, { testo: "Meteo non disponibile offline", icona: "fa-wifi" }); }
+  }
+  function mostraMsg(el, m){
+    m = m || { testo: "Meteo non disponibile" };
+    el.innerHTML = `<span class="meteo-msg"><i class="fa-solid ${m.icona || "fa-location-dot"}"></i><span>${esc(m.testo)}${m.link ? ` <u>${esc(m.link)}</u>` : ""}</span></span>`;
+    el.dataset.azione = m.azione ? "1" : "";
+    stati.get(el).azioneMsg = m.azione || null;
+  }
+  function disegna(el){
+    const cfg = stati.get(el), d = cfg.dati;
+    const oggi = oggiIso();
+    el.innerHTML = d.giorni.slice(0, 7).map((g, i) => `<span class="meteo-g${g.data === oggi ? " oggi" : ""}"><b>${esc(etichettaGiorno(g.data, i))}</b>${icona(g.sim, false)}</span>`).join("");
+    el.setAttribute("aria-label", "Meteo dei prossimi 7 giorni" + (d.luogo ? " a " + d.luogo : "") + ": tocca per il dettaglio ora per ora");
+    stati.get(el).azioneMsg = null;
+  }
+  function apriDettaglio(el, giorno){
+    sprite();
+    const cfg = stati.get(el), d = cfg && cfg.dati; if(!d) return;
+    let sel = giorno || d.giorni[0].data;
+    const velo = document.createElement("div");
+    velo.className = "meteo-velo";
+    velo.innerHTML = `<div class="meteo-sheet" role="dialog" aria-label="Previsioni meteo">
+      <div class="meteo-testa"><h3><i class="fa-solid fa-location-dot"></i>${esc(d.luogo || "Meteo")}</h3><button class="meteo-x" aria-label="Chiudi">✕</button></div>
+      <div class="meteo-giorni"></div><div class="meteo-ore"></div>
+      <div class="meteo-nota"></div></div>`;
+    const chiudi = () => { velo.remove(); document.removeEventListener("keydown", esc_); };
+    const esc_ = e => { if(e.key === "Escape") chiudi(); };
+    velo.addEventListener("click", e => { if(e.target === velo || e.target.closest(".meteo-x")) chiudi(); });
+    document.addEventListener("keydown", esc_);
+    const giorniEl = velo.querySelector(".meteo-giorni"), oreEl = velo.querySelector(".meteo-ore");
+    const rendi = () => {
+      giorniEl.innerHTML = d.giorni.slice(0, 7).map(g => `<button class="meteo-chip${g.data === sel ? " sel" : ""}" data-g="${g.data}"><b>${esc(etichettaGiorno(g.data))}</b>${icona(g.sim, false)}<small>${g.min != null ? g.min + "° / " + g.max + "°" : ""}</small></button>`).join("");
+      const ore = d.ore.filter(o => giornoDi(o.t) === sel && new Date(o.t) >= new Date(Date.now() - 3600e3));
+      const g = d.giorni.find(x => x.data === sel) || {};
+      const sei = ore.length && ore.every(o => o.passo === 6);
+      oreEl.innerHTML = `<div class="meteo-sezione">${esc(lungaGiorno(sel))} · ${NOMI[g.sim] || ""}${g.mm ? " · " + String(g.mm).replace(".", ",") + " mm" : ""}${sei ? " · ogni 6 ore" : ""}</div>`
+        + (ore.length ? ore.map(o => `<div class="meteo-riga"><span class="h">${ora(o.t)}</span>${icona(o.sim, o.notte)}<span class="t">${o.temp != null ? o.temp + "°" : "–"}</span>`
+          + `<span class="p">${Number(o.mm) > 0 ? '<i class="fa-solid fa-droplet" style="font-size:11px"></i> ' + String(Math.round(o.mm * 10) / 10).replace(".", ",") + " mm" : ""}</span>`
+          + `<span class="v">${o.vento != null ? '<i class="fa-solid fa-wind" style="font-size:11px"></i> ' + o.vento + " km/h" : ""}</span></div>`).join("")
+          : '<div class="meteo-msg" style="padding:20px 0">Nessun dettaglio per questo giorno.</div>');
+      giorniEl.querySelector(".sel")?.scrollIntoView({ block: "nearest", inline: "center" });
+    };
+    giorniEl.addEventListener("click", e => { const b = e.target.closest(".meteo-chip"); if(b){ sel = b.dataset.g; rendi(); oreEl.scrollTop = 0; } });
+    velo.querySelector(".meteo-nota").textContent = (d.demo ? "Dati di esempio. " : "") + "Fonte dati: " + (d.fonte || "") + (d.aggiornato ? " · aggiornato alle " + ora(d.aggiornato) : "") + ". Le previsioni oltre 2-3 giorni sono meno precise.";
+    document.body.appendChild(velo);
+    rendi();
+  }
+  window.EquoMeteo = {
+    monta(el, cfg){
+      if(!el) return;
+      sprite();
+      const gia = stati.get(el);
+      stati.set(el, Object.assign(gia || {}, cfg));
+      if(!gia){
+        el.setAttribute("role", "button"); el.tabIndex = 0;
+        const tocco = () => { const c = stati.get(el); if(c.azioneMsg){ c.azioneMsg(); return; } if(c.dati) apriDettaglio(el); else carica(el, true); };
+        el.addEventListener("click", tocco);
+        el.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); tocco(); } });
+      }
+      const c = stati.get(el);
+      if(!c.dati || !c.caricatoIl || Date.now() - c.caricatoIl > 30 * 60e3){ c.caricatoIl = Date.now(); carica(el); }
+    },
+    // previsione senza riquadro (es. icona accanto a un appuntamento): stessa cache del riquadro
+    async previsione(pos, cfg){
+      if(!pos) return null;
+      if(pos.demo) return datiDemo();
+      const chiave = "equo-meteo:" + (pos.lat != null ? Number(pos.lat).toFixed(2) + "," + Number(pos.lon).toFixed(2) : String(pos.indirizzo || "") + "|" + String(pos.citta || ""));
+      const salv = leggi(chiave);
+      if(salv && Date.now() - salv.salvato < 30 * 60e3) return salv.dati;
+      try{
+        const tk = await cfg.token();
+        const r = await fetch(cfg.endpoint, { method: "POST", headers: { "Content-Type": "application/json", ...(tk ? { Authorization: "Bearer " + tk } : {}) }, body: JSON.stringify(pos) });
+        const d = await r.json().catch(() => ({}));
+        if(d && d.giorni && d.giorni.length){ scrivi(chiave, { salvato: Date.now(), dati: d }); return d; }
+        return d && d.non_trovato ? { non_trovato: true } : (salv ? salv.dati : null);
+      }catch(e){ return salv ? salv.dati : null; }
+    },
+    // il tempo previsto a una certa ora di un giorno (ora più vicina)
+    alle(dati, giorno, oraHHMM){
+      if(!dati || !dati.ore) return null;
+      const ore = dati.ore.filter(o => giornoDi(o.t) === giorno);
+      if(!ore.length){ const g = (dati.giorni || []).find(x => x.data === giorno); return g ? { sim: g.sim, notte: false, temp: g.max, mm: g.mm } : null; }
+      const [h, m] = String(oraHHMM || "10:00").split(":").map(Number);
+      const obiettivo = h * 60 + (m || 0);
+      const min = o => { const t = ora(o.t).split(":").map(Number); return t[0] * 60 + t[1]; };
+      return ore.reduce((a, b) => Math.abs(min(b) - obiettivo) < Math.abs(min(a) - obiettivo) ? b : a);
+    },
+    icona(k, notte){ sprite(); return icona(k, notte); },
+    iconaNd(titolo){ sprite(); const t = esc(titolo || "Meteo non disponibile"); return `<svg class="mi mi-nd" role="img" aria-label="${t}"><title>${t}</title><use href="#mi-nd"/></svg>`; },
+    nome: k => NOMI[k] || "",
+    ricarica(el){ const c = stati.get(el); if(c){ c.caricatoIl = Date.now(); carica(el, true); } },
+    datiDemo,
+  };
+})();
+</script>
+<script>
+/* Meteo in Home: posizione del telefono (si chiede il permesso solo con un tocco; poi si usa l'ultima posizione nota) */
+let meteoPosChiesta = false;
+function meteoUltimaPos(){ try{ return JSON.parse(localStorage.getItem("equo-meteo-pos") || "null"); }catch(e){ return null; } }
+async function meteoPosizioneTelefono(){
+  if(DEMO_MODE) return { demo: true };
+  if(!navigator.geolocation) return { messaggio: { testo: "Questo dispositivo non fornisce la posizione per il meteo.", icona: "fa-location-crosshairs" } };
+  const ult = meteoUltimaPos();
+  let stato = "prompt";
+  try{ stato = (await navigator.permissions.query({ name: "geolocation" })).state; }catch(e){ stato = ult ? "granted" : "prompt"; }
+  if(stato === "denied") return ult || { messaggio: { testo: "Posizione non consentita: attivala nelle impostazioni del telefono per vedere il meteo.", icona: "fa-location-dot" } };
+  if(stato === "prompt" && !meteoPosChiesta){
+    if(ult) return ult;
+    return { messaggio: { testo: "Meteo dei prossimi 7 giorni:", link: "tocca per usare la tua posizione", icona: "fa-cloud-sun", azione: () => { meteoPosChiesta = true; meteoHome(true); } } };
+  }
+  const p = await new Promise(res => navigator.geolocation.getCurrentPosition(x => res(x), () => res(null), { enableHighAccuracy: false, timeout: 10000, maximumAge: 30 * 60e3 }));
+  if(!p) return ult || { messaggio: { testo: "Non riesco a leggere la posizione.", link: "Riprova", icona: "fa-location-dot", azione: () => { meteoPosChiesta = true; meteoHome(true); } } };
+  const pos = { lat: Math.round(p.coords.latitude * 100) / 100, lon: Math.round(p.coords.longitude * 100) / 100 };
+  try{ localStorage.setItem("equo-meteo-pos", JSON.stringify(pos)); }catch(e){}
+  return pos;
+}
+function meteoHome(forza){
+  if(typeof EquoMeteo === "undefined" || !currentUser) return;
+  const pro = document.getElementById("page-pro-home")?.classList.contains("active");
+  const el = document.getElementById(pro ? "meteo-pro" : "meteo-owner");
+  if(!el) return;
+  EquoMeteo.monta(el, {
+    endpoint: "/.netlify/functions/meteo",
+    token: async () => { try{ return (await sb.auth.getSession()).data.session?.access_token || ""; }catch(e){ return ""; } },
+    posizione: meteoPosizioneTelefono,
+  });
+  if(forza) EquoMeteo.ricarica(el);
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") try{ meteoHome(); }catch(e){} });
 </script>
 </body>
 </html>

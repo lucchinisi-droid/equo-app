@@ -33,12 +33,13 @@ exports.handler = async (event) => {
   if (testo(b.sito_web, 200)) return risposta(200, { ok: true });
   if (Number(b.ms) > 0 && Number(b.ms) < 2500) return risposta(200, { ok: true });
 
-  const modulo = b.modulo === "scuderia_smart" ? "scuderia_smart" : b.modulo === "candidatura" ? "candidatura" : null;
+  const modulo = ["scuderia_smart", "candidatura", "scuderia"].includes(b.modulo) ? b.modulo : null;
   if (!modulo) return risposta(400, { errore: "Modulo sconosciuto" });
 
   const r = {
-    tipo: modulo,
-    origine: modulo === "candidatura" ? "sito_candidatura" : "sito_scuderia_smart",
+    // la richiesta demo della pagina Scuderia è una richiesta «struttura» come quella dall'app
+    tipo: modulo === "scuderia" ? "struttura" : modulo,
+    origine: modulo === "candidatura" ? "sito_candidatura" : modulo === "scuderia" ? "sito_scuderia" : "sito_scuderia_smart",
     nome: testo(b.nome, 160),
     email: testo(b.email, 200).toLowerCase(),
     telefono: testo(b.telefono, 40),
@@ -52,6 +53,10 @@ exports.handler = async (event) => {
     r.professione = PROFESSIONI.includes(b.professione) ? b.professione : null;
     dettagli.specializzazione = testo(b.specializzazione, 200) || null;
     dettagli.esperienza = testo(b.esperienza, 60) || null;
+  } else if (modulo === "scuderia") {
+    r.nome_struttura = testo(b.struttura, 160);
+    dettagli.cavalli = testo(b.cavalli, 20) || null;
+    dettagli.pacchetto = ["START", "ADVANCE", "PREMIUM", "Enterprise"].includes(b.pacchetto) ? b.pacchetto : null;
   } else {
     r.nome_struttura = testo(b.struttura, 160);
     dettagli.ruolo = testo(b.ruolo, 80) || null;
@@ -63,7 +68,7 @@ exports.handler = async (event) => {
   const manca = [];
   if (!r.nome) manca.push("nome e cognome");
   if (modulo === "candidatura" && !r.professione) manca.push("professione");
-  if (modulo === "scuderia_smart" && !r.nome_struttura) manca.push("nome della struttura");
+  if (modulo !== "candidatura" && !r.nome_struttura) manca.push("nome della struttura");
   if (!r.citta) manca.push("città");
   if (!r.provincia) manca.push("provincia");
   if (!r.email) manca.push("email");

@@ -1,6 +1,16 @@
 {
   "titolo": "Le novità di questo aggiornamento",
   "voci": [
+    "Athena e Merlino sanno il meteo del centro e delle località: chiedi «che tempo fa sabato pomeriggio?» per decidere se fare lezione all'aperto.",
+    "Home: data e ora attuali accanto a «Bentornato».",
+    "Home: meteo dei prossimi 7 giorni all'indirizzo del centro (tocca per il dettaglio ora per ora) e nuova lente per cercare cavalli, persone, lezioni e articoli di magazzino da qualsiasi pagina (anche Ctrl+K).",
+    "Cavalli dei proprietari: quando il maniscalco fissa, modifica o annulla un appuntamento direttamente con il proprietario, il centro riceve l'avviso in chat e lo vede in Professionisti → Appuntamenti («Con il proprietario»). A lavoro fatto, la ferratura compare anche nella scheda del cavallo.",
+    "Professionisti → Appuntamenti: se il maniscalco cambia servizio, data o ora, l'appuntamento torna «Da confermare» con un riquadro che mostra cosa è cambiato (prima → ora), e in chat arriva l'avviso.",
+    "Android: il tasto «indietro» del telefono chiude prima la finestra aperta, poi torna alla Home; per uscire va premuto due volte.",
+    "Scheda del cavallo → «Invia in chat»: ora puoi mandarla anche ai maniscalchi collegati, direttamente nella chat Professionisti. Chi ha due ruoli compare con «come proprietario» o «come maniscalco».",
+    "Chat: puoi rispondere a un messaggio preciso, come su WhatsApp. Scorri il messaggio verso destra (dal computer: doppio clic) e scrivi la risposta; toccando la citazione torni al messaggio originale.",
+    "iPhone: toccando la notifica di un messaggio si apre direttamente la chat giusta, come su Android.",
+    "Chat: le spunte di lettura ora sono pallini (1 grigio inviato, 2 grigi consegnato, 2 verde scuro letto).",
     "Equo Scuderia ora si apre anche senza connessione: vedi gli ultimi dati consultati e torni a modificare appena rientra la rete.",
     "Nuova Gestione Groom (in Altre funzioni): l'app per il personale di stalla in 7 lingue, con QR personale e PIN, e i QR da attaccare ai box. 3 groom in ADVANCE, 10 in PREMIUM.",
     "Box / Stalla: il nome del proprietario sul box, la nota N e le attività del giorno che seguono il cavallo, e i cavalli si spostano tenendo premuto e trascinando.",
