@@ -18,6 +18,9 @@ async function utenteDaToken(event, supabase) {
   return data.user;
 }
 
+// ruoli professionali: chi ne ha uno (principale o secondario) paga sempre il prezzo da professionista
+const RUOLI_PRO = ["maniscalco", "veterinario", "istruttore"];
+
 const PRICE_MAP = {
   proprietario: {
     mensile: process.env.STRIPE_PRICE_PROP_MENSILE,
@@ -35,20 +38,22 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { piano, periodo } = JSON.parse(event.body || "{}");
+    const { periodo } = JSON.parse(event.body || "{}");
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
     const user = await utenteDaToken(event, supabase);
     if (!user) return { statusCode: 401, body: JSON.stringify({ error: "Non autenticato" }) };
     const userId = user.id;
     const email = user.email;
+    // niente doppio abbonamento: chi ha già Premium non può aprirne un secondo
+    const { data: prof, error: eProf } = await supabase.from("profiles").select("piano, ruolo, ruolo_secondario, stripe_customer_id, stripe_subscription_id").eq("id", userId).maybeSingle();
+    if (eProf) throw eProf;
+    // il prezzo lo decide il server dal profilo (mai dalla vista o dal body): un account con un ruolo
+    // professionale paga il prezzo da professionista e il Premium vale per entrambi i profili
+    const piano = prof && (RUOLI_PRO.includes(prof.ruolo) || RUOLI_PRO.includes(prof.ruolo_secondario)) ? "professionista" : "proprietario";
     const priceId = PRICE_MAP[piano] && PRICE_MAP[piano][periodo];
     if (!priceId) {
       return { statusCode: 400, body: JSON.stringify({ error: "Combinazione piano/periodo non valida" }) };
     }
-
-    // niente doppio abbonamento: chi ha già Premium non può aprirne un secondo
-    const { data: prof, error: eProf } = await supabase.from("profiles").select("piano, stripe_customer_id, stripe_subscription_id").eq("id", userId).maybeSingle();
-    if (eProf) throw eProf;
     if (prof && prof.piano === "premium") {
       return { statusCode: 409, body: JSON.stringify({ error: "Hai già Equo Premium attivo." }) };
     }
@@ -60,6 +65,8 @@ exports.handler = async (event) => {
       // stesso cliente Stripe di prima (storico pagamenti unico), altrimenti per email
       ...(prof && prof.stripe_customer_id ? { customer: prof.stripe_customer_id } : { customer_email: email }),
       client_reference_id: userId,
+      // l'utente resta scritto sull'abbonamento: serve al registro dei pagamenti per i rinnovi
+      subscription_data: { metadata: { user_id: userId } },
       allow_promotion_codes: true,
       success_url: `${process.env.URL}/?checkout=success`,
       cancel_url: `${process.env.URL}/?checkout=cancel`,

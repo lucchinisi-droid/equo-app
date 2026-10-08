@@ -36,6 +36,11 @@ exports.handler = async (event) => {
       .maybeSingle();
     if (readError) throw readError;
 
+    // eliminazione dell'account: si chiude solo l'abbonamento ricorrente (il lifetime resta, se l'utente rientra entro 30 giorni)
+    let soloAbbonamento = false;
+    try { soloAbbonamento = !!JSON.parse(event.body || "{}").solo_abbonamento; } catch (_) {}
+    if (soloAbbonamento && !(profile && profile.stripe_subscription_id)) return { statusCode: 200, body: JSON.stringify({ ok: true, nessun_abbonamento: true }) };
+
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     if (profile && profile.stripe_subscription_id) {
       try {
@@ -55,7 +60,7 @@ exports.handler = async (event) => {
 
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ piano: "free", stripe_subscription_id: null })
+      .update({ piano: "free", premium_livello: null, stripe_subscription_id: null })
       .eq("id", userId);
     if (updateError) throw updateError;
 

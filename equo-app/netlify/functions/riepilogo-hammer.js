@@ -148,7 +148,7 @@ async function inviaEmail(to, testo, nome) {
 }
 
 async function elaboraUtente(admin, p, oggi, settimana) {
-  const premium = p.piano === "premium";
+  const premium = p.piano === "premium" && p.premium_livello !== "proprietario";
   const d = await datiManiscalco(admin, p.id, oggi);
   if (!d.ha_clienti) return "senza_lavoro";
   // incassi nascosti nell'app (interruttore con PIN): il riepilogo non riporta importi
@@ -175,7 +175,7 @@ exports.handler = async () => {
   const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const oggi = oggiISO();
   const settimana = lunediDi(oggi);
-  const { data: maniscalchi, error } = await admin.from("profiles").select("id, full_name, email, piano, riepilogo_hammer, ruolo, ruolo_secondario")
+  const { data: maniscalchi, error } = await admin.from("profiles").select("id, full_name, email, piano, premium_livello, riepilogo_hammer, ruolo, ruolo_secondario")
     .or("ruolo.eq.maniscalco,ruolo_secondario.eq.maniscalco").limit(20000);
   if (error) { console.error("riepilogo hammer: lettura profili", error); return { statusCode: 500, body: "errore" }; }
   const { data: fatti } = await admin.from("ai_riepiloghi").select("user_id").eq("settimana", settimana).eq("vista", "professionista").limit(20000);

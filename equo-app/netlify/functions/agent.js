@@ -369,7 +369,7 @@ const rigaIntervento = (i) => ({ id: i.id, data: i.data_intervento, ora: i.ora ?
 
 async function clientiManiscalco(ctx) {
   if (ctx._clienti) return ctx._clienti;
-  const { data, error } = await ctx.db.from("clienti_mascalcia").select("id, nome, telefono, cliente_user_id, tipo_cliente").eq("maniscalco_id", ctx.userId).order("nome", { ascending: true });
+  const { data, error } = await ctx.db.from("clienti_mascalcia").select("id, nome, telefono, cliente_user_id, tipo_cliente").eq("maniscalco_id", ctx.userId).is("archiviato_il", null).order("nome", { ascending: true });
   if (error) throw error;
   ctx._clienti = data || [];
   return ctx._clienti;
@@ -968,7 +968,7 @@ exports.handler = async (event) => {
 
   // limite mensile lato server
   const mese = oggiISO().slice(0, 7);
-  const { data: profilo } = await admin.from("profiles").select("full_name, piano, ruolo, ruolo_secondario, created_at, ai_feedback_chiesto_at").eq("id", user.id).maybeSingle();
+  const { data: profilo } = await admin.from("profiles").select("full_name, piano, premium_livello, ruolo, ruolo_secondario, created_at, ai_feedback_chiesto_at").eq("id", user.id).maybeSingle();
   // Equo Scuderia: Athena (inclusa, basic in START) o Merlino (PREMIUM o add-on), secondo il pacchetto del centro
   const scud = vista === "scuderia";
   let limitiCentro = null;
@@ -979,7 +979,9 @@ exports.handler = async (event) => {
   if (merlino && !(centro.owner_id === user.id || membro.ruolo === "admin" || ["admin", "2", "3"].includes(String(membro.livello)))) return risposta(403, { error: "Merlino è riservato al titolare e ai responsabili del centro (livello 2 o 3)" });
   const athena = scud && !merlino;
   const athenaBasic = athena && limitiCentro.athena_proattiva === false;
-  const piano = profilo?.piano === "premium" ? "premium" : "free";
+  // il Premium da proprietario non vale nella vista professionista (Hammer & co.): lì serve il Premium professionista
+  const premiumSoloProp = profilo?.premium_livello === "proprietario";
+  const piano = profilo?.piano === "premium" && !(vista === "professionista" && premiumSoloProp) ? "premium" : "free";
   // Free: 5 messaggi al GIORNO (chiave "AAAA-MM-GG", riparte a mezzanotte ora italiana); Premium: 500 al mese ("AAAA-MM")
   const giornaliero = !scud && piano === "free";
   const periodo = giornaliero ? oggiISO() : mese;
