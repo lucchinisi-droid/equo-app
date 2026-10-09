@@ -1830,6 +1830,17 @@ textarea.input{resize:vertical}
 .ii-passo span{width:24px;height:24px;border-radius:50%;background:#14482c;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
 .ii-btn{width:100%;background:#1d4a35;color:#fff;border:2px solid #e8b04b;border-radius:12px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
 .ii-dopo{display:block;margin:10px auto 0;background:none;border:0;color:#5f6b63;font-size:13px;text-decoration:underline;cursor:pointer}
+/* cavalli in arrivo / usciti dal centro (Sposta cavallo) */
+.arrivo-card{border:2px solid var(--primary);border-radius:var(--radius-lg);padding:14px 16px;background:var(--surface);margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.arrivo-t{font-weight:800;font-size:15px;margin-bottom:4px}
+.arrivo-d{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.arrivo-d b{color:var(--text)}
+.arrivo-az{display:flex;gap:8px;flex-wrap:wrap}
+.usciti-box{margin:18px 0 6px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);padding:10px 14px}
+.usciti-box summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--muted)}
+.uscito-riga{display:flex;flex-direction:column;padding:8px 0;border-top:1px solid var(--border);font-size:13px}
+.uscito-riga span{color:var(--muted);font-size:12px}
+.usciti-nota{font-size:12px;color:var(--muted);margin:8px 0 0}
 </style>
 <!-- OneSignal: notifiche push (suono + banner anche a telefono bloccato/app chiusa). -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -2224,6 +2235,7 @@ textarea.input{resize:vertical}
               </div>
               <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
             </div>
+            <div id="cavalli-arrivi"></div>
             <div id="cavalli-sezioni">
               <div class="cavalli-sezione" data-sezione="proprieta">
                 <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('proprieta')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli di proprietà<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
@@ -2244,6 +2256,7 @@ textarea.input{resize:vertical}
             <div class="empty-state" id="cavalli-empty" style="display:none">
               <i class="fa-solid fa-horse-head"></i><div>Nessun cavallo registrato. Aggiungi il primo.</div>
             </div>
+            <div id="cavalli-usciti"></div>
 
             <!-- BOX / STALLA -->
             <section class="box-sezione" id="box-sezione">
@@ -6596,12 +6609,20 @@ async function refreshCavalliModule(){
   refreshBoxSezione();
 }
 
+let cavalliUsciti = [], cavalliArrivi = [];
 async function loadCavalli(){
-  if(DEMO_MODE){ cavalliList = demoState.cavalli; return; }
-  const { data, error } = await sb.from("scuderia_cavalli")
-    .select("id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo")
-    .eq("centro_id", currentCentro.id)
-    .order("nome", { ascending: true });
+  if(DEMO_MODE){ cavalliList = demoState.cavalli.filter(c => !c.uscito_il); cavalliUsciti = demoState.cavalli.filter(c => c.uscito_il); cavalliArrivi = demoState.arrivi || []; return; }
+  const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo";
+  // cavalli usciti (spostati altrove con «Sposta»): non si cancellano, restano in fondo come «Usciti dal centro»
+  const [att, usc, arr] = await Promise.all([
+    sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).is("uscito_il", null).order("nome", { ascending: true }),
+    sb.from("scuderia_cavalli").select("id, nome, razza, proprietario, codice_equo, uscito_il, uscito_verso").eq("centro_id", currentCentro.id).not("uscito_il", "is", null).order("uscito_il", { ascending: false }).limit(50),
+    sb.from("cavalli_arrivi").select("id, nome_cavallo, proprietario_nome, richiesto_nome, richiesto_ruolo, dal, created_at").eq("centro_id", currentCentro.id).eq("stato", "in_attesa").order("created_at", { ascending: true })
+  ]);
+  cavalliUsciti = usc.error ? [] : (usc.data || []);
+  cavalliArrivi = arr.error ? [] : (arr.data || []);
+  if(!att.error){ cavalliList = att.data || []; return; }
+  const { data, error } = await sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).order("nome", { ascending: true });
   if(!error){ cavalliList = data || []; return; }
   // ripiego se la colonna proprietario_membro_id non esistesse
   const r = await sb.from("scuderia_cavalli")
@@ -6660,7 +6681,35 @@ function toggleSezioneCavalli(sez){
   try{ localStorage.setItem("equo-scud-sez-chiuse", JSON.stringify(sezioniCavalliChiuse)); }catch(e){}
   renderCavalliList();
 }
+function renderArriviUsciti(){
+  const ab = document.getElementById("cavalli-arrivi"), ub = document.getElementById("cavalli-usciti");
+  if(ab) ab.innerHTML = cavalliArrivi.map(a => `<div class="arrivo-card">
+      <div class="arrivo-t">🐴 ${escapeHtml(a.nome_cavallo)} in arrivo</div>
+      <div class="arrivo-d">${escapeHtml(a.richiesto_nome || "Qualcuno")} (${a.richiesto_ruolo === "maniscalco" ? "maniscalco" : "proprietario"}) segna che <b>${escapeHtml(a.nome_cavallo)}</b>${a.proprietario_nome ? " di <b>" + escapeHtml(a.proprietario_nome) + "</b>" : ""} sta da voi dal ${formatDate(a.dal)}. Accogliendolo entra nei vostri cavalli (Pensione) con la sua scheda Equo e il suo storico.</div>
+      <div class="arrivo-az"><button class="btn btn-primary" onclick="rispondiArrivo('${a.id}', true, this)">Accogli</button><button class="btn btn-outline" onclick="rispondiArrivo('${a.id}', false, this)">Non è da noi</button></div>
+    </div>`).join("");
+  if(ub) ub.innerHTML = cavalliUsciti.length ? `<details class="usciti-box"><summary>Usciti dal centro · ${cavalliUsciti.length}</summary>
+      ${cavalliUsciti.map(c => `<div class="uscito-riga"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml([c.proprietario, c.codice_equo].filter(Boolean).join(" · "))}</span>
+        <span>uscito il ${formatDate(String(c.uscito_il).slice(0, 10))}${c.uscito_verso ? " · verso " + escapeHtml(c.uscito_verso) : ""}</span></div>`).join("")}
+      <p class="usciti-nota">La scheda e lo storico restano: se il cavallo torna e qualcuno lo indica in Equo, con «Accogli» si riattiva la stessa scheda.</p></details>` : "";
+}
+async function rispondiArrivo(id, accogli, btn){
+  const a = cavalliArrivi.find(x => x.id === id);
+  if(!a) return;
+  if(!accogli && btn.dataset.conferma !== "1"){ btn.dataset.conferma = "1"; btn.textContent = "Tocca ancora: non è da noi"; setTimeout(() => { btn.dataset.conferma = ""; btn.textContent = "Non è da noi"; }, 4000); return; }
+  btn.closest(".arrivo-az").querySelectorAll("button").forEach(b => b.disabled = true);
+  if(DEMO_MODE){
+    demoState.arrivi = (demoState.arrivi || []).filter(x => x.id !== id);
+    if(accogli) demoState.cavalli.push({ id: "dcav-" + Date.now(), nome: a.nome_cavallo, proprietario: a.proprietario_nome, tipo_proprieta: "pensione", centro_id: currentCentro.id });
+  } else {
+    const { data, error } = await sb.rpc("equo_rispondi_arrivo", { p_id: id, p_accogli: accogli });
+    if(error || !data?.ok){ showToast((data && data.errore) || (error && error.message) || "Non riuscito, riprova."); btn.closest(".arrivo-az").querySelectorAll("button").forEach(b => b.disabled = false); return; }
+  }
+  showToast(accogli ? `${a.nome_cavallo} accolto: lo trovi in Pensione` : `Segnalato: ${a.nome_cavallo} non è da voi. Chi l'aveva indicato riceve l'avviso.`);
+  await refreshCavalliModule();
+}
 function renderCavalliList(){
+  renderArriviUsciti();
   const empty = document.getElementById("cavalli-empty");
   empty.style.display = cavalliList.length === 0 ? "block" : "none";
   document.getElementById("cavalli-sezioni").style.display = cavalliList.length === 0 ? "none" : "block";

@@ -1611,6 +1611,155 @@ body.ai-aperta{overflow:hidden}
 @keyframes agInL{from{transform:translateX(40px);opacity:.3}to{transform:none;opacity:1}}
 @keyframes agInR{from{transform:translateX(-40px);opacity:.3}to{transform:none;opacity:1}}
 .ag-griglia{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* sposta cavallo */
+.dove-sta{display:flex;gap:12px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:10px 12px}
+.dove-sta .ic{width:38px;height:38px;border-radius:11px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.dove-sta .c{flex:1;min-width:0}.dove-sta .c b{display:block;font-size:14px}.dove-sta .c span{display:block;font-size:12px;color:var(--muted)}
+.dove-attesa{font-size:12.5px;margin-top:8px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));line-height:1.45}
+.dove-attesa.no{background:color-mix(in srgb,var(--red) 10%,var(--surface))}
+.sp-modal{max-height:92vh;overflow-y:auto}
+.sp-o{display:flex;gap:10px;align-items:center;border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13.5px;background:var(--surface);cursor:pointer;margin-bottom:6px}
+.sp-o.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.sp-o.attuale{opacity:.6;cursor:default}
+.sp-o input{accent-color:var(--accent);flex-shrink:0}
+.sp-o .c{flex:1;min-width:0}.sp-o .c b{display:block}.sp-o .c span{display:block;font-size:11.5px;color:var(--muted)}
+.sp-pill{font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 7px;background:var(--green);color:#fff;white-space:nowrap}
+.sp-sez{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.sp-lista{max-height:34vh;overflow-y:auto}
+.sp-extra{margin:-2px 0 8px}.sp-extra[hidden]{display:none}
+.sp-dal{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted);margin-top:10px}
+.sp-info{font-size:12.5px;color:var(--muted);line-height:1.55;background:var(--surface2);border-radius:10px;padding:8px 10px;margin-top:10px}
+.sp-info b{color:var(--text)}.sp-info[hidden]{display:none}
+.sposta-voce{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;line-height:1.45}
+.sposta-voce:last-child{border-bottom:none}
+.sposta-voce .data{flex-shrink:0;width:44px;text-align:center;font-size:10.5px;color:var(--muted);text-transform:uppercase}
+.sposta-voce .data b{display:block;font-size:17px;color:#2e7fb8;line-height:1.1}
+.sposta-voce .t{flex:1;min-width:0;color:var(--text)}
+.ag-di{font-weight:700;color:var(--text)}
+.ag-cli .ag-cli-nome{flex:1}
+.ag-cli-nav{flex-shrink:0;letter-spacing:0;text-transform:none;font:inherit;font-size:11px;font-weight:800;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:3px 8px;cursor:pointer}
+/* incassi: vista Semplice / Completa */
+.inc-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.inc-vista{display:flex;background:var(--surface2);border-radius:999px;padding:3px;flex-shrink:0}
+.inc-vista button{font:inherit;font-size:12.5px;font-weight:800;border:none;border-radius:999px;padding:6px 12px;background:transparent;color:var(--muted);cursor:pointer}
+.inc-vista button.on{background:var(--accent);color:var(--surface)}
+.inc-vista .stella{font-size:10px;margin-left:3px}
+.inc-cassa{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:15px 16px;margin-bottom:10px;cursor:pointer}
+.inc-cassa.aperta{border:2px solid var(--accent);padding:14px 15px}
+.inc-cassa .l{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.inc-cassa .v{font-family:Fraunces,serif;font-size:38px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.inc-cassa.verde .v{color:var(--green)} .inc-cassa.rosso .v{color:var(--red)}
+.inc-cassa .d{font-size:13px;color:var(--muted)}
+.inc-cassa .d.su{color:var(--green)} .inc-cassa .d.giu{color:var(--red)}
+.inc-det[hidden],#inc-semplice[hidden],#inc-completa[hidden]{display:none}
+.inc-det{margin-bottom:6px}
+.inc-stat-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inc-stat-kpis .k{background:var(--surface2);border-radius:12px;padding:9px 11px;min-width:0}
+.inc-stat-kpis .k.grande{grid-column:1/-1}
+.inc-stat-kpis .l{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.inc-stat-kpis .v{font-family:Fraunces,serif;font-size:21px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.inc-stat-kpis .k.grande .v{font-size:28px}
+.inc-stat-kpis .d{font-size:11.5px;color:var(--muted)}
+.inc-stat-kpis .d.su{color:var(--green)} .inc-stat-kpis .d.giu{color:var(--red)}
+.inc-tit em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:700}
+.inc-avviso{display:flex;gap:10px;align-items:center;background:color-mix(in srgb,#e0892f 14%,var(--surface));border:1px solid color-mix(in srgb,#e0892f 45%,var(--border));border-radius:12px;padding:9px 11px;font-size:12.5px;margin-top:10px;line-height:1.4}
+.inc-avviso b{color:#c0661a}
+.inc-avviso .btn{margin-left:auto;flex-shrink:0}
+.inc-tab{width:100%;border-collapse:collapse;font-size:12.5px}
+.inc-tab th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;font-weight:800;padding:4px 0 6px}
+.inc-tab th:first-child,.inc-tab td:first-child{text-align:left}
+.inc-tab td{padding:7px 0;border-top:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
+.inc-tab tr.cli{cursor:pointer}
+.inc-tab td:first-child{font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inc-tab td small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+.inc-misure{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.inc-misura{display:grid;grid-template-columns:64px 1fr 36px;gap:8px;align-items:center;font-size:12.5px;font-variant-numeric:tabular-nums}
+.inc-misura .f{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.inc-misura .f i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.inc-misura b{text-align:right}
+.inc-nota{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+.inc-bloccata{position:relative;min-height:470px}
+.inc-bloccata .sotto{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none}
+.inc-bloccata .lucchetto{position:absolute;left:6px;right:6px;top:30px;background:var(--surface);border:2px solid var(--accent);border-radius:20px;padding:18px;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.2)}
+.inc-bloccata .lucchetto h3{font-family:Fraunces,serif;margin:6px 0 4px;font-size:19px}
+.inc-bloccata .lucchetto p{font-size:13px;color:var(--muted);margin:0 0 8px}
+.inc-bloccata .lucchetto ul{text-align:left;font-size:13px;margin:0 0 12px;padding-left:20px;line-height:1.5}
+.prezzi-righe{display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow-y:auto}
+.prezzi-riga .n{font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.prezzi-riga .n b{color:var(--text)}
+.prezzi-campo{display:flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:12px;padding:4px 12px;background:var(--surface)}
+.prezzi-campo:focus-within{border-color:var(--accent)}
+.prezzi-campo span{color:var(--muted);font-weight:800}
+.prezzi-campo input{flex:1;min-width:0;border:none;background:transparent;font:inherit;font-size:18px;font-weight:800;color:var(--text);padding:6px 0;outline:none}
+.prezzi-campo small{font-size:11px;color:var(--muted);text-align:right}
+.prezzi-mai{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:12px}
+.prezzi-mai[hidden]{display:none}
+/* incassi a schede */
+.inc-seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface2);border-radius:13px;padding:3px;gap:3px;margin-bottom:12px}
+.inc-seg button{font:inherit;font-size:13px;font-weight:800;border:none;border-radius:10px;padding:8px 4px;background:transparent;color:var(--muted);cursor:pointer}
+.inc-seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.inc-seg button small{display:block;font-size:11.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.inc-periodi{margin-bottom:10px;overflow-x:auto;flex-wrap:nowrap}
+.inc-lucchetto{font-size:10px}
+.inc-date{display:flex;gap:8px;margin-bottom:10px}
+.inc-date[hidden]{display:none}
+.inc-date label{flex:1;font-size:12px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.inc-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.inc-kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 12px;min-width:0}
+.inc-kpi.grande{grid-column:1/-1}
+.inc-kpi .l{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.inc-kpi .v{font-family:Fraunces,serif;font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.inc-kpi.grande .v{font-size:32px}
+.inc-kpi .d{font-size:12px;color:var(--muted);margin-top:1px}
+.inc-kpi .d.su{color:var(--green)} .inc-kpi .d.giu{color:var(--red)}
+.inc-card{margin-bottom:12px}
+.inc-tit{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.inc-grafico{display:flex;align-items:flex-end;gap:4px;height:112px}
+.inc-grafico .c{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.inc-grafico .b{width:100%;max-width:38px;background:var(--accent);border-radius:4px 4px 0 0}
+.inc-grafico .b.zero{background:var(--border)}
+.inc-grafico small{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.inc-riga{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
+.inc-riga:last-child{border-bottom:none}
+.inc-riga .t{position:relative;padding:3px 8px;border-radius:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.inc-riga .t i{position:absolute;inset:0;background:var(--surface2);transform-origin:left;border-radius:6px}
+.inc-riga .t span{position:relative}
+.inc-riga b{font-variant-numeric:tabular-nums}
+.inc-gruppo{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px;padding:10px 0 4px}
+.inc-gruppo:first-child{padding-top:0}
+.inc-voce{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.inc-voce:last-child{border-bottom:none}
+.inc-voce .c{flex:1;min-width:0}
+.inc-voce .c b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inc-voce .c > span{font-size:11.5px;color:var(--muted)}
+.inc-voce .imp{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.inc-vecchio{color:var(--red);font-weight:700}
+.inc-saldato{flex:none}
+/* clienti a cartelle */
+.cli-cartelle{display:flex;gap:2px;border-bottom:1.5px solid var(--border);overflow-x:auto;margin-bottom:6px}
+.cli-cartelle button{font:inherit;font-size:14px;font-weight:800;border:none;background:none;color:var(--muted);padding:9px 10px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+.cli-cartelle button .n{font-size:11.5px;font-weight:800;min-width:22px;height:20px;border-radius:10px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted)}
+.cli-cartelle button.on{color:var(--text);border-bottom-color:var(--accent)}
+.cli-cartelle button.on .n{background:var(--accent);color:var(--surface)}
+.cli-cartelle button .n.nonletti{background:var(--red);color:#fff}
+.chat-sez[hidden]{display:none!important}
+.cli-cartella-sotto{font-size:12px;margin:0 2px 10px}
+.cli-lista{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.cli-riga{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer}
+.cli-riga:last-child{border-bottom:none}
+.cli-av{position:relative;width:40px;height:40px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:18px;color:var(--accent);flex:none}
+.cli-av .cav-sem{top:-3px;right:-3px}
+.cli-c{flex:1;min-width:0;display:flex;flex-direction:column}
+.cli-c b{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli-c > span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli-dx{font-size:11.5px;color:var(--muted);text-align:right;flex:none;line-height:1.3;display:flex;flex-direction:column;align-items:flex-end}
+.cli-dx b{color:var(--text)} .cli-dx b.rosso{color:var(--red)}
+.cli-riga.nuovo{color:var(--accent)}
+.cli-riga.nuovo .cli-av{border:2px dashed var(--accent);background:transparent;font-family:inherit;font-size:22px;font-weight:700}
+.cli-riga.nuovo b{color:var(--accent)}
+.cli-lettera{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em;padding:6px 12px 4px;background:var(--surface2)}
+.cli-invito{padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.cli-vuoto{font-size:13px;color:var(--muted);padding:12px}
 /* scheda cliente a box + scheda cavallo (maniscalco) */
 .cli-chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .cli-chip{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--surface2);color:var(--text);cursor:pointer}
@@ -1674,6 +1823,14 @@ dl.cavpro-kv dt{color:var(--muted)} dl.cavpro-kv dd{margin:0;font-weight:600;min
 .ag-cli{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px 4px 5px;display:flex;justify-content:space-between;gap:8px}
 .ag-cli span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ag-pannello .ag-add-day{width:100%;margin-top:4px}
+.ag-mani{width:20px;flex:none;color:var(--muted);font-size:15px;letter-spacing:-3px;text-align:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:6px 0}
+.ag-cli .ag-mani{padding:0;font-size:13px}
+.ag-cli{align-items:center}
+.ag-cli .ag-cli-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag-pannello .ag-ev{padding-left:4px}
+.ag-preso{position:fixed;z-index:60;pointer-events:none;box-shadow:0 12px 28px rgba(0,0,0,.25);transform:scale(1.02);background:var(--surface)!important;border-radius:12px;opacity:.96}
+.ag-posto{border:2px dashed var(--accent);border-radius:12px;margin-bottom:6px;opacity:.6}
+.ag-sugger{font-size:11.5px;color:var(--muted);text-align:center;padding:4px 0 2px}
 .ag-day + .ag-day{border-top:1px solid var(--border)}
 .ag-day-head{display:flex;align-items:center;gap:10px;padding:11px 2px;cursor:pointer;user-select:none}
 .ag-day-name{width:34px;font-weight:800;font-size:13px;text-transform:uppercase;color:var(--muted)}
@@ -2225,6 +2382,8 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <div class="section-title" style="margin-bottom:0" id="detail-horse-name">Cavallo</div>
       </div>
 
+      <div id="horse-dove" style="margin-bottom:14px"></div>
+
       <div class="card" style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-weight:700;font-size:14px">Scheda cavallo</div>
@@ -2360,52 +2519,39 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
     <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">+ Nuovo appuntamento</button>
   </div>
 
-  <!-- PROFESSIONISTA: INCASSI -->
+  <!-- PROFESSIONISTA: INCASSI (vista Semplice = cassa; vista Completa = statistiche, Premium) -->
   <div class="page-content" id="page-pro-incassi">
-    <div class="section-title">Incassi</div>
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-label">Incassato questo mese</div>
-        <div class="stat-value" id="incassi-mese-incassato">€ 0</div>
+    <div class="inc-testa">
+      <div class="section-title" id="inc-titolo" style="margin-bottom:0">Incassi</div>
+      <div class="inc-vista" id="inc-vista" role="tablist"></div>
+    </div>
+    <span id="incassi-mese-incassato" hidden></span>
+
+    <div id="inc-semplice">
+      <div class="hp-filtri inc-periodi" id="inc-periodi"></div>
+      <div class="inc-date" id="inc-date" hidden>
+        <label>Dal <input type="date" class="input" id="inc-dal" onchange="renderIncassiSaldati()"></label>
+        <label>Al <input type="date" class="input" id="inc-al" onchange="renderIncassiSaldati()"></label>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Da incassare</div>
-        <div class="stat-value" id="incassi-mese-da-incassare">€ 0</div>
-        <div class="muted" style="font-size:11px;margin-top:2px">interventi già fatti</div>
+      <button type="button" class="inc-cassa verde" id="inc-cassa-incassati" onclick="incApri('incassati')"></button>
+      <div id="inc-det-incassati" class="inc-det" hidden>
+        <div class="inc-kpis" id="inc-kpis"></div>
+        <div class="card inc-card" id="inc-grafico-card"><div class="inc-tit">Andamento</div><div class="inc-grafico" id="inc-grafico"></div></div>
+        <div class="card inc-card"><div class="inc-tit">Per tipo di lavoro</div><div id="inc-per-tipo"></div></div>
+        <div class="card inc-card"><div class="inc-tit">Per cliente</div><div id="inc-per-cliente"></div></div>
+        <div class="card inc-card"><div class="inc-tit"><span>Pagati nel periodo</span><span id="inc-elenco-n"></span></div><div id="inc-elenco"></div></div>
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin:0 2px 14px">Conta il giorno in cui il cliente ha pagato (registrato quando segni «Saldato»); per i lavori saldati prima del 9 ottobre 2026 vale il giorno del lavoro.</div>
       </div>
-    </div>
-    <div class="stat-card incassi-previsto" style="margin-top:10px">
-      <div class="stat-label">Previsto dagli appuntamenti in agenda</div>
-      <div class="stat-value" id="incassi-previsto">€ 0</div>
-    </div>
-    <div class="muted" style="font-size:12.5px;margin:8px 0 14px" id="incassi-mese-numero-wrap">
-      <span id="incassi-mese-numero">0</span> interventi questo mese
-    </div>
-
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:14px;margin-bottom:2px">Da saldare</div>
-      <div class="muted" style="font-size:12px;margin-bottom:8px">Solo cavalli già ferrati o trattati.</div>
-      <div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div>
-    </div>
-
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:14px;margin-bottom:2px">Previsti</div>
-      <div class="muted" style="font-size:12px;margin-bottom:8px">Importi degli appuntamenti ancora da fare.</div>
-      <div id="incassi-previsti-list"><div class="muted" style="font-size:13px">Nessun importo previsto.</div></div>
-    </div>
-
-    <div id="incassi-premium-box" style="display:none">
-      <div class="section-divider"></div>
-      <div class="section-title" style="font-size:15px">Ultimi 6 mesi</div>
-      <div class="card" style="margin-bottom:14px">
-        <div id="incassi-storico-list"><div class="muted" style="font-size:13px">Nessuno storico disponibile.</div></div>
+      <button type="button" class="inc-cassa rosso" id="inc-cassa-dasaldare" onclick="incApri('dasaldare')"></button>
+      <div id="inc-det-dasaldare" class="inc-det" hidden>
+        <div class="card inc-card"><div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div></div>
       </div>
-      <button class="btn btn-outline" style="width:100%" onclick="showToast('Disponibile a breve.')">Esporta ricevute PDF</button>
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin:2px 2px 14px">«Da incassare» non dipende dal periodo: è tutto quello che devi ancora riscuotere per lavori già fatti.</div>
     </div>
 
-    <div id="incassi-upsell-box" class="note-box" style="display:none">
-      Con <strong>Premium</strong> sblocchi lo storico completo degli incassi e l'export PDF delle ricevute per ogni cliente.
-      <button class="btn btn-primary btn-sm" style="width:100%;margin-top:10px" onclick="openMenu()">Passa a Premium</button>
+    <div id="inc-completa" hidden>
+      <div class="hp-filtri inc-periodi" id="inc-mesi"></div>
+      <div id="inc-stat"></div>
     </div>
   </div>
 
@@ -2413,9 +2559,14 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   <div class="page-content" id="page-pro-clienti">
     <div id="clienti-list-view">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div class="section-title" style="margin-bottom:0">I tuoi clienti</div>
+        <div class="section-title" style="margin-bottom:0">Clienti</div>
+        <button class="btn btn-outline btn-sm" id="cli-collega-btn" style="display:none" onclick="apriCollegaStruttura(null)"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-link"></i></span> Collega scuderia</button>
       </div>
-      <div id="clienti-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+      <!-- cartelle stile Telegram: Cavalli · Clienti · Scuderie, ognuna con il suo numero -->
+      <div class="cli-cartelle" id="cli-cartelle" role="tablist"></div>
+      <div class="muted cli-cartella-sotto" id="cli-cartella-sotto"></div>
+      <div id="clienti-list" class="cli-lista"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+      <div id="clienti-archiviati-box"></div>
     </div>
 
     <div id="clienti-detail-view" style="display:none">
@@ -2450,6 +2601,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
         <div class="muted" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700" id="cavpro-cliente">Cliente</div>
       </div>
       <div class="cavpro-hero" id="cavpro-hero"></div>
+      <div id="cavpro-dove" style="margin-top:12px"></div>
       <div class="hp-filtri cavpro-tab" id="cavpro-tab" style="margin:12px 0"></div>
       <div id="cavpro-corpo"></div>
     </div>
@@ -2458,17 +2610,19 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   <!-- PROFESSIONISTA: INBOX -->
   <div class="page-content" id="page-pro-inbox">
     <div class="section-title">Messaggi</div>
-    <div class="card" id="inbox-card" style="margin-bottom:14px">
+    <!-- cartelle stile Telegram: Clienti · Scuderie · Colleghi (pallino rosso = messaggi non letti) -->
+    <div class="cli-cartelle" id="chat-cartelle" role="tablist"></div>
+    <div class="muted cli-cartella-sotto" id="chat-cartella-sotto"></div>
+    <div class="card chat-sez" data-sez="clienti" id="inbox-card" style="margin-bottom:14px">
       <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
     </div>
-    <div id="inbox-strutture-wrap" style="display:none">
-      <div class="section-title" style="margin:22px 0 10px">Scuderie</div>
+    <div class="chat-sez" data-sez="scuderie" id="inbox-strutture-wrap">
       <div class="card" style="margin-bottom:14px">
         <div id="inbox-strutture-list"></div>
       </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px">
-      <div class="section-title" style="margin-bottom:0">Colleghi</div>
+    <div class="chat-sez" data-sez="colleghi">
+    <div style="display:flex;justify-content:flex-end;align-items:center;margin:0 0 10px">
       <button class="btn btn-primary btn-sm" onclick="apriNuovoCollega()">+ Collega</button>
     </div>
     <div class="card" style="margin-bottom:10px">
@@ -2477,6 +2631,7 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
     <div class="muted" style="font-size:12px;line-height:1.6;text-align:center">
       Confrontati con il veterinario, il maniscalco o l'istruttore di fiducia: foto, PDF e casi dei tuoi clienti in un posto solo.
       Video e note vocali tra colleghi con <strong>Premium</strong>.
+    </div>
     </div>
   </div>
 
@@ -3027,6 +3182,24 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
   </div>
 </div>
 
+<!-- aggiungi cavallo dalla cartella Cavalli -->
+<div class="modal-overlay" id="modal-nuovo-cavallo" onclick="closeOut(event,'modal-nuovo-cavallo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span>Aggiungi cavallo</div>
+    <div class="input-group"><label class="input-label" for="ncav-nome">Nome</label><input class="input" id="ncav-nome" placeholder="es. Brezza"></div>
+    <div class="input-row-2">
+      <input class="input" id="ncav-chip" placeholder="Microchip (opz.)" autocapitalize="characters" style="flex:1">
+      <div style="flex:1;min-width:0"><input class="input" id="ncav-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
+    </div>
+    <div class="input-group" style="margin-top:10px"><label class="input-label" for="ncav-cliente">Di chi è / dove sta?</label><select class="input" id="ncav-cliente" onchange="ncavClienteCambiato(this)"></select></div>
+    <div class="muted" style="font-size:12px;text-align:center;margin:4px 0 6px">oppure, se ha già un codice Equo</div>
+    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. MAR-000005" autocapitalize="characters" style="text-transform:uppercase"></div>
+    <div class="auth-error" id="ncav-errore" style="display:none"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaNuovoCavalloCartella(this)">Salva cavallo</button>
+  </div>
+</div>
+
 <!-- archivia / elimina cliente: cavalli e storico non si perdono mai -->
 <div class="modal-overlay" id="modal-archivia-cliente" onclick="closeOut(event,'modal-archivia-cliente')">
   <div class="modal">
@@ -3178,6 +3351,20 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
       <div class="auth-error" id="intervento-error" style="display:none"></div>
       <button class="btn btn-primary" id="intervento-save-btn" onclick="salvaInterventoMascalcia()" style="width:100%;margin-top:6px">Salva appuntamento</button>
       <button class="btn btn-danger" id="intervento-delete-btn" onclick="eliminaInterventoInModifica()" style="width:100%;margin-top:10px;display:none">Elimina appuntamento</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-prezzi" onclick="if(event.target===this)rispondiPrezzi(false)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="prezzi-tit">Manca il prezzo</div>
+    <div class="muted" id="prezzi-testo" style="font-size:13px;line-height:1.55;margin-bottom:12px"></div>
+    <div id="prezzi-righe" class="prezzi-righe"></div>
+    <label class="prezzi-mai" id="prezzi-mai-box"><input type="checkbox" id="prezzi-mai"> Non chiedermelo più</label>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <button class="btn btn-primary" id="prezzi-ok" style="width:100%" onclick="rispondiPrezzi(true)">Salva con prezzo</button>
+      <button class="btn btn-outline" id="prezzi-no" style="width:100%" onclick="rispondiPrezzi(false)">Salva senza prezzo</button>
     </div>
   </div>
 </div>
@@ -5101,7 +5288,7 @@ const DB = {
     if(DEMO_MODE){
       return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
         .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null,
-          ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ferro_note: c.ferro_note || null, scuderia_cavallo_id: c.scuderia_cavallo_id || null }));
+          ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ferro_note: c.ferro_note || null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, ub: ubicDi(c) }));
     }
     const [manRes, eqRes] = await Promise.all([
       sb.from("cavalli_clienti_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("nome", { ascending: true }),
@@ -5124,18 +5311,19 @@ const DB = {
     const senzaCopia = condivisi.filter(h => !manuali.some(m => m.horse_id === h.id)).map(h => h.id);
     let altrove = [];
     if(senzaCopia.length){
-      const r = await sb.from("cavalli_clienti_mascalcia").select("id, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, ferro_note, scuderia_cavallo_id, microchip, cliente_mascalcia_id, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
+      let r = await sb.from("cavalli_clienti_mascalcia").select("id, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, ferro_note, scuderia_cavallo_id, microchip, cliente_mascalcia_id, clienti_mascalcia(nome), " + UBIC_CAMPI.join(", ")).in("horse_id", senzaCopia);
+      if(r.error) r = await sb.from("cavalli_clienti_mascalcia").select("id, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, ferro_note, scuderia_cavallo_id, microchip, cliente_mascalcia_id, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
       altrove = r.data || [];
     }
     const out = condivisi.map(h => {
       const mirror = manuali.find(m => m.horse_id === h.id) || altrove.find(m => m.horse_id === h.id);
       const presso = mirror && mirror.cliente_mascalcia_id && mirror.cliente_mascalcia_id !== clienteId ? (mirror.clienti_mascalcia?.nome || "un altro cliente") : null;
       return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || h.codice_equo || null, razza: h.breed || null, presso, ferro_sistema: mirror?.ferro_sistema || null, ferro_numero: mirror?.ferro_numero || null,
-        ferratura_tipo: mirror?.ferratura_tipo || "completa", ferro_tipo: mirror?.ferro_tipo || "standard", ferro_note: mirror?.ferro_note || null, scuderia_cavallo_id: mirror?.scuderia_cavallo_id || null, nascita: h.birth_date || null };
+        ferratura_tipo: mirror?.ferratura_tipo || "completa", ferro_tipo: mirror?.ferro_tipo || "standard", ferro_note: mirror?.ferro_note || null, scuderia_cavallo_id: mirror?.scuderia_cavallo_id || null, nascita: h.birth_date || null, ub: ubicDi(mirror, clienteId) };
     });
     manuali.filter(m => !m.horse_id || !idCondivisi.has(m.horse_id)).forEach(m => {
       out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id, codice_equo: m.codice_equo || null, razza: m.razza || null, ferro_sistema: m.ferro_sistema || null, ferro_numero: m.ferro_numero || null,
-        ferratura_tipo: m.ferratura_tipo || "completa", ferro_tipo: m.ferro_tipo || "standard", ferro_note: m.ferro_note || null, scuderia_cavallo_id: m.scuderia_cavallo_id || null });
+        ferratura_tipo: m.ferratura_tipo || "completa", ferro_tipo: m.ferro_tipo || "standard", ferro_note: m.ferro_note || null, scuderia_cavallo_id: m.scuderia_cavallo_id || null, ub: ubicDi(m) });
     });
     return out;
   },
@@ -5162,9 +5350,57 @@ const DB = {
   },
   // Ricerca: tutti i cavalli dei clienti del professionista (per cercare un cliente dal nome del cavallo)
   async listCavalliMiei(){
-    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null }));
-    const { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
+    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null, horse_id: c.horse_id || null, codice_equo: c.codice_equo || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null, ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ...ubicDi(c) }));
+    let { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, " + UBIC_CAMPI.join(", ")).eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
+    if(error && /ubicazione/.test(error.message || "")) ({ data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true }));
     if(error) console.error("listCavalliMiei:", error);
+    return error ? [] : (data || []);
+  },
+  // SPOSTA CAVALLO
+  async spostaCavallo(p){
+    if(DEMO_MODE){
+      const oggi = p.dal || isoLocale(new Date());
+      let nome = p.dest === "casa" ? "A casa" : p.nome || "";
+      if(p.vista === "maniscalco"){
+        const r = demoState.cavalliClientiMascalcia.find(x => x.id === p.id);
+        if(!r) return { ok: false, errore: "Cavallo non trovato." };
+        const prima = luogoDi(ubicDi(r)).nome;
+        let cli = p.cliente || null;
+        if(p.dest === "nuova"){ cli = "dc-n" + Date.now(); demoState.clientiMascalcia.push({ id: cli, nome: p.nome, nome_cavallo: "", telefono: "", note: "", cliente_user_id: null, codice_invito: "EQUO-NEW", tipo_cliente: "struttura", indirizzo: p.indirizzo || null, created_at: oggi }); }
+        if(cli) nome = demoState.clientiMascalcia.find(x => x.id === cli)?.nome || nome;
+        Object.assign(r, cli === r.cliente_mascalcia_id || (p.dest === "casa" && !p.indirizzo) ? { ubicazione_tipo: null, ubicazione_cliente_id: null, ubicazione_nome: null, ubicazione_indirizzo: null }
+          : p.dest === "casa" ? { ubicazione_tipo: "casa", ubicazione_cliente_id: null, ubicazione_nome: null, ubicazione_indirizzo: p.indirizzo }
+          : { ubicazione_tipo: "scuderia", ubicazione_cliente_id: cli, ubicazione_nome: nome, ubicazione_indirizzo: null }, { ubicazione_dal: oggi });
+        (demoState.spostamenti = demoState.spostamenti || []).unshift({ chiave: r.id, creato: new Date().toISOString(), tipo: "spostamento", descrizione: `Spostato da «${prima}» a «${nome}» dal ${formatDate(oggi)} · Demo (maniscalco)` });
+        return { ok: true, luogo: nome, scuderia_cliente_id: p.dest === "nuova" ? cli : null };
+      }
+      const h = demoState.horses.find(x => x.id === p.id);
+      if(!h) return { ok: false, errore: "Cavallo non trovato." };
+      if(p.centro) nome = (demoState.stables || []).find(x => x.id === p.centro)?.name || "Scuderia";
+      const prima = luogoProprietario(h).nome;
+      Object.assign(h, { ubicazione_tipo: p.dest === "casa" ? "casa" : "scuderia", ubicazione_centro_id: p.centro || null, ubicazione_nome: p.dest === "casa" ? null : nome, ubicazione_indirizzo: p.indirizzo || null, ubicazione_dal: oggi });
+      (demoState.spostamenti = demoState.spostamenti || []).unshift({ chiave: h.id, creato: new Date().toISOString(), tipo: "spostamento", descrizione: `Spostato da «${prima}» a «${nome}» dal ${formatDate(oggi)} · Demo (proprietario)` });
+      return { ok: true, luogo: nome, arrivo: !!p.centro };
+    }
+    const { data, error } = await sb.rpc("equo_sposta_cavallo", { p_vista: p.vista, p_id: p.id, p_dest: p.dest, p_cliente: p.cliente || null, p_centro: p.centro || null,
+      p_nome: p.nome || null, p_indirizzo: p.indirizzo || null, p_dal: p.dal || null });
+    if(error) return { ok: false, errore: /equo_sposta_cavallo/.test(error.message || "") ? "Funzione non ancora attiva: serve l'aggiornamento del database." : error.message };
+    return data;
+  },
+  async spostamentiCavallo(vista, id){
+    if(!id) return [];
+    if(DEMO_MODE) return (demoState.spostamenti || []).filter(s => s.chiave === id);
+    const { data, error } = await sb.rpc("equo_spostamenti_cavallo", { p_vista: vista, p_id: id });
+    return error ? [] : (data || []);
+  },
+  async arriviCavallo(horseId){
+    if(DEMO_MODE || !horseId) return [];
+    const { data, error } = await sb.from("cavalli_arrivi").select("stato, created_at, risposto_il").eq("horse_id", horseId).order("created_at", { ascending: false }).limit(3);
+    return error ? [] : (data || []);
+  },
+  async cercaCentri(q){
+    if(DEMO_MODE) return (demoState.stables || []).filter(s => s.name.toLowerCase().includes(q.toLowerCase())).map(s => ({ id: s.id, nome: s.name, citta: "Velletri", provincia: "RM" }));
+    const { data, error } = await sb.rpc("equo_cerca_centri", { p_q: q });
     return error ? [] : (data || []);
   },
   async listInterventiMascalciaTutti(){
@@ -5427,7 +5663,7 @@ const DB = {
       return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
         .map(m => ({ ...m, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome, nome_cavallo: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome_cavallo } }));
     }
-    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo, centro_id, collegamento_stato)")
+    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo, centro_id, collegamento_stato, tipo_cliente)")
       .eq("maniscalco_id", currentUser.id).order("created_at", { ascending: false }).limit(200);
     return error ? [] : (data || []);
   },
@@ -7344,6 +7580,7 @@ async function openHorseDetail(id){
   document.getElementById("cavalli-detail-view").style.display = "block";
   document.getElementById("detail-horse-name").textContent = horse.name;
   renderHorseInfoBox(horse);
+  renderDoveStaProprietario(horse);
   caricaAllegatiCavallo("horse-allegati", "proprietario", { id });
   await loadHorseEvents(id);
 }
@@ -7384,13 +7621,14 @@ async function loadHorseEvents(horseId){
   box.innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   if(typeof cercaAzzera === "function" && loadHorseEvents.ultimo !== horseId) cercaAzzera("eventi");
   loadHorseEvents.ultimo = horseId;
-  const data = await DB.listEvents(horseId);
+  const [data, spost] = await Promise.all([DB.listEvents(horseId), DB.spostamentiCavallo("proprietario", horseId)]);
   currentHorseEventsData = data || [];
-  if(!data || data.length === 0){
+  if((!data || data.length === 0) && !spost.length){
     box.innerHTML = '<div class="muted" style="font-size:13px">Nessun evento registrato.</div>';
     return;
   }
-  box.innerHTML = data.map(ev => `
+  const voci = [...(data || []).map(ev => ({ d: ev.date || "", ev })), ...spost.map(s => ({ d: isoLocale(new Date(s.creato)), s }))].sort((a, b) => b.d.localeCompare(a.d));
+  box.innerHTML = voci.map(({ ev, s }) => s ? spostamentoHtml(s) : `
     <div class="event-item" style="cursor:pointer" onclick="openEditEventModal('${ev.id}')">
       <div>
         <div style="font-weight:600;font-size:14px">${EVENT_LABELS[ev.type] || ev.type}</div>
@@ -7925,49 +8163,171 @@ async function loadClientiMascalcia(){
   const [cli] = await Promise.all([DB.listClientiMascalcia(), caricaCavalliMiei()]);
   clientiMascalcia = cli;
   renderClientiList();
+  caricaCartellaCavalli().then(() => renderClientiList()).catch(() => {});
   await renderProDeadlines();
 }
 
 function clientiAttivi(){ return (clientiMascalcia || []).filter(c => !c.archiviato_il); }
+/* ---------- CLIENTI A CARTELLE (stile Telegram): Cavalli · Clienti · Scuderie ----------
+   Il primo spazio di ogni cartella è l'aggiunta rapida. La ricerca (cercaFiltro «clienti») cerca nella cartella aperta. */
+let cliCartella = "cavalli", cliCavalliEquo = [], cliInterventi = [];
+try{ cliCartella = localStorage.getItem("equo-cli-cartella") || "cavalli"; }catch(_){}
+// tutti i cavalli che segue il maniscalco: righe sue + cavalli dei proprietari su Equo non ancora in scheda
+function cavalliCartella(){
+  const attiviId = new Set(clientiAttivi().map(c => c.id));
+  const righe = (cavalliMieiLista || []).filter(c => attiviId.has(c.cliente_mascalcia_id)).map(c => ({ ...c, key: "m:" + c.id }));
+  const conHorse = new Set(righe.map(r => r.horse_id).filter(Boolean));
+  cliCavalliEquo.forEach(h => { if(!conHorse.has(h.horse_id) && attiviId.has(h.cliente_mascalcia_id)) righe.push(h); });
+  return righe.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+}
+async function caricaCartellaCavalli(){
+  // cavalli dei proprietari collegati che non hanno ancora una scheda del maniscalco + interventi per pallino e prossima data
+  const collegati = clientiAttivi().filter(c => c.cliente_user_id && !c.centro_id);
+  const [eq, inter] = await Promise.all([
+    Promise.all(collegati.map(c => DEMO_MODE ? Promise.resolve([]) : sb.rpc("cavalli_condivisi_cliente", { p_cliente_id: c.id }).then(r => (r.data || []).map(h => ({ key: "h:" + h.id, id: null, horse_id: h.id, nome: h.name, microchip: h.microchip, razza: h.breed, cliente_mascalcia_id: c.id, tipo: "equo" }))).catch(() => []))),
+    DB.listInterventiMascalciaTutti().catch(() => [])
+  ]);
+  cliCavalliEquo = eq.flat();
+  cliInterventi = (inter || []).concat(await DB.listProssimiAppuntamenti(200).catch(() => []));
+}
+function sceltaCartellaClienti(k){
+  cliCartella = k;
+  try{ localStorage.setItem("equo-cli-cartella", k); }catch(_){}
+  if(typeof cercaAzzera === "function") cercaAzzera("clienti");
+  renderClientiList();
+}
 function renderClientiList(){
   const box = document.getElementById("clienti-list");
   if(!box) return;
   const attivi = clientiAttivi();
-  // anche senza clienti si vedono le sezioni con «+ Aggiungi» (prima il tasto mancava proprio al primo accesso)
-  const intro = attivi.length === 0 ? '<div class="empty-state" style="padding:18px 10px 8px"><div class="fa-icon" style="width:32px;height:32px;font-size:28px;margin:0 auto 10px;color:var(--muted)"><i class="fa-solid fa-users"></i></div><div style="font-size:13.5px;line-height:1.6">Non hai ancora clienti.<br>Tocca <b>+ Aggiungi</b> qui sotto: un proprietario oppure una scuderia o un centro ippico.</div></div>' : "";
   const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
-  const card = c => `
-    <div class="card horse-card" data-cerca="${escapeHtml(paroleCercaCliente(c))}" onclick="openClienteDetail('${c.id}')">
-      <div class="horse-avatar"><i class="fa-solid ${isStruttura(c) ? "fa-building" : "fa-user"}" style="font-size:20px"></i></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700">${escapeHtml(c.nome)}</div>
-        <div class="muted" style="font-size:13px">${escapeHtml(c.nome_cavallo || (isStruttura(c) ? "Nessun cavallo indicato" : "Cavallo non indicato"))}</div>
-      </div>
-      ${badgeCollegamentoCliente(c)}
-    </div>
-    ${c.collegamento_stato === "da_confermare_pro" ? `
-    <div class="card" style="margin:-4px 0 12px;padding:12px 14px">
-      <div style="font-size:13px;line-height:1.5;margin-bottom:10px"><strong>${escapeHtml(c.nome)}</strong> ti ha invitato a collegarti come maniscalco su Equo Scuderia: chat e appuntamenti con la scuderia con doppia conferma.</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this)">Accetta</button>
-        <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this)">Rifiuta</button>
-      </div>
-    </div>` : ""}`;
-  const sezione = (tipo, titolo, vuoto) => {
-    const lista = attivi.filter(c => (isStruttura(c) ? "struttura" : "proprietario") === tipo).sort(alfabetico);
-    return `
-      <div class="clienti-sez-head">
-        <div class="clienti-sez-title">${titolo} (${lista.length})</div>
-        <div style="display:flex;gap:6px">
-          ${tipo === "struttura" && isManiscalcoUtente() ? `<button class="btn btn-outline btn-sm" onclick="apriCollegaStruttura(null)"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-link"></i></span> Collega</button>` : ""}
-          <button class="btn btn-outline btn-sm" onclick="apriNuovoCliente('${tipo}')">+ Aggiungi</button>
-        </div>
-      </div>
-      ${lista.length ? lista.map(card).join("") : `<div class="muted" style="font-size:13px;margin-bottom:6px">${vuoto}</div>`}`;
-  };
-  box.innerHTML = intro + sezione("proprietario", "PROPRIETARI", "Nessun proprietario ancora.")
-    + sezione("struttura", "SCUDERIE E CENTRI IPPICI", "Nessuna scuderia ancora. Aggiungi le scuderie e i centri ippici in cui lavori.")
-    + sezioneArchiviati(card, alfabetico);
+  const proprietari = attivi.filter(c => !isStruttura(c)).sort(alfabetico);
+  const scuderie = attivi.filter(isStruttura).sort(alfabetico);
+  const cavalli = cavalliCartella();
+  if(!["cavalli", "clienti", "scuderie"].includes(cliCartella)) cliCartella = "cavalli";
+  document.getElementById("cli-cartelle").innerHTML = [["cavalli", "Cavalli", cavalli.length], ["clienti", "Clienti", proprietari.length], ["scuderie", "Scuderie", scuderie.length]]
+    .map(([k, t, n]) => `<button role="tab" aria-selected="${cliCartella === k}" class="${cliCartella === k ? "on" : ""}" onclick="sceltaCartellaClienti('${k}')">${t}<span class="n">${n}</span></button>`).join("");
+  document.getElementById("cli-cartella-sotto").textContent = { cavalli: "Tutti i cavalli che segui", clienti: "Proprietari", scuderie: "Scuderie, maneggi e centri ippici" }[cliCartella];
+  const collega = document.getElementById("cli-collega-btn");
+  if(collega) collega.style.display = cliCartella === "scuderie" && isManiscalcoUtente() ? "" : "none";
+  const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
+  if(f) f.inp.placeholder = { cavalli: "Cerca cavallo, cliente o microchip", clienti: "Cerca cliente, cavallo o telefono", scuderie: "Cerca scuderia o cavallo" }[cliCartella];
+
+  const nuovo = (t, sotto, az) => `<div class="cli-riga nuovo cerca-ignora" onclick="${az}"><span class="cli-av">+</span><span class="cli-c"><b>${t}</b><span>${sotto}</span></span></div>`;
+  const nomeCli = id => (clientiMascalcia.find(c => c.id === id) || {}).nome || "";
+  let html = "";
+  if(cliCartella === "cavalli"){
+    html = nuovo("Aggiungi cavallo", "nuovo o con codice Equo", "apriNuovoCavalloCartella()");
+    let lettera = "";
+    const oggi = isoLocale(new Date());
+    cavalli.forEach(cv => {
+      const l = (cv.nome || "?").trim().charAt(0).toUpperCase();
+      if(l !== lettera){ lettera = l; html += `<div class="cli-lettera">${escapeHtml(l)}</div>`; }
+      const st = statoCavalloPro(cv, cliInterventi);
+      const cli = clientiMascalcia.find(c => c.id === cv.cliente_mascalcia_id);
+      const ferro = descrFerroBreve(cv);
+      const pros = st.prossimo ? (st.prossimo.data < oggi ? "scaduta" : formatDataBreve(st.prossimo.data)) : "";
+      html += `<div class="cli-riga" data-cerca="${escapeHtml([cv.microchip, cv.codice_equo, cli?.nome].filter(Boolean).join(" "))}" onclick="apriCavalloDaCartella('${cv.cliente_mascalcia_id}', '${cv.id || ""}', '${cv.horse_id || ""}')">
+        <span class="cli-av">${iniziale(cv.nome)}${st.sem ? `<i class="cav-sem ${st.sem}"></i>` : ""}</span>
+        <span class="cli-c"><b>${escapeHtml(cv.nome || "")}</b><span>${cli && isStruttura(cli) ? "📍 " : ""}${escapeHtml(nomeCli(cv.cliente_mascalcia_id))}${cv.tipo === "equo" ? " · su Equo" : ""}</span></span>
+        <span class="cli-dx">${escapeHtml(ferro || "")}${pros ? `<b class="${st.sem === "rosso" ? "rosso" : ""}">${escapeHtml(pros)}</b>` : ""}</span></div>`;
+    });
+    if(!cavalli.length) html += '<div class="cli-vuoto cerca-ignora">Nessun cavallo ancora: aggiungilo qui sopra o dalla scheda di un cliente.</div>';
+  } else {
+    const struttura = cliCartella === "scuderie";
+    const lista = struttura ? scuderie : proprietari;
+    html = struttura ? nuovo("Aggiungi scuderia", "scuderia, maneggio o centro ippico", "apriNuovoCliente('struttura')")
+                     : nuovo("Aggiungi cliente", "proprietario di uno o più cavalli", "apriNuovoCliente('proprietario')");
+    lista.forEach(c => {
+      const nomi = nomiCavalliCliente(c);
+      html += `<div class="cli-riga" data-cerca="${escapeHtml(paroleCercaCliente(c))}" onclick="openClienteDetail('${c.id}')">
+        <span class="cli-av"><i class="fa-solid ${struttura ? "fa-building" : "fa-user"}"></i></span>
+        <span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(nomi.length ? nomi.join(", ") : (struttura ? "Nessun cavallo indicato" : "Cavallo non indicato"))}</span></span>
+        ${badgeCollegamentoCliente(c) || '<span class="cli-dx">›</span>'}</div>
+        ${c.collegamento_stato === "da_confermare_pro" ? `<div class="cli-invito">
+          <div style="font-size:13px;line-height:1.5;margin-bottom:10px"><strong>${escapeHtml(c.nome)}</strong> ti ha invitato a collegarti come maniscalco su Equo Scuderia: chat e appuntamenti con la scuderia con doppia conferma.</div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this)">Accetta</button>
+          <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this)">Rifiuta</button></div></div>` : ""}`;
+    });
+    if(!lista.length) html += `<div class="cli-vuoto cerca-ignora">${struttura ? "Nessuna scuderia ancora. Aggiungi le scuderie e i centri ippici in cui lavori." : "Nessun proprietario ancora."}</div>`;
+  }
+  box.innerHTML = html;
+  // archiviati in fondo alla loro cartella
+  const arch = (clientiMascalcia || []).filter(c => c.archiviato_il && cliCartella !== "cavalli" && (cliCartella === "scuderie") === isStruttura(c));
+  const card = c => `<div class="cli-riga" onclick="openClienteDetail('${c.id}')"><span class="cli-av"><i class="fa-solid ${isStruttura(c) ? "fa-building" : "fa-user"}"></i></span><span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(c.nome_cavallo || "")}</span></span><span class="cli-dx">›</span></div>`;
+  document.getElementById("clienti-archiviati-box").innerHTML = arch.length ? `<details class="clienti-archiviati" style="margin-top:14px">
+      <summary class="clienti-sez-title" style="cursor:pointer;padding:6px 0">ARCHIVIATI (${arch.length})</summary>
+      <div class="muted" style="font-size:12.5px;line-height:1.5;margin:4px 0 8px">Cavalli e storico sono al sicuro. Apri un cliente per ripristinarlo.</div>
+      <div class="cli-lista" style="opacity:.72">${arch.sort(alfabetico).map(card).join("")}</div></details>` : "";
+}
+// dalla cartella Cavalli: si apre la scheda del cavallo (dentro il suo cliente); «indietro» torna alla cartella
+let schedaDaCartella = false;
+async function apriCavalloDaCartella(clienteId, cvId, horseId){
+  if(!clienteId) return;
+  await openClienteDetail(clienteId);
+  const cv = schedaCavalli.find(c => (cvId && c.id === cvId) || (horseId && c.horse_id === horseId));
+  if(!cv) return;
+  schedaDaCartella = true;
+  await apriSchedaCavalloPro(cv.key);
+}
+
+// «Aggiungi cavallo» dalla cartella Cavalli: nome, microchip, razza, di chi è (o codice Equo)
+function apriNuovoCavalloCartella(){
+  ["ncav-nome", "ncav-chip", "ncav-codice"].forEach(id => { document.getElementById(id).value = ""; });
+  razzaImposta("ncav-razza", "");
+  const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
+  const pr = clientiAttivi().filter(c => !isStruttura(c)).sort(alf), sc = clientiAttivi().filter(isStruttura).sort(alf);
+  document.getElementById("ncav-cliente").innerHTML = '<option value="">Scegli il cliente o la scuderia…</option>'
+    + (pr.length ? `<optgroup label="Clienti">${pr.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "")
+    + (sc.length ? `<optgroup label="Scuderie">${sc.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "")
+    + '<option value="__nuovo_p">+ Nuovo cliente</option><option value="__nuovo_s">+ Nuova scuderia</option>';
+  document.getElementById("ncav-errore").style.display = "none";
+  openModal("modal-nuovo-cavallo");
+}
+function ncavClienteCambiato(sel){
+  if(sel.value === "__nuovo_p" || sel.value === "__nuovo_s"){
+    const tipo = sel.value === "__nuovo_s" ? "struttura" : "proprietario";
+    sel.value = "";
+    closeModal("modal-nuovo-cavallo");
+    showToast(tipo === "struttura" ? "Crea la scuderia: poi aggiungi il cavallo dalla sua scheda" : "Crea il cliente: poi aggiungi il cavallo dalla sua scheda");
+    apriNuovoCliente(tipo);
+  }
+}
+async function salvaNuovoCavalloCartella(btn){
+  const err = document.getElementById("ncav-errore"); err.style.display = "none";
+  const errore = t => { err.textContent = t; err.style.display = "block"; };
+  const clienteId = document.getElementById("ncav-cliente").value;
+  const codice = document.getElementById("ncav-codice").value.trim();
+  const nome = document.getElementById("ncav-nome").value.trim();
+  if(!clienteId) return errore("Scegli di chi è o dove sta il cavallo.");
+  if(!codice && !nome) return errore("Scrivi il nome del cavallo (oppure il suo codice Equo).");
+  btn.disabled = true;
+  try{
+    if(codice){
+      if(DEMO_MODE) return errore("In demo l'aggiunta con codice non è disponibile.");
+      let { data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: clienteId, p_codice: codice, p_conferma: false });
+      if(error) return errore("Errore: " + error.message);
+      if(data && data.chiedi){
+        const ok = await chiediSiNo(`Spostare ${data.nome}?`, `${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}. Sì: lo sposti in ${data.a}, storico e interventi restano con il cavallo.`);
+        if(!ok) return;
+        ({ data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: clienteId, p_codice: codice, p_conferma: true }));
+        if(error) return errore("Errore: " + error.message);
+      }
+      if(!data?.ok) return errore(data?.errore || "Non riuscito, riprova.");
+      showToast(data.azione === "gia" ? `${data.nome} è già tra i cavalli di questo cliente.` : `${data.nome} aggiunto (codice ${data.codice}).`);
+    } else {
+      const razza = razzaValore("ncav-razza");
+      if(razza === false) return;
+      const { error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome, microchip: document.getElementById("ncav-chip").value.trim() || null, razza });
+      if(error) return errore("Errore: " + error.message);
+      showToast(`${nome} aggiunto`);
+    }
+    // tiene allineato il testo dei cavalli del cliente
+    const cav = await DB.listCavalliCliente(clienteId);
+    await DB.updateClienteMascalcia(clienteId, { nome_cavallo: cav.map(x => x.nome).join(", ") });
+    closeModal("modal-nuovo-cavallo");
+    await loadClientiMascalcia();
+  } finally { btn.disabled = false; }
 }
 // clienti archiviati: in fondo, chiusi; cavalli e storico restano e si possono ripristinare
 function sezioneArchiviati(card, alfabetico){
@@ -8419,6 +8779,7 @@ async function salvaEditCliente(){
 
 function closeClienteDetail(){
   currentClienteId = null;
+  schedaDaCartella = false;
   schedaCavalloKey = null;
   const vp = document.getElementById("cavallo-pro-view"); if(vp) vp.style.display = "none";
   document.getElementById("clienti-list-view").style.display = "block";
@@ -8543,7 +8904,7 @@ let storicoFiltroCavallo = "tutti";
 /* ---------- SCHEDA CLIENTE A BOX + SCHEDA DEL CAVALLO (maniscalco) ----------
    Il cavallo è al centro: un box per cavallo (il primo è «+ Aggiungi cavallo», poi in ordine alfabetico);
    lo storico è del singolo cavallo (anche se seguito presso un altro cliente). Niente più storico cumulativo del cliente. */
-let schedaCavalli = [], schedaFoto = {}, schedaCavalloKey = null, schedaCavalloTab = "tutto", schedaStoricoCavallo = [];
+let schedaCavalli = [], schedaFoto = {}, schedaCavalloKey = null, schedaCavalloTab = "tutto", schedaStoricoCavallo = [], schedaSpostamenti = [];
 async function loadClienteInterventi(clienteId){
   const grid = document.getElementById("cliente-cavalli-grid");
   if(!grid) return;
@@ -8757,17 +9118,19 @@ async function apriSchedaCavalloPro(key, soloAggiorna){
     <span class="cav-box-foto grande"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(cv.nome)}${st.sem ? `<i class="cav-sem ${st.sem}"></i>` : ""}</span>
     <div style="min-width:0"><div class="cavpro-nome">${escapeHtml(cv.nome)}</div>
       <div class="muted" style="font-size:12.5px">${escapeHtml([cv.codice_equo, cv.razza].filter(Boolean).join(" · ") || (cv.tipo === "equo" ? "cavallo del proprietario su Equo" : ""))}</div>
-      <div class="muted" style="font-size:12.5px">📍 ${escapeHtml(cv.presso ? "presso " + cv.presso : "presso " + (cli ? cli.nome : "questo cliente"))}</div></div>`;
+      ${cv.presso ? `<div class="muted" style="font-size:12.5px">Riga del maniscalco presso ${escapeHtml(cv.presso)}</div>` : ""}</div>`;
+  renderDoveCavalloPro(cv);
   if(!soloAggiorna) window.scrollTo({ top: 0 });
   if(!soloAggiorna) document.getElementById("cavpro-corpo").innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
   renderTabCavalloPro();
   // storico: tutti gli interventi del cavallo con questo maniscalco, anche presso altri clienti
-  schedaStoricoCavallo = await DB.listInterventiCavallo(cv);
+  [schedaStoricoCavallo, schedaSpostamenti] = await Promise.all([DB.listInterventiCavallo(cv), DB.spostamentiCavallo("maniscalco", cv.id)]);
   if(schedaCavalloKey !== key) return;
   renderCorpoCavalloPro();
 }
 function chiudiSchedaCavalloPro(){
   schedaCavalloKey = null;
+  if(schedaDaCartella){ schedaDaCartella = false; document.getElementById("cavallo-pro-view").style.display = "none"; closeClienteDetail(); renderClientiList(); return; }
   document.getElementById("cavallo-pro-view").style.display = "none";
   document.getElementById("clienti-detail-view").style.display = "block";
   renderBoxCavalliCliente();
@@ -8793,7 +9156,7 @@ function renderCorpoCavalloPro(){
         <dt>Razza</dt><dd>${escapeHtml(cv.razza || "—")}</dd>
         ${cv.nascita ? `<dt>Nascita</dt><dd>${formatDate(cv.nascita)}</dd>` : ""}
         <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find(x => x.id === currentClienteId)?.nome || "—")}</dd>
-        <dt>Dove sta</dt><dd>${escapeHtml(cv.presso || clientiMascalcia.find(x => x.id === currentClienteId)?.nome || "—")}</dd>
+        <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
       ${cv.tipo === "equo" ? '<div class="muted" style="font-size:11.5px;margin-top:8px">L\'anagrafica la gestisce il proprietario nella sua app.</div>' : ""}`)
     + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Cambia ferro</button>`, `
@@ -8812,21 +9175,25 @@ function renderCorpoCavalloPro(){
       <div style="display:flex;gap:6px;margin-top:8px"><input class="input" id="cavpro-ferro-note" maxlength="160" placeholder="${cv.ferro_tipo === "correttivo" ? "Modello o note (es. barra a uovo, sollevamento talloni)" : "Note sul ferro (facoltative)"}" value="${escapeHtml(cv.ferro_note || "")}" style="flex:1">
         <button class="btn btn-outline btn-sm" onclick="salvaFerraturaCavallo({ ferro_note: document.getElementById('cavpro-ferro-note').value.trim() || null })">Salva</button></div>
       <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Completa/mezza vale per tutti i suoi appuntamenti di «Ferratura». Standard o correttivo con le note va anche nel libretto del proprietario e nella scheda della scuderia; «ferri nuovi/rimessa» resta solo tuo.</div>`)
-    + sez("sto", "Storico di " + escapeHtml(cv.nome), `<button class="btn btn-outline btn-sm" onclick="nuovoInterventoCavalloPro()">+ Intervento</button>`, storicoCavalloHtml(schedaStoricoCavallo))
+    + sez("sto", "Storico di " + escapeHtml(cv.nome), `<button class="btn btn-outline btn-sm" onclick="nuovoInterventoCavalloPro()">+ Intervento</button>`, storicoCavalloHtml(schedaStoricoCavallo, schedaSpostamenti))
     + (vedi("all") ? `<div class="card cavpro-sez"><div class="cavpro-sez-testa"><span>Allegati</span><button class="btn btn-outline btn-sm" onclick="document.getElementById('cavpro-allegati-file').click()">+ Carica</button></div>
         <input type="file" id="cavpro-allegati-file" accept="application/pdf,image/*" style="display:none" onchange="caricaAllegatoCavallo(this, 'cavpro-allegati', 'maniscalco')">
         <div id="cavpro-allegati">${allegatiPrima || '<div class="muted" style="font-size:13px">Caricamento…</div>'}</div>
         <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Li vedono anche il proprietario collegato e la scuderia dove sta il cavallo. Ognuno può eliminare solo i file caricati da lui.</div></div>` : "");
   if(vedi("all") && (!allegatiPrima || allegatiCtx["cavpro-allegati"]?.cv !== cv)) caricaAllegatiCavallo("cavpro-allegati", "maniscalco", cv);
 }
-function storicoCavalloHtml(lista){
-  if(!lista.length) return '<div class="muted" style="font-size:13px">Nessun intervento per questo cavallo.</div>';
-  return lista.map(i => {
+function storicoCavalloHtml(lista, spostamenti){
+  if(!lista.length && !(spostamenti || []).length) return '<div class="muted" style="font-size:13px">Nessun intervento per questo cavallo.</div>';
+  const voci = [...lista.map(i => ({ d: i.data_intervento || "", i })), ...(spostamenti || []).map(s => ({ d: isoLocale(new Date(s.creato)), s }))]
+    .sort((a, b) => b.d.localeCompare(a.d));
+  return voci.map(({ i, s }) => {
+    if(s) return spostamentoHtml(s);
     const d = new Date(i.data_intervento + "T12:00");
     const ferro = (i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura")
       ? [i.quantita_ferri ? i.quantita_ferri + " ferri" : null, i.numero_ferro ? siglaFerro(i.misura_sistema, i.numero_ferro) : null].filter(Boolean).join(" ") : "";
     const extra = [i.ferri_nuovi === true ? "ferri nuovi" : i.ferri_nuovi === false ? "rimessa" : null, i.ferro_tipo === "correttivo" ? "correttivo" + (i.ferro_note ? " (" + i.ferro_note + ")" : "") : null,
-      i.importo != null ? Number(i.importo).toLocaleString("it-IT") + " €" : null, i.clienti_mascalcia?.nome && i.cliente_mascalcia_id !== currentClienteId ? "presso " + i.clienti_mascalcia.nome : null, i.note || null].filter(Boolean).join(" · ");
+      i.importo != null ? Number(i.importo).toLocaleString("it-IT") + " €" : null,
+      i.luogo_nome ? (/^A casa/.test(i.luogo_nome) ? "a casa" : "presso " + i.luogo_nome) : i.clienti_mascalcia?.nome && i.cliente_mascalcia_id !== currentClienteId ? "presso " + i.clienti_mascalcia.nome : null, i.note || null].filter(Boolean).join(" · ");
     return `<div class="cavpro-int" onclick="openInterventoModal(null, schedaStoricoCavallo.find(x => x.id === '${i.id}'))">
       <div class="cavpro-int-data"><b>${d.getDate()}</b>${AG_MESI[d.getMonth()]} ${d.getFullYear()}</div>
       <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px">${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)}${i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + escapeHtml(i.tipo_altro) : ""}${ferro ? " · " + escapeHtml(ferro) : ""}</div>
@@ -9087,7 +9454,8 @@ async function renderProDeadlines(){
   const boxApp = document.getElementById("home-pro-appuntamenti");
   const boxRic = document.getElementById("home-pro-deadlines");
   if(!boxApp && !boxRic) return;
-  const [app, ric] = await Promise.all([DB.listProssimiAppuntamenti(50), DB.listRichiami(30)]);
+  const [app0, ric] = await Promise.all([DB.listProssimiAppuntamenti(50), DB.listRichiami(30)]);
+  const app = agOrdinaGiro(app0);   // nello stesso giorno vale l'ordine del giro scelto in Agenda
   hpAppuntamenti = app;
   app.forEach(e => { agEventiCache[e.id] = e; });
   hpRichiamiLista = ric;
@@ -9619,84 +9987,629 @@ function formatMeseLabel(yyyyMm){
   return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("it-IT", { month: "long", year: "numeric" });
 }
 
+/* ---------- INCASSI: Saldati (per periodo), Da saldare, Previsti ----------
+   Saldati: conta il giorno del pagamento (saldato_il); per i saldati di prima del 9/10/2026 il giorno del lavoro.
+   Piano Free: Oggi e Mese corrente; Settimana, Anno e date a scelta sono Premium. */
+let incPeriodo = "mese", incTutti = [], incElencoTutto = false, incCavalli = [];
+let incVista = (() => { try { return localStorage.getItem("equo-inc-vista") || "semplice"; } catch(e){ return "semplice"; } })();
+let incMesi = (() => { try { return Number(localStorage.getItem("equo-inc-mesi")) || 6; } catch(e){ return 6; } })();
+let incAperta = "dasaldare", incCliTutti = false;
+const INC_PERIODI = [["oggi", "Oggi", false], ["settimana", "Settimana", true], ["mese", "Mese", false], ["anno", "Anno", true], ["date", "Scegli date…", true]];
+function euroTondo(n){ return (Number(n) || 0).toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: Number(n) % 1 ? 2 : 0 }); }
+function giornoPagamento(i){ return i.saldato_il ? isoLocale(new Date(i.saldato_il)) : (i.data_intervento || ""); }
+function incIntervallo(per){
+  const oggi = new Date(), iso = isoLocale(oggi);
+  if(per === "oggi") return { da: iso, a: iso, prevDa: aggiungiGiorniIso(iso, -1), prevA: aggiungiGiorniIso(iso, -1), nome: "oggi", prevNome: "ieri" };
+  if(per === "settimana"){
+    const lun = isoLocale(agLunedi(0)), dom = aggiungiGiorniIso(lun, 6);
+    return { da: lun, a: dom, prevDa: aggiungiGiorniIso(lun, -7), prevA: aggiungiGiorniIso(lun, -1), nome: "questa settimana", prevNome: "la settimana scorsa" };
+  }
+  if(per === "anno"){
+    const y = oggi.getFullYear();
+    return { da: y + "-01-01", a: y + "-12-31", prevDa: (y - 1) + "-01-01", prevA: (y - 1) + "-12-31", nome: String(y), prevNome: String(y - 1) };
+  }
+  if(per === "date"){
+    const da = document.getElementById("inc-dal").value || aggiungiGiorniIso(iso, -29), a = document.getElementById("inc-al").value || iso;
+    const n = giorniTra(da, a) + 1;
+    return { da, a, prevDa: aggiungiGiorniIso(da, -n), prevA: aggiungiGiorniIso(da, -1), nome: formatDataBreve(da) + " – " + formatDataBreve(a), prevNome: `i ${n} giorni prima` };
+  }
+  const y = oggi.getFullYear(), m = oggi.getMonth();
+  const primo = isoLocale(new Date(y, m, 1)), ultimo = isoLocale(new Date(y, m + 1, 0));
+  const pPrimo = isoLocale(new Date(y, m - 1, 1)), pUltimo = isoLocale(new Date(y, m, 0));
+  return { da: primo, a: ultimo, prevDa: pPrimo, prevA: pUltimo, nome: new Date(y, m, 1).toLocaleDateString("it-IT", { month: "long" }), prevNome: new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long" }) };
+}
+function incSaldatiTra(da, a){ return incTutti.filter(i => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => { const g = giornoPagamento(i); return g >= da && g <= a; })()); }
+const incSomma = l => l.reduce((t, i) => t + (Number(i.importo) || 0), 0);
+
 async function renderIncassi(){
   const box = document.getElementById("incassi-mese-incassato");
   if(!box) return;
-  const interventi = await DB.listInterventiMascalciaTutti();
-  const meseCorrente = isoLocale(new Date()).slice(0, 7); // "2026-09"
-  const delMese = interventi.filter(i => (i.data_intervento || "").startsWith(meseCorrente));
-  const incassatoMese = delMese.filter(i => i.stato_pagamento === "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
-  // «Da incassare» = solo interventi già FATTI e non saldati; gli appuntamenti da fare vanno in «Previsti»
-  const fattiNonSaldati = interventi.filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato");
-  const daIncassareMese = fattiNonSaldati.reduce((s, i) => s + (Number(i.importo) || 0), 0);
-  const previsti = interventi.filter(i => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0)
+  incTutti = await DB.listInterventiMascalciaTutti();
+  const iso = isoLocale(new Date()), mese = iso.slice(0, 7);
+  const incassatoMese = incSomma(incTutti.filter(i => i.stato_pagamento === "saldato" && i.stato === "fatto" && giornoPagamento(i).startsWith(mese)));
+  const fattiNonSaldati = incTutti.filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato");
+  const daIncassare = incSomma(fattiNonSaldati);
+  const previsti = incTutti.filter(i => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0)
     .sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
-  const previstoTot = previsti.reduce((s, i) => s + (Number(i.importo) || 0), 0);
-  const prevEl = document.getElementById("incassi-previsto");
-  if(prevEl) prevEl.textContent = formatEuro(previstoTot);
-  const prevBox = document.getElementById("incassi-previsti-list");
-  if(prevBox) prevBox.innerHTML = previsti.length === 0
-    ? '<div class="muted" style="font-size:13px">Nessun importo previsto.</div>'
-    : previsti.map(i => `
-      <div class="deadline-item" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600">${escapeHtml(i.clienti_mascalcia?.nome || "")}</div>
-          <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.ora ? " · " + String(i.ora).slice(0, 5) : ""}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</div>
-        </div>
-        <div style="font-weight:700;font-size:14px;color:var(--muted)">${formatEuro(i.importo)}</div>
-      </div>`).join("");
-
-  document.getElementById("incassi-mese-incassato").textContent = formatEuro(incassatoMese);
-  document.getElementById("incassi-mese-da-incassare").textContent = formatEuro(daIncassareMese);
-  document.getElementById("incassi-mese-numero").textContent = delMese.length;
-
-  if(typeof wgPro !== "undefined"){ wgPro.incassatoMese = incassatoMese; wgPro.daIncassareMese = daIncassareMese; wgPro.previsto = previstoTot; if(typeof wgRidisegna === "function") wgRidisegna(); }
+  const previstoTot = incSomma(previsti);
+  box.textContent = formatEuro(incassatoMese);
+  if(typeof wgPro !== "undefined"){ wgPro.incassatoMese = incassatoMese; wgPro.daIncassareMese = daIncassare; wgPro.previsto = previstoTot; if(typeof wgRidisegna === "function") wgRidisegna(); }
   const homeTeaser = document.getElementById("home-pro-incassi-mese");
   if(homeTeaser) homeTeaser.textContent = formatEuro(incassatoMese) + " incassati";
-
   const totalUnread = proUnreadTotal;
   const homeUnread = document.getElementById("home-pro-unread");
   if(homeUnread) homeUnread.textContent = totalUnread > 0 ? `${totalUnread} messagg${totalUnread === 1 ? "io" : "i"} non lett${totalUnread === 1 ? "o" : "i"}` : "Nessun messaggio non letto";
 
-  const daSaldare = fattiNonSaldati.slice().sort((a, b) => new Date(b.data_intervento) - new Date(a.data_intervento));
-  const daSaldareBox = document.getElementById("incassi-da-saldare-list");
-  daSaldareBox.innerHTML = daSaldare.length === 0
-    ? '<div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div>'
-    : daSaldare.map(i => `
-      <div class="deadline-item" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600">${escapeHtml(i.clienti_mascalcia?.nome || "")}</div>
-          <div class="muted" style="font-size:12px">${formatDate(i.data_intervento)}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</div>
-        </div>
-        <div style="font-weight:700;font-size:14px">${formatEuro(i.importo)}</div>
-      </div>
-    `).join("");
+  // vista Semplice | Completa
+  const prem = isPremium();
+  document.getElementById("inc-vista").innerHTML = [["semplice", "Semplice"], ["completa", "Completa"]]
+    .map(([k, t]) => `<button role="tab" aria-selected="${incVista === k}" class="${incVista === k ? "on" : ""}" onclick="sceltaVistaIncassi('${k}')">${t}${k === "completa" && !prem ? '<span class="stella" aria-label="Premium">★</span>' : ""}</button>`).join("");
+  document.getElementById("inc-titolo").textContent = incVista === "completa" ? "Statistiche" : "Incassi";
+  document.getElementById("inc-semplice").hidden = incVista !== "semplice";
+  document.getElementById("inc-completa").hidden = incVista !== "completa";
 
-  const premiumBox = document.getElementById("incassi-premium-box");
-  const upsellBox = document.getElementById("incassi-upsell-box");
-  if(isPremium()){
-    premiumBox.style.display = "block";
-    upsellBox.style.display = "none";
-    const mesi = {};
-    interventi.forEach(i => {
-      const key = (i.data_intervento || "").slice(0, 7);
-      if(!key) return;
-      if(!mesi[key]) mesi[key] = { saldato: 0 };
-      if(i.stato_pagamento === "saldato") mesi[key].saldato += Number(i.importo) || 0;
-    });
-    const ultimiMesi = Object.keys(mesi).sort().reverse().slice(0, 6);
-    document.getElementById("incassi-storico-list").innerHTML = ultimiMesi.length === 0
-      ? '<div class="muted" style="font-size:13px">Nessuno storico disponibile.</div>'
-      : ultimiMesi.map(key => `
-        <div class="deadline-item">
-          <div style="flex:1;font-size:13px;font-weight:600;text-transform:capitalize">${formatMeseLabel(key)}</div>
-          <div style="font-size:13px">${formatEuro(mesi[key].saldato)} incassati</div>
-        </div>
-      `).join("");
-  } else {
-    premiumBox.style.display = "none";
-    upsellBox.style.display = "block";
+  // DA INCASSARE: lavori già fatti e non pagati, per cliente, con i giorni passati
+  const oggiIso = iso;
+  const perCli = new Map();
+  fattiNonSaldati.forEach(i => { const k = i.cliente_mascalcia_id || "?"; if(!perCli.has(k)) perCli.set(k, { nome: i.clienti_mascalcia?.nome || "Cliente", righe: [] }); perCli.get(k).righe.push(i); });
+  const gruppiDs = [...perCli.values()].map(g => ({ ...g, tot: incSomma(g.righe), righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)) })).sort((a, b) => b.tot - a.tot);
+  const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
+  const cDs = document.getElementById("inc-cassa-dasaldare");
+  cDs.classList.toggle("aperta", incAperta === "dasaldare");
+  cDs.setAttribute("aria-expanded", String(incAperta === "dasaldare"));
+  cDs.innerHTML = `<span class="l"><span>Da incassare</span><span>${incAperta === "dasaldare" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(daIncassare)}</span>
+    <span class="d">${fattiNonSaldati.length ? `${fattiNonSaldati.length} ${fattiNonSaldati.length === 1 ? "lavoro già fatto" : "lavori già fatti"} · ${gruppiDs.length} ${gruppiDs.length === 1 ? "cliente" : "clienti"} · il più vecchio da ${piuVecchio} ${piuVecchio === 1 ? "giorno" : "giorni"}` : "Tutto incassato 👍"}</span>`;
+  document.getElementById("inc-det-dasaldare").hidden = incAperta !== "dasaldare";
+  document.getElementById("incassi-da-saldare-list").innerHTML = !gruppiDs.length ? '<div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div>'
+    : gruppiDs.map(g => `<div class="inc-gruppo"><span>${escapeHtml(g.nome)}</span><span>${euroTondo(g.tot)}</span></div>` + g.righe.map(i => {
+        const gg = giorniTra(i.data_intervento, oggiIso);
+        return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
+          <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
+            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span></div>
+          <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span>
+          <button class="btn btn-primary btn-sm inc-saldato" onclick="segnaSaldatoIncassi('${i.id}', this)">Saldato</button></div>`;
+      }).join("")).join("");
+
+  if(incVista === "completa") await renderIncassiCompleta();
+  renderIncassiSaldati();
+}
+
+function renderIncassiSaldati(){
+  const prem = isPremium();
+  if(!prem && INC_PERIODI.find(p => p[0] === incPeriodo)?.[2]) incPeriodo = "mese";
+  document.getElementById("inc-periodi").innerHTML = INC_PERIODI.map(([k, t, p]) =>
+    `<button class="${incPeriodo === k ? "on" : ""}" onclick="sceltaPeriodoIncassi('${k}')">${t}${p && !prem ? ' <span class="inc-lucchetto" aria-label="Premium">🔒</span>' : ""}</button>`).join("");
+  document.getElementById("inc-date").hidden = incPeriodo !== "date";
+  const r = incIntervallo(incPeriodo);
+  const lista = incSaldatiTra(r.da, r.a).sort((a, b) => giornoPagamento(b).localeCompare(giornoPagamento(a)));
+  const prev = incSaldatiTra(r.prevDa, r.prevA);
+  const tot = incSomma(lista), totPrev = incSomma(prev);
+  const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
+  const conImporto = lista.filter(i => Number(i.importo) > 0);
+  const cIn = document.getElementById("inc-cassa-incassati");
+  cIn.classList.toggle("aperta", incAperta === "incassati");
+  cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
+  cIn.innerHTML = `<span class="l"><span>Incassati · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
+    <span class="d">${lista.length} ${lista.length === 1 ? "lavoro pagato" : "lavori pagati"}${diff === null ? "" : ` · <span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(r.prevNome)}`}</span>`;
+  document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
+  document.getElementById("inc-kpis").innerHTML = `
+    <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>
+    <div class="inc-kpi"><div class="l">Media a lavoro</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
+
+  // grafico: settimana = giorni, mese = settimane, anno = mesi, date = giorni (≤31) o mesi
+  const barre = [];
+  if(incPeriodo === "settimana" || (incPeriodo === "date" && giorniTra(r.da, r.a) <= 31)){
+    for(let g = r.da; g <= r.a; g = aggiungiGiorniIso(g, 1)){
+      const d = new Date(g + "T12:00");
+      barre.push([incPeriodo === "settimana" ? AG_GIORNI[(d.getDay() + 6) % 7].charAt(0) : String(d.getDate()), incSomma(lista.filter(i => giornoPagamento(i) === g))]);
+    }
+  } else if(incPeriodo === "mese"){
+    const fine = Number(r.a.slice(8));
+    for(let s0 = 1; s0 <= fine; s0 += 7){
+      const s1 = Math.min(s0 + 6, fine), pre = r.da.slice(0, 8);
+      barre.push([s0 + "-" + s1, incSomma(lista.filter(i => { const g = Number(giornoPagamento(i).slice(8)); return g >= s0 && g <= s1; }))]);
+    }
+  } else if(incPeriodo === "anno" || incPeriodo === "date"){
+    const mesi = [];
+    for(let d = new Date(r.da.slice(0, 7) + "-01T12:00"); isoLocale(d).slice(0, 7) <= r.a.slice(0, 7); d.setMonth(d.getMonth() + 1)) mesi.push(isoLocale(d).slice(0, 7));
+    mesi.forEach(m => barre.push([new Date(m + "-01T12:00").toLocaleDateString("it-IT", { month: "narrow" }), incSomma(lista.filter(i => giornoPagamento(i).startsWith(m)))]));
   }
+  const gc = document.getElementById("inc-grafico-card");
+  gc.style.display = barre.length > 1 ? "" : "none";
+  const max = Math.max(1, ...barre.map(b => b[1]));
+  const fmtK = v => v >= 1000 ? (v / 1000).toFixed(1).replace(".", ",").replace(",0", "") + "k" : String(Math.round(v));
+  document.getElementById("inc-grafico").innerHTML = barre.map(([l, v]) => `<div class="c" title="${escapeHtml(l)}: ${euroTondo(v)}"><small>${v ? fmtK(v) : ""}</small><div class="b${v ? "" : " zero"}" style="height:${Math.max(2, Math.round(v / max * 78))}px"></div><small>${escapeHtml(l)}</small></div>`).join("");
+
+  // per tipo e per cliente
+  const barra = (t, v, maxV) => `<div class="inc-riga"><div class="t"><i style="transform:scaleX(${maxV ? (v / maxV).toFixed(3) : 0})"></i><span>${escapeHtml(t)}</span></div><b>${euroTondo(v)}</b></div>`;
+  const perTipo = Object.keys(TIPO_FERRATURA_LABELS).map(k => [TIPO_FERRATURA_LABELS[k], incSomma(lista.filter(i => i.tipo_ferratura === k))]).filter(x => x[1] > 0);
+  const mt = Math.max(0, ...perTipo.map(x => x[1]));
+  document.getElementById("inc-per-tipo").innerHTML = perTipo.length ? perTipo.map(([t, v]) => barra(t, v, mt)).join("") : '<div class="muted" style="font-size:13px">Nessun incasso nel periodo.</div>';
+  const cli = new Map();
+  lista.forEach(i => { const n = i.clienti_mascalcia?.nome || "Cliente"; cli.set(n, (cli.get(n) || 0) + (Number(i.importo) || 0)); });
+  const cliOrd = [...cli.entries()].sort((a, b) => b[1] - a[1]);
+  const top = cliOrd.slice(0, 5), altri = cliOrd.slice(5);
+  if(altri.length) top.push([`Altri ${altri.length} ${altri.length === 1 ? "cliente" : "clienti"}`, altri.reduce((t, x) => t + x[1], 0)]);
+  const mc = Math.max(0, ...top.map(x => x[1]));
+  document.getElementById("inc-per-cliente").innerHTML = top.length ? top.map(([t, v]) => barra(t, v, mc)).join("") : '<div class="muted" style="font-size:13px">Nessun incasso nel periodo.</div>';
+
+  // elenco
+  document.getElementById("inc-elenco-n").textContent = lista.length ? String(lista.length) : "";
+  const vis = incElencoTutto ? lista : lista.slice(0, 30);
+  document.getElementById("inc-elenco").innerHTML = !lista.length ? '<div class="muted" style="font-size:13px">Nessun lavoro saldato nel periodo.</div>'
+    : vis.map(i => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i.saldato_il ? " · pagato " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
+        <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("")
+      + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
+}
+function sceltaPeriodoIncassi(k){
+  const p = INC_PERIODI.find(x => x[0] === k);
+  if(p && p[2] && !isPremium()){ showToast("Settimana, Anno e date a scelta sono con Premium"); setTimeout(() => togglePiano(), 400); return; }
+  incPeriodo = k; incElencoTutto = false;
+  if(k === "date" && !document.getElementById("inc-dal").value){
+    const iso = isoLocale(new Date());
+    document.getElementById("inc-dal").value = aggiungiGiorniIso(iso, -29);
+    document.getElementById("inc-al").value = iso;
+  }
+  renderIncassi();
+}
+function incApri(k){
+  incAperta = incAperta === k ? null : k;
+  renderIncassi();
+}
+function sceltaVistaIncassi(k){
+  incVista = k;
+  try { localStorage.setItem("equo-inc-vista", k); } catch(e){}
+  renderIncassi();
+}
+function sceltaMesiIncassi(n){
+  incMesi = n;
+  try { localStorage.setItem("equo-inc-mesi", String(n)); } catch(e){}
+  renderIncassiCompleta();
+}
+
+/* ---------- VISTA COMPLETA (Premium): previsionale, clienti e prezzi, medie operative, consumo ferri ----------
+   I ferri nuovi/rimessi sono un dato privato del maniscalco: si vedono solo qui. */
+const INC_TIPI_CAVALLO = ["ferratura", "mezza_ferratura", "pareggio"];
+const INC_ORIZZONTE = 28; // previsionale: prossime 4 settimane
+function ferriIntervento(i){ return Number(i.quantita_ferri) || (i.tipo_ferratura === "mezza_ferratura" ? 2 : 4); }
+function incFinestra(mesi, primo){
+  const oggi = isoLocale(new Date());
+  const d = new Date(); d.setMonth(d.getMonth() - mesi);
+  let da = isoLocale(d);
+  const tagliata = !!(primo && primo > da);
+  if(tagliata) da = primo;
+  return { da, a: oggi, giorni: Math.max(7, giorniTra(da, oggi) + 1), tagliata };
+}
+const incData = iso => new Date(iso + "T12:00").toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+const incNum = (n, dec = 0) => (Number(n) || 0).toLocaleString("it-IT", { maximumFractionDigits: dec, minimumFractionDigits: 0 });
+function incPct(v, prima){ if(!prima) return ""; const d = Math.round((v - prima) / prima * 100); return `<span class="${d >= 0 ? "su" : "giu"}">${d >= 0 ? "▲" : "▼"} ${Math.abs(d)}%</span>`; }
+
+function statFinte(){
+  const k = (l, v) => `<div class="k"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+  return `<div class="card inc-card"><div class="inc-tit"><span>Previsionale</span></div><div class="inc-stat-kpis"><div class="k grande"><div class="l">Incasso in arrivo</div><div class="v">2.380 €</div></div></div></div>
+    <div class="card inc-card"><div class="inc-tit"><span>Medie operative</span></div><div class="inc-stat-kpis">${k("Cavalli a settimana", "14,5")}${k("Guadagno al mese", "6.090 €")}</div></div>
+    <div class="card inc-card"><div class="inc-tit"><span>Consumo ferri</span></div><div class="inc-stat-kpis">${k("A settimana", "38")}${k("Al mese", "164")}</div></div>`;
+}
+
+async function renderIncassiCompleta(){
+  const box = document.getElementById("inc-stat");
+  if(!box) return;
+  const mesiBox = document.getElementById("inc-mesi");
+  if(!isPremium()){
+    mesiBox.innerHTML = "";
+    box.innerHTML = `<div class="inc-bloccata"><div class="sotto" aria-hidden="true">${statFinte()}</div>
+      <div class="lucchetto"><div style="font-size:30px">📊</div><h3>Statistiche complete</h3><p>Con Premium vedi il tuo lavoro come un'azienda:</p>
+        <ul><li>quanto incasserai con gli appuntamenti in agenda</li><li>prezzo medio per cliente</li><li>cavalli e guadagno medi a settimana e al mese</li><li>quanti ferri usi e quanti comprarne</li></ul>
+        <button class="btn btn-primary" style="width:100%" onclick="togglePiano()">Passa a Premium</button>
+        <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="sceltaVistaIncassi('semplice')">Torna alla vista Semplice</button></div></div>`;
+    return;
+  }
+  mesiBox.innerHTML = [3, 6, 12].map(n => `<button class="${incMesi === n ? "on" : ""}" onclick="sceltaMesiIncassi(${n})">${n} mesi</button>`).join("");
+  try { incCavalli = await DB.listCavalliMiei(); } catch(e){ incCavalli = []; }
+  const oggi = isoLocale(new Date());
+  const fatti = incTutti.filter(i => i.stato === "fatto");
+  const primo = fatti.reduce((m, i) => !m || i.data_intervento < m ? i.data_intervento : m, null);
+  const W = incFinestra(incMesi, primo);
+  const settimane = W.giorni / 7, mesiEff = W.giorni / 30.44;
+  const inFin = fatti.filter(i => i.data_intervento >= W.da && i.data_intervento <= W.a);
+  const nomeFin = W.tagliata ? `dal ${incData(W.da)}` : `ultimi ${incMesi} mesi`;
+
+  // 1. PREVISIONALE
+  const fineOr = aggiungiGiorniIso(oggi, INC_ORIZZONTE - 1);
+  const futuri = incTutti.filter(i => i.stato === "programmato" && i.stato_pagamento !== "saldato" && i.data_intervento >= oggi);
+  const nelleSett = futuri.filter(i => i.data_intervento <= fineOr);
+  const conPrezzo = nelleSett.filter(i => Number(i.importo) > 0), senzaPrezzo = nelleSett.filter(i => !(Number(i.importo) > 0));
+  const piuAvanti = incSomma(futuri.filter(i => i.data_intervento > fineOr && Number(i.importo) > 0));
+  const settBarre = [0, 1, 2, 3].map(w => { const da = aggiungiGiorniIso(oggi, w * 7), a = aggiungiGiorniIso(oggi, w * 7 + 6);
+    return [Number(da.slice(8)) + "–" + incData(a), incSomma(conPrezzo.filter(i => i.data_intervento >= da && i.data_intervento <= a))]; });
+  const maxB = Math.max(1, ...settBarre.map(b => b[1]));
+  const fmtK = v => v >= 1000 ? (v / 1000).toFixed(1).replace(".", ",").replace(",0", "") + "k" : String(Math.round(v));
+  const prev = `<div class="card inc-card"><div class="inc-tit"><span>Previsionale</span><em>prossime 4 settimane</em></div>
+    <div class="inc-stat-kpis"><div class="k grande"><div class="l">Incasso in arrivo</div><div class="v">${euroTondo(incSomma(conPrezzo))}</div>
+      <div class="d">${conPrezzo.length} ${conPrezzo.length === 1 ? "appuntamento" : "appuntamenti"} con prezzo${piuAvanti ? ` · più avanti in agenda altri ${euroTondo(piuAvanti)}` : ""}</div></div></div>
+    <div class="inc-grafico" style="height:96px;margin-top:8px">${settBarre.map(([l, v]) => `<div class="c" title="${escapeHtml(l)}: ${euroTondo(v)}"><small>${v ? fmtK(v) : ""}</small><div class="b${v ? "" : " zero"}" style="height:${Math.max(2, Math.round(v / maxB * 62))}px"></div><small>${escapeHtml(l)}</small></div>`).join("")}</div>
+    ${senzaPrezzo.length ? `<div class="inc-avviso">⚠️ <span><b>${senzaPrezzo.length} ${senzaPrezzo.length === 1 ? "appuntamento senza prezzo" : "appuntamenti senza prezzo"}</b><br>non ${senzaPrezzo.length === 1 ? "è contato" : "sono contati"}</span><button class="btn btn-outline btn-sm" onclick="aggiungiPrezziMancanti()">Aggiungi</button></div>` : ""}</div>`;
+
+  // 2. CLIENTI E PREZZI
+  const attivi = clientiAttivi();
+  const idAttivi = new Set(attivi.map(c => c.id));
+  const cavAttivi = incCavalli.filter(c => idAttivi.has(c.cliente_mascalcia_id));
+  const media = (l) => { const v = l.filter(i => Number(i.importo) > 0); return v.length ? incSomma(v) / v.length : null; };
+  const righeCli = attivi.map(c => {
+    const suoi = inFin.filter(i => i.cliente_mascalcia_id === c.id);
+    return { id: c.id, nome: c.nome, scuderia: c.tipo_cliente === "struttura" || !!c.centro_id, cav: cavAttivi.filter(x => x.cliente_mascalcia_id === c.id).length,
+      fer: media(suoi.filter(i => i.tipo_ferratura === "ferratura")), par: media(suoi.filter(i => i.tipo_ferratura === "pareggio")), lavori: suoi.length };
+  }).filter(r => r.cav || r.lavori).sort((a, b) => b.cav - a.cav || b.lavori - a.lavori || a.nome.localeCompare(b.nome));
+  const visCli = incCliTutti ? righeCli : righeCli.slice(0, 8);
+  const mF = media(inFin.filter(i => i.tipo_ferratura === "ferratura")), mM = media(inFin.filter(i => i.tipo_ferratura === "mezza_ferratura")), mP = media(inFin.filter(i => i.tipo_ferratura === "pareggio"));
+  const medieTot = [mF != null ? `ferratura <b>${euroTondo(Math.round(mF))}</b>` : "", mM != null ? `mezza <b>${euroTondo(Math.round(mM))}</b>` : "", mP != null ? `pareggio <b>${euroTondo(Math.round(mP))}</b>` : ""].filter(Boolean).join(" · ");
+  const cli = `<div class="card inc-card"><div class="inc-tit"><span>Clienti e prezzi</span><em>${cavAttivi.length} ${cavAttivi.length === 1 ? "cavallo" : "cavalli"} · ${attivi.length} ${attivi.length === 1 ? "cliente" : "clienti"}</em></div>
+    ${righeCli.length ? `<table class="inc-tab"><tr><th>Cliente</th><th>Cavalli</th><th>Ferratura media</th></tr>
+      ${visCli.map(r => `<tr class="cli" onclick="showPage('pro-clienti'); openClienteDetail('${r.id}')"><td>${escapeHtml(r.nome)}${r.scuderia ? "<small>scuderia</small>" : r.par != null && r.fer == null ? `<small>pareggio ${euroTondo(Math.round(r.par))}</small>` : ""}</td><td>${r.cav}</td><td>${r.fer != null ? euroTondo(Math.round(r.fer)) : "—"}</td></tr>`).join("")}</table>
+      ${righeCli.length > visCli.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incCliTutti=true;renderIncassiCompleta()">Mostra tutti (${righeCli.length})</button>` : ""}`
+      : '<div class="muted" style="font-size:13px">Ancora nessun cliente con cavalli.</div>'}
+    <div class="inc-nota">${medieTot ? `Media di tutti i clienti (${escapeHtml(nomeFin)}): ${medieTot}. ` : ""}Conta solo i lavori fatti con il prezzo. Tocca un cliente per aprire la scheda.</div></div>`;
+
+  // 3. MEDIE OPERATIVE (cavalli ferrati e pareggiati; guadagno = valore dei lavori fatti)
+  const cavLav = inFin.filter(i => INC_TIPI_CAVALLO.includes(i.tipo_ferratura));
+  const valore = incSomma(inFin), conImp = inFin.filter(i => Number(i.importo) > 0);
+  const pDa = aggiungiGiorniIso(W.da, -W.giorni), pA = aggiungiGiorniIso(W.da, -1);
+  const primaFin = fatti.filter(i => i.data_intervento >= pDa && i.data_intervento <= pA);
+  const cavPrima = primaFin.filter(i => INC_TIPI_CAVALLO.includes(i.tipo_ferratura)).length, valPrima = incSomma(primaFin);
+  const kk = (l, v, d) => `<div class="k"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  const med = `<div class="card inc-card"><div class="inc-tit"><span>Medie operative</span><em>${escapeHtml(nomeFin)}</em></div>
+    ${cavLav.length || valore ? `<div class="inc-stat-kpis">
+      ${kk("Cavalli a settimana", incNum(cavLav.length / settimane, 1), "ferrati e pareggiati")}
+      ${kk("Cavalli al mese", incNum(cavLav.length / mesiEff), (incPct(cavLav.length, cavPrima) ? incPct(cavLav.length, cavPrima) + " sul periodo prima" : `${cavLav.length} in tutto`))}
+      ${kk("Guadagno a settimana", euroTondo(Math.round(valore / settimane)), "valore dei lavori fatti")}
+      ${kk("Guadagno al mese", euroTondo(Math.round(valore / mesiEff)), [conImp.length ? euroTondo(Math.round(valore / conImp.length)) + " a lavoro" : "", incPct(valore, valPrima)].filter(Boolean).join(" · "))}
+    </div>` : '<div class="muted" style="font-size:13px">Nessun lavoro fatto nel periodo.</div>'}
+    ${W.tagliata ? `<div class="inc-nota">Medie calcolate dal ${incData(W.da)}, il primo lavoro registrato in Equo.</div>` : ""}</div>`;
+
+  // 4. CONSUMO FERRI (solo numero, niente costi)
+  const conFerri = inFin.filter(i => i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura");
+  let nuovi = 0, rimessi = 0;
+  const perMisura = new Map();
+  conFerri.forEach(i => {
+    const n = ferriIntervento(i);
+    if(i.ferri_nuovi === false){ rimessi += n; return; }
+    nuovi += n;
+    const k = i.numero_ferro ? "n. " + i.numero_ferro + (i.misura_sistema ? " " + (MISURA_SISTEMA_LABEL[i.misura_sistema] || "") : "") : "?";
+    perMisura.set(k, (perMisura.get(k) || 0) + n);
+  });
+  const quotaNuovi = nuovi + rimessi ? nuovi / (nuovi + rimessi) : 1;
+  const inAgenda = futuri.filter(i => i.data_intervento <= aggiungiGiorniIso(oggi, 29) && (i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura"))
+    .reduce((t, i) => t + ferriIntervento(i), 0);
+  const agendaNuovi = Math.round(inAgenda * quotaNuovi), mediaMese = Math.round(nuovi / mesiEff);
+  const stima = Math.max(agendaNuovi, mediaMese);
+  const misure = [...perMisura.entries()].map(([k, v]) => [k, v / mesiEff]).sort((a, b) => (a[0] === "?") - (b[0] === "?") || b[1] - a[1]).slice(0, 10);
+  const maxM = Math.max(1, ...misure.map(m => m[1]));
+  const ferri = `<div class="card inc-card"><div class="inc-tit"><span>Consumo ferri</span><em>${escapeHtml(nomeFin)}</em></div>
+    ${nuovi + rimessi ? `<div class="inc-stat-kpis">
+      ${kk("Ferri nuovi a settimana", incNum(nuovi / settimane), `rimessi: ${incNum(rimessi / settimane)}`)}
+      ${kk("Ferri nuovi al mese", incNum(nuovi / mesiEff), `${Math.round(quotaNuovi * 100)}% nuovi · ${100 - Math.round(quotaNuovi * 100)}% rimessi`)}
+      <div class="k grande"><div class="l">Te ne servono nel prossimo mese</div><div class="v">≈ ${incNum(stima)} ferri</div>
+        <div class="d">in agenda: ${incNum(agendaNuovi)} · tua media: ${incNum(mediaMese)} al mese</div></div>
+    </div>
+    ${misure.length ? `<div class="inc-tit" style="margin-top:12px"><span>Per misura · al mese</span></div><div class="inc-misure">${misure.map(([k, v]) =>
+      `<div class="inc-misura"><span>${escapeHtml(k)}</span><div class="f"><i style="width:${Math.round(v / maxM * 100)}%${k === "?" ? ";opacity:.5" : ""}"></i></div><b>${incNum(v)}</b></div>`).join("")}</div>` : ""}
+    <div class="inc-nota">${perMisura.has("?") ? "«?» = ferrature senza misura del ferro: aggiungila nella scheda del cavallo. " : ""}Conta i ferri degli appuntamenti fatti: ferratura completa 4, mezza 2, o il numero indicato. Questi dati li vedi solo tu.</div>`
+      : '<div class="muted" style="font-size:13px">Nessuna ferratura fatta nel periodo.</div>'}</div>`;
+
+  box.innerHTML = prev + cli + med + ferri;
+}
+
+/* ---------- PREZZO MANCANTE: promemoria (salvando un appuntamento) e «Aggiungi» dal previsionale ---------- */
+let prezziResolve = null;
+function prezzoSuggerito(clienteId, cavalloId, tipo){
+  const conPrezzo = (incTutti || []).filter(i => Number(i.importo) > 0 && i.cliente_mascalcia_id === clienteId && i.tipo_ferratura === tipo)
+    .sort((a, b) => b.data_intervento.localeCompare(a.data_intervento));
+  const stesso = cavalloId ? conPrezzo.find(i => i.cavallo_cliente_id === cavalloId) : null;
+  const x = stesso || conPrezzo[0];
+  return x ? { v: Number(x.importo), fonte: stesso ? "ultimo prezzo per questo cavallo" : "ultimo prezzo di questo cliente" } : null;
+}
+// righe: [{ nome, tipo, clienteId, cavalloId, nomeCliente? }] → Promise: array di importi (null se vuoto) oppure null («senza prezzo»)
+function chiediPrezzi(righe, { salvataggio = true } = {}){
+  return new Promise(resolve => {
+    prezziResolve = { resolve, n: righe.length, salvataggio };
+    document.getElementById("prezzi-tit").textContent = salvataggio ? "Manca il prezzo" : "Aggiungi i prezzi";
+    document.getElementById("prezzi-testo").textContent = salvataggio
+      ? "Con l'importo Equo ti dice quanto incasserai nei prossimi giorni e chi deve ancora pagarti. Senza, questo appuntamento non entra nel previsionale."
+      : "Gli appuntamenti delle prossime 4 settimane senza importo. Quelli che lasci vuoti restano senza prezzo.";
+    document.getElementById("prezzi-righe").innerHTML = righe.map((r, n) => {
+      const sug = prezzoSuggerito(r.clienteId, r.cavalloId, r.tipo);
+      return `<div class="prezzi-riga"><div class="n"><b>${escapeHtml(r.nome || "Appuntamento")}</b> · ${escapeHtml(TIPO_FERRATURA_LABELS[r.tipo] || r.tipo || "")}${r.sotto ? " · " + escapeHtml(r.sotto) : ""}</div>
+        <label class="prezzi-campo"><span>€</span><input type="number" min="0" step="0.01" inputmode="decimal" id="prezzi-v-${n}" placeholder="importo" value="${sug ? sug.v : ""}">${sug ? `<small>${sug.fonte}</small>` : ""}</label></div>`;
+    }).join("");
+    document.getElementById("prezzi-mai-box").hidden = !salvataggio;
+    document.getElementById("prezzi-mai").checked = false;
+    document.getElementById("prezzi-ok").textContent = salvataggio ? "Salva con prezzo" : "Salva prezzi";
+    document.getElementById("prezzi-no").textContent = salvataggio ? "Salva senza prezzo" : "Più tardi";
+    openModal("modal-prezzi");
+  });
+}
+function rispondiPrezzi(ok){
+  const p = prezziResolve; prezziResolve = null;
+  closeModal("modal-prezzi");
+  if(!p) return;
+  if(p.salvataggio && document.getElementById("prezzi-mai").checked){ try { localStorage.setItem("equo-no-promemoria-prezzo", "1"); } catch(e){} }
+  if(!ok) return p.resolve(null);
+  const v = [];
+  for(let n = 0; n < p.n; n++){ const raw = document.getElementById("prezzi-v-" + n).value; v.push(raw === "" || !(Number(raw) >= 0) ? null : Number(raw)); }
+  p.resolve(v);
+}
+function promemoriaPrezzoAttivo(){ try { return localStorage.getItem("equo-no-promemoria-prezzo") !== "1"; } catch(e){ return true; } }
+async function aggiungiPrezziMancanti(){
+  const oggi = isoLocale(new Date()), fine = aggiungiGiorniIso(oggi, INC_ORIZZONTE - 1);
+  const lista = incTutti.filter(i => i.stato === "programmato" && i.stato_pagamento !== "saldato" && i.data_intervento >= oggi && i.data_intervento <= fine && !(Number(i.importo) > 0))
+    .sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || ""))).slice(0, 40);
+  if(!lista.length) return;
+  const v = await chiediPrezzi(lista.map(i => ({ nome: [i.clienti_mascalcia?.nome, i.cavalli_clienti_mascalcia?.nome].filter(Boolean).join(" · "), tipo: i.tipo_ferratura,
+    clienteId: i.cliente_mascalcia_id, cavalloId: i.cavallo_cliente_id, sotto: formatDataBreve(i.data_intervento) + (i.ora ? " " + String(i.ora).slice(0, 5) : "") })), { salvataggio: false });
+  if(!v) return;
+  let n = 0;
+  for(let k = 0; k < lista.length; k++){
+    if(v[k] == null) continue;
+    const { error } = await DB.updateInterventoMascalcia(lista[k].id, { importo: v[k] });
+    if(error){ showToast("Errore: " + error.message); break; }
+    if(DEMO_MODE) lista[k].importo = v[k];
+    n++;
+  }
+  if(n) showToast(n === 1 ? "Prezzo salvato" : `${n} prezzi salvati`);
+  await renderIncassi();
+}
+
+async function segnaSaldatoIncassi(id, btn){
+  btn.disabled = true;
+  const { error } = await DB.updateInterventoMascalcia(id, { stato_pagamento: "saldato" });
+  if(error){ btn.disabled = false; showToast("Errore: " + error.message); return; }
+  const i = incTutti.find(x => x.id === id);
+  if(i && DEMO_MODE) i.saldato_il = new Date().toISOString();
+  showToast("Segnato come saldato");
+  await renderIncassi();
+}
+
+
+/* ---------- SPOSTA CAVALLO: dove sta il cavallo (a casa / in una scuderia) ----------
+   Chi paga non cambia: cambia solo il luogo. Lo spostamento è uno per tutto l'ecosistema
+   (RPC equo_sposta_cavallo) e resta nello storico. L'agenda del maniscalco raggruppa per luogo. */
+const UBIC_CAMPI = ["ubicazione_tipo", "ubicazione_cliente_id", "ubicazione_nome", "ubicazione_indirizzo", "ubicazione_dal"];
+function ubicDi(r, clienteId){
+  const o = { cliente_mascalcia_id: (r && r.cliente_mascalcia_id) || clienteId || null };
+  UBIC_CAMPI.forEach(k => { o[k] = r ? r[k] ?? null : null; });
+  return o;
+}
+let cavalliMieiCache = null, cavalliMieiTs = 0, cavalliMieiById = {}, cavalliMieiByHorse = {};
+async function caricaUbicazioni(forza){
+  if(!forza && cavalliMieiCache && Date.now() - cavalliMieiTs < 60000) return cavalliMieiCache;
+  try { cavalliMieiCache = await DB.listCavalliMiei(); } catch(e){ cavalliMieiCache = cavalliMieiCache || []; }
+  cavalliMieiTs = Date.now(); cavalliMieiById = {}; cavalliMieiByHorse = {};
+  (cavalliMieiCache || []).forEach(c => { cavalliMieiById[c.id] = c; if(c.horse_id && !cavalliMieiByHorse[c.horse_id]) cavalliMieiByHorse[c.horse_id] = c; });
+  return cavalliMieiCache;
+}
+function clienteDiId(id){ return (clientiMascalcia || []).find(x => x.id === id) || null; }
+function eLuogoScuderia(c){ return !!(c && (c.tipo_cliente === "struttura" || c.centro_id)); }
+function nomeLuogoCliente(c){ return c ? (eLuogoScuderia(c) ? c.nome : "A casa · " + c.nome) : "Cliente"; }
+// luogo attuale di una riga cavallo del maniscalco → { key, nome, indirizzo, clienteId, scuderia, casa, dal }
+function luogoDi(r){
+  const cli = clienteDiId(r?.cliente_mascalcia_id);
+  const dal = r?.ubicazione_dal || null;
+  if(r?.ubicazione_tipo === "scuderia"){
+    const u = clienteDiId(r.ubicazione_cliente_id);
+    return { key: r.ubicazione_cliente_id ? "c:" + r.ubicazione_cliente_id : "n:" + (r.ubicazione_nome || ""), nome: u?.nome || r.ubicazione_nome || "Scuderia",
+      indirizzo: u?.indirizzo || null, clienteId: r.ubicazione_cliente_id || null, scuderia: true, casa: false, dal };
+  }
+  if(r?.ubicazione_tipo === "casa"){
+    const struttura = eLuogoScuderia(cli);
+    return { key: "casa:" + r.cliente_mascalcia_id + ":" + (r.ubicazione_indirizzo || ""), nome: "A casa · " + (r.ubicazione_nome || (struttura ? "privato" : cli?.nome || "")),
+      indirizzo: r.ubicazione_indirizzo || (struttura ? null : cli?.indirizzo || null), clienteId: struttura ? null : r.cliente_mascalcia_id, scuderia: false, casa: true, dal };
+  }
+  return { key: "c:" + (r?.cliente_mascalcia_id || ""), nome: nomeLuogoCliente(cli), indirizzo: cli?.indirizzo || null, clienteId: cli?.id || null,
+    scuderia: eLuogoScuderia(cli), casa: !eLuogoScuderia(cli), dal };
+}
+// luogo di un appuntamento: i lavori fatti ricordano dove sono stati fatti, gli altri seguono il cavallo
+function luogoEvento(e, attuale){
+  if(!attuale && e.stato === "fatto" && e.luogo_nome){
+    const lc = e.luogo_cliente_id ? clienteDiId(e.luogo_cliente_id) : null;
+    if(lc) return { key: "c:" + lc.id, nome: nomeLuogoCliente(lc), indirizzo: lc.indirizzo || null, clienteId: lc.id, scuderia: eLuogoScuderia(lc) };
+    if(/^A casa/.test(e.luogo_nome)) return luogoDi({ cliente_mascalcia_id: e.cliente_mascalcia_id });
+    return { key: "n:" + e.luogo_nome, nome: e.luogo_nome, indirizzo: null, clienteId: null, scuderia: true };
+  }
+  const riga = (e.cavallo_cliente_id && cavalliMieiById[e.cavallo_cliente_id]) || (e.horse_id && cavalliMieiByHorse[e.horse_id]) || null;
+  return luogoDi(riga ? { ...ubicDi(riga), cliente_mascalcia_id: riga.ubicazione_tipo ? riga.cliente_mascalcia_id : e.cliente_mascalcia_id } : { cliente_mascalcia_id: e.cliente_mascalcia_id });
+}
+function navigaLuogo(l){
+  if(!l) return;
+  if(l.indirizzo) return wgMostraMappe({ nome: l.nome }, l.indirizzo);
+  if(l.clienteId) return wgNaviga(l.clienteId);
+  wgMostraMappe({ nome: l.nome }, l.nome, "Indirizzo non indicato: ricerca per nome, controlla nelle mappe che sia il posto giusto.");
+}
+async function wgNavigaEvento(id){
+  const e = agEventiCache[id] || (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).find(x => x.id === id);
+  if(!e) return;
+  await caricaUbicazioni();
+  navigaLuogo(luogoEvento(e, true));
+}
+
+// riquadro «Dove sta» nella scheda cavallo del maniscalco
+function doveStaHtml(l, azione){
+  const sotto = [l.indirizzo, l.dal ? "dal " + formatDataBreve(l.dal) : ""].filter(Boolean).join(" · ");
+  return `<div class="dove-sta"><span class="ic">${l.scuderia ? "🐴" : "🏠"}</span>
+    <div class="c"><b>${escapeHtml(l.nome)}</b>${sotto ? `<span>${escapeHtml(sotto)}</span>` : ""}</div>${azione || ""}</div>`;
+}
+function renderDoveCavalloPro(cv){
+  const box = document.getElementById("cavpro-dove");
+  if(!box) return;
+  box.innerHTML = doveStaHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }), `<button class="btn btn-primary btn-sm" onclick="apriSpostaCavalloPro()">Sposta</button>`);
+}
+
+// ---------- finestra «Sposta» (maniscalco e proprietario) ----------
+let spCtx = null, spCercaT = null;
+function spOverlay(){
+  let ov = document.getElementById("modal-sposta");
+  if(!ov){
+    ov = document.createElement("div"); ov.className = "modal-overlay"; ov.id = "modal-sposta";
+    ov.addEventListener("click", ev => { if(ev.target === ov) closeModal("modal-sposta"); });
+    document.body.appendChild(ov);
+  }
+  return ov;
+}
+async function apriSpostaCavalloPro(){
+  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
+  if(!cv) return;
+  let id = cv.id;
+  if(!id){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(currentClienteId, cv)); if(id) cv.id = id; }
+  if(!id){ showToast("Non riuscito, riprova."); return; }
+  await caricaUbicazioni();
+  const ub = cv.ub || { cliente_mascalcia_id: currentClienteId };
+  const att = luogoDi(ub), pagante = clienteDiId(ub.cliente_mascalcia_id || currentClienteId);
+  const scuderie = clientiAttivi().filter(c => eLuogoScuderia(c)).sort((a, b) => a.nome.localeCompare(b.nome, "it"))
+    .map(c => ({ v: "cli:" + c.id, nome: c.nome, sotto: [c.indirizzo, (() => { const n = (cavalliMieiCache || []).filter(x => x.cliente_mascalcia_id === c.id || x.ubicazione_cliente_id === c.id).length; return n ? n + (n === 1 ? " cavallo che segui" : " cavalli che segui") : ""; })()].filter(Boolean).join(" · "),
+      equo: !!(c.centro_id && c.collegamento_stato === "attivo"), attuale: att.key === "c:" + c.id }));
+  spCtx = { vista: "maniscalco", id, nome: cv.nome, att, pagante, scuderie, casaInd: eLuogoScuderia(pagante) ? "" : (pagante?.indirizzo || ""),
+    collegato: clienteCollegatoEquo(pagante?.id) };
+  spDisegna();
+}
+async function apriSpostaCavalloProprietario(){
+  const h = (horses || []).find(x => x.id === currentHorseId);
+  if(!h) return;
+  let mie = [];
+  if(!DEMO_MODE){ try { const r = await sb.rpc("prop_indirizzi_scuderie"); mie = r.data || []; } catch(e){} }
+  else mie = (demoState.stables || []).map(s => ({ id: s.id, nome: s.name, citta: "" }));
+  spCtx = { vista: "proprietario", id: h.id, nome: h.name, att: { nome: luogoProprietario(h).nome, key: h.ubicazione_centro_id ? "centro:" + h.ubicazione_centro_id : "" },
+    scuderie: mie.map(c => ({ v: "centro:" + c.id, nome: c.nome, sotto: [c.indirizzo, c.citta].filter(Boolean).join(", "), equo: true, attuale: h.ubicazione_centro_id === c.id })),
+    casaInd: h.ubicazione_tipo === "casa" ? (h.ubicazione_indirizzo || "") : "" };
+  spDisegna();
+}
+function spDisegna(){
+  const c = spCtx, pro = c.vista === "maniscalco";
+  const ov = spOverlay();
+  ov.innerHTML = `<div class="modal sp-modal"><div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:2px">Dove va ${escapeHtml(c.nome)}?</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">Adesso: ${escapeHtml(c.att.nome || "non indicato")}</div>
+    <label class="sp-o"><input type="radio" name="sp-dest" value="casa" onchange="spAggiorna()"><span class="c"><b>🏠 A casa / privato</b><span>${pro ? `Indirizzo di ${escapeHtml(c.pagante?.nome || "proprietario")} o un altro` : "Il tuo indirizzo o un altro"}</span></span></label>
+    <div class="sp-extra" id="sp-casa-extra" hidden><input class="input" id="sp-casa-ind" maxlength="160" placeholder="Indirizzo (facoltativo)" value="${escapeHtml(c.casaInd || "")}"></div>
+    <div class="sp-sez">${pro ? "Le tue scuderie" : "Scuderie su Equo"}</div>
+    <input class="input" id="sp-cerca" placeholder="${pro ? "Cerca scuderia, maneggio, centro ippico…" : "Cerca per nome o città…"}" oninput="spCerca()" autocomplete="off" style="margin-bottom:6px">
+    <div id="sp-lista" class="sp-lista"></div>
+    <label class="sp-o"><input type="radio" name="sp-dest" value="nuova" onchange="spAggiorna()"><span class="c"><b>${pro ? "+ Nuova scuderia" : "Altra scuderia"}</b><span>${pro ? "Nome e indirizzo, la crei adesso" : "Non è su Equo: scrivi nome e indirizzo"}</span></span></label>
+    <div class="sp-extra" id="sp-nuova-extra" hidden>
+      <input class="input" id="sp-nuova-nome" maxlength="80" placeholder="Nome (es. Maneggio Il Poggio)" style="margin-bottom:6px">
+      <input class="input" id="sp-nuova-ind" maxlength="160" placeholder="Indirizzo (facoltativo)"></div>
+    <label class="sp-dal">Dal giorno <input type="date" class="input" id="sp-dal" value="${isoLocale(new Date())}"></label>
+    <div class="sp-info" id="sp-info" hidden></div>
+    <div class="auth-error" id="sp-err" style="display:none"></div>
+    <button class="btn btn-primary" id="sp-ok" style="width:100%;margin-top:12px" onclick="confermaSposta(this)">Sposta ${escapeHtml(c.nome)}</button>
+    <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="closeModal('modal-sposta')">Annulla</button></div>`;
+  spLista(c.scuderie);
+  openModal("modal-sposta");
+}
+function spLista(lista){
+  const box = document.getElementById("sp-lista");
+  if(!box) return;
+  const scelto = document.querySelector('input[name="sp-dest"]:checked')?.value;
+  box.innerHTML = lista.length ? lista.map(s => `<label class="sp-o${s.attuale ? " attuale" : ""}"><input type="radio" name="sp-dest" value="${s.v}"${scelto === s.v ? " checked" : ""}${s.attuale ? " disabled" : ""} onchange="spAggiorna()">
+      <span class="c"><b>${escapeHtml(s.nome)}</b><span>${s.attuale ? "è qui adesso" : escapeHtml(s.sotto || "")}</span></span>${s.equo ? `<span class="sp-pill">${spCtx.vista === "maniscalco" ? "Equo Scuderia" : "Equo"}</span>` : ""}</label>`).join("")
+    : `<div class="muted" style="font-size:12.5px;padding:4px 2px 8px">${spCtx.vista === "maniscalco" ? "Nessuna scuderia con questo nome: usa «+ Nuova scuderia»." : "Scrivi almeno 2 lettere per cercare, oppure usa «Altra scuderia»."}</div>`;
+}
+function spCerca(){
+  const q = document.getElementById("sp-cerca").value.trim();
+  if(spCtx.vista === "maniscalco"){
+    const n = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    spLista(spCtx.scuderie.filter(s => !q || n(s.nome + " " + s.sotto).includes(n(q))));
+    return;
+  }
+  clearTimeout(spCercaT);
+  if(q.length < 2){ spLista(spCtx.scuderie); return; }
+  spCercaT = setTimeout(async () => {
+    const r = await DB.cercaCentri(q);
+    if(document.getElementById("sp-cerca")?.value.trim() !== q) return;
+    spLista(r.map(c => ({ v: "centro:" + c.id, nome: c.nome, sotto: [c.citta, c.provincia ? "(" + c.provincia + ")" : ""].filter(Boolean).join(" "), equo: true, attuale: spCtx.att.key === "centro:" + c.id })));
+  }, 300);
+}
+function spScelta(){
+  const v = document.querySelector('input[name="sp-dest"]:checked')?.value || "";
+  const s = [...(spCtx.scuderie || [])].find(x => x.v === v) || null;
+  const nome = v === "casa" ? "A casa" : v === "nuova" ? (document.getElementById("sp-nuova-nome")?.value.trim() || "la nuova scuderia")
+    : (s?.nome || document.querySelector(`input[name="sp-dest"][value="${v}"]`)?.closest(".sp-o")?.querySelector("b")?.textContent || "");
+  return { v, nome, equo: !!(document.querySelector(`input[name="sp-dest"][value="${v}"]`)?.closest(".sp-o")?.querySelector(".sp-pill")) };
+}
+function spAggiorna(){
+  const sc = spScelta(), c = spCtx;
+  document.getElementById("sp-casa-extra").hidden = sc.v !== "casa";
+  document.getElementById("sp-nuova-extra").hidden = sc.v !== "nuova";
+  if(sc.v === "nuova") setTimeout(() => document.getElementById("sp-nuova-nome")?.focus(), 50);
+  document.querySelectorAll("#modal-sposta .sp-o").forEach(l => l.classList.toggle("on", !!l.querySelector("input:checked")));
+  const info = document.getElementById("sp-info");
+  if(!sc.v){ info.hidden = true; return; }
+  const righe = c.vista === "maniscalco" ? [
+    `Resta cliente <b>${escapeHtml(c.pagante?.nome || "lo stesso")}</b>: incassi e chat non cambiano.`,
+    `I prossimi appuntamenti di ${escapeHtml(c.nome)} passano sotto <b>${escapeHtml(sc.v === "casa" ? "A casa" : sc.nome)}</b> in agenda.`,
+    c.collegato ? `${escapeHtml(c.pagante.nome)} riceve un messaggio e lo vede nel libretto.` : "",
+    sc.equo ? `${escapeHtml(sc.nome)} usa Equo Scuderia: riceve la richiesta di accogliere ${escapeHtml(c.nome)}.` : ""
+  ] : [
+    `I maniscalchi che seguono ${escapeHtml(c.nome)} lo vedono subito e ricevono un messaggio.`,
+    sc.equo ? `${escapeHtml(sc.nome)} riceve la richiesta di accogliere ${escapeHtml(c.nome)}.` : "",
+    "Resta nel libretto del cavallo."
+  ];
+  info.innerHTML = righe.filter(Boolean).map(t => "✓ " + t).join("<br>");
+  info.hidden = false;
+}
+async function confermaSposta(btn){
+  const sc = spScelta(), c = spCtx;
+  const err = document.getElementById("sp-err");
+  const errore = m => { err.textContent = m; err.style.display = "block"; };
+  err.style.display = "none";
+  if(!sc.v) return errore("Scegli dove va " + c.nome + ".");
+  const p = { vista: c.vista, id: c.id, dest: sc.v === "casa" ? "casa" : sc.v === "nuova" ? "nuova" : "scuderia", dal: document.getElementById("sp-dal").value || null };
+  if(sc.v === "casa") p.indirizzo = document.getElementById("sp-casa-ind").value.trim() || null;
+  if(sc.v === "nuova"){
+    p.nome = document.getElementById("sp-nuova-nome").value.trim();
+    p.indirizzo = document.getElementById("sp-nuova-ind").value.trim() || null;
+    if(!p.nome) return errore("Scrivi il nome della scuderia.");
+  }
+  if(sc.v.startsWith("cli:")) p.cliente = sc.v.slice(4);
+  if(sc.v.startsWith("centro:")) p.centro = sc.v.slice(7);
+  btn.disabled = true;
+  const r = await DB.spostaCavallo(p);
+  btn.disabled = false;
+  if(!r || !r.ok) return errore((r && r.errore) || "Non riuscito, riprova.");
+  closeModal("modal-sposta");
+  showToast(`${c.nome}: ${r.luogo === "A casa" ? "a casa" : "ora sta a " + r.luogo}${r.arrivo ? " · la scuderia riceve la richiesta" : ""}`);
+  if(c.vista === "maniscalco"){
+    if(r.scuderia_cliente_id && !clienteDiId(r.scuderia_cliente_id)) await loadClientiMascalcia();
+    await caricaUbicazioni(true);
+    if(currentClienteId) await loadClienteInterventi(currentClienteId);
+    if(typeof renderAgendaSettimana === "function") renderAgendaSettimana();
+  } else {
+    await loadHorses();
+    if(currentHorseId) await openHorseDetail(currentHorseId);
+  }
+}
+
+// ---------- proprietario: riquadro «Dove sta» ----------
+function luogoProprietario(h){
+  if(h?.ubicazione_tipo === "scuderia") return { nome: h.ubicazione_nome || "Scuderia", scuderia: true, indirizzo: h.ubicazione_indirizzo, dal: h.ubicazione_dal };
+  if(h?.ubicazione_tipo === "casa") return { nome: "A casa", scuderia: false, indirizzo: h.ubicazione_indirizzo, dal: h.ubicazione_dal };
+  return { nome: "Non indicato", scuderia: false, indirizzo: null, dal: null, vuoto: true };
+}
+async function renderDoveStaProprietario(h){
+  const box = document.getElementById("horse-dove");
+  if(!box) return;
+  const l = luogoProprietario(h);
+  box.innerHTML = doveStaHtml({ ...l, nome: l.vuoto ? "Dove sta? Non ancora indicato" : (l.scuderia ? "Sta a: " + l.nome : l.nome) },
+    `<button class="btn btn-primary btn-sm" onclick="apriSpostaCavalloProprietario()">${l.vuoto ? "Indica" : "Sposta"}</button>`);
+  const arr = await DB.arriviCavallo(h.id);
+  if(currentHorseId !== h.id) return;
+  if(arr.some(a => a.stato === "in_attesa")) box.insertAdjacentHTML("beforeend", `<div class="dove-attesa">⏳ In attesa che ${escapeHtml(l.nome)} confermi l'arrivo.</div>`);
+  else if(arr[0] && arr[0].stato === "rifiutato" && Date.now() - new Date(arr[0].risposto_il || 0).getTime() < 7 * 864e5)
+    box.insertAdjacentHTML("beforeend", `<div class="dove-attesa no">⚠️ La scuderia ha risposto che ${escapeHtml(h.name)} non è da loro: è tornato dov'era.</div>`);
+}
+function spostamentoHtml(s){
+  const d = new Date(s.creato);
+  const ic = { spostamento: "📍", uscita: "↗️", arrivo: "✅", arrivo_rifiutato: "⚠️" }[s.tipo] || "📍";
+  return `<div class="sposta-voce"><span class="data"><b>${d.getDate()}</b>${AG_MESI[d.getMonth()]} ${d.getFullYear()}</span><span class="t">${ic} ${escapeHtml(s.descrizione)}</span></div>`;
 }
 
 /* ---------- MODAL APPUNTAMENTO MANISCALCO (nuovo + modifica) ---------- */
@@ -10205,6 +11118,13 @@ async function salvaInterventoMascalcia(){
       importi = prendiImportiScelti();
     }
 
+    // nuovo appuntamento da fare senza prezzo → promemoria (serve al previsionale degli incassi)
+    if(!interventoInModifica && stato === "programmato" && importoForm == null && !importi && tipo_ferratura !== "altro" && promemoriaPrezzoAttivo()){
+      if(!incTutti.length) { try { incTutti = await DB.listInterventiMascalciaTutti(); } catch(e){} }
+      const nomeCli = clientiMascalcia.find(c => c.id === cliente_mascalcia_id)?.nome || "";
+      importi = await chiediPrezzi(righe.map(r => ({ nome: r.nome || nomeCli, tipo: tipoPerCavallo(tipo_ferratura, r.key), clienteId: cliente_mascalcia_id, cavalloId: r.cavallo_cliente_id })));
+    }
+
     // stesso cliente, stesso cavallo, stesso giorno e stesso tipo: probabilmente salvato due volte
     if(!interventoInModifica){
       const stessoGiorno = await DB.listInterventiPeriodo(data_intervento, data_intervento).catch(() => []);
@@ -10411,7 +11331,8 @@ async function renderAgendaSettimana(direzione){
   renderRichiestePendenti();
   const [eventi, scadenze] = await Promise.all([
     DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
-    DB.listScadenzePeriodo(isoGiorni[0], isoGiorni[6])
+    DB.listScadenzePeriodo(isoGiorni[0], isoGiorni[6]),
+    caricaUbicazioni()
   ]);
   if(token !== agRenderToken) return; // un render più recente è già partito
   agEventiCache = {};
@@ -10574,15 +11495,16 @@ async function rifiutaRichiesta(id){
 /* Agenda a fisarmonica su 2 colonne (Lun|Mar, Mer|Gio, Ven|Sab, Domenica sotto):
    giorno chiuso = nome, data e numero; un solo giorno aperto alla volta, con il dettaglio
    a tutta larghezza sotto la sua coppia, raggruppato per cliente. Oggi si apre da solo. */
-let agGiorniDati = [];
-function agRigaEvento(e){
+let agGiorniDati = [], agLuoghi = {};
+function agRigaEvento(e, di){
   const cav = agNomeCavallo(e);
   return `
-      <div class="ag-ev${e.stato === "fatto" ? " fatto" : (e.stato === "richiesto" || e.stato === "proposto") ? " richiesta" : ""}">
+      <div class="ag-ev${e.stato === "fatto" ? " fatto" : (e.stato === "richiesto" || e.stato === "proposto") ? " richiesta" : ""}" data-ev="${e.id}">
+        <span class="ag-mani" data-drag="ev" aria-label="Trascina per cambiare l'ordine" title="Trascina per cambiare l'ordine">⋮⋮</span>
         <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
         <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
           <div class="ag-ev-title">${cav ? escapeHtml(cav) : '<span style="color:var(--muted);font-weight:500">Cavallo non indicato</span>'}</div>
-          <div class="ag-ev-sub">${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
           ${notaModificaMan(e)}
         </div>
         ${e.stato === "fatto"
@@ -10595,14 +11517,14 @@ function agRigaEvento(e){
         <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
       </div>`;
 }
-function agRigaScadenza(sc){
+function agRigaScadenza(sc, di){
   const cav = agNomeCavallo(sc);
   return `
       <div class="ag-ev promemoria">
         <div class="ag-ev-time" style="font-size:11px;color:var(--muted)">scad.</div>
         <div class="ag-ev-main" onclick="fissaDaScadenza('${sc.id}')">
           <div class="ag-ev-title">${cav ? escapeHtml(cav) : '<span style="color:var(--muted);font-weight:500">Cavallo non indicato</span>'}</div>
-          <div class="ag-ev-sub">Da ripetere: ${escapeHtml(TIPO_FERRATURA_LABELS[sc.tipo_ferratura] || sc.tipo_ferratura)} (ultimo ${formatDate(sc.data_intervento)})</div>
+          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}Da ripetere: ${escapeHtml(TIPO_FERRATURA_LABELS[sc.tipo_ferratura] || sc.tipo_ferratura)} (ultimo ${formatDate(sc.data_intervento)})</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="fissaDaScadenza('${sc.id}')">Fissa</button>
       </div>`;
@@ -10615,20 +11537,31 @@ function agTile(d){
     </button>`;
 }
 function agPannello(d){
-  // raggruppa per cliente nell'ordine del primo appuntamento; le scadenze vanno dopo gli appuntamenti dello stesso cliente
+  // raggruppa per LUOGO (una tappa del giro) nell'ordine del primo appuntamento; le scadenze vanno dopo gli appuntamenti dello stesso luogo.
+  // Sotto ogni cavallo resta scritto di chi è quando il luogo non è il suo cliente.
   const gruppi = new Map();
-  const chiave = x => x.cliente_mascalcia_id || ("n:" + (x.clienti_mascalcia?.nome || ""));
-  d.ev.forEach(e => { const k = chiave(e); if(!gruppi.has(k)) gruppi.set(k, { nome: e.clienti_mascalcia?.nome || "Cliente", righe: [] }); gruppi.get(k).righe.push(agRigaEvento(e)); });
-  d.sc.forEach(sc => { const k = chiave(sc); if(!gruppi.has(k)) gruppi.set(k, { nome: sc.clienti_mascalcia?.nome || "Cliente", righe: [] }); gruppi.get(k).righe.push(agRigaScadenza(sc)); });
+  const metti = (x, attuale, riga) => {
+    const l = luogoEvento(x, attuale);
+    if(!gruppi.has(l.key)){ gruppi.set(l.key, { nome: l.nome, l, righe: [] }); agLuoghi[l.key] = l; }
+    const di = l.key !== "c:" + x.cliente_mascalcia_id ? (x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "") : "";
+    gruppi.get(l.key).righe.push(riga(x, di));
+  };
+  agOrdinaGiro(d.ev).forEach(e => metti(e, false, agRigaEvento));
+  d.sc.forEach(sc => metti(sc, true, agRigaScadenza));
   const cavalli = new Set([...d.ev, ...d.sc].map(x => x.cavallo_cliente_id || x.horse_id || ("r:" + x.id))).size;
   const nCli = gruppi.size;
   const nomeEsteso = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"][d.k];
-  const corpo = [...gruppi.values()].map(gr => `
-      <div class="ag-cli"><span>${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span></div>${gr.righe.join("")}`).join("");
+  const corpo = [...gruppi.entries()].map(([k, gr]) => `
+      <div class="ag-gblock" data-cli="${escapeHtml(k)}">
+        <div class="ag-cli">${d.ev.length > 1 ? '<span class="ag-mani" data-drag="gr" aria-label="Trascina il luogo" title="Trascina il luogo">⋮⋮</span>' : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span>
+          <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button></div>
+        <div class="ag-gr">${gr.righe.join("")}</div>
+      </div>`).join("");
   return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
-        <span>${nCli ? `${nCli} ${nCli === 1 ? "cliente" : "clienti"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
-      ${corpo || '<div class="ag-empty">Nessun appuntamento</div>'}
+        <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+      <div class="ag-gruppi">${corpo || '<div class="ag-empty">Nessun appuntamento</div>'}</div>
+      ${d.ev.length > 1 ? '<div class="ag-sugger">Tieni premuto ⋮⋮ e trascina per cambiare l\'ordine del giro.</div>' : ""}
       <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${d.iso}')">+ Aggiungi in questo giorno</button>
     </div>`;
 }
@@ -10643,6 +11576,98 @@ function agDisegnaGriglia(){
     if(ap) html += agPannello(ap);
   }
   box.innerHTML = `<div class="ag-griglia">${html}</div>`;
+  agAttivaTrascina(box);
+}
+
+/* ---------- ORDINE DEL GIRO: trascina un cavallo nel suo cliente o un cliente intero ---------- */
+function agOrdinaGiro(l){
+  return (l || []).slice().sort((a, b) => (a.data_intervento || "").localeCompare(b.data_intervento || "")
+    || ((a.ordine_giro ?? 1e9) - (b.ordine_giro ?? 1e9))
+    || String(a.ora || "99").localeCompare(String(b.ora || "99"))
+    || String(a.created_at || "").localeCompare(String(b.created_at || "")));
+}
+let agTrascina = null;
+function agAttivaTrascina(box){
+  if(box.dataset.trascina) return;
+  box.dataset.trascina = "1";
+  box.addEventListener("pointerdown", e => {
+    const h = e.target.closest(".ag-mani");
+    if(!h) return;
+    e.preventDefault();
+    const tipo = h.dataset.drag;
+    const el = tipo === "gr" ? h.closest(".ag-gblock") : h.closest(".ag-ev");
+    const cont = el && el.parentElement;
+    if(!el || !cont) return;
+    const r = el.getBoundingClientRect();
+    const posto = document.createElement("div");
+    posto.className = "ag-posto"; posto.style.height = r.height + "px";
+    cont.insertBefore(posto, el);
+    el.classList.add("ag-preso");
+    el.style.width = r.width + "px"; el.style.left = r.left + "px"; el.style.top = r.top + "px";
+    agTrascina = { el, cont, posto, tipo, y0: e.clientY, top0: r.top, ordinePrima: agOrdineDom() };
+    try{ h.setPointerCapture(e.pointerId); }catch(_){}
+    if(navigator.vibrate) try{ navigator.vibrate(15); }catch(_){}
+  });
+  box.addEventListener("pointermove", e => {
+    const t = agTrascina; if(!t) return;
+    e.preventDefault();
+    t.el.style.top = (t.top0 + e.clientY - t.y0) + "px";
+    const fratelli = [...t.cont.children].filter(x => x !== t.el && x !== t.posto && (t.tipo === "gr" ? x.classList.contains("ag-gblock") : x.classList.contains("ag-ev") && x.dataset.ev));
+    let prima = null;
+    for(const f of fratelli){ const rr = f.getBoundingClientRect(); if(e.clientY < rr.top + rr.height / 2){ prima = f; break; } }
+    if(prima) t.cont.insertBefore(t.posto, prima);
+    else { const ultimo = fratelli[fratelli.length - 1]; if(ultimo) t.cont.insertBefore(t.posto, ultimo.nextSibling); }
+  });
+  const fine = async () => {
+    const t = agTrascina; if(!t) return;
+    agTrascina = null;
+    t.cont.insertBefore(t.el, t.posto); t.posto.remove();
+    t.el.classList.remove("ag-preso"); t.el.style.width = t.el.style.left = t.el.style.top = "";
+    const dopo = agOrdineDom();
+    if(dopo.join() === t.ordinePrima.join()) return;
+    await agSalvaOrdine(dopo, t.tipo === "ev" ? t.el.dataset.ev : null);
+  };
+  box.addEventListener("pointerup", fine);
+  box.addEventListener("pointercancel", fine);
+}
+function agOrdineDom(){ return [...document.querySelectorAll(".ag-pannello .ag-ev[data-ev]")].map(x => x.dataset.ev); }
+async function agSalvaOrdine(ids, spostato){
+  const ev = id => agEventiCache[id];
+  // scambio degli orari: il cavallo spostato è finito prima (o dopo) di uno con orario diverso nello stesso cliente
+  let scambio = null;
+  if(spostato && ev(spostato)?.ora){
+    const m = ev(spostato), pos = ids.indexOf(spostato);
+    const stessoCli = x => ev(x) && ev(x).cliente_mascalcia_id === m.cliente_mascalcia_id && ev(x).ora && x !== spostato;
+    const dopo = ids.slice(pos + 1).find(stessoCli), prima = ids.slice(0, pos).reverse().find(stessoCli);
+    const hm = x => String(ev(x).ora).slice(0, 5);
+    if(dopo && hm(dopo) < hm(spostato)) scambio = dopo;
+    else if(prima && hm(prima) > hm(spostato)) scambio = prima;
+  }
+  // salva il nuovo ordine (solo le righe che cambiano posizione)
+  const cambi = ids.map((id, n) => ({ id, n })).filter(x => ev(x.id) && ev(x.id).ordine_giro !== x.n);
+  for(const c of cambi){
+    const { error } = await DB.updateInterventoMascalcia(c.id, { ordine_giro: c.n });
+    if(error){ showToast("Ordine non salvato: " + error.message); break; }
+    ev(c.id).ordine_giro = c.n;
+  }
+  if(scambio){
+    const a = ev(spostato), b = ev(scambio), oa = String(a.ora).slice(0, 5), ob = String(b.ora).slice(0, 5);
+    const si = await chiediSiNo("Scambiare anche gli orari?", `Hai messo ${agNomeCavallo(a) || "questo cavallo"} (${oa}) ${ids.indexOf(spostato) < ids.indexOf(scambio) ? "prima" : "dopo"} di ${agNomeCavallo(b) || "un altro"} (${ob}). Sì: ${agNomeCavallo(a) || "il primo"} alle ${ob} e ${agNomeCavallo(b) || "l'altro"} alle ${oa}; i clienti collegati ricevono l'avviso. No: cambia solo l'ordine del giro.`);
+    if(si){
+      for(const [x, nuova] of [[a, ob], [b, oa]]){
+        const prec = { data: x.data_intervento, ora: String(x.ora).slice(0, 5), cliente: x.cliente_mascalcia_id, tipo_ferratura: x.tipo_ferratura, tipo_altro: x.tipo_altro || "" };
+        const { error } = await DB.updateInterventoMascalcia(x.id, { ora: nuova });
+        if(error){ showToast("Orario non cambiato: " + error.message); continue; }
+        x.ora = nuova;
+        if(!x.gruppo_id && x.stato === "programmato")
+          await avvisaClienteAppuntamento("modificato", { cliente_mascalcia_id: x.cliente_mascalcia_id, tipo_ferratura: x.tipo_ferratura, tipo_altro: x.tipo_altro, data_intervento: x.data_intervento, ora: nuova, cavallo: agNomeCavallo(x) }, prec);
+      }
+      showToast("Orari scambiati");
+    }
+  }
+  if(!scambio) showToast("Ordine del giro salvato");
+  await renderAgendaSettimana();
+  try{ await renderProDeadlines(); }catch(_){}
 }
 function toggleGiornoAgenda(iso){
   // un giorno alla volta: aprirne uno chiude gli altri
@@ -10668,7 +11693,7 @@ function agAttivaSwipe(box){
   if(box.dataset.swipe) return;
   box.dataset.swipe = "1";
   let x0 = null, y0 = null, t0 = 0;
-  box.addEventListener("touchstart", e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); }, { passive: true });
+  box.addEventListener("touchstart", e => { if(e.target.closest && e.target.closest(".ag-mani")){ x0 = null; return; } const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); }, { passive: true });
   box.addEventListener("touchend", e => {
     if(x0 === null) return;
     const t = e.changedTouches[0];
@@ -11583,13 +12608,18 @@ async function loadInboxMascalcia(){
   const navBadge = document.getElementById("inbox-nav-badge");
   if(navBadge) navBadge.style.display = totalUnread > 0 ? "block" : "none";
 
-  // Strutture collegate a Equo Scuderia: sezione a parte
-  const strutture = conversazioni.filter(m => m.clienti_mascalcia?.centro_id);
-  const clientiConv = conversazioni.filter(m => !m.clienti_mascalcia?.centro_id);
+  // cartella Scuderie: scuderie collegate a Equo Scuderia e clienti di tipo scuderia; cartella Clienti: i proprietari
+  const eScuderia = m => !!m.clienti_mascalcia?.centro_id || m.clienti_mascalcia?.tipo_cliente === "struttura"
+    || isStruttura((clientiMascalcia || []).find(c => c.id === m.cliente_mascalcia_id));
+  const strutture = conversazioni.filter(eScuderia);
+  const clientiConv = conversazioni.filter(m => !eScuderia(m));
   renderInboxStrutture(strutture, unreadByCliente);
+  chatContatori.clienti = { n: clientiConv.length, nonLetti: clientiConv.reduce((t, m) => t + (unreadByCliente[m.cliente_mascalcia_id] || 0), 0) };
+  chatContatori.scuderie = { n: strutture.length, nonLetti: strutture.reduce((t, m) => t + (unreadByCliente[m.cliente_mascalcia_id] || 0), 0) };
+  renderChatCartelle();
 
   if(clientiConv.length === 0){
-    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessun messaggio.<br>Le conversazioni con i clienti collegati appariranno qui.</div></div>';
+    box.innerHTML = '<div class="empty-state"><div class="icon" style="width:32px;height:32px;margin:0 auto 10px;color:var(--muted)"><svg><use href="#i-inbox"/></svg></div><div style="font-size:13.5px;line-height:1.6">Nessun messaggio con i proprietari.<br>Le conversazioni con i clienti appariranno qui.</div></div>';
     return;
   }
 
@@ -11611,21 +12641,40 @@ async function loadInboxMascalcia(){
   }).join("");
 }
 
+/* ---------- MESSAGGI A CARTELLE (stile Telegram): Clienti · Scuderie · Colleghi ---------- */
+let chatCartella = "clienti";
+const chatContatori = { clienti: { n: 0, nonLetti: 0 }, scuderie: { n: 0, nonLetti: 0 }, colleghi: { n: 0, nonLetti: 0 } };
+try{ chatCartella = localStorage.getItem("equo-chat-cartella") || "clienti"; }catch(_){}
+function sceltaCartellaChat(k){
+  chatCartella = k;
+  try{ localStorage.setItem("equo-chat-cartella", k); }catch(_){}
+  if(typeof cercaAzzera === "function") cercaAzzera("inbox");
+  renderChatCartelle();
+}
+function renderChatCartelle(){
+  const box = document.getElementById("chat-cartelle");
+  if(!box) return;
+  if(!["clienti", "scuderie", "colleghi"].includes(chatCartella)) chatCartella = "clienti";
+  box.innerHTML = [["clienti", "Clienti"], ["scuderie", "Scuderie"], ["colleghi", "Colleghi"]].map(([k, t]) => {
+    const c = chatContatori[k];
+    return `<button role="tab" aria-selected="${chatCartella === k}" class="${chatCartella === k ? "on" : ""}" onclick="sceltaCartellaChat('${k}')">${t}${c.nonLetti ? `<span class="n nonletti" aria-label="${c.nonLetti} non letti">${c.nonLetti}</span>` : `<span class="n">${c.n}</span>`}</button>`;
+  }).join("");
+  document.getElementById("chat-cartella-sotto").textContent = { clienti: "Chat con i proprietari dei cavalli", scuderie: "Chat con scuderie, maneggi e centri ippici", colleghi: "Chat con maniscalchi, veterinari e altri professionisti" }[chatCartella];
+  document.querySelectorAll("#page-pro-inbox .chat-sez").forEach(el => { el.hidden = el.dataset.sez !== chatCartella; });
+}
+
 function renderInboxStrutture(strutture, unreadByCliente){
   const wrap = document.getElementById("inbox-strutture-wrap");
   const box = document.getElementById("inbox-strutture-list");
   if(!wrap || !box) return;
-  const mostra = isManiscalcoUtente() || strutture.length > 0;
-  wrap.style.display = mostra ? "block" : "none";
-  if(!mostra) return;
   if(strutture.length === 0){
-    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6">Nessuna scuderia collegata. Da <strong>Clienti → Scuderie e centri ippici → Collega</strong> inserisci il codice della scuderia, oppure accetta l\'invito di una scuderia che usa Equo Scuderia.</div>';
+    box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6">Nessuna chat con scuderie. Da <strong>Clienti → Scuderie → Collega scuderia</strong> inserisci il codice di una scuderia che usa Equo Scuderia, oppure accetta il suo invito.</div>';
     return;
   }
   box.innerHTML = strutture.map(m => {
     const unread = unreadByCliente[m.cliente_mascalcia_id] || 0;
     const c = m.clienti_mascalcia || {};
-    const stato = c.collegamento_stato === "attivo" ? "" : c.collegamento_stato === "da_confermare_pro" ? "Invito da accettare · " : "In attesa della scuderia · ";
+    const stato = !c.centro_id || c.collegamento_stato === "attivo" ? "" : c.collegamento_stato === "da_confermare_pro" ? "Invito da accettare · " : "In attesa della scuderia · ";
     const chi = m.mittente_tipo === "maniscalco" ? "Tu: " : (m.mittente_nome ? m.mittente_nome + ": " : "");
     const preview = stato + chi + previewMessaggioMascalcia(m.tipo, m.testo, m.file_nome);
     const azione = c.collegamento_stato === "da_confermare_pro"
@@ -12353,6 +13402,8 @@ async function loadColleghiList(){
   const box = document.getElementById("colleghi-list");
   if(!box) return;
   const lista = await DB.listColleghi();
+  chatContatori.colleghi = { n: lista.length, nonLetti: lista.reduce((t, c) => t + (Number(c.unread) || 0), 0) };
+  renderChatCartelle();
   if(!lista.length){
     box.innerHTML = '<div class="muted" style="font-size:13px;line-height:1.6;text-align:center;padding:6px 0">Nessun collega ancora.<br>Tocca "+ Collega" e inserisci il suo codice professionista.</div>';
     return;
@@ -13394,8 +14445,8 @@ function cercaAzzera(id){ const f = cercaFiltri[id]; if(f && f.inp.value){ f.inp
 
 function cercaInitElenchi(){
   // Professionista
-  cercaFiltro({ id: "clienti", prima: "clienti-list", boxes: ["clienti-list"], item: ".horse-card", testa: ".clienti-sez-head", placeholder: "Cerca cliente, cavallo o telefono" });
-  cercaFiltro({ id: "incassi", prima: "incassi-da-saldare-list", boxes: ["incassi-da-saldare-list"], item: ".deadline-item", placeholder: "Cerca cliente o cavallo" });
+  cercaFiltro({ id: "clienti", prima: "clienti-list", boxes: ["clienti-list"], item: ".cli-riga", testa: ".cli-lettera", min: 0, placeholder: "Cerca cavallo, cliente o microchip" });
+  cercaFiltro({ id: "incassi", prima: "incassi-da-saldare-list", boxes: ["incassi-da-saldare-list"], item: ".inc-voce", testa: ".inc-gruppo", placeholder: "Cerca cliente o cavallo" });
   cercaFiltro({ id: "inbox", prima: "inbox-card", boxes: ["inbox-list", "inbox-strutture-list", "colleghi-list"], item: ".inbox-item", vuotoSopra: true,
     contenitori: { "inbox-list": "inbox-card", "inbox-strutture-list": "inbox-strutture-wrap" }, placeholder: "Cerca una conversazione" });
   // Proprietario
@@ -13868,9 +14919,9 @@ function renderWidgetPro(){
   const oggi = isoLocale(new Date());
   const adesso = new Date().toTimeString().slice(0, 5);
   const app = (hpAppuntamenti || []).filter(e => e.stato !== "annullato" && e.stato !== "rifiutato");
-  const diOggi = app.filter(e => e.data_intervento === oggi).sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")));
+  const diOggi = agOrdinaGiro(app.filter(e => e.data_intervento === oggi));   // ordine del giro scelto in Agenda (poi l'orario)
   const prossimoOggi = diOggi.find(e => !e.ora || String(e.ora).slice(0, 5) >= adesso) || null;
-  const futuri = app.filter(e => e.data_intervento > oggi).sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
+  const futuri = agOrdinaGiro(app.filter(e => e.data_intervento > oggi));
   const scelto = wgScelto ? app.find(e => e.id === wgScelto && e.data_intervento >= oggi) : null;
   if(wgScelto && !scelto) wgScelto = null;
   const prossimo = scelto || prossimoOggi || futuri[0] || null;
@@ -13897,7 +14948,9 @@ function renderWidgetPro(){
   if(prossimo){
     const c = wgClienteDi(prossimo.cliente_mascalcia_id);
     const cav = agNomeCavallo(prossimo);
-    const dove = [prossimo.clienti_mascalcia?.nome || c?.nome, c?.indirizzo].filter(Boolean).join(" · ");
+    const lp = cavalliMieiCache ? luogoEvento(prossimo, true) : null;
+    const dove = lp && lp.key !== "c:" + prossimo.cliente_mascalcia_id ? [lp.nome, lp.indirizzo, "di " + (prossimo.clienti_mascalcia?.nome || c?.nome || "")].filter(Boolean).join(" · ")
+      : [prossimo.clienti_mascalcia?.nome || c?.nome, c?.indirizzo].filter(Boolean).join(" · ");
     const altri = diOggi.filter(e => e.id !== prossimo.id).slice(0, 6);
     oggiHtml = `
       <div class="wg-prossimo" onclick="apriAzioniEvento('${prossimo.id}')">
@@ -13905,7 +14958,7 @@ function renderWidgetPro(){
         <div class="wg-chi">${wgEsc(cav || prossimo.clienti_mascalcia?.nome || "Appuntamento")} · ${wgEsc(wgTipoApp(prossimo).toLowerCase())}${wgMeteoIcona(prossimo)}</div>
         <div class="wg-dove">${wgEsc(dove)}</div>
         <div class="wg-azioni">
-          <button class="oro" onclick="event.stopPropagation();wgNaviga('${prossimo.cliente_mascalcia_id}')">${WG_IC.mappa}Naviga</button>
+          <button class="oro" onclick="event.stopPropagation();wgNavigaEvento('${prossimo.id}')">${WG_IC.mappa}Naviga</button>
           <button onclick="event.stopPropagation();openChatThread('${prossimo.cliente_mascalcia_id}')">${WG_IC.msg}Chatta</button>
           ${prossimo.stato === "programmato" ? `<button onclick="event.stopPropagation();hpSegnaFatto('${prossimo.id}')">${WG_IC.ok}Fatto</button>` : `<button onclick="event.stopPropagation();apriAzioniEvento('${prossimo.id}')">Apri</button>`}
         </div>
@@ -14046,7 +15099,7 @@ async function wgIndirizzoStruttura(c){
       wgIndirizziStrutture = error ? [] : (data || []);
     }catch(_){ wgIndirizziStrutture = []; }
   }
-  return wgIndirizziStrutture.find(x => x.cliente_id === c.id) || null;
+  return wgIndirizziStrutture.find(x => (x.cliente_id || x.id) === c.id) || null;
 }
 async function wgNaviga(clienteId){
   const c = wgClienteDi(clienteId);

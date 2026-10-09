@@ -299,3 +299,6 @@ h1 em,h2 em{font-style:italic;color:var(--oro);font-weight:600}
 .pac-top{background:#fff;border:2px solid var(--oro);box-shadow:0 10px 30px rgba(20,72,44,.12)}
 .pac-badge{position:absolute;top:-12px;left:22px;background:var(--oro);color:var(--notte);font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px}
 @media (max-width:900px){.pacchetti{grid-template-columns:1fr;max-width:520px}}
+/* foto della pagina Scuderia con logo e motto già nell'immagine: il motto resta in alto sopra il titolo, il logo sotto il bordo */
+.box.largo.prop-apertura .foto.piena.foto-equo{background-position:center 44%}
+@media (max-width:760px){.box.largo.prop-apertura .foto.piena.foto-equo{background-size:auto 260%;background-position:52% 49%}}
