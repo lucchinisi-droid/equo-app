@@ -7160,8 +7160,12 @@ function segnalaAggiornamento(dati){
 }
 function aggiornaOra(){
   document.getElementById("eq-pop-agg").classList.remove("attivo");
-  location.reload();
+  // ?aggiorna= dice al service worker di aspettare la versione nuova dalla rete (anche se lenta) invece della copia salvata
+  const u = new URL(location.href); u.searchParams.set("aggiorna", Date.now().toString(36));
+  location.replace(u.toString());
 }
+// tolgo ?aggiorna= dall'indirizzo dopo l'aggiornamento
+try { const u = new URL(location.href); if(u.searchParams.has("aggiorna")){ u.searchParams.delete("aggiorna"); history.replaceState(history.state, "", u.pathname + u.search + u.hash); } } catch(e){}
 
 // ---- Aggiornamento app: Netlify scrive il codice di build a ogni deploy (netlify/scrivi-build.js).
 // Se online c'è un deploy più nuovo compare il banner "Nuova versione disponibile → Aggiorna".

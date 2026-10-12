@@ -25,7 +25,7 @@ self.addEventListener("notificationclick", (e) => {
    - File del sito e librerie esterne (icone, font, database, PDF, QR, mappe): copia salvata, aggiornata in sottofondo.
    - MAI salvati: dati del database, funzioni del server, version.json (aggiornamenti), statistiche.
    ===================================================================== */
-const EQUO_CACHE = "equo-offline-v1";
+const EQUO_CACHE = "equo-offline-v2"; // v2: elimina le copie vecchie rimaste bloccate
 const EQUO_PRECARICA = ["/", "/manifest.json", "/assets/icona-equo.png", "/assets/logo-equo.png"];
 const EQUO_MAI = /supabase\.co|\/\.netlify\/functions\/|\/api\/|version\.json|onesignal\.com\/api|google-analytics|googletagmanager|nominatim|overpass|tile\.openstreetmap|api\.anthropic/;
 const EQUO_ESTERNI = /^(cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|unpkg\.com|fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.onesignal\.com)$/;
@@ -42,20 +42,27 @@ self.addEventListener("activate", (e) => {
   })());
 });
 
-// pagine: rete con 6 secondi di pazienza, altrimenti la copia salvata (chiave senza parametri: niente token nella cache)
-async function equoPagina(req) {
+// pagine: prima la rete. Se la rete è lenta (oltre 6 s) si apre la copia salvata MA il download continua in
+// sottofondo e la copia si aggiorna: alla prossima apertura c'è la versione nuova. (Prima il download veniva
+// interrotto: su connessioni lente, es. iPad, l'app restava per sempre alla versione vecchia.)
+// Con ?aggiorna= (tasto «Aggiorna») o senza copia salvata si aspetta la rete fino a 45 s.
+async function equoPagina(e, req) {
   const u = new URL(req.url);
   const chiave = u.origin + u.pathname;
   const cache = await caches.open(EQUO_CACHE);
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 6000);
-    const res = await fetch(req, { signal: ctrl.signal });
-    clearTimeout(t);
-    if (res && res.ok) cache.put(chiave, res.clone());
+  const dallaRete = fetch(req).then(async (res) => {
+    if (res && res.ok && !res.redirected) await cache.put(chiave, res.clone());
     return res;
-  } catch (e) {
-    return (await cache.match(chiave)) || (await cache.match(u.origin + "/")) || new Response(
+  });
+  e.waitUntil(dallaRete.catch(() => {}));
+  const salvata = (await cache.match(chiave)) || (await cache.match(u.origin + "/"));
+  const pazienza = u.searchParams.has("aggiorna") || !salvata ? 45000 : 6000;
+  try {
+    const res = await Promise.race([dallaRete, new Promise((_, no) => setTimeout(() => no(new Error("rete lenta")), pazienza))]);
+    if (res && (res.ok || !salvata)) return res;
+    return salvata || res;
+  } catch (err) {
+    return salvata || new Response(
       '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:sans-serif;padding:30px;text-align:center;color:#14482c"><h2>Sei offline</h2><p>Apri Equo una volta con la connessione: da quel momento funzionerà anche senza rete.</p></body>',
       { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
@@ -76,6 +83,6 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || EQUO_MAI.test(req.url)) return;
   const u = new URL(req.url);
-  if (req.mode === "navigate" && u.origin === self.location.origin) { e.respondWith(equoPagina(req)); return; }
+  if (req.mode === "navigate" && u.origin === self.location.origin) { e.respondWith(equoPagina(e, req)); return; }
   if (u.origin === self.location.origin || EQUO_ESTERNI.test(u.hostname)) e.respondWith(equoFile(e, req));
 });
