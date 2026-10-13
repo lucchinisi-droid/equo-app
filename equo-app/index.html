@@ -1687,6 +1687,123 @@ body.vm-semplice .solo-completa{display:none!important}
 .sposta-voce .t{flex:1;min-width:0;color:var(--text)}
 .ag-di{font-weight:700;color:var(--text)}
 .ag-cli .ag-cli-nome{flex:1}
+/* ===== Modalità Lavoro (maniscalco): schermo scuro, tasti grandi, conferme a scorrimento ===== */
+.ml{position:fixed;inset:0;z-index:68;overflow:hidden;color:#f6ecd4;font-family:"DM Sans",system-ui,sans-serif;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 0 calc(env(safe-area-inset-bottom,0px) + 128px);
+  background:radial-gradient(90% 40% at 100% 0%,rgba(226,171,69,.2),rgba(226,171,69,0) 60%),radial-gradient(90% 50% at 0% 80%,rgba(47,122,80,.3),rgba(47,122,80,0) 60%),linear-gradient(180deg,#0f261b,#08140e)}
+.ml[hidden]{display:none}
+body.ml-on{overflow:hidden}
+body.ml-on .bottom-nav,body.ml-on .hm-flot,body.ml-on #ai-fab{visibility:hidden}
+.ml .li{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ml .pi{width:26px;height:26px;fill:currentColor;flex:none}
+.ml-barra{display:flex;align-items:center;gap:10px;margin:2px 66px 0 14px;padding:10px 14px;border-radius:20px;background:linear-gradient(90deg,rgba(226,171,69,.22),rgba(226,171,69,.06));border:1px solid rgba(243,213,142,.3);min-width:0}
+.ml-pul{width:12px;height:12px;border-radius:50%;background:#e2ab45;box-shadow:0 0 0 5px rgba(226,171,69,.25);flex:none}
+.ml-barra b{font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:#f3d58e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ml-barra span:last-child{margin-left:auto;font-size:13px;font-weight:700;color:#b9ad8f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.ml-esci{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);right:12px;width:48px;height:48px;border-radius:50%;border:1.5px solid rgba(243,213,142,.35);background:rgba(246,236,212,.08);color:#f6ecd4;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ml-corpo{flex:1;overflow-y:auto;padding:12px 14px 10px;-webkit-overflow-scrolling:touch}
+.ml-vuoto{padding:40px 10px;text-align:center;color:#b9ad8f}
+.ml-av{width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:20px;font-weight:700;color:#14482c;background:radial-gradient(120% 120% at 30% 20%,#fbe3a6,#e8b453 50%,#c8902f)}
+.ml-av.grande{width:62px;height:62px;font-size:28px}
+.ml-card{border-radius:22px;background:rgba(246,236,212,.07);border:1px solid rgba(243,213,142,.2);padding:12px 12px 6px;margin-bottom:10px}
+.ml-h{display:flex;align-items:center;gap:10px;margin-bottom:8px;min-width:0}
+.ml-h b{font-family:Fraunces,serif;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-h small{margin-left:auto;font-size:13px;color:#b9ad8f;font-weight:700;text-align:right}
+.ml-al{display:flex;align-items:flex-start;gap:10px;border-radius:14px;padding:10px 12px;margin-bottom:6px;font-size:15.5px;line-height:1.4}
+.ml-al .li{width:22px;height:22px;margin-top:1px}
+.ml-al.sic{background:rgba(226,104,95,.18);border:1px solid rgba(226,104,95,.55);color:#ffd9d4}
+.ml-al.pie{background:rgba(226,171,69,.15);border:1px solid rgba(226,171,69,.45)}
+.ml-al.pie b{color:#f3d58e}
+.ml-al.ok{color:#bdf0d3;font-size:14.5px}
+.ml-sig{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:26px;border-radius:9px;padding:0 6px;background:#e2ab45;color:#14482c;font-weight:800;font-size:13px;letter-spacing:.04em;flex:none}
+/* slider: si conferma trascinando, mai con un tocco */
+.ml-slider{position:absolute;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);height:92px;border-radius:46px;display:flex;align-items:center;padding:6px 8px;user-select:none;-webkit-user-select:none;touch-action:none;
+  background:rgba(63,191,127,.14);border:2px solid rgba(63,191,127,.5)}
+.ml-slider b{position:absolute;left:96px;right:20px;text-align:center;font-size:19px;font-weight:800;color:#bdf0d3;pointer-events:none}
+.ml-pom{width:78px;height:78px;border-radius:50%;border:0;cursor:grab;flex:none;display:flex;align-items:center;justify-content:center;touch-action:none;position:relative;z-index:1;
+  background:radial-gradient(120% 120% at 30% 20%,#7fe0ad,#3fbf7f 50%,#1f8a52);color:#08311d;box-shadow:0 10px 20px -8px rgba(63,191,127,.8)}
+.ml-pom .li{width:38px;height:38px;stroke-width:2.4}
+.ml-slider.oro,.ml-slider:not(.verde){background:rgba(226,171,69,.14);border-color:rgba(226,171,69,.55)}
+.ml-slider.oro .ml-pom,.ml-slider:not(.verde) .ml-pom{background:radial-gradient(120% 120% at 30% 20%,#fbe3a6,#e8b453 50%,#c8902f);color:#14482c;box-shadow:0 10px 20px -8px rgba(226,171,69,.8)}
+.ml-slider.oro b,.ml-slider:not(.verde) b{color:#f3d58e}
+.ml-sugg{position:absolute;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 44px);text-align:center;color:#b9ad8f;font-size:15px;font-weight:700}
+.ml-sugg.piccolo{position:static;font-size:13px;font-weight:600;margin:8px 0;text-align:left}
+/* durante */
+.ml-quiete{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 30px}
+.ml-cer{width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#e2ab45;border:2px solid rgba(226,171,69,.4);box-shadow:0 0 0 18px rgba(226,171,69,.07),0 0 0 38px rgba(226,171,69,.035)}
+.ml-cer .pi{width:66px;height:66px}
+.ml-quiete h3{font-family:Fraunces,serif;font-size:34px;margin:34px 0 8px}
+.ml-quiete p{color:#b9ad8f;font-size:16px;line-height:1.5;margin:0;max-width:300px}
+/* dopo */
+.ml-riga{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px;border-radius:20px;background:rgba(246,236,212,.07);border:1px solid rgba(243,213,142,.2);margin-bottom:8px;min-width:0}
+.ml-t{flex:1 1 calc(100% - 60px);min-width:0}.ml-riga .ml-imp{margin-left:54px}.ml-riga .ml-st{margin-left:auto}.ml-t b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ml-t span{font-size:12.5px;color:#b9ad8f;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-imp{display:flex;align-items:center;gap:3px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(243,213,142,.25);padding:0 8px;height:44px}
+.ml-imp span{color:#b9ad8f;font-weight:700}
+.ml-imp input{width:52px;background:none;border:0;color:#f6ecd4;font:700 17px "DM Sans",sans-serif;outline:none;padding:0}
+.ml-st{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:800;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.ml-st .li{width:17px;height:17px;stroke-width:2.4}
+.ml-st.ok{color:#bdf0d3;background:rgba(63,191,127,.15)}
+.ml-st.pb{color:#14482c;background:#e2ab45;border:0;cursor:pointer;font-family:inherit}
+.ml-st.pb .ml-sig{background:#14482c;color:#f3d58e;min-width:28px;height:22px;font-size:11.5px}
+.ml-pbb{width:46px;height:46px;border-radius:50%;flex:none;border:1.5px solid rgba(226,171,69,.55);background:rgba(226,171,69,.12);color:#f3d58e;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ml-pbb .li{width:22px;height:22px}
+.ml-tot{display:flex;justify-content:space-between;align-items:baseline;padding:10px 6px 4px;font-size:15px;color:#b9ad8f;font-weight:700}
+.ml-tot b{font-family:Fraunces,serif;font-size:30px;color:#f6ecd4}
+.ml-pag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.ml-pag button{height:64px;border-radius:18px;border:2px solid rgba(243,213,142,.22);background:rgba(246,236,212,.06);color:#f6ecd4;font:800 16px "DM Sans",sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.ml-pag button small{font-size:11.5px;color:#b9ad8f;font-weight:600}
+.ml-pag button.on{border-color:#e2ab45;background:rgba(226,171,69,.2)}
+.ml-prox{display:flex;align-items:center;gap:10px;font-size:14.5px;color:#f3d58e;font-weight:700;padding:8px 6px}
+.ml-prox .li{width:22px;height:22px}
+/* problema: i quattro piedi a cerchi */
+.ml-cav{display:flex;align-items:center;gap:14px;padding:0 4px 4px}
+.ml-cav h3{margin:0;font-family:Fraunces,serif;font-size:28px;line-height:1.05}
+.ml-cav p{margin:4px 0 0;font-size:14px;color:#b9ad8f;font-weight:600}
+.ml-piedi{position:relative;margin:8px auto 0;width:min(100%,340px);aspect-ratio:1/0.93}
+.ml-piede{position:absolute;width:43%;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;color:#f6ecd4;cursor:pointer;
+  background:linear-gradient(180deg,rgba(246,236,212,.12),rgba(246,236,212,.04));border:3px solid rgba(243,213,142,.35)}
+.ml-piede b{font-size:18px;font-weight:800}
+.ml-piede small{font-size:11.5px;color:#b9ad8f;font-weight:800;letter-spacing:.06em}
+.ml-piede .pi{width:38px;height:38px;color:#e2ab45}
+.ml-piede em{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-size:11px;font-weight:800;color:#14482c;background:#f3d58e;border-radius:999px;padding:2px 8px}
+.ml-piede.sel{border-color:#e2ab45;background:radial-gradient(120% 120% at 30% 20%,rgba(251,227,166,.35),rgba(226,171,69,.12));box-shadow:0 0 0 7px rgba(226,171,69,.15)}
+.ml-piede.sel small{color:#f3d58e}
+.ml-ok{position:absolute;top:6px;right:10%;width:26px;height:26px;border-radius:50%;background:#e2ab45;color:#14482c;display:flex;align-items:center;justify-content:center}
+.ml-ok .li{width:15px;height:15px;stroke-width:2.6}
+.p-as{left:0;top:0}.p-ad{right:0;top:0}.p-ps{left:0;bottom:0}.p-pd{right:0;bottom:0}
+.ml-dd{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#b9ad8f;line-height:1.25;pointer-events:none}
+.ml-lab{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#b9ad8f;margin:18px 4px 8px}
+.ml-voci{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ml-voci button{min-height:56px;border-radius:18px;border:2px solid rgba(243,213,142,.22);background:rgba(246,236,212,.06);color:#f6ecd4;font:800 15.5px "DM Sans",sans-serif;display:flex;align-items:center;gap:8px;padding:0 12px;cursor:pointer;text-align:left}
+.ml-voci button .li,.ml-voci button .pi{width:22px;height:22px;color:#e2ab45}
+.ml-voci button.on{border-color:#e2ab45;background:rgba(226,171,69,.22)}
+.ml-racc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ml-racc button{height:84px;border-radius:24px;border:2px solid rgba(243,213,142,.22);background:rgba(246,236,212,.08);color:#f6ecd4;font:800 16px "DM Sans",sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.ml-racc button .li{width:32px;height:32px}
+.ml-racc button.fatto{border-color:#3fbf7f;color:#bdf0d3}
+.ml-racc button.ham{background:radial-gradient(120% 120% at 30% 20%,#2f7a50,#14482c 55%,#0b2c1b);color:#f3d58e;border-color:rgba(243,213,142,.45)}
+.ml-fotoprev{display:block;width:100%;max-height:150px;object-fit:cover;border-radius:16px;margin-top:10px}
+.ml-nota{width:100%;margin-top:10px;border-radius:16px;border:1.5px solid rgba(243,213,142,.25);background:rgba(0,0,0,.22);color:#f6ecd4;font:500 16px "DM Sans",sans-serif;padding:12px;resize:none;outline:none}
+.ml-nota::placeholder{color:#8f8670}
+.ml-stor{margin-top:10px;font-size:13.5px;line-height:1.45;color:#d9cfb6;background:rgba(246,236,212,.05);border-radius:14px;padding:10px 12px}
+.ml-stor b{color:#f3d58e}
+.ml-ric{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:800;font-size:15px}
+.ml-ric .li{width:22px;height:22px;color:#e2ab45}
+.ml-ric span{flex:1 1 calc(100% - 40px)}.ml-ric button{flex:1}
+.ml-ric button{min-width:58px;height:46px;border-radius:14px;border:2px solid rgba(243,213,142,.22);background:rgba(246,236,212,.06);color:#f6ecd4;font:800 14.5px "DM Sans",sans-serif;cursor:pointer}
+.ml-ric button.on{border-color:#e2ab45;background:rgba(226,171,69,.22)}
+.ml-tg{width:100%;margin-top:8px;height:58px;border-radius:18px;border:2px solid rgba(243,213,142,.18);background:rgba(246,236,212,.05);color:#f6ecd4;font:800 15.5px "DM Sans",sans-serif;display:flex;align-items:center;gap:10px;padding:0 14px;cursor:pointer;text-align:left}
+.ml-tg .li{width:22px;height:22px;color:#e2ab45}
+.ml-tg span{flex:1}
+.ml-tg i{width:50px;height:30px;border-radius:15px;background:rgba(246,236,212,.18);position:relative;flex:none;transition:background .2s}
+.ml-tg i::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#f6ecd4;transition:left .2s}
+.ml-tg.on{border-color:rgba(226,171,69,.6)}
+.ml-tg.on i{background:#3fbf7f}.ml-tg.on i::after{left:23px}
+/* «Sei arrivato?» e tasto Lavoro in agenda */
+.ml-arr{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.ml-arr span{background:#f5e8c9;border:1px solid #e6d3a6;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;color:#3b2c10}
+.ag-cli-lav{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:6px 12px;font:700 12.5px "DM Sans",sans-serif;color:#f3d58e;background:#14482c;cursor:pointer;margin-left:6px}
+.ag-cli-lav svg{width:15px;height:15px;fill:currentColor}
 .ag-cli-nav{flex-shrink:0;letter-spacing:0;text-transform:none;font:inherit;font-size:11px;font-weight:800;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:3px 8px;cursor:pointer}
 /* incassi: vista Semplice / Completa */
 .inc-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
@@ -3809,6 +3926,8 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
       <input class="input" id="fer-note" maxlength="160" placeholder="Note: modello o lavorazione (es. barra a uovo davanti)" style="margin-top:8px">
       <div class="muted solo-completa" id="fer-dati" style="font-size:12px;margin-top:8px"></div>
     </div>
+    <label class="input-label" style="margin-top:12px">Avviso di sicurezza <span class="muted" style="font-weight:500">(lo leggi all'arrivo)</span></label>
+    <input class="input" id="fer-avviso" maxlength="160" placeholder="Es. scalcia dietro, non legarlo corto">
     <div class="auth-error" id="fer-errore" style="display:none"></div>
     <button class="btn btn-primary" id="fer-salva" style="width:100%;margin-top:12px" onclick="salvaSchedaFerratura()">Salva</button>
   </div>
@@ -9217,6 +9336,12 @@ function apriSchedaFerratura(cv, clienteId, dopo, extra){
   document.getElementById("fer-titolo").textContent = (cv.nome || "Cavallo") + " · Ferratura";
   document.getElementById("fer-sistema").value = ferStato.s;
   document.getElementById("fer-note").value = cv.ferro_note || "";
+  const av = document.getElementById("fer-avviso"); av.value = cv.avviso_sicurezza || ""; ferStato.avviso = cv.avviso_sicurezza || "";
+  if(cv.id && cv.avviso_sicurezza === undefined && !DEMO_MODE){
+    sb.from("cavalli_clienti_mascalcia").select("avviso_sicurezza").eq("id", cv.id).maybeSingle().then(({ data }) => {
+      if(data && ferStato && ferStato.cv === cv && !av.value){ av.value = data.avviso_sicurezza || ""; ferStato.avviso = av.value; }
+    }, () => {});
+  }
   document.getElementById("fer-errore").style.display = "none";
   document.getElementById("fer-dati").innerHTML = extra || "";
   ferRender();
@@ -9269,9 +9394,11 @@ async function salvaSchedaFerratura(){
     else if(f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_tipo_post = null;
     campi.ferro_note = document.getElementById("fer-note").value.trim() || null;
   }
+  const avviso = document.getElementById("fer-avviso").value.trim();
+  if(avviso !== (f.avviso || "")) campi.avviso_sicurezza = avviso || null;
   // solo i campi davvero cambiati (lo storico registra ogni cambio)
   Object.keys(campi).forEach(k => {
-    const prima = k === "ferratura_tipo" ? lavoroCav(cv) : k === "ferro_tipo" ? (cv.ferro_tipo || "standard") : (cv[k] ?? null);
+    const prima = k === "ferratura_tipo" ? lavoroCav(cv) : k === "ferro_tipo" ? (cv.ferro_tipo || "standard") : k === "avviso_sicurezza" ? (f.avviso || null) : (cv[k] ?? null);
     if(String(prima ?? "") === String(campi[k] ?? "")) delete campi[k];
   });
   if(!Object.keys(campi).length){ closeModal("modal-ferratura"); if(f.dopo) f.dopo(cv, false); return; }
@@ -9281,7 +9408,7 @@ async function salvaSchedaFerratura(){
     if(!id && f.clienteId){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(f.clienteId, cv)); }
     if(!id) return err("Non riuscito, riprova.");
     const { error } = await DB.updateCavalloCliente(id, campi);
-    if(error) return err(/ferratura_tipo|ferro_tipo_post/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+    if(error) return err(/ferratura_tipo|ferro_tipo_post/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
     Object.assign(cv, campi, { id });
     // tiene allineate le altre copie del cavallo in memoria
     [schedaCavalli, cavalliEditCache, cavalliClienteCorrente, cavalliMieiLista].forEach(l => (l || []).forEach(x => { if(x !== cv && x.id === id) Object.assign(x, campi); }));
@@ -12218,7 +12345,7 @@ function agPannello(d){
   const corpo = [...gruppi.entries()].map(([k, gr]) => `
       <div class="ag-gblock" data-cli="${escapeHtml(k)}">
         <div class="ag-cli">${d.ev.length > 1 ? '<span class="ag-mani" data-drag="gr" aria-label="Trascina il luogo" title="Trascina il luogo">⋮⋮</span>' : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span>
-          <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button></div>
+          <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some(e => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
         <div class="ag-gr">${gr.righe.join("")}</div>
       </div>`).join("");
   return `<div class="ag-pannello" data-iso="${d.iso}">
@@ -15892,6 +16019,370 @@ function hmFoglio(titolo, sotto, corpo){
   document.getElementById("hm-velo").classList.add("on");
   document.getElementById("hm-foglio").classList.add("on");
 }
+/* ==================== MODALITÀ LAVORO DEL MANISCALCO (ottobre 2026) ====================
+   Regola di Alessandro: DURANTE l'intervento il telefono non si usa (la distrazione è pericolosa per lui e per il cavallo).
+   Quindi: PRIMA (all'arrivo, una scheda da leggere: sicurezza e problemi per piede lasciati l'ultima volta) →
+   DURANTE (l'app sta zitta: profiles.lavoro_fino mette in pausa le notifiche dei messaggi) →
+   DOPO (al furgone: «Chiudi la tappa»; ogni cavallo è «Regolare», i problemi si segnano solo se ci sono, sul piede giusto).
+   Tasti grandi, conferme a scorrimento (mai un tocco singolo che chiude per sbaglio). Stato salvato sul telefono: riaprendo l'app si torna lì. */
+const ML_PIEDI = [["as", "Ant. sx", "anteriore sinistro"], ["ad", "Ant. dx", "anteriore destro"], ["ps", "Post. sx", "posteriore sinistro"], ["pd", "Post. dx", "posteriore destro"]];
+const ML_VOCI = [["ferro perso", "ferro"], ["parete sfaldata", "alert"], ["ascesso o dolore", "alert"], ["fettone", "alert"], ["zoppia", "alert"], ["altro", "nota"]];
+const ML_IC = {
+  ferro: '<svg class="pi" viewBox="0 0 24 24"><use href="#i-ferro"/></svg>',
+  alert: '<svg class="li" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  nota: '<svg class="li" viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg>',
+  check: '<svg class="li" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  dx: '<svg class="li" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  x: '<svg class="li" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  cam: '<svg class="li" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  hammer: '<svg class="li" viewBox="0 0 24 24"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.202-1.756L9 2.96l.92.82A6.18 6.18 0 0 1 12 8.4V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/></svg>',
+  cal: '<svg class="li" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  chat: '<svg class="li" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  indietro: '<svg class="li" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg>'
+};
+let ml = null;            // tappa in corso { key, nome, uid, fase, ids[], importi{}, pag, inizio }
+let mlEventi = [], mlInfo = {}, mlProb = null;
+function mlSalva(){ try{ if(ml) localStorage.setItem("equo-lavoro", JSON.stringify(ml)); else localStorage.removeItem("equo-lavoro"); }catch(e){} }
+function mlOggi(){ return isoLocale(new Date()); }
+// tappe di oggi ancora da fare, una per luogo (come «Portami da…»)
+async function mlTappeOggi(){
+  try{ await caricaUbicazioni(); }catch(e){}
+  const oggi = mlOggi();
+  const app = agOrdinaGiro((hpAppuntamenti || []).filter(e => e.data_intervento === oggi && !["annullato", "rifiutato", "fatto"].includes(e.stato)));
+  const per = new Map();
+  app.forEach(e => { const l = luogoEvento(e, true); if(!per.has(l.key)) per.set(l.key, { l, eventi: [] }); per.get(l.key).eventi.push(e); });
+  return [...per.values()];
+}
+function mlCavId(e){
+  if(e.cavallo_cliente_id) return e.cavallo_cliente_id;
+  const r = e.horse_id && typeof cavalliMieiByHorse !== "undefined" ? cavalliMieiByHorse[e.horse_id] : null;
+  return r ? r.id : null;
+}
+async function mlApri(key){
+  const tappe = await mlTappeOggi();
+  const t = tappe.find(x => x.l.key === key) || tappe[0];
+  if(!t){ showToast("Nessuna tappa da fare oggi."); return; }
+  ml = { key: t.l.key, nome: t.l.nome, uid: currentUser?.id, fase: "prima", ids: t.eventi.map(e => e.id), importi: {}, pag: "saldato", inizio: Date.now(), giorno: mlOggi() };
+  mlSalva();
+  await mlCarica();
+  mlRender();
+}
+// dati della tappa: appuntamenti, avvisi di sicurezza, problemi aperti per piede
+async function mlCarica(){
+  mlEventi = (ml.ids || []).map(id => agEventiCache[id] || (hpAppuntamenti || []).find(e => e.id === id)).filter(Boolean);
+  if(!mlEventi.length && !DEMO_MODE){
+    const { data } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome, cliente_user_id), cavalli_clienti_mascalcia(nome)").in("id", ml.ids);
+    mlEventi = data || [];
+  }
+  const cav = [...new Set(mlEventi.map(mlCavId).filter(Boolean))];
+  mlInfo = {};
+  cav.forEach(id => { mlInfo[id] = { avviso: null, aperti: [], anno: [] }; });
+  if(cav.length && !DEMO_MODE){
+    try{
+      const [a, p] = await Promise.all([
+        sb.from("cavalli_clienti_mascalcia").select("id, avviso_sicurezza").in("id", cav),
+        sb.from("cavalli_problemi_piede").select("id, cavallo_cliente_id, piede, voci, nota, ricontrolla_il, risolto_il, creato_il").in("cavallo_cliente_id", cav)
+          .gte("creato_il", new Date(Date.now() - 365 * 86400e3).toISOString()).order("creato_il", { ascending: false })
+      ]);
+      (a.data || []).forEach(r => { if(mlInfo[r.id]) mlInfo[r.id].avviso = r.avviso_sicurezza || null; });
+      (p.data || []).forEach(r => { const m = mlInfo[r.cavallo_cliente_id]; if(!m) return; m.anno.push(r); if(!r.risolto_il) m.aperti.push(r); });
+    }catch(e){ console.warn("modalità lavoro:", e); }
+  }
+  if(DEMO_MODE && cav[0] && mlInfo[cav[0]]){
+    mlInfo[cav[0]].aperti = [{ piede: "pd", voci: ["ferro perso", "parete sfaldata"], ricontrolla_il: mlOggi(), creato_il: new Date(Date.now() - 20 * 86400e3).toISOString() }];
+    mlInfo[cav[0]].anno = mlInfo[cav[0]].aperti.slice();
+    if(cav[1] && mlInfo[cav[1]]) mlInfo[cav[1]].avviso = "Scalcia dietro quando gli si alza il posteriore sinistro.";
+  }
+  // importi proposti (l'ultimo prezzo di quel cavallo o cliente)
+  const mancano = mlEventi.filter(e => ml.importi[e.id] === undefined);
+  if(mancano.length){
+    for(const e of mancano){
+      let v = e.importo;
+      if(v == null && !incassiNascosti()){ try{ v = (await importiSuggeriti(e, [{ cavallo_cliente_id: e.cavallo_cliente_id, horse_id: e.horse_id }]))[0]; }catch(x){ v = null; } }
+      ml.importi[e.id] = v == null ? "" : String(v);
+    }
+    mlSalva();
+  }
+}
+const mlNomePiede = k => (ML_PIEDI.find(p => p[0] === k) || [k, k, k])[2];
+const mlSigla = k => String(k || "").toUpperCase();
+function mlRigaCavallo(e){ return { nome: agNomeCavallo(e) || "Cavallo", cli: e.clienti_mascalcia?.nome || clienteDiId(e.cliente_mascalcia_id)?.nome || "" }; }
+
+/* ---------- disegno ---------- */
+function mlRender(){
+  let el = document.getElementById("ml");
+  if(!ml){ if(el) el.hidden = true; document.body.classList.remove("ml-on"); return; }
+  if(!el){ el = document.createElement("div"); el.id = "ml"; el.className = "ml"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); document.body.appendChild(el); }
+  el.hidden = false; document.body.classList.add("ml-on");
+  const testa = (t, d) => `<div class="ml-barra"><span class="ml-pul"></span><b>${escapeHtml(t)}</b><span>${escapeHtml(d || "")}</span></div>`;
+  if(mlProb) return mlRenderProblema(el, testa);
+  if(ml.fase === "prima"){
+    const card = mlEventi.map(e => {
+      const r = mlRigaCavallo(e), id = mlCavId(e), inf = mlInfo[id] || { aperti: [] };
+      const av = [];
+      if(inf.avviso) av.push(`<div class="ml-al sic">${ML_IC.alert}<span>${escapeHtml(inf.avviso)}</span></div>`);
+      inf.aperti.forEach(p => av.push(`<div class="ml-al pie"><span class="ml-sig">${mlSigla(p.piede)}</span><span>${escapeHtml(mlNomePiede(p.piede).replace(/^./, c => c.toUpperCase()))}: ${escapeHtml((p.voci || []).join(", ") || "da controllare")}${p.nota ? " — " + escapeHtml(p.nota) : ""} (${formatDataBreve(String(p.creato_il).slice(0, 10))}).${p.ricontrolla_il && p.ricontrolla_il <= mlOggi() ? " <b>Ricontrollare oggi.</b>" : ""}</span></div>`));
+      if(!av.length) av.push(`<div class="ml-al ok">${ML_IC.check}<span>Nessun problema l'ultima volta.</span></div>`);
+      return `<div class="ml-card"><div class="ml-h"><span class="ml-av">${iniziale(r.nome)}</span><b>${escapeHtml(r.nome)}</b><small>${escapeHtml(agDescrizioneTipoPro(e))}</small></div>${av.join("")}</div>`;
+    }).join("");
+    el.innerHTML = testa(ml.nome, mlEventi.length + (mlEventi.length === 1 ? " cavallo" : " cavalli"))
+      + `<button class="ml-esci" onclick="mlAnnulla()" aria-label="Esci dalla modalità Lavoro">${ML_IC.x}</button>`
+      + `<div class="ml-corpo">${card || '<div class="ml-vuoto">Nessun appuntamento in questa tappa.</div>'}</div>`
+      + mlSlider("Ho letto · al lavoro", "mlAlLavoro", "oro");
+  } else if(ml.fase === "durante"){
+    el.innerHTML = `<button class="ml-esci" onclick="mlAnnulla()" aria-label="Esci dalla modalità Lavoro">${ML_IC.x}</button><div class="ml-quiete"><div class="ml-cer">${ML_IC.ferro}</div><h3>Al lavoro</h3><p>${escapeHtml(ml.nome)}<br>Notifiche dei messaggi in pausa finché non chiudi la tappa. Il telefono può restare in tasca.</p></div>`
+      + mlSlider("Ho finito · chiudi la tappa", "mlHoFinito", "");
+  } else {
+    const righe = mlEventi.map(e => {
+      const r = mlRigaCavallo(e), id = mlCavId(e);
+      const pb = (ml.problemi || []).filter(p => p.ev === e.id);
+      const imp = incassiNascosti() ? "" : `<label class="ml-imp"><span>€</span><input type="number" inputmode="decimal" step="0.01" min="0" value="${escapeHtml(ml.importi[e.id] ?? "")}" oninput="mlImporto('${e.id}', this.value)" aria-label="Importo ${escapeHtml(r.nome)}"></label>`;
+      return `<div class="ml-riga"><span class="ml-av">${iniziale(r.nome)}</span><div class="ml-t"><b>${escapeHtml(r.nome)}</b><span>${escapeHtml(agDescrizioneTipoPro(e))}</span></div>${imp}
+        ${pb.length ? `<button class="ml-st pb" onclick="mlApriProblema('${e.id}')">${pb.map(p => `<span class="ml-sig">${mlSigla(p.piede)}</span>`).join("")}Problema</button>`
+          : `<span class="ml-st ok">${ML_IC.check}Regolare</span>${id ? `<button class="ml-pbb" onclick="mlApriProblema('${e.id}')" aria-label="Segna un problema su ${escapeHtml(r.nome)}">${ML_IC.alert}</button>` : ""}`}</div>`;
+    }).join("");
+    const tot = mlEventi.reduce((t, e) => t + (Number(ml.importi[e.id]) || 0), 0);
+    el.innerHTML = testa("Chiudi la tappa", ml.nome)
+      + `<button class="ml-esci" onclick="ml.fase='durante';mlSalva();mlRender()" aria-label="Indietro">${ML_IC.indietro}</button>`
+      + `<div class="ml-corpo">${righe}
+        ${incassiNascosti() ? "" : `<div class="ml-tot"><span>Totale tappa</span><b>${formatEuro(tot)}</b></div>
+        <div class="ml-pag"><button class="${ml.pag === "saldato" ? "on" : ""}" onclick="mlPag('saldato')">Saldato<small>pagato ora</small></button><button class="${ml.pag === "da_saldare" ? "on" : ""}" onclick="mlPag('da_saldare')">Da saldare<small>lo segna da incassare</small></button></div>`}
+        <div class="ml-prox">${ML_IC.cal}<span id="ml-prox">Prossima volta: come l'ultima volta per ogni cavallo</span></div></div>`
+      + mlSlider("Scorri per chiudere", "mlChiudi", "verde");
+    mlProssima();
+  }
+  mlAttivaSlider(el);
+}
+async function mlProssima(){
+  const e = mlEventi.find(x => TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura]);
+  const el = document.getElementById("ml-prox"); if(!e || !el) return;
+  const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+  if(s.giorni && document.getElementById("ml-prox")) el.textContent = `Prossima volta qui: tra ${s.giorni} giorni · ${formatDataBreve(aggiungiGiorniIso(mlOggi(), s.giorni))}`;
+}
+function mlImporto(id, v){ ml.importi[id] = v; mlSalva(); const t = document.querySelector("#ml .ml-tot b"); if(t) t.textContent = formatEuro(mlEventi.reduce((s, e) => s + (Number(ml.importi[e.id]) || 0), 0)); }
+function mlPag(v){ ml.pag = v; mlSalva(); document.querySelectorAll("#ml .ml-pag button").forEach((b, i) => b.classList.toggle("on", (i === 0) === (v === "saldato"))); }
+
+/* ---------- conferma a scorrimento (niente tocco singolo) ---------- */
+function mlSlider(testo, fn, tipo){
+  return `<div class="ml-slider ${tipo}" data-fn="${fn}"><button type="button" class="ml-pom" aria-label="${escapeHtml(testo)}">${tipo === "verde" ? ML_IC.check : ML_IC.dx}</button><b>${escapeHtml(testo)}</b></div>`;
+}
+function mlAttivaSlider(root){
+  root.querySelectorAll(".ml-slider").forEach(sl => {
+    const pom = sl.querySelector(".ml-pom");
+    let x0 = null, dx = 0;
+    const max = () => sl.clientWidth - pom.offsetWidth - 16;
+    const fine = ok => {
+      x0 = null;
+      if(ok){ pom.style.transform = `translateX(${max()}px)`; const f = window[sl.dataset.fn]; setTimeout(() => f && f(), 120); }
+      else { pom.style.transition = "transform .25s"; pom.style.transform = ""; setTimeout(() => pom.style.transition = "", 260); }
+    };
+    pom.addEventListener("pointerdown", ev => { x0 = ev.clientX; dx = 0; pom.setPointerCapture(ev.pointerId); });
+    pom.addEventListener("pointermove", ev => { if(x0 == null) return; dx = Math.max(0, Math.min(max(), ev.clientX - x0)); pom.style.transform = `translateX(${dx}px)`; });
+    pom.addEventListener("pointerup", () => { if(x0 != null) fine(dx > max() * 0.8); });
+    pom.addEventListener("pointercancel", () => fine(false));
+    pom.addEventListener("keydown", ev => { if(ev.key === "Enter"){ ev.preventDefault(); fine(true); } });   // tastiera (accessibilità)
+  });
+}
+
+/* ---------- fasi ---------- */
+async function mlPausaNotifiche(on){
+  if(DEMO_MODE || !currentUser) return;
+  const { error } = await sb.from("profiles").update({ lavoro_fino: on ? new Date(Date.now() + 4 * 3600e3).toISOString() : null }).eq("id", currentUser.id);
+  if(error) console.warn("lavoro_fino:", error.message);
+}
+function mlAlLavoro(){ ml.fase = "durante"; mlSalva(); mlRender(); mlPausaNotifiche(true); }
+function mlHoFinito(){ ml.fase = "dopo"; mlSalva(); mlRender(); }
+async function mlAnnulla(){
+  if(!(await chiediSiNo("Uscire dalla modalità Lavoro?", "La tappa resta in agenda da fare; le notifiche tornano attive."))) return;
+  ml = null; mlProb = null; mlSalva(); mlRender(); mlPausaNotifiche(false);
+}
+async function mlChiudi(){
+  const oggi = mlOggi();
+  let errori = 0;
+  for(const e of mlEventi){
+    if(e.stato === "fatto") continue;
+    const upd = { stato: "fatto" };
+    if(e.data_intervento !== oggi) upd.data_intervento = oggi;
+    if(!incassiNascosti()){
+      const v = ml.importi[e.id];
+      upd.importo = v === "" || v == null || isNaN(Number(v)) ? null : Math.round(Number(v) * 100) / 100;
+      upd.stato_pagamento = ml.pag;
+    }
+    if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
+      const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+      // con 0 € la prossima data resta quella di prima («come prima»)
+      upd.prossima_scadenza = upd.importo === 0 && s.prima ? s.prima : (s.giorni ? aggiungiGiorniIso(oggi, s.giorni) : null);
+    }
+    const { error } = await DB.updateInterventoMascalcia(e.id, upd);
+    if(error){ errori++; console.error("chiudi tappa:", error); }
+  }
+  // i cavalli segnati «Regolare» chiudono i loro problemi aperti
+  if(!DEMO_MODE){
+    const conProblema = new Set((ml.problemi || []).map(p => p.cav));
+    const regolari = [...new Set(mlEventi.map(mlCavId).filter(id => id && !conProblema.has(id)))];
+    if(regolari.length){
+      const { error } = await sb.from("cavalli_problemi_piede").update({ risolto_il: new Date().toISOString() }).in("cavallo_cliente_id", regolari).is("risolto_il", null);
+      if(error) console.warn("problemi risolti:", error.message);
+    }
+  }
+  await mlPausaNotifiche(false);
+  const n = mlEventi.length;
+  ml = null; mlProb = null; mlSalva(); mlRender();
+  showToast(errori ? `Tappa chiusa, ma ${errori} lavori non salvati: controlla in agenda` : `Tappa chiusa: ${n} ${n === 1 ? "lavoro fatto" : "lavori fatti"}`);
+  try{ await renderProDeadlines(); await renderIncassi(); if(typeof renderAgendaSettimana === "function") await renderAgendaSettimana(); }catch(e){}
+}
+
+/* ---------- problema su un piede ---------- */
+function mlApriProblema(evId){
+  const e = mlEventi.find(x => x.id === evId); if(!e) return;
+  const cav = mlCavId(e); if(!cav){ showToast("Questo appuntamento non ha un cavallo: aprilo in agenda per assegnarlo."); return; }
+  mlProb = { ev: evId, cav, passo: 1, piedi: [], voci: [], nota: "", foto: null, fotoUrl: null, ric: 14, avvisa: false, vet: false };
+  mlRender();
+}
+function mlRenderProblema(el, testa){
+  const e = mlEventi.find(x => x.id === mlProb.ev), r = mlRigaCavallo(e), inf = mlInfo[mlProb.cav] || { anno: [] };
+  const volte = k => inf.anno.filter(p => p.piede === k).length;
+  if(mlProb.passo === 1){
+    const piede = ([k, t]) => {
+      const sel = mlProb.piedi.includes(k), n = volte(k);
+      return `<button type="button" class="ml-piede p-${k}${sel ? " sel" : ""}" onclick="mlPiede('${k}')">${ML_IC.ferro}<b>${t}</b><small>${sel ? "PROBLEMA" : "REGOLARE"}</small>${sel ? `<i class="ml-ok">${ML_IC.check}</i>` : ""}${n ? `<em>già ${n} ${n === 1 ? "volta" : "volte"} quest'anno</em>` : ""}</button>`;
+    };
+    const dove = mlProb.piedi.length === 1 ? " · " + mlNomePiede(mlProb.piedi[0]).replace("anteriore", "ant.").replace("posteriore", "post.").replace("sinistro", "sx").replace("destro", "dx") : "";
+    el.innerHTML = testa("Segna un problema", ml.nome)
+      + `<button class="ml-esci" onclick="mlProb=null;mlRender()" aria-label="Annulla">${ML_IC.x}</button>`
+      + `<div class="ml-corpo"><div class="ml-cav"><span class="ml-av grande">${iniziale(r.nome)}</span><div><h3>${escapeHtml(r.nome)}</h3><p>${escapeHtml(agDescrizioneTipoPro(e))}</p></div></div>
+        <div class="ml-piedi">${ML_PIEDI.map(piede).join("")}<div class="ml-dd">▲<br>DAVANTI<br><br><br>DIETRO<br>▼</div></div>
+        <div class="ml-lab">Cosa è successo${escapeHtml(dove)}</div>
+        <div class="ml-voci">${ML_VOCI.map(([v, ic]) => `<button type="button" class="${mlProb.voci.includes(v) ? "on" : ""}" onclick="mlVoce('${v}')">${ML_IC[ic]}${v.replace(/^./, c => c.toUpperCase())}</button>`).join("")}</div></div>`
+      + (mlProb.piedi.length && mlProb.voci.length ? mlSlider("Avanti", "mlProbAvanti", "oro") : `<div class="ml-sugg">Tocca il piede e cosa è successo</div>`);
+  } else {
+    const piedi = mlProb.piedi.map(mlNomePiede).join(" e ");
+    const prima = inf.anno.filter(p => mlProb.piedi.includes(p.piede));
+    const stor = prima.length ? `<b>Storico di ${mlProb.piedi.length > 1 ? "questi piedi" : "questo piede"}:</b> ${prima.length} ${prima.length === 1 ? "problema" : "problemi"} nell'ultimo anno (${prima.slice(0, 4).map(p => formatDataBreve(String(p.creato_il).slice(0, 10)) + " " + (p.voci || []).join(", ")).join("; ")}).`
+      : "<b>Storico:</b> è la prima volta che segni un problema qui.";
+    const coll = clienteCollegatoEquo(e.cliente_mascalcia_id);
+    el.innerHTML = testa(r.nome + " · " + mlProb.piedi.map(mlSigla).join(" "), mlProb.voci.join(" · "))
+      + `<button class="ml-esci" onclick="mlProb.passo=1;mlRender()" aria-label="Indietro">${ML_IC.indietro}</button>`
+      + `<div class="ml-corpo"><div class="ml-lab">Se serve</div>
+        <div class="ml-racc"><button type="button" class="${mlProb.foto ? "fatto" : ""}" onclick="document.getElementById('ml-foto').click()">${ML_IC.cam}Foto${mlProb.foto ? " ✓" : ""}</button>
+          <button type="button" class="ham" onclick="mlHammer()">${ML_IC.hammer}Hammer</button></div>
+        <input type="file" id="ml-foto" accept="image/*" capture="environment" hidden onchange="mlFoto(this)">
+        ${mlProb.fotoUrl ? `<img class="ml-fotoprev" src="${mlProb.fotoUrl}" alt="">` : ""}
+        <textarea class="ml-nota" rows="2" maxlength="300" placeholder="Nota (anche a voce: tocca il microfono della tastiera)" oninput="mlProb.nota=this.value">${escapeHtml(mlProb.nota)}</textarea>
+        <div class="ml-stor">${stor}</div>
+        <div class="ml-lab">E adesso</div>
+        <div class="ml-ric">${ML_IC.cal}<span>Ricontrolla</span>${[0, 7, 14, 30].map(g => `<button type="button" class="${mlProb.ric === g ? "on" : ""}" onclick="mlProb.ric=${g};mlRender()">${g ? g + " gg" : "No"}</button>`).join("")}</div>
+        ${coll ? `<button type="button" class="ml-tg${mlProb.avvisa ? " on" : ""}" onclick="mlProb.avvisa=!mlProb.avvisa;mlRender()">${ML_IC.chat}<span>Avvisa il proprietario</span><i></i></button>` : `<div class="ml-sugg piccolo">Il proprietario non usa Equo: l'avviso in chat non è possibile.</div>`}
+        <button type="button" class="ml-tg${mlProb.vet ? " on" : ""}" onclick="mlProb.vet=!mlProb.vet;mlRender()">${ML_IC.alert}<span>Serve il veterinario</span><i></i></button>
+        <div class="ml-sugg piccolo">Resta nello storico del ${escapeHtml(piedi)}. Il proprietario lo vede solo se lo avvisi.</div></div>`
+      + mlSlider("Salva il problema", "mlSalvaProblema", "verde");
+  }
+  mlAttivaSlider(el);
+}
+function mlPiede(k){ const a = mlProb.piedi; const i = a.indexOf(k); if(i >= 0) a.splice(i, 1); else a.push(k); mlRender(); }
+function mlVoce(v){ const a = mlProb.voci; const i = a.indexOf(v); if(i >= 0) a.splice(i, 1); else a.push(v); mlRender(); }
+function mlProbAvanti(){ mlProb.passo = 2; mlRender(); }
+async function mlFoto(input){
+  const f = input.files && input.files[0]; input.value = "";
+  if(!f) return;
+  try{ mlProb.fotoUrl = await riduciImmagine(f); mlProb.foto = true; }catch(e){ showToast("Non riesco a leggere la foto, riprova."); return; }
+  mlRender();
+}
+function mlHammer(){
+  const e = mlEventi.find(x => x.id === mlProb.ev), r = mlRigaCavallo(e), inf = mlInfo[mlProb.cav] || { anno: [] };
+  const testo = `Problema appena visto su ${r.nome} (${agDescrizioneTipoPro(e)}), piede ${mlProb.piedi.map(mlNomePiede).join(" e ")}: ${mlProb.voci.join(", ")}${mlProb.nota ? ". Nota: " + mlProb.nota : ""}.`
+    + (inf.anno.length ? ` Problemi dell'ultimo anno: ${inf.anno.map(p => String(p.creato_il).slice(0, 10) + " " + mlNomePiede(p.piede) + " " + (p.voci || []).join(", ")).join("; ")}.` : "");
+  openAiSheet().then(() => {
+    hpContesto = { tipo: "cavallo", nome: r.nome, testo, cv: (typeof cavalliMieiById !== "undefined" && cavalliMieiById[mlProb.cav]) || { id: mlProb.cav, nome: r.nome }, clienteId: e.cliente_mascalcia_id };
+    const sb2 = document.getElementById("hp-btn-storico"); if(sb2) sb2.hidden = false;
+    const c = document.getElementById("hp-ctx"); if(c){ c.hidden = false; document.getElementById("hp-ctx-nome").textContent = hpContesto.nome; }
+    const i = document.getElementById("chat-input"); if(i){ i.value = `Cosa mi consigli per il ${mlProb.piedi.map(mlNomePiede).join(" e ")} di ${r.nome}?`; }
+    if(mlProb.fotoUrl){ aiAllegati = [{ media_type: "image/jpeg", data: mlProb.fotoUrl.split(",")[1], anteprima: mlProb.fotoUrl, nome: "piede.jpg" }]; renderAllegatiAi(); }
+  });
+}
+async function mlSalvaProblema(){
+  const p = mlProb, e = mlEventi.find(x => x.id === p.ev), r = mlRigaCavallo(e);
+  const ric = p.ric ? aggiungiGiorniIso(mlOggi(), p.ric) : null;
+  let fotoPath = null;
+  try{
+    if(p.fotoUrl && !DEMO_MODE){
+      const blob = await (await fetch(p.fotoUrl)).blob();
+      fotoPath = `${currentUser.id}/piede-${Date.now().toString(36)}.jpg`;
+      const up = await sb.storage.from("cavalli-allegati").upload(fotoPath, blob, { contentType: "image/jpeg" });
+      if(up.error){ console.warn("foto problema:", up.error.message); fotoPath = null; }
+    }
+    if(!DEMO_MODE){
+      for(const k of p.piedi){
+        const { error } = await sb.rpc("equo_segna_problema_piede", { p_cavallo: p.cav, p_piede: k, p_voci: p.voci, p_nota: p.nota || null, p_foto: fotoPath,
+          p_ricontrolla: ric, p_avvisa: !!p.avvisa, p_vet: !!p.vet, p_intervento: e.id });
+        if(error){ showToast(/does not exist|schema cache/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Non salvato: " + error.message); return; }
+      }
+    }
+    // ricontrollo in agenda
+    if(ric){
+      const { error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: e.cliente_mascalcia_id, cavallo_cliente_id: p.cav, horse_id: e.horse_id || null,
+        tipo_ferratura: "altro", tipo_altro: "Ricontrollo " + p.piedi.map(mlNomePiede).join(" e ") + " · " + p.voci.join(", "), data_intervento: ric, stato: "programmato", note: p.nota || null });
+      if(error) console.warn("ricontrollo:", error.message);
+    }
+    // avviso al proprietario (con la foto come allegato del cavallo)
+    if(p.avvisa && clienteCollegatoEquo(e.cliente_mascalcia_id)){
+      const testo = `🔎 ${r.nome} · ${p.piedi.map(mlNomePiede).join(" e ")}: ${p.voci.join(", ")}.${p.nota ? " " + p.nota : ""}`
+        + (ric ? ` Lo ricontrollo il ${formatDataBreve(ric)}.` : "") + (p.vet ? " Ti consiglio di sentire anche il veterinario." : "");
+      await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: e.cliente_mascalcia_id, tipo: "testo", testo });
+      if(fotoPath) await sb.rpc("equo_aggiungi_allegato", { p_vista: "maniscalco", p_id: p.cav, p_nome: `Problema ${p.piedi.map(mlSigla).join("-")} ${mlOggi()}.jpg`, p_path: fotoPath, p_mime: "image/jpeg", p_byte: null }).then(() => {}, () => {});
+    }
+  } catch(err){ console.error("problema piede:", err); showToast("Non salvato, riprova."); return; }
+  ml.problemi = (ml.problemi || []).concat(p.piedi.map(k => ({ ev: p.ev, cav: p.cav, piede: k })));
+  const inf = mlInfo[p.cav]; if(inf) p.piedi.forEach(k => inf.anno.unshift({ piede: k, voci: p.voci, creato_il: new Date().toISOString() }));
+  mlProb = null; mlSalva(); mlRender();
+  showToast(`Problema segnato su ${r.nome}`);
+}
+
+/* ---------- arrivo sul posto: se apri l'app vicino a una tappa di oggi ---------- */
+let mlArrivoT = 0;
+async function mlControllaArrivo(){
+  if(ml || DEMO_MODE || !currentUser || !agenteAiHammer() || Date.now() - mlArrivoT < 5 * 60e3 || !navigator.geolocation) return;
+  mlArrivoT = Date.now();
+  let stato = "prompt";
+  try{ stato = (await navigator.permissions.query({ name: "geolocation" })).state; }catch(e){ return; }
+  if(stato !== "granted") return;                    // la posizione non si chiede qui: solo se è già permessa (meteo)
+  const tappe = await mlTappeOggi();
+  if(!tappe.length) return;
+  const pos = await new Promise(res => navigator.geolocation.getCurrentPosition(x => res(x.coords), () => res(null), { maximumAge: 120000, timeout: 8000 }));
+  if(!pos) return;
+  const visti = (() => { try{ return JSON.parse(localStorage.getItem("equo-lavoro-visti") || "{}"); }catch(e){ return {}; } })();
+  for(const t of tappe){
+    const k = mlOggi() + "|" + t.l.key;
+    if(visti[k]) continue;
+    const c = t.l.clienteId ? clienteDiId(t.l.clienteId) : null;
+    const p = t.l.indirizzo ? { indirizzo: t.l.indirizzo } : (c ? await wgMeteoPos(c) : null);
+    if(!p) continue;
+    const d = await EquoMeteo.previsione(p, { endpoint: "/.netlify/functions/meteo", token: async () => { try{ return (await sb.auth.getSession()).data.session?.access_token || ""; }catch(e){ return ""; } } });
+    if(!d || d.lat == null) continue;
+    const km = mlDistanza(pos.latitude, pos.longitude, d.lat, d.lon);
+    if(km < 1.5){                                     // le coordinate del meteo sono arrotondate a ~1 km
+      visti[k] = 1; try{ localStorage.setItem("equo-lavoro-visti", JSON.stringify(visti)); }catch(e){}
+      return mlMostraArrivo(t);
+    }
+  }
+}
+function mlDistanza(a1, o1, a2, o2){ const R = 6371, r = x => x * Math.PI / 180; const dA = r(a2 - a1), dO = r(o2 - o1); const h = Math.sin(dA / 2) ** 2 + Math.cos(r(a1)) * Math.cos(r(a2)) * Math.sin(dO / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+let mlArrivoKey = null;
+function mlMostraArrivo(t){
+  mlArrivoKey = t.l.key;
+  const nomi = [...new Set(t.eventi.map(e => agNomeCavallo(e)).filter(Boolean))];
+  hmFoglio("Sei arrivato?", t.l.nome, `<div class="ml-arr">${nomi.map(n => `<span>${iniziale(n)} ${escapeHtml(n)}</span>`).join("")}</div>
+    <button class="hm-tappa su" onclick="hmChiudi();mlApri(mlArrivoKey)"><span class="o">${ML_IC.ferro}</span><span class="c"><b>Inizia il lavoro</b><span>${t.eventi.length} ${t.eventi.length === 1 ? "cavallo" : "cavalli"} · leggi gli avvisi prima di cominciare</span></span></button>`);
+}
+// riaprendo l'app si torna alla tappa in corso (solo se è di oggi)
+async function mlRiprendi(){
+  if(ml || !currentUser) return;
+  let s = null; try{ s = JSON.parse(localStorage.getItem("equo-lavoro") || "null"); }catch(e){}
+  if(!s || s.uid !== currentUser.id) return;
+  if(s.giorno !== mlOggi()){ try{ localStorage.removeItem("equo-lavoro"); }catch(e){} mlPausaNotifiche(false); return; }
+  ml = s; await mlCarica(); mlRender();
+}
+
 // «Portami da…»: le tappe di oggi (una per luogo, nell'ordine del giro); tocca e si apre il navigatore
 let hmTappe = [];
 async function hmPortami(){
@@ -15909,7 +16400,7 @@ async function hmPortami(){
   const corpo = hmTappe.map((t, i) => `<button class="hm-tappa${i === (prossima < 0 ? 0 : prossima) ? " su" : ""}" onclick="hmVai(${i})">
       <span class="o">${t.ora ? escapeHtml(t.ora) : HM_IC.cal}</span>
       <span class="c"><b>${escapeHtml(t.l.nome)}</b><span>${escapeHtml([t.cavalli.join(", "), t.l.indirizzo].filter(Boolean).join(" · "))}</span></span>
-      <span class="vai">${HM_IC.nav}Vai</span></button>`).join("")
+      <span class="vai">${HM_IC.nav}Vai</span></button>${agenteAiHammer() ? `<button class="hm-tappa ml-tappa" onclick="hmChiudi();mlApri(hmTappe[${i}].l.key)"><span class="o"><svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><use href="#i-ferro"/></svg></span><span class="c"><b>Lavoro a ${escapeHtml(t.l.nome)}</b><span>avvisi prima di cominciare · chiudi la tappa dopo</span></span></button>` : ""}`).join("")
     + `<button class="hm-tappa" onclick="hmChiudi();apriCercaTutto()"><span class="o">${HM_IC.cerca}</span><span class="c"><b>Un altro cliente o scuderia…</b><span>cerca per nome</span></span></button>`;
   hmFoglio("Portami da…", hmTappe.length ? "Scegli la tappa: si apre il tuo navigatore" : "Oggi non hai appuntamenti da fare", corpo);
 }
@@ -16040,7 +16531,13 @@ function renderHomeMan(){
   if(b){ b.hidden = !n; b.textContent = n > 99 ? "99+" : n; }
   hmRenderBanner();
   hmTemperatura();
+  // modalità Lavoro: si riprende la tappa in corso, oppure «Sei arrivato?» se apri l'app vicino a una tappa di oggi
+  if(agenteAiHammer()){
+    if(!mlRipresa){ mlRipresa = true; mlRiprendi().then(() => mlControllaArrivo()).catch(e => console.warn("lavoro:", e)); }
+    else mlControllaArrivo().catch(e => console.warn("arrivo:", e));
+  }
 }
+let mlRipresa = false;
 // temperatura di oggi accanto all'icona del meteo (stessa previsione e cache del riquadro; la posizione non si chiede qui)
 let hmTempT = 0;
 async function hmTemperatura(){

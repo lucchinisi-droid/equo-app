@@ -185,6 +185,17 @@ async function gestisciChatMascalcia(supabase, record) {
 // link: { c: tipo di chat, id: thread, ... } → la notifica apre direttamente quella chat
 async function inviaPush(externalIds, titolo, corpo, app = "equo", link = null) {
   if (!externalIds || externalIds.length === 0) return { attempted: false, motivo: "nessun_destinatario" };
+  // modalità Lavoro del maniscalco: chi è al lavoro (profiles.lavoro_fino nel futuro) non riceve la notifica;
+  // il messaggio resta in chat e lo legge quando chiude la tappa
+  try {
+    const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const { data, error } = await sb.from("profiles").select("id").in("id", externalIds).gt("lavoro_fino", new Date().toISOString());
+    if (!error && data && data.length) {
+      const alLavoro = new Set(data.map((r) => r.id));
+      externalIds = externalIds.filter((id) => !alLavoro.has(id));
+      if (externalIds.length === 0) return { attempted: false, motivo: "al_lavoro" };
+    }
+  } catch (e) { console.warn("lavoro_fino:", e.message); }
   // lo staff della scuderia è iscritto alle push su scuderia.equohub.com → app OneSignal dedicata
   const scuderia = app === "scuderia" && process.env.ONESIGNAL_SCUDERIA_APP_ID && process.env.ONESIGNAL_SCUDERIA_REST_API_KEY;
   const appId = scuderia ? process.env.ONESIGNAL_SCUDERIA_APP_ID : process.env.ONESIGNAL_APP_ID;
