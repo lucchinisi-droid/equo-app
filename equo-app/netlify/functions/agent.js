@@ -246,6 +246,17 @@ Il tuo focus è l'anatomia dello zoccolo, il pareggio, le tipologie di ferri (tr
 
 ${REGOLE_COMUNI}`;
 
+// Hammer · analisi foto guidata (pannello «Analizza una foto»): risposta in sezioni fisse che l'app impagina
+const ISTRUZIONI_FOTO_GUIDATA = `ANALISI FOTO GUIDATA: il maniscalco ha scattato la foto dal pannello di analisi. Rispondi SOLO con queste sezioni, in quest'ordine, ognuna con 2-5 punti brevi:
+## Cosa si vede
+## Da controllare
+## Cosa fare
+## Limiti
+Poi l'ultima riga esattamente così: "Affidabilità: alta" oppure "Affidabilità: media" oppure "Affidabilità: bassa" (bassa se la foto è sfocata, storta, troppo lontana o non mostra quello che serve; in quel caso in "Limiti" dì quale scatto rifare).
+Niente saluti, niente altre sezioni, niente frase finale di avvertenza (la mostra già l'app). Le regole sul veterinario restano: se vedi segni di urgenza, la prima riga di "Cosa fare" è "Qui serve subito il veterinario".`;
+// Hammer · consulta un caso: una domanda alla volta con le risposte pronte da toccare
+const ISTRUZIONI_CASO = `CONSULTA UN CASO: guida il maniscalco come un collega esperto, UNA domanda alla volta (cavallo, disciplina, problema, da quanto, cosa ha già provato, ferro attuale, foto o lastre). Quando chiedi qualcosa, chiudi il messaggio con una riga esattamente così: "Scelte: prima | seconda | terza" (da 2 a 5 risposte brevi, max 4 parole l'una); l'app le mostra come tasti. Dopo 3-5 risposte (o se ti scrive "basta domande") dai il parere: ipotesi principali, cosa faresti col pareggio e col ferro, cosa controllare alla prossima visita, quando coinvolgere il veterinario. Nel parere non mettere la riga "Scelte".`;
+
 const clonaStrumento = (nome) => { const t = STRUMENTI.find((x) => x.name === nome); const { cache_control, ...resto } = t; return { ...resto }; };
 const TIPI_INTERVENTO = ["ferratura", "mezza_ferratura", "pareggio", "altro"];
 const TIPO_INTERVENTO_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
@@ -948,6 +959,10 @@ exports.handler = async (event) => {
   if (allegati.reduce((n, a) => n + a.data.length, 0) > 5_500_000) return risposta(413, { error: "Allegati troppo grandi" });
   if (!messaggio && !allegati.length) return risposta(400, { error: "Messaggio mancante" });
   const vista = body.vista === "professionista" ? "professionista" : body.vista === "scuderia" ? "scuderia" : "proprietario";
+  // Hammer: modalità del pannello (analisi foto guidata, consulta un caso, riassunto dello storico) e quello che il maniscalco sta guardando
+  const modalita = ["foto", "caso", "storico"].includes(body.modalita) ? body.modalita : null;
+  if (modalita === "foto" && !allegati.some((a) => a.media_type !== "application/pdf")) return risposta(400, { error: "Serve una foto" });
+  const contestoApp = typeof body.contesto_app === "string" ? body.contesto_app.replace(/\s+\n/g, "\n").slice(0, 2500) : "";
   // Athena (Equo Scuderia): serve il centro e l'appartenenza al suo staff (verificata qui, non dall'app)
   let centro = null, membro = null;
   if (vista === "scuderia") {
@@ -1001,16 +1016,22 @@ exports.handler = async (event) => {
     const { count } = await q;
     usati = count || 0;
   }
-  if (usati >= limite) return risposta(200, { limite_raggiunto: true, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
+  // un'analisi foto guidata vale 3 messaggi nel piano Free
+  const peso = hammer && modalita === "foto" && giornaliero ? 3 : 1;
+  if (usati + peso > limite) return risposta(200, { limite_raggiunto: true, peso, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   // prenotazione ATOMICA del messaggio (SQL ai_prenota): richieste in parallelo non superano il limite
   // e il messaggio resta contato anche se la risposta va in timeout. Se la funzione SQL manca, si prosegue come prima.
   const chiavePren = scud ? `centro:${centro.id}:${merlino ? "merlino" : "athena"}` : `utente:${user.id}:${chiaveMese}`;
-  let prenotato = false;
-  {
-    const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: scud ? mese : periodo, p_limite: limite, p_base: usati });
-    if (ePren) console.warn("ai_prenota non disponibile:", ePren.message);
-    else if (Number(pren) < 0) return risposta(200, { limite_raggiunto: true, uso: { usati: limite, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
-    else { prenotato = true; usati = Math.max(usati, Number(pren) - 1); }
+  let prenotato = 0;
+  for (let k = 0; k < peso; k++) {
+    const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: scud ? mese : periodo, p_limite: limite, p_base: usati + k });
+    if (ePren) { console.warn("ai_prenota non disponibile:", ePren.message); break; }
+    if (Number(pren) < 0) {
+      for (let j = 0; j < prenotato; j++) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: scud ? mese : periodo }).then(() => {}, () => {});
+      return risposta(200, { limite_raggiunto: true, peso, uso: { usati: limite, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
+    }
+    if (k === 0) usati = Math.max(usati, Number(pren) - 1);
+    prenotato++;
   }
 
   // contesto: cavalli, memoria, cronologia
@@ -1031,12 +1052,16 @@ exports.handler = async (event) => {
   const contesto = [
     `Oggi è ${new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome" })} (${oggiISO()}).`,
     scud ? `Utente: ${membro.nome_visualizzato || profilo?.full_name || "—"} · centro "${centro.nome}" · ruolo ${membro.ruolo}${membro.livello ? " (livello " + membro.livello + ")" : ""} · pacchetto ${String(limitiCentro.pacchetto || "").toUpperCase()} · messaggi a ${merlino ? "Merlino" : "Athena"} questo mese (tutto il centro): ${usati + 1} di ${limite}.`
-      : `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati ${giornaliero ? "oggi" : "questo mese"}: ${usati + 1} di ${limite}.`,
+      : `Utente: ${profilo?.full_name || "—"} · piano ${piano} · messaggi AI usati ${giornaliero ? "oggi" : "questo mese"}: ${usati + peso} di ${limite}.`,
     scud ? "" : listaCavalli.length ? `Cavalli: ${listaCavalli.map((c) => c.name).join(", ")}.` : "L'utente non ha ancora registrato cavalli (si aggiungono dal tab Cavalli).",
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
     hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
       vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
-    chiediFeedback ? "DOMANDA PER I BOSS: in questa risposta, SOLO se la conversazione è tranquilla (nessuna emergenza, nessun problema urgente o arrabbiato), dopo aver risposto aggiungi in fondo una riga con parole tue di questo senso: \"C'è qualcosa che vorresti cambiare o migliorare in Equo? Dimmelo, che lo faccio presente ai Boss.\" Se non è il momento giusto, non aggiungerla." : "",
+    hammer && contestoApp ? "IN QUESTO MOMENTO IL MANISCALCO STA GUARDANDO (dati dell'app, usali per rispondere senza chiederli di nuovo):\n" + contestoApp : "",
+    hammer && modalita === "foto" ? ISTRUZIONI_FOTO_GUIDATA : "",
+    hammer && modalita === "caso" ? ISTRUZIONI_CASO : "",
+    hammer && modalita === "storico" ? "RIASSUNTO DELLO STORICO: riassumi in 5-8 righe lo storico del cavallo che il maniscalco sta guardando (dati sopra): ritmo dei lavori, ferro e correttivi, cose ricorrenti, cosa tenere d'occhio alla prossima visita. Non inventare dati che non ci sono." : "",
+    chiediFeedback && !modalita ? "DOMANDA PER I BOSS: in questa risposta, SOLO se la conversazione è tranquilla (nessuna emergenza, nessun problema urgente o arrabbiato), dopo aver risposto aggiungi in fondo una riga con parole tue di questo senso: \"C'è qualcosa che vorresti cambiare o migliorare in Equo? Dimmelo, che lo faccio presente ai Boss.\" Se non è il momento giusto, non aggiungerla." : "",
   ].filter(Boolean).join("\n");
 
   const messages = (storia || []).reverse().map((m) => ({ role: m.ruolo === "assistant" ? "assistant" : "user", content: m.contenuto }));
@@ -1114,14 +1139,14 @@ exports.handler = async (event) => {
     }
   } catch (e) {
     // errore del servizio AI: il messaggio prenotato si restituisce
-    if (prenotato) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: scud ? mese : periodo }).then(() => {}, () => {});
+    for (let j = 0; j < prenotato; j++) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: scud ? mese : periodo }).then(() => {}, () => {});
     return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   }
 
   // se ha usato la ricerca web ma non ha scritto i link, aggiungiamo quelli citati
   if (testoFinale && link.length && !/https?:\/\//.test(testoFinale)) testoFinale += "\n\nLink:\n" + link.map((l) => `- [${l.titolo}](${l.url})`).join("\n");
   if (!testoFinale) testoFinale = ctx.azioni.length ? "Ho preparato le schede da confermare qui sotto." : "Non sono riuscito a rispondere, riprova.";
-  const testoUtenteSalvato = (allegati.length ? `📎 ${allegati.length === 1 ? "1 allegato" : allegati.length + " allegati"}${messaggio ? " — " : ""}` : "") + messaggio;
+  const testoUtenteSalvato = (modalita === "foto" ? "📷 Analisi foto — " : allegati.length ? `📎 ${allegati.length === 1 ? "1 allegato" : allegati.length + " allegati"}${messaggio ? " — " : ""}` : "") + messaggio;
 
   // salva conversazione e consumo (service role: la tabella ai_utilizzo non è scrivibile dall'app)
   const p = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
@@ -1132,9 +1157,9 @@ exports.handler = async (event) => {
   ]);
   // domanda per i Boss fatta davvero: si segna per non ripeterla prima di 14 giorni
   if (chiediFeedback && /boss/i.test(testoFinale)) await admin.from("profiles").update({ ai_feedback_chiesto_at: new Date().toISOString() }).eq("id", user.id);
-  await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + 1, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
+  await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + peso, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
 
-  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + 1, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
+  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, modalita });
 };
 
 // esportati solo per i test
