@@ -295,6 +295,52 @@ const STRUMENTI_HAMMER = [
   { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 
+// ---------------------------------------------------------------- ARES (istruttori / trainer, vista professionista)
+// Fase 1: consiglia, prepara le sedute e legge sedute/cavalli seguiti dell'istruttore (RLS). Non modifica né condivide nulla da solo.
+// Testo identico a prompt-agenti/ares-system-prompt.txt
+const ISTRUZIONI_ARES = `Sei **Ares**, l'agente AI di Equo per gli ISTRUTTORI e i TRAINER di equitazione. Parli con un istruttore professionista, in italiano.
+Il tuo focus è la didattica e l'allenamento: come si imposta una seduta, cosa guardare in un video (assetto del cavaliere, equilibrio, contatto, impulso, rettilineità, transizioni, ritmo, linee e geometrie del campo), come spiegare un esercizio e come dare un feedback chiaro all'allievo e al proprietario. Sei sintetico, concreto e pratico, come un collega esperto che ti affianca a bordo campo.
+
+## Come lavori
+- Per le domande tecniche (esercizi, progressioni, metodo, biomeccanica di base del cavallo e del cavaliere) cerca PRIMA nelle schede verificate con cerca_conoscenze. Se ne trovi una pertinente basati su quella e chiudi con "Fonte: <fonte>". Se non c'è, rispondi con la tua competenza e dillo ("indicazione generale, non da scheda").
+- Per le sedute dell'istruttore usa gli strumenti: le_mie_sedute (elenco e stato), dettaglio_seduta (annotazioni, commenti, risposte del proprietario), cavalli_seguiti. Non inventare mai nomi, date o contenuti di una seduta.
+- Se l'istruttore ti dice qualcosa di utile da ricordare (allievi, obiettivi, preferenze di lavoro), salvalo con salva_memoria.
+- I cavalli seguiti possono essere collegati al proprietario solo con il suo consenso (richiesta, codice trainer, struttura): se una seduta non parte, di' di controllare lo stato del collegamento in Cavalli seguiti. Non promettere mai che il proprietario riceverà qualcosa senza il suo consenso.
+- Per come funziona l'app Trainer (nuova seduta, editor, strumenti Punto/Voce/Lente/Lavagna/Rallenta, invio, slot, cavalli seguiti) usa guida_app e non inventare percorsi.
+
+## Cosa sai fare adesso
+- Aiutare a preparare una seduta: obiettivo, riscaldamento, esercizi, criteri per dire "riuscito".
+- Suggerire COSA annotare su un video (quali momenti segnare, con quale strumento: Punto per un istante, Lente per un dettaglio, Rallenta per un gesto veloce, Lavagna per linee e angoli, Voce per spiegare) e come formulare il commento. Le annotazioni le applica l'istruttore con l'editor: tu non modifichi né condividi nulla da solo.
+- Riassumere una seduta per il proprietario in poche righe chiare e rispettose.
+- Spiegare l'app e i limiti del piano (Free: 10 slot, video fino a 60 s; Premium: più capienza).
+
+## Regole non negoziabili
+- Niente diagnosi, niente farmaci, niente dosi: se vedi o senti parlare di zoppia, dolore, ferita, febbre, colica o comportamento che fa pensare a un malessere, la PRIMA frase è "Qui serve il veterinario", poi al massimo 2 cose pratiche di sicurezza (fermare il lavoro, far riposare il cavallo).
+- La sicurezza prima di tutto: se un esercizio o un cavallo è pericoloso per cavaliere o cavallo, dillo chiaramente e proponi un'alternativa più semplice.
+- Giudizi sul cavaliere o sul cavallo: restano osservazioni tecniche e costruttive, mai umilianti. Il proprietario leggerà quello che l'istruttore gli invia.
+- Non prometti risultati o tempi certi. Non esprimi valutazioni di valore economico del cavallo.
+- Non condividi mai nulla di una seduta da solo e non dici di averlo fatto.
+
+## Stile
+- Breve: di solito 3-8 righe, elenchi corti solo se servono. Niente tabelle (si legge sul telefono). Grassetto solo per la cosa chiave.
+- Niente frasi di rito. Chiudi, se utile, con una domanda mirata (es. "Che livello ha l'allievo?").
+- Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
+
+${REGOLE_COMUNI}`;
+const STRUMENTI_ARES = [
+  { ...clonaStrumento("cerca_conoscenze"), description: "Cerca nelle schede verificate di Equo su allenamento, didattica e equitazione (esercizi, progressioni, assetto, biomeccanica di base). Restituisce testo e fonte." },
+  clonaStrumento("guida_app"),
+  clonaStrumento("salva_memoria"),
+  clonaStrumento("riferisci_ai_boss"),
+  clonaStrumento("le_mie_segnalazioni"),
+  { name: "le_mie_sedute", description: "Sedute dell'istruttore (bozze e inviate) con id, titolo, cavallo, stato, data, numero di annotazioni e di commenti. Nascoste escluse.", input_schema: { type: "object", properties: {
+      cerca: { type: "string", description: "Filtra per titolo o nome del cavallo." }, stato: { type: "string", enum: ["bozza", "inviata"] }, limite: { type: "number", description: "Max 30 (default 15)." } } } },
+  { name: "dettaglio_seduta", description: "Dettaglio di una seduta (id da le_mie_sedute): note, annotazioni (tipo, secondo, testo) e commenti/risposte del proprietario.", input_schema: { type: "object", properties: {
+      id: { type: "string" } }, required: ["id"] } },
+  { name: "cavalli_seguiti", description: "Cavalli seguiti dall'istruttore (nome, cavaliere, note, se collegati a un cavallo Equo) e quante sedute hanno.", input_schema: { type: "object", properties: {} } },
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
+];
+
 // ---------------------------------------------------------------- ATHENA (Equo Scuderia: gestori, staff, istruttori)
 const ISTRUZIONI_ATHENA = `Sei **Athena**, l'agente AI di Equo Scuderia: la segreteria digitale del centro ippico. Parli con chi lavora nel centro (amministratore, segreteria, istruttori, staff di scuderia), in italiano.
 Il tuo compito principale è essere la GUIDA puntuale del gestionale: conosci ogni funzione e procedura (Home, Il tuo Centro e staff, Cavalli & Salute, Lezioni, Pacchetti e carnet, Chat con clienti e team, Professionisti, Magazzino con categorie, articoli, movimenti, lotti, riordini, depositi e fornitori) e le spieghi passo per passo con esempi chiari.
@@ -741,6 +787,43 @@ async function eseguiStrumento(nome, input, ctx) {
       return out.length ? out : `Nessun cliente o cavallo corrisponde a "${input.cerca}".`;
     }
 
+    case "le_mie_sedute": {
+      if (ctx.agente !== "ares") return "Strumento riservato agli istruttori.";
+      let q = db.from("sedute").select("id, titolo, stato, inviata_il, created_at, trainer_cavalli(nome), sedute_annotazioni(id, nascosta), sedute_commenti(id)")
+        .eq("trainer_id", userId).eq("nascosta", false).order("created_at", { ascending: false }).limit(Math.min(Number(input.limite) || 15, 30));
+      if (["bozza", "inviata"].includes(input.stato)) q = q.eq("stato", input.stato);
+      const { data, error } = await q;
+      if (error) return "Errore nel leggere le sedute.";
+      const cerca = String(input.cerca || "").toLowerCase().trim();
+      return (data || []).filter((x) => !cerca || (x.titolo + " " + (x.trainer_cavalli?.nome || "")).toLowerCase().includes(cerca)).map((x) => ({
+        id: x.id, titolo: x.titolo, cavallo: x.trainer_cavalli?.nome || null, stato: x.stato, data: (x.inviata_il || x.created_at || "").slice(0, 10),
+        annotazioni: (x.sedute_annotazioni || []).filter((a) => !a.nascosta).length, commenti: (x.sedute_commenti || []).length }));
+    }
+
+    case "dettaglio_seduta": {
+      if (ctx.agente !== "ares") return "Strumento riservato agli istruttori.";
+      const id = String(input.id || "");
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return "Id seduta non valido: leggilo da le_mie_sedute.";
+      const { data: se, error } = await db.from("sedute").select("id, titolo, note, stato, inviata_il, created_at, trainer_cavalli(nome, cavaliere)").eq("id", id).eq("trainer_id", userId).maybeSingle();
+      if (error || !se) return "Seduta non trovata.";
+      const [an, co] = await Promise.all([
+        db.from("sedute_annotazioni").select("t_sec, tipo, testo, created_at").eq("seduta_id", id).eq("nascosta", false).order("t_sec", { ascending: true }).limit(60),
+        db.from("sedute_commenti").select("testo, autore_id, created_at").eq("seduta_id", id).order("created_at", { ascending: true }).limit(40)]);
+      return { titolo: se.titolo, stato: se.stato, cavallo: se.trainer_cavalli?.nome || null, cavaliere: se.trainer_cavalli?.cavaliere || null, note: se.note || null,
+        annotazioni: (an.data || []).map((a) => ({ secondo: Math.round(Number(a.t_sec) * 10) / 10, tipo: a.tipo, testo: a.testo || null })),
+        commenti: (co.data || []).map((c) => ({ di: c.autore_id === userId ? "istruttore" : "proprietario", testo: c.testo, il: (c.created_at || "").slice(0, 10) })) };
+    }
+
+    case "cavalli_seguiti": {
+      if (ctx.agente !== "ares") return "Strumento riservato agli istruttori.";
+      const { data, error } = await db.from("trainer_cavalli").select("id, nome, cavaliere, note, horse_id, sedute(id)").eq("trainer_id", userId).is("archiviato_il", null).order("created_at", { ascending: false }).limit(60);
+      if (error) return "Errore nel leggere i cavalli seguiti.";
+      const { data: coll } = await db.from("trainer_collegamenti").select("horse_id, stato").eq("trainer_id", userId);
+      const stato = Object.fromEntries((coll || []).map((k) => [k.horse_id, k.stato]));
+      const testo = { attivo: "collegato: il proprietario riceve le sedute", da_confermare_proprietario: "in attesa che il proprietario accetti", da_confermare_trainer: "invito del proprietario da accettare", revocato: "collegamento chiuso" };
+      return (data || []).map((c) => ({ nome: c.nome, cavaliere: c.cavaliere || null, note: c.note || null, collegamento: c.horse_id ? (testo[stato[c.horse_id]] || "da collegare") : "non collegato a un cavallo Equo", sedute: (c.sedute || []).length }));
+    }
+
     case "agenda": {
       const da = isoValida(input.da) ? input.da : oggiISO();
       const a = isoValida(input.a) ? input.a : aggiungiGiorni(da, 7);
@@ -1005,7 +1088,9 @@ exports.handler = async (event) => {
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
   // Pegasus: vista proprietario. Veterinari/istruttori (vista professionista non maniscalco): Equo AI neutro
   const pegasus = vista === "proprietario";
-  const agente = merlino ? "merlino" : athena ? "athena" : hammer ? "hammer" : pegasus ? "pegasus" : "equo";
+  // Ares: vista professionista di un utente che è istruttore/trainer (ruolo letto dal DB, non dall'app)
+  const ares = vista === "professionista" && !hammer && [profilo?.ruolo, profilo?.ruolo_secondario].includes("istruttore");
+  const agente = merlino ? "merlino" : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : pegasus ? "pegasus" : "equo";
   const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", chiaveMese).maybeSingle();
   let limite = LIMITI[piano], usati = uso?.conteggio || 0;
   if (scud) {
@@ -1056,6 +1141,7 @@ exports.handler = async (event) => {
     scud ? "" : listaCavalli.length ? `Cavalli: ${listaCavalli.map((c) => c.name).join(", ")}.` : "L'utente non ha ancora registrato cavalli (si aggiungono dal tab Cavalli).",
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
     hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
+      ares ? "Stai parlando con un istruttore/trainer (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali; i cavalli che segue come istruttore li leggi con cavalli_seguiti." :
       vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
     hammer && contestoApp ? "IN QUESTO MOMENTO IL MANISCALCO STA GUARDANDO (dati dell'app, usali per rispondere senza chiederli di nuovo):\n" + contestoApp : "",
     hammer && modalita === "foto" ? ISTRUZIONI_FOTO_GUIDATA : "",
@@ -1079,8 +1165,8 @@ exports.handler = async (event) => {
 
   const contestoConversazione = [...(storia || []).slice(0, 6).reverse().map((m) => ({ ruolo: m.ruolo, testo: String(m.contenuto || "").slice(0, 600) })),
     { ruolo: "user", testo: (messaggio || "(allegato)").slice(0, 600) }];
-  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : "proprietario",
-    guida: scud ? "scuderia" : vista === "professionista" ? "maniscalco" : "proprietario",
+  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : ares ? "istruttore" : "proprietario",
+    guida: scud ? "scuderia" : ares ? "istruttore" : vista === "professionista" ? "maniscalco" : "proprietario",
     strumenti: merlino ? STRUMENTI_MERLINO : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
     centroId: centro?.id || null, agente, vista, contestoConversazione };
   // ultima posizione nota del telefono (solo per il meteo, arrotondata a ~1 km dall'app)
@@ -1103,12 +1189,12 @@ exports.handler = async (event) => {
         headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
           model: MODELLO,
-          max_tokens: allegati.length ? 2000 : (hammer || merlino ? 1600 : 1200),
+          max_tokens: allegati.length ? 2000 : (hammer || merlino || ares ? 1600 : 1200),
           system: [
-            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
-          tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : STRUMENTI,
+          tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : STRUMENTI,
           messages,
         }),
       });
@@ -1163,4 +1249,4 @@ exports.handler = async (event) => {
 };
 
 // esportati solo per i test
-exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };
+exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, ISTRUZIONI_ARES, STRUMENTI_ARES, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };

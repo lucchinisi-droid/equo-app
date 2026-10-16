@@ -2557,6 +2557,189 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
 .dr-sett .g .m.f{border-color:#e8b04b}
 .dr-sett .g .m.og{border:2px solid #e8b04b}
 </style>
+
+<style id="pill-css">
+/* ===== BARRA A PILLOLA, tasto «+», tono per pagina (16/10/2026) ===== */
+#bottom-nav-owner .nav-btn[data-page="cavalli"]{display:flex}
+#bottom-nav-owner .nav-piu{display:none!important}
+.hm-flot.msg{display:none!important}
+.hm-flot.piu{display:none;position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:#e2ab45;color:#14482c;border:2px solid rgba(255,255,255,.7);z-index:61;box-shadow:0 10px 22px rgba(20,72,44,.35)}
+.hm-flot.piu svg{width:26px;height:26px;stroke-width:2.2}
+body.pl-fab .hm-flot.piu{display:flex}
+body:has(#ai-fab.con-novita).pl-owner .hm-flot.piu::after{content:"";position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#e5484d;border:2px solid #fffaf0}
+body.pl-owner .ai-fab,body.pl-man .ai-fab,body.pl-vet .ai-fab,body.pl-istr .ai-fab{display:none!important}
+.hm-menu-piu.pl-menu{padding:12px}
+@media (max-width:767px){
+  body .bottom-nav{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-width:none;transform:none;height:68px;padding:6px;border-radius:34px;border:1px solid rgba(255,255,255,.75);background:rgba(255,250,240,.82);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 12px 30px rgba(20,72,44,.25);justify-content:space-between;align-items:center;gap:0;overflow:visible}
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body .bottom-nav{background:#fffaf0}}
+  body .bottom-nav .nav-btn{flex:0 0 68px;width:68px;height:56px;padding:0;gap:2px;justify-content:center;border-radius:26px;font-size:9px;font-weight:500;color:#6a5a38;letter-spacing:0}
+  body .bottom-nav .nav-btn small{font-size:9px;font-weight:500;line-height:1}
+  body .bottom-nav .nav-btn .icon,body .bottom-nav .nav-btn .hm-ico{width:22px;height:22px}
+  body .bottom-nav .nav-btn svg{stroke-width:1.4}
+  body .bottom-nav .nav-btn.active{background:#14482c;color:#f3d58e}
+  body .bottom-nav .inbox-nav-badge{top:5px;right:12px}
+  body .bottom-nav .nav-btn.nav-hammer{flex:0 0 72px;width:72px;justify-content:flex-end;padding-bottom:5px;overflow:visible;background:none}
+  body .nav-hammer small{color:#14482c;font-weight:600}
+  .nav-hammer .hm-ham{position:absolute;top:-34px;left:50%;margin:0 0 0 -33px;width:66px;height:66px}
+  .nav-hammer .hm-ham svg{display:none}
+  .nav-hammer .hm-ham::before{inset:-3px;background:radial-gradient(circle at 50% 2px,#fff6d6 0,#f5c24f 1.6px,rgba(245,194,79,0) 4.5px);filter:drop-shadow(0 0 3px rgba(245,194,79,.9));animation:hmGira 12s linear infinite}
+  .nav-hammer .hm-ham::after{background:#06130f url(assets/agenti/hammer.webp) center/cover no-repeat;box-shadow:0 8px 18px rgba(20,72,44,.4)}
+  .page-content{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+  .hm-menu-piu{left:12px;right:12px;width:auto;bottom:calc(158px + env(safe-area-inset-bottom));max-height:calc(100dvh - 190px);overflow-y:auto}
+}
+@media (min-width:600px) and (max-width:767px){body .bottom-nav{left:50%;right:auto;width:456px;transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.nav-hammer .hm-ham::before{animation:none}}
+.hm-menu-piu{background:rgba(255,250,240,.9);-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3);border-radius:26px}
+.hm-menu-piu h5{margin:6px 4px 8px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:800}
+.hm-menu-piu .pl-tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.hm-menu-piu .pl-tl{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px 8px;border:1px solid var(--border);border-top:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.7);font:inherit;font-size:11.5px;font-weight:700;line-height:1.15;text-align:center;color:var(--text);width:auto}
+.hm-menu-piu .pl-tl+.pl-tl{border-top:1px solid var(--border)}
+.hm-menu-piu .pl-tl span.pi-c{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#14482c;color:#f3d58e;flex:none}
+.hm-menu-piu .pl-tl.o span.pi-c{background:#e2ab45;color:#14482c}
+.hm-menu-piu .pl-tl span.pi-c svg{width:20px;height:20px;stroke-width:1.5}
+.hm-menu-piu .pl-tl small{display:block;font-size:9px;color:var(--muted);font-weight:700;margin-top:1px}
+.hm-menu-piu .pl-peg{display:flex;gap:10px;align-items:center;text-align:left;width:100%;background:#e2ab45;border:1px solid #c98f26;border-radius:20px;padding:10px 12px;margin-bottom:10px;font:inherit;color:#14482c;cursor:pointer}
+.hm-menu-piu .pl-peg .im{width:50px;height:50px;border-radius:50%;overflow:hidden;flex:none;background:#0b1626;border:2px solid #fff6e2;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.hm-menu-piu .pl-peg .im img{width:100%;height:100%;object-fit:cover;display:block}
+.hm-menu-piu .pl-peg b{font-family:Fraunces,serif;font-size:16px;display:block}
+.hm-menu-piu .pl-peg span.t{font-size:11.5px;font-weight:600;color:#4a3510;display:block;width:auto;height:auto;border-radius:0;background:none}
+.hm-menu-piu .pl-peg>div{min-width:0}
+/* vet e istruttori: icona del loro agente (presto disponibile) */
+body.pl-vet .ai-fab,body.pl-istr .ai-fab{background:#06130f center/cover no-repeat;border:2px solid #e2ab45}
+body.pl-vet .ai-fab{background-image:url(assets/agenti/galeno.webp)}
+body.pl-istr .ai-fab{background-image:url(assets/agenti/ares.webp)}
+body.pl-vet .ai-fab .icon,body.pl-vet .ai-fab .ai-fab-agente,body.pl-istr .ai-fab .icon,body.pl-istr .ai-fab .ai-fab-agente{display:none}
+/* tono per pagina (versione prudente): sfondo più chiaro in Home, sempre più intenso verso l'ultima voce della barra */
+html body[data-tono] #screen-app{--tono:#fbf3e2;background:linear-gradient(180deg,var(--tono) 0,var(--tono) 120px,var(--bg) 430px)}
+html body[data-tono="2"] #screen-app{--tono:#f3e2b6}
+html body[data-tono="3"] #screen-app{--tono:#e6cf8f}
+html body[data-tono="4"] #screen-app{--tono:#a9bb94}
+html body[data-tono="5"] #screen-app{--tono:#7f9a73}
+body[data-tono] #screen-app .topbar{background:transparent;border-bottom:0}
+</style>
+<style id="pl2-css">
+body.pl-vet .nav-hammer .hm-ham::after{background-image:url(assets/agenti/galeno.webp)}
+body.pl-istr .nav-hammer .hm-ham::after{background-image:url(assets/agenti/ares.webp)}
+body.pl-vet .nav-hammer .hm-ham::after,body.pl-istr .nav-hammer .hm-ham::after{background-size:cover;background-position:center}
+</style>
+<style id="hv3-css">
+body.pl-owner #page-home{position:relative}
+body.pl-owner #meteo-owner{display:none}
+.hv3-met{position:absolute;right:0;top:0;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px 12px 3px 4px;cursor:pointer}
+.hv3-met .meteo-box{width:auto;min-height:0;margin:0;padding:0;border:0;background:none;display:flex;gap:0}
+.hv3-met .meteo-g:not(.oggi){display:none}.hv3-met .meteo-g.oggi{flex-direction:row;gap:4px;padding:0}.hv3-met .meteo-g.oggi b{display:none}
+.hv3-met .meteo-g .mi{width:30px;height:30px}.hv3-met .meteo-g small{font-size:14px;font-weight:800;color:var(--text)}
+.hv3-met .meteo-scheletro:not(:first-child){display:none}.hv3-met .meteo-scheletro{width:70px;height:30px;flex:none;margin:0}
+.dr-ultimi,.dr-rapidi{display:none!important}
+.hv3-stor{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 10px;margin:4px 0 2px;scrollbar-width:none}.hv3-stor::-webkit-scrollbar{display:none}
+.hv3-st{flex:0 0 auto;width:64px;text-align:center;background:none;border:0;padding:0;font:inherit;cursor:pointer;color:var(--text)}
+.hv3-st .c{width:60px;height:60px;border-radius:50%;margin:0 auto;padding:2px;background:linear-gradient(135deg,#e2ab45,#14482c);display:flex}
+.hv3-st .c>span{flex:1;border-radius:50%;background:var(--surface) center/cover;display:flex;align-items:center;justify-content:center;color:#14482c;border:2px solid var(--surface)}
+.hv3-st .c svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hv3-st small{display:block;font-size:10.5px;margin-top:4px;color:var(--muted);font-weight:600}
+.hv3-st.vuoto .c{background:none;border:2px dashed var(--border);padding:0}.hv3-st.vuoto .c>span{border:0;background:none;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.04em}
+.hv3-due{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 12px}
+.hv3-k{border-radius:18px;padding:14px;border:1px solid var(--border);background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:var(--text);min-height:92px;display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden}
+.hv3-k b{font-size:14.5px}.hv3-k span{font-size:12px;color:var(--muted);line-height:1.35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hv3-k i{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.hv3-k i svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hv3-k.pren{background:#e9f0e4}.hv3-k.pren i{background:#cfe0c6;color:#14482c}
+.hv3-k.msg{background:#fbefc7;border-color:#ecd28a}.hv3-k.msg i{background:#f2d88b;color:#6b4a0c}
+.hv3-k.sch i{background:#dbe9d6;color:#14482c}.hv3-k.spe{background:#fff7e3}.hv3-k.spe i{background:#f5e0a6;color:#7a5410}
+#home-main{display:flex!important;flex-direction:column}#home-main[style*="none"]{display:none!important}
+#home-main>*{order:6}
+#home-main>#hv3-scad{order:1}#home-main>#hv3-pref{order:2}#home-main>#hv3-daequo{order:3}
+#home-main>.stat-row,#home-main>#home-last-message-card{display:none!important}
+.hv3-scad{margin-bottom:14px;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:var(--surface)}
+.hv3-scad .poster{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;background:linear-gradient(120deg,rgba(20,72,44,.92),rgba(20,72,44,.7)),url(assets/equo/e-18.jpg) center/cover;color:#fbf3e2}
+.hv3-scad .poster b{font-size:15px;display:block}.hv3-scad .poster span{font-size:12px;opacity:.85}
+.hv3-scad .poster em{margin-left:auto;font-style:normal;background:#e2ab45;color:#14482c;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800}
+.hv3-scad .corpo{display:none;padding:14px}.hv3-scad.aperta .corpo{display:block}
+.hv3-scad .corpo .section-title{display:none}
+#home-deadlines>*:nth-child(n+6){display:none}
+.hv3-pref{margin-bottom:14px;border-radius:18px;background:#fbefc7;border:1px solid #ecd28a;padding:14px}
+.hv3-pref h4{margin:0 0 10px;font-size:14.5px;display:flex;justify-content:space-between;align-items:center}.hv3-pref h4 button{background:none;border:0;font:inherit;font-size:12px;font-weight:800;color:#8a6516;cursor:pointer}
+.hv3-pr{display:flex;gap:10px;justify-content:space-between}
+.hv3-p{flex:1;max-width:62px;text-align:center;background:none;border:0;padding:0;font:inherit;cursor:pointer;color:var(--text)}
+.hv3-p .c{position:relative;width:52px;height:52px;border-radius:50%;margin:0 auto;background:#14482c;color:#e2ab45;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;font-family:Fraunces,serif}
+.hv3-p .c b{position:absolute;top:-3px;right:-3px;background:#c9473f;color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;font-family:inherit}
+.hv3-p small{display:block;font-size:10.5px;margin-top:4px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hv3-p.vuota .c{background:none;border:2px dashed #d3b970;color:#a8821e;font-size:22px}
+.hv3-sel{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);font-size:14px}
+</style>
+<style id="lib3-css">
+.lb-tabs{display:flex;gap:6px;margin:0 0 14px;padding:4px;border-radius:999px;background:rgba(255,250,240,.8);border:1px solid var(--border)}
+.lb-tabs button{flex:1;border:0;background:none;border-radius:999px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.lb-tabs button.on{background:#14482c;color:#f6e7c1}
+.lb-badge{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.lb-badge.ok{background:#dcebd6;color:#14482c}.lb-badge.dic{background:#f5e6b8;color:#7a5410}
+.lb-foto{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lb-foto button{aspect-ratio:1;border-radius:14px;border:2px dashed var(--border);background:var(--surface) center/cover;font:inherit;font-size:10.5px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding:4px}
+.lb-foto button.piena{border:0;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.lb-riga{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.lb-riga:last-child{border-bottom:0}
+.lb-blocco{text-align:center;padding:18px 8px}.lb-blocco p{font-size:13px;line-height:1.55;color:var(--muted);margin:6px 0 12px}
+.lb-tg{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13.5px}
+</style>
+<style id="tr-css">
+body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
+.tr-h{font-family:Fraunces,serif;font-size:19px;margin:2px 0 2px}.tr-sub{color:var(--muted);font-size:12.5px;margin-bottom:14px}
+.tr-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px}
+.tr-card h4{margin:0 0 8px;font-size:14.5px;display:flex;justify-content:space-between;align-items:center}
+.tr-card h4 button{background:none;border:0;font:inherit;font-size:12px;font-weight:800;color:#8a6516;cursor:pointer}
+.tr-cta{display:flex;gap:10px;align-items:center;border-radius:20px;padding:16px;margin-bottom:12px;background:linear-gradient(135deg,#14482c,#2c6a45);color:#fbf3e2}
+.tr-cta b{display:block;font-family:Fraunces,serif;font-size:17px;margin-bottom:2px}.tr-cta span{font-size:12.5px;opacity:.9}
+.tr-cta .bt{margin-left:auto;display:flex;flex-direction:column;gap:6px}
+.tr-btn{border:0;border-radius:999px;padding:9px 14px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;background:#e2ab45;color:#14482c;white-space:nowrap}
+.tr-btn.v{background:#14482c;color:#f6e7c1;border:1px solid #e2ab45}.tr-btn.g{background:rgba(255,255,255,.18);color:#fbf3e2}.tr-btn.o{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.tr-slot{height:8px;border-radius:99px;background:#eadfc6;overflow:hidden;margin:8px 0 4px}.tr-slot i{display:block;height:100%;background:linear-gradient(90deg,#e2ab45,#14482c)}
+.tr-riga{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}.tr-riga:last-child{border-bottom:0}
+.tr-riga .th{width:44px;height:44px;border-radius:12px;background:#14482c;color:#e2ab45;display:flex;align-items:center;justify-content:center;flex:none}
+.tr-riga .th svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tr-riga b{display:block;font-size:14px}.tr-riga small{color:var(--muted);font-size:12px}
+.tr-chip{margin-left:auto;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.tr-chip.b{background:#f5e6b8;color:#7a5410}.tr-chip.i{background:#dcebd6;color:#14482c}.tr-chip.n{background:#f2d4d0;color:#8a2a22}
+.tr-vuoto{text-align:center;padding:22px 10px;color:var(--muted);font-size:13px;line-height:1.55}
+.tr-ed{display:none;position:fixed;inset:0;z-index:90;background:#0e1a14;color:#fbf3e2;flex-direction:column}
+.tr-ed.on{display:flex}
+.tr-top{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px}
+.tr-top b{flex:1;font-family:Fraunces,serif;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-top button.ind{background:none;border:0;color:#fbf3e2;font-size:24px;line-height:1;cursor:pointer;padding:4px 8px}
+.tr-stage{position:relative;background:#000;flex:0 0 auto;max-height:42vh;display:flex;justify-content:center}
+.tr-stage video{width:100%;max-height:42vh;display:block;background:#000}
+.tr-stage canvas#tr-cv{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+#tr-ov{position:absolute;left:8px;right:8px;bottom:8px;pointer-events:none;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#tr-ov .bl{background:rgba(226,171,69,.95);color:#14301c;border-radius:12px;padding:6px 10px;font-size:13px;font-weight:700;max-width:90%}
+#tr-lente{position:absolute;right:8px;top:8px;width:34%;aspect-ratio:4/3;border:2px solid #e2ab45;border-radius:10px;display:none;background:#000}
+.tr-ctl{display:flex;align-items:center;gap:8px;padding:8px 12px}
+.tr-ctl button{background:rgba(255,255,255,.12);border:0;color:#fbf3e2;border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
+.tr-ctl button.on{background:#e2ab45;color:#14301c}.tr-ctl .t{font-variant-numeric:tabular-nums;font-size:12.5px;margin-left:auto;opacity:.85}
+.tr-tl{position:relative;height:34px;margin:0 12px;background:rgba(255,255,255,.1);border-radius:99px;touch-action:none}
+.tr-tl .pr{position:absolute;left:0;top:0;bottom:0;background:rgba(226,171,69,.35);border-radius:99px;pointer-events:none}
+.tr-tl .pt{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid #0e1a14;pointer-events:none}
+.tr-tl .rl{position:absolute;top:10px;bottom:10px;background:rgba(138,180,255,.55);border-radius:6px;pointer-events:none}
+.tr-tools{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
+.tr-tools button{flex:1 0 auto;background:#1b2f25;border:1px solid #2f4a3a;color:#fbf3e2;border-radius:14px;padding:9px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:62px}
+.tr-tools button.on{background:#e2ab45;color:#14301c;border-color:#e2ab45}
+.tr-tools svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tr-list{flex:1;overflow:auto;padding:4px 12px calc(20px + env(safe-area-inset-bottom))}
+.tr-an{display:flex;gap:10px;padding:10px;border-radius:14px;background:#16281f;margin-bottom:8px;font-size:13px}
+.tr-an .tm{font-variant-numeric:tabular-nums;font-weight:800;color:#e2ab45;cursor:pointer;flex:none}
+.tr-an .tx{flex:1}.tr-an .tx small{display:block;opacity:.7;margin-top:2px}
+.tr-an button{background:none;border:0;color:#e2ab45;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.tr-lav{display:none;gap:6px;padding:6px 12px;align-items:center}.tr-lav.on{display:flex}
+.tr-lav button{background:#1b2f25;border:1px solid #2f4a3a;color:#fbf3e2;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:700}
+.tr-lav button.on{background:#e2ab45;color:#14301c}.tr-lav i{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #fff;display:inline-block;cursor:pointer}
+.tr-field{width:100%;box-sizing:border-box;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;padding:11px 12px;font:inherit;margin-bottom:10px}
+</style>
+<style id="trc-css">
+.tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
+.tr-az .tr-btn{padding:8px 11px;font-size:12px}
+.tr-dest{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px}
+.tr-dest input{width:20px;height:20px;accent-color:#14482c;flex:none}
+.tr-dest b{display:block}.tr-dest small{color:var(--muted);font-size:12px}
+.tr-dest-nota{background:#f5e6b8;color:#5f4410;border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:8px}
+</style>
 </head>
 <body>
 
@@ -2673,9 +2856,9 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
         <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
       </button>
-      <button class="role-card" onclick="apriCandidatura('istruttore','app_primo_accesso')">
+      <button class="role-card" onclick="chooseMainRole('istruttore')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
-        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Allievi, cavalli e sedute di lavoro</div></div>
       </button>
       <button class="role-card disabled" disabled>
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-shop"></i></span></div>
@@ -3201,11 +3384,10 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
   <div class="bottom-nav" id="bottom-nav-owner">
     <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
     <button class="nav-btn" data-page="diario" onclick="showPage('diario')"><span class="icon"><svg><use href="#i-diario"/></svg></span><small>Diario</small></button>
-    <button class="nav-piu" onclick="diarioApri('foto')" aria-label="Nuovo momento nel Diario"><span><svg class="ic-d"><use href="#i-plus"/></svg></span></button>
-    <button class="nav-btn" data-page="chat" onclick="showPage('chat')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Chat</small><span class="inbox-nav-badge" id="owner-chat-nav-badge" style="display:none"></span></button>
-    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><small>Cavalli</small></button>
+    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.4"/><path d="M5.5 16c.7-1.8 2-2.6 3.5-2.6s2.8.8 3.5 2.6M14.5 9.5h4M14.5 13h3"/></svg></span><small>Libretto</small></button>
+    <button class="nav-btn" data-page="chat" onclick="showPage('chat')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="owner-chat-nav-badge" style="display:none"></span></button>
     <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Calendario</small></button>
-    <button class="nav-btn" data-page="spese" onclick="showPage('spese')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
+    <button class="nav-btn" data-page="spese" onclick="showPage('spese')" style="display:none"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
   </div>
   <div class="bottom-nav" id="bottom-nav-pro" style="display:none">
     <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
@@ -4268,17 +4450,7 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
     <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
     <button class="link-altro-profilo" onclick="openRichiestaProfilo()">Hai bisogno di aggiungere un altro profilo? <u>Clicca qui</u></button>
 
-    <div class="menu-section-label">Home</div>
-    <div class="menu-row">
-      <div class="menu-row-label">
-        <span class="fa-icon"><i class="fa-solid fa-table-cells-large"></i></span>
-        <span>Vista Widget<br><small class="muted" style="font-size:11px">Spenta: torni alla Home classica</small></span>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="vista-widget-switch" onchange="cambiaVistaHome(this.checked)">
-        <span class="switch-track"><span class="switch-thumb"></span></span>
-      </label>
-    </div>
+    <div class="menu-section-label" id="menu-home-label">Versione</div>
     <div class="menu-row" id="menu-vista-man-row" style="display:none;margin-top:8px">
       <div class="menu-row-label">
         <span class="fa-icon"><i class="fa-solid fa-sliders"></i></span>
@@ -4461,9 +4633,9 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
         <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
       </button>
-      <button class="role-card" onclick="closeModal('modal-add-pro-role');apriCandidatura('istruttore','app_aggiungi_profilo')">
+      <button class="role-card" onclick="confirmAddSecondaryRole('istruttore')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
-        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Allievi, cavalli e sedute di lavoro</div></div>
       </button>
     </div>
   </div>
@@ -7776,7 +7948,7 @@ function agenteAiHammer(){
   return vistaAi() === "professionista" && (currentUser?.vistaAttiva || currentUser?.ruolo) === "maniscalco";
 }
 function nomeAgenteAi(){
-  return agenteAiHammer() ? "Hammer" : vistaAi() === "proprietario" ? "Pegasus" : "Equo AI";
+  return agenteAiHammer() ? "Hammer" : vistaAi() === "proprietario" ? "Pegasus" : (currentUser?.vistaAttiva || currentUser?.ruolo) === "veterinario" ? "Galeno" : (currentUser?.vistaAttiva || currentUser?.ruolo) === "istruttore" ? "Ares" : "Equo AI";
 }
 const BENVENUTO_PEGASUS = 'Ciao, sono <strong>Pegasus</strong> 🪽. Tengo d\'occhio i tuoi cavalli: scadenze, spese, appuntamenti col maniscalco e lezioni, e ti dico cosa fare e quando. Prova a chiedermi <em>"Cosa scade questo mese?"</em> o <em>"Quanto ho speso in pensione quest\'anno?"</em>. Con la 📎 mandami una fattura o il certificato vaccinale: preparo io le schede da confermare.';
 const BENVENUTO_EQUO_AI = document.getElementById("ai-benvenuto")?.innerHTML || "";
@@ -8169,12 +8341,14 @@ async function loadHomeLastMessage(){
 
   if(candidates.length === 0) return;
   candidates.sort((a, b) => new Date(b.data) - new Date(a.data));
+  window.homeChatTutte = candidates;
   const top = candidates[0];
   homeLastMessageTarget = top;
   document.getElementById("home-last-message-from").textContent = top.nome;
   document.getElementById("home-last-message-preview").textContent = top.testo;
   card.style.display = "block";
   if(typeof wgRidisegna === "function" && vistaAi() === "proprietario") wgRidisegna();
+  if(typeof homeV3Chat === "function") homeV3Chat();
 }
 
 function goToLastMessage(){
@@ -16574,7 +16748,7 @@ const WG_IC = {
 };
 const wgEsc = s => escapeHtml(String(s ?? ""));
 const wgEuro = n => "€ " + Math.round(Number(n) || 0).toLocaleString("it-IT");
-function vistaWidgetAttiva(){ return !currentUser || currentUser.homeVista !== "standard"; }
+function vistaWidgetAttiva(){ return true; }  // Home a widget unica (16/10/2026): niente più Home classica
 function incassiNascosti(){ return !!(currentUser && currentUser.incassiNascosti); }
 
 
@@ -16601,8 +16775,8 @@ const HM_NAV = `
   <button class="nav-btn" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
   <button class="nav-btn" data-page="pro-agenda" onclick="showPage('pro-agenda')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
   <button class="nav-btn nav-hammer" id="nav-hammer" onclick="openAiSheet()" aria-label="Hammer, agente di mascalcia"><span class="hm-ham">${HM_IC.hammer}<i class="hm-ham-dot"></i></span><small>Hammer</small></button>
-  <button class="nav-btn" data-page="pro-clienti" data-cart="clienti" onclick="hmCartella('clienti')"><span class="icon hm-ico">${HM_IC.users}</span><small>Clienti</small></button>
-  <button class="nav-btn" data-page="pro-clienti" data-cart="cavalli" onclick="hmCartella('cavalli')"><span class="icon hm-ico">${HM_IC.ferro}</span><small>Cavalli</small></button>`;
+  <button class="nav-btn" data-page="pro-inbox" onclick="hmMessaggi()"><span class="icon hm-ico">${HM_IC.inbox}</span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>
+  <button class="nav-btn" data-page="pro-clienti" data-cart="clienti" onclick="hmCartella('clienti')"><span class="icon hm-ico">${HM_IC.users}</span><small>Clienti</small></button>`;
 let hmNavOriginale = null;
 function homeManAttiva(){ return !!currentUser && agenteAiHammer(); }
 function applicaHomeMan(){
@@ -18634,6 +18808,962 @@ async function albumNascondi(){
   const _od = openHorseDetail; openHorseDetail = async function(id){ await _od(id); try{ albumRender(id); }catch(e){} };
 })();
 
+</script>
+
+<script id="pill-js">
+/* ===== BARRA A PILLOLA, «+» e tono per pagina (16/10/2026) ===== */
+function plRuolo(){
+  if(!currentUser) return null;
+  if(vistaAi() === "proprietario") return "owner";
+  if(agenteAiHammer()) return "man";
+  const r = currentUser.vistaAttiva || currentUser.ruolo;
+  return r === "veterinario" ? "vet" : r === "istruttore" ? "istr" : "pro";
+}
+const PL_TONI = {
+  owner: { home: 1, diario: 2, cavalli: 3, spese: 3, chat: 4, prenotazioni: 5 },
+  man:   { "pro-home": 1, "pro-agenda": 2, "pro-incassi": 3, "pro-inbox": 4, "pro-clienti": 5 },
+  vet:   { "pro-home": 1, "pro-agenda": 2, "pro-inbox": 3, "pro-clienti": 4, "pro-incassi": 5 },
+  istr:  { "pro-home": 1, "pro-agenda": 2, "pro-inbox": 3, "pro-clienti": 4, "pro-incassi": 5 },
+  pro:   { "pro-home": 1, "pro-agenda": 2, "pro-inbox": 3, "pro-clienti": 4, "pro-incassi": 5 }
+};
+function plPagina(){ return document.querySelector(".page-content.active")?.id?.replace("page-", "") || ""; }
+function plAggiorna(){
+  const app = document.getElementById("screen-app");
+  const r = app && app.classList.contains("active") ? plRuolo() : null;
+  const b = document.body;
+  ["owner", "man", "vet", "istr", "pro"].forEach(k => b.classList.toggle("pl-" + k, r === k));
+  const pg = plPagina();
+  const tono = r ? ((PL_TONI[r] || {})[pg] || 1) : null;
+  if(tono) b.dataset.tono = tono; else delete b.dataset.tono;
+  b.classList.toggle("pl-fab", (r === "owner" || r === "man") && pg !== "chat" && pg !== "pro-inbox");
+}
+const _plShowPage = showPage;
+showPage = function(){ const x = _plShowPage.apply(this, arguments); plAggiorna(); return x; };
+const _plApplicaHm = applicaHomeMan;
+applicaHomeMan = function(){ const x = _plApplicaHm.apply(this, arguments); plAggiorna(); return x; };
+setInterval(plAggiorna, 1200);
+document.addEventListener("DOMContentLoaded", plAggiorna);
+
+const PLI = {
+  cal: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M10 16h4M12 14v4"/></svg>',
+  fatto: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>',
+  scuderia: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M2 21h20"/><rect x="8" y="13" width="8" height="8"/><path d="m8 13 8 8M16 13l-8 8"/></svg>',
+  scad: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg>',
+  pin: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  partner: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+};
+function plTile(ic, t, az, o, cls, sotto){
+  return `<button class="pl-tl${o ? " o" : ""} ${cls || ""}" onclick="hmChiudi();${az}"><span class="pi-c">${ic}</span>${t}${sotto ? `<small>${sotto}</small>` : ""}</button>`;
+}
+function plSez(t, tiles){ return `<h5>${t}</h5><div class="pl-tg">${tiles.join("")}</div>`; }
+function plCostruisciMenu(){
+  const m = document.getElementById("hm-menu-piu"); if(!m) return;
+  const r = plRuolo(); let h = "";
+  if(r === "owner"){
+    h += `<button class="pl-peg" onclick="hmChiudi();openAiSheet()"><span class="im"><img src="assets/agenti/pegasus.webp" alt=""></span><div><b>Chiedi a Pegasus</b><span class="t">Il tuo esperto equestre, risponde subito</span></div></button>`;
+    h += plSez("Vai a", [
+      plTile(HM_IC.wallet, "Spese", "showPage('spese')"),
+      plTile(HM_IC.ferro, "I miei cavalli", "showPage('cavalli')"),
+      plTile(PLI.pin, "Servizi vicino a te", "openServicesMap()"),
+      plTile(PLI.partner, "Partner", "window.location.href='mailto:gestione.equo@gmail.com?subject='+encodeURIComponent('Vorrei comparire come partner su Equo')"),
+      plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
+    ]);
+  } else if(r === "man"){
+    h += plSez("Crea subito", [
+      plTile(PLI.cal, "Appuntamento", "openInterventoModal(null)", 1),
+      plTile(PLI.fatto, "Intervento già fatto", "hmGiaFatto()", 1),
+      plTile(HM_IC.ferro, "Cavallo", "hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)", 1),
+      plTile(HM_IC.users, "Cliente", "apriNuovoCliente('proprietario')", 1),
+      plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1)
+    ]);
+    h += plSez("Vai a", [
+      plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
+      plTile(HM_IC.ferro, "Cavalli", "hmCartella('cavalli')"),
+      plTile(PLI.scuderia, "Scuderie e centri", "hmCartella('clienti')"),
+      plTile(PLI.scad, "Scadenze", "hmScadenze()"),
+      plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
+      plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
+      plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
+    ]);
+  } else return;
+  m.innerHTML = h; m.classList.add("pl-menu");
+}
+const _plHmPiu = hmPiu;
+hmPiu = function(){ plCostruisciMenu(); return _plHmPiu.apply(this, arguments); };
+// vet e istruttori: l'agente non c'è ancora → «presto disponibile»
+const _plOpenAi = openAiSheet;
+openAiSheet = function(){
+  const r = plRuolo();
+  if(r === "vet"){ showToast(nomeAgenteAi() + " è presto disponibile"); return; }
+  return _plOpenAi.apply(this, arguments);
+};
+// l'etichetta «Versione» del menu profilo compare solo se c'è l'interruttore Completa/Semplice
+const _plAggSw = aggiornaSwitchHome;
+aggiornaSwitchHome = function(){
+  const x = _plAggSw.apply(this, arguments);
+  const row = document.getElementById("menu-vista-man-row"), lab = document.getElementById("menu-home-label");
+  if(lab) lab.style.display = row && row.style.display !== "none" ? "" : "none";
+  return x;
+};
+</script>
+<script id="pl2-js">
+/* Veterinario e istruttore: stessa pillola del maniscalco, con il loro agente (Galeno / Ares) al centro.
+   L'agente non c'è ancora: al tocco compare «presto disponibile» (vedi openAiSheet sopra). */
+const PL_AGENTE = { vet: ["Galeno", "veterinario"], istr: ["Ares", "istruttore"] };
+function plNavAltri(){
+  const r = plRuolo(), nav = document.getElementById("bottom-nav-pro");
+  if(!nav || !PL_AGENTE[r]) return;
+  if(nav.dataset.alt === r) return;
+  const nome = PL_AGENTE[r][0];
+  nav.innerHTML = HM_NAV.replace('onclick="hmMessaggi()"', 'onclick="showPage(\'pro-inbox\'); loadColleghiList();"')
+    .replace('onclick="hmCartella(\'clienti\')"', 'onclick="showPage(\'pro-clienti\')"')
+    .replace(/Hammer, agente di mascalcia/, nome + ", agente AI").replace('<small>Hammer</small>', '<small>' + nome + '</small>')
+    .replace(/ data-cart="clienti"/, "");
+  nav.dataset.alt = r; delete nav.dataset.man;
+  nav.querySelectorAll(".nav-btn[data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === plPagina()));
+}
+const _pl2Agg = plAggiorna;
+plAggiorna = function(){
+  _pl2Agg.apply(this, arguments);
+  plNavAltri();
+  const r = plRuolo();
+  if(PL_AGENTE[r]){
+    const pg = plPagina();
+    document.body.classList.toggle("pl-fab", pg !== "pro-inbox");
+  }
+};
+const _pl2Menu = plCostruisciMenu;
+plCostruisciMenu = function(){
+  const r = plRuolo();
+  if(!PL_AGENTE[r]) return _pl2Menu.apply(this, arguments);
+  const m = document.getElementById("hm-menu-piu"); if(!m) return;
+  m.innerHTML = plSez("Vai a", [
+    plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
+    plTile(HM_IC.users, "Clienti", "showPage('pro-clienti')"),
+    plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
+    plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
+    plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
+  ]);
+  m.classList.add("pl-menu");
+};
+plAggiorna();
+</script>
+<script id="hv3-js">
+(function(){
+ var IC={foto:'<svg viewBox="0 0 24 24"><use href="#i-camera"/></svg>',vocale:'<svg viewBox="0 0 24 24"><use href="#i-mic"/></svg>',
+  nota:'<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
+  video:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>'};
+ var ICK={pren:'<svg viewBox="0 0 24 24"><use href="#i-calendar"/></svg>',msg:'<svg viewBox="0 0 24 24"><use href="#i-inbox"/></svg>',
+  sch:'<svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>',spe:'<svg viewBox="0 0 24 24"><use href="#i-wallet"/></svg>'};
+ function q(i){return document.getElementById(i);}
+ // 1) BUG foto: dopo la firma, le prime immagini si scaricano e diventano blob (il link firmato sul telefono a volte non carica)
+ var blobTent={};
+ var _firma=window.firmaUrl;
+ window.firmaUrl=async function(bucket,paths,mappa){
+  await _firma.apply(this,arguments);
+  try{
+   var da=(paths||[]).filter(function(p){return p&&!blobTent[bucket+"/"+p];}).slice(0,12);
+   await Promise.all(da.map(async function(p){
+    blobTent[bucket+"/"+p]=1;
+    try{var r=await sb.storage.from(bucket).download(p);if(r&&r.data&&r.data.size)mappa[p]=URL.createObjectURL(r.data);}catch(e){}
+   }));
+  }catch(e){}
+ };
+ // 2) meteo a pastiglia
+ function meteoPastiglia(){
+  var m=q("meteo-owner");if(!m||m.parentNode.classList.contains("hv3-met"))return;
+  var w=document.createElement("div");w.className="hv3-met";m.parentNode.insertBefore(w,m);w.appendChild(m);
+  m.style.display="";m.classList.add("hm-meteo");
+  w.onclick=function(e){if(e.target!==m&&!m.contains(e.target))m.click();};
+ }
+ // 3) storie + card
+ function dd(v){var d=new Date(v.data_voce);return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");}
+ window.homeV3Storie=function(){
+  var voci=(typeof diarioVoci!=="undefined"?diarioVoci:[]).slice(0,5);
+  if(!voci.length)return '<div class="hv3-stor"><button class="hv3-st vuoto" onclick="homeV3Vuoto()"><div class="c"><span>VUOTO</span></div><small>Ultimi momenti</small></button></div>';
+  return '<div class="hv3-stor">'+voci.map(function(v){
+   var u=typeof diarioFotoUrl==="function"?diarioFotoUrl(v):null;
+   return '<button class="hv3-st" onclick="diarioDettaglio(\''+v.id+'\')"><div class="c"><span'+(u?' style="background-image:url(\''+u+'\')"':'')+'>'+(u?'':(IC[v.tipo]||IC.nota))+'</span></div><small>'+dd(v)+'</small></button>';
+  }).join("")+'</div>';
+ };
+ window.homeV3Vuoto=function(){
+  diarioSheet("Ultimi momenti",'<p style="line-height:1.6">Qui compaiono gli ultimi 5 momenti del tuo cavallo: foto, video, vocali, note, ferrature, vaccini e lezioni.</p><p style="line-height:1.6">Ogni cerchio mostra la data e il tipo di momento. Per iniziare, scrivi il primo nel Diario.</p><button class="btn btn-primary" style="width:100%" onclick="closeModal(\'modal-dr-sheet\');diarioApri(\'foto\')">Aggiungi un momento</button>');
+ };
+ function cardHtml(){
+  var h=typeof diarioCavallo==="function"?diarioCavallo():null;
+  var uno=typeof horses!=="undefined"&&horses.length===1;
+  var spese=(q("stat-expenses")||{}).textContent||"€ 0";
+  var lm=typeof homeLastMessageTarget!=="undefined"?homeLastMessageTarget:null,msg=lm?('<b>'+escapeHtml(lm.nome)+'</b><span>'+escapeHtml(lm.testo||"")+'</span>'):'<b>Messaggi</b><span>Nessun messaggio per ora</span>';
+  return '<div class="hv3-due"><button class="hv3-k pren" onclick="showPage(\'prenotazioni\')"><i>'+ICK.pren+'</i><b>Prenotazioni</b><span>Le tue lezioni in scuderia</span></button>'+
+   '<button class="hv3-k msg" id="hv3-msg" onclick="'+(lm?'goToLastMessage()':"showPage('chat')")+'"><i>'+ICK.msg+'</i><small style="font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#8a6516">ULTIMO MESSAGGIO</small>'+msg+'</button></div>'+
+   '<div class="hv3-due"><button class="hv3-k sch" onclick="apriSchedaCavallo('+(uno?"'"+horses[0].id+"'":"null")+')"><i>'+ICK.sch+'</i><b>'+(uno&&h?'Scheda di '+escapeHtml(h.name):'I miei cavalli')+'</b><span>Libretto, salute e storico</span></button>'+
+   '<button class="hv3-k spe" onclick="showPage(\'spese\')"><i>'+ICK.spe+'</i><b>Spese</b><span>Questo mese '+escapeHtml(spese)+'</span></button></div>';
+ }
+ // 4) scadenze chiuse + chat preferite + Da Equo in basso
+ function scadenze(){
+  var dl=q("home-deadlines");if(!dl)return;var card=dl.closest(".card");if(!card||card.id==="hv3-scad")return;
+  card.id="hv3-scad";card.className="hv3-scad";
+  var p=document.createElement("div");p.className="poster";
+  p.innerHTML='<div><b>Prossime scadenze</b><span>Tocca per vedere le prossime 5</span></div><em id="hv3-scn"></em>';
+  p.onclick=function(){card.classList.toggle("aperta");};
+  var corpo=document.createElement("div");corpo.className="corpo";
+  while(card.firstChild)corpo.appendChild(card.firstChild);
+  card.appendChild(p);card.appendChild(corpo);
+ }
+ function contaScad(){var dl=q("home-deadlines"),n=q("hv3-scn");if(!dl||!n)return;var c=dl.querySelectorAll(".deadline-item,.dl-item,.card").length||0;n.textContent=c?c:"";n.style.display=c?"":"none";}
+ function chiavi(){try{return JSON.parse(localStorage.getItem("equo-chat-pref-"+(currentUser&&currentUser.id))||"null");}catch(e){return null;}}
+ function key(c){return c.tipo+":"+((c.target&&(c.target.membro_id||c.target.cliente_mascalcia_id||c.target.id))||c.nome);}
+ window.homeV3Chat=function(){
+  var main=q("home-main");if(!main)return;
+  var box=q("hv3-pref");if(!box){box=document.createElement("div");box.id="hv3-pref";box.className="hv3-pref";main.appendChild(box);}
+  var tutte=window.homeChatTutte||[],ch=chiavi(),scelte;
+  if(ch)scelte=ch.map(function(k){return tutte.find(function(c){return key(c)===k;});}).filter(Boolean);
+  else scelte=tutte.slice(0,5);
+  var cerchi=scelte.slice(0,5).map(function(c,i){return '<button class="hv3-p" onclick="homeV3Apri('+tutte.indexOf(c)+')"><div class="c">'+escapeHtml((c.nome||"?").trim().charAt(0).toUpperCase())+'</div><small>'+escapeHtml((c.nome||"").split(" ")[0])+'</small></button>';});
+  while(cerchi.length<5)cerchi.push('<button class="hv3-p vuota" onclick="homeV3Scegli()"><div class="c">+</div><small>Preferita</small></button>');
+  box.innerHTML='<h4>Chat preferite<button onclick="homeV3Scegli()">Modifica</button></h4><div class="hv3-pr">'+cerchi.join("")+'</div>';
+  var m=q("hv3-msg");if(m){var nuovo=document.createElement("div");nuovo.innerHTML=cardHtml();var n2=nuovo.querySelector("#hv3-msg");if(n2)m.replaceWith(n2);}
+ };
+ window.homeV3Apri=function(i){var c=(window.homeChatTutte||[])[i];if(!c)return;homeLastMessageTarget=c;goToLastMessage();};
+ window.homeV3Scegli=function(){
+  var tutte=window.homeChatTutte||[];
+  if(!tutte.length){showToast("Quando avrai delle chat potrai sceglierne 5 da tenere qui.");return;}
+  var ch=chiavi()||tutte.slice(0,5).map(key);
+  diarioSheet("Chat preferite",'<p class="muted" style="font-size:13px">Scegli fino a 5 chat da avere sempre a portata di mano.</p>'+tutte.map(function(c){var k=key(c);return '<label class="hv3-sel"><input type="checkbox" '+(ch.indexOf(k)>=0?"checked":"")+' data-k="'+escapeHtml(k)+'"> '+escapeHtml(c.nome)+'</label>';}).join("")+'<button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="homeV3Salva()">Salva</button>');
+ };
+ window.homeV3Salva=function(){
+  var sel=[].slice.call(document.querySelectorAll("#dr-sheet-b input[data-k]:checked")).map(function(x){return x.dataset.k;}).slice(0,5);
+  try{localStorage.setItem("equo-chat-pref-"+(currentUser&&currentUser.id),JSON.stringify(sel));}catch(e){}
+  closeModal("modal-dr-sheet");homeV3Chat();
+ };
+ // aggancio dopo il disegno della Home
+ function post(){
+  meteoPastiglia();scadenze();contaScad();
+  var o=q("home-oggi"),main=q("home-main");if(!o)return;
+  var oggi=o.querySelector(".dr-oggi");
+  if(oggi&&!o.querySelector(".hv3-stor")){
+   var w=document.createElement("div");w.id="hv3-sopra";w.innerHTML=homeV3Storie()+cardHtml();oggi.after(w);
+  }
+  var tit=o.querySelector(":scope > .eq-tit"),sc=o.querySelector(":scope > .eq-scroll");
+  if(tit&&sc&&main){var f=q("hv3-daequo");if(!f){f=document.createElement("div");f.id="hv3-daequo";main.appendChild(f);}f.innerHTML="";f.appendChild(tit);f.appendChild(sc);}
+  homeV3Chat();
+ }
+ var _dhr=window.diarioHomeRender;
+ window.diarioHomeRender=async function(){var r=await _dhr.apply(this,arguments);try{post();}catch(e){console.error(e);}return r;};
+ setInterval(function(){try{meteoPastiglia();scadenze();contaScad();}catch(e){}},2000);
+})();
+</script>
+<script id="lib3-js">
+(function(){
+ var TAB="identita";
+ function q(i){return document.getElementById(i);}
+ var POS=[["fronte","Fronte"],["sinistra","Sinistra"],["destra","Destra"],["particolari","Particolari"]];
+ function schede(){
+  var v=q("cavalli-detail-view");if(!v)return;
+  if(!q("lb-tabs")){
+   var t=document.createElement("div");t.id="lb-tabs";t.className="lb-tabs";
+   t.innerHTML='<button data-t="identita" class="on">Identità</button><button data-t="salute">Salute</button><button data-t="sport">Sport</button>';
+   t.onclick=function(e){var b=e.target.closest("button[data-t]");if(b)libTab(b.dataset.t);};
+   v.querySelector(".detail-header").after(t);
+   var cards=[].slice.call(v.children);
+   cards.forEach(function(c){
+    if(c===t||c.classList.contains("detail-header"))return;
+    var txt=(c.textContent||"");
+    var tab="identita";
+    if(c.id==="horse-dove")tab="identita";
+    else if(/Libretto sanitario|Allegati/.test(txt.slice(0,40)))tab="salute";
+    c.dataset.lbtab=tab;
+   });
+   var nuove=document.createElement("div");nuove.id="lb-nuove-identita";nuove.dataset.lbtab="identita";nuove.innerHTML='<div class="card" id="lb-foto-card" style="margin-bottom:14px"></div><div class="card" id="lb-vis-card" style="margin-bottom:14px"></div><div class="card" id="lb-storico-card" style="margin-bottom:14px;display:none"></div>';
+   q("horse-dove").after(nuove);
+   var sp=document.createElement("div");sp.id="lb-sport";sp.dataset.lbtab="sport";sp.innerHTML="";
+   t.after(sp);
+  }
+  libTab(TAB,true);
+ }
+ window.libTab=function(t,nofocus){
+  TAB=t;var v=q("cavalli-detail-view");
+  [].forEach.call(q("lb-tabs").children,function(b){b.classList.toggle("on",b.dataset.t===t);});
+  [].forEach.call(v.children,function(c){if(c.dataset&&c.dataset.lbtab)c.style.display=c.dataset.lbtab===t?"":"none";});
+  var sc=q("lb-storico-card");if(sc&&t==="identita"&&sc.dataset.ha!=="1")sc.style.display="none";
+  if(t==="sport")libSport();
+ };
+ // ---- Identità
+ function h(){return (typeof horses!=="undefined"&&typeof currentHorseId!=="undefined")?horses.find(function(x){return x.id===currentHorseId;}):null;}
+ var _ri=window.renderHorseInfoBox;
+ window.renderHorseInfoBox=function(hh){
+  _ri.apply(this,arguments);
+  try{
+   var box=q("horse-info-box");if(!box)return;
+   var rows=box.children;
+   for(var i=0;i<rows.length;i++){var l=rows[i].firstElementChild;if(l&&l.textContent==="Microchip"&&hh.microchip){
+    var b=document.createElement("span");b.className="lb-badge "+(hh.microchip_verificato?"ok":"dic");b.textContent=hh.microchip_verificato?"verificato":"dichiarato";
+    rows[i].lastElementChild.appendChild(b);}}
+   libFoto(hh);libVis(hh);libStorico(hh);
+  }catch(e){console.error(e);}
+ };
+ var _ohd=window.openHorseDetail;
+ window.openHorseDetail=async function(id){schede();TAB="identita";var r=await _ohd.apply(this,arguments);schede();return r;};
+ async function libUrl(path){try{var r=await sb.storage.from("cavalli-album").createSignedUrl(path,3600);return r.data&&r.data.signedUrl;}catch(e){return null;}}
+ async function libFoto(hh){
+  var c=q("lb-foto-card");if(!c)return;
+  var f=hh.foto_riconoscimento||{};
+  c.innerHTML='<div style="font-weight:700;font-size:14px;margin-bottom:4px">Foto di riconoscimento</div><div class="muted" style="font-size:12px;line-height:1.5;margin-bottom:10px">Quattro foto per riconoscere il cavallo: fronte, lato sinistro, lato destro e particolari (stelle, balzane, segni).</div><div class="lb-foto" id="lb-foto-g">'+POS.map(function(p){return '<button data-p="'+p[0]+'" onclick="libFotoScegli(\''+p[0]+'\')">'+p[1]+'</button>';}).join("")+'</div><input type="file" id="lb-foto-file" accept="image/*" style="display:none" onchange="libFotoCarica(this)">';
+  if(typeof DEMO_MODE!=="undefined"&&DEMO_MODE)return;
+  POS.forEach(async function(p){if(!f[p[0]])return;var u=await libUrl(f[p[0]]);var b=document.querySelector('#lb-foto-g button[data-p="'+p[0]+'"]');if(u&&b){b.style.backgroundImage="url('"+u+"')";b.classList.add("piena");}});
+ }
+ var posAtt=null;
+ window.libFotoScegli=function(p){posAtt=p;q("lb-foto-file").click();};
+ window.libFotoCarica=async function(inp){
+  var file=inp.files&&inp.files[0];inp.value="";if(!file||!posAtt)return;
+  if(typeof DEMO_MODE!=="undefined"&&DEMO_MODE){showToast("Nella demo le foto non si salvano");return;}
+  var hh=h();if(!hh)return;
+  try{
+   showToast("Carico la foto…");
+   var blob=await diarioComprimi(file);
+   var path=currentUser.id+"/riconoscimento/"+hh.id+"-"+posAtt+"-"+Date.now()+".jpg";
+   var up=await sb.storage.from("cavalli-album").upload(path,blob,{contentType:"image/jpeg"});if(up.error)throw up.error;
+   var nf=Object.assign({},hh.foto_riconoscimento||{});nf[posAtt]=path;
+   var r=await sb.from("horses").update({foto_riconoscimento:nf}).eq("id",hh.id);if(r.error)throw r.error;
+   hh.foto_riconoscimento=nf;libFoto(hh);showToast("Foto salvata");
+  }catch(e){showToast("Non sono riuscito a salvare la foto: "+(e.message||"errore"));}
+ };
+ // visibilità per i professionisti
+ function libVis(hh){
+  var c=q("lb-vis-card");if(!c)return;
+  var v=(hh.libretto_visibilita||{})._tutti||{identita:true,salute:true,sport:false};
+  function tg(k,t){return '<label class="lb-tg"><span>'+t+'</span><input type="checkbox" '+(v[k]?"checked":"")+' onchange="libVisSalva(\''+k+'\',this.checked)"></label>';}
+  c.innerHTML='<div style="font-weight:700;font-size:14px;margin-bottom:2px">Cosa vedono i professionisti</div><div class="muted" style="font-size:12px;line-height:1.5;margin-bottom:6px">Scegli quali schede del libretto possono consultare maniscalco, veterinario e istruttore collegati. Spese, note private e incassi non si vedono mai.</div>'+tg("identita","Identità")+tg("salute","Salute")+tg("sport","Sport");
+ }
+ window.libVisSalva=async function(k,val){
+  var hh=h();if(!hh)return;
+  var lv=Object.assign({},hh.libretto_visibilita||{});var t=Object.assign({identita:true,salute:true,sport:false},lv._tutti||{});t[k]=val;lv._tutti=t;
+  if(typeof DEMO_MODE!=="undefined"&&DEMO_MODE){hh.libretto_visibilita=lv;return;}
+  var r=await sb.from("horses").update({libretto_visibilita:lv}).eq("id",hh.id);
+  if(r.error){showToast("Non sono riuscito a salvare");libVis(hh);return;}
+  hh.libretto_visibilita=lv;showToast("Salvato");
+ };
+ async function libStorico(hh){
+  var c=q("lb-storico-card");if(!c||(typeof DEMO_MODE!=="undefined"&&DEMO_MODE))return;
+  try{
+   var r=await sb.from("cavalli_storico").select("*").eq("horse_id",hh.id).order("created_at",{ascending:false}).limit(10);
+   var d=r.data||[];c.dataset.ha=d.length?"1":"0";c.style.display=d.length&&TAB==="identita"?"":"none";if(!d.length)return;
+   c.innerHTML='<div style="font-weight:700;font-size:14px;margin-bottom:6px">Storico dei cambi</div>'+d.map(function(x){return '<div class="lb-riga"><span class="muted">'+escapeHtml(x.campo)+' · '+formatDate(x.created_at)+'</span><span style="text-align:right">'+escapeHtml(x.valore_prima||"—")+' → '+escapeHtml(x.valore_dopo||"—")+'</span></div>';}).join("");
+  }catch(e){}
+ }
+ // avviso quando si cambia il microchip
+ var _es=window.eseguiSalvataggioHorse;
+ window.eseguiSalvataggioHorse=async function(payload){
+  try{
+   if(typeof editingHorseId!=="undefined"&&editingHorseId){
+    var vecchio=(horses.find(function(x){return x.id===editingHorseId;})||{}).microchip;
+    if(vecchio&&payload.microchip&&String(vecchio).trim()!==String(payload.microchip).trim()){
+     var ok=await chiediSiNo("Cambiare il microchip?","Il numero resta nello storico del cavallo (prima e dopo) e il nuovo numero risulterà «dichiarato» finché un professionista non lo verifica. Chi segue il cavallo vede il cambio.");
+     if(!ok)return;
+    }
+   }
+  }catch(e){}
+  return _es.apply(this,arguments);
+ };
+ // ---- Sport (Premium)
+ async function libSport(){
+  var c=q("lb-sport");if(!c)return;var hh=h();if(!hh)return;
+  var prem=typeof isPremium==="function"&&isPremium();
+  if(!prem){
+   c.innerHTML='<div class="card lb-blocco"><div style="font-weight:700;font-size:15px">La scheda Sport è Premium</div><p>Discipline, livello, tessera federale e risultati di gara: tutta la carriera sportiva di '+escapeHtml(hh.name)+' in un posto solo, che lo segue anche se cambia proprietario.</p><button class="btn btn-primary" style="width:100%" onclick="closeModal(\'modal-dr-sheet\');togglePiano()">Passa a Premium</button></div>';
+   return;
+  }
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  var disc=[],voci=[];
+  if(!(typeof DEMO_MODE!=="undefined"&&DEMO_MODE)){
+   var a=await sb.from("cavalli_sport").select("*").eq("horse_id",hh.id).order("created_at");disc=a.data||[];
+   var b=await sb.from("sport_voci").select("*").eq("horse_id",hh.id).order("data",{ascending:false}).limit(50);voci=b.data||[];
+  }
+  c.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:700;font-size:14px">Discipline</div><button class="btn btn-outline btn-sm" onclick="libSportForm(\'disc\')">+ Disciplina</button></div>'+
+   (disc.length?disc.map(function(d){return '<div class="lb-riga"><span><b>'+escapeHtml(d.disciplina)+'</b>'+(d.livello?' · '+escapeHtml(d.livello):'')+'</span><span class="muted">'+escapeHtml(d.tessera||"")+'</span></div>';}).join(""):'<div class="muted" style="font-size:13px">Nessuna disciplina ancora.</div>')+'</div>'+
+   '<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:700;font-size:14px">Gare e risultati</div><button class="btn btn-outline btn-sm" onclick="libSportForm(\'voce\')">+ Risultato</button></div>'+
+   (voci.length?voci.map(function(x){return '<div class="lb-riga"><span><b>'+escapeHtml(x.titolo)+'</b><br><span class="muted">'+formatDate(x.data)+(x.luogo?' · '+escapeHtml(x.luogo):'')+'</span></span><span style="text-align:right">'+escapeHtml(x.esito||"")+'</span></div>';}).join(""):'<div class="muted" style="font-size:13px">Nessun risultato registrato.</div>')+'</div>';
+ }
+ window.libSportForm=function(tipo){
+  var f=tipo==="disc"
+   ?'<input class="input" id="sp-1" placeholder="Disciplina (es. Salto ostacoli)" style="margin-bottom:8px"><input class="input" id="sp-2" placeholder="Livello (es. C130)" style="margin-bottom:8px"><input class="input" id="sp-3" placeholder="Tessera federale" style="margin-bottom:8px">'
+   :'<input class="input" id="sp-1" placeholder="Gara o evento" style="margin-bottom:8px"><input class="input" type="date" id="sp-2" style="margin-bottom:8px"><input class="input" id="sp-3" placeholder="Luogo" style="margin-bottom:8px"><input class="input" id="sp-4" placeholder="Esito (es. 2° classificato)" style="margin-bottom:8px">';
+  diarioSheet(tipo==="disc"?"Nuova disciplina":"Nuovo risultato",f+'<button class="btn btn-primary" style="width:100%" onclick="libSportSalva(\''+tipo+'\')">Salva</button>');
+ };
+ window.libSportSalva=async function(tipo){
+  var hh=h();if(!hh)return;var g=function(i){var e=q("sp-"+i);return e?e.value.trim():"";};
+  if(!g(1)){showToast("Scrivi almeno il nome");return;}
+  if(typeof DEMO_MODE!=="undefined"&&DEMO_MODE){showToast("Nella demo non si salva");return;}
+  var r=tipo==="disc"?await sb.from("cavalli_sport").insert({horse_id:hh.id,disciplina:g(1),livello:g(2)||null,tessera:g(3)||null}):await sb.from("sport_voci").insert({horse_id:hh.id,titolo:g(1),data:g(2)||new Date().toISOString().slice(0,10),luogo:g(3)||null,esito:g(4)||null});
+  if(r.error){showToast("Non sono riuscito a salvare: "+(r.error.message||"errore"));return;}
+  closeModal("modal-dr-sheet");libSport();
+ };
+})();
+</script>
+<script id="tr-js">
+(function(){
+ var BK="sedute-media";
+ var TR={cavalli:[],sedute:[],media:{},slot:{usati:0,limite:10},cur:null,ann:[],comm:[],vurl:null,tool:null,forme:[],lavCol:"#e2ab45",lavK:"linea",lente:null,rec:null,caricato:false,owner:false};
+ var DEMO=function(){return typeof DEMO_MODE!=="undefined"&&DEMO_MODE;};
+ function q(i){return document.getElementById(i);}
+ function esc(s){return escapeHtml(String(s==null?"":s));}
+ function isTr(){return typeof plRuolo==="function"&&plRuolo()==="istr";}
+ function toast(m){if(typeof showToast==="function")showToast(m);}
+ function fmt(t){t=Math.max(0,t||0);var m=Math.floor(t/60),s=Math.floor(t%60);return m+":"+String(s).padStart(2,"0");}
+ var IC={film:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>',
+  punto:'<svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>',
+  voce:'<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  lente:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg>',
+  lavagna:'<svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>',
+  rallenta:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>'};
+ // ----- dati
+ function demoDati(){
+  if(!TR.demoInit){TR.demoInit=true;TR.cavalli=[{id:"dc1",nome:"Aurora",cavaliere:"Giulia Verdi",horse_id:"h1"},{id:"dc2",nome:"Rio",cavaliere:"Marco Bianchi",horse_id:"h2"},{id:"dc3",nome:"Fiamma",cavaliere:"Anna Neri"}];TR.sedute=[];TR.slot={usati:0,limite:10};TR.coll=[{id:"k1",stato:"attivo",mio_ruolo:"trainer",horse_id:"h1",cavallo:"Aurora",proprietario:"Giulia Verdi",origine:"trainer"},{id:"k2",stato:"da_confermare_proprietario",mio_ruolo:"trainer",horse_id:"h2",cavallo:"Rio",proprietario:"Marco Bianchi",origine:"trainer",da_rispondere:false},{id:"k3",stato:"da_confermare_trainer",mio_ruolo:"trainer",horse_id:"h3",cavallo:"Luna",proprietario:"Sara Rossi",origine:"proprietario",da_rispondere:true}];TR.centri=[{id:"c1",nome:"Centro Ippico Blu",ruolo:"istruttore"}];}
+ }
+ async function carica(){
+  if(DEMO()){demoDati();TR.caricato=true;return;}
+  try{
+   var r=await Promise.all([
+    sb.from("trainer_cavalli").select("*").is("archiviato_il",null).order("created_at"),
+    sb.from("sedute").select("*, sedute_media(id,path,durata_s)").eq("trainer_id",currentUser.id).eq("nascosta",false).order("created_at",{ascending:false}).limit(100),
+    sb.rpc("equo_trainer_slot"),sb.rpc("equo_miei_collegamenti"),sb.rpc("equo_trainer_miei_centri")]);
+   TR.cavalli=r[0].data||[];TR.sedute=r[1].data||[];if(r[2].data)TR.slot=r[2].data;TR.coll=Array.isArray(r[3].data)?r[3].data:[];TR.centri=Array.isArray(r[4].data)?r[4].data:[];TR.caricato=true;
+  }catch(e){console.error(e);}
+ }
+ function premium(){return typeof isPremium==="function"&&isPremium();}
+ function cavNome(s){var c=TR.cavalli.find(function(x){return x.id===s.cavallo_id;});return c?c.nome:(s.cavallo_nome||"Senza cavallo");}
+ function chip(s){return s.stato==="inviata"?'<span class="tr-chip i">Inviata</span>':'<span class="tr-chip b">Bozza</span>';}
+ function slotHtml(){
+  if(premium())return "";
+  var u=TR.slot.usati||0,l=TR.slot.limite||10;
+  return '<div class="tr-card"><h4><span>Prova l\'editor: '+u+' di '+l+'</span><button onclick="trPrem()">Premium</button></h4><div class="tr-slot"><i style="width:'+Math.min(100,u/l*100)+'%"></i></div><div class="muted" style="font-size:12px;line-height:1.45">Ogni seduta inviata usa uno slot. Gli slot non si cancellano e non si rinnovano. Video fino a 60 secondi.'+(u>=l?' <b>Hai finito gli slot: puoi ancora usare chat e agenda e rivedere le sedute già fatte.</b>':'')+'</div></div>';
+ }
+ window.trPrem=function(){if(typeof togglePiano==="function")togglePiano();};
+ function righe(list){
+  if(!list.length)return '<div class="tr-vuoto">Ancora nessuna seduta.<br>Filma o carica un video per cominciare.</div>';
+  return list.map(function(s){return '<div class="tr-riga" onclick="trApri(\''+s.id+'\')"><div class="th">'+IC.film+'</div><div><b>'+esc(s.titolo)+'</b><small>'+esc(cavNome(s))+' · '+formatDate(s.created_at)+'</small></div>'+chip(s)+'</div>';}).join("");
+ }
+ // ----- Home
+ function pagina(id){
+  var el=q("page-"+id);if(el)return el;
+  var home=q("page-pro-home");el=document.createElement("div");el.className="page-content";el.id="page-"+id;home.parentNode.insertBefore(el,home.nextSibling);return el;
+ }
+ window.trRenderHome=async function(){
+  var home=q("page-pro-home");if(!home)return;
+  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";home.appendChild(box);}
+  if(!TR.caricato){box.innerHTML='<div class="loading"><div class="spinner"></div></div>';await carica();}
+  var nome=(currentUser&&(currentUser.nome||currentUser.full_name))||"";
+  var ora=new Date().getHours(),sal=ora<13?"Buongiorno":ora<18?"Buon pomeriggio":"Buonasera";
+  var rec=TR.sedute.slice(0,3);
+  box.innerHTML='<div class="tr-h">'+sal+(nome?', '+esc(String(nome).split(" ")[0]):'')+'</div><div class="tr-sub">'+new Date().toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})+'</div>'+
+   '<div class="tr-cta"><div><b>Nuova seduta</b><span>Filma o carica il video del lavoro</span></div><div class="bt"><button class="tr-btn" onclick="trNuova()">Filma / Carica</button></div></div>'+
+   slotHtml()+
+   '<div class="tr-card"><h4><span>Sedute recenti</span><button onclick="showPage(\'tr-sedute\')">Vedi tutte</button></h4>'+righe(rec)+'</div>'+
+   '<div class="tr-card"><h4><span>Cavalli seguiti</span><button onclick="showPage(\'tr-cavalli\')">'+TR.cavalli.length+(premium()?'':' di 10')+' ›</button></h4><div class="muted" style="font-size:12.5px">'+(TR.cavalli.length?TR.cavalli.slice(0,4).map(function(c){return esc(c.nome);}).join(", "):'Aggiungi i cavalli che alleni per collegare le sedute.')+'</div></div>';
+ };
+ // ----- Sedute
+ window.trRenderSedute=async function(){
+  var p=pagina("tr-sedute");if(!TR.caricato)await carica();
+  p.innerHTML='<div class="tr-h" style="display:flex;justify-content:space-between;align-items:center"><span>Sedute</span><button class="tr-btn" onclick="trNuova()">+ Nuova</button></div><div class="tr-sub">Il lavoro con i tuoi cavalli, video e analisi.</div>'+slotHtml()+'<div class="tr-card">'+righe(TR.sedute)+'</div>';
+ };
+ // ----- Cavalli seguiti
+
+ // ----- COLLEGAMENTI istruttore ↔ proprietario ↔ struttura
+ function collT(){return (TR.coll||[]).filter(function(x){return x.mio_ruolo==="trainer";});}
+ function collDi(hid){return hid?collT().find(function(x){return x.horse_id===hid;}):null;}
+ function msgColl(m){
+  if(/RIFIUTATO/.test(m))return "Il proprietario ha chiuso il collegamento: deve invitarti lui con il tuo codice trainer.";
+  if(/NON_TROVATO/.test(m))return "Il codice non corrisponde a nessun cavallo.";
+  if(/NON_VALIDO/.test(m))return "Il codice non è valido.";
+  if(/LIMITE_CAVALLI/.test(m))return "Hai raggiunto i 10 cavalli del piano Free.";
+  return "Operazione non riuscita.";
+ }
+ function esitoColl(d){
+  var st=d&&d.stato,n=d&&d.nome||"il cavallo";
+  return st==="attivo"?"Collegato a "+n+".":"Richiesta inviata: le sedute di "+n+" arriveranno al proprietario solo quando avrà accettato.";
+ }
+ function chipColl(c,cv){
+  if(!c)return cv&&cv.horse_id?'<span class="tr-chip b">Da collegare</span>':'';
+  if(c.stato==="attivo")return '<span class="tr-chip i">'+(c.origine==="centro"?'Centro':'Collegato')+'</span>';
+  if(c.stato==="revocato")return '<span class="tr-chip n">Chiuso</span>';
+  return '<span class="tr-chip b">'+(c.da_rispondere?'Invito':'In attesa')+'</span>';
+ }
+ async function ricarica(){TR.caricato=false;await carica();trRenderCavalli();trRenderHome();}
+ window.trRenderCavalli=async function(){
+  var p=pagina("tr-cavalli");if(!TR.caricato)await carica();
+  var inv=collT().filter(function(x){return x.da_rispondere;});
+  var h='<div class="tr-h" style="display:flex;justify-content:space-between;align-items:center"><span>Cavalli seguiti</span><button class="tr-btn" onclick="trNuovoCavallo()">+ Cavallo</button></div><div class="tr-sub">'+TR.cavalli.length+(premium()?'':' di 10')+' cavalli</div>';
+  if(inv.length)h+='<div class="tr-card"><h4><span>Inviti dei proprietari</span></h4>'+inv.map(function(c){return '<div class="tr-riga" style="cursor:default"><div class="th">'+IC.film+'</div><div><b>'+esc(c.cavallo)+'</b><small>'+esc(c.proprietario)+' ti invita a seguire il suo cavallo</small></div><div class="tr-az"><button class="tr-btn" onclick="trCollRisp(\''+c.id+'\',true)">Accetta</button><button class="tr-btn o" onclick="trCollRisp(\''+c.id+'\',false)">No</button></div></div>';}).join("")+'</div>';
+  h+='<div class="tr-card">'+(TR.cavalli.length?TR.cavalli.map(function(c){var k=collDi(c.horse_id);return '<div class="tr-riga" onclick="trCavSheet(\''+c.id+'\')"><div class="th">'+IC.film+'</div><div><b>'+esc(c.nome)+'</b><small>'+esc(c.cavaliere||"Cavaliere non indicato")+(c.centro_id?" · centro":"")+'</small></div>'+chipColl(k,c)+'</div>';}).join(""):'<div class="tr-vuoto">Nessun cavallo ancora.</div>')+'</div>';
+  h+='<div class="tr-card"><h4><span>Strutture</span><button onclick="trEntraCentro()">+ Entra</button></h4>'+
+   ((TR.centri||[]).length?TR.centri.map(function(c){return '<div class="tr-riga" onclick="trCentroSheet(\''+c.id+'\')"><div class="th">'+IC.film+'</div><div><b>'+esc(c.nome)+'</b><small>Tocca per seguire i cavalli del centro</small></div></div>';}).join(""):'<div class="muted" style="font-size:12.5px;line-height:1.5">Lavori in un centro ippico? Entra con il suo codice invito: potrai seguire i suoi cavalli e inviare le sedute anche agli allievi e allo staff.</div>')+'</div>';
+  h+='<div class="tr-card"><h4><span>Il tuo codice trainer</span><button onclick="trMioCodice()">Mostra</button></h4><div class="muted" style="font-size:12.5px;line-height:1.5">Un proprietario può invitarti con questo codice: tu accetti e il cavallo compare qui. Nessuna seduta arriva a un proprietario senza il suo consenso.</div></div>';
+  p.innerHTML=h;
+ };
+ window.trCavSheet=function(id){
+  var cv=TR.cavalli.find(function(x){return x.id===id;});if(!cv)return;
+  var c=collDi(cv.horse_id),h='<div class="muted" style="font-size:13px;margin-bottom:10px">'+esc(cv.cavaliere||"Cavaliere non indicato")+'</div>';
+  if(c&&c.stato==="attivo")h+='<div style="font-size:13.5px;line-height:1.5;margin-bottom:12px">Collegato a <b>'+esc(c.proprietario)+'</b>'+(c.origine==="centro"?' tramite il centro':'')+'. Le sedute che invii le vede lui.</div><button class="tr-btn o" style="width:100%" onclick="trCollRevoca(\''+c.id+'\')">Interrompi il collegamento</button>';
+  else if(c&&c.stato==="da_confermare_proprietario")h+='<div style="font-size:13.5px;line-height:1.5;margin-bottom:12px">In attesa che <b>'+esc(c.proprietario)+'</b> accetti la richiesta. Finché non accetta non può ricevere sedute.</div><button class="tr-btn o" style="width:100%" onclick="trCollRevoca(\''+c.id+'\')">Annulla la richiesta</button>';
+  else if(c&&c.stato==="da_confermare_trainer")h+='<div style="font-size:13.5px;line-height:1.5;margin-bottom:12px"><b>'+esc(c.proprietario)+'</b> ti invita a seguire questo cavallo.</div><div class="tr-az" style="display:flex;gap:8px"><button class="tr-btn" style="flex:1" onclick="trCollRisp(\''+c.id+'\',true)">Accetta</button><button class="tr-btn o" style="flex:1" onclick="trCollRisp(\''+c.id+'\',false)">Rifiuta</button></div>';
+  else h+=(c&&c.stato==="revocato"?'<div style="font-size:13px;margin-bottom:10px;color:#8a2a22">Il collegamento è stato chiuso.</div>':'')+'<div style="font-size:13px;line-height:1.5;margin-bottom:10px">Per inviare le sedute al proprietario inserisci il codice Equo del cavallo: il proprietario riceve una richiesta e deve accettarla.</div><input class="tr-field" id="trk-k" placeholder="Codice Equo (es. MAR-000123)"><button class="btn btn-primary" style="width:100%" onclick="trCollegaCodice(\''+id+'\')">Invia richiesta</button>';
+  diarioSheet(esc(cv.nome),h);
+ };
+ window.trCollegaCodice=async function(id){
+  var k=(q("trk-k").value||"").trim();if(!k){toast("Scrivi il codice Equo");return;}
+  if(DEMO()){var cv=TR.cavalli.find(function(x){return x.id===id;});cv.horse_id="h"+Date.now();TR.coll.push({id:"k"+Date.now(),stato:"da_confermare_proprietario",mio_ruolo:"trainer",horse_id:cv.horse_id,cavallo:cv.nome,proprietario:"Proprietario",origine:"trainer"});closeModal("modal-dr-sheet");toast(esitoColl({stato:"da_confermare_proprietario",nome:cv.nome}));trRenderCavalli();return;}
+  var r=await sb.rpc("equo_trainer_collega_cavallo",{p_cavallo:id,p_codice:k});
+  if(r.error){toast(msgColl(r.error.message||""));return;}
+  closeModal("modal-dr-sheet");toast(esitoColl(r.data));await ricarica();
+ };
+ window.trCollRisp=async function(id,ok){
+  if(DEMO()){var c=TR.coll.find(function(x){return x.id===id;});if(c){c.stato=ok?"attivo":"revocato";c.da_rispondere=false;}closeModal("modal-dr-sheet");toast(ok?"Collegamento attivo":"Invito rifiutato");trRenderCavalli();return;}
+  var r=await sb.rpc("equo_rispondi_collegamento",{p_id:id,p_accetta:ok});
+  if(r.error){toast(/LIMITE_CAVALLI/.test(r.error.message||"")?"Hai raggiunto i 10 cavalli del piano Free.":"Operazione non riuscita");return;}
+  closeModal("modal-dr-sheet");toast(ok?"Collegamento attivo":"Invito rifiutato");await ricarica();
+ };
+ window.trCollRevoca=async function(id){
+  if(!(await chiediSiNo("Interrompere il collegamento?","Non potrai più inviargli sedute. Quelle già inviate restano al proprietario e tutto resta nello storico.")))return;
+  if(DEMO()){var c=TR.coll.find(function(x){return x.id===id;});if(c)c.stato="revocato";closeModal("modal-dr-sheet");trRenderCavalli();return;}
+  var r=await sb.rpc("equo_revoca_collegamento",{p_id:id});
+  if(r.error){toast("Operazione non riuscita");return;}
+  closeModal("modal-dr-sheet");await ricarica();
+ };
+ window.trMioCodice=async function(){
+  var cod="";
+  if(DEMO())cod="TR-7K2M9Q";
+  else{var r=await sb.rpc("equo_mio_codice_trainer");if(r.error||!r.data){toast("Non riesco a creare il codice");return;}cod=r.data;}
+  diarioSheet("Il tuo codice trainer",'<div style="text-align:center;font-size:30px;font-weight:900;letter-spacing:2px;color:#14482c;margin:6px 0 10px">'+esc(cod)+'</div><div style="font-size:13px;line-height:1.5;margin-bottom:12px">Dallo a un proprietario: nell\'app Equo va su «+» → <b>I miei istruttori</b>, sceglie il cavallo e inserisce questo codice. Poi tu accetti qui in Cavalli seguiti.</div><button class="btn btn-primary" style="width:100%" onclick="trCopiaCodice(\''+esc(cod)+'\')">Copia / condividi</button>');
+ };
+ window.trCopiaCodice=function(c){
+  var t="Il mio codice trainer su Equo: "+c;
+  if(navigator.share){navigator.share({text:t}).catch(function(){});return;}
+  try{navigator.clipboard.writeText(t);toast("Codice copiato");}catch(e){toast(t);}
+ };
+ window.trEntraCentro=function(){
+  diarioSheet("Entra in una struttura",'<div style="font-size:13px;line-height:1.5;margin-bottom:10px">Inserisci il codice invito che ti ha dato il centro (lo trova in Equo Scuderia → Il tuo Centro). Entrerai come istruttore e potrai seguire i cavalli del centro.</div><input class="tr-field" id="trc-cod" placeholder="Codice invito del centro" autocapitalize="characters"><button class="btn btn-primary" style="width:100%" onclick="trEntraCentroOk()">Entra</button>');
+ };
+ window.trEntraCentroOk=async function(){
+  var k=(q("trc-cod").value||"").trim();if(!k){toast("Scrivi il codice del centro");return;}
+  if(DEMO()){TR.centri.push({id:"c"+Date.now(),nome:"Nuovo centro",ruolo:"istruttore"});closeModal("modal-dr-sheet");toast("Sei entrato nel centro");trRenderCavalli();return;}
+  var r=await sb.rpc("join_centro_by_code",{p_join_code:k,p_ruolo:"istruttore"});
+  if(r.error){toast(/non valido/i.test(r.error.message||"")?"Codice del centro non valido.":"Non sono riuscito a entrare nel centro.");return;}
+  closeModal("modal-dr-sheet");toast("Sei entrato nel centro");await ricarica();
+ };
+ window.trCentroSheet=async function(cid){
+  var c=(TR.centri||[]).find(function(x){return x.id===cid;});if(!c)return;
+  diarioSheet(esc(c.nome),'<div class="loading"><div class="spinner"></div></div>');
+  var l=[];
+  if(DEMO())l=[{id:"s1",nome:"Luna",proprietario:"Anna Neri",su_equo:true,seguito:false},{id:"s2",nome:"Tempesta",proprietario:"Luca Gori",su_equo:false,seguito:true}];
+  else{var r=await sb.rpc("equo_trainer_cavalli_centro",{p_centro:cid});if(r.error){closeModal("modal-dr-sheet");toast("Non riesco a leggere i cavalli del centro");return;}l=r.data||[];}
+  var h='<div class="muted" style="font-size:12.5px;line-height:1.5;margin-bottom:8px">Seguire un cavallo del centro ti collega al suo proprietario (se è su Equo), che può sempre revocare. Il titolare del centro vede le sedute che invii su questi cavalli.</div>'+
+   (l.length?l.map(function(x){return '<div class="tr-riga" style="cursor:default"><div class="th">'+IC.film+'</div><div><b>'+esc(x.nome)+'</b><small>'+esc(x.proprietario||"Proprietario non indicato")+(x.su_equo?' · su Equo':'')+'</small></div>'+(x.seguito?'<span class="tr-chip i">Seguito</span>':'<button class="tr-btn" onclick="trSeguiCentro(\''+cid+'\',\''+x.id+'\')">Segui</button>')+'</div>';}).join(""):'<div class="tr-vuoto">Il centro non ha ancora cavalli in Equo Scuderia.</div>');
+  diarioSheet(esc(c.nome),h);
+ };
+ window.trSeguiCentro=async function(cid,sid){
+  if(!premium()&&TR.cavalli.length>=10){closeModal("modal-dr-sheet");toast("Nel piano Free puoi seguire 10 cavalli.");trPrem();return;}
+  if(DEMO()){TR.cavalli.push({id:"dc"+Date.now(),nome:"Luna",cavaliere:"Anna Neri",horse_id:"h9",centro_id:cid});TR.coll.push({id:"k"+Date.now(),stato:"attivo",mio_ruolo:"trainer",horse_id:"h9",cavallo:"Luna",proprietario:"Anna Neri",origine:"centro"});closeModal("modal-dr-sheet");toast("Seguito: collegato al proprietario tramite il centro");trRenderCavalli();return;}
+  var r=await sb.rpc("equo_trainer_segui_cavallo_centro",{p_centro:cid,p_scuderia:sid});
+  if(r.error){toast(msgColl(r.error.message||""));return;}
+  closeModal("modal-dr-sheet");toast(r.data&&r.data.collegamento==="attivo"?"Seguito: collegato al proprietario tramite il centro":"Seguito. Il cavallo non è ancora su Equo: puoi inviare le sedute allo staff e agli allievi del centro.");await ricarica();
+ };
+ window.trNuovoCavallo=function(){
+  diarioSheet("Nuovo cavallo seguito",'<input class="tr-field" id="trc-n" placeholder="Nome del cavallo"><input class="tr-field" id="trc-c" placeholder="Cavaliere o proprietario (facoltativo)"><input class="tr-field" id="trc-k" placeholder="Codice Equo (facoltativo, es. MAR-000123)"><button class="btn btn-primary" style="width:100%" onclick="trSalvaCavallo()">Salva</button>');
+ };
+ window.trSalvaCavallo=async function(){
+  var n=(q("trc-n").value||"").trim(),c=(q("trc-c").value||"").trim(),k=(q("trc-k").value||"").trim();
+  if(!n){toast("Scrivi il nome del cavallo");return;}
+  if(!premium()&&TR.cavalli.length>=10){closeModal("modal-dr-sheet");toast("Nel piano Free puoi seguire 10 cavalli. Passa a Premium per aggiungerne altri.");trPrem();return;}
+  if(DEMO()){TR.cavalli.push({id:"dc"+Date.now(),nome:n,cavaliere:c});}
+  else{
+   var r=await sb.from("trainer_cavalli").insert({nome:n,cavaliere:c||null}).select().single();
+   if(r.error){toast(/LIMITE_CAVALLI/.test(r.error.message||"")?"Hai raggiunto i 10 cavalli del piano Free.":"Non sono riuscito a salvare: "+(r.error.message||"errore"));return;}
+   TR.cavalli.push(r.data);
+   if(k){var lk=await sb.rpc("equo_trainer_collega_cavallo",{p_cavallo:r.data.id,p_codice:k});
+    if(lk.error)toast(msgColl(lk.error.message||"")+" Il cavallo è salvato senza collegamento.");
+    else{toast(esitoColl(lk.data));}
+    await carica();}
+  }
+  closeModal("modal-dr-sheet");trRenderCavalli();trRenderHome();
+ };
+ // ----- Nuova seduta
+ window.trNuova=async function(){
+  if(!TR.caricato)await carica();
+  if(!premium()&&(TR.slot.usati||0)>=(TR.slot.limite||10)){toast("Hai usato i 10 slot di prova.");trPrem();return;}
+  var opt=TR.cavalli.map(function(c){return '<option value="'+c.id+'">'+esc(c.nome)+'</option>';}).join("");
+  diarioSheet("Nuova seduta",'<input class="tr-field" id="trs-t" placeholder="Titolo (es. Salto, lavoro in piano)">'+
+   '<select class="tr-field" id="trs-c"><option value="">Scegli il cavallo…</option>'+opt+'<option value="+">+ Nuovo cavallo</option></select>'+
+   '<label class="tr-btn v" style="display:block;text-align:center;margin-bottom:6px">Filma o scegli un video<input type="file" id="trs-f" accept="video/*" style="display:none" onchange="trVideoScelto(this)"></label>'+
+   '<div class="muted" id="trs-i" style="font-size:12px;margin-bottom:10px">'+(premium()?'':'Nel piano Free il video dura al massimo 60 secondi. ')+'Il video resta privato finché non lo invii.</div>'+
+   '<button class="btn btn-primary" style="width:100%" id="trs-ok" onclick="trCreaSeduta()" disabled>Crea la seduta</button>');
+  q("trs-c").onchange=function(){if(this.value==="+"){closeModal("modal-dr-sheet");trNuovoCavallo();}};
+ };
+ window.trVideoScelto=function(inp){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  var u=URL.createObjectURL(f),v=document.createElement("video");v.preload="metadata";
+  v.onloadedmetadata=function(){
+   var d=v.duration||0;
+   if(!premium()&&d>60.5){q("trs-i").innerHTML='<b style="color:#a03028">Il video dura '+Math.round(d)+' secondi: nel piano Free il massimo è 60. Scegline uno più corto.</b>';q("trs-ok").disabled=true;TR.nuovoFile=null;return;}
+   TR.nuovoFile=f;TR.nuovaDur=d;q("trs-i").textContent="Video pronto · "+fmt(d);q("trs-ok").disabled=false;
+  };
+  v.onerror=function(){TR.nuovoFile=f;TR.nuovaDur=null;q("trs-i").textContent="Video scelto";q("trs-ok").disabled=false;};
+  v.src=u;
+ };
+ window.trCreaSeduta=async function(){
+  var t=(q("trs-t").value||"").trim()||"Seduta del "+new Date().toLocaleDateString("it-IT"),cid=q("trs-c").value||null;
+  if(!TR.nuovoFile){toast("Scegli un video");return;}
+  var btn=q("trs-ok");btn.disabled=true;btn.textContent="Carico…";
+  try{
+   var s;
+   if(DEMO()){
+    s={id:"ds"+Date.now(),titolo:t,cavallo_id:cid,stato:"bozza",created_at:new Date().toISOString(),sedute_media:[{id:"dm1",path:"demo",durata_s:TR.nuovaDur}],_url:URL.createObjectURL(TR.nuovoFile)};
+    TR.sedute.unshift(s);
+   }else{
+    var cv=TR.cavalli.find(function(c){return c.id===cid;});
+    var r=await sb.from("sedute").insert({titolo:t,cavallo_id:cid,horse_id:cv&&cv.horse_id||null}).select().single();
+    if(r.error)throw r.error;s=r.data;
+    var ext=(TR.nuovoFile.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"")||"mp4";
+    var path=currentUser.id+"/"+s.id+"/"+Date.now()+"."+ext;
+    var up=await sb.storage.from(BK).upload(path,TR.nuovoFile,{contentType:TR.nuovoFile.type||"video/mp4"});
+    if(up.error)throw up.error;
+    var m=await sb.from("sedute_media").insert({seduta_id:s.id,path:path,tipo:"video",durata_s:TR.nuovaDur,mime:TR.nuovoFile.type,byte:TR.nuovoFile.size}).select().single();
+    if(m.error)throw m.error;
+    s.sedute_media=[m.data];TR.sedute.unshift(s);
+   }
+   TR.nuovoFile=null;closeModal("modal-dr-sheet");trApri(s.id);trRenderHome();
+  }catch(e){toast(/VIDEO_TROPPO_LUNGO/.test(e.message||"")?"Il video supera i 60 secondi del piano Free.":"Non sono riuscito a caricare: "+(e.message||"errore"));btn.disabled=false;btn.textContent="Crea la seduta";}
+ };
+ // ----- Editor / visualizzatore
+ function ensureEd(){
+  if(q("tr-ed"))return;
+  var d=document.createElement("div");d.id="tr-ed";d.className="tr-ed";
+  d.innerHTML='<div class="tr-top"><button class="ind" onclick="trChiudi()">‹</button><b id="tr-tit"></b><button class="tr-btn" id="tr-invia" onclick="trInvia()">Invia</button></div>'+
+   '<div class="tr-stage" id="tr-stage"><video id="tr-v" playsinline webkit-playsinline></video><canvas id="tr-lente"></canvas><canvas id="tr-cv"></canvas><div id="tr-ov"></div></div>'+
+   '<div class="tr-ctl"><button id="tr-play" onclick="trPlay()">▶</button><button data-v=".25" onclick="trVel(.25)">0.25×</button><button data-v=".5" onclick="trVel(.5)">0.5×</button><button data-v="1" class="on" onclick="trVel(1)">1×</button><span class="t" id="tr-t">0:00</span></div>'+
+   '<div class="tr-tl" id="tr-tl"><div class="pr" id="tr-pr"></div></div>'+
+   '<div class="tr-lav" id="tr-lav"><button data-k="linea" class="on" onclick="trLavK(\'linea\')">Linea</button><button data-k="freccia" onclick="trLavK(\'freccia\')">Freccia</button><button data-k="cerchio" onclick="trLavK(\'cerchio\')">Cerchio</button><i style="background:#e2ab45" onclick="trLavC(\'#e2ab45\')"></i><i style="background:#ff5a4d" onclick="trLavC(\'#ff5a4d\')"></i><i style="background:#58d68d" onclick="trLavC(\'#58d68d\')"></i><button onclick="trLavUndo()">Annulla</button><button class="on" onclick="trLavSalva()">Salva</button></div>'+
+   '<div class="tr-tools" id="tr-tools"></div><div class="tr-list" id="tr-list"></div>';
+  document.body.appendChild(d);
+  var v=q("tr-v");
+  v.addEventListener("timeupdate",trTick);v.addEventListener("play",function(){q("tr-play").textContent="❚❚";});v.addEventListener("pause",function(){q("tr-play").textContent="▶";trTick();});
+  v.addEventListener("loadedmetadata",function(){trTick();trDisegnaTl();});
+  var tl=q("tr-tl"),drag=false;
+  function seek(e){var r=tl.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;if(v.duration)v.currentTime=Math.max(0,Math.min(v.duration,x/r.width*v.duration));}
+  tl.addEventListener("pointerdown",function(e){drag=true;seek(e);});window.addEventListener("pointermove",function(e){if(drag)seek(e);});window.addEventListener("pointerup",function(){drag=false;});
+  var cv=q("tr-cv"),dr=null;
+  function pos(e){var r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
+  cv.addEventListener("pointerdown",function(e){if(TR.tool!=="lavagna"&&TR.tool!=="lente")return;dr=pos(e);dr.x2=dr.x;dr.y2=dr.y;cv.setPointerCapture(e.pointerId);});
+  cv.addEventListener("pointermove",function(e){if(!dr)return;var p=pos(e);dr.x2=p.x;dr.y2=p.y;TR.bozza=dr;trDisegna();});
+  cv.addEventListener("pointerup",function(){if(!dr)return;if(Math.hypot(dr.x2-dr.x,dr.y2-dr.y)>.02){if(TR.tool==="lavagna")TR.forme.push({k:TR.lavK,c:TR.lavCol,x1:dr.x,y1:dr.y,x2:dr.x2,y2:dr.y2});else if(TR.tool==="lente"){trLenteSalva(dr);}}dr=null;TR.bozza=null;trDisegna();});
+ }
+ window.trApri=async function(id,comeProp){
+  var s=TR.sedute.find(function(x){return x.id===id;})||(TR.ricevute||[]).find(function(x){return x.id===id;});
+  if(!s)return;ensureEd();TR.cur=s;TR.owner=!!comeProp;TR.tool=null;TR.forme=[];TR.ann=[];TR.comm=[];
+  q("tr-ed").classList.add("on");q("tr-tit").textContent=s.titolo;
+  q("tr-invia").style.display=(!comeProp&&s.stato!=="inviata")?"":"none";
+  var v=q("tr-v");v.pause();v.removeAttribute("src");
+  var m=(s.sedute_media||[])[0];
+  if(DEMO()){v.src=s._url||"";}
+  else if(m){var u=await sb.storage.from(BK).createSignedUrl(m.path,3600);if(u.data)v.src=u.data.signedUrl;else toast("Non riesco a caricare il video");}
+  await caricaAnn();trTools();trLista();trDisegnaTl();
+  if(comeProp&&!DEMO()){try{await sb.from("sedute_condivisioni").update({visto_il:new Date().toISOString()}).eq("seduta_id",s.id).eq("user_id",currentUser.id);}catch(e){}}
+ };
+ async function caricaAnn(){
+  if(DEMO()){TR.ann=TR.cur._ann||(TR.cur._ann=[]);TR.comm=TR.cur._comm||(TR.cur._comm=[]);return;}
+  var a=await sb.from("sedute_annotazioni").select("*").eq("seduta_id",TR.cur.id).eq("nascosta",false).order("t_sec");TR.ann=a.data||[];
+  var c=await sb.from("sedute_commenti").select("*").eq("seduta_id",TR.cur.id).order("created_at");TR.comm=c.data||[];
+ }
+ window.trChiudi=function(){var v=q("tr-v");if(v)v.pause();q("tr-ed").classList.remove("on");TR.cur=null;if(isTr()){trRenderHome();if(q("page-tr-sedute")&&q("page-tr-sedute").classList.contains("active"))trRenderSedute();}else if(typeof trOwnerCard==="function")trOwnerCard(true);};
+ function puoAnnotare(){return !TR.owner||premium();}
+ function trTools(){
+  var t=q("tr-tools");if(!puoAnnotare()){t.innerHTML='<div style="font-size:12px;opacity:.8;padding:4px">Puoi guardare il video e rispondere ai punti. Per aggiungere i tuoi segni serve Premium.</div>';return;}
+  var def=[["punto","Punto"],["voce","Voce"],["lente","Lente"],["lavagna","Lavagna"],["rallenta","Rallenta"]];
+  t.innerHTML=def.map(function(d){return '<button data-t="'+d[0]+'" class="'+(TR.tool===d[0]?"on":"")+'" onclick="trTool(\''+d[0]+'\')">'+IC[d[0]]+d[1]+'</button>';}).join("");
+ }
+ window.trTool=function(t){
+  var v=q("tr-v");
+  if(t==="punto"){v.pause();diarioSheet("Punto a "+fmt(v.currentTime),'<textarea class="tr-field" id="trp-t" rows="3" placeholder="Cosa vuoi far notare?"></textarea><button class="btn btn-primary" style="width:100%" onclick="trSalvaPunto()">Salva il punto</button>');TR.tool=null;trTools();return;}
+  if(t==="voce"){trVoce();return;}
+  if(t==="rallenta"){trRallenta();return;}
+  TR.tool=TR.tool===t?null:t;
+  if(TR.tool==="lavagna"){v.pause();TR.forme=[];q("tr-lav").classList.add("on");}else q("tr-lav").classList.remove("on");
+  if(TR.tool==="lente"){v.pause();toast("Trascina sul video per scegliere cosa ingrandire");}
+  trTools();trDisegna();
+ };
+ async function aggiungiAnn(a){
+  a.t_sec=Math.round(q("tr-v").currentTime*10)/10;
+  if(DEMO()){a.id="da"+Date.now();a.autore_id=currentUser.id;a.created_at=new Date().toISOString();TR.ann.push(a);}
+  else{
+   a.seduta_id=TR.cur.id;a.media_id=((TR.cur.sedute_media||[])[0]||{}).id||null;
+   var r=await sb.from("sedute_annotazioni").insert(a).select().single();if(r.error){toast("Non sono riuscito a salvare: "+(r.error.message||"errore"));return false;}
+   TR.ann.push(r.data);
+  }
+  TR.ann.sort(function(x,y){return x.t_sec-y.t_sec;});trLista();trDisegnaTl();trDisegna();return true;
+ }
+ window.trSalvaPunto=async function(){var t=(q("trp-t").value||"").trim();if(!t){toast("Scrivi una nota");return;}if(await aggiungiAnn({tipo:"punto",testo:t,payload:{}}))closeModal("modal-dr-sheet");};
+ async function trRallenta(){
+  var v=q("tr-v");var da=v.currentTime,a=Math.min(v.duration||da+3,da+3);
+  await aggiungiAnn({tipo:"rallenta",testo:"Rallentato",payload:{da:da,a:a,vel:.5}});toast("Questo tratto va a metà velocità");
+ }
+ window.trLenteSalva=async function(d){
+  var x=Math.min(d.x,d.x2),y=Math.min(d.y,d.y2),w=Math.abs(d.x2-d.x),h=Math.abs(d.y2-d.y);
+  TR.tool=null;trTools();await aggiungiAnn({tipo:"lente",testo:"Ingrandimento",payload:{x:x,y:y,w:w,h:h}});
+ };
+ window.trLavK=function(k){TR.lavK=k;[].forEach.call(document.querySelectorAll("#tr-lav button[data-k]"),function(b){b.classList.toggle("on",b.dataset.k===k);});};
+ window.trLavC=function(c){TR.lavCol=c;};TR.lavCol="#e2ab45";
+ window.trLavUndo=function(){TR.forme.pop();trDisegna();};
+ window.trLavSalva=async function(){if(!TR.forme.length){toast("Disegna qualcosa prima");return;}var f=TR.forme.slice();TR.forme=[];TR.tool=null;q("tr-lav").classList.remove("on");await aggiungiAnn({tipo:"lavagna",testo:"Lavagna",payload:{forme:f}});trTools();};
+ async function trVoce(){
+  var v=q("tr-v");
+  if(TR.rec){TR.rec.stop();return;}
+  try{
+   var st=await navigator.mediaDevices.getUserMedia({audio:true});v.pause();
+   var ch=[],mr=new MediaRecorder(st);TR.rec=mr;toast("Registro… tocca di nuovo Voce per fermare (max 30 s)");
+   mr.ondataavailable=function(e){ch.push(e.data);};
+   var stop=setTimeout(function(){if(TR.rec)TR.rec.stop();},30000);
+   mr.onstop=async function(){
+    clearTimeout(stop);st.getTracks().forEach(function(t){t.stop();});TR.rec=null;
+    var blob=new Blob(ch,{type:mr.mimeType||"audio/webm"});
+    if(DEMO()){await aggiungiAnn({tipo:"voce",testo:"Nota vocale",payload:{},audio_path:URL.createObjectURL(blob)});return;}
+    var p=currentUser.id+"/"+TR.cur.id+"/voce-"+Date.now()+".webm";
+    var up=await sb.storage.from(BK).upload(p,blob,{contentType:blob.type});
+    if(up.error){toast("Non sono riuscito a salvare la nota vocale");return;}
+    await aggiungiAnn({tipo:"voce",testo:"Nota vocale",payload:{},audio_path:p});
+   };
+   mr.start();
+  }catch(e){toast("Microfono non disponibile");TR.rec=null;}
+ }
+ window.trPlayVoce=async function(id){
+  var a=TR.ann.find(function(x){return x.id===id;});if(!a||!a.audio_path)return;
+  var u=a.audio_path;
+  if(!DEMO()){var r=await sb.storage.from(BK).createSignedUrl(a.audio_path,600);if(!r.data)return;u=r.data.signedUrl;}
+  new Audio(u).play();
+ };
+ window.trPlay=function(){var v=q("tr-v");if(v.paused)v.play();else v.pause();};
+ window.trVel=function(x){TR.manVel=x;q("tr-v").playbackRate=x;[].forEach.call(document.querySelectorAll(".tr-ctl button[data-v]"),function(b){b.classList.toggle("on",Number(b.dataset.v)===x);});};
+ window.trSalta=function(t){var v=q("tr-v");v.currentTime=t;};
+ function trTick(){
+  var v=q("tr-v");if(!v||!v.duration){return;}
+  var t=v.currentTime;q("tr-t").textContent=fmt(t)+" / "+fmt(v.duration);q("tr-pr").style.width=(t/v.duration*100)+"%";
+  // rallenta
+  var rl=TR.ann.find(function(a){return a.tipo==="rallenta"&&t>=a.payload.da&&t<=a.payload.a;});
+  if(!v.paused){var voluta=TR.manVel||1;v.playbackRate=rl?Math.min(voluta,rl.payload.vel||.5):voluta;}
+  // punti vicini
+  var ov=q("tr-ov");
+  ov.innerHTML=TR.ann.filter(function(a){return a.tipo==="punto"&&Math.abs(a.t_sec-t)<=2;}).map(function(a){return '<div class="bl">'+esc(a.testo)+'</div>';}).join("");
+  trDisegna();
+ }
+ function trDisegnaTl(){
+  var tl=q("tr-tl"),v=q("tr-v");if(!tl)return;
+  [].slice.call(tl.querySelectorAll(".pt,.rl")).forEach(function(n){n.remove();});
+  var d=v.duration||0;if(!d)return;
+  var col={punto:"#e2ab45",voce:"#7fb5ff",lente:"#58d68d",lavagna:"#ff8a65",rallenta:"#c0a0ff"};
+  TR.ann.forEach(function(a){
+   if(a.tipo==="rallenta"){var r=document.createElement("div");r.className="rl";r.style.left=(a.payload.da/d*100)+"%";r.style.width=((a.payload.a-a.payload.da)/d*100)+"%";tl.appendChild(r);}
+   var p=document.createElement("div");p.className="pt";p.style.left=(a.t_sec/d*100)+"%";p.style.background=col[a.tipo]||"#fff";tl.appendChild(p);
+  });
+ }
+ function trDisegna(){
+  var cv=q("tr-cv"),v=q("tr-v");if(!cv||!v)return;
+  var r=cv.getBoundingClientRect(),W=Math.round(r.width||300),H=Math.round(r.height||200);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  var c=cv.getContext("2d");c.clearRect(0,0,W,H);
+  var t=v.currentTime||0,forme=[];
+  TR.ann.forEach(function(a){if(a.tipo==="lavagna"&&Math.abs(a.t_sec-t)<=1.2)forme=forme.concat(a.payload.forme||[]);});
+  if(TR.tool==="lavagna")forme=forme.concat(TR.forme);
+  forme.concat(TR.bozza&&TR.tool==="lavagna"?[{k:TR.lavK,c:TR.lavCol,x1:TR.bozza.x,y1:TR.bozza.y,x2:TR.bozza.x2,y2:TR.bozza.y2}]:[]).forEach(function(f){
+   c.strokeStyle=f.c;c.fillStyle=f.c;c.lineWidth=3;c.lineCap="round";
+   var x1=f.x1*W,y1=f.y1*H,x2=f.x2*W,y2=f.y2*H;
+   if(f.k==="cerchio"){c.beginPath();c.ellipse((x1+x2)/2,(y1+y2)/2,Math.abs(x2-x1)/2,Math.abs(y2-y1)/2,0,0,7);c.stroke();}
+   else{c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+    if(f.k==="freccia"){var an=Math.atan2(y2-y1,x2-x1);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-14*Math.cos(an-.45),y2-14*Math.sin(an-.45));c.lineTo(x2-14*Math.cos(an+.45),y2-14*Math.sin(an+.45));c.closePath();c.fill();}}
+  });
+  if(TR.tool==="lente"&&TR.bozza){c.strokeStyle="#58d68d";c.setLineDash([6,4]);c.strokeRect(Math.min(TR.bozza.x,TR.bozza.x2)*W,Math.min(TR.bozza.y,TR.bozza.y2)*H,Math.abs(TR.bozza.x2-TR.bozza.x)*W,Math.abs(TR.bozza.y2-TR.bozza.y)*H);c.setLineDash([]);}
+  // lente
+  var le=TR.ann.find(function(a){return a.tipo==="lente"&&t>=a.t_sec&&t<=a.t_sec+3;}),lc=q("tr-lente");
+  if(le&&v.videoWidth){var p=le.payload;lc.style.display="block";lc.width=240;lc.height=180;lc.getContext("2d").drawImage(v,p.x*v.videoWidth,p.y*v.videoHeight,p.w*v.videoWidth,p.h*v.videoHeight,0,0,240,180);}else lc.style.display="none";
+ }
+ setInterval(function(){var e=q("tr-ed");if(e&&e.classList.contains("on")&&!q("tr-v").paused)trDisegna();},120);
+ var NOMI={punto:"Punto",voce:"Nota vocale",lente:"Ingrandimento",lavagna:"Lavagna",rallenta:"Rallentato"};
+ function trLista(){
+  var l=q("tr-list");if(!l)return;
+  l.innerHTML=(TR.ann.length?TR.ann.map(function(a){
+   var cm=TR.comm.filter(function(c){return c.annotazione_id===a.id;}).map(function(c){return '<small>'+(c.autore_id===currentUser.id?"Tu":"Risposta")+': '+esc(c.testo)+'</small>';}).join("");
+   return '<div class="tr-an"><span class="tm" onclick="trSalta('+a.t_sec+')">'+fmt(a.t_sec)+'</span><div class="tx"><b>'+(NOMI[a.tipo]||a.tipo)+'</b>'+(a.testo&&a.tipo==="punto"?'<br>'+esc(a.testo):'')+cm+'</div>'+
+    (a.tipo==="voce"?'<button onclick="trPlayVoce(\''+a.id+'\')">▶ Ascolta</button>':'')+
+    '<button onclick="trRispondi(\''+a.id+'\')">Rispondi</button>'+
+    (a.autore_id===currentUser.id?'<button onclick="trNascondi(\''+a.id+'\')">Nascondi</button>':'')+'</div>';
+  }).join(""):'<div class="tr-vuoto" style="color:#fbf3e2;opacity:.7">'+(TR.owner?'Il trainer non ha ancora aggiunto segni.':'Nessun segno ancora. Metti in pausa e usa gli strumenti qui sopra.')+'</div>');
+ }
+ window.trRispondi=function(id){diarioSheet("Rispondi",'<textarea class="tr-field" id="trr-t" rows="3" placeholder="Scrivi la tua risposta"></textarea><button class="btn btn-primary" style="width:100%" onclick="trInviaRisposta(\''+id+'\')">Invia</button>');};
+ window.trInviaRisposta=async function(id){
+  var t=(q("trr-t").value||"").trim();if(!t)return;
+  if(DEMO()){TR.comm.push({id:"dc"+Date.now(),annotazione_id:id,autore_id:currentUser.id,testo:t});}
+  else{var r=await sb.from("sedute_commenti").insert({seduta_id:TR.cur.id,annotazione_id:id,testo:t}).select().single();if(r.error){toast("Non sono riuscito a inviare");return;}TR.comm.push(r.data);}
+  closeModal("modal-dr-sheet");trLista();
+ };
+ window.trNascondi=async function(id){
+  if(!(await chiediSiNo("Nascondere questo segno?","Sparisce dal video ma resta nello storico della seduta.")))return;
+  if(!DEMO())await sb.from("sedute_annotazioni").update({nascosta:true}).eq("id",id);
+  TR.ann=TR.ann.filter(function(a){return a.id!==id;});if(DEMO())TR.cur._ann=TR.ann;trLista();trDisegnaTl();trDisegna();
+ };
+
+ window.trInvia=async function(){
+  var s=TR.cur;if(!s)return;
+  var d;
+  if(DEMO()){d={proprietario:{nome:"Giulia Verdi",stato:"attivo"},membri:[{user_id:"u1",nome:"Anna Neri",ruolo:"allievo"}]};}
+  else{var r=await sb.rpc("equo_destinatari_seduta",{p_seduta:s.id});if(r.error){toast("Non riesco a leggere i destinatari");return;}d=r.data||{};}
+  var p=d.proprietario,att=p&&p.stato==="attivo",h="";
+  if(p&&att)h+='<label class="tr-dest"><input type="checkbox" checked disabled><span><b>'+esc(p.nome)+'</b><small>Proprietario · collegato</small></span></label>';
+  else if(p)h+='<div class="tr-dest-nota"><b>'+esc(p.nome)+'</b> (proprietario) non riceverà la seduta: '+(p.stato==="in_attesa"?"non ha ancora accettato il collegamento.":p.stato==="revocato"?"il collegamento è stato chiuso.":"il cavallo non è collegato.")+'</div>';
+  else h+='<div class="tr-dest-nota">Questo cavallo non ha un proprietario collegato su Equo.</div>';
+  var ruoli={allievo:"Allievo",veterinario:"Veterinario",maniscalco:"Maniscalco",istruttore:"Istruttore"};
+  (d.membri||[]).forEach(function(m){h+='<label class="tr-dest"><input type="checkbox" class="tri-m" value="'+esc(m.user_id)+'" onchange="trInviaAgg()"><span><b>'+esc(m.nome)+'</b><small>'+(ruoli[m.ruolo]||"Centro")+' del centro</small></span></label>';});
+  h+='<div class="muted" style="font-size:12px;line-height:1.45;margin:8px 0">'+(premium()?'':'Userà uno slot di prova ('+((TR.slot.usati||0)+1)+' di 10) e non si cancella. ')+'Dopo l\'invio la seduta non torna bozza.</div><button class="btn btn-primary" id="tri-ok" style="width:100%" onclick="trInviaOk()">Invia la seduta</button>';
+  if(!att&&!(d.membri||[]).length)h+='<div class="muted" style="font-size:12px;margin-top:8px">Per inviarla collega il cavallo dal tuo elenco «Cavalli seguiti».</div>';
+  TR.destOk=!!att;
+  diarioSheet("Inviare la seduta?",h);
+  trInviaAgg();
+ };
+ window.trInviaAgg=function(){
+  var b=q("tri-ok");if(!b)return;
+  var n=document.querySelectorAll(".tri-m:checked").length;
+  b.disabled=!(TR.destOk||n>0);
+ };
+ window.trInviaOk=async function(){
+  var s=TR.cur;if(!s)return;
+  var ids=[].slice.call(document.querySelectorAll(".tri-m:checked")).map(function(x){return x.value;});
+  var b=q("tri-ok");if(b){b.disabled=true;b.textContent="Invio…";}
+  if(DEMO()){s.stato="inviata";TR.slot.usati=(TR.slot.usati||0)+1;}
+  else{
+   var r=await sb.rpc("equo_invia_seduta",{p_seduta:s.id,p_destinatari:ids});
+   if(r.error){var m=r.error.message||"";
+    toast(/SLOT_ESAURITI/.test(m)?"Hai usato i 10 slot di prova.":/SENZA_VIDEO/.test(m)?"Aggiungi almeno un video.":/NESSUN_DESTINATARIO/.test(m)?"Nessun destinatario: il proprietario non ha ancora accettato il collegamento.":/DESTINATARIO_NON_VALIDO/.test(m)?"Destinatario non valido.":"Non sono riuscito a inviare: "+m);
+    if(/SLOT/.test(m))trPrem();if(b){b.disabled=false;b.textContent="Invia la seduta";}return;}
+   s.stato="inviata";var sl=await sb.rpc("equo_trainer_slot");if(sl.data)TR.slot=sl.data;
+  }
+  closeModal("modal-dr-sheet");q("tr-invia").style.display="none";toast("Seduta inviata");
+ };
+ // ----- vista proprietario (riceve e risponde)
+ window.trOwnerCard=async function(forza){
+  if(isTr()||DEMO())return;
+  try{
+   if(TR.ricevuteOk&&!forza)return;
+   var r=await sb.from("sedute_condivisioni").select("seduta_id,visto_il,sedute(id,titolo,inviata_il,horse_id,stato,sedute_media(id,path,durata_s))").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(20);
+   var l=(r.data||[]).filter(function(x){return x.sedute;});TR.ricevuteOk=true;
+   TR.ricevute=l.map(function(x){return Object.assign({},x.sedute,{_nuova:!x.visto_il});});
+   var box=q("hv3-sopra");if(!box)return;var old=q("tr-own");if(old)old.remove();
+   trOwnerCollCard();if(!TR.ricevute.length)return;
+   var nuove=TR.ricevute.filter(function(s){return s._nuova;}).length;
+   var d=document.createElement("div");d.id="tr-own";d.className="tr-card";
+   d.innerHTML='<h4><span>Sedute del tuo trainer'+(nuove?' · '+nuove+' nuove':'')+'</span></h4>'+TR.ricevute.slice(0,3).map(function(s){return '<div class="tr-riga" onclick="trApri(\''+s.id+'\',true)"><div class="th">'+IC.film+'</div><div><b>'+esc(s.titolo)+'</b><small>'+formatDate(s.inviata_il||s.created_at)+'</small></div>'+(s._nuova?'<span class="tr-chip n">Nuova</span>':'')+'</div>';}).join("");
+   box.appendChild(d);
+  }catch(e){console.error(e);}
+ };
+
+ // ----- lato proprietario: richieste di collegamento e «I miei istruttori»
+ async function ownerColl(){var r=await sb.rpc("equo_miei_collegamenti");return (Array.isArray(r.data)?r.data:[]).filter(function(x){return x.mio_ruolo==="proprietario";});}
+ async function trOwnerCollCard(){
+  if(isTr()||DEMO())return;
+  try{
+   var old=q("tr-own-coll");if(old)old.remove();
+   var box=q("hv3-sopra");if(!box)return;
+   var l=await ownerColl();TR.collO=l;
+   var inv=l.filter(function(x){return x.da_rispondere;});if(!inv.length)return;
+   old=q("tr-own-coll");if(old)old.remove();
+   var d=document.createElement("div");d.id="tr-own-coll";d.className="tr-card";
+   d.innerHTML='<h4><span>Richieste dei tuoi istruttori</span></h4>'+inv.map(function(c){return '<div class="tr-riga" style="cursor:default"><div class="th">'+IC.film+'</div><div><b>'+esc(c.trainer)+'</b><small>vuole seguire '+esc(c.cavallo)+' e inviarti le sedute</small></div><div class="tr-az"><button class="tr-btn" onclick="trCollRispO(\''+c.id+'\',true)">Accetta</button><button class="tr-btn o" onclick="trCollRispO(\''+c.id+'\',false)">No</button></div></div>';}).join("");
+   box.appendChild(d);
+  }catch(e){console.error(e);}
+ }
+ window.trCollRispO=async function(id,ok){
+  var r=await sb.rpc("equo_rispondi_collegamento",{p_id:id,p_accetta:ok});
+  if(r.error){toast("Operazione non riuscita");return;}
+  toast(ok?"Istruttore collegato: riceverai le sue sedute":"Richiesta rifiutata");
+  trOwnerCollCard();if(q("modal-dr-sheet")&&q("modal-dr-sheet").classList.contains("active"))trCollOwner();
+ };
+ window.trCollRevocaO=async function(id){
+  if(!(await chiediSiNo("Interrompere il collegamento?","L'istruttore non potrà più inviarti sedute. Quelle già ricevute restano tue.")))return;
+  var r=await sb.rpc("equo_revoca_collegamento",{p_id:id});
+  if(r.error){toast("Operazione non riuscita");return;}
+  toast("Collegamento interrotto");trOwnerCollCard();trCollOwner();
+ };
+ window.trCollInvita=async function(){
+  var hid=q("tri-h")&&q("tri-h").value,k=(q("tri-k").value||"").trim();
+  if(!hid){toast("Scegli il cavallo");return;}if(!k){toast("Scrivi il codice dell'istruttore (TR-…)");return;}
+  var r=await sb.rpc("equo_proprietario_invita_trainer",{p_horse:hid,p_codice:k});
+  if(r.error){var m=r.error.message||"";toast(/NON_TROVATO/.test(m)?"Codice non trovato: chiedi all'istruttore di mostrarti il suo codice TR-… nell'app Trainer.":/PROPRIO/.test(m)?"Questo è il tuo stesso codice.":"Invito non riuscito");return;}
+  toast(r.data&&r.data.stato==="attivo"?(r.data.trainer||"L'istruttore")+" è collegato":"Invito inviato a "+(r.data&&r.data.trainer||"all'istruttore")+": deve accettare lui");
+  trCollOwner();
+ };
+ window.trCollOwner=async function(){
+  if(DEMO()){diarioSheet("I miei istruttori",'<div class="tr-vuoto">Disponibile con un account reale.</div>');return;}
+  diarioSheet("I miei istruttori",'<div class="loading"><div class="spinner"></div></div>');
+  var l=[];try{l=await ownerColl();}catch(e){}
+  var hs=(typeof horses!=="undefined"&&horses)||[];
+  var att=l.filter(function(x){return x.stato==="attivo";}),ric=l.filter(function(x){return x.da_rispondere;}),sent=l.filter(function(x){return x.stato==="da_confermare_trainer"&&!x.da_rispondere;}),h="";
+  if(ric.length)h+='<h5 style="margin:6px 0">Richieste da accettare</h5>'+ric.map(function(c){return '<div class="tr-riga" style="cursor:default"><div><b>'+esc(c.trainer)+'</b><small>vuole seguire '+esc(c.cavallo)+'</small></div><div class="tr-az" style="margin-left:auto;display:flex;gap:6px"><button class="tr-btn" onclick="trCollRispO(\''+c.id+'\',true)">Accetta</button><button class="tr-btn o" onclick="trCollRispO(\''+c.id+'\',false)">No</button></div></div>';}).join("");
+  h+='<h5 style="margin:10px 0 6px">Collegati</h5>'+(att.length?att.map(function(c){return '<div class="tr-riga" style="cursor:default"><div><b>'+esc(c.trainer)+'</b><small>segue '+esc(c.cavallo)+(c.centro?' · '+esc(c.centro):'')+'</small></div><button class="tr-btn o" style="margin-left:auto" onclick="trCollRevocaO(\''+c.id+'\')">Revoca</button></div>';}).join(""):'<div class="muted" style="font-size:12.5px">Nessun istruttore collegato. Senza il tuo consenso nessuno può inviarti sedute.</div>');
+  if(sent.length)h+='<h5 style="margin:10px 0 6px">Inviti in attesa</h5>'+sent.map(function(c){return '<div class="tr-riga" style="cursor:default"><div><b>'+esc(c.trainer)+'</b><small>per '+esc(c.cavallo)+' · deve ancora accettare</small></div><button class="tr-btn o" style="margin-left:auto" onclick="trCollRevocaO(\''+c.id+'\')">Annulla</button></div>';}).join("");
+  h+='<h5 style="margin:12px 0 6px">Invita il tuo istruttore</h5><select class="tr-field" id="tri-h"><option value="">Scegli il cavallo…</option>'+hs.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+'</option>';}).join("")+'</select><input class="tr-field" id="tri-k" placeholder="Codice dell\'istruttore (TR-…)" autocapitalize="characters"><button class="btn btn-primary" style="width:100%" onclick="trCollInvita()">Invita</button><div class="muted" style="font-size:12px;line-height:1.5;margin-top:8px">L\'istruttore trova il suo codice nell\'app Trainer → Cavalli seguiti → «Il tuo codice trainer».</div>';
+  diarioSheet("I miei istruttori",h);
+ };
+ var _dhr2=window.diarioHomeRender;
+ if(_dhr2)window.diarioHomeRender=async function(){var r=await _dhr2.apply(this,arguments);try{trOwnerCard(true);}catch(e){}return r;};
+ // ----- barra, «+» e pagine del trainer
+ function navTr(){
+  var nav=document.getElementById("bottom-nav-pro");if(!nav||!isTr()||nav.dataset.alt==="istr2")return;
+  nav.innerHTML='<button class="nav-btn" data-page="pro-home" onclick="showPage(\'pro-home\')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>'+
+   '<button class="nav-btn" data-page="tr-sedute" onclick="showPage(\'tr-sedute\')"><span class="icon hm-ico">'+IC.film.replace("<svg","<svg class=\"hm-svg\"")+'</span><small>Sedute</small></button>'+
+   '<button class="nav-btn nav-hammer" id="nav-hammer" onclick="openAiSheet()" aria-label="Ares, agente AI"><span class="hm-ham"><i class="hm-ham-dot"></i></span><small>Ares</small></button>'+
+   '<button class="nav-btn" data-page="pro-inbox" onclick="showPage(\'pro-inbox\'); loadColleghiList();"><span class="icon hm-ico">'+HM_IC.inbox+'</span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>'+
+   '<button class="nav-btn" data-page="pro-agenda" onclick="showPage(\'pro-agenda\')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>';
+  nav.dataset.alt="istr2";delete nav.dataset.man;
+  var pg=typeof plPagina==="function"?plPagina():"";nav.querySelectorAll(".nav-btn[data-page]").forEach(function(b){b.classList.toggle("active",b.dataset.page===pg);});
+ }
+ var _pna=window.plNavAltri;
+ window.plNavAltri=function(){if(isTr()){navTr();return;}var n=document.getElementById("bottom-nav-pro");if(n&&n.dataset.alt==="istr2"){delete n.dataset.alt;}return _pna&&_pna.apply(this,arguments);};
+ if(typeof PL_TONI!=="undefined")PL_TONI.istr={"pro-home":1,"tr-sedute":2,"tr-cavalli":3,"pro-inbox":4,"pro-agenda":5,"pro-clienti":4,"pro-incassi":5};
+ var _pcm=window.plCostruisciMenu;
+ window.plCostruisciMenu=function(){
+  if(!isTr()){var rr=_pcm.apply(this,arguments);try{if(typeof plRuolo==="function"&&plRuolo()==="owner"){var mm=document.getElementById("hm-menu-piu");if(mm)mm.insertAdjacentHTML("beforeend",plSez("Allenamento",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"I miei istruttori","trCollOwner()")]));}}catch(e){}return rr;}
+  var m=document.getElementById("hm-menu-piu");if(!m)return;
+  m.innerHTML=plSez("Crea subito",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"Nuova seduta","trNuova()",1),plTile(HM_IC.ferro,"Cavallo seguito","trNuovoCavallo()",1)])+
+   plSez("Vai a",[plTile(HM_IC.ferro,"Cavalli seguiti","showPage('tr-cavalli')"),plTile(HM_IC.wallet,"Incassi","showPage('pro-incassi')"),plTile(HM_IC.users,"Clienti","showPage('pro-clienti')"),plTile(HM_IC.cerca,"Cerca","apriCercaTutto()"),plTile(HM_IC.qr,"Invita clienti","openCodicePersonaleModal()"),plTile(HM_IC.aiuto,"Serve aiuto?","apriTicketAssistenza()")]);
+  m.classList.add("pl-menu");
+ };
+ var _sp=window.showPage;
+ window.showPage=function(p){
+  var r=_sp.apply(this,arguments);
+  try{
+   if(isTr()){ if(p==="pro-home")trRenderHome(); else if(p==="tr-sedute")trRenderSedute(); else if(p==="tr-cavalli")trRenderCavalli(); }
+   else if(p==="home"&&typeof trOwnerCard==="function")trOwnerCard(true);
+  }catch(e){console.error(e);}
+  return r;
+ };
+ // Ares: l'immagine al centro (stile come Galeno/Hammer)
+ document.addEventListener("DOMContentLoaded",function(){["tr-sedute","tr-cavalli"].forEach(pagina);});
+ try{["tr-sedute","tr-cavalli"].forEach(pagina);}catch(e){}
+})();
+</script>
+<script id="ares-js">
+/* Ares · agente degli istruttori/trainer: testata, benvenuto e segnaposto della chat */
+(function(){
+  var _t = aggiornaTestataAi;
+  aggiornaTestataAi = function(){
+    var r = _t.apply(this, arguments);
+    try{
+      if(typeof plRuolo === "function" && plRuolo() === "istr"){
+        var t = document.getElementById("ai-sheet-titolo"); if(t) t.textContent = "Ares · allenamento e sedute";
+        var b = document.getElementById("ai-benvenuto");
+        if(b) b.innerHTML = 'Ciao, sono <strong>Ares</strong> 🏇, l\'agente di Equo per istruttori e trainer. Ti aiuto a preparare una seduta, a decidere cosa annotare su un video e a spiegare l\'esercizio a chi ti guarda: prova <em>"come imposto una seduta sul galoppo?"</em> o <em>"cosa devo guardare nel video di oggi?"</em>. Le annotazioni le fai tu nell\'editor: io non invio nulla da solo.';
+        var i = document.getElementById("chat-input"); if(i) i.placeholder = "Chiedi ad Ares…";
+      }
+    }catch(e){ console.error("ares-js:", e); }
+    return r;
+  };
+  try{ VERSIONI.ares = "1.0"; }catch(e){}
+})();
 </script>
 </body>
 </html>
