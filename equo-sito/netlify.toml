@@ -31,6 +31,13 @@
   status = 200
   force = true
 
+# Statistiche anonime di visite e click: funzione sul sito dell'app (stesso dominio, niente CORS)
+[[redirects]]
+  from = "/api/v"
+  to = "https://app.equohub.com/.netlify/functions/visita"
+  status = 200
+  force = true
+
 # ---------- Vecchio sito (Next.js): indirizzi rimandati alle pagine nuove ----------
 # (/contatti, /termini e /privacy funzionano da soli: Netlify serve contatti.html, termini.html, privacy.html)
 [[redirects]]

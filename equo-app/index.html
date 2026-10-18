@@ -2916,6 +2916,7 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
     <div id="home-oggi"></div>
     <div id="home-da-saldare" style="display:none"></div>
     <div class="wh" id="wh-owner"></div>
+    <div id="home-proposte"></div>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
         <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
@@ -3085,6 +3086,7 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
           <div style="font-weight:700;font-size:14px">Scheda cavallo</div>
           <button class="btn btn-outline btn-sm btn-variazione" onclick="openHorseForm(currentHorseId)">Modifica</button>
         </div>
+        <div id="horse-livello-box"></div>
         <div id="horse-info-box" style="display:flex;flex-direction:column;gap:4px;font-size:13px"></div>
       </div>
 
@@ -3152,6 +3154,7 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
         <div><div class="hm-saluto" id="hm-saluto">Ciao</div><div class="hm-data" id="hm-data"></div></div>
         <div class="hm-meteo-pill" onclick="if(!event.target.closest('#hm-meteo')) document.getElementById('hm-meteo').click()"><div class="meteo-box hm-meteo" id="hm-meteo" aria-label="Meteo della settimana"></div><span class="hm-temp" id="hm-temp"></span></div>
       </div>
+      <div id="hm-conferme"></div>
       <div class="hm-banner" id="hm-banner"><div class="hm-slides" id="hm-slides"></div><div class="hm-pall" id="hm-pall"></div></div>
       <div class="hm-cerchi">
         <button class="hm-cerchio" onclick="hmPortami()"><span class="c"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 22 2l-9 19-2-8z"/></svg></span>Portami da…</button>
@@ -3303,6 +3306,8 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
       <!-- cavalli del cliente: un box per cavallo (il primo è sempre «+ Aggiungi cavallo») -->
       <div class="clienti-sez-head" style="margin-top:4px"><div class="clienti-sez-title" id="cliente-cavalli-titolo">CAVALLI</div></div>
       <input class="input" id="cliente-cavalli-cerca" placeholder="Cerca cavallo…" style="margin-bottom:10px;display:none" oninput="renderBoxCavalliCliente()">
+      <div id="cliente-proposte-box"></div>
+      <div id="cliente-simili-box"></div>
       <div class="cav-griglia" id="cliente-cavalli-grid"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
       <div id="cliente-qui-box"></div>
       <div id="cliente-conti-box"></div>
@@ -4027,9 +4032,9 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
         <div id="edit-cliente-cavalli"></div>
         <div class="cod-cav-box">
           <div style="font-size:12.5px;font-weight:700;margin-bottom:2px">Codice Equo del cavallo</div>
-          <div class="muted" style="font-size:12px;margin-bottom:6px">Il cavallo ha già un codice Equo (es. MAR-000005)? Aggiungilo qui: arriva con tutto il suo storico, anche se ora è tra i cavalli di un altro cliente.</div>
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Il cavallo ha già un codice Equo (es. PRV-000005)? Aggiungilo qui: arriva con tutto il suo storico, anche se ora è tra i cavalli di un altro cliente.</div>
           <div style="display:flex;gap:8px">
-            <input class="input" id="edit-cliente-codice-cavallo" placeholder="es. MAR-000005" autocapitalize="characters" style="flex:1;text-transform:uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiCavalloCodice()}">
+            <input class="input" id="edit-cliente-codice-cavallo" placeholder="es. PRV-000005" autocapitalize="characters" style="flex:1;text-transform:uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiCavalloCodice()}">
             <button class="btn btn-primary btn-sm" style="flex:none" onclick="aggiungiCavalloCodice(this)">Aggiungi</button>
           </div>
         </div>
@@ -4060,7 +4065,7 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
     </div>
     <div class="input-group" style="margin-top:10px"><label class="input-label" for="ncav-cliente">Di chi è / dove sta?</label><select class="input" id="ncav-cliente" onchange="ncavClienteCambiato(this)"></select></div>
     <div class="muted" style="font-size:12px;text-align:center;margin:4px 0 6px">oppure, se ha già un codice Equo</div>
-    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. MAR-000005" autocapitalize="characters" style="text-transform:uppercase"></div>
+    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. PRV-000005" autocapitalize="characters" style="text-transform:uppercase"></div>
     <div class="auth-error" id="ncav-errore" style="display:none"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaNuovoCavalloCartella(this)">Salva cavallo</button>
   </div>
@@ -8280,7 +8285,175 @@ async function loadHorses(){
   renderHome();
   renderHorsesList();
   controllaStessoCavallo();
+  caricaProposteCavalli();
 }
+
+/* ---------- CODICE CAVALLO 2C: proposte, livelli, conferme ---------- */
+const LIVELLI_CODICE = { provvisorio: ["Provvisorio", "#5B6B62", "#E9EEEB"], validato: ["Validato", "#14573A", "#E3F1E9"], certificato: ["Certificato", "#7A5A00", "#F8EDD2"] };
+function badgeLivelloCodice(l){
+  const x = LIVELLI_CODICE[l] || LIVELLI_CODICE.provvisorio;
+  return `<span style="font-size:11px;font-weight:700;color:${x[1]};background:${x[2]};border-radius:999px;padding:3px 9px">${x[0]}</span>`;
+}
+let proposteCav = [];
+async function caricaProposteCavalli(){
+  const box = document.getElementById("home-proposte");
+  if(!box) return;
+  if(DEMO_MODE){ box.innerHTML = ""; return; }
+  try{
+    const { data, error } = await sb.rpc("equo_proposte_cavalli_proprietario");
+    proposteCav = (!error && Array.isArray(data)) ? data : [];
+  } catch(e){ proposteCav = []; }
+  renderProposteCavalli();
+}
+function renderProposteCavalli(){
+  const box = document.getElementById("home-proposte");
+  if(!box) return;
+  if(!proposteCav.length){ box.innerHTML = ""; return; }
+  const man = proposteCav[0].maniscalco || "Il tuo maniscalco";
+  const righe = proposteCav.map(p => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
+      <div style="min-width:0"><div style="font-weight:600">${escapeHtml(p.nome || "")}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml([p.razza, p.codice].filter(Boolean).join(" · "))}${p.esiste_gia ? " · hai già un cavallo con questo nome: si uniscono" : ""}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-primary btn-sm" onclick="accettaProposta('${p.proposta}')">Accetta</button>
+        <button class="btn btn-ghost btn-sm" onclick="rifiutaProposta('${p.proposta}')">Non è mio</button>
+      </div>
+    </div>`).join("");
+  box.innerHTML = `<div class="card" style="margin-bottom:14px">
+    <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.</div>
+    ${righe}
+    ${proposteCav.length > 1 ? `<button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti</button>` : ""}
+  </div>`;
+}
+async function accettaPropostaSilenzioso(id){
+  const { data, error } = await sb.rpc("equo_accetta_cavallo_proposto", { p_proposta: id });
+  if(error || !data) return { ok: false, motivo: "errore" };
+  return data;
+}
+function messaggioProposta(res){
+  if(res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere un solo cavallo: passa a Premium per accettare anche gli altri.";
+  if(res.motivo === "proposta_non_trovata") return "Questa proposta non è più disponibile.";
+  return "Operazione non riuscita. Riprova.";
+}
+async function accettaProposta(id){
+  const res = await accettaPropostaSilenzioso(id);
+  if(!res.ok){ showToast(messaggioProposta(res)); if(res.motivo === "limite_cavalli_free") openModal("modal-limite-cavalli"); return; }
+  showToast("Cavallo aggiunto. Controlla i dati e confermali.");
+  await loadHorses();
+  if(res.horse_id && horses.some(h => h.id === res.horse_id)) openHorseDetail(res.horse_id);
+}
+async function accettaTuttiProposte(){
+  let n = 0, stop = null;
+  for(const p of [...proposteCav]){
+    const res = await accettaPropostaSilenzioso(p.proposta);
+    if(res.ok) n++; else { stop = res; break; }
+  }
+  if(n) showToast(n === 1 ? "1 cavallo aggiunto." : n + " cavalli aggiunti.");
+  if(stop) { showToast(messaggioProposta(stop)); if(stop.motivo === "limite_cavalli_free") openModal("modal-limite-cavalli"); }
+  await loadHorses();
+}
+async function rifiutaProposta(id){
+  const { data } = await sb.rpc("equo_rifiuta_cavallo_proposto", { p_proposta: id });
+  showToast(data?.ok ? "Fatto: il maniscalco potrà correggere la scheda." : "Operazione non riuscita.");
+  caricaProposteCavalli();
+}
+
+/* livello del codice sulla scheda cavallo (proprietario) */
+async function renderLivelloCavallo(h){
+  const box = document.getElementById("horse-livello-box");
+  if(!box) return;
+  const liv = h.codice_livello || "provvisorio";
+  const codice = h.codice_equo || "in assegnazione";
+  const testa = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div><b class="cod-equo">${escapeHtml(codice)}</b></div>${badgeLivelloCodice(liv)}</div>`;
+  box.innerHTML = `<div class="card" style="margin-bottom:12px">${testa}</div>`;
+  if(DEMO_MODE) return;
+  let st = null;
+  try{ const r = await sb.rpc("equo_stato_codice", { p_horse: h.id }); st = r.data; } catch(e){}
+  if(currentHorseId !== h.id || !st || !st.ok) return;
+  const v = (ok, t) => `<div style="font-size:13.5px;padding:2px 0;color:${ok ? "#14573A" : "var(--muted)"}">${ok ? "✓" : "○"} ${t}</div>`;
+  const dati = st.nome && st.razza && st.nascita;
+  let corpo = v(st.nome, "Nome") + v(st.razza, "Razza") + v(st.nascita, "Data di nascita")
+    + v(st.conferma_proprietario, "Tua conferma dei dati")
+    + v(st.conferme_valide >= 2, "Seconda conferma da un professionista collegato (" + Math.min(st.conferme_valide, 2) + "/2)");
+  let msg = "";
+  if(liv === "provvisorio"){
+    msg = !dati ? "Completa nome, razza e data di nascita per poter confermare."
+      : (!st.io_ho_confermato ? "Controlla i dati e confermali. Con la conferma di un professionista il codice diventa definitivo."
+      : "Tua conferma data. Manca la conferma di un professionista collegato (maniscalco, istruttore o scuderia).");
+  } else if(liv === "validato"){
+    msg = "Codice definitivo" + (st.codice_definitivo ? ": " + st.codice_definitivo : "") + ". Se cambi nome, razza o data di nascita, le conferme vanno rinnovate.";
+  } else {
+    msg = "Microchip verificato: il cavallo è Certificato.";
+  }
+  const btn = (dati && !st.io_ho_confermato)
+    ? `<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="confermaDatiCavallo('${h.id}')">Confermo i dati</button>`
+    : (!dati ? `<button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="openHorseForm('${h.id}')">Completa i dati</button>` : "");
+  box.innerHTML = `<div class="card" style="margin-bottom:12px">${testa}${corpo}<div class="muted" style="font-size:12.5px;line-height:1.5;margin-top:8px">${escapeHtml(msg)}</div>${btn}</div>`;
+}
+async function confermaDatiCavallo(id){
+  const { data, error } = await sb.rpc("equo_conferma_cavallo", { p_horse: id });
+  if(error || !data?.ok){ showToast(data?.motivo === "dati_incompleti" ? "Completa nome, razza e data di nascita." : "Conferma non riuscita. Riprova."); return; }
+  showToast(data.livello === "validato" ? "Codice definitivo assegnato: " + (data.codice_definitivo || "") : "Conferma registrata.");
+  await loadHorses();
+  if(horses.some(h => h.id === id)) openHorseDetail(id);
+}
+
+/* professionista: cavalli da confermare (home maniscalco) */
+let confermePro = [], confermeProTs = 0;
+async function caricaConfermePro(force){
+  const box = document.getElementById("hm-conferme");
+  if(!box || DEMO_MODE) return;
+  if(!force && Date.now() - confermeProTs < 60000) return;
+  confermeProTs = Date.now();
+  try{
+    const { data, error } = await sb.rpc("equo_cavalli_da_confermare");
+    confermePro = (!error && Array.isArray(data)) ? data : [];
+  } catch(e){ confermePro = []; }
+  if(!confermePro.length){ box.innerHTML = ""; return; }
+  const righe = confermePro.map((c, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--border,#DDE5E0)">
+      <div style="min-width:0"><div style="font-weight:600">${escapeHtml(c.nome || "")}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml(c.codice || "")}${c.motivo === "dati_modificati" ? " · dati cambiati, riconferma" : ""}</div></div>
+      <button class="btn btn-primary btn-sm" onclick="confermaCavalloPro(${i})">Confermo</button>
+    </div>`).join("");
+  box.innerHTML = `<div class="card" style="margin:0 0 14px">
+    <div class="section-title" style="margin-bottom:2px">Da confermare (${confermePro.length})</div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5;margin-bottom:4px">Conferma che nome, razza e data di nascita sono giusti: serve la tua conferma, con quella del proprietario, per il codice definitivo.</div>
+    ${righe}</div>`;
+}
+async function confermaCavalloPro(i){
+  const c = confermePro[i];
+  if(!c) return;
+  const { data, error } = await sb.rpc("equo_conferma_cavallo", { p_horse: c.horse_id || null, p_scuderia_cavallo: c.scuderia_cavallo_id || null });
+  if(error || !data?.ok){ showToast("Conferma non riuscita. Riprova."); return; }
+  showToast(data.livello === "validato" ? "Confermato: codice definitivo " + (data.codice_definitivo || "") : "Conferma registrata.");
+  caricaConfermePro(true);
+}
+
+/* maniscalco: proponi i cavalli al proprietario collegato */
+async function renderProposteCliente(c){
+  const box = document.getElementById("cliente-proposte-box");
+  if(!box) return;
+  box.innerHTML = "";
+  if(DEMO_MODE || !c || !c.cliente_user_id || isStruttura(c)) return;
+  let lista = [];
+  try{ const { data } = await sb.rpc("equo_proposte_inviate", { p_cliente: c.id }); lista = Array.isArray(data) ? data : []; } catch(e){}
+  if(currentClienteId !== c.id) return;
+  const n = s => lista.filter(p => p.stato === s).length;
+  const riga = lista.length ? `In attesa: ${n("in_attesa")} · accettati: ${n("accettata")} · rifiutati: ${n("rifiutata")}` : "Nessun cavallo ancora proposto.";
+  box.innerHTML = `<div class="card" style="margin:0 0 12px"><div style="font-weight:600;margin-bottom:2px">Cavalli proposti al proprietario</div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5;margin-bottom:8px">${riga}</div>
+    <button class="btn btn-outline btn-sm" onclick="proponiCavalliCliente('${c.id}')">Proponi i cavalli al proprietario</button></div>`;
+}
+async function proponiCavalliCliente(clienteId){
+  const { data, error } = await sb.rpc("equo_proponi_cavalli_cliente", { p_cliente: clienteId });
+  if(error || !data?.ok){ showToast(data?.motivo === "cliente_non_collegato" ? "Il cliente non ha ancora collegato l'app." : "Operazione non riuscita."); return; }
+  showToast(data.proposti ? data.proposti + (data.proposti === 1 ? " cavallo proposto." : " cavalli proposti.") : "Niente di nuovo da proporre.");
+  const c = clientiMascalcia.find(x => x.id === clienteId);
+  if(c) renderProposteCliente(c);
+}
+
 
 /* ---------- SCHEDA UNICA: stesso nome in scuderia → decide il proprietario ---------- */
 let stessoCavalloCoda = null, stessoCavalloAttuale = null;
@@ -8548,6 +8721,7 @@ async function openHorseDetail(id){
   document.getElementById("cavalli-list-view").style.display = "none";
   document.getElementById("cavalli-detail-view").style.display = "block";
   document.getElementById("detail-horse-name").textContent = horse.name;
+  renderLivelloCavallo(horse);
   renderHorseInfoBox(horse);
   renderDoveStaProprietario(horse);
   caricaAllegatiCavallo("horse-allegati", "proprietario", { id });
@@ -9551,6 +9725,7 @@ async function openClienteDetail(id){
       <button class="cli-chip" onclick="openChatThread(currentClienteId)"><span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi</button>
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
     </div>`;
+  renderProposteCliente(c);
   const chipQr = document.getElementById("cli-chip-qr");
   if(chipQr) chipQr.style.display = isStruttura(c) && c.centro_id ? "none" : "";
   qrClienteAperto = false;
@@ -10071,6 +10246,7 @@ async function loadClienteInterventi(clienteId){
     try{ const r = await sb.rpc("pro_foto_cavalli", { p_righe: ids }); (r.data || []).forEach(f => { schedaFoto[f.cavallo_cliente_id] = f.foto_url; }); }catch(e){}
   }
   renderBoxCavalliCliente();
+  renderAvvisoSimili();
   renderInterventiSenzaCavallo();
   const boxQui = document.getElementById("cliente-qui-box"); if(boxQui) boxQui.innerHTML = "";
   caricaCavalliMiei().then(() => { if(currentClienteId === clienteId) renderCavalliQui(clienteId); }).catch(() => {});
@@ -10124,6 +10300,70 @@ function descrFerroBreve(cv){
   if(cv.ferratura_tipo === "pareggio") return "pareggio";
   if(cv.ferro_tipo === "correttivo" || cv.ferro_tipo_post === "correttivo") p.push("correttivo");
   return p.join(" · ");
+}
+/* ---------- AVVISO «SEMBRA LO STESSO CAVALLO» ----------
+   Una scheda inserita a mano e una inserita dal proprietario con nomi uguali si uniscono da sole (database).
+   Con nomi solo simili (es. «White» e «White night») si propone l'unione con un tocco: vince il nome del proprietario. */
+function nomeConfronto(s){ return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); }
+function distanzaNomi(a, b){
+  const m = a.length, n = b.length;
+  if(!m) return n; if(!n) return m;
+  let prev = Array.from({ length: n + 1 }, (_, j) => j);
+  for(let i = 1; i <= m; i++){
+    const cur = [i];
+    for(let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[n];
+}
+function nomiSimili(a, b){
+  const x = nomeConfronto(a), y = nomeConfronto(b);
+  if(!x || !y) return false;
+  if(x === y) return true;
+  const corto = x.length <= y.length ? x : y, lungo = x.length <= y.length ? y : x;
+  if(corto.length >= 3 && lungo.startsWith(corto + " ")) return true;
+  return corto.length >= 4 && distanzaNomi(x, y) <= 1;
+}
+function simiIgnorati(){ try{ return new Set(JSON.parse(localStorage.getItem("eq_simili_no") || "[]")); }catch(e){ return new Set(); } }
+function ignoraSimili(chiave){
+  try{ const s = simiIgnorati(); s.add(chiave); localStorage.setItem("eq_simili_no", JSON.stringify([...s].slice(-200))); }catch(e){}
+  renderAvvisoSimili();
+}
+let similiCorrenti = [];
+function renderAvvisoSimili(){
+  const box = document.getElementById("cliente-simili-box");
+  if(!box) return;
+  const no = simiIgnorati();
+  const manuali = (schedaCavalli || []).filter(c => c.id && !c.horse_id && !c.scuderia_cavallo_id && !c.presso);
+  const collegati = (schedaCavalli || []).filter(c => c.horse_id && !c.presso && c.tipo === "equo");
+  const usati = new Set(), coppie = [];
+  manuali.forEach(m => {
+    const c = collegati.find(x => !usati.has(x.horse_id) && nomiSimili(m.nome, x.nome) && !no.has(m.id + "|" + x.horse_id));
+    if(c){ usati.add(c.horse_id); coppie.push({ m, c, chiave: m.id + "|" + c.horse_id }); }
+  });
+  similiCorrenti = coppie;
+  box.innerHTML = coppie.slice(0, 3).map((p, i) => `<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:12px 14px;margin:0 0 10px">
+    <div style="font-weight:600;font-size:14px;margin-bottom:4px">È lo stesso cavallo?</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.5">«${escapeHtml(p.m.nome)}» (l'hai inserito tu) e «${escapeHtml(p.c.nome)}» (inserito dal proprietario) sembrano lo stesso cavallo. Se li unisci resta una scheda sola, con il nome del proprietario: lavori e avvisi si conservano.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button type="button" class="btn btn-primary btn-sm" onclick="unisciSimili(${i})">Unisci in «${escapeHtml(p.c.nome)}»</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="ignoraSimili('${p.chiave}')">Sono diversi</button>
+    </div></div>`).join("");
+}
+async function unisciSimili(i){
+  const p = similiCorrenti[i];
+  if(!p || !currentClienteId) return;
+  if(!confirm(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
+  if(DEMO_MODE){
+    demoState.interventiMascalcia.forEach(x => { if(x.cavallo_cliente_id === p.m.id) x.cavallo_cliente_id = p.c.id || null; });
+    demoState.cavalliClientiMascalcia = demoState.cavalliClientiMascalcia.filter(x => x.id !== p.m.id);
+  } else {
+    const { data, error } = await sb.rpc("equo_unisci_cavalli_cliente", { p_togli: p.m.id, p_tieni: p.c.id || null, p_horse: p.c.id ? null : p.c.horse_id });
+    if(error || !data || data.ok === false){ console.error("equo_unisci_cavalli_cliente:", error || data); showToast("Non sono riuscito a unire le schede, riprova"); return; }
+  }
+  showToast("Schede unite in «" + p.c.nome + "»");
+  schedaCavalli = [];
+  await loadClienteInterventi(currentClienteId);
 }
 function renderBoxCavalliCliente(){
   const grid = document.getElementById("cliente-cavalli-grid");
@@ -17389,6 +17629,7 @@ function hmBannerAvanti(){
 
 function renderHomeMan(){
   if(!document.getElementById("hm")) return;
+  caricaConfermePro();
   document.getElementById("hm-saluto").textContent = testoSaluto();
   document.getElementById("hm-data").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   // scadenze: in ritardo + entro 7 giorni

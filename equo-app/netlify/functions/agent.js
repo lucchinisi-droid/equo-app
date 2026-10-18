@@ -343,21 +343,29 @@ const STRUMENTI_ARES = [
 
 // ---------------------------------------------------------------- ATHENA (Equo Scuderia: gestori, staff, istruttori)
 const ISTRUZIONI_ATHENA = `Sei **Athena**, l'agente AI di Equo Scuderia: la segreteria digitale del centro ippico. Parli con chi lavora nel centro (amministratore, segreteria, istruttori, staff di scuderia), in italiano.
-Il tuo compito principale è essere la GUIDA puntuale del gestionale: conosci ogni funzione e procedura (Home, Il tuo Centro e staff, Cavalli & Salute, Lezioni, Pacchetti e carnet, Chat con clienti e team, Professionisti, Magazzino con categorie, articoli, movimenti, lotti, riordini, depositi e fornitori) e le spieghi passo per passo con esempi chiari.
+Sei la SEGRETARIA del centro: conosci gli iscritti (allievi, proprietari, clienti), i cavalli presenti (anagrafica, box, proprietario), il personale e i livelli di accesso, e le procedure del gestionale per la gestione del centro (Home, Il tuo Centro e staff, Cavalli e box, Lezioni, Pacchetti e carnet, Chat con clienti e team, Professionisti, Statistiche, Pacchetto e assistenza), che spieghi passo per passo con esempi chiari.
+
+## Cosa NON è tuo (ci sono gli agenti verticali)
+Magazzino e scorte, allenamenti, veterinaria e salute del cavallo, mascalcia NON sono la tua materia: ognuna ha il suo agente specializzato.
+- Magazzino (articoli, carichi e scarichi, scorte, lotti, riordini, depositi, fornitori) → **Ermes**.
+- Veterinaria, salute, vaccini, cure → **Galeno**.
+- Mascalcia e ferratura → **Hammer**.
+- Allenamenti e lavoro del cavallo → **Ares**.
+Se ti chiedono qualcosa di questi argomenti (anche "aggiungi/scarica/quanto ne abbiamo"): NON spiegare procedure, NON dare quantità, consigli tecnici o passi dettagliati. Rispondi in 1–2 frasi: di questo si occupa [agente], chiedilo a lui; se non è attivo nel centro, è un agente aggiuntivo (si attiva dai pacchetti ADVANCE in su): per attivarlo "Serve aiuto?" → "Apri un ticket". Al massimo indica il nome del menu dove si trova la funzione, senza passi. Non proporre di continuare su quell'argomento. Poi offri aiuto sulla tua parte (iscritti, cavalli, staff, lezioni, pacchetti).
 
 ## Chi sei (persona e tono)
 - Precisa, calma e organizzata, come la migliore responsabile di segreteria di un centro ippico. Dai del tu, frasi brevi, zero gergo informatico.
 - Se ti chiedono chi sei: "Sono Athena, l'agente di Equo Scuderia che ti guida nel gestionale". Non presentarti a ogni messaggio.
 
 ## Come lavori
-- Domande su come si usa il gestionale: usa SEMPRE guida_app (vedi "Guida all'app" qui sotto). Se la procedura dipende dai permessi (livelli 1, 2, 3, Admin), dillo.
-- Domande sulla situazione del centro ("cosa c'è da fare?", "cosa scade?", "cosa manca in magazzino?", "chi deve rinnovare il carnet?"): usa situazione_centro e rispondi con i dati veri, mai inventati; poi spiega dove andare nel gestionale per intervenire.
+- Domande su come si usa il gestionale (esclusi gli argomenti degli agenti verticali): usa SEMPRE guida_app (vedi "Guida all'app" qui sotto). Se la procedura dipende dai permessi (livelli 1, 2, 3, Admin), dillo.
+- Domande sulla situazione del centro ("cosa c'è da fare?", "chi deve rinnovare il carnet?", "che lezioni ci sono domani?", "come sono messi i box?"): usa situazione_centro e rispondi con i dati veri, mai inventati; poi spiega dove andare nel gestionale per intervenire. Nella situazione ignora le parti di magazzino e di scadenze sanitarie: se sono rilevanti, dì in una riga solo che ci sono cose da vedere con Ermes (magazzino) o Galeno (salute), senza elencarle né spiegare.
 - Non puoi ancora modificare dati da sola: spiega all'utente i passi per farlo lui (sono pochi tocchi) e offri di guidarlo.
-- Salute dei cavalli: puoi dare indicazioni generali prudenti, ma per sintomi o emergenze la prima frase è "Chiama subito il veterinario". Mai dosi di farmaci.
+- Salute dei cavalli: non è la tua materia (c'è Galeno). Se ti descrivono sintomi o un'emergenza, la prima frase è "Chiama subito il veterinario"; poi rimanda a Galeno. Mai dosi di farmaci.
 
 ## Stile delle risposte
 - Brevi e pratiche: di solito 3–8 righe; passi numerati quando spieghi una procedura. Niente tabelle. Grassetto solo per la cosa più importante.
-- Chiudi, se utile, con UNA proposta concreta ("Vuoi che ti spieghi anche come inviare l'ordine al fornitore?").
+- Chiudi, se utile, con UNA proposta concreta sulla tua parte ("Vuoi che ti spieghi anche come invitare un nuovo allievo?").
 - Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
 
 ${REGOLE_COMUNI}`;
@@ -381,6 +389,33 @@ const ISTRUZIONI_ATHENA_BASIC = ISTRUZIONI_ATHENA
 - Non puoi girare segnalazioni ai Boss: per problemi, richieste o idee indica "Serve aiuto?" → "Apri un ticket" in Home.
 - Se l'utente chiede funzioni non incluse nel suo pacchetto (Pacchetti & Abbonamenti, Magazzino, Statistiche, Store, Fatturazione, altri agenti), spiega in una riga cosa fanno e che sono incluse da ADVANCE in su.`;
 const STRUMENTI_ATHENA_BASIC = [clonaStrumento("guida_app"), { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } }];
+
+// ---------------------------------------------------------------- HAMMER e ARES in Equo Scuderia (add-on del centro)
+// Sono gli stessi agenti dell'app (stesse istruzioni e stesse schede di conoscenza), applicati ai cavalli del centro.
+const CONTESTO_AGENTE_SCUDERIA = (nome, materia) => `
+
+## Qui sei in Equo Scuderia (il gestionale del centro ippico)
+- Sei lo stesso ${nome} dell'app Equo, ma qui parli con lo STAFF di un centro ippico (titolare, responsabili, istruttori, scuderizzi) e lavori sui cavalli del centro, non su un singolo professionista.
+- La tua materia: ${materia}. Per magazzino e scorte c'è Ermes, per salute e veterinaria Galeno, per numeri e conti Merlino, per iscritti, staff e uso del gestionale Athena: se la domanda è loro, rimanda all'agente giusto in una frase.
+- I cavalli del centro li leggi con cavalli_centro (nome, razza, età, proprietario, box, note): non inventare mai dati; se mancano, dillo.
+- In questa versione NON hai strumenti per clienti, agenda, sedute, ricordi o guida dell'app: non nominarli, non promettere di salvare o modificare dati e, se serve un'azione nel gestionale, di' all'utente cosa fare lui o chiedi ad Athena.
+- Se il centro è un'emergenza sanitaria (sintomi, colica, zoppia improvvisa) la prima frase è "Chiama subito il veterinario".`;
+const ISTRUZIONI_HAMMER_SCUD = ISTRUZIONI_HAMMER.replace("Parli con un MANISCALCO professionista, in italiano.", "Parli con lo staff di un centro ippico, in italiano.")
+  + CONTESTO_AGENTE_SCUDERIA("Hammer", "mascalcia, pareggio, ferri, piede equino e andature");
+const ISTRUZIONI_ARES_SCUD = ISTRUZIONI_ARES.replace("Parli con un istruttore professionista, in italiano.", "Parli con lo staff di un centro ippico, in italiano.")
+  + CONTESTO_AGENTE_SCUDERIA("Ares", "didattica, allenamento, programmi di lavoro e lezioni per allievi e cavalli");
+const STRUMENTO_CAVALLI_CENTRO = { name: "cavalli_centro", description: "Cavalli attualmente presenti nel centro: nome, razza, mantello, età, proprietario, box e note. Filtra per nome con 'cerca'. Sola lettura.", input_schema: { type: "object", properties: { cerca: { type: "string", description: "Parte del nome del cavallo." } } } };
+const STRUMENTI_HAMMER_SCUD = [
+  STRUMENTI_HAMMER.find((t) => t.name === "web_search"),
+  STRUMENTI_HAMMER.find((t) => t.name === "cerca_conoscenze"),
+  STRUMENTO_CAVALLI_CENTRO,
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
+].filter(Boolean);
+const STRUMENTI_ARES_SCUD = [
+  STRUMENTI_ARES.find((t) => t.name === "cerca_conoscenze"),
+  STRUMENTO_CAVALLI_CENTRO,
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
+].filter(Boolean);
 
 // ---------------------------------------------------------------- MERLINO (Equo Scuderia: analista, contabile e stratega del centro)
 const MERLINO_MAX_RICERCHE = 4;
@@ -537,7 +572,7 @@ async function luogoMeteo(dest, ctx) {
     }
     return { pos: { citta: dest, luogo: dest }, nome: dest };
   }
-  if (ctx.ambito === "maniscalco") {
+  if (ctx.ambito === "maniscalco" && !ctx.centroId) {
     if (generico) return ctx.posizione ? { pos: { ...ctx.posizione }, nome: "dove ti trovi" } : { messaggio: "Non conosco la posizione del maniscalco: chiedi di quale cliente, struttura o località vuole il meteo." };
     const clienti = await clientiManiscalco(ctx);
     let trovati = trovaPerNome(clienti, dest);
@@ -688,6 +723,20 @@ async function eseguiStrumento(nome, input, ctx) {
       if (error) { console.error("guida_app:", error); return "Errore nel leggere la guida."; }
       if (!(data || []).length) return "Nessuna scheda trovata: riprova con altre parole (sinonimi, nome del menu) o con elenco = true per vedere tutte le schede. Non inventare percorsi.";
       return data;
+    }
+
+    case "cavalli_centro": {
+      if (!ctx.centroId) return "Strumento disponibile solo in Equo Scuderia.";
+      let q = db.from("scuderia_cavalli").select("id, nome, razza, mantello, data_nascita, proprietario, note, nota_box").eq("centro_id", ctx.centroId).is("uscito_il", null).order("nome").limit(60);
+      const cerca = String(input.cerca || "").replace(/[%,()]/g, "").trim().slice(0, 60);
+      if (cerca) q = q.ilike("nome", `%${cerca}%`);
+      const { data, error } = await q;
+      if (error) { console.error("cavalli_centro:", error); return "Errore nel leggere i cavalli del centro."; }
+      if (!(data || []).length) return cerca ? "Nessun cavallo con questo nome nel centro." : "Nel centro non ci sono ancora cavalli registrati.";
+      const { data: box } = await db.from("scuderia_box").select("numero, nome, cavallo_id").eq("centro_id", ctx.centroId).in("cavallo_id", data.map((c) => c.id));
+      const boxDi = {}; (box || []).forEach((b) => { boxDi[b.cavallo_id] = b.nome || ("Box " + b.numero); });
+      const anni = (d) => d ? Math.floor((Date.now() - new Date(d).getTime()) / 31557600000) : null;
+      return data.map((c) => ({ nome: c.nome, razza: c.razza, mantello: c.mantello, eta_anni: anni(c.data_nascita), proprietario: c.proprietario, box: boxDi[c.id] || null, note: [c.note, c.nota_box].filter(Boolean).join(" · ") || null }));
     }
 
     case "situazione_centro": {
@@ -1022,6 +1071,18 @@ async function eseguiStrumento(nome, input, ctx) {
   }
 }
 
+// Prova gratuita di un agente extra: 1 giorno e 10 messaggi (si avvia dal gestionale, vedi SQL schema-agenti-prezzi-prove)
+const PROVA_MESSAGGI = 10;
+async function provaAgente(admin, centroId, agente) {
+  const { data: r } = await admin.from("centri_prove_agenti").select("iniziata_il").eq("centro_id", centroId).eq("agente", agente).maybeSingle();
+  if (!r) return null;
+  const fine = new Date(r.iniziata_il).getTime() + 86400000;
+  if (Date.now() >= fine) return null;
+  const { count } = await admin.from("ai_messaggi").select("id", { count: "exact", head: true }).eq("centro_id", centroId).eq("agente", agente).eq("ruolo", "user").gte("created_at", r.iniziata_il);
+  if ((count || 0) >= PROVA_MESSAGGI) return null;
+  return { usati: count || 0, fine };
+}
+
 // ---------------------------------------------------------------- handler
 exports.handler = async (event) => {
   const origine = event.headers.origin || event.headers.Origin || "";
@@ -1072,10 +1133,16 @@ exports.handler = async (event) => {
   let limitiCentro = null;
   if (scud) { const { data: lc } = await admin.rpc("centro_limiti", { p_centro_id: centro.id }); limitiCentro = lc || {}; }
   const merlino = scud && body.agente === "merlino";
-  if (merlino && !(limitiCentro.agenti || []).includes("merlino")) return risposta(403, { error: "Merlino non è attivo per questo centro", bloccato: true });
+  let prova = null;
+  if (merlino && !(limitiCentro.agenti || []).includes("merlino")) prova = await provaAgente(admin, centro.id, "merlino");
+  if (merlino && !(limitiCentro.agenti || []).includes("merlino") && !prova) return risposta(403, { error: "Merlino non è attivo per questo centro", bloccato: true });
   // Merlino (numeri, incassi, strategia): solo titolare, amministratori e livelli 2-3
   if (merlino && !(centro.owner_id === user.id || membro.ruolo === "admin" || ["admin", "2", "3"].includes(String(membro.livello)))) return risposta(403, { error: "Merlino è riservato al titolare e ai responsabili del centro (livello 2 o 3)" });
-  const athena = scud && !merlino;
+  // Hammer e Ares (add-on del centro): stessi agenti dell'app, sui cavalli del centro
+  const agScud = scud && ["hammer", "ares"].includes(body.agente) ? body.agente : null;
+  if (agScud && !(limitiCentro.agenti || []).includes(agScud)) prova = await provaAgente(admin, centro.id, agScud);
+  if (agScud && !(limitiCentro.agenti || []).includes(agScud) && !prova) return risposta(403, { error: `${agScud === "hammer" ? "Hammer" : "Ares"} non è attivo per questo centro`, bloccato: true });
+  const athena = scud && !merlino && !agScud;
   const athenaBasic = athena && limitiCentro.athena_proattiva === false;
   // il Premium da proprietario non vale nella vista professionista (Hammer & co.): lì serve il Premium professionista
   const premiumSoloProp = profilo?.premium_livello === "proprietario";
@@ -1083,30 +1150,43 @@ exports.handler = async (event) => {
   // Free: 5 messaggi al GIORNO (chiave "AAAA-MM-GG", riparte a mezzanotte ora italiana); Premium: 500 al mese ("AAAA-MM")
   const giornaliero = !scud && piano === "free";
   const periodo = giornaliero ? oggiISO() : mese;
-  const chiaveMese = merlino ? mese + "-merlino" : athena ? mese + "-athena" : periodo;
+  const chiaveMese = merlino ? mese + "-merlino" : agScud ? mese + "-" + agScud : athena ? mese + "-athena" : periodo;
   // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
   // Pegasus: vista proprietario. Veterinari/istruttori (vista professionista non maniscalco): Equo AI neutro
   const pegasus = vista === "proprietario";
   // Ares: vista professionista di un utente che è istruttore/trainer (ruolo letto dal DB, non dall'app)
   const ares = vista === "professionista" && !hammer && [profilo?.ruolo, profilo?.ruolo_secondario].includes("istruttore");
-  const agente = merlino ? "merlino" : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : pegasus ? "pegasus" : "equo";
+  const agente = merlino ? "merlino" : agScud ? agScud : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : pegasus ? "pegasus" : "equo";
   const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", chiaveMese).maybeSingle();
   let limite = LIMITI[piano], usati = uso?.conteggio || 0;
   if (scud) {
     // in Scuderia il limite è del CENTRO (tutto lo staff insieme), per agente
-    limite = Number(merlino ? limitiCentro.merlino_messaggi : limitiCentro.athena_messaggi) || 30;
+    limite = Number(merlino || agScud ? limitiCentro.merlino_messaggi : limitiCentro.athena_messaggi) || 30;
     let q = admin.from("ai_messaggi").select("id", { count: "exact", head: true }).eq("centro_id", centro.id).eq("ruolo", "user").gte("created_at", mese + "-01T00:00:00Z");
-    q = merlino ? q.eq("agente", "merlino") : q.or("agente.is.null,agente.eq.athena");
+    q = merlino ? q.eq("agente", "merlino") : agScud ? q.eq("agente", agScud) : q.or("agente.is.null,agente.eq.athena");
     const { count } = await q;
     usati = count || 0;
+    if (prova) { limite = PROVA_MESSAGGI; usati = prova.usati; }
+    else if (merlino || agScud) {
+      // messaggi extra del centro (200 o 500 al mese): pool condiviso fra gli agenti extra, usato quando un agente finisce i suoi
+      const { data: cc } = await admin.from("centri").select("messaggi_extra").eq("id", centro.id).maybeSingle();
+      const extra = Number(cc?.messaggi_extra) || 0;
+      if (extra > 0) {
+        const { data: righe } = await admin.from("ai_messaggi").select("agente").eq("centro_id", centro.id).eq("ruolo", "user")
+          .in("agente", ["merlino", "hammer", "ares", "ermes", "galeno"]).gte("created_at", mese + "-01T00:00:00Z").limit(50000);
+        const per = {}; (righe || []).forEach((r) => { per[r.agente] = (per[r.agente] || 0) + 1; });
+        const altri = Object.entries(per).filter(([k]) => k !== agente).reduce((n, [, c]) => n + Math.max(0, c - limite), 0);
+        limite += Math.max(0, extra - altri);
+      }
+    }
   }
   // un'analisi foto guidata vale 3 messaggi nel piano Free
   const peso = hammer && modalita === "foto" && giornaliero ? 3 : 1;
   if (usati + peso > limite) return risposta(200, { limite_raggiunto: true, peso, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   // prenotazione ATOMICA del messaggio (SQL ai_prenota): richieste in parallelo non superano il limite
   // e il messaggio resta contato anche se la risposta va in timeout. Se la funzione SQL manca, si prosegue come prima.
-  const chiavePren = scud ? `centro:${centro.id}:${merlino ? "merlino" : "athena"}` : `utente:${user.id}:${chiaveMese}`;
+  const chiavePren = scud ? `centro:${centro.id}:${merlino ? "merlino" : agScud || "athena"}${prova ? ":prova" : ""}` : `utente:${user.id}:${chiaveMese}`;
   let prenotato = 0;
   for (let k = 0; k < peso; k++) {
     const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: scud ? mese : periodo, p_limite: limite, p_base: usati + k });
@@ -1124,7 +1204,7 @@ exports.handler = async (event) => {
   const { data: memoria } = scud ? { data: [] } : await db.from("ai_memoria").select("testo, horse_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
   let qStoria = db.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", user.id).eq("vista", vista);
   if (scud) qStoria = qStoria.eq("centro_id", centro.id);
-  if (merlino) qStoria = qStoria.eq("agente", "merlino"); else if (athena) qStoria = qStoria.or("agente.is.null,agente.eq.athena");
+  if (merlino) qStoria = qStoria.eq("agente", "merlino"); else if (agScud) qStoria = qStoria.eq("agente", agScud); else if (athena) qStoria = qStoria.or("agente.is.null,agente.eq.athena");
   const { data: storia } = await qStoria.order("created_at", { ascending: false }).limit(16);
 
   const listaCavalli = cavalli || [];
@@ -1165,9 +1245,9 @@ exports.handler = async (event) => {
 
   const contestoConversazione = [...(storia || []).slice(0, 6).reverse().map((m) => ({ ruolo: m.ruolo, testo: String(m.contenuto || "").slice(0, 600) })),
     { ruolo: "user", testo: (messaggio || "(allegato)").slice(0, 600) }];
-  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer ? "maniscalco" : ares ? "istruttore" : "proprietario",
+  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer || agScud === "hammer" ? "maniscalco" : ares || agScud === "ares" ? "istruttore" : "proprietario",
     guida: scud ? "scuderia" : ares ? "istruttore" : vista === "professionista" ? "maniscalco" : "proprietario",
-    strumenti: merlino ? STRUMENTI_MERLINO : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
+    strumenti: merlino ? STRUMENTI_MERLINO : agScud === "hammer" ? STRUMENTI_HAMMER_SCUD : agScud === "ares" ? STRUMENTI_ARES_SCUD : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
     centroId: centro?.id || null, agente, vista, contestoConversazione };
   // ultima posizione nota del telefono (solo per il meteo, arrotondata a ~1 km dall'app)
   if (body.posizione && Number.isFinite(Number(body.posizione.lat)) && Number.isFinite(Number(body.posizione.lon)))
@@ -1178,7 +1258,7 @@ exports.handler = async (event) => {
     const { data: inc } = await admin.from("profiles").select("incassi_nascosti").eq("id", user.id).maybeSingle();
     ctx.incassiNascosti = !!inc?.incassi_nascosti;
   } catch (_) { ctx.incassiNascosti = false; }
-  const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0, ricerche: 0 };
+  const costo = { in: 0, out: 0, cacheRead: 0, cacheWrite: 0, ricerche: 0, giri: 0 };
   let link = [];
   let testoFinale = "";
 
@@ -1189,9 +1269,9 @@ exports.handler = async (event) => {
         headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
           model: MODELLO,
-          max_tokens: allegati.length ? 2000 : (hammer || merlino || ares ? 1600 : 1200),
+          max_tokens: allegati.length ? 2000 : (hammer || merlino || ares || agScud ? 1600 : 1200),
           system: [
-            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
           tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : STRUMENTI,
@@ -1201,6 +1281,7 @@ exports.handler = async (event) => {
       const data = await res.json();
       if (!res.ok) { console.error("Errore Claude API:", JSON.stringify(data).slice(0, 500)); throw new Error("api"); }
       const u = data.usage || {};
+      costo.giri += 1;
       costo.in += u.input_tokens || 0; costo.out += u.output_tokens || 0;
       costo.cacheRead += u.cache_read_input_tokens || 0; costo.cacheWrite += u.cache_creation_input_tokens || 0;
       costo.ricerche += u.server_tool_use?.web_search_requests || 0;
@@ -1244,9 +1325,15 @@ exports.handler = async (event) => {
   // domanda per i Boss fatta davvero: si segna per non ripeterla prima di 14 giorni
   if (chiediFeedback && /boss/i.test(testoFinale)) await admin.from("profiles").update({ ai_feedback_chiesto_at: new Date().toISOString() }).eq("id", user.id);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + peso, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
+  // costo reale per agente (tabella ai_costi); se la tabella non esiste ancora, il resto funziona uguale
+  try {
+    await admin.from("ai_costi").insert({ user_id: user.id, centro_id: centro?.id || null, agente: agente || null, vista: vista || null, modello: MODELLO,
+      token_in: costo.in, token_out: costo.out, cache_read: costo.cacheRead, cache_write: costo.cacheWrite, ricerche: costo.ricerche, giri: costo.giri,
+      prova: !!prova, costo_usd: Math.round(costoUsd * 100000) / 100000 });
+  } catch (_) {}
 
-  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, modalita });
+  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, prova: prova ? { fine: new Date(prova.fine).toISOString() } : undefined, modalita });
 };
 
 // esportati solo per i test
-exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, ISTRUZIONI_ARES, STRUMENTI_ARES, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };
+exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, ISTRUZIONI_ARES, STRUMENTI_ARES, ISTRUZIONI_HAMMER_SCUD, STRUMENTI_HAMMER_SCUD, ISTRUZIONI_ARES_SCUD, STRUMENTI_ARES_SCUD, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };

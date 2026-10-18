@@ -1056,6 +1056,8 @@ a{color:inherit}
   width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:#f4d3dc;color:#8c3a55;
   display:flex;align-items:center;justify-content:center;font-size:31px;box-shadow:0 6px 18px rgba(140,58,85,.28)}
 .athena-fab:hover{background:#efc3cf}
+.athena-fab{padding:0;overflow:hidden}
+.athena-fab .athena-ic img{width:56px;height:56px;border-radius:50%;object-fit:cover;display:block}
 .athena-fab .athena-ic{display:block;line-height:0;animation:athenaMuovi 4.5s ease-in-out infinite;transform-origin:50% 60%}
 @keyframes athenaMuovi{0%,55%,100%{transform:rotate(0) scale(1)}63%{transform:rotate(-14deg) scale(1.12)}
   72%{transform:rotate(12deg) scale(1.16)}81%{transform:rotate(-7deg) scale(1.08)}90%{transform:rotate(3deg) scale(1.02)}}
@@ -1227,6 +1229,10 @@ body.box-trascina{user-select:none;-webkit-user-select:none;cursor:grabbing}
 :root[data-theme="dark"] .pk-start{background:#3a352b;color:#e6dcc6}:root[data-theme="dark"] .pk-advance{background:#26402b;color:#cfe5cc}
 .pk-card{margin-top:16px}
 .pk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.pk-promo{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:14px;border-radius:10px;background:var(--muted-bg);border:1px solid var(--border);border-left:4px solid var(--primary);font-size:13.5px;line-height:1.45}
+.pk-promo>i{font-size:18px;color:var(--primary);margin-top:2px}
+.pk-promo a{color:var(--primary);font-weight:700;margin-left:4px}
+.pk-promo-fine{border-left-color:#d08a1e}
 .pk-uso{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:6px 0 14px}
 .pk-uso .riga{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:5px}
 .pk-uso .riga b{color:var(--text)}
@@ -2109,7 +2115,7 @@ textarea.input{resize:vertical}
 
     <div class="main">
       <button class="athena-fab" id="athena-fab" onclick="apriAthena()" aria-label="Athena, la tua segreteria AI" title="Athena · segreteria AI">
-        <span class="athena-ic"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.14em"><path d="M6.5 3.5 9 6.8h6l2.5-3.3v6.8c1.6 1.4 2.3 3.2 2.3 5.1 0 3.6-3.4 6.1-7.8 6.1s-7.8-2.5-7.8-6.1c0-1.9.7-3.7 2.3-5.1Z"/><circle cx="9.4" cy="10.2" r="2.1"/><circle cx="14.6" cy="10.2" r="2.1"/><circle cx="9.4" cy="10.2" r=".75" fill="currentColor" stroke="none"/><circle cx="14.6" cy="10.2" r=".75" fill="currentColor" stroke="none"/><path d="M11.2 12.6 12 14l.8-1.4Z" fill="currentColor"/><path d="M7.6 14.6c.9 1.5 1 3.4.4 5M16.4 14.6c-.9 1.5-1 3.4-.4 5"/><path d="M11 16.6h.01M13 16.6h.01M12 18.2h.01"/></svg></span>
+        <span class="athena-ic"><img src="assets/agenti/athena.webp" alt="" width="56" height="56"></span>
       </button>
       <div class="sfondo-pagina" id="sfondo-a" aria-hidden="true"></div>
       <div class="sfondo-pagina" id="sfondo-b" aria-hidden="true"></div>
@@ -3059,7 +3065,7 @@ textarea.input{resize:vertical}
 <div class="modal-overlay" id="modal-athena" onclick="closeOut(event,'modal-athena')">
   <div class="modal athena-modal">
     <div class="athena-top">
-      <span class="athena-av" id="ag-av"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.14em"><path d="M6.5 3.5 9 6.8h6l2.5-3.3v6.8c1.6 1.4 2.3 3.2 2.3 5.1 0 3.6-3.4 6.1-7.8 6.1s-7.8-2.5-7.8-6.1c0-1.9.7-3.7 2.3-5.1Z"/><circle cx="9.4" cy="10.2" r="2.1"/><circle cx="14.6" cy="10.2" r="2.1"/><circle cx="9.4" cy="10.2" r=".75" fill="currentColor" stroke="none"/><circle cx="14.6" cy="10.2" r=".75" fill="currentColor" stroke="none"/><path d="M11.2 12.6 12 14l.8-1.4Z" fill="currentColor"/><path d="M7.6 14.6c.9 1.5 1 3.4.4 5M16.4 14.6c-.9 1.5-1 3.4-.4 5"/><path d="M11 16.6h.01M13 16.6h.01M12 18.2h.01"/></svg></span>
+      <span class="athena-av" id="ag-av" style="background:url(assets/agenti/athena.webp) center/cover no-repeat;font-size:0"></span>
       <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16px" id="ag-nome">Athena</div><div style="font-size:12px;color:var(--muted)" id="ag-sub">la tua segreteria AI · conosce tutto il gestionale</div></div>
       <button class="btn btn-ghost btn-sm" onclick="athenaNuovaChat()" title="Nuova chat"><i class="fa-solid fa-rotate-left"></i></button>
       <span class="x" style="cursor:pointer;color:var(--muted);font-size:16px;padding:4px" onclick="closeModal('modal-athena')">✕</span>
@@ -3067,7 +3073,7 @@ textarea.input{resize:vertical}
     <div class="athena-box" id="athena-box"></div>
     <div class="athena-chips" id="athena-chips">
       <button data-proattiva onclick="athenaChiedi(this.textContent)">Cosa c'è da fare oggi?</button>
-      <button onclick="athenaChiedi(this.textContent)">Come registro lo scarico del fieno?</button>
+      <button onclick="athenaChiedi(this.textContent)">Come invito un nuovo allievo?</button>
       <button onclick="athenaChiedi(this.textContent)">Come creo un carnet di lezioni?</button>
       <button onclick="athenaChiedi(this.textContent)">Come collego un maniscalco?</button>
       <button onclick="athenaChiedi(this.textContent)">Cosa posso fare con il gestionale?</button>
@@ -3875,7 +3881,7 @@ async function afterLogin(){
 
   const { data: membri, error } = await sb
     .from("scuderia_membri")
-    .select("id, centro_id, ruolo, nome_visualizzato, livello, permessi, centri(id, nome, indirizzo, telefono, join_code, owner_id, citta, provincia, regione, box_icone_extra)")
+    .select("id, centro_id, ruolo, nome_visualizzato, livello, permessi, centri(id, nome, indirizzo, telefono, join_code, owner_id, citta, provincia, regione, box_icone_extra, promo_inizio, promo_fino, promo_pacchetto_prima)")
     .eq("user_id", currentUser.id);
 
   if(error){ showToast("Errore nel caricamento del profilo."); return; }
@@ -8821,7 +8827,16 @@ function renderIlTuoPacchetto(){
   };
   const f = (ok, testo) => `<li class="${ok ? "" : "no"}"><i class="fa-solid ${ok ? "fa-check" : "fa-lock"}"></i>${testo}</li>`;
   const col = { start:1, advance:2, premium:3 }[p.pacchetto_reale] || 0;
-  box.innerHTML = `
+  const promoFino = currentCentro?.promo_pacchetto_prima && currentCentro?.promo_fino ? currentCentro.promo_fino : null;
+  const promoGg = promoFino ? Math.ceil((new Date(promoFino + "T23:59:59").getTime() - Date.now()) / 864e5) : null;
+  const promoHtml = promoFino && promoGg >= 0 ? `
+    <div class="pk-promo${promoGg <= 14 ? " pk-promo-fine" : ""}">
+      <i class="fa-solid fa-gift"></i>
+      <div><b>3 mesi di PREMIUM in regalo</b> fino al <b>${new Date(promoFino + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</b> (${promoGg === 0 ? "ultimo giorno" : promoGg === 1 ? "manca 1 giorno" : "mancano " + promoGg + " giorni"}).
+      Dopo questa data il centro passa al pacchetto <b>${PK_NOMI[currentCentro.promo_pacchetto_prima] || ""}</b>, salvo diverso accordo.
+      <a href="#" onclick="richiediUpgrade('${currentCentro.promo_pacchetto_prima === "start" ? "advance" : "premium"}');return false">Scegli con noi il pacchetto giusto</a></div>
+    </div>` : "";
+  box.innerHTML = promoHtml + `
     <div class="pk-top">
       <h3 style="margin:0">Il tuo pacchetto</h3>
       <span class="pk-badge pk-${p.pacchetto}">${p.sbloccato ? '<i class="fa-solid fa-key"></i> Sblocco totale' : PK_NOMI[p.pacchetto]}</span>
@@ -9217,42 +9232,100 @@ function statisticheDemo(){
    AGENTI AI (pagina) — Athena inclusa; Merlino / Ermes add-on (uno incluso in PREMIUM)
    ===================================================================== */
 const AGENTI_INFO = [
-  { key:"athena", nome:"Athena", ruolo:"Segreteria e guida del gestionale", icon:"svg:owl", cls:"athena-col", testo:"Conosce tutto il gestionale e ti guida passo passo; ti dice cosa c'è da fare (scadenze, carnet, scorte)." },
+  { key:"athena", nome:"Athena", ruolo:"Segreteria e guida del gestionale", icon:"svg:owl", cls:"athena-col", testo:"È la segretaria del centro: conosce iscritti, cavalli, staff e il gestionale e ti guida passo passo; ti dice cosa c'è da fare (lezioni, carnet, box)." },
   { key:"merlino", nome:"Merlino", ruolo:"Numeri, conti e strategia", icon:"fa-hat-wizard", cls:"merlino-av", testo:"Legge i numeri del centro, trova dove guadagni e dove perdi, sorveglia la concorrenza della zona con il radar settimanale." },
   { key:"ermes", nome:"Ermes", ruolo:"Magazzino e logistica", icon:"fa-truck-ramp-box", cls:"", testo:"Tiene d'occhio scorte, lotti e consumi e prepara le liste di riordino per i fornitori.", presto:true },
   { key:"galeno", nome:"Galeno", ruolo:"Veterinario", icon:"fa-stethoscope", cls:"", testo:"Supporto sanitario: protocolli, scadenze, primo orientamento.", presto:true },
-  { key:"hammer", nome:"Hammer", ruolo:"Mascalcia", icon:"fa-hammer", cls:"", testo:"Il maniscalco esperto per pareggi, ferrature e piede equino.", presto:true },
-  { key:"ares", nome:"Ares", ruolo:"Istruttore", icon:"fa-person-running", cls:"", testo:"Programmi di lavoro per allievi e cavalli.", presto:true },
+  { key:"hammer", nome:"Hammer", ruolo:"Mascalcia", icon:"fa-hammer", cls:"", testo:"Il maniscalco esperto: pareggi, ferrature e piede equino, applicato ai cavalli del centro." },
+  { key:"ares", nome:"Ares", ruolo:"Istruttore", icon:"fa-person-running", cls:"", testo:"L'istruttore: programmi di lavoro e lezioni per allievi e cavalli del centro." },
 ];
+const AG_PREZZI = { merlino:9, ermes:9, hammer:4, ares:4, galeno:4 };   // € al mese + IVA
+const AG_BUNDLE = { advance:24, premium:19 };                              // tutti gli agenti, € al mese + IVA
+const AG_EXTRA_MSG = [{ n:200, p:7 }, { n:500, p:15 }];                    // messaggi extra condivisi, € al mese + IVA
+let proveAgenti;   // undefined = da caricare; null = non disponibile; altrimenti { merlino:{stato,...}, hammer, ares }
+async function caricaProveAgenti(){
+  if(DEMO_MODE){ proveAgenti = { merlino:{ stato:"disponibile" }, hammer:{ stato:"disponibile" }, ares:{ stato:"disponibile" } }; return; }
+  try{
+    const { data, error } = await sb.rpc("agenti_prove_stato", { p_centro: currentCentro.id });
+    proveAgenti = !error && data && !data.errore ? data : null;
+  } catch(e){ proveAgenti = null; }
+}
 function renderModuloAgenti(){
   const el = document.getElementById("module-ai"); if(!el) return;
+  if(proveAgenti === undefined){ proveAgenti = null; caricaProveAgenti().then(() => renderModuloAgenti()); }
   const p = pianoCentro || {}, attivi = p.agenti || ["athena"];
   const owl = document.querySelector(".athena-ic svg")?.outerHTML || "";
+  const prova = a => (proveAgenti || {})[a.key] || null;
+  const prezzo = a => AG_PREZZI[a.key] ? `${AG_PREZZI[a.key]} € + IVA al mese` : "";
+  const oraProva = d => new Date(d).toLocaleString("it-IT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
   const stato = a => {
     if(attivi.includes(a.key) && !a.presto) return `<span class="stato" style="color:#3f7a45">● Attivo${a.key === "athena" && p.athena_proattiva === false ? " · basic" : ""}${a.key !== "athena" && p.agente_incluso === a.key ? " · incluso in PREMIUM" : ""}</span>`;
-    if(a.presto) return `<span class="stato" style="color:var(--muted)">In arrivo${attivi.includes(a.key) ? " · già sbloccato per te" : ""}</span>`;
-    if(p.pacchetto === "start") return `<span class="stato" style="color:var(--muted)"><i class="fa-solid fa-lock"></i> Disponibile da ADVANCE</span>`;
-    if(p.pacchetto === "premium" && !p.agente_incluso) return `<span class="stato" style="color:#8a6516">Incluso a scelta in PREMIUM</span>`;
-    return `<span class="stato" style="color:#8a6516">Add-on · prezzo in arrivo</span>`;
+    if(a.presto) return `<span class="stato" style="color:var(--muted)">${prezzo(a) ? "Add-on " + prezzo(a) + " · " : ""}In arrivo${attivi.includes(a.key) ? " · già sbloccato per te" : ""}</span>`;
+    const pr = prova(a);
+    if(pr?.stato === "attiva") return `<span class="stato" style="color:#3f7a45">● Prova gratuita · ${pr.rimasti} messaggi, fino al ${oraProva(pr.fine)}</span>`;
+    if(p.pacchetto === "start") return `<span class="stato" style="color:var(--muted)"><i class="fa-solid fa-lock"></i> Da ADVANCE · ${prezzo(a)}</span>`;
+    if(p.pacchetto === "premium" && !p.agente_incluso) return `<span class="stato" style="color:#8a6516">Incluso a scelta in PREMIUM · altrimenti ${prezzo(a)}</span>`;
+    return `<span class="stato" style="color:#8a6516">Add-on · ${prezzo(a)}</span>`;
   };
   const azione = a => {
     if(attivi.includes(a.key) && !a.presto) return `<button class="btn btn-primary btn-sm" onclick="apriAgente('${a.key}')">Apri la chat</button>`;
     if(a.presto) return "";
-    if(p.pacchetto === "start") return `<button class="btn btn-outline btn-sm" onclick="apriUpsell('agenti')">Scopri</button>`;
-    return `<button class="btn btn-outline btn-sm" onclick="richiediAgente('${a.key}')">${p.pacchetto === "premium" && !p.agente_incluso ? "Scegli questo agente" : "Richiedi l'attivazione"}</button>`;
+    const pr = prova(a);
+    if(pr?.stato === "attiva") return `<button class="btn btn-primary btn-sm" onclick="apriAgente('${a.key}')">Apri la chat</button>`;
+    const bottoni = [];
+    if(pr?.stato === "disponibile") bottoni.push(`<button class="btn btn-ghost btn-sm" onclick="avviaProvaAgente('${a.key}')">Prova gratis 1 giorno</button>`);
+    else if(pr?.stato === "attesa") bottoni.push(`<span style="font-size:11.5px;color:var(--muted)">Prova dal ${oraProva(pr.dal)}</span>`);
+    else if(pr?.stato === "usata") bottoni.push(`<span style="font-size:11.5px;color:var(--muted)">Prova già usata</span>`);
+    bottoni.push(p.pacchetto === "start" ? `<button class="btn btn-outline btn-sm" onclick="apriUpsell('agenti')">Scopri</button>`
+      : `<button class="btn btn-outline btn-sm" onclick="richiediAgente('${a.key}')">${p.pacchetto === "premium" && !p.agente_incluso ? "Scegli questo agente" : "Richiedi l'attivazione"}</button>`);
+    return `<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${bottoni.join("")}</span>`;
   };
+  const bundle = p.pacchetto && p.pacchetto !== "start" && p.pacchetto !== "enterprise" ? `
+    <div class="card" style="margin-top:16px"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <div><div style="font-weight:800;font-size:16px">Tutti gli agenti insieme</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5">Merlino, Hammer, Ares e, appena escono, Ermes e Galeno: <b>${AG_BUNDLE[p.pacchetto] || 24} € + IVA al mese</b>${p.pacchetto === "premium" ? " (hai già un agente incluso)" : " (19 € per chi ha PREMIUM)"}. 300 messaggi al mese per ogni agente.</div></div>
+      <button class="btn btn-outline btn-sm" onclick="richiediAgente('tutti')">Richiedi il pacchetto</button></div></div>
+    <div class="card" style="margin-top:12px"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <div><div style="font-weight:800;font-size:16px">Messaggi in più</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5">Ogni agente a pagamento ha 300 messaggi al mese. Se non bastano, aggiungi messaggi condivisi fra tutti gli agenti del centro: ${AG_EXTRA_MSG.map(m => `<b>${m.n} messaggi a ${m.p} € + IVA al mese</b>`).join(" oppure ")}.</div></div>
+      <span style="display:flex;gap:6px;flex-wrap:wrap">${AG_EXTRA_MSG.map(m => `<button class="btn btn-outline btn-sm" onclick="richiediMessaggiExtra(${m.n})">${m.n} messaggi</button>`).join("")}</span></div></div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">Ogni agente si può provare gratis per 1 giorno con 10 messaggi (uno nuovo ogni 3 giorni).</p>` : `<p style="font-size:12px;color:var(--muted);margin-top:12px">Ogni agente si può provare gratis per 1 giorno con 10 messaggi (uno nuovo ogni 3 giorni). Gli agenti si acquistano da ADVANCE in su.</p>`;
   el.innerHTML = `<div class="page-header"><div><h1><span class="page-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span> Agenti AI</h1>
     <p>Il tuo team digitale: ognuno è esperto di un'area del centro e conosce il gestionale alla perfezione.</p></div></div>
     <div class="ag-grid">${AGENTI_INFO.map(a => `<div class="card ag-card"><div class="top"><div class="av ${a.cls}">${a.icon === "svg:owl" ? owl : `<i class="fa-solid ${a.icon}"></i>`}</div>
       <div><div style="font-weight:800;font-size:16px">${a.nome}</div><div style="font-size:12.5px;color:var(--muted)">${a.ruolo}</div></div></div>
-      <p>${a.testo}</p><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto">${stato(a)}${azione(a)}</div></div>`).join("")}</div>`;
+      <p>${a.testo}</p><div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:auto">${stato(a)}${azione(a)}</div></div>`).join("")}</div>${bundle}`;
+}
+async function avviaProvaAgente(key){
+  const nome = key[0].toUpperCase() + key.slice(1);
+  if(!confirm(`Vuoi provare ${nome} gratis? La prova dura 1 giorno e comprende 10 messaggi. Dopo la prova potrai provare un altro agente dopo 3 giorni.`)) return;
+  if(DEMO_MODE){ proveAgenti = { ...proveAgenti, [key]:{ stato:"attiva", rimasti:10, fine:new Date(Date.now() + 864e5).toISOString() } }; renderModuloAgenti(); apriAgente(key); return; }
+  const { error } = await sb.rpc("agente_prova_avvia", { p_centro: currentCentro.id, p_agente: key });
+  if(error){
+    const m = error.message || "";
+    showToast(/SOLO_RESPONSABILI/.test(m) ? "La prova la può avviare solo il titolare o un responsabile (livello 2 o 3)."
+      : /ATTENDI_3_GIORNI/.test(m) ? "Hai già provato un agente da poco: potrai provarne un altro dopo 3 giorni."
+      : /PROVA_GIA_USATA/.test(m) ? "Hai già usato la prova di questo agente."
+      : /AGENTE_GIA_ATTIVO/.test(m) ? "Questo agente è già attivo per il centro." : "Non riesco ad avviare la prova, riprova.");
+    proveAgenti = undefined; renderModuloAgenti(); return;
+  }
+  proveAgenti = undefined; await caricaProveAgenti(); renderModuloAgenti(); apriAgente(key);
 }
 function richiediAgente(key){
   apriTicketAssistenza();
-  const nome = key[0].toUpperCase() + key.slice(1);
+  const tutti = key === "tutti";
+  const nome = tutti ? "il pacchetto Tutti gli agenti" : key[0].toUpperCase() + key.slice(1);
+  const prezzo = tutti ? `${AG_BUNDLE[pianoCentro?.pacchetto] || 24} € + IVA al mese` : `${AG_PREZZI[key] || ""} € + IVA al mese`;
   document.getElementById("tk-categoria").value = "pagamenti";
-  document.getElementById("tk-oggetto").value = `Attivazione agente ${nome}`;
-  document.getElementById("tk-descrizione").value = `Vorremmo attivare ${nome} per ${currentCentro?.nome || "il nostro centro"}${pianoCentro?.pacchetto === "premium" ? " come agente incluso nel pacchetto PREMIUM" : ""}.`;
+  document.getElementById("tk-oggetto").value = tutti ? "Attivazione pacchetto Tutti gli agenti" : `Attivazione agente ${nome}`;
+  document.getElementById("tk-descrizione").value = `Vorremmo attivare ${nome} per ${currentCentro?.nome || "il nostro centro"} (${prezzo})${!tutti && pianoCentro?.pacchetto === "premium" ? ", come agente incluso nel pacchetto PREMIUM se ancora disponibile" : ""}.`;
+}
+function richiediMessaggiExtra(n){
+  apriTicketAssistenza();
+  const m = AG_EXTRA_MSG.find(x => x.n === n) || AG_EXTRA_MSG[0];
+  document.getElementById("tk-categoria").value = "pagamenti";
+  document.getElementById("tk-oggetto").value = `Messaggi extra per gli agenti: ${m.n} al mese`;
+  document.getElementById("tk-descrizione").value = `Vorremmo aggiungere ${m.n} messaggi extra al mese (${m.p} € + IVA al mese, condivisi fra gli agenti) per ${currentCentro?.nome || "il nostro centro"}.`;
 }
 
 const CHIAVE_ULTIMO_ONLINE = "equo-scuderia-ultimo-online";
@@ -9998,19 +10071,24 @@ function openModal(id){ document.getElementById(id).classList.add("active"); }
 let athenaCaricata = false, athenaInCorso = false, agenteAttivo = "athena";
 const AGENTI_CHAT = {
   athena: { nome:"Athena", sub:"la tua segreteria AI · conosce tutto il gestionale", cls:"", placeholder:"Chiedi ad Athena come si fa qualcosa…",
-    chips:["Cosa c'è da fare oggi?","Come registro lo scarico del fieno?","Come creo un carnet di lezioni?","Come collego un maniscalco?","Cosa posso fare con il gestionale?"] },
+    chips:["Cosa c'è da fare oggi?","Come invito un nuovo allievo?","Come creo un carnet di lezioni?","Come collego un maniscalco?","Cosa posso fare con il gestionale?"] },
   merlino: { nome:"Merlino", sub:"numeri, conti e strategia del centro", cls:"merlino-av", placeholder:"Chiedi a Merlino dei numeri del centro…",
     chips:["Come sta andando il centro questo mese?","Quali cavalli mi fanno guadagnare di più?","Chi rischio di perdere e cosa gli scrivo?","Cosa fa la concorrenza della zona?","E se aumento la lezione di 2 €?"] },
+  hammer: { nome:"Hammer", sub:"mascalcia: pareggio, ferri e piede equino", cls:"", placeholder:"Chiedi a Hammer di ferratura e piedi…",
+    chips:["Che ferro consigli per un cavallo con i talloni bassi?","Ogni quanto va ricontrollato un pareggio?","Come riconosco i primi segni di laminite?","Quali cavalli del centro hanno note sui piedi?"] },
+  ares: { nome:"Ares", sub:"allenamento: programmi di lavoro e lezioni", cls:"", placeholder:"Chiedi ad Ares di allenamenti e lezioni…",
+    chips:["Imposta una lezione di 45 minuti sul lavoro in piano","Come preparo un cavallo giovane al salto?","Esercizi per migliorare l'assetto di un principiante","Che programma consigli per un cavallo che riparte dopo una pausa?"] },
 };
+const AGENTI_IMG = { athena:"athena", merlino:"merlino", hammer:"hammer", ares:"ares" };
 function apriAthena(){ apriAgente("athena"); }
 async function apriAgente(key, domanda){
   Registro.pagina("agente-" + key);
-  if(key === "merlino" && pianoCentro && !(pianoCentro.agenti || []).includes("merlino")){ apriUpsell("agenti"); return; }
+  if(key !== "athena" && pianoCentro && !(pianoCentro.agenti || []).includes(key) && !(proveAgenti && proveAgenti[key]?.stato === "attiva")){ apriUpsell("agenti"); return; }
   const a = AGENTI_CHAT[key] || AGENTI_CHAT.athena;
   if(agenteAttivo !== key){ agenteAttivo = key; athenaCaricata = false; }
   const av = document.getElementById("ag-av");
   av.className = "athena-av " + a.cls;
-  av.innerHTML = key === "merlino" ? '<i class="fa-solid fa-hat-wizard"></i>' : '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.14em"><path d="M6.5 3.5 9 6.8h6l2.5-3.3v6.8c1.6 1.4 2.3 3.2 2.3 5.1 0 3.6-3.4 6.1-7.8 6.1s-7.8-2.5-7.8-6.1c0-1.9.7-3.7 2.3-5.1Z"/><circle cx="9.4" cy="10.2" r="2.1"/><circle cx="14.6" cy="10.2" r="2.1"/><circle cx="9.4" cy="10.2" r=".75" fill="currentColor" stroke="none"/><circle cx="14.6" cy="10.2" r=".75" fill="currentColor" stroke="none"/><path d="M11.2 12.6 12 14l.8-1.4Z" fill="currentColor"/><path d="M7.6 14.6c.9 1.5 1 3.4.4 5M16.4 14.6c-.9 1.5-1 3.4-.4 5"/><path d="M11 16.6h.01M13 16.6h.01M12 18.2h.01"/></svg>';
+  av.innerHTML = ""; av.style.cssText = "background:url(assets/agenti/" + (AGENTI_IMG[key] || "athena") + ".webp) center/cover no-repeat;font-size:0";
   document.getElementById("ag-nome").textContent = a.nome;
   document.getElementById("ag-sub").textContent = a.sub;
   document.getElementById("athena-input").placeholder = a.placeholder;
@@ -10053,11 +10131,19 @@ function athenaBenvenuto(){
     athenaBolla("assistant", `Ciao${nome ? " " + nome : ""}! Sono **Merlino** 🔮, l'agente di Equo Scuderia per numeri, conti e strategia.\nLeggo i dati del centro e ti dico **dove guadagni, dove perdi e cosa fare**: incassi, clienti a rischio, margine per cavallo, occupazione, e cosa fa la **concorrenza della zona**. Prova a chiedermi "come sta andando il centro?".`);
     return;
   }
+  if(agenteAttivo === "hammer"){
+    athenaBolla("assistant", `Ciao${nome ? " " + nome : ""}! Sono **Hammer**, l'agente di Equo per la **mascalcia**.\nTi aiuto su pareggio, ferri, piede equino e andature, anche sui cavalli di ${currentCentro?.nome || "questo centro"}. Chiedimi pure.`);
+    return;
+  }
+  if(agenteAttivo === "ares"){
+    athenaBolla("assistant", `Ciao${nome ? " " + nome : ""}! Sono **Ares**, l'agente di Equo per l'**allenamento**.\nPreparo programmi di lavoro e lezioni per allievi e cavalli di ${currentCentro?.nome || "questo centro"}. Dimmi cosa ti serve.`);
+    return;
+  }
   if(pianoCentro && pianoCentro.athena_proattiva === false){
     athenaBolla("assistant", `Ciao${nome ? " " + nome : ""}! Sono **Athena**, la guida di ${currentCentro?.nome || "Equo Scuderia"}.\nChiedimi **come si fa** qualsiasi cosa nel gestionale e ti porto passo passo, con un esempio.`);
     return;
   }
-  athenaBolla("assistant", `Ciao${nome ? " " + nome : ""}! Sono **Athena**, la segreteria AI di ${currentCentro?.nome || "Equo Scuderia"}.\nConosco tutto il gestionale, Magazzino compreso: chiedimi **come si fa** qualsiasi cosa e ti porto passo passo, con un esempio. Posso anche dirti **cosa c'è da fare** oggi nel centro (scadenze, carnet, scorte).`);
+  athenaBolla("assistant", `Ciao${nome ? " " + nome : ""}! Sono **Athena**, la segreteria AI di ${currentCentro?.nome || "Equo Scuderia"}.\nSono la segretaria del centro: conosco iscritti, cavalli, staff e le procedure del gestionale. Chiedimi **come si fa** e ti porto passo passo, con un esempio. Posso anche dirti **cosa c'è da fare** oggi (lezioni, carnet, box). Per magazzino, salute, ferratura e allenamenti ci sono gli agenti specializzati.`);
 }
 async function apriAthenaPannello(){
   openModal("modal-athena");
@@ -10066,7 +10152,7 @@ async function apriAthenaPannello(){
     const box = document.getElementById("athena-box"); box.innerHTML = "";
     if(!DEMO_MODE && currentCentro?.id){
       let q = sb.from("ai_messaggi").select("ruolo, contenuto").eq("vista", "scuderia").eq("centro_id", currentCentro.id);
-      q = agenteAttivo === "merlino" ? q.eq("agente", "merlino") : q.or("agente.is.null,agente.eq.athena");
+      q = agenteAttivo !== "athena" ? q.eq("agente", agenteAttivo) : q.or("agente.is.null,agente.eq.athena");
       const { data } = await q.order("created_at", { ascending: false }).limit(30);
       const storia = (data || []).reverse();
       if(storia.length){ storia.forEach(m => athenaBolla(m.ruolo, m.contenuto)); document.getElementById("athena-chips").style.display = "none"; }
@@ -10091,7 +10177,7 @@ async function athenaInvia(){
   const pensa = athenaBolla("assistant", "Athena sta scrivendo…", "pensa");
   if(DEMO_MODE){
     if(agenteAttivo === "merlino"){ setTimeout(() => { pensa.classList.remove("pensa"); pensa.innerHTML = athenaFormatta("**[Demo] Incassi di questo mese: € 3.380, +11% sul mese scorso.**\n- Il margine più basso è **Brezza**: la pensione (€ 300) non copre i costi (€ 360 con la quota comune).\n- 3 clienti non montano da più di 3 settimane.\nCosa farei:\n1. Porta la pensione di Brezza a € 380 al rinnovo.\n2. Scrivi oggi a Sofia, Marco ed Elena (Statistiche → Clienti a rischio → \"Scrivi\")."); }, 600); return; }
-    setTimeout(() => { pensa.classList.remove("pensa"); pensa.innerHTML = athenaFormatta("**[Demo]** Nel gestionale vero qui Athena ti risponde con la procedura esatta, per esempio:\n**Dove**: menu \"Magazzino\" → \"Movimento rapido\" → \"Scarico\"\n1. Cerca l'articolo (es. fieno).\n2. Imposta la quantità usata.\n3. Tocca \"Registra scarico\"."); }, 600);
+    setTimeout(() => { pensa.classList.remove("pensa"); pensa.innerHTML = athenaFormatta("**[Demo]** Nel gestionale vero qui Athena ti risponde con la procedura esatta, per esempio:\n**Dove**: menu \"Cavalli\" → \"+\" Nuovo cavallo\n1. Inserisci nome e proprietario.\n2. Scegli il box.\n3. Tocca \"Salva\"."); }, 600);
     return;
   }
   athenaInCorso = true; document.getElementById("athena-send").disabled = true;
@@ -10104,11 +10190,13 @@ async function athenaInvia(){
     const data = await res.json().catch(() => ({}));
     pensa.classList.remove("pensa");
     if(res.status === 401) pensa.innerHTML = athenaFormatta("Sessione scaduta: esci e rientra per parlare con Athena.");
-    else if(res.status === 403 && data.bloccato) pensa.innerHTML = athenaFormatta(`${AGENTI_CHAT[agenteAttivo].nome} non è attivo per questo centro: lo trovi in "Agenti AI".`);
+    else if(res.status === 403 && data.bloccato){ pensa.innerHTML = athenaFormatta(`${AGENTI_CHAT[agenteAttivo].nome} non è attivo per questo centro (o la prova è finita): lo trovi in "Agenti AI".`); proveAgenti = undefined; }
     else if(res.status === 403) pensa.innerHTML = athenaFormatta(data.error ? data.error + "." : "Non risulti nello staff di questo centro.");
-    else if(data.limite_raggiunto) pensa.innerHTML = athenaFormatta(`Il centro ha usato tutti i **${data.uso.limite} messaggi** di ${AGENTI_CHAT[agenteAttivo].nome} di questo mese: il contatore riparte il 1° del mese. Per un problema urgente usa "Serve aiuto?" → "Apri un ticket" in Home.`);
+    else if(data.limite_raggiunto && agenteAttivo !== "athena" && data.uso.limite === 10 && !((pianoCentro?.agenti || []).includes(agenteAttivo))){ pensa.innerHTML = athenaFormatta(`La prova gratuita di ${AGENTI_CHAT[agenteAttivo].nome} è finita (10 messaggi). Se ti è piaciuto lo attivi da "Agenti AI".`); proveAgenti = undefined; }
+    else if(data.limite_raggiunto) pensa.innerHTML = athenaFormatta(`Il centro ha usato tutti i **${data.uso.limite} messaggi** di ${AGENTI_CHAT[agenteAttivo].nome} di questo mese: il contatore riparte il 1° del mese.${agenteAttivo !== "athena" ? " Puoi aggiungere messaggi extra da \"Agenti AI\" (200 a 7 € o 500 a 15 € + IVA al mese, condivisi fra gli agenti)." : ""} Per un problema urgente usa "Serve aiuto?" → "Apri un ticket" in Home.`);
     else pensa.innerHTML = athenaFormatta(data.reply || "Non sono riuscita a rispondere, riprova.");
-    if(data.uso) document.getElementById("athena-uso").textContent = `${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome} questo mese (tutto il centro)`;
+    if(data.uso) document.getElementById("athena-uso").textContent = data.prova ? `Prova gratuita: ${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome}` : `${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome} questo mese (tutto il centro)`;
+    if(data.prova) proveAgenti = undefined;
   } catch(e){
     pensa.classList.remove("pensa"); pensa.textContent = "Errore di connessione, riprova.";
   }
@@ -10784,16 +10872,17 @@ function aggiornaDataOraScud(){
  var oldR=window.renderModuloAgenti;
  window.renderModuloAgenti=function(){
   oldR.apply(this,arguments);
-  var img={athena:"athena",merlino:"merlino",ermes:"ermes"};
+  var img={athena:"athena",merlino:"merlino",ermes:"ermes",galeno:"galeno",hammer:"hammer",ares:"ares"};
   document.querySelectorAll("#module-ai .ag-card").forEach(function(c){
    var nome=(c.querySelector(".top div:last-child div")||{}).textContent||"";var k=nome.trim().toLowerCase();
    if(img[k]){var av=c.querySelector(".av");av.className="av img";av.innerHTML="";av.style.backgroundImage="url(assets/agenti/"+img[k]+".webp)";}
-   if(k==="ermes"){var st=c.querySelector(".stato");if(st){st.textContent="Add-on · presto disponibile";}}
+   if(k==="ermes"){var st=c.querySelector(".stato");if(st){st.textContent="Add-on 9 € + IVA al mese · presto disponibile";}}
    if(k==="merlino"){var p=c.querySelector("p");if(p&&p.textContent.indexOf("Radar")<0)p.insertAdjacentHTML("afterend",'<p style="font-size:12px"><b>Radar di Merlino</b>: ogni settimana ti dice cosa fanno i centri vicini.</p>');}
   });
  };
  agg("home");
 })();
 </script>
+<script src="/stat.js" defer></script>
 </body>
 </html>
