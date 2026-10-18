@@ -923,6 +923,9 @@ window.QRCode=QRCode;})();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
+#cavalli-detail-view.bloccato > :not(.detail-header):not(#horse-lock-box){filter:blur(7px);pointer-events:none;user-select:none;opacity:.65}
+.horse-card.bloccato .horse-avatar,.horse-card.bloccato .muted{filter:blur(4px)}
+
 :root {
   --bg:#0e2019; --surface:#14312a; --surface2:#1c3f35;
   --border:#2a4d41; --accent:#e8b04b; --accent2:#c98f2e;
@@ -3068,6 +3071,7 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
         <button class="back-btn" onclick="closeHorseDetail()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
         <div class="section-title" style="margin-bottom:0" id="detail-horse-name">Cavallo</div>
       </div>
+      <div id="horse-lock-box"></div>
 
       <div id="horse-dove" style="margin-bottom:14px"></div>
       <div class="card" style="margin-bottom:14px">
@@ -8286,6 +8290,7 @@ async function loadHorses(){
   renderHorsesList();
   controllaStessoCavallo();
   caricaProposteCavalli();
+  caricaCavalliBloccati();
 }
 
 /* ---------- CODICE CAVALLO 2C: proposte, livelli, conferme ---------- */
@@ -8321,7 +8326,7 @@ function renderProposteCavalli(){
     </div>`).join("");
   box.innerHTML = `<div class="card" style="margin-bottom:14px">
     <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
-    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free è completo un solo cavallo: gli altri si aggiungono ma restano bloccati finché non passi a Premium."}</div>
     ${righe}
     ${proposteCav.length > 1 ? `<button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti</button>` : ""}
   </div>`;
@@ -8338,9 +8343,10 @@ function messaggioProposta(res){
 }
 async function accettaProposta(id){
   const res = await accettaPropostaSilenzioso(id);
-  if(!res.ok){ showToast(messaggioProposta(res)); if(res.motivo === "limite_cavalli_free") openModal("modal-limite-cavalli"); return; }
+  if(!res.ok){ showToast(messaggioProposta(res)); return; }
   showToast("Cavallo aggiunto. Controlla i dati e confermali.");
   await loadHorses();
+  await caricaCavalliBloccati();
   if(res.horse_id && horses.some(h => h.id === res.horse_id)) openHorseDetail(res.horse_id);
 }
 async function accettaTuttiProposte(){
@@ -8357,6 +8363,31 @@ async function rifiutaProposta(id){
   const { data } = await sb.rpc("equo_rifiuta_cavallo_proposto", { p_proposta: id });
   showToast(data?.ok ? "Fatto: il maniscalco potrà correggere la scheda." : "Operazione non riuscita.");
   caricaProposteCavalli();
+}
+
+/* piano Free: i cavalli accettati dal maniscalco oltre il primo restano bloccati finche non passi a Premium */
+let cavalliBloccati = new Set();
+async function caricaCavalliBloccati(){
+  if(DEMO_MODE) return;
+  let ids = [];
+  if(!isPremium()){
+    try{ const { data, error } = await sb.rpc("equo_cavalli_bloccati"); if(!error && Array.isArray(data)) ids = data; } catch(e){}
+  }
+  const nuovo = ids.join(",");
+  const vecchio = [...cavalliBloccati].join(",");
+  cavalliBloccati = new Set(ids);
+  if(nuovo !== vecchio) renderHorsesList();
+}
+function renderHorseBloccato(h){
+  const box = document.getElementById("horse-lock-box");
+  const v = document.getElementById("cavalli-detail-view");
+  if(!box || !v) return;
+  if(!h || !cavalliBloccati.has(h.id)){ box.innerHTML = ""; v.classList.remove("bloccato"); return; }
+  v.classList.add("bloccato");
+  box.innerHTML = `<div class="card" style="margin-bottom:14px;text-align:center;padding:18px">
+    <div style="font-weight:700;margin-bottom:6px">Scheda e interventi di ${escapeHtml(h.name)} sono bloccati</div>
+    <div class="muted" style="font-size:13px;line-height:1.55;margin-bottom:12px">Il tuo maniscalco continua a registrare gli interventi, che restano al sicuro. Con il piano Free è completo un solo cavallo: passa a Premium per sbloccare questa scheda, con tutto il suo storico.</div>
+    <button class="btn btn-primary" style="width:100%" onclick="openModal('modal-limite-cavalli')">Sblocca con Premium</button></div>`;
 }
 
 /* livello del codice sulla scheda cavallo (proprietario) */
@@ -8588,11 +8619,12 @@ function renderHorsesList(){
   const TIPO_LABELS = { proprieta: "Di proprietà", noleggio: "A noleggio" };
   box.innerHTML = horses.map(h => {
     const sub = [h.breed, TIPO_LABELS[h.tipo_proprieta] || null].filter(Boolean).join(" · ") || "Razza non specificata";
+    const bl = cavalliBloccati.has(h.id);
     return `
-    <div class="card horse-card" data-cerca="${escapeHtml([h.microchip, h.mantello, h.codice_equo].filter(Boolean).join(" "))}" onclick="openHorseDetail('${h.id}')">
+    <div class="card horse-card${bl ? " bloccato" : ""}" data-cerca="${escapeHtml([h.microchip, h.mantello, h.codice_equo].filter(Boolean).join(" "))}" onclick="openHorseDetail('${h.id}')">
       <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:22px"></i></div>
       <div>
-        <div style="font-weight:700">${escapeHtml(h.name)}</div>
+        <div style="font-weight:700">${escapeHtml(h.name)}${bl ? ' <span style="font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px">Bloccato</span>' : ""}</div>
         <div class="muted" style="font-size:13px">${escapeHtml(sub)}</div>
       </div>
     </div>`;
@@ -8721,6 +8753,7 @@ async function openHorseDetail(id){
   document.getElementById("cavalli-list-view").style.display = "none";
   document.getElementById("cavalli-detail-view").style.display = "block";
   document.getElementById("detail-horse-name").textContent = horse.name;
+  renderHorseBloccato(horse);
   renderLivelloCavallo(horse);
   renderHorseInfoBox(horse);
   renderDoveStaProprietario(horse);
