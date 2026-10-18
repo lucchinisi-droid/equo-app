@@ -482,3 +482,11 @@ File `ux/mockup-home-nuovi-menu-v1.html`: proprietario, maniscalco, trainer, Scu
 - DA FARE: sfocatura/blocco lato database. Oggi lo sfocato e solo grafico e i dati arrivano al telefono. Serve un controllo in RLS o nelle funzioni, cosi i dati dei cavalli bloccati non escono finche l'owner e Free.
 - DA FARE: sfocare anche in Home, scadenze e spese i dati dei cavalli bloccati.
 - DA FARE: le stesse schermate (proposte, livelli, conferme) in Equo Scuderia e area trainer; stampa QR/PDF solo da Validato; Passaggio di proprieta.
+
+## STATO 18/10/2026 sera: codice a tre livelli ONLINE (fasi 1, 2A, 2B, 2C + blocco Free)
+- ESEGUITI da Simone: schema-codice-livelli, schema-codice-provvisorio, schema-codice-proposte, schema-cavalli-bloccati. DEPLOY fatto (push 18/10: app con proposte, livello/conferma, Da confermare, Proponi cavalli, blocco Free sfocato).
+- Agenti aggiornati (nel codice, DA PUBBLICARE con il prossimo deploy): paragrafo "Codice del cavallo" in Pegasus e "Cavalli dei clienti e codice" in Hammer (agent.js + prompt-agenti/*.txt). Schede guida nuove in equo-app/schema-guide-codice-livelli-18ott.sql (4 schede: 2 proprietario, 2 maniscalco): DA ESEGUIRE dopo il deploy, rieseguibile.
+- PROVA DA FARE con account veri: maniscalco con cliente e 2 cavalli a mano -> il proprietario si collega -> Home mostra le proposte -> Accetta (stesso codice PRV, nessun doppione) -> completa data di nascita -> "Confermo i dati" -> il maniscalco vede "Da confermare" -> conferma -> cavallo Validato con codice definitivo (numeri da 201). Poi proprietario Free con 2 proposte: il secondo e Bloccato (sfocato, "Sblocca con Premium").
+- DA FARE (codice): sfocatura lato database dei cavalli bloccati; sfocare anche Home/scadenze/spese; schermate proposte/livelli/conferme in Equo Scuderia e area trainer (Ares); stampa QR/PDF solo da Validato; Passaggio di proprieta; log nello storico delle modifiche di razza/data di nascita (prima->dopo); novita.json con le nuove funzioni.
+- DA DECIDERE: verifica del microchip per il Certificato (chi e come); quali ruoli professionali contano come conferma (veterinario non e un ruolo del profilo); codici gia stampati/comunicati prima del PRV.
+- DA VERIFICARE: eseguito anche equo-app/schema-cavalli-clienti-unisci-rpc.sql (serve al tasto "Unisci" di "E lo stesso cavallo?")? e schema-agenti-prezzi-prove.sql (aperto dal 17/10)?
