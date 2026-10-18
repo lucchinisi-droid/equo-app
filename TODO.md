@@ -122,12 +122,12 @@ Oggi in Equo c'è solo il flag centri.sdi_attivo e i dati fiscali della scuderia
 
 ## 🔴 URGENTE · DOMANI 9 ottobre 2026 — STRIPE (dopo il deploy dell'8/10)
 Il codice nuovo è online (deploy 8/10): senza questi passaggi rinnovi, rimborsi, contestazioni e passaggi di livello NON vengono registrati.
-- [ ] 1. Webhook Stripe (endpoint già esistente di equo-app): aggiungere gli eventi `invoice.paid`, `customer.subscription.updated`, `charge.refunded`, `charge.dispute.created` (oltre a `checkout.session.completed`, `customer.subscription.deleted`)
-- [ ] 2. Creare il link di pagamento «Differenza Premium lifetime» 50 € una tantum → variabile Netlify (sito equo-app) `STRIPE_LINK_UPGRADE_LIFETIME`, poi nuovo deploy o «Clear cache and deploy»
-- [ ] 3. Controllare le variabili Netlify `STRIPE_PRICE_PRO_*` (prezzi da professionista mensile/annuale/lifetime)
-- [ ] 4. Customer Portal: disattivare il cambio piano
-- [ ] 5. Pagamenti falliti: impostare «cancella abbonamento»
-- [ ] 6. Controllare i codici promozionali attivi
+- [x] (17/10) 1. Webhook Stripe (endpoint già esistente di equo-app): aggiungere gli eventi `invoice.paid`, `customer.subscription.updated`, `charge.refunded`, `charge.dispute.created` (oltre a `checkout.session.completed`, `customer.subscription.deleted`)
+- [x] (17/10, link https://buy.stripe.com/28E3cx64ffNq2kj3V76Na02, env impostata su Netlify, attiva al prossimo deploy) 2. Creare il link di pagamento «Differenza Premium lifetime» 50 € una tantum → variabile Netlify (sito equo-app) `STRIPE_LINK_UPGRADE_LIFETIME`, poi nuovo deploy o «Clear cache and deploy»
+- [x] (17/10) 3. Controllare le variabili Netlify `STRIPE_PRICE_PRO_*` (prezzi da professionista mensile/annuale/lifetime)
+- [x] (17/10) 4. Customer Portal: disattivare il cambio piano
+- [x] (17/10) 5. Pagamenti falliti: impostare «cancella abbonamento»
+- [x] (17/10: PROVAPRO, PROVAPREMIUM1, STAFF100 0/10; promo spenti sui 3 link) 6. Controllare i codici promozionali attivi
 - [ ] 7. Verifica: un pagamento di prova (poi rimborso) deve comparire nella pagina «Registro pagamenti» e nel rimborso diventare «Rimborsato»
 
 - [ ] 8. DEPLOY del sito (in attesa): pagina Scuderia con la nuova foto di apertura (img/scuderia-equo.webp, classe foto-equo in css/sito.css: su computer il motto resta sopra il titolo e il logo fuori dal riquadro; su telefono solo ragazza e cavallo). Comando: git add equo-app equo-scuderia equo-sito → commit → git push origin master
@@ -213,7 +213,7 @@ git push origin master
 - [ ] Redirect vecchi indirizzi, robots.txt, sitemap.xml, immagine social, icona
 
 ### Subito dopo il deploy
-- [ ] Stripe: attivare «accettare i termini di servizio» su ENTRAMBI i Payment Link Early Adopter
+- [x] (17/10, già attivi) Stripe: attivare «accettare i termini di servizio» su ENTRAMBI i Payment Link Early Adopter
 - [ ] Inviare un modulo di prova da equohub.com/candidatura.html e da scuderia-smart.html → controllare l'email
 - [ ] Acquisto di prova 49 € dal sito → rimborso → SQL di ripristino del profilo (chiederlo a Claude)
 - [ ] Provare su telefono: Home a widget, PIN incassi, Naviga, «portami in scuderia» con Pegasus
@@ -410,3 +410,75 @@ File `ux/mockup-home-nuovi-menu-v1.html`: proprietario, maniscalco, trainer, Scu
 - MANISCALCO Home = la vista widget attuale (carta Oggi con puntini, 5 tondi: Portami da… · Scadenze · Da incassare · Cerca · Altro, carte Cavalli · Clienti · Scuderie) DA MANTENERE; cambiano solo barra (Home · Agenda · [Hammer] · Messaggi · Clienti) e «+». Quindi togliere l'interruttore «Vista Widget» (Home classica) — la widget diventa l'unica. Mockup: `ux/mockup-home-maniscalco-widget-v1.html`. Resta da chiarire solo l'interruttore Completa/Semplice.
 - Maniscalco: TENERE entrambi gli interruttori Completa/Semplice (decisione 16/10). Resta solo da togliere «Vista Widget».
 - Maniscalco: la MODALITÀ LAVORO (Sei arrivato? → Ho letto · al lavoro → Al lavoro → Ho finito, con i 4 piedi Ant. sx/Ant. dx/Post. sx/Post. dx Regolare/Problema) esiste già e NON va toccata: con la nuova barra/Home deve restare raggiungibile da «Portami da…», dalla carta Oggi e dal popup «Sei arrivato?».
+
+## Analytics sito/gestionale (17/10/2026) — pronto, da pubblicare
+1) Eseguire equo-app/schema-analytics-sito.sql in Supabase. 2) git add equo-app equo-sito equo-scuderia → commit → push. 3) Cruscotto Equo: scheda Analytics già online. Escludere il proprio browser: aprire il sito con ?nostat=1. Retention 24 mesi (cancellazione manuale per ora).
+
+## Promo scuderie «3 mesi PREMIUM gratis» (17/10)
+- [x] Meccanismo creato ed eseguito: equo-app/schema-promo-centri-automatica.sql (attiva_promo_centro una sola volta, scadenza notturna pg_cron, imposta_onboarding_centro).
+- Attivazione centri: fatta da Claude su richiesta di Simone (select attiva_promo_centro('<id>', 3);) finché i volumi sono sostenibili. Poi onboarding: 20 cavalli, 20 proprietari, staff.
+- [ ] (idea) mostrare nel gestionale la data di fine promo al centro; (idea) pannello «Promo centri» nel Cruscotto.
+
+## Economia scuderie + avviso fine promo (17/10)
+- [ ] SQL DA ESEGUIRE: equo-app/schema-centri-contratti.sql (tabella centri_contratti, imposta_contratto_centro, chiudi_contratto_centro, equo_scade_promo_centri aggiornata: a fine promo il centro passa al pacchetto del contratto).
+- [x] Cruscotto, scheda Scuderie: «Soldi delle scuderie» (incassato, da incassare, previsione 12 mesi, potenziale, scadenze) + «Come usano il gestionale e quali upgrade proporre». Pubblicato (v5). Mostra l'avviso se i contratti non sono ancora nel DB.
+- [x] Gestionale (equo-scuderia/index.html): riquadro «3 mesi di PREMIUM in regalo fino al …» nel pannello «Il tuo pacchetto» (legge promo_fino/promo_pacchetto_prima da centri). DA PUBBLICARE col deploy.
+- Prima scuderia reale: impostare il contratto con select imposta_contratto_centro('<id>','advance','annuale'); poi registrare i pagamenti con registra_pagamento_scuderia (importo IVA inclusa).
+
+## Athena = segretaria, non agente verticale (17/10)
+- [x] agent.js (ISTRUZIONI_ATHENA): niente magazzino, salute, mascalcia, allenamenti: rimanda a Ermes / Galeno / Hammer / Ares (se non attivo: add-on da ADVANCE, ticket). Nella situazione ignora magazzino e scadenze sanitarie. Gestionale: chip e saluto di Athena aggiornati. DA PUBBLICARE col deploy (funzione + gestionale). Dopo il deploy: provare «aggiungi 5 balle di fieno al magazzino» → deve rimandare a Ermes in 1-2 frasi.
+
+## Hammer e Ares acquistabili in Scuderia + icone agenti (17/10)
+- [ ] SQL DA ESEGUIRE: equo-app/schema-agenti-scuderia-hammer-ares.sql (vincolo agente_incluso esteso a galeno/hammer/ares).
+- [x] agent.js: nel gestionale (vista scuderia) body.agente = 'hammer' | 'ares' → stesse istruzioni dell'app + contesto «staff del centro»; strumenti: cerca_conoscenze (schede maniscalco/istruttore), web_search (solo Hammer), cavalli_centro (nuovo, sola lettura sui cavalli del centro), meteo. Limite messaggi = merlino_messaggi del centro, contati per agente. Niente strumenti di clienti/agenda/sedute/memoria.
+- [x] Gestionale: schede Hammer e Ares non più «In arrivo» (Add-on, «Richiedi l'attivazione»; attivi se il centro li ha), chat con chip e saluto, icone nuove (galeno/hammer/ares copiate in equo-scuderia/assets/agenti), pulsante Athena in basso a destra e intestazione chat con l'immagine nuova.
+- Attivazione: da SQL (vedi commenti nel file). Prezzo add-on ancora «in arrivo». Ermes e Galeno restano «presto».
+- DA PUBBLICARE col deploy (agent.js + gestionale). Test dopo il deploy: attivare Hammer su un centro e chiedere «che ferro consigli?» e «quali cavalli del centro hanno note sui piedi?».
+
+## Prezzi agenti extra, prova gratuita, messaggi extra (17/10)
+- Listino (IVA esclusa, al mese): Merlino 9, Ermes 9, Hammer 4, Ares 4, Galeno 4 · nessuno sconto sul 2º agente · TUTTI gli agenti 24 (19 per PREMIUM) · messaggi extra condivisi fra gli agenti extra: 200 = 7, 500 = 15 · PREMIUM: 1 agente incluso a scelta (0 €, 300 messaggi/mese) · START: nessun acquisto (consigliato ADVANCE) ma può provare.
+- Prova gratuita per TUTTI i pacchetti: 1 giorno e 10 messaggi per agente, un nuovo agente ogni 3 giorni, una sola volta per agente (solo Merlino, Hammer, Ares: gli unici attivi). La può avviare titolare/admin/livello 2-3.
+- [ ] SQL DA ESEGUIRE: equo-app/schema-agenti-prezzi-prove.sql (colonna centri.messaggi_extra protetta dal guard, tabella centri_prove_agenti, RPC agenti_prove_stato / agente_prova_avvia, imposta_messaggi_extra_centro(centro, 0|200|500), centro_e_responsabile).
+- [x] agent.js: prova (limite 10, chiave contatore ':prova'), pool messaggi extra, risposta con prova.fine. [x] Gestionale: prezzi sulle schede, «Prova gratis 1 giorno», box «Tutti gli agenti insieme» e «Messaggi in più» (richiesta via ticket), messaggi in chat per fine prova/limite. [x] Cruscotto (v6): colonna «Agenti e messaggi extra (listino/mese)» (non nei totali). DA PUBBLICARE col deploy (agent.js + gestionale).
+- Costo reale misurato ~2,7 centesimi di € a messaggio (29 messaggi): da ricontrollare dopo il primo mese; pareggio: Hammer/Ares/Galeno ~150 messaggi/mese, Merlino/Ermes ~330, 200 extra = 7 € → ~260 messaggi.
+- Attivazione agenti/pacchetto tutti: da SQL (centri.agenti_extra / agente_incluso, vedi schema-agenti-scuderia-hammer-ares.sql) — manuale tramite Claude; poi aggiornare il contratto (importo con agenti compresi).
+
+## Schede doppie dello stesso cavallo nel cliente del maniscalco (18/10/2026)
+- Causa: la scheda inserita a mano dal maniscalco (senza collegamento) e quella creata dal collegamento con il proprietario non venivano mai riconosciute come lo stesso cavallo; l'unione automatica esisteva solo per i cavalli di una scuderia.
+- Dati di Marco Mattozzi corretti a mano (Venere e White → White night). Nome del proprietario ha sempre priorità.
+- `equo-app/schema-cavalli-clienti-aggancio.sql` (ESEGUITO il 18/10, provato in locale; per incollarlo nel SQL Editor usare $fn$ e blocchi separati): aggancia/unisce per nome uguale (senza maiuscole/accenti). Nomi solo simili (White / White night) restano da unire a mano.
+- Nota: le DELETE su cavalli_clienti_mascalcia dal connettore Supabase di Claude vanno in timeout; dal SQL Editor funzionano.
+- Avviso «È lo stesso cavallo?» nella scheda cliente del maniscalco (nomi simili: prefisso a parola intera o differenza di 1 lettera): tasti «Unisci» / «Sono diversi». Codice in `equo-app/index.html` (renderAvvisoSimili, unisciSimili) — DA PUBBLICARE; richiede `equo-app/schema-cavalli-clienti-unisci-rpc.sql` (DA ESEGUIRE, provato in locale: RPC `equo_unisci_cavalli_cliente`).
+
+## Codice cavallo: provvisorio + doppia conferma + bollino (18/10/2026) — PROGETTO, non costruito
+- Decisioni: tre livelli provvisorio → validato (nome, razza, data di nascita + doppia conferma da due persone diverse tra proprietario e professionisti; codice definitivo e bollino «Validato») → certificato (validato + microchip verificato; bollino «Certificato»). Il codice definitivo si assegna a Validato (il Certificato aggiunge solo il bollino dorato). Doppia conferma: 1 persona = 1 conferma, una delle due SEMPRE del proprietario; la scuderia conta (proprietario per i suoi cavalli, professionista per quelli dei clienti). Passaggio di proprietà attivo già da Validato. I ~170 codici attuali diventano provvisori fino alla conferma. Dettagli e 13 casi di prova nel documento del progetto. Mockup: https://claude.ai/artifact/4USwoYL47VHpTcR8ERJFwN. Da decidere: prefisso PRV-, verifica microchip, ruoli professionista.
+- Dettagli, fasi e rischi in `claude/Equo_Codice_cavallo_validazione.md` (Project Equo).
+- Prima di costruire: verificare cosa è già stato stampato/comunicato con i codici attuali e decidere i vantaggi del bollino (stampa/QR, passaggio di proprietà, ricerca).
+- Fatto il 18/10: unificazione codici (numero più vecchio + alias), registro costo AI per agente (`ai_costi`, cruscotto v7).
+
+## Prassi «il maniscalco prepara, il proprietario riceve» (18/10, progetto, non costruito)
+- Documento: Equo_Codice_cavallo_prassi_maniscalco (progetto Equo). Il maniscalco inserisce cavallo e proprietario, il proprietario si abbina, accetta i cavalli (non li crea), li completa e conferma; maniscalco o altro professionista è la seconda conferma. Nessun doppione possibile in questo flusso.
+- Regola generale: le conferme valgono per la versione dei dati essenziali; se cambiano, decadono le conferme degli altri e chi modifica conferma da sé.
+- Da costruire: RPC «proponi al proprietario», accettazione con creazione della scheda in horses mantenendo il numero, «Non è mio», tabella cavalli_conferme, notifiche di riconferma. Casi di prova 14–20.
+
+## Codice a tre livelli · FASE 1 database (18/10) · file equo-app/schema-codice-livelli.sql
+- Blocchi 0-7 provati su database di prova (scenari 1,4,6,7,8,9,10,12,13 + protezioni). Da eseguire da Simone nel SQL Editor, un blocco alla volta. Niente cambia per gli utenti (codice_equo e app non toccati).
+- Blocco 0 corregge un errore GIA' in produzione: cambiare nome o microchip di un cavallo del proprietario dava errore (trigger horses_storico_cambi scriveva colonne inesistenti in cavalli_storico).
+- Dopo l'esecuzione: verifica con le query di controllo; poi fase 2 (app + migrazione dei codici attuali a provvisori PRV-, proponi/accetta cavalli dal maniscalco).
+- Nota: le righe manuali del maniscalco (cavalli_clienti_mascalcia) non hanno data di nascita: la sua conferma arriva dopo che il proprietario ha accettato e completato.
+
+## Codice a tre livelli · FASE 2A database (18/10) · file equo-app/schema-codice-provvisorio.sql
+- Fase 1 eseguita e verificata (7 cavalli, 4 scuderia, 0 conferme, 4 trigger, 4 funzioni).
+- 2A (da eseguire): i codici mostrati diventano PRV-NNNNNN (provvisorio) e il codice definitivo (validato/certificato); i numeri definitivi partono da 201; la ricerca per codice (pro_cavallo_da_codice) trova PRV-, vecchi codici e definitivi. Compatibile con l'app gia' in produzione (i codici sono solo testo).
+- Prossimi passi: 2B proponi/accetta cavalli dal maniscalco al proprietario (RPC), 2C schermate app (livello, checklist, Conferma, bollini, testo es. MAR-000005 -> PRV-000005 nei campi codice).
+
+## Codice a tre livelli · FASE 2B database (18/10) · file equo-app/schema-codice-proposte.sql
+- 2A eseguita e verificata (tutti i codici PRV-, 141 schede su 141). 2B in un unico blocco da eseguire: tabella cavalli_proposte, equo_proponi_cavalli_cliente (+ trigger automatico al collegamento del cliente), equo_proposte_cavalli_proprietario, equo_accetta_cavallo_proposto, equo_rifiuta_cavallo_proposto, equo_proposte_inviate, equo_cavalli_da_confermare.
+- DECISIONE APERTA: il piano Free (1 cavallo) blocca l'accettazione del secondo cavallo proposto dal maniscalco (risposta limite_cavalli_free). Da decidere: rispettare il limite (upsell Premium) o esentare i cavalli accettati dal maniscalco.
+- Prossimo: 2C schermate app (proposte ricevute dal proprietario, livello/checklist/Conferma/bollini, da confermare per i professionisti, testo es. MAR-000005 -> PRV-000005).
+
+## Fase 2C: blocco Free dei cavalli proposti dal maniscalco (18/10/26)
+- Fatto: i cavalli accettati dal maniscalco si aggiungono anche oltre il limite Free; oltre il primo restano bloccati (sfocati in app, invito a Premium). SQL: equo-app/schema-cavalli-bloccati.sql
+- DA FARE: sfocatura/blocco lato database. Oggi lo sfocato e solo grafico e i dati arrivano al telefono. Serve un controllo in RLS o nelle funzioni, cosi i dati dei cavalli bloccati non escono finche l'owner e Free.
+- DA FARE: sfocare anche in Home, scadenze e spese i dati dei cavalli bloccati.
+- DA FARE: le stesse schermate (proposte, livelli, conferme) in Equo Scuderia e area trainer; stampa QR/PDF solo da Validato; Passaggio di proprieta.
