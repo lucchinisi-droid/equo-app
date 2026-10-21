@@ -533,3 +533,11 @@ File `ux/mockup-home-nuovi-menu-v1.html`: proprietario, maniscalco, trainer, Scu
 - ALLENATORE: "Da confermare" nella Home (#tr-conferme, stessa funzione del maniscalco caricaConfermePro(forza, idBox)).
 - NOTIFICHE: equo-app/schema-notifiche-cavalli.sql (DA ESEGUIRE DOPO il deploy) + funzione netlify/functions/notify-cavalli.js. Tabella notifiche_cavalli + webhook "notify-cavalli" (segreto copiato da notify-chat-scuderia). Avvisi: proposta di cavalli dal pulsante del maniscalco -> proprietario; nome/razza/nascita cambiati con dati completi -> tutti quelli che possono confermare tranne chi ha modificato (staff scuderia sull'app OneSignal della scuderia). Niente doppioni entro 10 minuti. Provato su Postgres locale (5 scenari).
 - Verifiche: controllo 4 ruoli app OK, controllo Scuderia OK su computer e telefono, confronto visivo app identico.
+
+## >>> PROSSIMA SESSIONE (dal 22/10/2026) — riepilogo completo in claude/Equo_Storico_4_dal_21-10-26.md (Project Equo)
+1. Simone: `git push` (6 commit verificati), poi SQL `equo-app/schema-notifiche-cavalli.sql`. Prima di lunedi (riepilogo Pegasus).
+2. Prove con account veri: Riccardo allenatore (sedute, lezioni, chat); codice cavallo completo (proposta -> accetta -> completa -> conferme -> Validato); push di proposta e "Da confermare"; Scuderia: riquadro Codice Equo e Home "Da confermare".
+3. Decidere: transizione scheda PDF scuderie (oggi tutti provvisori = niente PDF) / PDF con scritta "provvisorio"; scheda PDF/QR nell'app proprietario (promessa Premium non costruita).
+4. Multi-file: allenatore nella sua cartella con Vite; togliere gli altri avvolgimenti (trRenderHome x2, renderHome, openHorseDetail, plCostruisciMenu, plNavAltri, diarioHomeRender).
+5. Aperti: Passaggio di proprieta, Instagram Stories, log prima->dopo razza/nascita, novita.json, Stripe (prova 49 EUR, Crediti Hammer, carrello), IVA con commercialista.
+Metodo: modifiche solo in equo-app-src/src e equo-scuderia-src/src -> unisci.cjs -> controlli automatici -> commit. Nessun deploy di prova.
