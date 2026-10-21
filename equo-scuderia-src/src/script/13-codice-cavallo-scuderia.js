@@ -15,7 +15,7 @@ async function renderCodiceScud(c){
   const box = document.getElementById("scud-codice-box");
   if(!box || !c) return;
   const liv = c.codice_livello || "provvisorio";
-  const testa = `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px"><h3 style="margin:0">Codice Equo <span style="font-family:monospace;font-size:14px">${escapeHtml(c.codice_equo || (DEMO_MODE ? "MAR-000201" : "in assegnazione"))}</span></h3>${badgeLivelloScud(DEMO_MODE ? "validato" : liv)}</div>`;
+  const testa = `<div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px"><h3 style="margin:0">Codice Equo <span style="font-family:monospace;font-size:14px">${escapeHtml(c.codice_equo || (DEMO_MODE ? "MAR-000201" : "in assegnazione"))}</span></h3>${badgeLivelloScud(DEMO_MODE ? "validato" : liv)}</div>`;
   box.innerHTML = `<div class="card" style="margin-bottom:16px">${testa}</div>`;
   if(DEMO_MODE) return;
   let st = null;
@@ -25,7 +25,7 @@ async function renderCodiceScud(c){
     box.innerHTML = `<div class="card" style="margin-bottom:16px">${testa}<p style="margin:0;color:var(--muted);font-size:12.5px">Solo amministratori e istruttori del centro possono confermare i dati del cavallo.</p></div>`;
     return;
   }
-  const v = (ok, t) => `<div style="font-size:13px;padding:2px 0;color:${ok ? "#14573A" : "var(--muted)"}">${ok ? "✓" : "○"} ${t}</div>`;
+  const v = (ok, t) => `<div style="font-size:13px;padding:2px 0;color:${ok ? "var(--primary)" : "var(--muted)"};font-weight:${ok ? 600 : 400}">${ok ? "✓" : "○"} ${t}</div>`;
   const dati = st.nome && st.razza && st.nascita;
   const proprio = st.il_mio_ruolo === "proprietario"; // cavallo di proprieta del centro: il centro fa da proprietario
   const corpo = v(st.nome, "Nome") + v(st.razza, "Razza") + v(st.nascita, "Data di nascita")
