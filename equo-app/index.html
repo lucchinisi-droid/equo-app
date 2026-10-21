@@ -18908,7 +18908,7 @@ async function diarioDettaglio(id){
   diarioDetId = id; diarioDetCat = v.categoria || null;
   const url = v.media_path ? diarioUrl[v.media_path] : null;
   diarioShareBlob = null;
-  if(v.tipo === "foto" && url){ fetch(url).then(r => r.blob()).then(b => { diarioShareBlob = { id, b }; }).catch(() => {}); }
+  if(v.tipo === "foto" && url){ fetch(url).then(r => r.blob()).then(diarioMarchia).then(b => { diarioShareBlob = { id, b }; }).catch(() => {}); }
   const d = new Date(v.data_voce);
   diarioSheet(`<span style="text-transform:capitalize">${d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}</span>`,
     (v.tipo === "foto" && url ? `<img src="${url}" alt="" style="width:100%;max-height:320px;object-fit:cover;border-radius:16px;margin-bottom:10px">` : "") +
@@ -18920,6 +18920,27 @@ async function diarioDettaglio(id){
     (v.tipo === "foto" ? `<button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="diarioNellAlbum()">Metti nell'album del cavallo</button>` : "") +
     (v.tipo === "foto" || v.tipo === "nota" ? `<button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="diarioCondividi('${v.id}')"><i class="fa-brands fa-instagram"></i> Condividi su Instagram</button>` : "") +
     `<button class="btn btn-outline" style="width:100%" onclick="diarioNascondi('${v.id}')">Nascondi dal Diario</button>`);
+}
+/* logo Equo + Equohub.com in basso a destra, solo sulla copia che si condivide (la foto salvata non cambia) */
+function diarioCaricaImg(src){ return new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ko(new Error("immagine")); i.src = src; }); }
+async function diarioMarchia(blob){
+  try{
+    const url = URL.createObjectURL(blob);
+    const [foto, logo] = await Promise.all([diarioCaricaImg(url), diarioCaricaImg("assets/equo/logo-share.png")]);
+    URL.revokeObjectURL(url);
+    const W = foto.naturalWidth, H = foto.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"); g.drawImage(foto, 0, 0, W, H);
+    const lato = Math.min(W, H), L = Math.round(lato * 0.15), m = Math.round(lato * 0.035), f = Math.round(L * 0.25);
+    g.font = "700 " + f + "px 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
+    const testo = "Equohub.com", tw = g.measureText(testo).width, bloccoW = Math.max(L, tw);
+    const cx = W - m - bloccoW / 2, yLogo = H - m - f - Math.round(f * 0.45) - L;
+    g.save(); g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = Math.round(L * 0.12); g.shadowOffsetY = Math.round(L * 0.02);
+    g.drawImage(logo, Math.round(cx - L / 2), yLogo, L, L);
+    g.fillStyle = "#ffffff"; g.textAlign = "center"; g.textBaseline = "top";
+    g.fillText(testo, cx, yLogo + L + Math.round(f * 0.35));
+    g.restore();
+    return await new Promise((ok, ko) => c.toBlob(b => b ? ok(b) : ko(new Error("marchio")), "image/jpeg", 0.9));
+  } catch(e){ return blob; }
 }
 async function diarioCondividi(id){
   const v = diarioVoci.find(x => x.id === id); if(!v) return;
@@ -18935,7 +18956,7 @@ async function diarioCondividi(id){
     if(!blob){
       await firmaUrl("diario-media", [v.media_path], diarioUrl);
       const u = diarioUrl[v.media_path]; if(!u) throw new Error("foto non disponibile");
-      blob = await (await fetch(u)).blob();
+      blob = await diarioMarchia(await (await fetch(u)).blob());
     }
     const file = new File([blob], "equo-" + (h.name || "cavallo").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + ".jpg", { type: "image/jpeg" });
     if(navigator.canShare && navigator.canShare({ files: [file] })){
