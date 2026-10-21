@@ -4,6 +4,12 @@
   # codice di build interno per il banner "Nuova versione disponibile" (non è la versione v1.0 mostrata)
   command = "node netlify/scrivi-build.js"
 
+# PROVA del controllo automatico (tests/controllo-app.cjs) solo sul ramo "beta":
+# se il controllo dei 4 ruoli fallisce, Netlify non pubblica. Quando la prova va bene
+# lo stesso comando passa anche alla produzione.
+[context.beta]
+  command = "node netlify/scrivi-build.js && npm run controllo:netlify"
+
 [functions]
   node_bundler = "esbuild"
 

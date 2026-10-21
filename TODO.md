@@ -503,3 +503,9 @@ File `ux/mockup-home-nuovi-menu-v1.html`: proprietario, maniscalco, trainer, Scu
 - Saluto della Home allenatore senza nome: leggeva currentUser.nome/full_name, il campo reale e fullName.
 - Provato in modalita demo (Playwright, 390 px): Home, Sedute, Messaggi, Agenda, Cavalli seguiti, menu "+", Nuova seduta, Cavallo seguito, Il mio codice: nessun errore JS. NON provabile in demo: chat, proposte lezione, collegamenti con account reali.
 - 21/10 sera: CORRETTO un mio errore: il :not(#tr-home) aggiunto alla regola vista-widget alzava la priorita CSS e nascondeva la Home del maniscalco (#hm). Tolto; ora #tr-home ha la classe wh-keep. Provate le Home di maniscalco, istruttore, veterinario e proprietario in demo: tutte visibili, tasto + presente. REGOLA: dopo ogni modifica CSS o di navigazione provare tutti e 4 i ruoli prima del deploy.
+
+## 21/10/2026: PASSAGGIO AL MULTI-FILE · TAPPA 1 (rete di sicurezza)
+- Piano completo: claude/Equo_Architettura_multifile.md (Project Equo).
+- Fatto: equo-app/tests/controllo-app.cjs (Playwright, 4 ruoli in demo: Home, barra, tasto +, pagine, errori JS). Provato: passa sulla versione attuale, blocca le due versioni rotte di oggi. package.json: script controllo / controllo:netlify, devDependency playwright 1.56.0. netlify.toml: [context.beta] con il controllo nel comando di build.
+- DA FARE (Simone): abilitare branch deploy "beta" su Netlify (equo-app), poi creare e pushare il ramo beta e guardare il log di build. Se ok: controllo anche in produzione. Se Chromium non parte su Netlify: GitHub Actions.
+- Tappe successive: Vite + core, poi un ruolo alla volta (allenatore, veterinario, proprietario, maniscalco), poi Equo Scuderia.
