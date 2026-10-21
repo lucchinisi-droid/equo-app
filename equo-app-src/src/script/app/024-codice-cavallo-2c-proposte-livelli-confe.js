@@ -72,6 +72,8 @@ async function rifiutaProposta(id){
 
 /* piano Free: i cavalli accettati dal maniscalco oltre il primo restano bloccati finche non passi a Premium */
 let cavalliBloccati = new Set();
+// cavalli che il proprietario puo usare (esclusi quelli bloccati dal piano Free): per diario, lezioni e scelte di cavallo
+function cavalliUsabili(){ return (horses || []).filter(h => !cavalliBloccati.has(h.id)); }
 async function caricaCavalliBloccati(){
   if(DEMO_MODE) return;
   let ids = [];

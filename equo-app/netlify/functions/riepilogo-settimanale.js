@@ -36,7 +36,10 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 async function datiUtente(admin, userId, oggi) {
   const fra7 = aggiungiGiorni(oggi, 7), fra14 = aggiungiGiorni(oggi, 14);
   const { data: cavalli } = await admin.from("horses").select("id, name").eq("owner_id", userId).order("created_at", { ascending: true });
-  const lista = cavalli || [];
+  // cavalli bloccati dal piano Free (arrivati dal maniscalco oltre il primo): fuori dal riepilogo
+  const { data: bloccati } = await admin.rpc("equo_cavalli_bloccati_di", { p_owner: userId });
+  const bl = new Set(Array.isArray(bloccati) ? bloccati : []);
+  const lista = (cavalli || []).filter((c) => !bl.has(c.id));
   const nome = (id) => lista.find((c) => c.id === id)?.name || "—";
   const ids = lista.map((c) => c.id);
 
@@ -74,7 +77,8 @@ async function datiUtente(admin, userId, oggi) {
   const lunScorso = aggiungiGiorni(lunediDi(oggi), -7), domScorsa = aggiungiGiorni(lunediDi(oggi), -1);
   const inizioMese = oggi.slice(0, 8) + "01";
   const da = lunScorso < inizioMese ? lunScorso : inizioMese;
-  const { data: spese } = await admin.from("expenses").select("category, amount, date").eq("owner_id", userId).gte("date", da).lte("date", oggi);
+  const { data: speseTutte } = await admin.from("expenses").select("category, amount, date, horse_id").eq("owner_id", userId).gte("date", da).lte("date", oggi);
+  const spese = (speseTutte || []).filter((e) => !bl.has(e.horse_id));
   const somma = (f) => (spese || []).filter(f).reduce((s, e) => s + Number(e.amount || 0), 0);
   const speseSettimana = somma((e) => e.date >= lunScorso && e.date <= domScorsa);
   const speseMese = somma((e) => e.date >= inizioMese);

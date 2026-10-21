@@ -142,7 +142,7 @@ function openAddLezioneModal(id){
   if(horses.length === 0){
     sel.innerHTML = '<option value="">Nessun cavallo</option>';
   } else {
-    sel.innerHTML = horses.map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join("");
+    sel.innerHTML = cavalliUsabili().map(h => `<option value="${h.id}">${escapeHtml(h.name)}</option>`).join("");
   }
   if(editingLezioneId){
     const l = lezioniCache.find(x => x.id === editingLezioneId);

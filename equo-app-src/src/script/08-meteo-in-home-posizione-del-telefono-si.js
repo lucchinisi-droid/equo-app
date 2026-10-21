@@ -39,9 +39,10 @@ const DIARIO_CATS = [["allenamento","Allenamento"],["passeggiata","Passeggiata"]
 function dKey(d){ return new Date(d).toLocaleDateString("sv-SE"); }
 function dEtichetta(k){ return new Date(k + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }); }
 function diarioCavallo(){
-  if(!horses || !horses.length) return null;
-  if(!diarioHorseId || !horses.some(h => h.id === diarioHorseId)) diarioHorseId = (horses.some(h => h.id === currentHorseId) ? currentHorseId : horses[0].id);
-  return horses.find(h => h.id === diarioHorseId);
+  const lista = cavalliUsabili();
+  if(!lista.length) return null;
+  if(!diarioHorseId || !lista.some(h => h.id === diarioHorseId)) diarioHorseId = (lista.some(h => h.id === currentHorseId) ? currentHorseId : lista[0].id);
+  return lista.find(h => h.id === diarioHorseId);
 }
 const firmaTs = {};
 async function firmaUrl(bucket, paths, mappa){
@@ -112,7 +113,7 @@ function diarioRender(){
   const h = diarioCavallo(), box = document.getElementById("diario-corpo");
   if(!h || !box) return;
   const st = diarioStats(diarioVoci);
-  const chips = horses.length > 1 ? '<div class="dr-chips">' + horses.map(x => `<button class="dr-chip${x.id === h.id ? " on" : ""}" onclick="diarioScegli('${x.id}')">${escapeHtml(x.name)}</button>`).join("") + '</div>' : "";
+  const chips = cavalliUsabili().length > 1 ? '<div class="dr-chips">' + cavalliUsabili().map(x => `<button class="dr-chip${x.id === h.id ? " on" : ""}" onclick="diarioScegli('${x.id}')">${escapeHtml(x.name)}</button>`).join("") + '</div>' : "";
   const sub = [h.codice_equo ? "Equo n. " + h.codice_equo : "", h.breed || ""].filter(Boolean).join(" · ");
   let sett = "";
   const giorniIt = ["D","L","M","M","G","V","S"];
@@ -304,7 +305,7 @@ function diarioApri(tipo, data){
   document.getElementById("dr-anteprima").style.display = "none";
   document.getElementById("dr-audio").style.display = "none";
   document.getElementById("dr-rec-lab").textContent = "Tocca per registrare (massimo 3 minuti)";
-  document.getElementById("dr-cavallo").innerHTML = horses.map(h => `<option value="${h.id}"${h.id === diarioHorseId ? " selected" : ""}>${escapeHtml(h.name)}</option>`).join("");
+  document.getElementById("dr-cavallo").innerHTML = cavalliUsabili().map(h => `<option value="${h.id}"${h.id === diarioHorseId ? " selected" : ""}>${escapeHtml(h.name)}</option>`).join("");
   document.getElementById("dr-cats").innerHTML = DIARIO_CATS.map(c => `<button type="button" class="dr-chip${c[0] === diarioCat ? " on" : ""}" onclick="diarioCatScegli('${c[0]}')">${c[1]}</button>`).join("");
   diarioTipoScegli(tipo || "foto");
   document.getElementById("dr-salva").disabled = false;
