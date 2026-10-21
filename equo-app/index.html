@@ -923,6 +923,14 @@ window.QRCode=QRCode;})();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
+.dr-sett .m .ic{position:absolute;top:6px;left:0;right:0;display:flex;gap:4px;justify-content:center;font-size:13px;color:#b9852a;pointer-events:none}
+.dr-sett .m.foto .ic{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.dr-sett-nav{display:flex;align-items:center;justify-content:space-between;margin:0 0 6px}
+.dr-sett-nav span{font-size:12.5px;font-weight:700;color:var(--muted)}
+.dr-sett-nav button{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;width:32px;height:28px;font-size:16px;line-height:1;cursor:pointer;font-family:inherit}
+.dr-sett-nav button:disabled{opacity:.35;cursor:default}
+.dr-sett-w{touch-action:pan-y}
+
 #cavalli-detail-view.bloccato > :not(.detail-header):not(#horse-lock-box){filter:blur(7px);pointer-events:none;user-select:none;opacity:.65}
 .horse-card.bloccato .horse-avatar,.horse-card.bloccato .muted{filter:blur(4px)}
 
@@ -18732,7 +18740,7 @@ function meteoHome(forza){
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") try{ meteoHome(); }catch(e){} });
 
 /* ===== DIARIO · fase 1 (14/10/2026): foto, note e vocali del cavallo ===== */
-let diarioHorseId = null, diarioVoci = [], diarioTipo = "foto", diarioCat = "allenamento", diarioFile = null, diarioRec = null, diarioRecChunks = [], diarioRecBlob = null, diarioRecTimer = null, diarioUrl = {}, diarioFiltro = null, diarioDataNuova = null, diarioMeseOff = 0, diarioDetId = null, diarioDetCat = null;
+let diarioHorseId = null, diarioVoci = [], diarioTipo = "foto", diarioCat = "allenamento", diarioFile = null, diarioRec = null, diarioRecChunks = [], diarioRecBlob = null, diarioRecTimer = null, diarioUrl = {}, diarioFiltro = null, diarioDataNuova = null, diarioMeseOff = 0, diarioDetId = null, diarioDetCat = null, diarioSettOff = 0, diarioShareBlob = null;
 const DIARIO_CATS = [["allenamento","Allenamento"],["passeggiata","Passeggiata"],["lezione","Lezione"],["cura","Cura"],["traguardo","Traguardo"],["altro","Altro"]];
 function dKey(d){ return new Date(d).toLocaleDateString("sv-SE"); }
 function dEtichetta(k){ return new Date(k + "T12:00:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }); }
@@ -18741,16 +18749,21 @@ function diarioCavallo(){
   if(!diarioHorseId || !horses.some(h => h.id === diarioHorseId)) diarioHorseId = (horses.some(h => h.id === currentHorseId) ? currentHorseId : horses[0].id);
   return horses.find(h => h.id === diarioHorseId);
 }
+const firmaTs = {};
 async function firmaUrl(bucket, paths, mappa){
-  const da = paths.filter(p => p && !mappa[p]);
+  const adesso = Date.now();
+  const valido = (u) => u && !/undefined/.test(u);
+  // rifirma anche gli indirizzi piu vecchi di 40 minuti (durano 60): l'app resta aperta a lungo
+  const da = [...new Set(paths.filter(p => p && (!valido(mappa[p]) || adesso - (firmaTs[bucket + "|" + p] || 0) > 2400000)))];
   if(!da.length) return;
   try{
     const r = await sb.storage.from(bucket).createSignedUrls(da, 3600);
-    (r.data || []).forEach(x => { if(x && x.signedUrl && x.path) mappa[x.path] = x.signedUrl; });
-  } catch(e){}
-  // se qualcuna non è stata firmata, riprova una per una
-  for(const p of da.filter(p => !mappa[p])){
-    try{ const r = await sb.storage.from(bucket).createSignedUrl(p, 3600); if(r.data && r.data.signedUrl) mappa[p] = r.data.signedUrl; } catch(e){}
+    if(r.error) console.warn("firma file:", r.error.message);
+    (r.data || []).forEach(x => { if(x && x.path && valido(x.signedUrl)){ mappa[x.path] = x.signedUrl; firmaTs[bucket + "|" + x.path] = adesso; } });
+  } catch(e){ console.warn("firma file:", e && e.message); }
+  // se qualcuna non e stata firmata, riprova una per una
+  for(const p of da.filter(p => !valido(mappa[p]) || firmaTs[bucket + "|" + p] !== adesso)){
+    try{ const r = await sb.storage.from(bucket).createSignedUrl(p, 3600); if(r.error) console.warn("firma file:", r.error.message); if(r.data && valido(r.data.signedUrl)){ mappa[p] = r.data.signedUrl; firmaTs[bucket + "|" + p] = adesso; } } catch(e){}
   }
 }
 async function diarioFetch(horseId){
@@ -18770,6 +18783,15 @@ function diarioStats(voci){
 }
 function diarioFotoUrl(v){ return v.tipo === "foto" && v.media_path ? diarioUrl[v.media_path] : null; }
 function diarioFotoGiorno(k){ const v = diarioVoci.find(x => dKey(x.data_voce) === k && x.tipo === "foto"); return v ? diarioFotoUrl(v) : null; }
+const DIARIO_ICONE = { foto: "fa-camera", video: "fa-video", vocale: "fa-microphone", nota: "fa-pen" };
+function diarioIconeGiorno(k){
+  const tipi = [...new Set(diarioVoci.filter(x => dKey(x.data_voce) === k).map(x => x.tipo))];
+  return tipi.length ? '<span class="ic">' + tipi.slice(0, 3).map(t => `<i class="fa-solid ${DIARIO_ICONE[t] || "fa-circle"}"></i>`).join("") + '</span>' : "";
+}
+function diarioSettVai(n){
+  diarioSettOff = Math.min(0, Math.max(-52, diarioSettOff + n));
+  diarioRender();
+}
 function diarioSheet(titolo, corpo){
   document.getElementById("dr-sheet-t").innerHTML = titolo;
   document.getElementById("dr-sheet-b").innerHTML = corpo;
@@ -18800,11 +18822,17 @@ function diarioRender(){
   const sub = [h.codice_equo ? "Equo n. " + h.codice_equo : "", h.breed || ""].filter(Boolean).join(" · ");
   let sett = "";
   const giorniIt = ["D","L","M","M","G","V","S"];
+  const fineSett = new Date(); fineSett.setDate(fineSett.getDate() + diarioSettOff * 7);
+  const inizioSett = new Date(fineSett); inizioSett.setDate(inizioSett.getDate() - 6);
+  const mese = (d) => d.toLocaleDateString("it-IT", { month: "short" });
+  const etichettaSett = diarioSettOff === 0 ? "Ultimi 7 giorni" : inizioSett.getDate() + " " + mese(inizioSett) + " – " + fineSett.getDate() + " " + mese(fineSett);
+  const oggiK = dKey(new Date());
   for(let i = 6; i >= 0; i--){
-    const d = new Date(); d.setDate(d.getDate() - i);
+    const d = new Date(fineSett); d.setDate(d.getDate() - i);
     const k = dKey(d), n = diarioVoci.filter(x => dKey(x.data_voce) === k).length, f = diarioFotoGiorno(k);
-    sett += `<div class="g">${giorniIt[d.getDay()]}<button class="m${n ? " f" : ""}${f ? " foto" : ""}${i === 0 ? " og" : ""}" ${f ? `style="background-image:url('${f}')"` : ""} onclick="diarioGiorno('${k}')">${d.getDate()}${n && !f ? '<i class="pt"></i>' : ""}</button></div>`;
+    sett += `<div class="g">${giorniIt[d.getDay()]}<button class="m${n ? " f" : ""}${f ? " foto" : ""}${k === oggiK ? " og" : ""}" ${f ? `style="background-image:url('${f}')"` : ""} onclick="diarioGiorno('${k}')">${diarioIconeGiorno(k)}${d.getDate()}</button></div>`;
   }
+  sett = `<div class="dr-sett-w"><div class="dr-sett-nav"><button onclick="diarioSettVai(-1)" aria-label="Settimana precedente">‹</button><span>${etichettaSett}</span><button onclick="diarioSettVai(1)" aria-label="Settimana successiva"${diarioSettOff >= 0 ? " disabled" : ""}>›</button></div><div class="dr-sett">${sett}</div></div>`;
   const visibili = diarioFiltro ? diarioVoci.filter(v => v.categoria === diarioFiltro) : diarioVoci;
   const cats = DIARIO_CATS.filter(c => diarioVoci.some(v => v.categoria === c[0]));
   const filtro = cats.length > 1 ? '<div class="dr-chips"><button class="dr-chip' + (!diarioFiltro ? " on" : "") + '" onclick="diarioFiltra(null)">Tutti</button>' + cats.map(c => `<button class="dr-chip${diarioFiltro === c[0] ? " on" : ""}" onclick="diarioFiltra('${c[0]}')">${c[1]}</button>`).join("") + '</div>' : "";
@@ -18812,14 +18840,20 @@ function diarioRender(){
   box.innerHTML = chips +
     `<div class="dr-hero" style="background-image:url('${cavalloHero(h)}')" onclick="apriSchedaCavallo('${h.id}')"><span class="sch">Scheda e album</span><div class="c"><div class="n">${escapeHtml(h.name)}</div><div class="s">${escapeHtml(sub)}</div></div></div>` +
     `<div class="dr-stat"><button onclick="diarioInfo('streak')"><b>${st.streak}</b><span>giorni di fila</span></button><button onclick="diarioInfo('mese')"><b>${st.mese}</b><span>momenti del mese</span></button><button onclick="diarioInfo('tot')"><b>${st.tot}</b><span>nel Diario</span></button></div>` +
-    `<div class="dr-sett">${sett}</div>` + filtro + lista;
+    sett + filtro + lista;
+  const sw = box.querySelector(".dr-sett-w");
+  if(sw){
+    let x0 = null;
+    sw.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+    sw.addEventListener("touchend", e => { if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) > 45) diarioSettVai(dx > 0 ? -1 : 1); });
+  }
 }
 function diarioVoceHtml(v){
   const d = new Date(v.data_voce), quando = d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" }) + " · " + d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
   const url = v.media_path ? diarioUrl[v.media_path] : null;
   const cat = DIARIO_CATS.find(c => c[0] === v.categoria);
   let corpo = "";
-  if(v.tipo === "foto") corpo += url ? `<div class="im" style="background-image:url('${url}')"></div>` : '<div class="im" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">Foto non disponibile</div>';
+  if(v.tipo === "foto") corpo += url ? `<div class="im" style="background-image:url('${url}')"></div>` : '<div class="im" style="display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;color:var(--muted);font-size:13px"><i class="fa-solid fa-camera" style="font-size:22px"></i>Foto non disponibile: tocca per riprovare</div>';
   corpo += '<div class="rg">';
   if(v.testo) corpo += `<div class="t">${escapeHtml(v.testo)}</div>`;
   if(v.tipo === "vocale" && url) corpo += `<audio controls preload="none" src="${url}" onclick="event.stopPropagation()"></audio>`;
@@ -18852,7 +18886,7 @@ function diarioMeseVista(off){
   let celle = ""; for(let i = 0; i < primo; i++) celle += "<span></span>";
   for(let g = 1; g <= giorni; g++){
     const k = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(g).padStart(2, "0"), n = diarioVoci.filter(x => dKey(x.data_voce) === k).length, f = diarioFotoGiorno(k);
-    celle += `<button class="m${n ? " f" : ""}${f ? " foto" : ""}" ${f ? `style="background-image:url('${f}')"` : ""} onclick="diarioGiorno('${k}')">${g}${n && !f ? '<i class="pt"></i>' : ""}</button>`;
+    celle += `<button class="m${n ? " f" : ""}${f ? " foto" : ""}" ${f ? `style="background-image:url('${f}')"` : ""} onclick="diarioGiorno('${k}')">${diarioIconeGiorno(k)}${g}</button>`;
   }
   const nome = base.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
   const nMese = diarioVoci.filter(x => dKey(x.data_voce).slice(0, 7) === y + "-" + String(m + 1).padStart(2, "0")).length;
@@ -18864,14 +18898,17 @@ function diarioGiorno(k){
   const futuro = k > dKey(new Date());
   diarioSheet(`<span style="text-transform:capitalize">${dEtichetta(k)}</span>`,
     (del.length ? del.map(v => { const url = v.media_path ? diarioUrl[v.media_path] : null; const c = DIARIO_CATS.find(x => x[0] === v.categoria);
-      return `<button class="dr-riga" style="gap:12px" onclick="diarioDettaglio('${v.id}')"><span class="dr-mini" ${v.tipo === "foto" && url ? `style="background-image:url('${url}')"` : ""}>${v.tipo === "vocale" ? "🎙" : v.tipo === "nota" ? "✎" : ""}</span><span style="flex:1;text-align:left"><b style="display:block;font-size:14px">${v.tipo === "foto" ? "Foto" : v.tipo === "vocale" ? "Vocale" : "Nota"}${c ? " · " + c[1] : ""}</b><span class="muted" style="font-size:12.5px">${escapeHtml((v.testo || "").slice(0, 60)) || new Date(v.data_voce).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span></span><span>›</span></button>`; }).join("")
+      return `<button class="dr-riga" style="gap:12px" onclick="diarioDettaglio('${v.id}')"><span class="dr-mini" ${v.tipo === "foto" && url ? `style="background-image:url('${url}')"` : ""}>${v.tipo === "foto" && url ? "" : `<i class="fa-solid ${DIARIO_ICONE[v.tipo] || "fa-circle"}"></i>`}</span><span style="flex:1;text-align:left"><b style="display:block;font-size:14px">${v.tipo === "foto" ? "Foto" : v.tipo === "vocale" ? "Vocale" : "Nota"}${c ? " · " + c[1] : ""}</b><span class="muted" style="font-size:12.5px">${escapeHtml((v.testo || "").slice(0, 60)) || new Date(v.data_voce).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span></span><span>›</span></button>`; }).join("")
       : '<div class="dr-vuota">Nessun momento in questo giorno.</div>') +
     (futuro ? "" : `<button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="closeModal('modal-dr-sheet');diarioApri('foto','${k}')">Aggiungi un momento${k === dKey(new Date()) ? "" : " per questo giorno"}</button>`));
 }
-function diarioDettaglio(id){
+async function diarioDettaglio(id){
   const v = diarioVoci.find(x => x.id === id); if(!v) return;
+  if(v.media_path && !diarioUrl[v.media_path]) await firmaUrl("diario-media", [v.media_path], diarioUrl);
   diarioDetId = id; diarioDetCat = v.categoria || null;
   const url = v.media_path ? diarioUrl[v.media_path] : null;
+  diarioShareBlob = null;
+  if(v.tipo === "foto" && url){ fetch(url).then(r => r.blob()).then(b => { diarioShareBlob = { id, b }; }).catch(() => {}); }
   const d = new Date(v.data_voce);
   diarioSheet(`<span style="text-transform:capitalize">${d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}</span>`,
     (v.tipo === "foto" && url ? `<img src="${url}" alt="" style="width:100%;max-height:320px;object-fit:cover;border-radius:16px;margin-bottom:10px">` : "") +
@@ -18881,7 +18918,38 @@ function diarioDettaglio(id){
     `<div class="dr-chips" style="margin-top:10px" id="dr-det-cats">${DIARIO_CATS.map(c => `<button type="button" class="dr-chip${c[0] === diarioDetCat ? " on" : ""}" onclick="diarioDetCatScegli('${c[0]}')">${c[1]}</button>`).join("")}</div>` +
     `<button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="diarioDetSalva()">Salva modifiche</button>` +
     (v.tipo === "foto" ? `<button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="diarioNellAlbum()">Metti nell'album del cavallo</button>` : "") +
+    (v.tipo === "foto" || v.tipo === "nota" ? `<button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="diarioCondividi('${v.id}')"><i class="fa-brands fa-instagram"></i> Condividi su Instagram</button>` : "") +
     `<button class="btn btn-outline" style="width:100%" onclick="diarioNascondi('${v.id}')">Nascondi dal Diario</button>`);
+}
+async function diarioCondividi(id){
+  const v = diarioVoci.find(x => x.id === id); if(!v) return;
+  const h = horses.find(x => x.id === v.horse_id) || {};
+  const testo = [v.testo, (h.name ? h.name + " · " : "") + "Equo", "#equo #cavalli"].filter(Boolean).join("\n");
+  try{
+    if(v.tipo === "nota"){
+      if(navigator.share){ await navigator.share({ text: testo }); }
+      else if(navigator.clipboard){ await navigator.clipboard.writeText(testo); showToast("Testo copiato: incollalo su Instagram"); }
+      return;
+    }
+    let blob = diarioShareBlob && diarioShareBlob.id === id ? diarioShareBlob.b : null;
+    if(!blob){
+      await firmaUrl("diario-media", [v.media_path], diarioUrl);
+      const u = diarioUrl[v.media_path]; if(!u) throw new Error("foto non disponibile");
+      blob = await (await fetch(u)).blob();
+    }
+    const file = new File([blob], "equo-" + (h.name || "cavallo").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + ".jpg", { type: "image/jpeg" });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], text: testo });
+    } else {
+      // computer o browser senza condivisione file: salva la foto e copia il testo
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+      try{ if(navigator.clipboard) await navigator.clipboard.writeText(testo); } catch(e){}
+      showToast("Foto salvata e testo copiato: aprila e pubblicala su Instagram");
+    }
+  } catch(e){
+    if(e && e.name === "AbortError") return;
+    showToast("Non riesco a condividere: " + ((e && e.message) || "errore"));
+  }
 }
 function diarioDetCatScegli(c){ diarioDetCat = c; document.querySelectorAll("#dr-det-cats .dr-chip").forEach(b => b.classList.toggle("on", b.getAttribute("onclick").includes("'" + c + "'"))); }
 async function diarioDetSalva(){
