@@ -2096,7 +2096,7 @@ dl.cavpro-kv dt{color:var(--muted)} dl.cavpro-kv dd{margin:0;font-weight:600;min
 /* ---------- Home a widget ---------- */
 .wh{display:none}
 body.vista-widget .wh{display:grid}
-body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh):not(#tr-home),
+body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh),
 body.vista-widget #home-main{display:none!important}
 .wg-meteo{display:inline-flex;align-items:center;gap:2px;margin-left:8px;vertical-align:middle;flex:none}
 .wg-meteo .mi{width:22px;height:22px}
@@ -19659,7 +19659,7 @@ plAggiorna();
  }
  window.trRenderHome=async function(){
   var home=q("page-pro-home");if(!home)return;
-  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";home.appendChild(box);}
+  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";box.className="wh-keep";home.appendChild(box);}
   if(!TR.caricato){box.innerHTML='<div class="loading"><div class="spinner"></div></div>';await carica();}
   var nome=(currentUser&&(currentUser.fullName||currentUser.nome||currentUser.full_name))||"";
   var ora=new Date().getHours(),sal=ora<13?"Buongiorno":ora<18?"Buon pomeriggio":"Buonasera";
