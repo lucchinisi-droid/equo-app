@@ -78,6 +78,14 @@ const SENZA_PIU = ["pro-inbox", "chat"]; // pagine dove il "+" e nascosto appost
     await ctx.close();
   }
   await browser.close();
+  // risultato leggibile nel sito pubblicato: /controllo.json (prova che il controllo e girato davvero)
+  try{
+    fs.writeFileSync(path.resolve(__dirname, "..", "controllo.json"), JSON.stringify({
+      esito: errori.length ? "FALLITO" : "OK", quando: new Date().toISOString(),
+      ruoli: RUOLI.map(r => r.ruolo), errori,
+      commit: process.env.COMMIT_REF || null, ramo: process.env.BRANCH || null,
+    }, null, 2));
+  } catch(e){}
   if(errori.length){
     console.error("\nCONTROLLO FALLITO, il deploy viene bloccato:\n- " + errori.join("\n- "));
     process.exit(1);
