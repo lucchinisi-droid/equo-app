@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-codice-proprietario" onclick="closeOut(event,'modal-codice-proprietario')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Il tuo codice per la chat</div>
+    <div class="muted" style="font-size:12px;line-height:1.6;margin-bottom:14px">
+      Condividilo con un altro proprietario su Equo per iniziare a chattare con lui.
+    </div>
+    <div style="display:flex;justify-content:center;margin-bottom:14px">
+      <div id="codice-proprietario-qr" style="background:#fff;padding:10px;border-radius:12px"></div>
+    </div>
+    <div style="text-align:center;font-weight:700;font-size:20px;letter-spacing:1px;margin-bottom:16px" id="codice-proprietario-testo">—</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="copyCodiceProprietario()">Copia</button>
+      <button class="btn btn-primary" style="flex:1" onclick="shareCodiceProprietario()">Condividi</button>
+    </div>
+  </div>
+</div>
+

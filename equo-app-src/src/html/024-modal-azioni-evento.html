@@ -1,0 +1,17 @@
+<div class="modal-overlay" id="modal-azioni-evento" onclick="closeOut(event,'modal-azioni-evento')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-azioni-evento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="azioni-evento-titolo">Appuntamento</div>
+    <div class="muted" style="font-size:13px;line-height:1.6" id="azioni-evento-dettaglio"></div>
+    <div class="ag-azioni">
+      <button class="btn btn-primary btn-conferma" id="azioni-evento-fatto" onclick="azioneEvento('fatto')">Segna come fatto</button>
+      <button class="btn btn-outline btn-variazione" onclick="azioneEvento('modifica')"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
+      <button class="btn btn-outline" onclick="azioneEvento('pdf')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Stampa PDF</button>
+      <button class="btn btn-outline" onclick="azioneEvento('chat')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat</button>
+      <button class="btn btn-outline" id="azioni-evento-annulla-struttura" style="display:none;color:var(--red)" onclick="azioneEvento('annulla_struttura')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla con la scuderia</button>
+      <button class="btn btn-danger" id="azioni-evento-elimina" onclick="azioneEvento('elimina')"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span> Elimina</button>
+    </div>
+  </div>
+</div>
+

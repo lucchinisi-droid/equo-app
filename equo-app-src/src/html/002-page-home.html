@@ -1,0 +1,105 @@
+  <div class="page-content active" id="page-home">
+    <div class="section-title" style="font-size:18px;margin-bottom:2px" id="home-greeting"></div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:14px" id="home-date"></div>
+    <div class="meteo-box" id="meteo-owner" aria-label="Meteo dei prossimi 7 giorni"></div>
+    <div id="home-oggi"></div>
+    <div id="home-da-saldare" style="display:none"></div>
+    <div class="wh" id="wh-owner"></div>
+    <div id="home-proposte"></div>
+    <div id="home-setup" style="display:none">
+      <div class="card" style="text-align:center;padding:28px">
+        <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
+        <div class="section-title" style="margin-bottom:8px">Aggiungi il tuo primo cavallo</div>
+        <div class="muted" style="font-size:14px;line-height:1.6;margin-bottom:20px">
+          Crea la scheda del tuo cavallo per iniziare a tracciare vaccini, spese e scadenze.
+        </div>
+        <button class="btn btn-primary" onclick="openHorseForm()" style="width:100%;margin-bottom:10px">
+          <span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span> Aggiungi cavallo
+        </button>
+        <button class="btn btn-outline" onclick="openModal('modal-join-stable')" style="width:100%">
+          <span class="icon"><svg><use href="#i-link"/></svg></span> Collega una scuderia con un codice
+        </button>
+      </div>
+    </div>
+
+    <div id="home-main" style="display:none">
+      <div class="promo-banner" id="promo-banner">
+        <div class="promo-slide active" data-slide="0">
+          <div style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <span class="promo-tag">PRENOTAZIONI</span>
+              <div class="promo-title">Prenota le lezioni dall'app</div>
+              <div class="promo-desc">Richiede che la tua scuderia usi Equo Scuderia</div>
+            </div>
+          </div>
+        </div>
+        <div class="promo-slide" data-slide="1">
+          <div style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <span class="promo-tag">ASSISTENTE AI</span>
+              <div class="promo-title">Un esperto equestre h24 nel telefono</div>
+              <div class="promo-desc">Dubbi su alimentazione e gestione, risposta subito</div>
+            </div>
+          </div>
+        </div>
+        <div class="promo-slide" data-slide="2">
+          <div style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <span class="promo-tag">SERVIZI</span>
+              <div class="promo-title">Clinica o maniscalco più vicini</div>
+              <div class="promo-desc">Un tap per chiamare o farti indicare la strada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="partner-banner" id="partner-banner">
+        <div class="partner-slide active" data-pslide="0" onclick="window.location.href='mailto:gestione.equo@gmail.com?subject=' + encodeURIComponent('Vorrei comparire come partner su Equo')">
+          <span class="partner-tag">PARTNER</span>
+          <div class="partner-title">Vuoi comparire qui?</div>
+          <div class="partner-desc">Scrivici</div>
+        </div>
+        <div class="partner-slide" data-pslide="1" onclick="openModal('modal-segnala-maneggio')">
+          <span class="partner-tag">SEGNALAZIONE</span>
+          <div class="partner-title">Segnalaci il tuo maneggio</div>
+          <div class="partner-desc">E ottieni 1 mese di Premium gratis</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-label">Spese questo mese</div>
+          <div class="stat-value" id="stat-expenses">€ 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Scadenze in arrivo</div>
+          <div class="stat-value" id="stat-deadlines">0</div>
+        </div>
+      </div>
+
+      <div class="card" id="home-last-message-card" style="margin-bottom:14px;display:none;cursor:pointer" onclick="goToLastMessage()">
+        <span class="badge badge-accent" style="background:var(--accent);color:#14231b">ULTIMO MESSAGGIO</span>
+        <div style="font-weight:700;font-size:14px;margin-top:8px" id="home-last-message-from"></div>
+        <div class="muted" style="font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="home-last-message-preview"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="section-title" style="font-size:16px;margin-bottom:8px">Prossime scadenze</div>
+        <div id="home-deadlines"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+      </div>
+
+      <button class="btn btn-outline" onclick="openServicesMap()" style="width:100%">
+        <span class="icon"><svg><use href="#i-mappin"/></svg></span> Servizi vicino a te
+      </button>
+    </div>
+    <div class="card aiuto-card wh-keep" style="margin-top:14px" onclick="apriTicketAssistenza()">
+      <div class="aiuto-ico"><i class="fa-solid fa-life-ring"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14.5px">Serve aiuto?</div>
+        <div class="muted" style="font-size:12.5px;margin-top:2px;line-height:1.4">Scrivici: ti rispondiamo via email.</div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="event.stopPropagation();apriTicketAssistenza()">Apri un ticket</button>
+    </div>
+  </div>
+
+  <!-- DIARIO (proprietario) -->

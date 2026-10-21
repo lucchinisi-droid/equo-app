@@ -1,0 +1,14 @@
+<div class="modal-overlay" id="modal-microchip-warning" onclick="closeOut(event,'modal-microchip-warning')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>Microchip non inserito</div>
+    <div class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.5">
+      Senza il microchip alcune funzioni di Equo App ed Equo Scuderia (come il collegamento automatico con la tua scuderia) non saranno utilizzabili.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" style="width:100%" onclick="tornaAInserireMicrochip()">Inserisco il microchip</button>
+      <button class="btn btn-outline" style="width:100%" onclick="confermaSalvaSenzaMicrochip()">Lo inserisco dopo</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,33 @@
+/* ---------- Tablet e computer (da 768 px) ---------- */
+@media (min-width:768px){
+  body{display:block;background:var(--bg)}
+  .screen{max-width:none;margin:0;box-shadow:none}
+  #screen-app .page-content{padding:22px 28px calc(40px + env(safe-area-inset-bottom)) 28px}
+  #screen-app .page-content > *{max-width:1040px;margin-left:auto;margin-right:auto}
+  #screen-app{padding-left:96px}
+  .bottom-nav{position:fixed;left:0;right:auto;top:0;bottom:0;width:96px;max-width:none;transform:none;height:auto;flex-direction:column;justify-content:flex-start;gap:6px;padding:calc(84px + env(safe-area-inset-top)) 0 20px;border-top:0;border-right:1px solid var(--border)}
+  .bottom-nav .nav-btn{flex:0 0 auto;width:100%;padding:12px 0}
+  .ai-fab{right:24px;bottom:24px}
+  .wh{grid-template-columns:repeat(4,1fr);gap:14px}
+  .wg-grande{grid-column:span 2;grid-row:span 2}
+  .wg-medio{grid-column:span 2}
+  .wg-piccolo{aspect-ratio:auto;min-height:170px}
+  .modal-overlay{align-items:center}
+  .modal{border-radius:20px;max-width:560px;max-height:88vh}
+  /* clienti e cavalli: elenco a sinistra, scheda a destra */
+  #page-pro-clienti.active{display:grid!important;grid-template-columns:minmax(300px,380px) 1fr;gap:22px;align-items:start}
+  #page-pro-clienti > *{max-width:none!important;margin:0!important}
+  #page-pro-clienti #clienti-list-view{display:block!important;position:sticky;top:0}
+  #page-pro-clienti #clienti-detail-view .back-btn{display:none}
+  #page-cavalli.active{display:grid!important;grid-template-columns:minmax(280px,360px) 1fr;gap:22px;align-items:start}
+  #page-cavalli > *{max-width:none!important;margin:0!important}
+  #page-cavalli #cavalli-list-view{display:block!important}
+  #page-cavalli #cavalli-detail-view .back-btn{display:none}
+  /* chat aperta come pannello a destra */
+  .mchat-overlay{left:auto;width:min(560px,58vw);border-left:1px solid var(--border);box-shadow:-10px 0 30px rgba(0,0,0,.12)}
+}
+@media (min-width:1200px){
+  .wh{grid-template-columns:repeat(6,1fr)}
+  .wg-grande{grid-column:span 2;grid-row:span 2}
+  .wg-medio{grid-column:span 2}
+}

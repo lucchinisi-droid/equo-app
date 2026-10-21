@@ -1,0 +1,22 @@
+<div class="modal-overlay" id="modal-add-pro-role" onclick="closeOut(event,'modal-add-pro-role')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Che tipo di professionista sei?</div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5">Scegli con attenzione: la professione resta legata al tuo account e al badge Equo Certified e non si potrà cambiare dall'app.</div>
+    <div class="role-list" style="margin-top:8px">
+      <button class="role-card" onclick="confirmAddSecondaryRole('maniscalco')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span></div>
+        <div><div class="role-card-title">Maniscalco</div><div class="role-card-desc">Ferrature, interventi e clienti</div></div>
+      </button>
+      <button class="role-card" onclick="closeModal('modal-add-pro-role');apriCandidatura('veterinario','app_aggiungi_profilo')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
+      </button>
+      <button class="role-card" onclick="confirmAddSecondaryRole('istruttore')">
+        <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
+        <div><div class="role-card-title">Istruttore/Trainer</div><div class="role-card-desc">Allievi, cavalli e sedute di lavoro</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+

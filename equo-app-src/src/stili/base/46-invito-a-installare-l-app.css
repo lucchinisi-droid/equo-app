@@ -1,0 +1,11 @@
+/* invito a installare l'app */
+.ii-velo{position:fixed;inset:0;z-index:9000;background:rgba(10,24,18,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.ii-card{width:100%;max-width:440px;background:#fbf8f1;border:1.5px solid #e8b04b;border-radius:18px;padding:18px 18px 14px;color:#1d2b23;font-size:14px;line-height:1.45}
+.ii-testa{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.ii-testa img{width:46px;height:46px;border-radius:12px;flex:none}
+.ii-testa b{display:block;font-size:16px;color:#14482c;margin-bottom:2px}
+.ii-testa span{color:#5f6b63;font-size:13px}
+.ii-passo{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #ece4d3}
+.ii-passo span{width:24px;height:24px;border-radius:50%;background:#14482c;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.ii-btn{width:100%;background:#1d4a35;color:#fff;border:2px solid #e8b04b;border-radius:12px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
+.ii-dopo{display:block;margin:10px auto 0;background:none;border:0;color:#5f6b63;font-size:13px;text-decoration:underline;cursor:pointer}

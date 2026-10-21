@@ -1,0 +1,35 @@
+  <div class="page-content" id="page-chat">
+    <div class="card" id="push-permission-banner" style="display:none;margin-bottom:14px;align-items:center;justify-content:space-between;gap:10px">
+      <div style="font-size:13px">Attiva le notifiche per non perdere i messaggi, anche a telefono bloccato.</div>
+      <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="attivaNotifichePush()">Attiva</button>
+    </div>
+    <div id="farrier-chat-section" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="section-title" style="font-size:15px;margin-bottom:0">Il tuo maniscalco</div>
+        <button class="btn btn-outline btn-sm" onclick="openCollegaManiscalco()">+ Collega</button>
+      </div>
+      <div class="card" id="farrier-chat-list-card">
+        <div id="farrier-chat-list"></div>
+      </div>
+    </div>
+
+    <div id="stable-chat-section" style="display:none;margin-bottom:20px">
+      <div class="section-title" style="font-size:15px">La tua scuderia</div>
+      <div class="card" id="stable-chat-list-card">
+        <div id="stable-chat-list"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="section-title" style="margin-bottom:0">Chat tra proprietari</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-chat')">+ Nuova chat</button>
+    </div>
+    <div class="card" id="owner-chat-list-card">
+      <div id="owner-chat-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+    </div>
+    <div class="muted" style="font-size:12px;line-height:1.6;margin-top:14px;text-align:center">
+      Per chattare con un altro proprietario ti serve il suo codice — trovi il tuo in "Il tuo codice per la chat" nel menu profilo.
+    </div>
+  </div>
+
+  <!-- CAVALLI -->

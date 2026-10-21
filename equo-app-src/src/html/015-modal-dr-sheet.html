@@ -1,0 +1,334 @@
+<div class="modal-overlay" id="modal-dr-sheet" onclick="closeOut(event,'modal-dr-sheet')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dr-sheet-t"></div>
+    <div id="dr-sheet-b"></div>
+  </div>
+</div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottom-nav-owner">
+    <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
+    <button class="nav-btn" data-page="diario" onclick="showPage('diario')"><span class="icon"><svg><use href="#i-diario"/></svg></span><small>Diario</small></button>
+    <button class="nav-btn" data-page="cavalli" onclick="showPage('cavalli')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.4"/><path d="M5.5 16c.7-1.8 2-2.6 3.5-2.6s2.8.8 3.5 2.6M14.5 9.5h4M14.5 13h3"/></svg></span><small>Libretto</small></button>
+    <button class="nav-btn" data-page="chat" onclick="showPage('chat')"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="owner-chat-nav-badge" style="display:none"></span></button>
+    <button class="nav-btn" data-page="prenotazioni" onclick="showPage('prenotazioni')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Calendario</small></button>
+    <button class="nav-btn" data-page="spese" onclick="showPage('spese')" style="display:none"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Spese</small></button>
+  </div>
+  <div class="bottom-nav" id="bottom-nav-pro" style="display:none">
+    <button class="nav-btn active" data-page="pro-home" onclick="showPage('pro-home')"><span class="icon"><svg><use href="#i-home"/></svg></span><small>Home</small></button>
+    <button class="nav-btn" data-page="pro-agenda" onclick="showPage('pro-agenda')"><span class="icon"><svg><use href="#i-calendar"/></svg></span><small>Agenda</small></button>
+    <button class="nav-btn" data-page="pro-inbox" onclick="showPage('pro-inbox'); loadColleghiList();"><span class="icon"><svg><use href="#i-inbox"/></svg></span><small>Messaggi</small><span class="inbox-nav-badge" id="inbox-nav-badge" style="display:none"></span></button>
+    <button class="nav-btn" data-page="pro-clienti" onclick="showPage('pro-clienti')"><span class="fa-icon"><i class="fa-solid fa-users"></i></span><small>Clienti</small></button>
+    <button class="nav-btn" data-page="pro-incassi" onclick="showPage('pro-incassi')"><span class="icon"><svg><use href="#i-wallet"/></svg></span><small>Incassi</small></button>
+  </div>
+
+  <!-- AI FAB -->
+  <button class="ai-fab" id="ai-fab" onclick="openAiSheet()" aria-label="Assistente AI">
+    <span class="icon ai-fab-sparkles"><svg><use href="#i-sparkles"/></svg></span>
+    <i class="fa-solid fa-horse-head ai-fab-agente" id="ai-fab-icona" aria-hidden="true"></i>
+    <span class="ai-fab-dot" aria-hidden="true"></span>
+  </button>
+
+
+  <!-- HOME DEL MANISCALCO: Messaggi e «+» flottanti, menu del «+», foglio dal basso -->
+  <button class="hm-flot msg" id="hm-msg" onclick="hmMessaggi()" aria-label="Messaggi"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"/></svg><b id="hm-msg-n" hidden></b></button>
+  <button class="hm-flot piu" id="hm-piu" onclick="hmPiu()" aria-label="Aggiungi"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+  <div class="hm-velo" id="hm-velo" onclick="hmChiudi()"></div>
+  <div class="hm-menu-piu" id="hm-menu-piu" role="menu">
+    <button class="r-app" onclick="hmChiudi();openInterventoModal(null)"><span><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M10 16h4M12 14v4"/></svg></span>Appuntamento</button>
+    <button class="r-cav" onclick="hmChiudi();hmGiaFatto()"><span><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>Intervento già fatto</button>
+    <button class="r-cav" onclick="hmChiudi();hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)"><span><svg class="hm-svg pieno" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 4h1V1h-4v3s2 4 2 8-2 7-6 7-6-3-6-7 2-8 2-8V1H4v3h1S2 8 2 14c0 5 5 9 10 9s10-4 10-9c0-6-3-10-3-10M4 13c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1m2 6c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1m6 3c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1m6-3c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1m2-6c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1"/></svg></span>Cavallo</button>
+    <button class="r-cli" onclick="hmChiudi();apriNuovoCliente('proprietario')"><span><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>Cliente</button>
+    <button class="r-scu" onclick="hmChiudi();apriNuovoCliente('struttura')"><span><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M2 21h20"/><rect x="8" y="13" width="8" height="8"/><path d="m8 13 8 8M16 13l-8 8"/><path d="M10 9.5h4"/></svg></span>Scuderia</button>
+    <button class="r-inc solo-incassi" onclick="hmChiudi();hmDaIncassare()"><span><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4M16.71 13.88l.7.71-2.82 2.82"/></svg></span>Incasso</button>
+  </div>
+  <div class="hm-foglio" id="hm-foglio" role="dialog" aria-modal="true" aria-labelledby="hm-foglio-tit"><div class="man"></div><h3 id="hm-foglio-tit"></h3><div class="s" id="hm-foglio-s"></div><div id="hm-foglio-corpo"></div></div>
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+  <!-- POP-UP DI SISTEMA: offline e aggiornamento disponibile -->
+  <div class="eq-pill-stato off" id="eq-pill-offline" onclick="mostraPopOffline()"><i class="fa-solid fa-wifi"></i> Offline · Equo non ti abbandona</div>
+  <div class="eq-pill-stato coda" id="eq-pill-coda" onclick="offInviaCoda()"></div>
+  <div class="eq-pill-stato agg" id="eq-pill-agg" onclick="mostraPopAggiornamento()"><i class="fa-solid fa-arrows-rotate"></i> Aggiornamento disponibile</div>
+  <div class="eq-pop-overlay" id="eq-pop-offline" onclick="if(event.target.id==='eq-pop-offline')chiudiPop('offline')">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-off-tit">
+      <div class="ic off"><i class="fa-solid fa-wifi"></i></div>
+      <h3 id="eq-pop-off-tit">Sei offline</h3>
+      <p id="eq-pop-off-testo"></p>
+      <p class="piccolo" id="eq-pop-off-ora"></p>
+      <div class="az"><button class="btn btn-primary" onclick="chiudiPop('offline')">Ho capito, continuo</button></div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-richiamo">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="ric-tit">
+      <div class="ic ric"><i class="fa-solid fa-calendar-plus"></i></div>
+      <h3 id="ric-tit">Prossimo intervento</h3>
+      <div id="ric-passo1">
+        <p class="grande" id="ric-grande">Inserisco il prossimo intervento tra<b id="ric-giorni-txt">35 giorni</b></p>
+        <p class="piccolo" id="ric-dettaglio"></p>
+        <div class="ric-come-prima" id="ric-come-prima" style="display:none"></div>
+        <div class="ric-pag solo-incassi" id="ric-pag" style="display:none">
+          <div class="ric-importi" id="ric-importi"></div>
+          <span id="ric-pag-imp"></span>
+          <div class="ric-pag-scelte">
+            <button type="button" data-p="da_saldare" onclick="richiamoPagamento('da_saldare')">Da saldare</button>
+            <button type="button" data-p="saldato" onclick="richiamoPagamento('saldato')">Saldato</button>
+          </div>
+        </div>
+        <div class="ric-ferri" id="ric-ferri" style="display:none">
+          <label><input type="checkbox" id="ric-ferri-chk" onchange="richiamoFerriRender()"> Ferri nuovi utilizzati</label>
+          <div id="ric-ferri-num" style="display:none">
+            <div class="fer-step">
+              <button type="button" onclick="richiamoFerriN(-1)" aria-label="Meno">−</button>
+              <div class="val" id="ric-ferri-val">4</div>
+              <button type="button" onclick="richiamoFerriN(1)" aria-label="Più">+</button>
+            </div>
+            <small class="muted" id="ric-ferri-su" style="display:block;text-align:center;margin-top:4px"></small>
+          </div>
+        </div>
+        <div class="az-riga">
+          <button class="btn-equo-ok" onclick="richiamoConferma()">OK</button>
+          <button class="btn-equo-cambia" id="ric-btn-cambia" onclick="richiamoCambia()">CAMBIA</button>
+        </div>
+      </div>
+      <div id="ric-passo2" style="display:none">
+        <p style="margin-bottom:4px">Tra quanti giorni?</p>
+        <div class="ric-ruota-box"><div class="ric-ruota" id="ric-ruota" onscroll="richiamoRuotaScroll()"></div></div>
+        <p class="piccolo" id="ric-dettaglio2"></p>
+        <div class="az-riga"><button class="btn-equo-ok" onclick="richiamoConferma()">OK</button></div>
+      </div>
+      <div id="ric-passo3" style="display:none">
+        <p class="grande" style="color:#b0473a">Richiamo molto vicino:<b id="ric-poco-txt">5 giorni</b></p>
+        <p class="piccolo" id="ric-poco-dett">Di solito tra una ferratura e l'altra passano almeno 10 giorni. Controlla che sia giusto.</p>
+        <div class="az-riga">
+          <button class="btn-equo-ok" onclick="richiamoConferma(true)">CONFERMO</button>
+          <button class="btn-equo-cambia" onclick="richiamoCambia()">MODIFICA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-vista">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="vista-tit">
+      <h3 id="vista-tit">Come vuoi usare Equo?</h3>
+      <p class="piccolo">Puoi cambiare idea quando vuoi dal menu. I tuoi dati restano gli stessi.</p>
+      <button type="button" class="vm-opz on" data-v="semplice" onclick="sceltaVistaMan('semplice')">
+        <span class="vm-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>
+        <span><b>Semplice</b><small>Agenda, clienti, cavalli e soldi. Pochi tasti grandi: un tocco e hai fatto.</small></span>
+      </button>
+      <button type="button" class="vm-opz" data-v="completa" onclick="sceltaVistaMan('completa')">
+        <span class="vm-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M10 20V5M16 20v-7M22 20H2"/></svg></span>
+        <span><b>Completa</b><small>Tutto della Semplice, più statistiche degli incassi, ferri nuovi usati, interventi straordinari e ferro davanti/dietro.</small></span>
+      </button>
+      <div class="az-riga"><button class="btn-equo-ok" onclick="confermaVistaMan()">INIZIA</button></div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-sino">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="sino-tit">
+      <div class="ic ric"><i class="fa-solid fa-hammer" id="sino-ic"></i></div>
+      <h3 id="sino-tit"></h3>
+      <p class="piccolo" id="sino-testo"></p>
+      <div class="az-riga">
+        <button class="btn-equo-ok" onclick="rispondiSiNo(true)">SÌ</button>
+        <button class="btn-equo-cambia" onclick="rispondiSiNo(false)">NO</button>
+      </div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-agg" onclick="if(event.target.id==='eq-pop-agg')chiudiPop('agg')">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-agg-tit">
+      <div class="ic agg"><i class="fa-solid fa-arrows-rotate"></i></div>
+      <h3 id="eq-pop-agg-tit">È disponibile un aggiornamento</h3>
+      <p id="eq-pop-agg-testo"></p>
+      <details id="eq-pop-agg-novita" style="display:none"><summary>Cosa c'è di nuovo</summary><ul id="eq-pop-agg-lista"></ul></details>
+      <div class="az">
+        <button class="btn btn-primary" onclick="aggiornaOra()">Aggiorna ora</button>
+        <button class="btn btn-ghost" onclick="chiudiPop('agg')">Più tardi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI SHEET (mezza schermata) -->
+  <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="if(event.target.id==='ai-sheet-overlay')closeAiSheet()">
+    <div class="ai-sheet">
+      <div class="ai-sheet-header">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700">
+          <span class="icon" style="color:var(--accent)"><svg><use href="#i-sparkles"/></svg></span>
+          <span id="ai-sheet-titolo">Assistente AI</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="nuovaConversazioneAi()" style="padding:6px 10px;font-size:12px">Nuova chat</button>
+          <button class="back-btn" onclick="closeAiSheet()"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+        </div>
+      </div>
+      <!-- pannello di Hammer: cosa stai guardando + avvii rapidi -->
+      <div class="hp-pan" id="hp-pan" hidden>
+        <div class="hp-ctx" id="hp-ctx" hidden><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Stai guardando <b id="hp-ctx-nome"></b></span><button type="button" onclick="hpTogliContesto()" aria-label="Non usare questa scheda">×</button></div>
+        <div class="hp-avvii">
+          <button type="button" onclick="hpChiedi()"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Chiedi a Hammer</button>
+          <button type="button" onclick="hpApriFoto()"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></svg>Analizza una foto</button>
+          <button type="button" onclick="hpCaso()"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>Consulta un caso</button>
+          <button type="button" id="hp-btn-storico" onclick="hpStorico()" hidden><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg>Riassumi lo storico</button>
+        </div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-bubble ai" id="ai-benvenuto">Ciao! Sono <strong>Equo AI</strong>. Conosco i tuoi cavalli, le scadenze, le spese e gli appuntamenti col maniscalco. Prova a chiedermi: <em>"Cosa scade questo mese?"</em> oppure <em>"Quanto ho speso in pensione quest'anno?"</em>. Con la 📎 puoi allegare la foto di una fattura o del certificato vaccinale: preparo io le schede da confermare.</div>
+        </div>
+        <div class="muted" style="font-size:10.5px;text-align:center;padding:2px 14px 2px">Supporto informativo: non sostituisce il parere di un veterinario o professionista.</div>
+        <div class="ai-usage-note" id="ai-usage-note"></div>
+        <div class="ai-allegati" id="ai-allegati"></div>
+        <div class="chat-input-row">
+          <button class="ai-clip" onclick="document.getElementById('ai-file').click()" aria-label="Allega foto o PDF" title="Allega foto o PDF (fattura, certificato vaccinale…)"><i class="fa-solid fa-paperclip"></i></button>
+          <input type="file" id="ai-file" accept="image/*,application/pdf" multiple style="display:none" onchange="aggiungiAllegatiAi(event)">
+          <input class="input" id="chat-input" placeholder="Scrivi o allega una foto…" onkeydown="if(event.key==='Enter')sendChatMessage()">
+          <button class="btn btn-primary chat-send" onclick="sendChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- HAMMER · ANALISI FOTO (modalità Focus) -->
+  <div class="hp-focus" id="hp-focus" role="dialog" aria-modal="true" aria-labelledby="hp-f-tit">
+    <div class="hp-f-testa"><button type="button" class="hp-f-x" onclick="hpChiudiFoto()" aria-label="Chiudi">×</button><b id="hp-f-tit">Analizza una foto</b><span id="hp-f-cav"></span></div>
+    <div class="hp-f-corpo" id="hp-f-passo1">
+      <div class="hp-f-lab">1 · Cosa fotografi</div>
+      <div class="hp-f-scatti" id="hp-f-scatti"></div>
+      <div class="hp-f-lab">2 · La foto</div>
+      <div class="hp-f-cornice" id="hp-f-cornice" onclick="document.getElementById('hp-f-cam').click()">
+        <div class="hp-f-guida" id="hp-f-guida"></div>
+        <img id="hp-f-img" alt="" hidden>
+        <div class="hp-f-gira" aria-hidden="true"></div>
+      </div>
+      <div class="hp-f-az">
+        <button type="button" class="hp-b o" onclick="document.getElementById('hp-f-cam').click()"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></svg>Scatta</button>
+        <button type="button" class="hp-b o" onclick="document.getElementById('hp-f-gal').click()"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>Dalla galleria</button>
+      </div>
+      <input type="file" id="hp-f-cam" accept="image/*" capture="environment" hidden onchange="hpFotoScelta(this)">
+      <input type="file" id="hp-f-gal" accept="image/*" hidden onchange="hpFotoScelta(this)">
+      <textarea class="input" id="hp-f-nota" rows="2" maxlength="400" placeholder="Note per Hammer (facoltative): es. zoppica davanti destro da 3 giorni"></textarea>
+      <div class="hp-f-costo" id="hp-f-costo"></div>
+      <button type="button" class="hp-b v" id="hp-f-via" onclick="hpAnalizza()" disabled><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Analizza</button>
+    </div>
+    <div class="hp-f-corpo" id="hp-f-passo2" hidden>
+      <div class="hp-f-attesa" id="hp-f-attesa"><div class="hp-f-cornice gira"><img id="hp-f-img2" alt=""><div class="hp-f-gira"></div></div><p>Hammer sta guardando la foto…</p><ol class="hp-f-step"><li>Inquadratura e luce</li><li>Asse, angoli, talloni</li><li>Ferro, suola, parete</li><li>Cosa fare</li></ol></div>
+      <div id="hp-f-esito" hidden></div>
+    </div>
+  </div>
+  <!-- MENU ALLEGATI (tutte le chat): fotocamera, galleria, documento PDF -->
+  <div class="allegati-overlay" id="allegati-overlay" onclick="if(event.target === this) chiudiMenuAllegati()">
+    <div class="allegati-sheet">
+      <button class="allegati-opt" onclick="scegliAllegato('camera')"><i class="fa-solid fa-camera"></i> Scatta una foto</button>
+      <button class="allegati-opt" onclick="scegliAllegato('galleria')"><i class="fa-solid fa-image"></i> <span id="allegati-galleria-label">Foto dalla galleria</span></button>
+      <button class="allegati-opt" onclick="scegliAllegato('documento')"><i class="fa-solid fa-file-pdf"></i> Documento PDF</button>
+      <button class="allegati-opt" id="allegati-video-premium" style="display:none" onclick="chiudiMenuAllegati(); showToast('I video in chat sono inclusi in Equo Premium'); togglePiano();"><i class="fa-solid fa-video"></i> Video <span class="badge-premium-mini" style="margin-left:auto;font-size:11px;font-weight:800;color:var(--accent)">PREMIUM</span></button>
+      <button class="btn btn-ghost" style="margin-top:4px" onclick="chiudiMenuAllegati()">Annulla</button>
+    </div>
+  </div>
+  <input type="file" id="allegato-camera" accept="image/*" capture="environment" style="display:none" onchange="allegatoScelto(event)">
+  <input type="file" id="allegato-galleria" accept="image/*" style="display:none" onchange="allegatoScelto(event)">
+  <input type="file" id="allegato-documento" accept="application/pdf,.pdf" style="display:none" onchange="allegatoScelto(event)">
+
+  <!-- MASCALCIA CHAT (stile WhatsApp) -->
+  <div class="mchat-overlay" id="mchat-overlay">
+    <div class="mchat-header">
+      <button class="back-btn" onclick="closeChatThread()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="horse-avatar" style="width:38px;height:38px;border-radius:50%"><i class="fa-solid fa-user" style="font-size:16px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="mchat-header-name" id="mchat-cliente-nome">Cliente</div>
+        <div class="mchat-header-sub" id="mchat-cliente-sub"></div>
+      </div>
+    </div>
+    <div class="mchat-quick-actions">
+      <button class="btn btn-outline btn-sm" id="mchat-btn-intervento" onclick="isStrutturaCollegata(currentClienteId) ? apriPropostaStruttura(currentClienteId) : openInterventoModal(currentClienteId)">Segna intervento fatto</button>
+      <button class="btn btn-outline btn-sm" onclick="shareInviteCodeFromChat()">Condividi codice invito</button>
+    </div>
+    <div class="mchat-messages" id="mchat-messages"></div>
+    <div class="mchat-emoji-picker" id="mchat-emoji-picker"></div>
+    <div class="mchat-allegato" id="mchat-allegato">
+      <span class="mchat-doc-ico" style="width:26px;height:30px;font-size:8px">PDF</span>
+      <span class="mchat-allegato-nome" id="mchat-allegato-nome"></span>
+      <button onclick="rimuoviAllegatoChat()" aria-label="Rimuovi allegato">✕</button>
+    </div>
+    <div class="mchat-input-bar" id="mchat-input-bar">
+      <button class="mchat-emoji-btn" onclick="toggleEmojiPicker()" aria-label="Emoji">🙂</button>
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('mchat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
+      <input class="input" id="mchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMascalciaMessage()">
+      <button class="mchat-mic-btn" id="mchat-mic-btn" onclick="startVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendMascalciaMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+    <div class="mchat-recording-bar" id="mchat-recording-bar">
+      <button class="mchat-cancel-rec-btn" onclick="cancelVoiceRecording()" aria-label="Annulla"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+      <div class="mchat-rec-dot"></div>
+      <div class="mchat-rec-timer" id="mchat-rec-timer">0:00</div>
+      <div class="muted" style="flex:1;font-size:12.5px">Registrazione in corso...</div>
+      <button class="mchat-send-btn btn btn-primary" onclick="stopAndSendVoiceRecording()" aria-label="Invia nota vocale"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- CHAT PROPRIETARIO -> SUO MANISCALCO (messaggi_mascalcia, lato cliente; riusa le classi mchat-*) -->
+  <div class="mchat-overlay" id="fchat-overlay">
+    <div class="mchat-header">
+      <button class="back-btn" onclick="closeFarrierChatThread()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="horse-avatar" style="width:38px;height:38px;border-radius:50%"><i class="fa-solid fa-hammer" style="font-size:16px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="mchat-header-name" id="fchat-nome">Il tuo maniscalco</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="apriAppuntamentiManiscalco()" aria-label="Appuntamenti"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span> Prenota</button>
+      <button class="btn btn-outline btn-sm" onclick="apriAbbinamentoDaChat()" aria-label="Abbina cavalli"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span></button>
+    </div>
+    <div class="mchat-messages" id="fchat-messages"></div>
+    <div class="mchat-input-bar">
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('fchat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
+      <input class="input" id="fchat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendFarrierChatMessage()">
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendFarrierChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- CHAT CON LA SCUDERIA (solo testo, riusa le classi mchat-*) -->
+  <div class="mchat-overlay" id="schat-overlay">
+    <div class="mchat-header">
+      <button class="back-btn" onclick="closeStableChatThread()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="horse-avatar" style="width:38px;height:38px;border-radius:50%"><i class="fa-solid fa-horse-head" style="font-size:16px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="mchat-header-name" id="schat-nome">Scuderia</div>
+      </div>
+    </div>
+    <div class="mchat-messages" id="schat-messages"></div>
+    <div class="mchat-input-bar">
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('schat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
+      <input class="input" id="schat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendStableChatMessage()">
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendStableChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+  </div>
+
+  <!-- CHAT PROPRIETARIO↔PROPRIETARIO (stile WhatsApp, riusa le classi mchat-*) -->
+  <div class="mchat-overlay" id="ochat-overlay">
+    <div class="mchat-header">
+      <button class="back-btn" onclick="closeOwnerChatThread()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+      <div class="horse-avatar" style="width:38px;height:38px;border-radius:50%"><i class="fa-solid fa-user" style="font-size:16px"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="mchat-header-name" id="ochat-nome">Proprietario</div>
+      </div>
+    </div>
+    <div class="mchat-messages" id="ochat-messages"></div>
+    <div class="mchat-emoji-picker" id="ochat-emoji-picker"></div>
+    <input type="file" id="ochat-media-input" accept="image/*,video/*" style="display:none" onchange="handleOwnerChatMediaChange(event)">
+    <div class="mchat-input-bar" id="ochat-input-bar">
+      <button class="mchat-emoji-btn" onclick="toggleOwnerEmojiPicker()" aria-label="Emoji">🙂</button>
+      <button class="mchat-emoji-btn" onclick="apriMenuAllegati('ochat')" aria-label="Allega foto o documento"><span class="fa-icon" style="width:18px;height:18px"><i class="fa-solid fa-paperclip"></i></span></button>
+      <input class="input" id="ochat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendOwnerChatMessage()">
+      <button class="mchat-mic-btn" id="ochat-mic-btn" onclick="startOwnerVoiceRecording()" aria-label="Registra nota vocale"><span class="icon"><svg><use href="#i-mic"/></svg></span></button>
+      <button class="mchat-send-btn btn btn-primary" onmousedown="event.preventDefault()" onclick="sendOwnerChatMessage()"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+    <div class="mchat-recording-bar" id="ochat-recording-bar">
+      <button class="mchat-cancel-rec-btn" onclick="cancelOwnerVoiceRecording()" aria-label="Annulla"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
+      <div class="mchat-rec-dot"></div>
+      <div class="mchat-rec-timer" id="ochat-rec-timer">0:00</div>
+      <div class="muted" style="flex:1;font-size:12.5px">Registrazione in corso...</div>
+      <button class="mchat-send-btn btn btn-primary" onclick="stopAndSendOwnerVoiceRecording()" aria-label="Invia nota vocale"><span class="icon"><svg><use href="#i-send"/></svg></span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+

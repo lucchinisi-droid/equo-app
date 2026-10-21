@@ -1,0 +1,26 @@
+<div class="modal-overlay" id="modal-ferro-cavallo" onclick="closeOut(event,'modal-ferro-cavallo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span><span id="ferro-cav-titolo">Ferro standard</span></div>
+    <div class="muted" style="font-size:12.5px;line-height:1.55;margin-bottom:12px">Vale per tutti gli appuntamenti di questo cavallo. Ogni appuntamento conserva il ferro usato quel giorno; ogni cambio resta nello storico del cavallo.</div>
+    <div class="input-group">
+      <label class="input-label">Sistema</label>
+      <select class="input" id="ferro-misura-sistema" onchange="onMisuraSistemaChange('ferro')" style="margin-bottom:8px">
+        <option value="olandese">Olandese / Internazionale</option>
+        <option value="italiana">Italiana</option>
+        <option value="tedesca">Tedesca</option>
+      </select>
+      <div class="misura-wheel-wrap">
+        <div class="misura-wheel-band"></div>
+        <div class="misura-wheel" id="ferro-misura-wheel"></div>
+        <div class="misura-wheel-fade top"></div>
+        <div class="misura-wheel-fade bot"></div>
+      </div>
+      <div class="misura-equivalenze" id="ferro-misura-equivalenze"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" id="ferro-cav-salva" onclick="salvaFerroCavallo()">Salva ferro standard</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px;display:none" id="ferro-cav-togli" onclick="salvaFerroCavallo(true)">Togli il ferro standard</button>
+  </div>
+</div>
+
+<!-- FERRATURA DEL CAVALLO (scheda / libretto): lavoro, misura, tipo di ferro, note -->

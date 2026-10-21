@@ -1,0 +1,14 @@
+<div class="modal-overlay" id="modal-abbina-cavalli" onclick="closeOut(event,'modal-abbina-cavalli')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span>Abbina i tuoi cavalli</div>
+    <div class="muted" style="font-size:13px;margin-bottom:10px;line-height:1.5" id="abbina-cavalli-intro"></div>
+    <div id="abbina-cavalli-list" style="max-height:52vh;overflow:auto"></div>
+    <div class="auth-error" id="abbina-cavalli-error" style="display:none;margin-top:8px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-outline" style="flex:1" onclick="saltaAbbinamentoCavalli()">Non ora</button>
+      <button class="btn btn-primary btn-conferma" style="flex:1" id="abbina-cavalli-btn" onclick="confermaAbbinamentoCavalli()">Conferma</button>
+    </div>
+  </div>
+</div>
+

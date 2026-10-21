@@ -1,0 +1,14 @@
+<div class="modal-overlay" id="modal-prezzi" onclick="if(event.target===this)rispondiPrezzi(false)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="prezzi-tit">Manca il prezzo</div>
+    <div class="muted" id="prezzi-testo" style="font-size:13px;line-height:1.55;margin-bottom:12px"></div>
+    <div id="prezzi-righe" class="prezzi-righe"></div>
+    <label class="prezzi-mai" id="prezzi-mai-box"><input type="checkbox" id="prezzi-mai"> Non chiedermelo più</label>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <button class="btn btn-primary" id="prezzi-ok" style="width:100%" onclick="rispondiPrezzi(true)">Salva con prezzo</button>
+      <button class="btn btn-outline" id="prezzi-no" style="width:100%" onclick="rispondiPrezzi(false)">Salva senza prezzo</button>
+    </div>
+  </div>
+</div>
+

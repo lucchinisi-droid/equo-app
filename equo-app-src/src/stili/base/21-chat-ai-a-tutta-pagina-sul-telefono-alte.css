@@ -1,0 +1,13 @@
+/* chat AI: a tutta pagina sul telefono, altezza sulla parte visibile (tastiera iOS compresa, --ai-vh via visualViewport) */
+.ai-sheet{background:var(--bg);width:100%;max-width:none;
+  height:var(--ai-vh, 100dvh);
+  border-radius:0;display:flex;flex-direction:column;overflow:hidden;border:none}
+.ai-sheet .chat-wrap{flex:1;min-height:0}
+@media (min-width:700px){.ai-sheet{max-width:480px;height:min(78vh, 760px);border-radius:20px;margin-bottom:24px;border:1px solid var(--border);box-shadow:0 -8px 30px rgba(0,0,0,.35)}}
+body.ai-aperta{overflow:hidden}
+@media (max-width:520px){.ai-sheet .chat-bubble.ai{max-width:92%}.ai-sheet .chat-bubble.user{max-width:85%}}
+.ai-sheet-header{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ai-sheet .ai-sheet-header{padding-top:calc(14px + env(safe-area-inset-top))}
+@media (min-width:700px){.ai-sheet .ai-sheet-header{padding-top:14px}}
+

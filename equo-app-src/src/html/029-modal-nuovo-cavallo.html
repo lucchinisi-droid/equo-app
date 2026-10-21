@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-nuovo-cavallo" onclick="closeOut(event,'modal-nuovo-cavallo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span>Aggiungi cavallo</div>
+    <div class="input-group"><label class="input-label" for="ncav-nome">Nome</label><input class="input" id="ncav-nome" placeholder="es. Brezza"></div>
+    <div class="input-row-2">
+      <input class="input" id="ncav-chip" placeholder="Microchip (opz.)" autocapitalize="characters" style="flex:1">
+      <div style="flex:1;min-width:0"><input class="input" id="ncav-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
+    </div>
+    <div class="input-group" style="margin-top:10px"><label class="input-label" for="ncav-cliente">Di chi è / dove sta?</label><select class="input" id="ncav-cliente" onchange="ncavClienteCambiato(this)"></select></div>
+    <div class="muted" style="font-size:12px;text-align:center;margin:4px 0 6px">oppure, se ha già un codice Equo</div>
+    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. PRV-000005" autocapitalize="characters" style="text-transform:uppercase"></div>
+    <div class="auth-error" id="ncav-errore" style="display:none"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaNuovoCavalloCartella(this)">Salva cavallo</button>
+  </div>
+</div>
+
+<!-- archivia / elimina cliente: cavalli e storico non si perdono mai -->

@@ -1,0 +1,37 @@
+<div class="modal-overlay" id="modal-ferratura" onclick="closeOut(event,'modal-ferratura')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-ferratura')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-ferro"/></svg></span><span id="fer-titolo">Ferratura</span></div>
+    <div class="muted" style="font-size:12.5px;line-height:1.55;margin-bottom:12px">Si imposta una volta: vale per tutti i suoi appuntamenti e va nel libretto del cavallo. Ogni cambio resta nello storico.</div>
+    <label class="input-label">Che lavoro ha</label>
+    <div class="fer-lavoro" id="fer-lavoro">
+      <button type="button" data-v="completa" onclick="ferLavoro('completa')"><b>Ferrato</b><small>4 ferri</small></button>
+      <button type="button" data-v="mezza" onclick="ferLavoro('mezza')"><b>Mezza</b><small>2 davanti</small></button>
+      <button type="button" data-v="pareggio" onclick="ferLavoro('pareggio')"><b>Pareggio</b><small>senza ferri</small></button>
+    </div>
+    <div id="fer-con-ferri">
+      <label class="input-label">Misura del ferro</label>
+      <div class="fer-step">
+        <button type="button" onclick="ferMisura(-1)" aria-label="Misura più piccola">−</button>
+        <div class="val" id="fer-misura">—</div>
+        <button type="button" onclick="ferMisura(1)" aria-label="Misura più grande">+</button>
+      </div>
+      <select class="input" id="fer-sistema" onchange="ferSistema()" style="margin:8px 0 12px">
+        <option value="italiana">Misura italiana</option>
+        <option value="olandese">Olandese / Internazionale</option>
+        <option value="tedesca">Tedesca</option>
+      </select>
+      <label class="input-label" id="fer-tipo-label">Tipo di ferro</label>
+      <div class="fer-riga" id="fer-riga-unico"><span></span><div class="fer-scelta" data-k="ft"><button type="button" data-v="standard" onclick="ferTipo('ft','standard')">Standard</button><button type="button" data-v="correttivo" onclick="ferTipo('ft','correttivo')">Correttivo</button></div></div>
+      <div class="fer-riga" id="fer-riga-dietro" style="display:none"><span>Dietro</span><div class="fer-scelta" data-k="ftp"><button type="button" data-v="standard" onclick="ferTipo('ftp','standard')">Standard</button><button type="button" data-v="correttivo" onclick="ferTipo('ftp','correttivo')">Correttivo</button></div></div>
+      <input class="input" id="fer-note" maxlength="160" placeholder="Note: modello o lavorazione (es. barra a uovo davanti)" style="margin-top:8px">
+      <div class="muted solo-completa" id="fer-dati" style="font-size:12px;margin-top:8px"></div>
+    </div>
+    <label class="input-label" style="margin-top:12px">Avviso di sicurezza <span class="muted" style="font-weight:500">(lo leggi all'arrivo)</span></label>
+    <input class="input" id="fer-avviso" maxlength="160" placeholder="Es. scalcia dietro, non legarlo corto">
+    <div class="auth-error" id="fer-errore" style="display:none"></div>
+    <button class="btn btn-primary" id="fer-salva" style="width:100%;margin-top:12px" onclick="salvaSchedaFerratura()">Salva</button>
+  </div>
+</div>
+

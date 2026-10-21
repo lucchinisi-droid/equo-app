@@ -1,0 +1,34 @@
+<div class="modal-overlay" id="modal-add-expense" onclick="closeOut(event,'modal-add-expense')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-wallet"/></svg></span><span id="modal-add-expense-title">Nuova spesa</span></div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Categoria</label>
+        <select class="input" id="expense-category">
+          <option value="pensione">Pensione</option>
+          <option value="mangime">Mangime</option>
+          <option value="veterinario">Veterinario</option>
+          <option value="maniscalco">Maniscalco</option>
+          <option value="attrezzatura">Attrezzatura</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Importo (€)</label>
+        <input class="input" id="expense-amount" type="number" step="0.01" placeholder="0.00">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Data</label>
+        <input class="input" id="expense-date" type="date">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nota (opzionale)</label>
+        <input class="input" id="expense-notes" placeholder="es. Mangime mensile">
+      </div>
+      <button class="btn btn-primary" onclick="saveExpense()" style="width:100%;margin-top:6px">Salva spesa</button>
+      <button class="btn btn-danger" id="expense-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteExpenseFromModal()">Elimina spesa</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,26 @@
+<div class="modal-overlay" id="modal-upgrade-premium" onclick="closeOut(event,'modal-upgrade-premium')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Passa a Premium</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">
+      Sblocchi cavalli/clienti illimitati, reminder automatici, AI con più messaggi e le altre funzioni Premium.
+      Puoi tornare a Free in qualsiasi momento dal menu, con lo stesso numero di passaggi.
+    </p>
+    <div id="upgrade-demo-actions" style="display:none">
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:18px" id="upgrade-premium-note">
+        Attivazione istantanea in modalità demo — nessun pagamento reale.
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+        <button class="btn btn-primary" style="flex:1" onclick="confirmUpgradePremium()" id="upgrade-premium-confirm-btn">Conferma</button>
+      </div>
+    </div>
+    <div id="upgrade-real-options" style="display:none;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" style="width:100%" onclick="startCheckout('mensile')" id="upgrade-btn-mensile">Mensile</button>
+      <button class="btn btn-outline" style="width:100%" onclick="startCheckout('annuale')" id="upgrade-btn-annuale">Annuale</button>
+      <button class="btn btn-outline" style="width:100%" onclick="startLifetimeCheckout()" id="upgrade-btn-lifetime">Lifetime</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-upgrade-premium')">Annulla</button>
+    </div>
+  </div>
+</div>
+

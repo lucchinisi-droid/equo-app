@@ -1,0 +1,20 @@
+<div class="modal-overlay" id="modal-limite-clienti" onclick="closeOut(event,'modal-limite-clienti')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Hai raggiunto i 10 clienti del piano Free</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:10px">
+      I tuoi clienti, i cavalli e l'agenda restano tutti al loro posto. Per aggiungere altri clienti passa a <strong>Equo Premium</strong>:
+    </p>
+    <ul style="font-size:13.5px;line-height:1.7;margin:0 0 18px;padding-left:18px">
+      <li>clienti illimitati</li>
+      <li>giro della zona e messaggi pronti per i richiami</li>
+      <li>note vocali senza limiti e 500 messaggi al mese con Hammer</li>
+    </ul>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-limite-clienti')">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-limite-clienti');togglePiano()">Passa a Premium</button>
+    </div>
+  </div>
+</div>
+
+<!-- Piano Free proprietario: 1 cavallo -->

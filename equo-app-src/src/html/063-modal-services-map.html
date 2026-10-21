@@ -1,0 +1,16 @@
+<div class="modal-overlay" id="modal-services-map" onclick="closeOut(event,'modal-services-map')">
+  <div class="modal" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-map-location-dot"></i></span>Servizi vicino a te</div>
+    <div id="services-map-chips" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px">
+      <button class="chip active" data-tipo="tutti" onclick="filterServices('tutti')">Tutti</button>
+      <button class="chip" data-tipo="veterinario" onclick="filterServices('veterinario')">Veterinari</button>
+      <button class="chip" data-tipo="centro_ippico" onclick="filterServices('centro_ippico')">Centri ippici</button>
+      <button class="chip" data-tipo="negozio" onclick="filterServices('negozio')">Negozi</button>
+    </div>
+    <div id="services-map-canvas" style="height:220px;border-radius:14px;overflow:hidden;margin-bottom:12px"></div>
+    <div id="services-list"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: completa profilo (nome e cognome obbligatori) ═══ -->

@@ -1,0 +1,28 @@
+/* ferratura del cavallo (scheda) */
+.fer-lavoro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.fer-lavoro button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:14px;padding:10px 4px;font:inherit;cursor:pointer;line-height:1.25}
+.fer-lavoro button b{display:block;font-size:14.5px}.fer-lavoro button small{font-size:11.5px;color:var(--muted)}
+.fer-lavoro button.on{border-color:var(--green,#14482c);background:var(--green,#14482c);color:#fff}.fer-lavoro button.on small{color:#e9dcc0}
+.fer-step{display:flex;align-items:center;gap:10px}
+.fer-step button{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:22px;font-weight:700;cursor:pointer}
+.fer-step .val{flex:1;text-align:center;font-size:20px;font-weight:800}
+.fer-scelta{display:inline-flex;background:var(--surface2);border-radius:999px;padding:3px;gap:3px}
+.fer-scelta button{border:0;background:transparent;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.fer-scelta button.on{background:var(--green,#14482c);color:#fff}
+.fer-scelta button.on[data-v="correttivo"]{background:#a8721c}
+.fer-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}
+.int-scheda-righe{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.int-scheda-riga{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:8px 10px;background:var(--surface)}
+.int-scheda-riga .av{width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.int-scheda-riga .tx{flex:1;min-width:0;font-size:12.5px;color:var(--muted);line-height:1.35}.int-scheda-riga .tx b{display:block;color:var(--text);font-size:13.5px}
+.int-scheda-riga button{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:12px;cursor:pointer}
+.int-quando{display:flex;gap:6px;margin-bottom:8px}
+.int-quando button{flex:1;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;padding:8px 4px;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.int-quando button.on{border-color:var(--green,#14482c);background:var(--green,#14482c);color:#fff}
+.str-preset{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.str-preset button{display:flex;gap:8px;align-items:center;text-align:left;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;padding:9px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;line-height:1.25}
+.str-preset button svg{width:20px;height:20px;flex-shrink:0;color:var(--accent)}
+.str-preset button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.str-zoccoli{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.str-zoccoli button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:10px;padding:7px;font:inherit;font-size:12.5px;cursor:pointer}
+.str-zoccoli button.on{border-color:var(--green,#14482c);background:var(--green,#14482c);color:#fff}

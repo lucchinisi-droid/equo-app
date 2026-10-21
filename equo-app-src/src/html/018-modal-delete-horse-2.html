@@ -1,0 +1,15 @@
+<div class="modal-overlay" id="modal-delete-horse-2" onclick="closeOut(event,'modal-delete-horse-2')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>Operazione irreversibile</div>
+    <div class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.5">
+      Questa azione è <strong>definitiva</strong> e non può essere annullata: <span id="delete-horse-nome-2"></span> e tutti i suoi dati verranno cancellati per sempre. Confermi?
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-danger" style="width:100%" onclick="confirmDeleteHorse()">Elimina definitivamente</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-delete-horse-2')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: avviso microchip mancante -->

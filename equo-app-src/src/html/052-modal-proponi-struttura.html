@@ -1,0 +1,24 @@
+<div class="modal-overlay" id="modal-proponi-struttura" onclick="closeOut(event,'modal-proponi-struttura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Proponi a <span id="prop-str-nome" style="margin-left:4px">scuderia</span></div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px;line-height:1.5">La scuderia riceve la proposta e la conferma, propone un'altra data o la annulla.</div>
+    <div class="auth-form">
+      <div class="input-group"><label class="input-label">Tipo</label>
+        <select class="input" id="prop-str-tipo" onchange="document.getElementById('prop-str-tipo-altro-group').style.display = this.value === 'altro' ? 'flex' : 'none'">
+          <option value="ferratura">Ferratura</option><option value="pareggio">Pareggio</option><option value="altro">Altro</option>
+        </select></div>
+      <div class="input-group" id="prop-str-tipo-altro-group" style="display:none"><label class="input-label">Specifica</label><input class="input" id="prop-str-tipo-altro" maxlength="60"></div>
+      <div class="input-group"><label class="input-label">Cavalli della scuderia</label><div id="prop-str-cavalli" style="max-height:210px;overflow-y:auto"></div></div>
+      <div style="display:flex;gap:10px">
+        <div class="input-group" style="flex:1"><label class="input-label">Data</label><input class="input" type="date" id="prop-str-data"></div>
+        <div class="input-group" style="flex:1"><label class="input-label">Ora</label><input class="input" type="time" id="prop-str-ora"></div>
+      </div>
+      <div class="input-group"><label class="input-label">Importo per cavallo € (facoltativo)</label><input class="input" type="number" inputmode="decimal" min="0" step="0.5" id="prop-str-importo"></div>
+      <div class="input-group"><label class="input-label">Note (facoltative)</label><input class="input" id="prop-str-note" maxlength="300"></div>
+      <div class="auth-error" id="prop-str-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="inviaPropostaStruttura()" style="width:100%;margin-top:6px">Invia proposta</button>
+    </div>
+  </div>
+</div>
+

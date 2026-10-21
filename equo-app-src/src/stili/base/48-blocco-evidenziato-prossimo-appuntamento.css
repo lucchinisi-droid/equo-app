@@ -1,0 +1,31 @@
+/* blocco evidenziato (prossimo appuntamento, scadenza più vicina) */
+.wg-prossimo{background:#14482c;color:#f4f1ea;border-radius:16px;padding:12px 13px;cursor:pointer}
+.wg-prossimo.rosso{background:#7d2b24}
+.wg-quando{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#e8b04b}
+.wg-chi{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-top:3px;line-height:1.2}
+.wg-dove{font-size:12.5px;color:#cfdcd2;margin-top:2px}
+.wg-azioni{display:flex;gap:8px;margin-top:10px}
+.wg-azioni button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.13);border:0;color:inherit;border-radius:11px;padding:9px 4px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-width:0}
+.wg-azioni button.oro{background:#e8b04b;color:#14312a}
+.wg-azioni svg{width:15px;height:15px;flex-shrink:0}
+.wg-azioni.chiaro button{background:var(--surface2);color:var(--text)}
+.wg-azioni.chiaro button.oro{background:#14482c;color:#fff}
+.wg-voce{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--border);font-size:13px;cursor:pointer}
+.wg-voce:first-of-type{margin-top:6px}
+.wg-voce .wg-t{flex:1;min-width:0}
+.gia-fatto-row{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border-radius:12px;padding:10px 12px;margin:-4px 0 12px;font-size:13.5px;line-height:1.4;cursor:pointer}
+.gia-fatto-row input{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--green,#1d4a35)}
+.gia-fatto-row small{font-size:11.5px}
+.wg-piu{flex-shrink:0;border:0;background:var(--surface2);color:var(--muted);border-radius:10px;width:34px;height:30px;font-size:18px;line-height:1;cursor:pointer}
+.wg-voce:active{background:var(--surface2)}
+.wg-ora{font-weight:700;min-width:44px;flex-shrink:0}
+.wg-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wg-t small{color:var(--muted)}
+.wg-ric{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--border);font-size:13px;cursor:pointer}
+.wg-testa + .wg-ric,.wg-prossimo + .wg-ric{border-top:0}
+.wg-prossimo + .wg-ric{margin-top:6px}
+.wg-ric .wg-t{white-space:normal}
+.wg-ric .wg-t small{display:block;font-size:11.5px}
+.wg-sem{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.wg-sem.rosso{background:var(--red)}.wg-sem.ocra{background:#d9a13b}.wg-sem.verde{background:var(--green)}
+.wg-scrivi{border:1px solid var(--border);background:var(--surface);color:var(--accent);font:inherit;font-size:12px;font-weight:700;border-radius:10px;padding:5px 10px;cursor:pointer;flex-shrink:0}

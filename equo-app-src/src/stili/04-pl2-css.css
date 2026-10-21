@@ -1,0 +1,4 @@
+
+body.pl-vet .nav-hammer .hm-ham::after{background-image:url(assets/agenti/galeno.webp)}
+body.pl-istr .nav-hammer .hm-ham::after{background-image:url(assets/agenti/ares.webp)}
+body.pl-vet .nav-hammer .hm-ham::after,body.pl-istr .nav-hammer .hm-ham::after{background-size:cover;background-position:center}

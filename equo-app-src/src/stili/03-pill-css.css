@@ -1,0 +1,58 @@
+
+/* ===== BARRA A PILLOLA, tasto «+», tono per pagina (16/10/2026) ===== */
+#bottom-nav-owner .nav-btn[data-page="cavalli"]{display:flex}
+#bottom-nav-owner .nav-piu{display:none!important}
+.hm-flot.msg{display:none!important}
+.hm-flot.piu{display:none;position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:#e2ab45;color:#14482c;border:2px solid rgba(255,255,255,.7);z-index:61;box-shadow:0 10px 22px rgba(20,72,44,.35)}
+.hm-flot.piu svg{width:26px;height:26px;stroke-width:2.2}
+body.pl-fab .hm-flot.piu{display:flex}
+body:has(#ai-fab.con-novita).pl-owner .hm-flot.piu::after{content:"";position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#e5484d;border:2px solid #fffaf0}
+body.pl-owner .ai-fab,body.pl-man .ai-fab,body.pl-vet .ai-fab,body.pl-istr .ai-fab{display:none!important}
+.hm-menu-piu.pl-menu{padding:12px}
+@media (max-width:767px){
+  body .bottom-nav{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-width:none;transform:none;height:68px;padding:6px;border-radius:34px;border:1px solid rgba(255,255,255,.75);background:rgba(255,250,240,.82);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 12px 30px rgba(20,72,44,.25);justify-content:space-between;align-items:center;gap:0;overflow:visible}
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body .bottom-nav{background:#fffaf0}}
+  body .bottom-nav .nav-btn{flex:0 0 68px;width:68px;height:56px;padding:0;gap:2px;justify-content:center;border-radius:26px;font-size:9px;font-weight:500;color:#6a5a38;letter-spacing:0}
+  body .bottom-nav .nav-btn small{font-size:9px;font-weight:500;line-height:1}
+  body .bottom-nav .nav-btn .icon,body .bottom-nav .nav-btn .hm-ico{width:22px;height:22px}
+  body .bottom-nav .nav-btn svg{stroke-width:1.4}
+  body .bottom-nav .nav-btn.active{background:#14482c;color:#f3d58e}
+  body .bottom-nav .inbox-nav-badge{top:5px;right:12px}
+  body .bottom-nav .nav-btn.nav-hammer{flex:0 0 72px;width:72px;justify-content:flex-end;padding-bottom:5px;overflow:visible;background:none}
+  body .nav-hammer small{color:#14482c;font-weight:600}
+  .nav-hammer .hm-ham{position:absolute;top:-34px;left:50%;margin:0 0 0 -33px;width:66px;height:66px}
+  .nav-hammer .hm-ham svg{display:none}
+  .nav-hammer .hm-ham::before{inset:-3px;background:radial-gradient(circle at 50% 2px,#fff6d6 0,#f5c24f 1.6px,rgba(245,194,79,0) 4.5px);filter:drop-shadow(0 0 3px rgba(245,194,79,.9));animation:hmGira 12s linear infinite}
+  .nav-hammer .hm-ham::after{background:#06130f url(assets/agenti/hammer.webp) center/cover no-repeat;box-shadow:0 8px 18px rgba(20,72,44,.4)}
+  .page-content{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+  .hm-menu-piu{left:12px;right:12px;width:auto;bottom:calc(158px + env(safe-area-inset-bottom));max-height:calc(100dvh - 190px);overflow-y:auto}
+}
+@media (min-width:600px) and (max-width:767px){body .bottom-nav{left:50%;right:auto;width:456px;transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.nav-hammer .hm-ham::before{animation:none}}
+.hm-menu-piu{background:rgba(255,250,240,.9);-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3);border-radius:26px}
+.hm-menu-piu h5{margin:6px 4px 8px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:800}
+.hm-menu-piu .pl-tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.hm-menu-piu .pl-tl{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px 8px;border:1px solid var(--border);border-top:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.7);font:inherit;font-size:11.5px;font-weight:700;line-height:1.15;text-align:center;color:var(--text);width:auto}
+.hm-menu-piu .pl-tl+.pl-tl{border-top:1px solid var(--border)}
+.hm-menu-piu .pl-tl span.pi-c{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#14482c;color:#f3d58e;flex:none}
+.hm-menu-piu .pl-tl.o span.pi-c{background:#e2ab45;color:#14482c}
+.hm-menu-piu .pl-tl span.pi-c svg{width:20px;height:20px;stroke-width:1.5}
+.hm-menu-piu .pl-tl small{display:block;font-size:9px;color:var(--muted);font-weight:700;margin-top:1px}
+.hm-menu-piu .pl-peg{display:flex;gap:10px;align-items:center;text-align:left;width:100%;background:#e2ab45;border:1px solid #c98f26;border-radius:20px;padding:10px 12px;margin-bottom:10px;font:inherit;color:#14482c;cursor:pointer}
+.hm-menu-piu .pl-peg .im{width:50px;height:50px;border-radius:50%;overflow:hidden;flex:none;background:#0b1626;border:2px solid #fff6e2;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.hm-menu-piu .pl-peg .im img{width:100%;height:100%;object-fit:cover;display:block}
+.hm-menu-piu .pl-peg b{font-family:Fraunces,serif;font-size:16px;display:block}
+.hm-menu-piu .pl-peg span.t{font-size:11.5px;font-weight:600;color:#4a3510;display:block;width:auto;height:auto;border-radius:0;background:none}
+.hm-menu-piu .pl-peg>div{min-width:0}
+/* vet e istruttori: icona del loro agente (presto disponibile) */
+body.pl-vet .ai-fab,body.pl-istr .ai-fab{background:#06130f center/cover no-repeat;border:2px solid #e2ab45}
+body.pl-vet .ai-fab{background-image:url(assets/agenti/galeno.webp)}
+body.pl-istr .ai-fab{background-image:url(assets/agenti/ares.webp)}
+body.pl-vet .ai-fab .icon,body.pl-vet .ai-fab .ai-fab-agente,body.pl-istr .ai-fab .icon,body.pl-istr .ai-fab .ai-fab-agente{display:none}
+/* tono per pagina (versione prudente): sfondo più chiaro in Home, sempre più intenso verso l'ultima voce della barra */
+html body[data-tono] #screen-app{--tono:#fbf3e2;background:linear-gradient(180deg,var(--tono) 0,var(--tono) 120px,var(--bg) 430px)}
+html body[data-tono="2"] #screen-app{--tono:#f3e2b6}
+html body[data-tono="3"] #screen-app{--tono:#e6cf8f}
+html body[data-tono="4"] #screen-app{--tono:#a9bb94}
+html body[data-tono="5"] #screen-app{--tono:#7f9a73}
+body[data-tono] #screen-app .topbar{background:transparent;border-bottom:0}

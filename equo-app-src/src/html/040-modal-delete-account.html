@@ -1,0 +1,15 @@
+<div class="modal-overlay" id="modal-delete-account" onclick="closeOut(event,'modal-delete-account')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Elimina account</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">
+      Il tuo account e i tuoi dati resteranno recuperabili per <strong>30 giorni</strong>: puoi annullare in qualsiasi momento rientrando in Equo entro quella data. Trascorsi i 30 giorni, la cancellazione diventa definitiva.
+    </p>
+    <div class="auth-error" id="delete-account-error" style="display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-account')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteAccount()">Elimina</button>
+    </div>
+  </div>
+</div>
+

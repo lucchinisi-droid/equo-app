@@ -1,0 +1,163 @@
+<div class="modal-overlay" id="modal-add-intervento" onclick="closeOut(event,'modal-add-intervento')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-add-intervento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="intervento-modal-title">Nuovo appuntamento</span></div>
+    <div class="int-richiesta-box" id="intervento-richiesta-box" style="display:none"></div>
+    <div class="auth-form">
+      <!-- 1. Cliente -->
+      <div class="input-group" id="intervento-cliente-group">
+        <label class="input-label">Cliente</label>
+        <select class="input" id="intervento-cliente-select" onchange="onInterventoClienteChange()"></select>
+      </div>
+      <!-- 2. Nome cliente (solo nuovo) -->
+      <div class="input-group" id="intervento-nuovo-cliente-group" style="display:none">
+        <label class="input-label">Nome cliente</label>
+        <input class="input" id="intervento-nuovo-cliente-nome" placeholder="es. Marco Rossi">
+        <select class="input" id="intervento-nuovo-cliente-tipo" style="margin-top:8px">
+          <option value="proprietario">Proprietario</option>
+          <option value="struttura">Scuderia o centro ippico</option>
+        </select>
+      </div>
+      <!-- 3. Cavallo -->
+      <div class="input-group" id="intervento-cavallo-group">
+        <label class="input-label" id="intervento-cavallo-label">Cavallo</label>
+        <select class="input" id="intervento-cavallo-select" onchange="toggleInterventoNuovoCavallo()"></select>
+        <div class="int-cav-multi" id="intervento-cavalli-multi" style="display:none"></div>
+        <div class="int-scheda-righe" id="intervento-scheda-righe"></div>
+      </div>
+      <div class="input-row-2" id="intervento-nuovo-cavallo-group" style="display:none">
+        <div class="input-group">
+          <label class="input-label">Nome cavallo</label>
+          <input class="input" id="intervento-nuovo-cavallo-nome" placeholder="es. Aurora">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Microchip (opz.)</label>
+          <input class="input" id="intervento-nuovo-cavallo-microchip" placeholder="15 cifre" autocapitalize="characters">
+        </div>
+      </div>
+      <div class="input-group" id="intervento-nuovo-cavallo-lavoro-group" style="display:none">
+        <label class="input-label">Che lavoro ha il nuovo cavallo</label>
+        <div class="fer-lavoro" id="intervento-nuovo-cavallo-lavoro" style="margin-bottom:0">
+          <button type="button" class="on" data-v="completa" onclick="nuovoCavalloLavoro('completa')"><b>Ferrato</b><small>4 ferri</small></button>
+          <button type="button" data-v="mezza" onclick="nuovoCavalloLavoro('mezza')"><b>Mezza</b><small>2 davanti</small></button>
+          <button type="button" data-v="pareggio" onclick="nuovoCavalloLavoro('pareggio')"><b>Pareggio</b><small>senza ferri</small></button>
+        </div>
+        <small class="muted" style="font-size:11.5px">Resta nella sua scheda: misura e tipo di ferro li imposti dopo con «Modifica».</small>
+      </div>
+      <!-- Lavoro: come da scheda o straordinario (solo Completa) -->
+      <div class="input-group solo-completa" id="intervento-modo-group" style="display:none">
+        <label class="input-label">Lavoro</label>
+        <div class="fer-scelta" id="intervento-modo">
+          <button type="button" data-v="scheda" onclick="sceltaModoIntervento('scheda')">Come da scheda</button>
+          <button type="button" data-v="straordinario" onclick="sceltaModoIntervento('straordinario')">Straordinario ▸</button>
+        </div>
+      </div>
+      <div class="input-group solo-completa" id="intervento-str-group" style="display:none">
+        <div class="str-preset" id="intervento-str-preset"></div>
+        <div id="intervento-str-zoccoli-box" style="display:none">
+          <label class="input-label">Quale ferro?</label>
+          <div class="str-zoccoli" id="intervento-str-zoccoli"></div>
+        </div>
+        <small class="muted" style="font-size:11.5px">Non sposta la prossima ferratura e non cambia la scheda del cavallo. Resta nello storico e nel libretto.</small>
+      </div>
+      <!-- 4. Tipo -->
+      <div class="input-group" id="intervento-tipo-group">
+        <label class="input-label">Tipo</label>
+        <select class="input" id="intervento-tipo" onchange="toggleInterventoTipoFields()">
+          <option value="ferratura">Ferratura</option>
+          <option value="mezza_ferratura">Mezza ferratura</option>
+          <option value="pareggio">Pareggio</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <!-- 5. Specifica (solo Altro) -->
+      <div class="input-group" id="intervento-tipo-altro-group" style="display:none">
+        <label class="input-label">Specifica</label>
+        <input class="input" id="intervento-tipo-altro" placeholder="es. controllo zoccoli">
+      </div>
+      <!-- 6. Ferro: quello standard della scheda del cavallo; «Cambia ferro» solo per questo appuntamento -->
+      <div class="input-group" id="intervento-ferro-group" style="display:none">
+        <label class="input-label">Ferro</label>
+        <div id="intervento-ferro-righe"></div>
+        <div class="ferro-editor" id="intervento-ferro-editor" style="display:none">
+        <div class="ferro-editor-tit" id="intervento-ferro-editor-tit"></div>
+        <select class="input" id="intervento-misura-sistema" onchange="onMisuraSistemaChange()" style="margin-bottom:8px">
+          <option value="olandese">Olandese / Internazionale</option>
+          <option value="italiana">Italiana</option>
+          <option value="tedesca">Tedesca</option>
+        </select>
+        <div class="misura-wheel-wrap">
+          <div class="misura-wheel-band"></div>
+          <div class="misura-wheel" id="intervento-misura-wheel"></div>
+          <div class="misura-wheel-fade top"></div>
+          <div class="misura-wheel-fade bot"></div>
+        </div>
+        <div class="misura-equivalenze" id="intervento-misura-equivalenze"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="button" class="btn btn-outline btn-sm" style="flex:1" onclick="chiudiEditorFerro(false)">Annulla</button>
+          <button type="button" class="btn btn-primary btn-sm" style="flex:1" onclick="chiudiEditorFerro(true)">Usa questo ferro</button>
+        </div>
+        </div>
+      </div>
+      <!-- 7. Quantità: rotella 1-4 -->
+      <div class="input-group" id="intervento-quantita-group" style="display:none">
+        <label class="input-label">Ferri <span id="intervento-quantita-per" style="font-weight:400;text-transform:none"></span></label>
+        <div class="misura-wheel-wrap q-wheel">
+          <div class="misura-wheel-band"></div>
+          <div class="misura-wheel" id="intervento-quantita-wheel"></div>
+          <div class="misura-wheel-fade top"></div>
+          <div class="misura-wheel-fade bot"></div>
+        </div>
+      </div>
+      <label class="gia-fatto-row" id="intervento-ferri-nuovi-row" style="display:none">
+        <input type="checkbox" id="intervento-ferri-nuovi" checked>
+        <span><b>Ferri nuovi utilizzati</b><br><small class="muted">Togli la spunta se è una rimessa (stessi ferri riutilizzati). Lo vedi solo tu: i clienti e le scuderie non lo vedono.</small></span>
+      </label>
+      <!-- 8-9. Quando: Oggi / Domani / Scegli giorno + Data e Ora -->
+      <div class="int-quando" id="intervento-quando">
+        <button type="button" data-q="0" onclick="quandoIntervento(0)">Oggi</button>
+        <button type="button" data-q="1" onclick="quandoIntervento(1)">Domani</button>
+        <button type="button" data-q="x" onclick="quandoIntervento('x')">Scegli giorno</button>
+      </div>
+      <div class="input-row-2">
+        <div class="input-group">
+          <label class="input-label">Data</label>
+          <input class="input" id="intervento-data" type="date" onchange="aggiornaGiaFatto();aggiornaQuando()">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Ora</label>
+          <input class="input" id="intervento-ora" type="time">
+        </div>
+      </div>
+      <label class="gia-fatto-row" id="intervento-gia-fatto-row" style="display:none">
+        <input type="checkbox" id="intervento-gia-fatto">
+        <span><b>L'ho già fatto</b><br><small class="muted">Lascialo spento se è un appuntamento di oggi ancora da fare: lo segnerai «Fatto» dopo.</small></span>
+      </label>
+      <!-- 10-11. Importo e pagamento: visibili solo modificando un intervento già fatto -->
+      <div id="intervento-incasso-group" style="display:none">
+      <div class="input-group solo-incassi">
+        <label class="input-label">Importo (€)</label>
+        <input class="input" id="intervento-importo" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
+      </div>
+      <!-- 11. Pagamento -->
+      <div class="input-group solo-incassi">
+        <label class="input-label">Pagamento</label>
+        <select class="input" id="intervento-pagamento">
+          <option value="da_saldare">Da saldare</option>
+          <option value="saldato">Saldato</option>
+        </select>
+      </div>
+      </div>
+      <!-- 12. Note -->
+      <div class="input-group">
+        <label class="input-label">Note (facoltative)</label>
+        <input class="input" id="intervento-note" placeholder="es. tolti i ferri per le lastre">
+      </div>
+      <div class="auth-error" id="intervento-error" style="display:none"></div>
+      <button class="btn btn-primary" id="intervento-save-btn" onclick="salvaInterventoMascalcia()" style="width:100%;margin-top:6px">Salva appuntamento</button>
+      <button class="btn btn-danger" id="intervento-delete-btn" onclick="eliminaInterventoInModifica()" style="width:100%;margin-top:10px;display:none">Elimina appuntamento</button>
+    </div>
+  </div>
+</div>
+

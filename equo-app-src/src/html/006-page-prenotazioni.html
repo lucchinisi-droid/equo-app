@@ -1,0 +1,22 @@
+  <div class="page-content" id="page-prenotazioni">
+    <div class="section-title">Calendario</div>
+
+    <div class="note-box" id="cal-nota-scuderia" style="margin-bottom:14px">
+      <strong>Con Equo Scuderia sarebbe automatico.</strong> Se la tua scuderia usa Equo Scuderia, le lezioni prenotate appariranno qui da sole. Per ora le aggiungi tu a mano.
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px" onclick="openModal('modal-join-stable')">Collega la tua scuderia</button>
+    </div>
+
+    <!-- Lezioni ed eventi sanitari inseriti dalla scuderia collegata (sola lettura + Accetta/Modifica) -->
+    <div id="scuderia-cal-box" style="display:none;margin-bottom:22px">
+      <div class="section-title" style="font-size:15px;margin-bottom:6px">Dalla tua scuderia</div>
+      <div id="scuderia-cal-list"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="section-title" style="margin-bottom:0;font-size:15px">Le tue lezioni</div>
+      <button class="btn btn-primary btn-sm" onclick="openAddLezioneModal()">+ Lezione</button>
+    </div>
+    <div id="lezioni-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+  </div>
+
+  <!-- SPESE -->

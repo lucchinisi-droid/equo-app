@@ -1,0 +1,23 @@
+/* menu in basso del maniscalco: Home · Agenda · HAMMER · Clienti · Cavalli */
+.nav-btn.nav-hammer{overflow:visible}
+.nav-hammer .hm-ham{width:64px;height:64px;margin-top:-30px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.nav-hammer .hm-ham::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(from 0deg,#fff1c2,#e2ab45 22%,rgba(226,171,69,0) 46%,rgba(226,171,69,0) 68%,#e2ab45 90%,#fff1c2);animation:hmGira 3.5s linear infinite}
+.nav-hammer .hm-ham::after{content:"";position:absolute;inset:0;border-radius:50%;background:#14482c;box-shadow:0 8px 18px rgba(20,72,44,.4)}
+.nav-hammer .hm-ham svg{position:relative;z-index:1;color:#e2ab45;width:28px;height:28px}
+.nav-hammer small{color:var(--text);font-weight:700}
+.nav-hammer.pulsa .hm-ham{animation:hmPulsa 1.8s ease-out infinite}
+.nav-hammer .hm-ham-dot{display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#e5484d;border:2px solid var(--surface);z-index:2}
+.nav-hammer.pulsa .hm-ham-dot{display:block}
+@keyframes hmGira{to{transform:rotate(360deg)}}
+@keyframes hmPulsa{0%{box-shadow:0 0 0 0 rgba(226,171,69,.6)}70%{box-shadow:0 0 0 18px rgba(226,171,69,0)}100%{box-shadow:0 0 0 0 rgba(226,171,69,0)}}
+@media (prefers-reduced-motion:reduce){.nav-hammer .hm-ham::before,.nav-hammer.pulsa .hm-ham{animation:none}}
+.nav-btn .hm-ico{width:22px;height:22px}
+@media (min-width:768px){
+  .nav-hammer .hm-ham{margin-top:0;width:56px;height:56px}
+  .hm-flot.msg{left:112px}
+  .hm-flot{bottom:24px}
+  .hm-flot.piu{right:24px}
+  .hm-menu-piu{right:24px;bottom:94px}
+  #hm{max-width:720px!important}
+}
+

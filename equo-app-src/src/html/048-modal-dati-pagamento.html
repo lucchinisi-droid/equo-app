@@ -1,0 +1,45 @@
+<div class="modal-overlay" id="modal-dati-pagamento" onclick="closeOut(event,'modal-dati-pagamento')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Dati per i pagamenti</div>
+    <div class="muted" style="font-size:12px;line-height:1.6;margin-bottom:14px">
+      Solo informativi: li mostriamo ai tuoi clienti così puoi farti pagare più facilmente. Nessun pagamento passa da qui.
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Tipo soggetto</label>
+        <select class="input" id="dp-tipo">
+          <option value="persona_fisica">Persona fisica</option>
+          <option value="ditta_individuale">Ditta individuale</option>
+          <option value="partita_iva">Partita IVA</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nome / Ragione sociale</label>
+        <input class="input" id="dp-nome" placeholder="es. Mario Rossi">
+      </div>
+      <div class="input-group">
+        <label class="input-label">P.IVA / Codice fiscale (la P.IVA serve per il badge Equo Certified)</label>
+        <input class="input" id="dp-piva-cf" placeholder="es. RSSMRA80A01H501U">
+      </div>
+      <div class="input-group">
+        <label class="input-label">IBAN</label>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="dp-iban" placeholder="IT00 X000 0000 0000 0000 0000 000" style="text-transform:uppercase;flex:1">
+          <button class="btn btn-outline btn-sm" onclick="copyDatiPagamentoField('dp-iban')">Copia</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email PayPal</label>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="dp-paypal" type="email" placeholder="tuaemail@paypal.it" style="flex:1">
+          <button class="btn btn-outline btn-sm" onclick="copyDatiPagamentoField('dp-paypal')">Copia</button>
+        </div>
+      </div>
+      <div class="auth-error" id="dp-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="saveDatiPagamento()" style="width:100%;margin-top:6px">Salva</button>
+      <button class="btn btn-outline" onclick="shareDatiPagamento()" style="width:100%;margin-top:8px">Condividi con un cliente</button>
+    </div>
+  </div>
+</div>
+

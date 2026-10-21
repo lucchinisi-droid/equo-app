@@ -1,0 +1,175 @@
+<div class="modal-overlay" id="modal-menu" onclick="closeOut(event,'modal-menu')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-menu')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+
+    <div class="menu-profile">
+      <div class="menu-profile-avatar-wrap" onclick="document.getElementById('avatar-file-input').click()">
+        <div class="menu-profile-avatar" id="menu-avatar">?</div>
+        <div class="avatar-edit-badge"><span class="fa-icon"><i class="fa-solid fa-camera"></i></span></div>
+      </div>
+      <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarFileChange(event)">
+      <div>
+        <div style="font-weight:700" id="profile-name">—</div>
+        <div class="muted" style="font-size:13px" id="profile-email">—</div>
+      </div>
+    </div>
+
+    <div class="menu-section-label">Il tuo profilo</div>
+    <div class="menu-row">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-id-badge"></i></span>
+        <span id="menu-role-label">—</span>
+      </div>
+    </div>
+    <div class="profilo-switch-row" id="menu-dual-role-switcher" style="display:none">
+      <span class="lab a" id="sw-lab-a">Proprietario</span>
+      <label class="switch big duale">
+        <input type="checkbox" id="profilo-switch" onchange="onProfiloSwitch(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+      <span class="lab b" id="sw-lab-b">Professionista</span>
+    </div>
+    <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
+    <button class="link-altro-profilo" onclick="openRichiestaProfilo()">Hai bisogno di aggiungere un altro profilo? <u>Clicca qui</u></button>
+
+    <div class="menu-section-label" id="menu-home-label">Versione</div>
+    <div class="menu-row" id="menu-vista-man-row" style="display:none;margin-top:8px">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-sliders"></i></span>
+        <span>Versione Completa<br><small class="muted" style="font-size:11px">Spenta: versione Semplice, pochi tasti grandi. I dati restano gli stessi</small></span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="vista-man-switch" onchange="cambiaVistaManiscalco(this.checked ? 'completa' : 'semplice')">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+    <div class="menu-row" id="menu-incassi-row" style="display:none;margin-top:8px">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-euro-sign"></i></span>
+        <span>Mostra gli incassi<br><small class="muted" style="font-size:11px">Spento: spariscono da tutta l'app. Per riaccenderli serve il PIN</small></span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="incassi-switch" onchange="cambiaIncassi(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+
+    <div class="menu-row" id="menu-promemoria-row" style="display:none;margin-top:8px">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-bell"></i></span>
+        <span>Promemoria pagamenti ai clienti<br><small class="muted" style="font-size:11px">Lavori «Da saldare»: un avviso al cliente su Equo, poi un promemoria discreto ogni 5 giorni</small></span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="promemoria-switch" onchange="cambiaPromemoriaPagamenti(this.checked)">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+
+    <div id="menu-pro-section" style="display:none">
+      <div class="menu-section-label">Attività professionale</div>
+      <div class="menu-row" style="cursor:pointer" onclick="openDatiPagamentoModal()">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-money-check-dollar"></i></span>
+          <span>Dati per i pagamenti</span>
+        </div>
+        <span class="icon"><svg><use href="#i-chevron"/></svg></span>
+      </div>
+      <div class="menu-row" style="cursor:pointer;margin-top:8px" onclick="openCodicePersonaleModal()">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>
+          <span>Il tuo codice personale</span>
+        </div>
+        <span class="icon"><svg><use href="#i-chevron"/></svg></span>
+      </div>
+      <div id="menu-richiami" style="display:none">
+        <div class="menu-section-label">Richiami predefiniti</div>
+        <div class="muted" style="font-size:11.5px;margin:-2px 0 8px">Dopo un intervento fatto, l'app propone il prossimo tra questi giorni (per ogni cavallo ricorda l'ultima scelta).</div>
+        <div class="menu-row"><div class="menu-row-label"><span>Ferratura</span></div><div><input class="input ric-giorni-input" type="number" min="1" max="60" id="ric-def-ferratura" onchange="salvaRichiamiPredefiniti()"> <small class="muted">giorni</small></div></div>
+        <div class="menu-row"><div class="menu-row-label"><span>Mezza ferratura</span></div><div><input class="input ric-giorni-input" type="number" min="1" max="60" id="ric-def-mezza_ferratura" onchange="salvaRichiamiPredefiniti()"> <small class="muted">giorni</small></div></div>
+        <div class="menu-row"><div class="menu-row-label"><span>Pareggio</span></div><div><input class="input ric-giorni-input" type="number" min="1" max="60" id="ric-def-pareggio" onchange="salvaRichiamiPredefiniti()"> <small class="muted">giorni</small></div></div>
+      </div>
+      <div id="menu-hammer-riepilogo" style="display:none">
+        <div class="menu-section-label">Hammer</div>
+        <div class="menu-row">
+          <div class="menu-row-label">
+            <span class="fa-icon"><i class="fa-solid fa-calendar-week"></i></span>
+            <span>Riepilogo settimanale di Hammer<br><small class="muted" style="font-size:11px">Ogni lunedì in chat: agenda, richieste, clienti da richiamare, incassi · Premium: anche notifica ed email</small></span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="riepilogo-hammer-switch" onchange="toggleRiepilogoHammer(this.checked)">
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="menu-owner-section" style="display:none">
+      <div class="menu-section-label">Chat</div>
+      <div class="menu-row" style="cursor:pointer" onclick="openCodiceProprietarioModal()">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>
+          <span>Il tuo codice per la chat</span>
+        </div>
+        <span class="icon"><svg><use href="#i-chevron"/></svg></span>
+      </div>
+      <div class="menu-section-label">Pegasus</div>
+      <div class="menu-row">
+        <div class="menu-row-label">
+          <span class="fa-icon"><i class="fa-solid fa-calendar-week"></i></span>
+          <span>Riepilogo settimanale di Pegasus<br><small class="muted" style="font-size:11px">Ogni lunedì in chat · Premium: anche notifica ed email</small></span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="riepilogo-switch" onchange="toggleRiepilogoSettimanale(this.checked)">
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="menu-section-label">Aspetto</div>
+    <div class="menu-row">
+      <div class="menu-row-label">
+        <span class="icon" id="theme-icon"></span>
+        <span id="theme-label">Modalità scura</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+
+    <div class="menu-section-label">Piano</div>
+    <div class="card" id="piano-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <div style="font-weight:700" id="piano-label">Free</div>
+          <div class="muted" style="font-size:12px" id="piano-desc">Funzioni base</div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="piano-btn" onclick="togglePiano()">Passa a Premium</button>
+      </div>
+    </div>
+
+    <div class="menu-section-label">Metodo di pagamento</div>
+    <div class="card" id="payment-methods-card">
+      <div id="payment-methods-list" class="muted" style="font-size:13px">Nessun metodo salvato.</div>
+      <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-payment')" style="width:100%;margin-top:12px">
+        + Aggiungi metodo di pagamento
+      </button>
+    </div>
+
+    <div class="menu-section-label">Legale</div>
+    <div class="menu-row" style="cursor:pointer" onclick="closeModal('modal-menu');openLegalPage('privacy')">
+      <div class="menu-row-label">
+        <span class="fa-icon"><i class="fa-solid fa-scale-balanced"></i></span>
+        <span>Privacy, Cookie e Termini</span>
+      </div>
+      <span class="icon"><svg><use href="#i-chevron"/></svg></span>
+    </div>
+
+    <div style="height:8px"></div>
+    <button class="btn btn-outline" style="width:100%" onclick="openModal('modal-confirm-logout')">Esci</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px;color:var(--red)" onclick="closeModal('modal-menu');openModal('modal-delete-account')">Elimina account</button>
+    <div class="muted" id="menu-versioni" style="text-align:center;font-size:11px;margin-top:14px;opacity:.75">Equo App v1.0</div>
+  </div>
+</div>
+

@@ -1,0 +1,40 @@
+/* Home pro: Prossimi appuntamenti + Da richiamare */
+.hp-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.hp-tit{font-weight:700;font-size:15px}
+.hp-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.hp-conta{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.hp-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--surface2);white-space:nowrap}
+.hp-pill i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.hp-gruppo{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.hp-gruppo:first-child{margin-top:4px}
+.hp-riga{display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer}
+.hp-riga + .hp-riga{border-top:1px solid var(--border)}
+.hp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.hp-dot.rosso{background:#c0473d}.hp-dot.ocra{background:#d9a13b}.hp-dot.verde{background:#3f7a45}
+.hp-ora{width:40px;font-weight:700;font-size:12.5px;flex-shrink:0}
+.hp-main{flex:1;min-width:0}
+.hp-main b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hp-main span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hp-main span.rosso{color:#c0473d;font-weight:600}.hp-main span.ocra{color:#9a6b12;font-weight:600}
+.hp-tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--surface2);color:var(--muted);margin-left:4px}
+.hp-vedi{width:100%;margin-top:8px}
+.hp-filtri{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}
+.hp-filtri button{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:99px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.hp-filtri button.on{background:#1d4a35;color:#fff;border-color:#1d4a35}
+.hp-giorni{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hp-giorni button{border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 4px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;color:var(--text)}
+#hp-lista-corpo{max-height:62vh;overflow-y:auto}
+.storico-cav{font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px;margin-bottom:1px}
+.storico-cav .fa-icon{color:var(--accent);font-size:13px}
+.storico-cav.vuoto{color:var(--muted);font-weight:600;font-size:13px}
+.int-richiesta-box{margin:4px 0 10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#e8b04b 15%,var(--surface));border:1.5px solid color-mix(in srgb,#e8b04b 55%,transparent);font-size:13px;line-height:1.45}
+.int-richiesta-box b{display:block;font-size:13.5px;margin-bottom:2px}
+.int-cambiata #intervento-data,.int-cambiata #intervento-ora{border-color:#e8b04b;box-shadow:0 0 0 2px color-mix(in srgb,#e8b04b 35%,transparent)}
+.hp-giro{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:2px 0 8px;border-radius:12px;background:color-mix(in srgb,#e8b04b 16%,var(--surface));border:1.5px solid color-mix(in srgb,#e8b04b 55%,transparent);cursor:pointer}
+.hp-giro-ic{width:34px;height:34px;border-radius:10px;background:#1d4a35;color:#e8b04b;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.hp-giro .hp-main span{white-space:normal}
+.hp-main .hp-prem,.hp-prem{display:inline-block!important;width:auto;color:#14312a!important;font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:99px;background:#e8b04b;color:#14312a;margin-left:6px;vertical-align:1px}
+.giro-cav{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:14px;border-bottom:1px solid var(--border)}
+.giro-cav:last-child{border-bottom:0}
+.giro-cav small{color:var(--muted);font-size:12px;margin-left:auto}
+

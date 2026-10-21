@@ -1,0 +1,27 @@
+  <div class="page-content" id="page-pro-inbox">
+    <div class="section-title">Messaggi</div>
+    <!-- cartelle stile Telegram: Clienti · Scuderie · Colleghi (pallino rosso = messaggi non letti) -->
+    <div class="cli-cartelle" id="chat-cartelle" role="tablist"></div>
+    <div class="muted cli-cartella-sotto" id="chat-cartella-sotto"></div>
+    <div class="card chat-sez" data-sez="clienti" id="inbox-card" style="margin-bottom:14px">
+      <div id="inbox-list"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+    </div>
+    <div class="chat-sez" data-sez="scuderie" id="inbox-strutture-wrap">
+      <div class="card" style="margin-bottom:14px">
+        <div id="inbox-strutture-list"></div>
+      </div>
+    </div>
+    <div class="chat-sez" data-sez="colleghi">
+    <div style="display:flex;justify-content:flex-end;align-items:center;margin:0 0 10px">
+      <button class="btn btn-primary btn-sm" onclick="apriNuovoCollega()">+ Collega</button>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      <div id="colleghi-list"><div class="muted" style="font-size:13px">Caricamento…</div></div>
+    </div>
+    <div class="muted" style="font-size:12px;line-height:1.6;text-align:center">
+      Confrontati con il veterinario, il maniscalco o l'istruttore di fiducia: foto, PDF e casi dei tuoi clienti in un posto solo.
+      Video e note vocali tra colleghi con <strong>Premium</strong>.
+    </div>
+    </div>
+  </div>
+

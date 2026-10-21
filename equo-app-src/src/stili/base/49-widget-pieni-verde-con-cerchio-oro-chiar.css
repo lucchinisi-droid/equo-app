@@ -1,0 +1,16 @@
+/* widget pieni: verde con cerchio oro (chiaro) · oro con cerchio verde (scuro) */
+.wg-pieno{background:#14482c;border-color:#14482c;color:#fff}
+.wg-pieno .wg-riga{color:#d9e5dc}
+.wg-pieno .wg-riga.evid{color:#e8b04b;font-weight:700}
+.wg-pieno .wg-num small{color:#d9e5dc}
+.wg-cerchio{width:40px;height:40px;border-radius:50%;background:#e8b04b;color:#14482c;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wg-cerchio svg{width:20px;height:20px}
+.wg-cerchio.grande{width:58px;height:58px;margin:auto auto 8px}
+.wg-cerchio.grande svg{width:28px;height:28px}
+.wg-azione{align-items:center;justify-content:center}
+.wg-azione .wg-riga.forte{color:#fff;margin-bottom:auto}
+:root:not([data-theme="light"]) .wg-pieno{background:#e8b04b;border-color:#e8b04b;color:#14312a}
+:root:not([data-theme="light"]) .wg-pieno .wg-riga,:root:not([data-theme="light"]) .wg-pieno .wg-num small{color:#3d3013}
+:root:not([data-theme="light"]) .wg-pieno .wg-riga.evid{color:#14482c}
+:root:not([data-theme="light"]) .wg-pieno .wg-cerchio{background:#14482c;color:#e8b04b}
+:root:not([data-theme="light"]) .wg-azione .wg-riga.forte{color:#14312a}

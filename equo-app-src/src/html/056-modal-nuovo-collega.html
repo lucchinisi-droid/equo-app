@@ -1,0 +1,20 @@
+<div class="modal-overlay" id="modal-nuovo-collega" onclick="closeOut(event,'modal-nuovo-collega')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-user-doctor"></i></span>Chatta con un collega</div>
+    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+      Chiedi al collega il suo <strong>codice professionista</strong> (lo trova nel menu → "Il tuo codice personale").
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice del collega</label>
+        <input class="input" id="nuovo-collega-codice" placeholder="Codice del collega (EQUO-PRO-, TRA-, MED-…)" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')avviaChatCollega()">
+      </div>
+      <div class="auth-error" id="nuovo-collega-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="avviaChatCollega()" style="width:100%;margin-top:6px">Avvia chat</button>
+      <div class="muted" style="font-size:12.5px;text-align:center;margin:16px 0 8px">Il tuo collega non usa ancora Equo?</div>
+      <button class="btn btn-outline" onclick="invitaCollega()" style="width:100%"><span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-share-nodes"></i></span> Invitalo su Equo</button>
+    </div>
+  </div>
+</div>
+

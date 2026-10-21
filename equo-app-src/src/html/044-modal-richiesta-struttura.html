@@ -1,0 +1,26 @@
+<div class="modal-overlay" id="modal-richiesta-struttura" onclick="closeOut(event,'modal-richiesta-struttura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="rs-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Equo per il tuo centro ippico</div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Lasciaci i dati del tuo centro o della tua scuderia: ti ricontattiamo noi per attivare Equo Scuderia, il gestionale dedicato.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Nome del centro ippico</label><input class="input" id="rs-nome" maxlength="160" placeholder="es. Centro Ippico Le Querce"></div>
+        <div class="input-group"><label class="input-label">Via</label><input class="input" id="rs-via" maxlength="200" placeholder="Via e numero civico"></div>
+        <div class="input-group"><label class="input-label">Città</label><input class="input" id="rs-citta" maxlength="120" placeholder="Città (provincia)"></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input" id="rs-email" type="email" maxlength="200" placeholder="email@centroippico.it"></div>
+        <div class="input-group"><label class="input-label">Telefono</label><input class="input" id="rs-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
+        <div class="muted" style="font-size:11.5px;line-height:1.5">Useremo questi dati solo per ricontattarti, come previsto dall'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a>.</div>
+        <div class="auth-error" id="rs-error" style="display:none"></div>
+        <button class="btn btn-primary" id="rs-btn" onclick="inviaContattoStruttura()" style="width:100%;margin-top:4px">Invia</button>
+      </div>
+    </div>
+    <div id="rs-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">🏇</div>
+      <div class="section-title" style="margin-bottom:6px">Grazie, richiesta inviata!</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">Ti ricontatteremo al più presto per attivare Equo Scuderia. Se hai anche un cavallo o sei un professionista, puoi intanto scegliere quel profilo.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeModal('modal-richiesta-struttura')">Ok</button>
+    </div>
+  </div>
+</div>
+

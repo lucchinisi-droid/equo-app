@@ -1,0 +1,34 @@
+/* ---------- Home a widget ---------- */
+.wh{display:none}
+body.vista-widget .wh{display:grid}
+body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh),
+body.vista-widget #home-main{display:none!important}
+.wg-meteo{display:inline-flex;align-items:center;gap:2px;margin-left:8px;vertical-align:middle;flex:none}
+.wg-meteo .mi{width:22px;height:22px}
+.wg-meteo small{font-size:11.5px;font-weight:600;color:var(--muted)}
+.wg-voce .wg-meteo{margin:0 4px 0 6px}
+.wg-prossimo .wg-meteo small{color:rgba(255,255,255,.85)}
+.cod-cav-box{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px dashed var(--accent);background:var(--surface)}
+.wh{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;grid-auto-flow:row dense}
+.wg{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:13px 14px;position:relative;overflow:hidden;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wg:active{transform:scale(.985)}
+.wg-grande,.wg-medio{grid-column:1/-1}
+.wg-grande{cursor:default}
+.wg-piccolo{aspect-ratio:1/1;display:flex;flex-direction:column}
+.wg-et{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.wg-et svg{width:14px;height:14px;color:var(--accent);flex-shrink:0}
+.wg-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.wg-meta{font-size:12px;color:var(--muted)}
+.wg-num{font-family:'Fraunces',serif;font-weight:700;font-size:30px;line-height:1;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wg-num small{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted)}
+.wg-riga{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wg-riga b{color:var(--text);font-weight:600}
+.wg-riga.forte{font-size:13.5px;font-weight:700;color:inherit;text-align:center;-webkit-line-clamp:3}
+.wg-riga.forte small{font-weight:500;font-size:11.5px;opacity:.85}
+.wg-badge{position:absolute;top:12px;right:12px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--red);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.wg-premium{position:absolute;top:11px;right:11px;font-size:9.5px;font-weight:800;letter-spacing:.06em;background:#e8b04b;color:#14312a;padding:2px 7px;border-radius:999px}
+.wg-link{border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:0}
+.wg-vuoto{font-size:13px;color:var(--muted);text-align:center;padding:14px 6px;line-height:1.6}
+.wg-vuoto.piccolo{padding:8px 4px;text-align:left}
+.wg-nota{font-size:11.5px;color:var(--muted);margin-top:6px}
+.wg-tag{font-size:10.5px;font-weight:700;background:var(--surface2);color:var(--accent);padding:1px 7px;border-radius:999px;margin-left:4px}

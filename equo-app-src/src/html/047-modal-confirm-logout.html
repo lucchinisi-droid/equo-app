@@ -1,0 +1,12 @@
+<div class="modal-overlay" id="modal-confirm-logout" onclick="closeOut(event,'modal-confirm-logout')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Conferma logout</div>
+    <p class="muted" style="font-size:14px;margin-bottom:20px">Sei sicuro di voler effettuare il logout dall'account?</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-confirm-logout')">Annulla</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-confirm-logout');logout()">Esci</button>
+    </div>
+  </div>
+</div>
+

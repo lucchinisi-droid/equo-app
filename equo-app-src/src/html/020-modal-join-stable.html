@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-join-stable" onclick="closeOut(event,'modal-join-stable')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-link"/></svg></span>Collega una scuderia</div>
+    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+      Chiedi il codice al gestore della tua scuderia per collegare il cavallo e sbloccare la prenotazione lezioni.
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice scuderia</label>
+        <input class="input" id="stable-code" placeholder="es. EQUO-4F82" style="text-transform:uppercase">
+      </div>
+      <div class="auth-error" id="stable-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="joinStable()" style="width:100%;margin-top:6px">Collega</button>
+    </div>
+  </div>
+</div>
+

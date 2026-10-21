@@ -1,0 +1,14 @@
+<div class="modal-overlay" id="modal-reactivate-account" onclick="closeOut(event,'modal-reactivate-account')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Cancellazione in corso</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:18px" id="reactivate-account-text">
+      Hai chiesto di eliminare questo account. I dati verranno cancellati definitivamente il —.
+    </p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-reactivate-account');logout()">Esci</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmReactivateAccount()">Annulla cancellazione</button>
+    </div>
+  </div>
+</div>
+

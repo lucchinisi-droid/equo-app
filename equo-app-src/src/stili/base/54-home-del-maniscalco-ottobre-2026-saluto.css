@@ -1,0 +1,21 @@
+/* ---------- HOME DEL MANISCALCO (ottobre 2026): saluto + meteo, banner, 5 cerchi, righe, Messaggi e «+» flottanti, Hammer al centro ---------- */
+#hm{display:none}
+body.home-man #page-pro-home > :not(#hm){display:none!important}
+body.home-man #page-pro-home > #hm{display:block!important}
+body.home-man .ai-fab{display:none!important}
+.hm{--verde:#14482c;--oro:#e2ab45;--oro-chiaro:#f3d58e}
+.hm-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hm-saluto{font-family:'Fraunces',serif;font-size:25px;font-weight:700;line-height:1.1}
+.hm-data{font-size:13.5px;color:var(--muted);margin-top:3px}
+.hm-meteo-pill{display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px 12px 3px 4px;flex:none;cursor:pointer}
+.hm-temp{font-weight:800;font-size:15px;line-height:1.05}.hm-temp small{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+.hm-temp:empty{display:none}
+.hm-meteo.meteo-box{width:auto;min-height:0;margin:0;padding:0;border:0;background:none;border-radius:999px;flex:none;gap:0}
+.hm-meteo .meteo-g:not(.oggi){display:none}
+.hm-meteo .meteo-g.oggi{flex-direction:row;gap:4px;padding:0}
+.hm-meteo .meteo-g.oggi b{display:none}
+.hm-meteo .meteo-g .mi{width:30px;height:30px}
+.hm-meteo .meteo-g small{font-size:14px;font-weight:800;color:var(--text)}
+.hm-meteo .meteo-scheletro:not(:first-child){display:none}
+.hm-meteo .meteo-scheletro{width:70px;height:30px;flex:none;margin:0}
+.hm-meteo .meteo-msg{font-size:11.5px;max-width:130px;padding:3px 4px}

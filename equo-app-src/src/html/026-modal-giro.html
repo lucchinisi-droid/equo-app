@@ -1,0 +1,19 @@
+<div class="modal-overlay" id="modal-giro" onclick="closeOut(event,'modal-giro')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-giro')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-route"></i></span> Giro da <span id="giro-nome"></span></div>
+    <div class="muted" style="font-size:13px;margin-bottom:10px">Un solo appuntamento per tutti i cavalli selezionati: in agenda trovi una riga per cavallo, alla stessa ora.</div>
+    <div class="auth-form">
+      <div style="display:flex;gap:8px">
+        <div class="input-group" style="flex:1"><label>Data</label><input type="date" class="input" id="giro-data"></div>
+        <div class="input-group" style="width:110px"><label>Ora</label><input type="time" class="input" id="giro-ora"></div>
+      </div>
+      <div class="input-group"><label>Cavalli</label><div id="giro-cavalli"></div></div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;margin:4px 0 2px"><input type="checkbox" id="giro-avvisa" checked style="width:18px;height:18px"> Avvisa il cliente in chat (messaggio già pronto)</label>
+      <div class="error-msg" id="giro-error" style="display:none"></div>
+      <button class="btn btn-primary btn-conferma" style="width:100%;margin-top:8px" onclick="confermaGiro()">Fissa il giro</button>
+    </div>
+  </div>
+</div>
+

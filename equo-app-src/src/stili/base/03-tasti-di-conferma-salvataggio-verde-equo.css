@@ -1,0 +1,11 @@
+/* tasti di conferma/salvataggio: verde Equo con bordo giallo (criterio doppio tasto) */
+.btn-primary{background:#1d4a35;color:#fff;border:2px solid #e8b04b}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-ghost{background:transparent;color:var(--muted);font-size:13px}
+.btn-danger{background:rgba(226,104,95,.15);color:var(--red);border:1px solid rgba(226,104,95,.3)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:10px}
+
+.auth-error{background:rgba(226,104,95,.1);border:1px solid rgba(226,104,95,.3);
+  color:var(--red);padding:10px 14px;border-radius:10px;font-size:13px}
+

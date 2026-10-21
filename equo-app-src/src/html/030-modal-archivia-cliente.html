@@ -1,0 +1,23 @@
+<div class="modal-overlay" id="modal-archivia-cliente" onclick="closeOut(event,'modal-archivia-cliente')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="archivia-cliente-titolo">Archivia cliente</div>
+    <div id="archivia-cliente-testo" style="font-size:13.5px;line-height:1.6;margin-bottom:14px"></div>
+    <div id="archivia-cliente-sposta" style="display:none;margin-bottom:14px">
+      <div class="card" style="padding:12px 14px">
+        <div style="font-weight:700;font-size:13.5px;margin-bottom:8px">Sposta i cavalli in un altro cliente</div>
+        <div id="archivia-cliente-cavalli" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+        <select class="input" id="archivia-cliente-dest"></select>
+        <div class="muted" style="font-size:12px;line-height:1.5;margin-top:6px">Gli appuntamenti non ancora fatti seguono il cavallo; gli interventi già fatti restano a questo cliente (incassi). Lo spostamento resta nello storico del cavallo.</div>
+        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:10px" id="archivia-cliente-sposta-ok" onclick="spostaCavalliCliente(this)">Sposta</button>
+      </div>
+    </div>
+    <div class="auth-error" id="archivia-cliente-error" style="display:none"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-outline" id="archivia-cliente-btn-sposta" style="width:100%" onclick="mostraSpostaCavalli()">Sposta i cavalli in un altro cliente</button>
+      <button class="btn btn-primary" id="archivia-cliente-ok" style="width:100%" onclick="confermaArchiviaCliente(this)">Archivia cliente</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-archivia-cliente')">Annulla</button>
+    </div>
+  </div>
+</div>
+

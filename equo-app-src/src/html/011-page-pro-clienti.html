@@ -1,0 +1,56 @@
+  <div class="page-content" id="page-pro-clienti">
+    <div id="clienti-list-view">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="section-title" style="margin-bottom:0">Clienti</div>
+        <button class="btn btn-outline btn-sm" id="cli-collega-btn" style="display:none" onclick="apriCollegaStruttura(null)"><span class="fa-icon" style="width:13px;height:13px"><i class="fa-solid fa-link"></i></span> Collega scuderia</button>
+      </div>
+      <!-- cartelle stile Telegram: Cavalli · Clienti · Scuderie, ognuna con il suo numero -->
+      <div class="cli-cartelle" id="cli-cartelle" role="tablist"></div>
+      <div class="muted cli-cartella-sotto" id="cli-cartella-sotto"></div>
+      <div id="clienti-list" class="cli-lista"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+      <div id="clienti-archiviati-box"></div>
+    </div>
+
+    <div id="clienti-detail-view" style="display:none">
+      <div class="detail-header">
+        <button class="back-btn" onclick="closeClienteDetail()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+        <div class="section-title" style="margin-bottom:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="detail-cliente-nome">Cliente</div>
+        <button class="btn btn-outline btn-sm btn-variazione" onclick="openEditCliente()"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span> Modifica</button>
+      </div>
+
+      <div class="card" style="margin-bottom:14px" id="detail-cliente-info"></div>
+
+      <div class="card" style="margin-bottom:14px;display:none" id="detail-cliente-qr-card">
+        <div class="qr-box" id="detail-cliente-qr"></div>
+        <div class="invite-code" id="detail-cliente-code">—</div>
+        <div class="muted" style="font-size:12px;text-align:center;margin-top:6px;line-height:1.5" id="detail-cliente-link-hint">Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.</div>
+      </div>
+
+      <!-- cavalli del cliente: un box per cavallo (il primo è sempre «+ Aggiungi cavallo») -->
+      <div class="clienti-sez-head" style="margin-top:4px"><div class="clienti-sez-title" id="cliente-cavalli-titolo">CAVALLI</div></div>
+      <input class="input" id="cliente-cavalli-cerca" placeholder="Cerca cavallo…" style="margin-bottom:10px;display:none" oninput="renderBoxCavalliCliente()">
+      <div id="cliente-proposte-box"></div>
+      <div id="cliente-simili-box"></div>
+      <div class="cav-griglia" id="cliente-cavalli-grid"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+      <div id="cliente-qui-box"></div>
+      <div id="cliente-conti-box"></div>
+      <div class="card" id="cliente-orfani" style="margin:14px 0;display:none"></div>
+      <div id="cliente-interventi-list" style="display:none"></div>
+
+      <button class="btn btn-outline btn-archivia-cliente" style="width:100%;margin-top:14px" onclick="deleteCurrentCliente()">Archivia cliente</button>
+    </div>
+
+    <!-- SCHEDA DEL SINGOLO CAVALLO (maniscalco) -->
+    <div id="cavallo-pro-view" style="display:none">
+      <div class="detail-header">
+        <button class="back-btn" onclick="chiudiSchedaCavalloPro()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+        <div class="muted" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700" id="cavpro-cliente">Cliente</div>
+      </div>
+      <div class="cavpro-hero" id="cavpro-hero"></div>
+      <div id="cavpro-dove" style="margin-top:12px"></div>
+      <div class="hp-filtri cavpro-tab" id="cavpro-tab" style="margin:12px 0"></div>
+      <div id="cavpro-corpo"></div>
+    </div>
+  </div>
+
+  <!-- PROFESSIONISTA: INBOX -->

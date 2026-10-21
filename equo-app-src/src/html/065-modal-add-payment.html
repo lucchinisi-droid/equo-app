@@ -1,0 +1,65 @@
+<div class="modal-overlay" id="modal-add-payment" onclick="closeOut(event,'modal-add-payment')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Aggiungi metodo di pagamento</div>
+
+    <div class="pm-type-row">
+      <button class="pm-type-btn active" data-pm-type="carta" onclick="selectPmType('carta')">
+        <span class="icon"><svg><use href="#i-card"/></svg></span> Carta
+      </button>
+      <button class="pm-type-btn" data-pm-type="paypal" onclick="selectPmType('paypal')">
+        <span class="icon"><svg><use href="#i-paypal"/></svg></span> PayPal
+      </button>
+      <button class="pm-type-btn" data-pm-type="iban" onclick="selectPmType('iban')">
+        <span class="icon"><svg><use href="#i-bank"/></svg></span> IBAN
+      </button>
+    </div>
+
+    <div id="pm-form-carta">
+      <div class="muted" style="font-size:13px;line-height:1.6;margin-bottom:14px">
+        La carta viene aggiunta tramite il modulo sicuro Stripe — i dati della carta non passano mai dai
+        nostri server. (In questo scheletro il flusso Stripe non è ancora collegato.)
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="addPaymentMethod('carta')">Continua con Stripe</button>
+    </div>
+
+    <div id="pm-form-paypal" style="display:none">
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group">
+          <label class="input-label">Email PayPal</label>
+          <input class="input" id="pm-paypal-email" type="email" placeholder="tuaemail@esempio.it">
+        </div>
+        <button class="btn btn-primary" onclick="addPaymentMethod('paypal')" style="width:100%">Salva PayPal</button>
+      </div>
+    </div>
+
+    <div id="pm-form-iban" style="display:none">
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group">
+          <label class="input-label">IBAN</label>
+          <input class="input" id="pm-iban" placeholder="IT00 X000 0000 0000 0000 0000 000" style="text-transform:uppercase">
+        </div>
+        <div class="muted" style="font-size:12px;line-height:1.5">
+          Usato per bonifici o addebiti SEPA. Conservato solo per il tuo profilo.
+        </div>
+        <button class="btn btn-primary" onclick="addPaymentMethod('iban')" style="width:100%">Salva IBAN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGALE: Privacy / Cookie / Termini -->
+<div class="legal-overlay" id="legal-overlay">
+  <div class="mchat-header">
+    <button class="back-btn" onclick="closeLegalPage()"><span class="icon"><svg><use href="#i-back"/></svg></span></button>
+    <div style="flex:1;min-width:0"><div class="mchat-header-name">Informazioni legali</div></div>
+  </div>
+  <div class="legal-tabs">
+    <button class="legal-tab" id="legal-tab-privacy" onclick="openLegalPage('privacy')">Privacy</button>
+    <button class="legal-tab" id="legal-tab-cookie" onclick="openLegalPage('cookie')">Cookie</button>
+    <button class="legal-tab" id="legal-tab-termini" onclick="openLegalPage('termini')">Termini</button>
+  </div>
+  <div class="legal-body" id="legal-body"></div>
+</div>
+
+<!-- PIANO: Passa a Premium / Torna a Free -->

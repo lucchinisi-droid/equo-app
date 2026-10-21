@@ -1,0 +1,15 @@
+<div class="modal-overlay" id="modal-delete-horse-1" onclick="closeOut(event,'modal-delete-horse-1')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Eliminare <span id="delete-horse-nome-1"></span>?</div>
+    <div class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.5">
+      Verranno cancellati anche il libretto sanitario e tutti gli eventi registrati per questo cavallo.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-danger" style="width:100%" onclick="askDeleteHorseStep2()">Continua</button>
+      <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-delete-horse-1')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: elimina cavallo, passo 2 (conferma definitiva) -->

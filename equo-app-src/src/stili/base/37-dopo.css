@@ -1,0 +1,21 @@
+/* dopo */
+.ml-riga{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px;border-radius:20px;background:rgba(246,236,212,.07);border:1px solid rgba(243,213,142,.2);margin-bottom:8px;min-width:0}
+.ml-t{flex:1 1 calc(100% - 60px);min-width:0}.ml-riga .ml-imp{margin-left:54px}.ml-riga .ml-st{margin-left:auto}.ml-t b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ml-t span{font-size:12.5px;color:#b9ad8f;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-imp{display:flex;align-items:center;gap:3px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(243,213,142,.25);padding:0 8px;height:44px}
+.ml-imp span{color:#b9ad8f;font-weight:700}
+.ml-imp input{width:52px;background:none;border:0;color:#f6ecd4;font:700 17px "DM Sans",sans-serif;outline:none;padding:0}
+.ml-st{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:800;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.ml-st .li{width:17px;height:17px;stroke-width:2.4}
+.ml-st.ok{color:#bdf0d3;background:rgba(63,191,127,.15)}
+.ml-st.pb{color:#14482c;background:#e2ab45;border:0;cursor:pointer;font-family:inherit}
+.ml-st.pb .ml-sig{background:#14482c;color:#f3d58e;min-width:28px;height:22px;font-size:11.5px}
+.ml-pbb{width:46px;height:46px;border-radius:50%;flex:none;border:1.5px solid rgba(226,171,69,.55);background:rgba(226,171,69,.12);color:#f3d58e;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ml-pbb .li{width:22px;height:22px}
+.ml-tot{display:flex;justify-content:space-between;align-items:baseline;padding:10px 6px 4px;font-size:15px;color:#b9ad8f;font-weight:700}
+.ml-tot b{font-family:Fraunces,serif;font-size:30px;color:#f6ecd4}
+.ml-pag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.ml-pag button{height:64px;border-radius:18px;border:2px solid rgba(243,213,142,.22);background:rgba(246,236,212,.06);color:#f6ecd4;font:800 16px "DM Sans",sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.ml-pag button small{font-size:11.5px;color:#b9ad8f;font-weight:600}
+.ml-pag button.on{border-color:#e2ab45;background:rgba(226,171,69,.2)}
+.ml-prox{display:flex;align-items:center;gap:10px;font-size:14.5px;color:#f3d58e;font-weight:700;padding:8px 6px}
+.ml-prox .li{width:22px;height:22px}

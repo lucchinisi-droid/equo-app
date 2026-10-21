@@ -1,0 +1,25 @@
+  <div class="page-content" id="page-pro-agenda">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="role-card-icon"><span class="icon"><svg><use href="#i-link"/></svg></span></div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">Invita i tuoi clienti su Equo</div>
+          <div class="muted" style="font-size:12.5px;margin-top:2px">Condividi il link per collegarli al tuo profilo</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px" onclick="copyInviteLink()">Copia link invito</button>
+    </div>
+
+    <div class="card" id="ag-richieste" style="display:none;margin-bottom:14px;border:1.5px solid var(--accent)"></div>
+
+    <div class="ag-head"><div class="section-title" id="pro-agenda-title">Agenda della settimana</div></div>
+    <div class="ag-nav">
+      <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(-1)" aria-label="Settimana precedente">‹</button>
+      <div class="ag-week-label"><div id="ag-week-label">—</div><button class="ag-oggi-btn" id="ag-oggi-btn" style="display:none" onclick="tornaSettimanaCorrente()">Torna a oggi</button></div>
+      <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(1)" aria-label="Settimana successiva">›</button>
+    </div>
+    <div class="card ag-week" id="ag-week" style="margin-bottom:14px"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+    <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">+ Nuovo appuntamento</button>
+  </div>
+
+  <!-- PROFESSIONISTA: INCASSI (vista Semplice = cassa; vista Completa = statistiche, Premium) -->

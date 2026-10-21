@@ -1,0 +1,37 @@
+<div class="modal-overlay" id="modal-candidatura" onclick="closeOut(event,'modal-candidatura')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="cand-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-stethoscope" id="cand-ico"></i></span><span id="cand-titolo">Veterinari e trainer</span></div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Stiamo costruendo gli strumenti di Equo per veterinari e istruttori. Lasciaci i tuoi contatti: ti ricontattiamo per progettarli insieme e darti l'accesso in anteprima.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Professione *</label>
+          <select class="input" id="cand-professione" onchange="aggiornaCandidatura()"><option value="veterinario">Veterinario</option><option value="istruttore">Istruttore o trainer</option></select></div>
+        <div class="input-group"><label class="input-label">Nome e cognome *</label><input class="input" id="cand-nome" maxlength="160" autocomplete="name"></div>
+        <div class="input-group"><label class="input-label">Email *</label><input class="input" id="cand-email" type="email" maxlength="200" autocomplete="email"></div>
+        <div class="input-group"><label class="input-label">Telefono *</label><input class="input" id="cand-telefono" type="tel" maxlength="40" autocomplete="tel" placeholder="+39 …"></div>
+        <div style="display:grid;grid-template-columns:1fr 110px;gap:10px">
+          <div class="input-group"><label class="input-label">Città *</label><input class="input" id="cand-citta" maxlength="120" autocomplete="address-level2"></div>
+          <div class="input-group"><label class="input-label">Provincia *</label><input class="input" id="cand-provincia" maxlength="30" placeholder="es. RM"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Specializzazione <span class="muted" style="font-weight:400">(facoltativa)</span></label><input class="input" id="cand-spec" maxlength="200" placeholder="es. ortopedia, salto ostacoli"></div>
+        <div class="input-group"><label class="input-label">Raccontaci di te <span class="muted" style="font-weight:400">(facoltativo)</span></label><textarea class="input" id="cand-msg" maxlength="1500" rows="3" placeholder="Come lavori oggi, cosa ti farebbe risparmiare tempo…"></textarea></div>
+        <label class="consent-row" style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.5;margin:2px 0 4px"><input type="checkbox" id="cand-privacy" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"><span>Ho letto l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')" style="color:var(--accent)">Informativa Privacy</a> e accetto che Equo usi questi dati per ricontattarmi. *</span></label>
+        <div class="auth-error" id="cand-error" style="display:none"></div>
+        <button class="btn btn-primary" id="cand-btn" onclick="inviaCandidatura()" style="width:100%;margin-top:4px">Invia la candidatura</button>
+        <div class="muted" style="font-size:11.5px;text-align:center;margin-top:8px">* campi obbligatori</div>
+      </div>
+    </div>
+    <div id="cand-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">🩺</div>
+      <div class="section-title" style="margin-bottom:6px">Candidatura inviata, grazie!</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px" id="cand-ok-testo">Ti ricontattiamo presto all'email o al telefono che ci hai lasciato.</div>
+      <div id="cand-ok-onboarding" style="display:none">
+        <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="closeModal('modal-candidatura');chooseMainRole('proprietario')">Ho anche un cavallo: entro come proprietario</button>
+        <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-candidatura');logout()">Esci</button>
+      </div>
+      <button class="btn btn-primary" id="cand-ok-chiudi" style="width:100%" onclick="closeModal('modal-candidatura')">Ok</button>
+    </div>
+  </div>
+</div>
+

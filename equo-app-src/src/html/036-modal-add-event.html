@@ -1,0 +1,32 @@
+<div class="modal-overlay" id="modal-add-event" onclick="closeOut(event,'modal-add-event')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="modal-add-event-title">Nuovo evento sanitario</span></div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Tipo</label>
+        <select class="input" id="event-type">
+          <option value="vaccino">Vaccino</option>
+          <option value="coggins">Test Coggins</option>
+          <option value="ferratura">Ferratura</option>
+          <option value="sverminazione">Sverminazione</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Data</label>
+        <input class="input" id="event-date" type="date">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Prossima scadenza (opzionale)</label>
+        <input class="input" id="event-next-date" type="date">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note (opzionale)</label>
+        <input class="input" id="event-notes" placeholder="es. Dr. Rossi">
+      </div>
+      <button class="btn btn-primary" onclick="saveHorseEvent()" style="width:100%;margin-top:6px">Salva evento</button>
+      <button class="btn btn-danger" id="event-delete-btn" style="width:100%;margin-top:8px;display:none" onclick="deleteHorseEventFromModal()">Elimina evento</button>
+    </div>
+  </div>
+</div>
+

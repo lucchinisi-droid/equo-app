@@ -1,0 +1,31 @@
+<div class="modal-overlay" id="modal-segnala-maneggio" onclick="closeOut(event,'modal-segnala-maneggio')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-gift"></i></span>Segnala un maneggio</div>
+    <div class="muted" style="font-size:12px;margin-bottom:14px">Conosci un maneggio o un centro ippico non ancora su Equo? Segnalacelo: se si registra, tu ricevi 1 mese di Premium gratis.</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Nome del centro ippico</label>
+        <input class="input" id="segnala-nome-struttura" placeholder="es. Centro Ippico Le Querce">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Città</label>
+        <input class="input" id="segnala-citta" placeholder="es. Colleferro (RM)">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Via (opzionale)</label>
+        <input class="input" id="segnala-via" placeholder="es. Via Roma 10">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Telefono del centro ippico (opzionale)</label>
+        <input class="input" id="segnala-telefono-struttura" type="tel" placeholder="es. 06 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email o telefono tuo, per ricevere il codice</label>
+        <input class="input" id="segnala-contatto-premio" placeholder="dove ti mandiamo il codice">
+      </div>
+      <button class="btn btn-primary" onclick="submitSegnalazioneManeggio()" style="width:100%;margin-top:6px">Invia segnalazione</button>
+    </div>
+  </div>
+</div>
+

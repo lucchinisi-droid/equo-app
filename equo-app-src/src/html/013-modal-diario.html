@@ -1,0 +1,34 @@
+<div class="modal-overlay" id="modal-diario" onclick="closeOut(event,'modal-diario')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dr-titolo">Nuovo momento</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Cavallo</label>
+        <select class="input" id="dr-cavallo"></select>
+      </div>
+      <div class="dr-chips" id="dr-tipi">
+        <button type="button" class="dr-chip on" data-t="foto" onclick="diarioTipoScegli('foto')">Foto</button>
+        <button type="button" class="dr-chip" data-t="nota" onclick="diarioTipoScegli('nota')">Nota</button>
+        <button type="button" class="dr-chip" data-t="vocale" onclick="diarioTipoScegli('vocale')">Vocale</button>
+        <button type="button" class="dr-chip" onclick="diarioVideoPremium()">Video · Premium</button>
+      </div>
+      <div id="dr-box-foto">
+        <input type="file" id="dr-file" accept="image/*" style="display:none" onchange="diarioFilePronto(this)">
+        <button type="button" class="btn btn-outline" style="width:100%" onclick="document.getElementById('dr-file').click()"><svg class="ic-d"><use href="#i-camera"/></svg> Scatta o scegli una foto</button>
+        <img id="dr-anteprima" alt="" style="display:none;width:100%;max-height:240px;object-fit:cover;border-radius:16px;margin-top:10px">
+      </div>
+      <div id="dr-box-vocale" style="display:none">
+        <div class="dr-reg"><button type="button" class="rec" id="dr-rec" onclick="diarioRegistra()" aria-label="Registra"><svg class="ic-d"><use href="#i-mic"/></svg></button><div class="muted" id="dr-rec-lab" style="font-size:13px">Tocca per registrare (massimo 3 minuti)</div></div>
+        <audio id="dr-audio" controls style="display:none;width:100%"></audio>
+      </div>
+      <div class="input-group" style="margin-top:10px">
+        <textarea class="input" id="dr-testo" rows="3" maxlength="2000" placeholder="Una riga su questo momento (facoltativa)"></textarea>
+      </div>
+      <div class="dr-chips" id="dr-cats"></div>
+      <div class="muted" style="font-size:12px;margin-bottom:12px">Visibilità: <b>solo tu</b>. Condividere con la scuderia o con altre persone arriva con i prossimi aggiornamenti.</div>
+      <button class="btn btn-primary" id="dr-salva" style="width:100%" onclick="diarioSalva()">Salva nel Diario</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,45 @@
+/* --- Ruota misure ferro (modal appuntamento maniscalco) --- */
+.misura-wheel-wrap{position:relative;height:132px;border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
+.misura-wheel{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:44px 0}
+.misura-wheel::-webkit-scrollbar{display:none}
+.misura-wheel-item{height:44px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:17px;color:var(--muted);transition:color .15s,font-size .15s;cursor:pointer;user-select:none}
+.misura-wheel-item.sel{color:var(--text);font-weight:700;font-size:21px}
+.misura-wheel-band{position:absolute;left:10px;right:10px;top:44px;height:44px;border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);pointer-events:none;border-radius:6px;background:rgba(201,143,46,.08)}
+.misura-wheel-fade{position:absolute;left:0;right:0;height:40px;pointer-events:none}
+.misura-wheel-fade.top{top:0;background:linear-gradient(var(--surface),transparent)}
+.misura-wheel-fade.bot{bottom:0;background:linear-gradient(transparent,var(--surface))}
+.misura-equivalenze{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.ds-riga-corta{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:10px 14px;margin-bottom:12px;font:inherit;font-size:13.5px;font-weight:700;color:var(--text);cursor:pointer}
+.ds-card{margin-bottom:14px;padding:14px 16px}
+.ds-testa{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px;margin-bottom:6px}
+.ds-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;vertical-align:middle}
+.ds-man{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 2px}
+.ds-voce{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);font-size:13.5px}
+.ds-dx{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.ds-dx button,.ds-link,.ds-ok{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:underline;cursor:pointer}
+.ds-link{margin-top:6px}
+.ds-ok{display:block;margin:10px auto 0;color:var(--muted);font-weight:600}
+.ds-paga{display:grid;gap:6px;margin-top:6px;padding:10px 12px;border-radius:12px;background:var(--surface2);font-size:13px;word-break:break-all}
+.ds-copia{cursor:pointer;font-weight:600}
+.int-cav-multi{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:2px 12px;max-height:230px;overflow-y:auto}
+.int-cav{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:14px;cursor:pointer;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+.int-cav:last-child{border-bottom:0}
+.int-cav input{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)}
+.int-cav small{color:var(--muted);font-size:11.5px}
+.int-cav.nuovo{color:var(--accent);font-weight:600}
+.ferro-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);margin-bottom:6px;font-size:13.5px}
+.ferro-riga .fr-nome{font-weight:700}
+.ferro-riga .fr-dett{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.ferro-riga .fr-dett.diverso{color:var(--accent);font-weight:600}
+.ferro-riga .fr-az{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.ferro-riga button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:underline;cursor:pointer}
+.ferro-riga button.sec{color:var(--muted);font-weight:500}
+.ferro-editor{border:1px dashed var(--accent);border-radius:14px;padding:10px 12px;margin-top:4px}
+.ferro-editor-tit{font-size:12.5px;font-weight:700;margin-bottom:8px}
+.q-wheel .misura-wheel-item{font-size:16px}
+.ric-importi{margin:0 auto 10px;max-width:280px;text-align:left}
+.ric-imp-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:14px}
+.ric-imp-riga span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ric-imp-riga label{display:flex;align-items:center;gap:4px;flex-shrink:0;color:var(--muted)}
+.ric-imp-riga input{width:92px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;font:inherit;font-size:15px;text-align:right;background:var(--surface);color:var(--text)}
+.ric-imp-tot{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:6px;font-weight:800;font-size:14px}

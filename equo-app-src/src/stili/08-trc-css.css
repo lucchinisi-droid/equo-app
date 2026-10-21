@@ -1,0 +1,7 @@
+
+.tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
+.tr-az .tr-btn{padding:8px 11px;font-size:12px}
+.tr-dest{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px}
+.tr-dest input{width:20px;height:20px;accent-color:#14482c;flex:none}
+.tr-dest b{display:block}.tr-dest small{color:var(--muted);font-size:12px}
+.tr-dest-nota{background:#f5e6b8;color:#5f4410;border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:8px}

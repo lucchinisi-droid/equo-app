@@ -1,0 +1,21 @@
+<div class="modal-overlay" id="modal-collega-maniscalco" onclick="closeOut(event,'modal-collega-maniscalco')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span>Collega il tuo maniscalco</div>
+    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+      Inserisci o scansiona il codice del tuo maniscalco (il suo codice personale EQUO-PRO-… oppure quello che ti ha dato): potrai scrivergli in chat e ricevere qui appuntamenti e riepiloghi in PDF.
+    </div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice maniscalco</label>
+        <input class="input" id="collega-maniscalco-codice" placeholder="EQUO-PRO-XXXXX" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')collegaManiscalco()">
+      </div>
+      <div class="auth-error" id="collega-maniscalco-error" style="display:none"></div>
+      <button class="btn btn-primary" id="collega-maniscalco-btn" onclick="collegaManiscalco()" style="width:100%;margin-top:6px">Collega</button>
+      <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
+        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
+      </button>
+    </div>
+  </div>
+</div>
+

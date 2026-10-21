@@ -1,0 +1,36 @@
+  <div class="page-content" id="page-pro-incassi">
+    <div class="inc-testa">
+      <div class="section-title" id="inc-titolo" style="margin-bottom:0">Incassi</div>
+      <div class="inc-vista" id="inc-vista" role="tablist"></div>
+    </div>
+    <span id="incassi-mese-incassato" hidden></span>
+
+    <div id="inc-semplice">
+      <div class="hp-filtri inc-periodi" id="inc-periodi"></div>
+      <div class="inc-date" id="inc-date" hidden>
+        <label>Dal <input type="date" class="input" id="inc-dal" onchange="renderIncassiSaldati()"></label>
+        <label>Al <input type="date" class="input" id="inc-al" onchange="renderIncassiSaldati()"></label>
+      </div>
+      <button type="button" class="inc-cassa verde" id="inc-cassa-incassati" onclick="incApri('incassati')"></button>
+      <div id="inc-det-incassati" class="inc-det" hidden>
+        <div class="inc-kpis" id="inc-kpis"></div>
+        <div class="card inc-card" id="inc-grafico-card"><div class="inc-tit">Andamento</div><div class="inc-grafico" id="inc-grafico"></div></div>
+        <div class="card inc-card"><div class="inc-tit">Per tipo di lavoro</div><div id="inc-per-tipo"></div></div>
+        <div class="card inc-card"><div class="inc-tit">Per cliente</div><div id="inc-per-cliente"></div></div>
+        <div class="card inc-card"><div class="inc-tit"><span>Pagati nel periodo</span><span id="inc-elenco-n"></span></div><div id="inc-elenco"></div></div>
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin:0 2px 14px">Conta il giorno in cui il cliente ha pagato (registrato quando segni «Saldato»); per i lavori saldati prima del 9 ottobre 2026 vale il giorno del lavoro.</div>
+      </div>
+      <button type="button" class="inc-cassa rosso" id="inc-cassa-dasaldare" onclick="incApri('dasaldare')"></button>
+      <div id="inc-det-dasaldare" class="inc-det" hidden>
+        <div class="card inc-card"><div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div></div>
+      </div>
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin:2px 2px 14px">«Da incassare» non dipende dal periodo: è tutto quello che devi ancora riscuotere per lavori già fatti.</div>
+    </div>
+
+    <div id="inc-completa" hidden>
+      <div class="hp-filtri inc-periodi" id="inc-mesi"></div>
+      <div id="inc-stat"></div>
+    </div>
+  </div>
+
+  <!-- PROFESSIONISTA: CLIENTI -->

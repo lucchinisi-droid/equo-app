@@ -1,0 +1,18 @@
+/* «Fatto»: importo con € e Saldato / Da saldare sulla stessa riga; ferri nuovi (Completa); «come prima» */
+.ric-pag.in-riga{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.ric-pag.in-riga .ric-importi{margin:0;max-width:none}
+.ric-pag.in-riga #ric-pag-imp{display:none}
+.ric-pag.in-riga{gap:6px;flex-wrap:nowrap}
+.ric-pag.in-riga .ric-euro input{width:58px!important}
+.ric-pag.in-riga .ric-pag-scelte button{padding:8px 10px;font-size:13px}
+.ric-euro{display:inline-flex;align-items:center;border:1.5px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}
+.ric-euro span{padding:0 4px 0 10px;font-weight:800;color:var(--muted)}
+.ric-euro input{border:0!important;width:76px!important;padding:8px 8px 8px 2px!important;background:transparent!important;font-weight:700}
+.ric-ferri{margin:0 0 12px;text-align:left;border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:14px;padding:9px 11px}
+.ric-ferri label{display:flex;gap:8px;align-items:center;font-weight:700;font-size:13.5px;cursor:pointer}
+.ric-ferri .fer-step{margin-top:8px}.ric-ferri .fer-step button{width:36px;height:36px;font-size:19px}
+.ric-ferri .fer-step .val{font-size:17px}
+.ric-come-prima{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--text);border-radius:12px;padding:8px 10px;font-size:12.5px;margin:0 0 10px;text-align:left}
+.input-row-2{display:flex;gap:10px}
+.input-row-2 > .input-group{flex:1;min-width:0}
+

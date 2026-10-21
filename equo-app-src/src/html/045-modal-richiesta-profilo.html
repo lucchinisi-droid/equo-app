@@ -1,0 +1,41 @@
+<div class="modal-overlay" id="modal-richiesta-profilo" onclick="closeOut(event,'modal-richiesta-profilo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="rp-form">
+      <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-user-plus"></i></span>Un altro profilo</div>
+      <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Dicci di cosa hai bisogno: verifichiamo la richiesta e ti ricontattiamo noi.</div>
+      <div class="auth-form" style="max-width:none">
+        <div class="input-group"><label class="input-label">Cosa ti serve?</label>
+          <select class="input" id="rp-richiesta" onchange="aggiornaFormRichiestaProfilo()">
+            <option value="seconda_professione">Aggiungere una seconda professione</option>
+            <option value="cambio_professione">Cambiare la mia professione</option>
+            <option value="struttura">Aggiungere un profilo scuderia o centro ippico</option>
+            <option value="altro">Altro</option>
+          </select></div>
+        <div class="input-group" id="rp-prof-group"><label class="input-label">Professione</label>
+          <select class="input" id="rp-professione">
+            <option value="maniscalco">Maniscalco</option>
+            <option value="veterinario">Veterinario</option>
+            <option value="istruttore">Istruttore/Trainer</option>
+          </select></div>
+        <div id="rp-struttura-group" style="display:none;flex-direction:column;gap:12px">
+          <div class="input-group"><label class="input-label">Nome del centro ippico</label><input class="input" id="rp-nome-struttura" maxlength="160"></div>
+          <div class="input-group"><label class="input-label">Città</label><input class="input" id="rp-citta" maxlength="120"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Nome e cognome</label><input class="input" id="rp-nome" maxlength="160"></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input" id="rp-email" type="email" maxlength="200"></div>
+        <div class="input-group"><label class="input-label">Telefono</label><input class="input" id="rp-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
+        <div class="input-group"><label class="input-label">Messaggio (facoltativo)</label><textarea class="input" id="rp-messaggio" rows="3" maxlength="1500" placeholder="es. sono veterinario e anche maniscalco"></textarea></div>
+        <div class="auth-error" id="rp-error" style="display:none"></div>
+        <button class="btn btn-primary" id="rp-btn" onclick="inviaRichiestaProfilo()" style="width:100%;margin-top:4px">Invia</button>
+      </div>
+    </div>
+    <div id="rp-ok" class="richiesta-ok" style="display:none">
+      <div class="emoji">✉️</div>
+      <div class="section-title" style="margin-bottom:6px">Richiesta inviata</div>
+      <div class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:16px">Ti ricontatteremo al più presto.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeModal('modal-richiesta-profilo')">Ok</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,27 @@
+<div class="modal-overlay" id="modal-condividi-dati" onclick="closeOut(event,'modal-condividi-dati')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-condividi-dati')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span>Condividi i dati di pagamento</div>
+    <div id="condividi-scelta">
+      <button class="share-opt primary" onclick="condividiDatiVia('chat')">
+        <span class="share-opt-ico"><i class="fa-solid fa-comment"></i></span>
+        <span class="share-opt-txt"><strong>Chat Equo</strong><small>Arrivano nell'app del cliente, con notifica. Consigliato</small></span>
+      </button>
+      <button class="share-opt" onclick="condividiDatiVia('whatsapp')">
+        <span class="share-opt-ico"><i class="fa-brands fa-whatsapp"></i></span>
+        <span class="share-opt-txt"><strong>WhatsApp</strong><small>Per chi non usa ancora Equo</small></span>
+      </button>
+      <button class="share-opt" onclick="condividiDatiVia('email')">
+        <span class="share-opt-ico"><i class="fa-solid fa-envelope"></i></span>
+        <span class="share-opt-txt"><strong>Email</strong><small>Per chi non usa ancora Equo</small></span>
+      </button>
+    </div>
+    <div id="condividi-clienti" style="display:none">
+      <div class="muted" style="font-size:13px;margin-bottom:8px">A quale cliente?</div>
+      <div id="condividi-clienti-list" style="max-height:48vh;overflow:auto"></div>
+      <button class="btn btn-outline" style="width:100%;margin-top:12px" onclick="mostraSceltaCondivisione()">‹ Indietro</button>
+    </div>
+  </div>
+</div>
+

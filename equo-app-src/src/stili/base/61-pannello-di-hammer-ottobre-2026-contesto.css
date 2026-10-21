@@ -1,0 +1,23 @@
+/* ---------- PANNELLO DI HAMMER (ottobre 2026): contesto, avvii rapidi, analisi foto (Focus), consulta un caso ---------- */
+.hp-pan{padding:8px 14px 6px;border-bottom:1px solid var(--border);background:var(--surface)}
+.hp-ctx{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.hp-ctx svg{width:16px;height:16px;color:var(--accent);flex:none}
+.hp-ctx b{color:var(--text)}
+.hp-ctx span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hp-ctx button{border:0;background:var(--surface2);color:var(--muted);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:15px;line-height:1}
+.hp-avvii{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.hp-avvii::-webkit-scrollbar{display:none}
+.hp-avvii button{flex:none;display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:999px;padding:8px 13px 8px 10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.hp-avvii button svg{width:17px;height:17px;color:var(--accent)}
+.hp-scelte{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 6px;align-self:flex-start;max-width:92%}
+.hp-scelte button{border:1.5px solid #e2ab45;background:var(--surface);color:var(--text);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.hp-scelte button:disabled{opacity:.45;cursor:default}
+.hp-caso-barra{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--accent);padding:4px 14px 0}
+.hp-caso-barra button{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+.hp-limite{border:2px solid #e2ab45;border-radius:20px;padding:14px;text-align:center;background:var(--surface)}
+.hp-limite b{font-size:15.5px;display:block}.hp-limite p{font-size:13px;color:var(--muted);margin:4px 0 8px;line-height:1.45}
+.hp-b{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:12px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;margin-top:8px}
+.hp-b svg{width:18px;height:18px}
+.hp-b.v{background:#14482c;color:#f3d58e}.hp-b.v:disabled{opacity:.45;cursor:default}
+.hp-b.o{background:var(--surface2);color:var(--accent);border:1px solid var(--border)}
+.hp-b.r{background:none;color:var(--red);border:1px solid color-mix(in srgb,var(--red) 40%,transparent)}

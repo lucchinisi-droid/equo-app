@@ -1,0 +1,7 @@
+/* versione Semplice / Completa */
+body.vm-semplice .solo-completa{display:none!important}
+.vm-opz{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:16px;padding:12px;margin:0 0 10px;font:inherit;cursor:pointer}
+.vm-opz.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.vm-opz b{display:block;font-size:15px}.vm-opz small{display:block;font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+.vm-ic{width:40px;height:40px;flex-shrink:0;border-radius:12px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.vm-ic svg{width:22px;height:22px}

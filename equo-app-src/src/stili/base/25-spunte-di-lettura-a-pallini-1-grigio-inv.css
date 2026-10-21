@@ -1,0 +1,11 @@
+/* spunte di lettura a pallini: 1 grigio = inviato, 2 grigi = consegnato, 2 verde scuro = letto */
+.ferri{display:inline-flex;align-items:center;line-height:0}
+.ferri svg{height:7px;width:auto;display:block}
+.ferri-invio svg{height:11px}
+.ferri-inviato,.ferri-consegnato{color:rgba(20,35,27,.45)}
+.ferri-letto{color:#0b4a2c}
+.mchat-day-sep{align-self:center;font-size:11px;color:var(--muted);background:var(--surface);
+  border:1px solid var(--border);padding:3px 12px;border-radius:20px;margin:6px 0}
+.mchat-input-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);
+  background:var(--surface);flex-shrink:0}

@@ -1,0 +1,31 @@
+<div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Il piano Free comprende 1 cavallo</div>
+    <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:10px">
+      Il tuo cavallo e tutti i suoi dati restano al loro posto. Per aggiungere altri cavalli passa a <strong>Equo Premium</strong>:
+    </p>
+    <ul style="font-size:13.5px;line-height:1.7;margin:0 0 18px;padding-left:18px">
+      <li>cavalli illimitati</li>
+      <li>promemoria automatici di vaccini, ferrature e sverminazioni</li>
+      <li>scheda PDF e QR del cavallo, storico spese completo</li>
+      <li>500 messaggi al mese con Pegasus</li>
+    </ul>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-limite-cavalli')">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-limite-cavalli');togglePiano()">Passa a Premium</button>
+    </div>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookie-banner">
+  <p>Usiamo cookie tecnici (necessari) e, solo con il tuo consenso, Google Analytics per capire come viene usato Equo.
+    <a href="#" onclick="event.preventDefault();openLegalPage('cookie')" style="color:var(--accent)">Maggiori info</a>.</p>
+  <div class="cookie-banner-actions">
+    <button class="btn btn-outline btn-sm" onclick="rejectCookies()">Rifiuta</button>
+    <button class="btn btn-primary btn-sm" onclick="acceptCookies()">Accetta</button>
+  </div>
+</div>
+
+<script>

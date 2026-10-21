@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-stesso-cavallo" onclick="closeOut(event,'modal-stesso-cavallo')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span>È lo stesso cavallo?</span></div>
+    <div class="muted" id="stesso-cavallo-testo" style="font-size:13.5px;margin-bottom:16px;line-height:1.55"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="rispondiStessoCavallo(false)">No, è un altro</button>
+      <button class="btn btn-primary" style="flex:1" id="stesso-cavallo-ok" onclick="rispondiStessoCavallo(true)">Sì, è lui</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeModal('modal-stesso-cavallo')">Decido più tardi</button>
+  </div>
+</div>
+

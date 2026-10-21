@@ -1,0 +1,4 @@
+/* ---------- Incassi nascosti ---------- */
+body.incassi-nascosti .solo-incassi,
+body.incassi-nascosti .nav-btn[data-page="pro-incassi"]{display:none!important}
+body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}

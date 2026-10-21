@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-qr-scan" onclick="closeOut(event,'modal-qr-scan')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-qrcode"></i></span>Inquadra il QR</div>
+    <div style="position:relative;border-radius:14px;overflow:hidden;background:#000">
+      <video id="qr-scan-video" style="width:100%;display:block" muted playsinline></video>
+      <canvas id="qr-scan-canvas" style="display:none"></canvas>
+    </div>
+    <div class="muted" style="font-size:12px;text-align:center;margin-top:10px">Inquadra il codice QR dell'altra persona per collegarti subito.</div>
+    <button class="btn btn-outline" onclick="closeQrScanner()" style="width:100%;margin-top:10px">Annulla</button>
+  </div>
+</div>
+

@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-new-chat" onclick="closeOut(event,'modal-new-chat')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="icon"><svg><use href="#i-inbox"/></svg></span>Nuova chat</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Codice dell'altro proprietario</label>
+        <input class="input" id="new-chat-codice" placeholder="EQUO-XXXXX" style="text-transform:uppercase">
+      </div>
+      <div class="auth-error" id="new-chat-error" style="display:none"></div>
+      <button class="btn btn-primary" onclick="startNewChat()" style="width:100%;margin-top:6px">Avvia chat</button>
+      <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
+        <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
+      </button>
+    </div>
+  </div>
+</div>
+

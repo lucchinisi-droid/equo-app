@@ -509,3 +509,9 @@ File `ux/mockup-home-nuovi-menu-v1.html`: proprietario, maniscalco, trainer, Scu
 - Fatto: equo-app/tests/controllo-app.cjs (Playwright, 4 ruoli in demo: Home, barra, tasto +, pagine, errori JS). Provato: passa sulla versione attuale, blocca le due versioni rotte di oggi. package.json: script controllo / controllo:netlify, devDependency playwright 1.56.0. netlify.toml: [context.beta] con il controllo nel comando di build.
 - DA FARE (Simone): abilitare branch deploy "beta" su Netlify (equo-app), poi creare e pushare il ramo beta e guardare il log di build. Se ok: controllo anche in produzione. Se Chromium non parte su Netlify: GitHub Actions.
 - Tappe successive: Vite + core, poi un ruolo alla volta (allenatore, veterinario, proprietario, maniscalco), poi Equo Scuderia.
+
+## 21/10/2026: MULTI-FILE · TAPPA 2 (prima parte) — sorgenti divisi
+- Nuova cartella equo-app-src/: l'index.html dell'app e diviso in 256 file (63 di stile comune, 8 stili di modulo, 68 pagine/finestre HTML, 102 sezioni del codice principale, 13 script di modulo) + modello. strumenti/unisci.cjs li rimette insieme: verificato che il risultato e IDENTICO byte per byte all'index.html online (nessun effetto sull'app pubblicata). LEGGIMI in equo-app-src.
+- Da ora: si modifica in equo-app-src/src, poi unisci.cjs, poi controllo dei 4 ruoli, poi commit.
+- Vite: rimandato. npm non e raggiungibile ne dal mio ambiente cloud ne dalla VM del Mac, quindi non potrei verificare la sua build prima del deploy. unisci.cjs (senza dipendenze) fa il lavoro di unione; la struttura dei file e gia compatibile con un passaggio a Vite.
+- Prossimi passi tappa 2: navigazione unica a eventi al posto di showPage/plAggiorna avvolte piu volte; stile di ogni ruolo confinato (prefisso) e riduzione dei !important; poi un ruolo alla volta. Ogni passo con controllo dei 4 ruoli.

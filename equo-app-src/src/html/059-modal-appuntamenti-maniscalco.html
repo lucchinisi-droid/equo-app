@@ -1,0 +1,50 @@
+<div class="modal-overlay" id="modal-appuntamenti-maniscalco" onclick="closeOut(event,'modal-appuntamenti-maniscalco')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-appuntamenti-maniscalco')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Appuntamenti</div>
+    <div id="app-man-list" style="margin-bottom:14px"></div>
+    <div style="font-weight:700;font-size:14px;margin-bottom:8px">Richiedi un appuntamento</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Cavallo</label>
+        <select class="input" id="rich-cavallo" onchange="toggleRichiestaCampi()"></select>
+      </div>
+      <div class="input-group" id="rich-cavallo-nome-group" style="display:none">
+        <label class="input-label">Nome del cavallo</label>
+        <input class="input" id="rich-cavallo-nome" placeholder="es. Aurora">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Tipo</label>
+        <select class="input" id="rich-tipo" onchange="toggleRichiestaCampi()">
+          <option value="ferratura">Ferratura</option>
+          <option value="mezza_ferratura">Mezza ferratura</option>
+          <option value="pareggio">Pareggio</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="input-group" id="rich-tipo-altro-group" style="display:none">
+        <label class="input-label">Specifica</label>
+        <input class="input" id="rich-tipo-altro" placeholder="es. controllo zoccolo">
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="input-group" style="flex:1">
+          <label class="input-label">Data preferita</label>
+          <input class="input" id="rich-data" type="date">
+        </div>
+        <div class="input-group" style="flex:1">
+          <label class="input-label">Ora (opzionale)</label>
+          <input class="input" id="rich-ora" type="time">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note (opzionale)</label>
+        <input class="input" id="rich-note" placeholder="es. perde un ferro anteriore">
+      </div>
+      <div class="auth-error" id="rich-error" style="display:none"></div>
+      <button class="btn btn-primary" id="rich-btn" onclick="inviaRichiestaAppuntamento()" style="width:100%;margin-top:6px">Invia richiesta</button>
+      <div class="muted" style="font-size:12px;text-align:center;line-height:1.5">Il maniscalco la riceve in agenda e ti conferma qui in chat.</div>
+    </div>
+  </div>
+</div>
+

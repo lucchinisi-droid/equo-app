@@ -1,0 +1,55 @@
+<div class="modal-overlay" id="modal-add-horse" onclick="closeOut(event,'modal-add-horse')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-add-horse')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span id="horse-form-title">Nuovo cavallo</span></div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Nome</label>
+        <input class="input" id="horse-name" placeholder="es. Aurora">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Categoria</label>
+        <select class="input" id="horse-tipo-proprieta">
+          <option value="proprieta">Cavallo di proprietà</option>
+          <option value="noleggio">Cavallo a noleggio</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Razza (opzionale)</label>
+        <input class="input" id="horse-breed" placeholder="Scrivi per cercare, es. puros, maremm…">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Mantello (opzionale)</label>
+        <input class="input" id="horse-mantello" placeholder="es. Baio">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Data di nascita (opzionale)</label>
+        <input class="input" id="horse-birthdate" type="date">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Microchip (opzionale)</label>
+        <input class="input" id="horse-microchip" placeholder="15 cifre">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Gruppo sanguigno (opzionale)</label>
+        <input class="input" id="horse-gruppo-sanguigno" placeholder="Facoltativo">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note (opzionale)</label>
+        <input class="input" id="horse-note" placeholder="Facoltativo">
+      </div>
+      <label style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-top:4px;cursor:pointer">
+        <input type="checkbox" id="horse-condiviso" checked style="width:18px;height:18px;flex-shrink:0;margin-top:2px">
+        <span>
+          <span style="font-weight:600;font-size:13.5px">Condividi con i professionisti collegati</span><br>
+          <span class="muted" style="font-size:12px;line-height:1.5">Il maniscalco a cui ti sei collegato vede solo nome, razza e microchip per registrare gli interventi sul cavallo giusto.</span>
+        </span>
+      </label>
+      <div class="auth-error" id="horse-error" style="display:none"></div>
+      <button class="btn btn-primary" id="horse-save-btn" onclick="saveHorse()" style="width:100%;margin-top:6px">Crea scheda</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: elimina cavallo, passo 1 -->

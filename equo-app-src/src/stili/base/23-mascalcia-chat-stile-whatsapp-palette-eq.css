@@ -1,0 +1,25 @@
+/* MASCALCIA CHAT (stile WhatsApp, palette Equo) */
+.mchat-overlay{display:none;position:fixed;inset:0;z-index:70;flex-direction:column;background:var(--bg)}
+.mchat-overlay.active{display:flex}
+.mchat-foto{max-width:220px;max-height:280px;border-radius:12px;display:block;object-fit:cover}
+.allegati-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center}
+.allegati-overlay.active{display:flex}
+.allegati-sheet{width:100%;max-width:480px;background:var(--surface);border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.allegati-opt{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+.allegati-opt i{width:22px;text-align:center;color:var(--accent);font-size:18px}
+.mchat-header{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));
+  border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+.mchat-header-name{font-weight:700;font-size:14.5px}
+.mchat-header-sub{font-size:11.5px;color:var(--muted)}
+.mchat-quick-actions{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);
+  overflow-x:auto;flex-shrink:0}
+.mchat-quick-actions .btn{flex-shrink:0;white-space:nowrap}
+.mchat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;
+  background:
+    radial-gradient(ellipse at top left,rgba(232,176,75,.07),transparent 55%),
+    radial-gradient(ellipse at bottom right,rgba(92,200,143,.06),transparent 55%),
+    var(--bg)}
+.mchat-bubble{max-width:78%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.4;
+  display:flex;flex-direction:column;gap:2px}
+.mchat-bubble.out{align-self:flex-end;background:var(--accent);color:#14231b;border-bottom-right-radius:3px}
+.mchat-bubble.in{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}

@@ -1,0 +1,10 @@
+/* AI FAB + SHEET */
+.ai-fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));
+  width:56px;height:56px;border-radius:50%;background:var(--accent);color:#14231b;
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:60}
+.ai-fab .icon{width:24px;height:24px}
+.ai-fab{transition:opacity .2s,transform .2s}
+body.fab-via .ai-fab{opacity:0;transform:scale(.7);pointer-events:none}
+.ai-fab-dot{display:none;position:absolute;top:4px;right:4px;width:13px;height:13px;border-radius:50%;background:#e5484d;border:2px solid var(--bg,#fff)}
+.ai-fab.con-novita .ai-fab-dot{display:block}

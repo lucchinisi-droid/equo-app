@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-codice-personale" onclick="closeOut(event,'modal-codice-personale')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Il tuo codice personale</div>
+    <div class="muted" style="font-size:12px;line-height:1.6;margin-bottom:14px">
+      Condividilo con chi non è ancora tuo cliente su Equo — chi lo usa entra subito in contatto con te.
+    </div>
+    <div style="display:flex;justify-content:center;margin-bottom:14px">
+      <div id="codice-personale-qr" style="background:#fff;padding:10px;border-radius:12px"></div>
+    </div>
+    <div style="text-align:center;font-weight:700;font-size:20px;letter-spacing:1px;margin-bottom:16px" id="codice-personale-testo">—</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="copyCodicePersonale()">Copia</button>
+      <button class="btn btn-primary" style="flex:1" onclick="shareCodicePersonale()">Condividi</button>
+    </div>
+  </div>
+</div>
+

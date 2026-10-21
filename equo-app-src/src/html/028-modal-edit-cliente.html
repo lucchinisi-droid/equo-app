@@ -1,0 +1,69 @@
+<div class="modal-overlay" id="modal-edit-cliente" onclick="closeOut(event,'modal-edit-cliente')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-edit-cliente')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-pen"></i></span>Modifica cliente</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label">Tipo di cliente</label>
+        <select class="input" id="edit-cliente-tipo">
+          <option value="proprietario">Proprietario</option>
+          <option value="struttura">Scuderia o centro ippico</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Nome cliente</label>
+        <input class="input" id="edit-cliente-nome" placeholder="es. Marco Rossi">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Telefono</label>
+        <input class="input" id="edit-cliente-telefono" type="tel" inputmode="tel" placeholder="es. 333 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Indirizzo (per «Naviga»)</label>
+        <input class="input" id="edit-cliente-indirizzo" autocomplete="street-address" placeholder="es. Via Casilina km 51, Colleferro">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Note</label>
+        <input class="input" id="edit-cliente-note" placeholder="es. scuderia, indicazioni">
+      </div>
+      <div class="input-group" id="edit-cliente-codice-group">
+        <label class="input-label">Codice Equo del cliente (opzionale)</label>
+        <input class="input" id="edit-cliente-codice-equo" placeholder="EQUO-XXXXX" style="text-transform:uppercase" autocapitalize="characters">
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Il cliente lo trova in Equo App → menu profilo → "Il tuo codice per la chat". Così puoi scrivergli tu per primo.</div>
+      </div>
+      <div class="input-group" id="edit-cliente-collegato" style="display:none">
+        <label class="input-label">Equo App</label>
+        <div style="font-size:13.5px"><strong style="color:var(--green)">✓ Collegato a Equo</strong> — puoi scrivergli dalla chat.</div>
+        <label class="gia-fatto-row" style="margin-top:8px">
+          <input type="checkbox" id="edit-cliente-promemoria">
+          <span><b>Promemoria pagamenti</b><br><small class="muted">Se un lavoro resta «Da saldare», il cliente riceve un avviso e ogni 5 giorni un promemoria discreto in Equo. Toglila per un cliente di fiducia.</small></span>
+        </label>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Cavalli</label>
+        <div id="edit-cliente-cavalli"></div>
+        <div class="cod-cav-box">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:2px">Codice Equo del cavallo</div>
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Il cavallo ha già un codice Equo (es. PRV-000005)? Aggiungilo qui: arriva con tutto il suo storico, anche se ora è tra i cavalli di un altro cliente.</div>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="edit-cliente-codice-cavallo" placeholder="es. PRV-000005" autocapitalize="characters" style="flex:1;text-transform:uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiCavalloCodice()}">
+            <button class="btn btn-primary btn-sm" style="flex:none" onclick="aggiungiCavalloCodice(this)">Aggiungi</button>
+          </div>
+        </div>
+        <div class="muted" style="font-size:12px;margin:10px 0 0">Oppure un cavallo nuovo:</div>
+        <div class="input-row-2" style="margin-top:6px">
+          <input class="input" id="edit-cliente-nuovo-cavallo" placeholder="Nome nuovo cavallo" style="flex:1.4">
+          <input class="input" id="edit-cliente-nuovo-chip" placeholder="Microchip (opz.)" autocapitalize="characters" style="flex:1">
+        </div>
+        <div style="margin-top:8px"><input class="input" id="edit-cliente-nuovo-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="aggiungiCavalloEditCliente()">+ Aggiungi cavallo</button>
+      </div>
+      <div class="auth-error" id="edit-cliente-error" style="display:none"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaEditCliente()">Salva modifiche</button>
+      <button class="btn btn-outline btn-archivia-cliente" style="width:100%;margin-top:10px" onclick="deleteCurrentCliente()">Archivia cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- aggiungi cavallo dalla cartella Cavalli -->

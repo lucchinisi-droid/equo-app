@@ -1,0 +1,6 @@
+/* «Sei arrivato?» e tasto Lavoro in agenda */
+.ml-arr{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.ml-arr span{background:#f5e8c9;border:1px solid #e6d3a6;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;color:#3b2c10}
+.ag-cli-lav{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:6px 12px;font:700 12.5px "DM Sans",sans-serif;color:#f3d58e;background:#14482c;cursor:pointer;margin-left:6px}
+.ag-cli-lav svg{width:15px;height:15px;fill:currentColor}
+.ag-cli-nav{flex-shrink:0;letter-spacing:0;text-transform:none;font:inherit;font-size:11px;font-weight:800;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:3px 8px;cursor:pointer}

@@ -1,0 +1,23 @@
+/* Early Adopter */
+.early-avviso{display:flex;gap:12px;align-items:flex-start;width:100%;max-width:360px;margin:-14px 0 20px;padding:12px 14px;border-radius:14px;background:#14482c;color:#f4f1ea;text-align:left}
+.early-avviso b{display:block;font-size:14px}
+.early-avviso span:not(.early-medaglia){display:block;font-size:12.5px;color:#e8b04b;font-weight:600;margin-top:1px}
+.early-avviso small{display:block;font-size:12px;color:#cfdcd2;margin-top:4px;line-height:1.4}
+.ref-avviso{display:flex;gap:12px;align-items:flex-start;width:100%;max-width:360px;margin:-14px 0 20px;padding:12px 14px;border-radius:14px;background:#14482c;color:#f4f1ea;text-align:left}
+.ref-avviso b{display:block;font-size:14px}
+.ref-avviso span:not(.early-medaglia){display:block;font-size:12.5px;color:#e8b04b;font-weight:600;margin-top:1px}
+.ref-avviso small{display:block;font-size:12px;color:#cfdcd2;margin-top:4px;line-height:1.4}
+#onb-step-1 .early-avviso{margin:0 0 14px}
+.early-medaglia{width:30px;height:30px;border-radius:50%;background:#e8b04b;color:#14482c;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.early-medaglia.grande{width:44px;height:44px;font-size:22px}
+.role-card.early-scelta{outline:2px solid var(--accent);outline-offset:2px}
+.early-testa{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.early-prezzo{font-family:'Fraunces',serif;font-size:38px;font-weight:700;line-height:1;margin:6px 0 10px}
+.early-prezzo small{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted)}
+.early-punti{list-style:none;margin:0 0 12px;padding:0;font-size:13.5px}
+.early-punti li{position:relative;padding-left:20px;margin:6px 0;line-height:1.45}
+.early-punti li::before{content:"";position:absolute;left:3px;top:.5em;width:7px;height:7px;background:var(--accent);transform:rotate(45deg)}
+.early-posti{font-size:13px;margin-bottom:12px;color:var(--muted)}
+.early-posti b{color:var(--text)}
+.early-nota{font-size:12.5px;line-height:1.5;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:9px 11px;margin-bottom:12px}
+.early-txt{font-size:13.5px;line-height:1.6;margin-bottom:14px}
