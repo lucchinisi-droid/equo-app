@@ -14,6 +14,12 @@ function refreshSchedaPdfUI(c){
   const qrDiv = document.getElementById("scheda-qr");
   const azioni = document.getElementById("scheda-pdf-azioni");
   qrDiv.innerHTML = "";
+  // scheda PDF e QR ufficiali solo dal livello Validato (decisione 18/10/2026)
+  if(typeof codiceValidatoScud === "function" && !codiceValidatoScud(c)){
+    btn.style.display = "none"; qrBox.style.display = "none"; azioni.style.display = "none";
+    status.innerHTML = "La scheda PDF e il QR ufficiali si sbloccano quando il codice del cavallo e <b>Validato</b>: completa i dati e fai le due conferme nel riquadro qui sopra.";
+    return;
+  }
   if(!c.pdf_url){
     btn.style.display = "";
     btn.innerHTML = `<i class="fa-solid fa-file-pdf"></i> Genera PDF`;
@@ -34,6 +40,7 @@ const urlPdfPulito = u => String(u || "").split("?")[0];
 async function handleSchedaPdf(){
   const c = cavalliList.find(x => x.id === currentCavalloId);
   if(!c) return;
+  if(typeof codiceValidatoScud === "function" && !codiceValidatoScud(c)){ showToast("La scheda PDF si sblocca quando il codice e Validato."); return; }
   const btn = document.getElementById("scheda-pdf-btn");
   btn.disabled = true;
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generazione...`;
@@ -45,6 +52,7 @@ async function handleSchedaPdf(){
 async function pdfCavalloAggiornato(){
   let c = cavalliList.find(x => x.id === currentCavalloId);
   if(!c) return null;
+  if(typeof codiceValidatoScud === "function" && !codiceValidatoScud(c)){ showToast("La scheda PDF si sblocca quando il codice e Validato."); return null; }
   if(needsPdfUpdate(c)){
     showToast("Aggiorno la scheda PDF…");
     await generateSchedaPdf(c);

@@ -84,6 +84,7 @@ function renderCavalloDetail(){
     fotoEl.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)"><i class="fa-solid fa-horse-head"></i></div>`;
   }
   refreshSchedaPdfUI(c);
+  if(typeof renderCodiceScud === "function") renderCodiceScud(c);
 
   const scad = scadenzarioFor(c.id);
   const grid = document.getElementById("scadenzario-grid");

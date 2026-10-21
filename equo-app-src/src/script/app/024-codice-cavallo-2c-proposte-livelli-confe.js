@@ -138,9 +138,11 @@ async function confermaDatiCavallo(id){
 }
 
 /* professionista: cavalli da confermare (home maniscalco) */
-let confermePro = [], confermeProTs = 0;
-async function caricaConfermePro(force){
-  const box = document.getElementById("hm-conferme");
+let confermePro = [], confermeProTs = 0, confermeProBox = "hm-conferme";
+// idBox: "hm-conferme" (Home maniscalco) o "tr-conferme" (Home allenatore)
+async function caricaConfermePro(force, idBox){
+  if(idBox) confermeProBox = idBox;
+  const box = document.getElementById(confermeProBox);
   if(!box || DEMO_MODE) return;
   if(!force && Date.now() - confermeProTs < 60000) return;
   confermeProTs = Date.now();
