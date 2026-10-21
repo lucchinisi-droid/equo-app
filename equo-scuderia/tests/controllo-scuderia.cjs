@@ -44,6 +44,9 @@ const SCHERMI = [
       if(!home) male("sezione Home assente");
       else if(home.disp === "none" || home.alto < 150 || home.testo < 40) male("Home NON visibile (display=" + home.disp + " altezza=" + home.alto + " testo=" + home.testo + ")");
 
+      const nav = await pg.evaluate(() => typeof quandoApriSezione === "function" && typeof showModule === "function" && showModule.toString().includes("avvisaSezione"));
+      if(!nav) male("showModule e stata riassegnata: usare quandoApriSezione(fn)");
+
       const voci = await pg.evaluate(() => [...new Set([...document.querySelectorAll(".nav-item[data-module]")].map(b => b.dataset.module))]);
       if(voci.length < 6) male("menu laterale incompleto (" + voci.length + " voci)");
       for(const k of voci){

@@ -264,8 +264,13 @@ function aggiornaSfondoPagina(key){
   }
 }
 
+// NAVIGAZIONE UNICA (21/10/2026): showModule apre la sezione e poi avvisa chi si e iscritto con
+// quandoApriSezione(fn). NON riassegnare showModule in altri file. Un errore in un iscritto non blocca gli altri.
+const ascoltiSezione = [];
+function quandoApriSezione(fn){ ascoltiSezione.push(fn); }
+function avvisaSezione(key){ for(const fn of ascoltiSezione){ try{ fn(key); }catch(e){ console.error("quandoApriSezione:", e); } } }
 function showModule(key){
-  if(moduloBloccato(key)){ Registro.azione("bloccato:" + key); apriUpsell(key); return; }
+  if(moduloBloccato(key)){ Registro.azione("bloccato:" + key); apriUpsell(key); avvisaSezione(key); return; }
   Registro.pagina(key);
   aggiornaSfondoPagina(key);
   document.querySelectorAll(".module-page").forEach(p => p.style.display = "none");
@@ -285,6 +290,7 @@ function showModule(key){
   if(key === "statistiche") refreshStatisticheModule();
   if(key === "ai") renderModuloAgenti();
   if(key === "centro"){ renderIlTuoPacchetto(); renderZonaCentro(); groomCaricaTeam(); }
+  avvisaSezione(key);
 }
 
 function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("sidebar-overlay").classList.add("active"); }

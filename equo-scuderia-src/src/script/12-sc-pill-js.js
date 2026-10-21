@@ -15,8 +15,7 @@
   var n=document.getElementById("chat-nav-unread-badge"),d=document.getElementById("sc-pill-dot");
   if(d)d.classList.toggle("on",!!(n&&parseInt(n.textContent,10)>0));
  }
- var orig=window.showModule;
- window.showModule=function(key){var r=orig.apply(this,arguments);try{agg(key);scPiu(false);}catch(e){}return r;};
+ quandoApriSezione(function(key){agg(key);scPiu(false);});
  setInterval(function(){var a=document.querySelector(".nav-item.active");agg(a&&a.dataset.module);},3000);
  // card Athena nella sidebar desktop
  var nav=document.querySelector(".sidebar-nav");
