@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-import-cavalli" onclick="closeOut(event,'modal-import-cavalli')">
+  <div class="modal">
+    <div class="modal-title">Importa cavalli <span class="x" onclick="saltaImportCavalli()">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px" id="import-cavalli-title"></p>
+    <div id="import-cavalli-list" style="max-height:300px;overflow:auto;margin-top:6px"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="saltaImportCavalli()">Non ora</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confermaImportCavalli()">Importa selezionati</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Legale (Privacy / Cookie / Termini) -->

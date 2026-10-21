@@ -1,0 +1,9 @@
+/* modalità stalla (display / tablet in scuderia) */
+.box-sezione.stalla{position:fixed;inset:0;z-index:1500;margin:0;padding:18px 20px calc(18px + env(safe-area-inset-bottom));background:var(--bg);overflow-y:auto}
+.box-sezione.stalla .box-griglia{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.box-sezione.stalla .box-card{min-height:270px}
+.box-sezione.stalla .box-foto{width:104px;height:104px}
+.box-sezione.stalla .box-ic{width:30px;height:30px;font-size:14px;border-radius:9px}
+.box-sezione.stalla .box-nome{font-size:17px}
+.box-orologio{font-size:28px;font-weight:800;letter-spacing:-.01em}
+

@@ -1,0 +1,118 @@
+        <div class="module-page" id="module-cavalli" style="display:none">
+          <!-- LISTA CAVALLI -->
+          <div id="cavalli-list-view">
+            <div class="page-header">
+              <div>
+                <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli &amp; Salute</h1>
+                <p>Anagrafica cavalli del centro e scadenzario sanitario.</p>
+              </div>
+              <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+            </div>
+            <div id="cavalli-arrivi"></div>
+            <div id="cavalli-sezioni">
+              <div class="cavalli-sezione" data-sezione="proprieta">
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('proprieta')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli di proprietà<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
+                <div class="grid grid-3" id="cavalli-grid-proprieta"></div>
+                <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
+              </div>
+              <div class="cavalli-sezione" data-sezione="pensione">
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('pensione')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli in pensione<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
+                <div class="grid grid-3" id="cavalli-grid-pensione"></div>
+                <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
+              </div>
+              <div class="cavalli-sezione" data-sezione="soci">
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('soci')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli di soci/istruttori<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
+                <div class="grid grid-3" id="cavalli-grid-soci"></div>
+                <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
+              </div>
+            </div>
+            <div class="empty-state" id="cavalli-empty" style="display:none">
+              <i class="fa-solid fa-horse-head"></i><div>Nessun cavallo registrato. Aggiungi il primo.</div>
+            </div>
+            <div id="cavalli-usciti"></div>
+
+            <!-- BOX / STALLA -->
+            <section class="box-sezione" id="box-sezione">
+              <div class="box-stalla-barra" id="box-stalla-barra" style="display:none;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
+                <div><div class="box-orologio" id="box-orologio">--:--</div><div style="color:var(--muted);font-size:13px" id="box-stalla-centro"></div></div>
+                <button class="btn btn-outline" onclick="boxModalitaStalla(false)"><i class="fa-solid fa-compress"></i> Esci dalla modalità stalla</button>
+              </div>
+              <div class="box-testa">
+                <div>
+                  <h2><span class="page-icon"><i class="fa-solid fa-warehouse"></i></span> Box / Stalla</h2>
+                  <div class="box-conta" id="box-conta"></div>
+                </div>
+                <div class="box-azioni">
+                  <button class="btn btn-outline btn-sm" id="box-btn-impost" onclick="boxApriImpostazioni()" data-tip="Scegli le icone del giorno da mostrare nei box"><i class="fa-solid fa-sliders"></i> Icone del giorno</button>
+                  <button class="btn btn-outline btn-sm" onclick="boxModalitaStalla(true);document.getElementById('box-stalla-centro').textContent=currentCentro?.nome||''" data-tip="Schermo intero per un tablet o un display in scuderia: si aggiorna da solo"><i class="fa-solid fa-expand"></i> Modalità stalla</button>
+                </div>
+              </div>
+              <div class="box-griglia" id="box-griglia"></div>
+            </section>
+          </div>
+
+          <!-- DETTAGLIO CAVALLO -->
+          <div id="cavalli-detail-view" style="display:none">
+            <button class="back-link" onclick="closeCavalloDetail()"><i class="fa-solid fa-arrow-left"></i> Torna ai cavalli</button>
+            <div class="page-header">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <div id="detail-cavallo-foto" style="width:64px;height:64px;border-radius:var(--radius);background:var(--muted-bg);flex-shrink:0;background-size:cover;background-position:center"></div>
+                <div>
+                  <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> <span id="detail-cavallo-nome">—</span></h1>
+                  <p id="detail-cavallo-sub">—</p>
+                  <p id="detail-cavallo-info" style="margin:2px 0 0;color:var(--muted);font-size:13px"></p>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline btn-sm btn-variazione" id="btn-modifica-cavallo" onclick="openCavalloForm(currentCavalloId)"><i class="fa-solid fa-pen"></i> Modifica</button>
+                <button class="btn btn-danger btn-sm" onclick="askDeleteCavallo()"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <h3 style="margin-top:0">Scheda cavallo (PDF + QR)</h3>
+              <p id="scheda-pdf-status" style="margin:0 0 12px;color:var(--muted);font-size:12.5px">Nessuna scheda generata ancora.</p>
+              <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+                <div style="display:flex;flex-direction:column;gap:8px;min-width:190px">
+                  <button class="btn btn-primary btn-sm" id="scheda-pdf-btn" onclick="handleSchedaPdf()"><i class="fa-solid fa-file-pdf"></i> Genera PDF</button>
+                  <div id="scheda-pdf-azioni" style="display:none;flex-direction:column;gap:8px">
+                    <button class="btn btn-outline btn-sm" onclick="scaricaSchedaPdf()"><i class="fa-solid fa-download"></i> Scarica PDF</button>
+                    <button class="btn btn-outline btn-sm" onclick="apriInviaSchedaChat()"><i class="fa-solid fa-paper-plane"></i> Invia in chat</button>
+                    <button class="btn btn-outline btn-sm" onclick="stampaSchedaPdf()"><i class="fa-solid fa-print"></i> Stampa</button>
+                  </div>
+                </div>
+                <div id="scheda-qr-box" style="display:none">
+                  <div id="scheda-qr"></div>
+                  <p style="margin:6px 0 0;color:var(--muted);font-size:11.5px;text-align:center">Scansiona per aprire il PDF</p>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <h3 style="margin-top:0">Scadenzario sanitario</h3>
+              <div class="grid grid-2" id="scadenzario-grid"></div>
+            </div>
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <h3 style="margin:0">Storico eventi</h3>
+                <button class="btn btn-outline btn-sm" id="btn-registra-evento" onclick="openEventoForm()"><i class="fa-solid fa-plus"></i> Registra evento</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Tipo</th><th>Data</th><th>Scadenza</th><th>Note</th><th></th></tr></thead>
+                  <tbody id="eventi-table-body"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="eventi-empty" style="display:none">
+                <i class="fa-solid fa-clipboard-list"></i><div>Nessun evento registrato ancora.</div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">
+                <h3 style="margin:0">Allegati</h3>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('scud-allegati-file').click()"><i class="fa-solid fa-paperclip"></i> Carica PDF o foto</button>
+              </div>
+              <input type="file" id="scud-allegati-file" accept="application/pdf,image/*" style="display:none" onchange="caricaAllegatoScud(this)">
+              <div id="scud-allegati"><div style="color:var(--muted);font-size:13px">Caricamento…</div></div>
+              <p style="margin:10px 0 0;color:var(--muted);font-size:12px">Lastre, referti, foto: li vedono anche il proprietario collegato e il maniscalco che segue il cavallo. Si possono eliminare solo i file caricati da chi è collegato ora.</p>
+            </div>
+          </div>
+        </div>

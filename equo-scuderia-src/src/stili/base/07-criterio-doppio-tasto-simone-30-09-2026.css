@@ -1,0 +1,6 @@
+/* CRITERIO DOPPIO TASTO (Simone 30/09/2026): VERDE Equo con bordo giallo = conferma · GIALLO Equo con bordo bianco = variazione (modifica/cambia/sposta) */
+.btn.btn-conferma,.btn-conferma{background:#1d4a35!important;color:#fff!important;border:2px solid #e8b04b!important}
+.btn.btn-conferma:hover{filter:brightness(1.08)}
+.btn.btn-variazione,.btn-variazione{background:#e8b04b!important;color:#14312a!important;border:2px solid #fff!important;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.btn.btn-variazione:hover{filter:brightness(1.04)}
+.athena-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}

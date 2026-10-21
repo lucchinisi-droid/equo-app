@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-mag-ubicazione" onclick="closeOut(event,'modal-mag-ubicazione')">
+  <div class="modal">
+    <div class="modal-title"><span id="mag-ubi-titolo">Nuovo deposito</span> <span class="x" onclick="closeModal('modal-mag-ubicazione')">✕</span></div>
+    <div class="field"><label>Tipo</label><select class="input" id="mag-ubi-tipo" onchange="magUbiTipoCambiato()">
+      <option value="deposito">Deposito (es. Fienile, Selleria, Magazzino mangimi)</option>
+      <option value="zona">Zona / stanza dentro un deposito</option>
+      <option value="scaffale">Scaffale / armadio / ripiano</option></select></div>
+    <div class="field" id="mag-ubi-parent-box"><label>Dentro a</label><select class="input" id="mag-ubi-parent"></select></div>
+    <div class="field"><label>Nome</label><input class="input" id="mag-ubi-nome" maxlength="80" placeholder="Es. Fienile, Armadio 2, Ripiano alto"></div>
+    <div class="field"><label>Note</label><input class="input" id="mag-ubi-note" maxlength="500" placeholder="Facoltative"></div>
+    <div class="auth-error" id="mag-ubi-err"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger" id="mag-ubi-elimina" style="display:none" onclick="magEliminaUbicazione()"><i class="fa-solid fa-trash"></i></button>
+      <button class="btn btn-primary" style="flex:1" onclick="magSalvaUbicazione()"><i class="fa-solid fa-check"></i> Salva</button>
+    </div>
+  </div>
+</div>
+

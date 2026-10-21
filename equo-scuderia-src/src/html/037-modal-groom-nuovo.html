@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-groom-nuovo" onclick="closeOut(event,'modal-groom-nuovo')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">Aggiungi groom <span class="x" onclick="closeModal('modal-groom-nuovo')">✕</span></div>
+    <div class="field"><label>Nome</label><input class="input" id="groom-nome" maxlength="60" placeholder="Es. Rahim"></div>
+    <div class="field"><label>Lingua dell'app</label><select class="input" id="groom-lingua">
+      <option value="it">Italiano</option><option value="en">English</option><option value="ro">Română (rumeno)</option><option value="hi">हिन्दी (hindi)</option>
+      <option value="pa">ਪੰਜਾਬੀ (punjabi)</option><option value="bn">বাংলা (bengalese)</option><option value="ar">العربية (arabo)</option></select>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Il groom può cambiarla quando vuole dall'app.</div></div>
+    <div id="groom-err" style="display:none;color:#a5281b;font-size:13px;margin:0 0 10px"></div>
+    <button class="btn btn-primary" style="width:100%" id="groom-salva" onclick="groomSalvaNuovo()"><i class="fa-solid fa-qrcode"></i> Crea e mostra il QR</button>
+  </div>
+</div>
+<!-- MODAL: QR personale del groom -->

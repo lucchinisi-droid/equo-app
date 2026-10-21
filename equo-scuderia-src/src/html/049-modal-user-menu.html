@@ -1,0 +1,21 @@
+<div class="modal-overlay" id="modal-user-menu" onclick="closeOut(event,'modal-user-menu')">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-title">Il tuo profilo <span class="x" onclick="closeModal('modal-user-menu')">✕</span></div>
+    <div class="field">
+      <label>Aspetto</label>
+      <div class="theme-toggle">
+        <div class="theme-opt" id="theme-opt-light" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> Giorno</div>
+        <div class="theme-opt" id="theme-opt-dark" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> Notte</div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeModal('modal-user-menu');openLegalPage('privacy')">
+      <i class="fa-solid fa-scale-balanced"></i> Privacy, Cookie e Termini
+    </button>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeModal('modal-user-menu');logout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
+    </button>
+    <div id="menu-versione-scuderia" style="text-align:center;font-size:11px;margin-top:14px;color:var(--muted);opacity:.85">Equo Scuderia v1.0</div>
+  </div>
+</div>
+
+<!-- MODAL: dettaglio statistica home -->

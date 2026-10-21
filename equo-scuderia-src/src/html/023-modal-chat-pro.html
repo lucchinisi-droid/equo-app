@@ -1,0 +1,21 @@
+<div class="modal-overlay" id="modal-chat-pro" onclick="closeOut(event,'modal-chat-pro')">
+  <div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh">
+    <div class="modal-title"><span><i class="fa-solid fa-hammer" style="color:var(--muted);margin-right:6px"></i><span id="chat-pro-nome">Maniscalco</span></span> <span class="x" onclick="chiudiChatProfessionista()">✕</span></div>
+    <div id="chat-pro-messages" style="flex:1;overflow-y:auto;min-height:240px;max-height:380px;display:flex;flex-direction:column;gap:8px;padding:6px 2px;margin-bottom:10px"></div>
+    <div id="chat-pro-rec" style="display:none;align-items:center;gap:10px;margin-bottom:8px;padding:8px 12px;border-radius:12px;background:var(--danger-bg);color:var(--danger);font-size:13px;font-weight:600">
+      <span style="width:9px;height:9px;border-radius:50%;background:var(--danger)"></span>
+      <span style="flex:1">Registrazione… <span id="chat-pro-rec-timer">0:00</span></span>
+      <button class="btn btn-ghost btn-sm" onclick="annullaAudioPro()">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="inviaAudioPro()"><i class="fa-solid fa-paper-plane"></i> Invia</button>
+    </div>
+    <div style="display:flex;gap:6px" id="chat-pro-bar">
+      <input type="file" id="chat-pro-file" accept="image/*,video/*,application/pdf,.pdf" style="display:none" onchange="inviaAllegatoPro(event)">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('chat-pro-file').click()" title="Allega foto, video o PDF"><i class="fa-solid fa-paperclip"></i></button>
+      <button class="btn btn-ghost btn-sm" onclick="avviaAudioPro()" title="Nota vocale"><i class="fa-solid fa-microphone"></i></button>
+      <input class="input" id="chat-pro-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaTestoPro()}">
+      <button class="btn btn-primary btn-sm" onclick="inviaTestoPro()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: appuntamenti con un maniscalco collegato (doppia conferma, più cavalli) -->

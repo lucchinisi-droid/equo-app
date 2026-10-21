@@ -1,0 +1,15 @@
+        <div class="module-page" id="module-statistiche" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-chart-line"></i></span> Statistiche</h1>
+              <p>I numeri del tuo centro, letti da Merlino: dove guadagni, chi rischi di perdere, cosa fa la concorrenza.</p>
+            </div>
+            <div class="st-azioni">
+              <label class="vs-toggle" data-tip="Semplice: 4 numeri e le cose da fare oggi. Completa: tutte le analisi."><span>Semplice</span><input type="checkbox" id="vs-statistiche" onchange="vistaCambia('statistiche', this.checked)"><i></i><span>Completa</span></label>
+              <button class="btn btn-outline" id="st-btn-pdf" onclick="stReportPdf()"><i class="fa-solid fa-file-pdf"></i> Report PDF</button>
+              <button class="btn btn-primary" id="st-btn-merlino" onclick="apriAgente('merlino')"><i class="fa-solid fa-hat-wizard"></i> Chiedi a Merlino</button>
+            </div>
+          </div>
+          <div id="st-body"></div>
+        </div>
+        <!-- MODULO: GESTIONE GROOM (app Equo Groom per il personale di stalla: QR personale + PIN) -->

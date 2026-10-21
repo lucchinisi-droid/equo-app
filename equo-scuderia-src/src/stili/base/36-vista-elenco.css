@@ -1,0 +1,9 @@
+/* vista elenco */
+.mag-list .mag-art{flex-direction:row;align-items:center;gap:14px;padding:10px 14px}
+.mag-list{grid-template-columns:1fr}
+.mag-list .mag-art .top{flex:1.4;min-width:0}
+.mag-list .mag-art .qta{width:120px}
+.mag-list .mag-art .mag-livello{flex:1;min-width:80px}
+.mag-list .mag-art .meta,.mag-list .mag-art .copertura{display:none}
+.mag-list .mag-art .azioni{width:150px;margin:0}
+@media (max-width:760px){.mag-list .mag-art .mag-livello{display:none}.mag-list .mag-art .azioni{width:auto}.mag-list .mag-art .qta{width:auto}}

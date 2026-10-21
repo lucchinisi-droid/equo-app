@@ -1,0 +1,17 @@
+<div class="modal-overlay" id="modal-hard-reset" onclick="closeOut(event,'modal-hard-reset')">
+  <div class="modal">
+    <div class="modal-title">Conferma Hard Reset <span class="x" onclick="closeModal('modal-hard-reset')">✕</span></div>
+    <p id="hard-reset-desc" style="color:var(--muted);font-size:13.5px"></p>
+    <div class="field">
+      <label>Codice Equo (6 cifre)</label>
+      <input class="input" id="hard-reset-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" style="letter-spacing:.35em;font-size:18px;text-align:center">
+    </div>
+    <div class="auth-error" id="hard-reset-error"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-hard-reset')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" id="hard-reset-confirm-btn" onclick="confirmHardReset()">Cancella definitivamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: aggiungi maniscalco (codice professionista) -->

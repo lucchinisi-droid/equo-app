@@ -1,0 +1,17 @@
+/* ---------- AUTH ---------- */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--muted-bg)}
+.auth-card{width:100%;max-width:400px;background:var(--surface);border-radius:var(--radius-lg);
+  border:1px solid var(--border);box-shadow:var(--shadow-md);padding:32px 28px}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.auth-logo img{height:32px;width:auto;background:#fff;border-radius:8px;padding:4px 6px}
+.auth-logo .t{font-weight:700;font-size:18px}
+.auth-tag{color:var(--muted);font-size:13.5px;margin:0 0 22px}
+.auth-tabs{display:flex;background:var(--muted-bg);border-radius:var(--radius-full);padding:4px;margin-bottom:20px}
+.auth-tab{flex:1;text-align:center;padding:9px;border-radius:var(--radius-full);cursor:pointer;
+  font-size:13.5px;font-weight:600;color:var(--muted)}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.auth-error{background:var(--danger-bg);color:var(--danger);padding:10px 12px;border-radius:var(--radius);
+  font-size:13px;margin-bottom:14px;display:none}
+.auth-demo{text-align:center;margin-top:16px}
+.auth-demo a{font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer}
+

@@ -1,0 +1,31 @@
+<div class="modal-overlay" id="modal-mag-categoria" onclick="closeOut(event,'modal-mag-categoria')">
+  <div class="modal mag-wide">
+    <div class="modal-title"><span id="mag-cat-titolo">Nuova categoria</span> <span class="x" onclick="closeModal('modal-mag-categoria')">✕</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 160px;gap:16px;align-items:start" class="mag-cat-form">
+      <div>
+        <div class="field"><label>Nome</label><input class="input" id="mag-cat-nome" maxlength="60" placeholder="Es. Trattori e mezzi, Bar e ristoro, Eventi" oninput="magCatAnteprima()"></div>
+        <div class="field"><label>Cosa contiene</label>
+          <div class="mag-seg" style="margin:0">
+            <label style="flex:1;cursor:pointer"><input type="radio" name="mag-cat-tipo" value="consumo" onchange="magCatAnteprima()" style="margin-right:6px">Scorte che si consumano</label>
+            <label style="flex:1;cursor:pointer"><input type="radio" name="mag-cat-tipo" value="durevole" onchange="magCatAnteprima()" style="margin-right:6px">Beni durevoli</label>
+          </div>
+          <p style="color:var(--muted);font-size:12px;margin:6px 0 0">Scorte: soglia minima, giorni di scorta e riordini. Durevoli (divise, attrezzi, mezzi): condizione in ordine / da lavare / da riparare / da sostituire.</p>
+        </div>
+      </div>
+      <div><label style="display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Anteprima</label>
+        <div class="mag-cat" id="mag-cat-anteprima" style="cursor:default"></div></div>
+    </div>
+    <div class="field"><label>Icona</label><div class="mag-scelte" id="mag-cat-icone"></div></div>
+    <div class="field"><label>Colore</label><div class="mag-scelte" id="mag-cat-colori"></div></div>
+    <div class="mag-2col">
+      <div class="field"><label>Sottocategorie <span style="text-transform:none;font-weight:500">(separate da virgola)</span></label><input class="input" id="mag-cat-sub" placeholder="Es. Carburante, Ricambi, Olio"></div>
+      <div class="field"><label>Unità di misura predefinita</label><select class="input" id="mag-cat-unita"></select></div>
+    </div>
+    <div class="auth-error" id="mag-cat-err"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" id="mag-cat-nascondi" style="display:none" onclick="magNascondiCategoria()"></button>
+      <button class="btn btn-primary" style="flex:1" onclick="magSalvaCategoria()"><i class="fa-solid fa-check"></i> Salva categoria</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,45 @@
+<div class="modal-overlay" id="modal-mag-movimento" onclick="closeOut(event,'modal-mag-movimento')">
+  <div class="modal">
+    <div class="modal-title"><span><i class="fa-solid fa-bolt" style="color:var(--primary)"></i> Movimento rapido</span> <span class="x" onclick="closeModal('modal-mag-movimento')">✕</span></div>
+    <div class="mag-seg" id="mag-mov-seg">
+      <button data-t="scarico" class="scarico" onclick="magMovTipo('scarico')"><i class="fa-solid fa-arrow-up-from-bracket"></i> Scarico</button>
+      <button data-t="carico" class="carico" onclick="magMovTipo('carico')"><i class="fa-solid fa-truck-ramp-box"></i> Carico</button>
+      <button data-t="rettifica" onclick="magMovTipo('rettifica')"><i class="fa-solid fa-scale-balanced"></i> Inventario</button>
+      <button data-t="trasferimento" onclick="magMovTipo('trasferimento')"><i class="fa-solid fa-right-left"></i> Sposta</button>
+    </div>
+    <div class="field" id="mag-mov-pick-box">
+      <label>Articolo</label>
+      <div class="mag-search"><i class="fa-solid fa-magnifying-glass"></i><input class="input" id="mag-mov-q" placeholder="Cerca: fieno, ferri, coperta…" oninput="magMovRenderPick()" autocomplete="off"></div>
+      <div class="mag-pick-list" id="mag-mov-pick"></div>
+    </div>
+    <div id="mag-mov-corpo" style="display:none">
+      <div class="mag-pick sel" id="mag-mov-sel" onclick="magMovCambiaArticolo()" title="Cambia articolo"></div>
+      <div id="mag-mov-q-box">
+        <div style="text-align:center;font-size:12px;color:var(--muted);margin:12px 0 2px" id="mag-mov-q-label">Quantità</div>
+        <div class="mag-stepper">
+          <button type="button" onclick="magMovStep(-1)">−</button>
+          <input type="number" id="mag-mov-qta" inputmode="decimal" min="0" step="any" value="1">
+          <button type="button" onclick="magMovStep(1)">+</button>
+          <span class="u" id="mag-mov-unita">pz</span>
+        </div>
+        <div class="mag-rapidi" id="mag-mov-rapidi"></div>
+        <div style="text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:10px" id="mag-mov-anteprima"></div>
+      </div>
+      <div id="mag-mov-extra-carico" class="mag-2col">
+        <div class="field"><label>Lotto</label><input class="input" id="mag-mov-lotto" placeholder="Facoltativo"></div>
+        <div class="field"><label>Scadenza</label><input class="input" type="date" id="mag-mov-scadenza"></div>
+        <div class="field"><label>Costo unitario €</label><input class="input" type="number" step="0.01" min="0" id="mag-mov-costo" placeholder="Facoltativo"></div>
+        <div class="field"><label>Fornitore</label><select class="input" id="mag-mov-fornitore"></select></div>
+      </div>
+      <div id="mag-mov-extra-scarico">
+        <div class="field"><label>Per quale cavallo? <span style="text-transform:none;font-weight:500">(facoltativo)</span></label><select class="input" id="mag-mov-cavallo"></select></div>
+        <div style="font-size:12px;color:var(--muted);margin:-6px 0 12px" id="mag-mov-lotto-info"></div>
+      </div>
+      <div id="mag-mov-extra-sposta" class="field"><label>Nuova ubicazione</label><select class="input" id="mag-mov-ubicazione"></select></div>
+      <div class="field"><label>Nota</label><input class="input" id="mag-mov-nota" placeholder="Facoltativa" maxlength="500"></div>
+      <div class="auth-error" id="mag-mov-err"></div>
+      <button class="btn btn-primary btn-block" id="mag-mov-salva" onclick="magSalvaMovimento()"><i class="fa-solid fa-check"></i> Registra</button>
+    </div>
+  </div>
+</div>
+

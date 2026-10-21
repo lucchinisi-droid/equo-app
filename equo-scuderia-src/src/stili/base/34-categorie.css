@@ -1,0 +1,27 @@
+/* categorie */
+.mag-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.mag-cat{position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:13px 13px 11px;cursor:pointer;text-align:left;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;overflow:hidden}
+.mag-cat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.mag-cat.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(63,93,58,.15)}
+.mag-cat .ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:9px;color:#fff}
+.mag-cat .ic svg{width:20px;height:20px}
+.mag-cat .nome{font-weight:700;font-size:13.5px;line-height:1.2}
+.mag-cat .info{font-size:11.5px;color:var(--muted);margin-top:3px}
+.mag-cat .mag-sem{position:absolute;top:13px;right:13px}
+.mag-cat .cnt{position:absolute;top:9px;right:28px;font-size:11px;font-weight:800;color:var(--danger)}
+.mag-cat .cnt.g{color:#a07400}
+.mag-cat .salute{height:5px;border-radius:5px;background:var(--muted-bg);margin-top:9px;display:flex;overflow:hidden}
+.mag-cat .salute i{display:block;height:100%}
+.mag-subcats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.mag-chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--text)}
+.mag-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.mag-chip .mag-sem{width:8px;height:8px;box-shadow:none}
+.mag-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.mag-search{flex:1;min-width:200px;position:relative}
+.mag-search i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px}
+.mag-search .input{padding-left:36px;border-radius:999px;background:var(--surface)}
+.mag-toolbar select.input{width:auto;border-radius:999px;background:var(--surface);padding:9px 12px}
+.mag-vista{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:var(--surface)}
+.mag-vista button{border:none;background:transparent;padding:9px 12px;cursor:pointer;color:var(--muted)}
+.mag-vista button.active{background:var(--muted-bg);color:var(--text)}

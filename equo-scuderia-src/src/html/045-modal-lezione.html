@@ -1,0 +1,25 @@
+<div class="modal-overlay" id="modal-lezione" onclick="closeOut(event,'modal-lezione')">
+  <div class="modal">
+    <div class="modal-title"><span id="lezione-modal-titolo">Nuova lezione</span> <span class="x" onclick="closeModal('modal-lezione')">✕</span></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data</label><input class="input" id="lez-data" type="date"></div>
+      <div class="field"><label>Ora inizio</label><input class="input" id="lez-ora" type="time"></div>
+    </div>
+    <div class="field"><label>Istruttore</label><select class="input" id="lez-istruttore"></select></div>
+    <div class="field"><label>Cavallo</label><select class="input" id="lez-cavallo" onchange="lezioneCavalloCambiato()"><option value="">Nessuno / da definire</option></select></div>
+    <div class="field"><label>Allievo / Proprietario</label><select class="input" id="lez-allievo" onchange="aggiornaCavalieriSuggeriti()"></select></div>
+    <div class="field"><label>Chi monta <span style="color:var(--muted);font-weight:400">(se diverso, es. figlio o figlia)</span></label>
+      <input class="input" id="lez-cavaliere" list="lez-cavalieri-suggeriti" maxlength="80" placeholder="Facoltativo, es. Sofia">
+      <datalist id="lez-cavalieri-suggeriti"></datalist></div>
+    <div class="field" id="lez-stato-field" style="display:none"><label>Stato</label>
+      <select class="input" id="lez-stato">
+        <option value="prenotata">Prenotata</option><option value="confermata">Confermata</option>
+        <option value="completata">Completata</option><option value="annullata">Annullata</option>
+      </select></div>
+    <div class="field"><label>Note</label><input class="input" id="lez-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="lezione-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveLezione()">Salva lezione</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina lezione -->

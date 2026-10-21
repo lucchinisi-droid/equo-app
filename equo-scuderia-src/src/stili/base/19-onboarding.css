@@ -1,0 +1,11 @@
+/* ---------- ONBOARDING ---------- */
+.onboard-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--muted-bg)}
+.onboard-card{width:100%;max-width:460px}
+.onboard-choice{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px;margin-bottom:14px;cursor:pointer;transition:border-color .15s ease}
+.onboard-choice:hover{border-color:var(--primary)}
+.onboard-choice .ic{width:40px;height:40px;border-radius:var(--radius);background:var(--secondary);
+  color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px}
+.onboard-choice h3{margin:0 0 4px;font-size:15.5px}
+.onboard-choice p{margin:0;color:var(--muted);font-size:13px}
+

@@ -1,0 +1,12 @@
+<div class="modal-overlay" id="modal-delete-lezione" onclick="closeOut(event,'modal-delete-lezione')">
+  <div class="modal">
+    <div class="modal-title">Annulla lezione <span class="x" onclick="closeModal('modal-delete-lezione')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questa lezione?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-lezione')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteLezione()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: nuovo pacchetto/abbonamento -->

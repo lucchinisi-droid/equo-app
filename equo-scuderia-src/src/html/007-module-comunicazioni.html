@@ -1,0 +1,34 @@
+        <div class="module-page" id="module-comunicazioni" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-comments"></i></span> Messaggi</h1>
+              <p>Messaggi a tutto il centro, per ruolo o a un singolo membro.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-nuovo-messaggio" onclick="openMessaggioForm()"><i class="fa-solid fa-plus"></i> Nuovo messaggio</button>
+          </div>
+          <div class="card" id="push-permission-banner" style="display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">
+            <div style="font-size:13px">Attiva le notifiche per non perdere i messaggi dei clienti, anche a schermo bloccato.</div>
+            <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="attivaNotifichePush()">Attiva</button>
+          </div>
+          <div class="card">
+            <div id="messaggi-list"></div>
+            <div class="empty-state" id="messaggi-empty" style="display:none">
+              <i class="fa-solid fa-comments"></i><div>Nessun messaggio ancora. Scrivi il primo al tuo team.</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:20px">
+            <div class="page-header" style="margin-bottom:14px">
+              <div>
+                <h2 style="font-size:16px;margin:0">Chatta con i tuoi clienti</h2>
+                <p style="margin:2px 0 0">Chat 1-a-1 con proprietari e professionisti collegati al centro che usano Equo App.</p>
+              </div>
+              <button class="btn btn-primary" id="btn-nuova-chat-cliente" onclick="openNuovaChatClienteForm()"><i class="fa-solid fa-plus"></i> Nuova chat</button>
+            </div>
+            <input class="input" id="clienti-chat-search" placeholder="Cerca per nome o cognome..." oninput="renderClientiChatList()" style="margin-bottom:12px">
+            <div id="clienti-chat-list"></div>
+            <div class="empty-state" id="clienti-chat-empty" style="display:none">
+              <i class="fa-solid fa-user-group"></i><div>Nessun cliente collegato ancora. Aggiungi il "Codice app proprietario" quando crei o modifichi un cavallo per collegarlo.</div>
+            </div>
+          </div>
+        </div>

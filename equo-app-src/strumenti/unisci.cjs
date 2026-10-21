@@ -4,8 +4,10 @@
 const fs = require("fs");
 const path = require("path");
 const RADICE = path.resolve(__dirname, "..", "..");
-const SRC = path.join(RADICE, "equo-app-src", "src");
-const DEST = path.join(RADICE, "equo-app", "index.html");
+// --app equo-scuderia per Equo Scuderia (sorgenti in equo-scuderia-src/src); senza: l'app Equo
+const APP = process.argv.includes("--app") ? process.argv[process.argv.indexOf("--app") + 1] : "equo-app";
+const SRC = path.join(RADICE, APP + "-src", "src");
+const DEST = path.join(RADICE, APP, "index.html");
 const modello = fs.readFileSync(path.join(SRC, "index.modello.html"), "utf8");
 const usati = new Set();
 const out = modello.replace(/<!--@ ([^ ]+) -->/g, (_, rel) => {
@@ -18,14 +20,14 @@ const tutti = []; (function giro(d, pre){ for(const f of fs.readdirSync(d, { wit
 const orfani = tutti.filter(r => !usati.has(r));
 if(orfani.length){ console.error("File non collegati nel modello:\n- " + orfani.join("\n- ")); process.exit(1); }
 // regola di confinamento: cosa mostra la Home dei professionisti si decide SOLO in stili/10-regole-ruoli.css
-const violazioni = tutti.filter(r => r.startsWith("stili/") && r !== "stili/10-regole-ruoli.css")
+const violazioni = APP !== "equo-app" ? [] : tutti.filter(r => r.startsWith("stili/") && r !== "stili/10-regole-ruoli.css")
   .filter(r => /#page-pro-home\s*>/.test(fs.readFileSync(path.join(SRC, r), "utf8")));
 if(violazioni.length){ console.error("Regole su \"#page-pro-home > ...\" fuori da stili/10-regole-ruoli.css:\n- " + violazioni.join("\n- ")); process.exit(1); }
 if(process.argv.includes("--verifica")){
   const ora = fs.readFileSync(DEST, "utf8");
-  if(ora !== out){ console.error("equo-app/index.html NON corrisponde ai sorgenti in equo-app-src/src: rilanciare unisci.cjs"); process.exit(1); }
-  console.log("OK: equo-app/index.html corrisponde ai sorgenti (" + usati.size + " file).");
+  if(ora !== out){ console.error(APP + "/index.html NON corrisponde ai sorgenti in " + APP + "-src/src: rilanciare unisci.cjs"); process.exit(1); }
+  console.log("OK: " + APP + "/index.html corrisponde ai sorgenti (" + usati.size + " file).");
 } else {
   fs.writeFileSync(DEST, out);
-  console.log("Scritto equo-app/index.html da " + usati.size + " file (" + out.length + " caratteri).");
+  console.log("Scritto " + APP + "/index.html da " + usati.size + " file (" + out.length + " caratteri).");
 }

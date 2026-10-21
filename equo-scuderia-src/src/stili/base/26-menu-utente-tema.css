@@ -1,0 +1,6 @@
+/* ---------- MENU UTENTE / TEMA ---------- */
+.theme-toggle{display:flex;background:var(--muted-bg);border-radius:var(--radius-full);padding:4px;margin-top:6px}
+.theme-opt{flex:1;text-align:center;padding:9px;border-radius:var(--radius-full);cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--muted)}
+.theme-opt.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+

@@ -1,0 +1,42 @@
+<div class="modal-overlay" id="modal-member" onclick="closeOut(event,'modal-member')">
+  <div class="modal">
+    <div class="modal-title">Modifica membro <span class="x" onclick="closeModal('modal-member')">✕</span></div>
+    <div class="field"><label>Nome visualizzato</label><input class="input" id="member-nome" placeholder="Nome e cognome"></div>
+    <div class="field">
+      <label>Ruolo</label>
+      <select class="input" id="member-ruolo" onchange="onMemberRuoloChange()">
+        <option value="istruttore">Istruttore</option>
+        <option value="veterinario">Veterinario</option>
+        <option value="maniscalco">Maniscalco</option>
+        <option value="allievo">Allievo/Genitore</option>
+        <option value="collaboratore">Collaboratore (segreteria)</option>
+        <option value="admin">Amministratore</option>
+      </select>
+    </div>
+    <div class="field" id="member-livello-field">
+      <label>Livello permessi</label>
+      <select class="input" id="member-livello" onchange="onMemberLivelloChange()">
+        <option value="1">Livello 1 — Sola lettura + post-it</option>
+        <option value="2">Livello 2 — Modifica dati base</option>
+        <option value="3">Livello 3 — Personalizzato</option>
+      </select>
+    </div>
+    <p id="member-livello-admin-note" style="display:none;color:var(--muted);font-size:12.5px;margin:-6px 0 14px">Il ruolo Amministratore ha sempre tutti i permessi (Livello Admin), incluso l'Hard Reset.</p>
+    <div class="field" id="member-permessi-field" style="display:none">
+      <label>Permessi personalizzati</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-cavalli"> Modifica/cancellazione cavalli</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-eventi"> Modifica/cancellazione eventi sanitari</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-lezioni"> Gestione lezioni</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-pacchetti"> Gestione pacchetti</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-messaggi"> Invio messaggi broadcast</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-contatti"> Gestione contatti utili</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:13.5px"><input type="checkbox" id="perm-fiscali"> Visualizza dati societari</label>
+      </div>
+    </div>
+    <div class="auth-error" id="member-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveMember()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL: nuovo/modifica contatto utile -->

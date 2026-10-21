@@ -1,0 +1,25 @@
+<div class="modal-overlay" id="modal-legal" onclick="closeOut(event,'modal-legal')">
+  <div class="modal" style="max-width:460px;display:flex;flex-direction:column;max-height:86vh">
+    <div class="modal-title">Informazioni legali <span class="x" onclick="closeModal('modal-legal')">✕</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <div class="btn btn-outline btn-sm" id="legal-tab-privacy" style="flex:1" onclick="openLegalPage('privacy')">Privacy</div>
+      <div class="btn btn-outline btn-sm" id="legal-tab-cookie" style="flex:1" onclick="openLegalPage('cookie')">Cookie</div>
+      <div class="btn btn-outline btn-sm" id="legal-tab-termini" style="flex:1" onclick="openLegalPage('termini')">Termini</div>
+    </div>
+    <div id="legal-body" class="legal-body" style="flex:1;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div id="cookie-banner" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:200;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:460px;margin:0 auto">
+  <p style="font-size:12.5px;line-height:1.55;margin-bottom:12px">Usiamo cookie tecnici (necessari) e, solo con il tuo consenso, Google Analytics per capire come viene usato Equo Scuderia.
+    <a href="#" onclick="event.preventDefault();openLegalPage('cookie')">Maggiori info</a>.</p>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-outline btn-sm" style="flex:1" onclick="rejectCookies()">Rifiuta</button>
+    <button class="btn btn-primary btn-sm" style="flex:1" onclick="acceptCookies()">Accetta</button>
+  </div>
+</div>
+
+<!-- MODAL: nuovo/modifica cavallo -->

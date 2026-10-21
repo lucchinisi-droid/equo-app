@@ -1,0 +1,2 @@
+/* barra chiusa: il contatore diventa un pallino in alto a destra dell'icona */
+.sidebar.collapsed .nav-item .nav-unread-badge{position:absolute;top:1px;right:3px;margin:0;min-width:16px;height:16px;padding:0 4px;font-size:9px}

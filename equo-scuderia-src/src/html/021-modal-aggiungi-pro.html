@@ -1,0 +1,14 @@
+<div class="modal-overlay" id="modal-aggiungi-pro" onclick="closeOut(event,'modal-aggiungi-pro')">
+  <div class="modal">
+    <div class="modal-title">Aggiungi maniscalco <span class="x" onclick="closeModal('modal-aggiungi-pro')">✕</span></div>
+    <div class="field">
+      <label>Codice professionista</label>
+      <input class="input" id="pro-codice-input" placeholder="Es. EQUO-PRO-AB12C" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaInvitoProfessionista()">
+      <p style="color:var(--muted);font-size:12px;margin-top:4px">Il maniscalco trova il suo codice in Equo App (menu profilo). Riceverà l'invito e dovrà accettarlo. Se nel suo profilo mancano P.IVA o codice fiscale te lo segnaliamo, ma puoi collegarlo lo stesso.</p>
+    </div>
+    <div class="auth-error" id="pro-codice-error"></div>
+    <button class="btn btn-primary btn-block" id="pro-codice-btn" onclick="inviaInvitoProfessionista()">Invia invito</button>
+  </div>
+</div>
+
+<!-- MODAL: conferma chiusura collegamento professionista -->

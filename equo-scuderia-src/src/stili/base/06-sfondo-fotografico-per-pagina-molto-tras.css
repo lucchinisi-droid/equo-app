@@ -1,0 +1,13 @@
+/* sfondo fotografico per pagina: molto trasparente, dietro al contenuto (vedi SFONDI_PAGINE) */
+.athena-fab{position:fixed;right:22px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:60;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:#f4d3dc;color:#8c3a55;
+  display:flex;align-items:center;justify-content:center;font-size:31px;box-shadow:0 6px 18px rgba(140,58,85,.28)}
+.athena-fab:hover{background:#efc3cf}
+.athena-fab{padding:0;overflow:hidden}
+.athena-fab .athena-ic img{width:56px;height:56px;border-radius:50%;object-fit:cover;display:block}
+.athena-fab .athena-ic{display:block;line-height:0;animation:athenaMuovi 4.5s ease-in-out infinite;transform-origin:50% 60%}
+@keyframes athenaMuovi{0%,55%,100%{transform:rotate(0) scale(1)}63%{transform:rotate(-14deg) scale(1.12)}
+  72%{transform:rotate(12deg) scale(1.16)}81%{transform:rotate(-7deg) scale(1.08)}90%{transform:rotate(3deg) scale(1.02)}}
+@media (prefers-reduced-motion: reduce){.athena-fab .athena-ic{animation:none}}
+@media (max-width:900px){.athena-fab{right:16px;bottom:calc(84px + env(safe-area-inset-bottom))}}
+:root[data-theme="dark"] .athena-fab{background:#5a2a3a;color:#f4d3dc;box-shadow:0 6px 18px rgba(0,0,0,.45)}

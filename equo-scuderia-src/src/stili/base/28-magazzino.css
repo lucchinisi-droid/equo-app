@@ -1,0 +1,7 @@
+/* ================= MAGAZZINO ================= */
+.mag-sem{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 3px rgba(0,0,0,.04)}
+.mag-sem.verde{background:#2f8a4e}.mag-sem.giallo{background:#e0a100}.mag-sem.rosso{background:var(--danger)}
+.mag-sem.pulse{animation:magPulse 1.8s ease-in-out infinite}
+@keyframes magPulse{0%,100%{box-shadow:0 0 0 0 rgba(179,38,30,.45)}60%{box-shadow:0 0 0 7px rgba(179,38,30,0)}}
+.mag-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.st-azioni{align-items:center}

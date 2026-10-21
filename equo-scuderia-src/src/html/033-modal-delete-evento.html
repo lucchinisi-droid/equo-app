@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-delete-evento" onclick="closeOut(event,'modal-delete-evento')">
+  <div class="modal">
+    <div class="modal-title">Elimina evento <span class="x" onclick="closeModal('modal-delete-evento')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo evento dallo storico sanitario?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-evento')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteEvento()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: nuova lezione -->
+<!-- MODAL: Athena (segreteria AI) — chat vera: guida del gestionale + situazione del centro -->

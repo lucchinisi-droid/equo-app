@@ -1,0 +1,37 @@
+        <div class="module-page" id="module-home">
+          <div class="page-header home-testa">
+            <div>
+              <p class="home-hello">Bentornato<span id="home-dataora"></span></p>
+              <h1><span class="page-icon"><i class="fa-solid fa-gauge-high"></i></span> <span id="home-centro-name">Il tuo centro</span></h1>
+              <p>Panoramica rapida di tutto il gestionale.</p>
+            </div>
+            <div class="meteo-box" id="meteo-scud" aria-label="Meteo dei prossimi 7 giorni"></div>
+            <button type="button" class="scud-lente home" onclick="apriCercaScud()" aria-label="Cerca nel gestionale" title="Cerca (Ctrl+K)"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </div>
+          <div class="grid grid-3" id="home-stats" style="margin-bottom:26px"></div>
+          <h3 style="margin:0 0 10px">Accesso rapido</h3>
+          <div class="grid grid-3" id="home-quick-grid" style="margin-bottom:26px"></div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <h3 style="margin:0">Promemoria del centro ippico</h3>
+            <button class="btn btn-outline btn-sm" onclick="openNotaForm()"><i class="fa-solid fa-plus"></i> Nuovo post-it</button>
+          </div>
+          <div class="postit-board" id="note-board"></div>
+          <div class="empty-state" id="note-empty" style="display:none">
+            <i class="fa-solid fa-note-sticky"></i><div>Nessun promemoria ancora. Aggiungi il primo.</div>
+          </div>
+
+          <div class="card aiuto-card" onclick="apriTicketAssistenza()">
+            <div class="aiuto-ico"><i class="fa-solid fa-life-ring"></i></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:15px">Serve aiuto?</div>
+              <div style="color:var(--muted);font-size:13px;margin-top:2px;line-height:1.45">Per dubbi su come si usa il gestionale chiedi ad Athena; per problemi o richieste apri un ticket: ti rispondiamo via email.</div>
+            </div>
+            <div class="aiuto-az">
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();apriAthena()">Chiedi ad Athena</button>
+              <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();apriTicketAssistenza()">Apri un ticket</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULO: IL TUO CENTRO -->

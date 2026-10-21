@@ -1,0 +1,21 @@
+/* ---------- POST-IT ---------- */
+.postit-board{display:flex;flex-wrap:wrap;gap:16px}
+.postit{width:200px;min-height:130px;border-radius:6px;padding:16px 14px;position:relative;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);font-size:13.5px;line-height:1.45;
+  transform:rotate(var(--postit-rot,-1deg));color:#3a3320;white-space:pre-wrap;word-break:break-word;
+  cursor:grab;touch-action:none;user-select:none;transition:box-shadow .15s ease}
+.postit.dragging{opacity:.5;cursor:grabbing;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.postit.drag-over{outline:2px dashed var(--primary);outline-offset:3px}
+.postit .close-x{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;
+  background:rgba(0,0,0,.08);color:#3a3320}
+.postit .close-x:hover{background:rgba(0,0,0,.18)}
+.postit-giallo{background:#fdf3b0}
+.postit-rosa{background:#f9c9d8}
+.postit-blu{background:#bfe0f5}
+.color-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+.color-swatch.selected{border-color:var(--text)}
+.color-swatch.postit-giallo{background:#fdf3b0}
+.color-swatch.postit-rosa{background:#f9c9d8}
+.color-swatch.postit-blu{background:#bfe0f5}
+

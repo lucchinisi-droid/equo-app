@@ -1,0 +1,32 @@
+/* ---------- PACCHETTI (START / ADVANCE / PREMIUM): lucchetti, upsell, "Il tuo pacchetto" ---------- */
+.nav-lock{margin-left:auto;font-size:11px;color:var(--muted);opacity:.85}
+.nav-item.bloccato .nav-label{opacity:.72}
+.pk-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;padding:4px 10px;border-radius:999px;text-transform:uppercase}
+.pk-start{background:#e9e4d8;color:#5b5140}.pk-advance{background:#dfe9dc;color:#2f5a33}.pk-premium{background:linear-gradient(135deg,#f3e2b3,#d9b25c);color:#4a3508}
+.pk-completo,.pk-enterprise{background:linear-gradient(135deg,#1f3d2b,#3f6b4a);color:#f3e6c0}
+:root[data-theme="dark"] .pk-start{background:#3a352b;color:#e6dcc6}:root[data-theme="dark"] .pk-advance{background:#26402b;color:#cfe5cc}
+.pk-card{margin-top:16px}
+.pk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.pk-promo{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:14px;border-radius:10px;background:var(--muted-bg);border:1px solid var(--border);border-left:4px solid var(--primary);font-size:13.5px;line-height:1.45}
+.pk-promo>i{font-size:18px;color:var(--primary);margin-top:2px}
+.pk-promo a{color:var(--primary);font-weight:700;margin-left:4px}
+.pk-promo-fine{border-left-color:#d08a1e}
+.pk-uso{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:6px 0 14px}
+.pk-uso .riga{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:5px}
+.pk-uso .riga b{color:var(--text)}
+.pk-barra{height:7px;border-radius:99px;background:var(--muted-bg);overflow:hidden}
+.pk-barra i{display:block;height:100%;border-radius:99px;background:var(--primary)}
+.pk-barra i.warn{background:#d9a13b}.pk-barra i.full{background:#c0473d}
+.pk-funz{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px 14px;font-size:13px;margin:0 0 14px;padding:0;list-style:none}
+.pk-funz li{display:flex;gap:8px;align-items:center}
+.pk-funz li.no{color:var(--muted)}
+.pk-funz .fa-check{color:#3f7a45}.pk-funz .fa-lock{color:var(--muted);font-size:11px}
+.pk-confronto{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 14px}
+.pk-confronto th,.pk-confronto td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:center}
+.pk-confronto th:first-child,.pk-confronto td:first-child{text-align:left}
+.pk-confronto th.attuale{background:color-mix(in srgb,var(--primary) 12%,transparent);border-radius:8px 8px 0 0}
+.upsell-hero{text-align:center;padding:4px 0 10px}
+.upsell-hero .ic{width:58px;height:58px;margin:0 auto 10px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,#f3e2b3,#d9b25c);color:#4a3508}
+.upsell-lista{margin:10px 0 16px;padding:0;list-style:none;font-size:13.5px}
+.upsell-lista li{display:flex;gap:9px;margin:7px 0;line-height:1.45}.upsell-lista li i{color:#3f7a45;margin-top:3px}
+

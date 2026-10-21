@@ -1,0 +1,38 @@
+<div class="modal-overlay" id="modal-messaggio" onclick="closeOut(event,'modal-messaggio')">
+  <div class="modal">
+    <div class="modal-title">Nuovo messaggio <span class="x" onclick="closeModal('modal-messaggio')">✕</span></div>
+    <div class="field">
+      <label>Destinatari</label>
+      <select class="input" id="msg-destinatario" onchange="toggleDestinatarioMsg()">
+        <option value="tutti">Tutto il centro</option>
+        <option value="ruolo">Per ruolo</option>
+        <option value="singolo">Un membro specifico</option>
+      </select>
+    </div>
+    <div class="field" id="msg-ruolo-field" style="display:none">
+      <label>Ruolo</label>
+      <select class="input" id="msg-ruolo">
+        <option value="istruttore">Istruttori</option>
+        <option value="veterinario">Veterinari</option>
+        <option value="maniscalco">Maniscalchi</option>
+        <option value="allievo">Allievi/Genitori</option>
+      </select>
+    </div>
+    <div class="field" id="msg-membro-field" style="display:none">
+      <label>Membro</label>
+      <select class="input" id="msg-membro"></select>
+    </div>
+    <div class="field"><label>Messaggio</label><textarea class="input" id="msg-testo" rows="4" placeholder="Scrivi il messaggio..." style="resize:vertical"></textarea></div>
+    <div class="field">
+      <label>Priorità</label>
+      <select class="input" id="msg-priorita">
+        <option value="normale">Normale</option>
+        <option value="urgente">Urgente</option>
+      </select>
+    </div>
+    <div class="auth-error" id="messaggio-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveMessaggio()">Invia messaggio</button>
+  </div>
+</div>
+
+<script>

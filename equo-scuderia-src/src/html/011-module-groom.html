@@ -1,0 +1,24 @@
+        <div class="module-page" id="module-groom" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-id-badge"></i></span> Gestione Groom</h1>
+              <p>Il personale di stalla segna pasti, fieno, paddock e le altre attività dal telefono, nella sua lingua. Niente account: un QR personale e un PIN di 4 cifre.</p>
+            </div>
+            <div class="st-azioni">
+              <button class="btn btn-outline" onclick="groomStampaBox()" data-tip="Un QR da attaccare su ogni box: il groom lo inquadra e apre subito quel cavallo."><i class="fa-solid fa-print"></i> Stampa QR dei box</button>
+              <button class="btn btn-primary" id="groom-btn-agg" onclick="groomApriNuovo()"><i class="fa-solid fa-plus"></i> Aggiungi groom</button>
+            </div>
+          </div>
+          <div class="card groom-testa">
+            <div class="groom-cont"><b id="groom-contatore">0 di 0</b><span>groom attivi nel tuo pacchetto</span></div>
+            <div class="groom-passi">
+              <div><i class="fa-solid fa-qrcode"></i><span><b>1.</b> Aggiungi il groom e mandagli il suo QR (o fallo inquadrare dal tuo schermo).</span></div>
+              <div><i class="fa-solid fa-key"></i><span><b>2.</b> Al primo accesso sceglie un PIN di 4 cifre e la sua lingua.</span></div>
+              <div><i class="fa-solid fa-hand-pointer"></i><span><b>3.</b> Tocca le icone del box: qui vedi chi l'ha fatto e a che ora.</span></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="window.open('/groom?demo=1','_blank')"><i class="fa-solid fa-mobile-screen"></i> Prova l'app Groom</button>
+          </div>
+          <div class="card"><div id="groom-lista"></div>
+            <div class="empty-state" id="groom-vuoto" style="display:none"><i class="fa-solid fa-id-badge"></i><div>Nessun groom ancora. Tocca "Aggiungi groom": in un minuto è operativo.</div></div>
+          </div>
+        </div>

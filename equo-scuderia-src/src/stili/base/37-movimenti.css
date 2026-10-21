@@ -1,0 +1,14 @@
+/* movimenti */
+.mag-mov{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border)}
+.mag-mov:last-child{border-bottom:none}
+.mag-mov .ic{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.mag-mov .ic.carico{background:#e4efe1;color:#2c5228}.mag-mov .ic.scarico{background:var(--danger-bg);color:var(--danger)}
+.mag-mov .ic.rettifica{background:#e6eef8;color:#3b6ea5}.mag-mov .ic.trasferimento{background:#f3ecdf;color:#7a5a20}
+:root[data-theme="dark"] .mag-mov .ic.carico{background:#1f3320;color:#8fd08a}
+:root[data-theme="dark"] .mag-mov .ic.rettifica{background:#1c2a3a;color:#8fb6e0}
+:root[data-theme="dark"] .mag-mov .ic.trasferimento{background:#33291a;color:#e0c08a}
+.mag-mov .t{flex:1;min-width:0;font-size:13.5px}
+.mag-mov .t small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.mag-mov .q{font-weight:800;font-size:15px;white-space:nowrap}
+.mag-mov .q.piu{color:#2f8a4e}.mag-mov .q.meno{color:var(--danger)}
+.mag-giorno{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin:14px 0 2px}

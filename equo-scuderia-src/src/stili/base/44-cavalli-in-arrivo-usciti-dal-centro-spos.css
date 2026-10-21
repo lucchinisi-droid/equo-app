@@ -1,0 +1,11 @@
+/* cavalli in arrivo / usciti dal centro (Sposta cavallo) */
+.arrivo-card{border:2px solid var(--primary);border-radius:var(--radius-lg);padding:14px 16px;background:var(--surface);margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.arrivo-t{font-weight:800;font-size:15px;margin-bottom:4px}
+.arrivo-d{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.arrivo-d b{color:var(--text)}
+.arrivo-az{display:flex;gap:8px;flex-wrap:wrap}
+.usciti-box{margin:18px 0 6px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);padding:10px 14px}
+.usciti-box summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--muted)}
+.uscito-riga{display:flex;flex-direction:column;padding:8px 0;border-top:1px solid var(--border);font-size:13px}
+.uscito-riga span{color:var(--muted);font-size:12px}
+.usciti-nota{font-size:12px;color:var(--muted);margin:8px 0 0}

@@ -1,0 +1,6 @@
+/* sotto-navigazione */
+.mag-subnav{display:flex;gap:4px;background:var(--muted-bg);border:1px solid var(--border);border-radius:var(--radius-full);padding:4px;margin:6px 0 16px;overflow-x:auto;scrollbar-width:none}
+.mag-subnav::-webkit-scrollbar{display:none}
+.mag-subnav button{border:none;background:transparent;border-radius:var(--radius-full);padding:9px 16px;font-weight:600;font-size:13.5px;color:var(--muted);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.mag-subnav button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.mag-subnav .n{font-size:11px;background:var(--danger);color:#fff;border-radius:999px;padding:1px 7px}

@@ -1,0 +1,12 @@
+<div class="modal-overlay" id="modal-scollega-pro" onclick="closeOut(event,'modal-scollega-pro')">
+  <div class="modal">
+    <div class="modal-title">Chiudi collegamento <span class="x" onclick="closeModal('modal-scollega-pro')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px" id="scollega-pro-text"></p>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-scollega-pro')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" id="scollega-pro-btn" onclick="confermaScollegaProfessionista()">Chiudi collegamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: chat con un maniscalco collegato (messaggi_mascalcia via RPC) -->

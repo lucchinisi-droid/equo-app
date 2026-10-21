@@ -1,0 +1,32 @@
+<div class="modal-overlay" id="modal-ticket" onclick="closeOut(event,'modal-ticket')">
+  <div class="modal">
+    <div id="tk-form">
+      <div class="modal-title"><span><i class="fa-solid fa-life-ring" style="color:var(--primary)"></i> Apri un ticket</span> <span class="x" onclick="closeModal('modal-ticket')">✕</span></div>
+      <p style="color:var(--muted);font-size:13px;margin:-6px 0 14px;line-height:1.5">Raccontaci cosa succede: il team Equo ti risponde via email. Per dubbi veloci su come si usa il gestionale chiedi ad Athena (la civetta in basso a destra).</p>
+      <div class="field"><label>Di cosa si tratta?</label>
+        <select class="input" id="tk-categoria">
+          <option value="problema">Problema / errore</option>
+          <option value="domanda">Domanda sull'uso del gestionale</option>
+          <option value="account">Account e accesso</option>
+          <option value="pagamenti">Abbonamento e pagamenti</option>
+          <option value="suggerimento">Suggerimento</option>
+          <option value="altro">Altro</option>
+        </select></div>
+      <div class="field"><label>Oggetto</label><input class="input" id="tk-oggetto" maxlength="120" placeholder="es. Non vedo il pulsante Articolo in Magazzino"></div>
+      <div class="field"><label>Descrizione</label><textarea class="input" id="tk-descrizione" rows="5" maxlength="4000" placeholder="Cosa stavi facendo, cosa ti aspettavi e cosa è successo (eventuale messaggio di errore)"></textarea></div>
+      <div class="grid grid-2">
+        <div class="field"><label>Email per la risposta</label><input class="input" id="tk-email" type="email" maxlength="160"></div>
+        <div class="field"><label>Telefono <span style="color:var(--muted);font-weight:400">(facoltativo)</span></label><input class="input" id="tk-telefono" type="tel" maxlength="40" placeholder="+39 …"></div>
+      </div>
+      <div class="auth-error" id="tk-error"></div>
+      <button class="btn btn-primary btn-block" id="tk-btn" onclick="inviaTicketAssistenza()">Invia ticket</button>
+    </div>
+    <div id="tk-ok" style="display:none;text-align:center;padding:8px 4px">
+      <div style="font-size:40px;margin-bottom:6px">🛟</div>
+      <h3 style="margin:0 0 6px" id="tk-ok-titolo">Ticket inviato</h3>
+      <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 16px">Ti abbiamo mandato una email di conferma: la risposta del team arriverà allo stesso indirizzo.</p>
+      <button class="btn btn-primary btn-block" onclick="closeModal('modal-ticket')">Ok</button>
+    </div>
+  </div>
+</div>
+

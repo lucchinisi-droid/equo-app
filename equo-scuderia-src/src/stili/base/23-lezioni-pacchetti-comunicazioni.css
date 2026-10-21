@@ -1,0 +1,11 @@
+/* ---------- LEZIONI / PACCHETTI / COMUNICAZIONI ---------- */
+.lez-filter-btn{background:var(--muted-bg);color:var(--muted);border:none}
+.lez-filter-btn.active{background:var(--secondary);color:var(--primary-hover)}
+textarea.input{resize:vertical}
+.msg-item{border-bottom:1px solid var(--border);padding:14px 0}
+.msg-item:last-child{border-bottom:none}
+.msg-item .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:10px;flex-wrap:wrap}
+.msg-item .who{font-weight:600;font-size:13.5px}
+.msg-item .when{font-size:11.5px;color:var(--muted)}
+.msg-item .body{font-size:13.5px;color:var(--text);white-space:pre-wrap}
+

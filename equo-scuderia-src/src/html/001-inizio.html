@@ -1,0 +1,233 @@
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+  <!-- POP-UP DI SISTEMA: offline e aggiornamento disponibile -->
+  <div class="eq-pill-stato off" id="eq-pill-offline" onclick="mostraPopOffline()"><i class="fa-solid fa-wifi"></i> Offline · Equo non ti abbandona</div>
+  <div class="eq-pill-stato agg" id="eq-pill-agg" onclick="mostraPopAggiornamento()"><i class="fa-solid fa-arrows-rotate"></i> Aggiornamento disponibile</div>
+  <div class="eq-pop-overlay" id="eq-pop-offline" onclick="if(event.target.id==='eq-pop-offline')chiudiPop('offline')">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-off-tit">
+      <div class="ic off"><i class="fa-solid fa-wifi"></i></div>
+      <h3 id="eq-pop-off-tit">Sei offline</h3>
+      <p id="eq-pop-off-testo"></p>
+      <p class="piccolo" id="eq-pop-off-ora"></p>
+      <div class="az"><button class="btn btn-primary" onclick="chiudiPop('offline')">Ho capito, continuo</button></div>
+    </div>
+  </div>
+  <div class="eq-pop-overlay" id="eq-pop-agg" onclick="if(event.target.id==='eq-pop-agg')chiudiPop('agg')">
+    <div class="eq-pop" role="dialog" aria-modal="true" aria-labelledby="eq-pop-agg-tit">
+      <div class="ic agg"><i class="fa-solid fa-arrows-rotate"></i></div>
+      <h3 id="eq-pop-agg-tit">È disponibile un aggiornamento</h3>
+      <p id="eq-pop-agg-testo"></p>
+      <details id="eq-pop-agg-novita" style="display:none"><summary>Cosa c'è di nuovo</summary><ul id="eq-pop-agg-lista"></ul></details>
+      <div class="az">
+        <button class="btn btn-primary" onclick="aggiornaOra()">Aggiorna ora</button>
+        <button class="btn btn-ghost" onclick="chiudiPop('agg')">Più tardi</button>
+      </div>
+    </div>
+  </div>
+
+<!-- ═══════════ AUTH SCREEN ═══════════ -->
+<div class="screen active" id="screen-auth">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><img src="assets/logo-equo.png" alt="Equo"></div>
+      <p class="auth-tag">Il gestionale per centri ippici, maneggi e scuderie.</p>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">Accedi</div>
+        <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">Registrati</div>
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+      <form id="auth-form" onsubmit="submitAuth(event)">
+        <div class="field" id="field-nome" style="display:none">
+          <label>Nome e cognome</label>
+          <input class="input" id="auth-nome" placeholder="Il tuo nome">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input class="input" id="auth-email" type="email" placeholder="tuamail@esempio.it" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="input" id="auth-password" type="password" placeholder="••••••••" required minlength="6">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="auth-submit-btn">Accedi</button>
+      </form>
+      <div class="auth-demo">
+        <a onclick="startDemo()">Prova la demo (senza account)</a>
+      </div>
+      <div class="muted" style="font-size:11px;line-height:1.5;text-align:center;margin-top:12px;color:var(--muted)">
+        Continuando accetti i <a href="#" onclick="event.preventDefault();openLegalPage('termini')">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')">Informativa Privacy</a>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ONBOARDING SCREEN ═══════════ -->
+<div class="screen" id="screen-onboarding">
+  <div class="onboard-wrap">
+    <div class="onboard-card">
+      <div class="auth-logo"><img src="assets/logo-equo.png" alt="Equo"></div>
+      <div class="t" style="font-weight:700;font-size:18px;margin:8px 0 0">Benvenuto su Equo Scuderia</div>
+      <p class="auth-tag" style="margin-bottom:16px">Per iniziare, dicci come vuoi usare il gestionale.</p>
+
+      <div class="card" id="onb-consent-group" style="margin-bottom:18px;display:none">
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.55;cursor:pointer">
+          <input type="checkbox" id="onb-consent" style="margin-top:3px;flex-shrink:0">
+          <span>Accetto, anche per conto del centro/attività che rappresento, i <a href="#" onclick="event.preventDefault();openLegalPage('termini')">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')">Informativa Privacy</a> di Equo Scuderia.</span>
+        </label>
+      </div>
+      <div class="auth-error" id="onb-consent-error" style="display:none;margin-bottom:14px"></div>
+
+      <div class="onboard-choice" onclick="showOnboardCreate()">
+        <div class="ic"><i class="fa-solid fa-house-chimney"></i></div>
+        <h3>Gestisco un centro ippico</h3>
+        <p>Crea il profilo del tuo centro e diventa amministratore: potrai invitare istruttori, veterinari, maniscalchi e allievi.</p>
+      </div>
+      <div class="onboard-choice" onclick="showOnboardJoin()">
+        <div class="ic"><i class="fa-solid fa-key"></i></div>
+        <h3>Ho un codice invito</h3>
+        <p>Un centro ti ha invitato con un codice. Inseriscilo per entrare a far parte del team.</p>
+      </div>
+
+      <!-- Crea centro -->
+      <div class="card" id="onboard-create" style="display:none;margin-top:6px">
+        <div class="field">
+          <label>Nome del centro</label>
+          <input class="input" id="centro-nome" placeholder="Es. Centro Ippico Colleferro">
+        </div>
+        <div class="field">
+          <label>Indirizzo (facoltativo)</label>
+          <input class="input" id="centro-indirizzo" placeholder="Via, città">
+        </div>
+        <div class="field">
+          <label>Telefono (facoltativo)</label>
+          <input class="input" id="centro-telefono" placeholder="+39 ...">
+        </div>
+        <div class="auth-error" id="create-centro-error"></div>
+        <button class="btn btn-primary btn-block" onclick="createCentro()">Crea centro</button>
+      </div>
+
+      <!-- Unisciti -->
+      <div class="card" id="onboard-join" style="display:none;margin-top:6px">
+        <div class="field">
+          <label>Codice invito</label>
+          <input class="input" id="join-code" placeholder="Es. EQUO-XXXX" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>Il tuo ruolo</label>
+          <select class="input" id="join-ruolo">
+            <option value="istruttore">Istruttore</option>
+            <option value="veterinario">Veterinario</option>
+            <option value="maniscalco">Maniscalco</option>
+            <option value="allievo">Allievo / Genitore</option>
+          </select>
+        </div>
+        <div class="auth-error" id="join-centro-error"></div>
+        <button class="btn btn-primary btn-block" onclick="joinCentro()">Unisciti al centro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ APP SHELL (admin/staff) ═══════════ -->
+<div class="screen" id="screen-app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <nav class="sc-pill" id="sc-pill" aria-label="Menu principale">
+    <button data-m="home" onclick="showModule('home')"><svg viewBox="0 0 24 24"><path d="M3.5 11.2 12 4l8.5 7.2M5.8 9.6V20h12.4V9.6"/></svg><span>Home</span></button>
+    <button data-m="cavalli" onclick="showModule('cavalli')"><svg viewBox="0 0 24 24"><path d="M7 20v-5.5C5.6 13 5 11 5.4 9c.5-2.4 2.6-4 5-4h.9l1.3-1.4L13.6 5c2.9.5 4.9 2.6 5 5.4l.1 4.3-3.4 1.2L14.600 20"/></svg><span>Cavalli</span></button>
+    <button class="sc-ath" onclick="apriAthena()" aria-label="Athena"><i></i><span>Athena</span></button>
+    <button data-m="lezioni" onclick="showModule('lezioni')"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.500 3.500v4M15.500 3.500v4"/></svg><span>Lezioni</span></button>
+    <button data-m="comunicazioni" onclick="showModule('comunicazioni')"><svg viewBox="0 0 24 24"><path d="M4 6.500A2.500 2.500 0 0 1 6.500 4h11A2.500 2.500 0 0 1 20 6.500v7a2.500 2.500 0 0 1-2.500 2.500H11l-4.500 4v-4A2.500 2.500 0 0 1 4 13.500z"/></svg><span>Messaggi</span><b id="sc-pill-dot"></b></button>
+  </nav>
+  <button class="sc-piu" id="sc-piu" onclick="scPiu()" aria-label="Altre funzioni"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <div class="sc-velo" id="sc-velo" onclick="scPiu(false)"></div>
+  <div class="sc-menu" id="sc-menu"></div>
+
+  <div class="app-shell" id="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="assets/logo-equo.png" alt="Equo" class="brand-logo brand-logo-full">
+        <img src="assets/icona-equo.png" alt="Equo" class="brand-logo brand-logo-icon">
+        <div class="brand-text">
+          <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase">Scuderia</div>
+          <div class="sub" id="sidebar-centro-name">—</div>
+        </div>
+        <button class="sidebar-toggle" onclick="toggleSidebarCollapse()" title="Riduci/espandi menu">
+          <i class="fa-solid fa-chevron-left" id="sidebar-toggle-icon"></i>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-divider">Gestione</div>
+        <button class="nav-item active" data-module="home" onclick="showModule('home')">
+          <i class="fa-solid fa-gauge-high"></i> <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-module="centro" onclick="showModule('centro')">
+          <i class="fa-solid fa-house-chimney"></i> <span class="nav-label">Il tuo Centro</span>
+        </button>
+        <button class="nav-item" data-module="cavalli" onclick="showModule('cavalli')">
+          <i class="fa-solid fa-horse-head"></i> <span class="nav-label">Cavalli &amp; Salute</span> <span class="nav-unread-badge sem-verde" id="cavalli-nav-badge" title="Scadenze sanitarie">0</span>
+        </button>
+        <button class="nav-item" data-module="lezioni" onclick="showModule('lezioni')">
+          <i class="fa-solid fa-calendar-days"></i> <span class="nav-label">Lezioni &amp; Prenotazioni</span> <span class="nav-unread-badge sem-verde" id="lezioni-nav-badge" title="Lezioni di oggi">0</span>
+        </button>
+        <button class="nav-item" data-module="pacchetti" onclick="showModule('pacchetti')">
+          <i class="fa-solid fa-ticket"></i> <span class="nav-label">Pacchetti &amp; Abbonamenti</span> <span class="nav-unread-badge sem-verde" id="pacchetti-nav-badge" title="Pacchetti da rinnovare">0</span>
+        </button>
+        <button class="nav-item" data-module="comunicazioni" onclick="showModule('comunicazioni')">
+          <i class="fa-solid fa-comments"></i> <span class="nav-label">Messaggi</span> <span class="nav-unread-badge sem-verde" id="chat-nav-unread-badge" title="Messaggi non letti">0</span>
+        </button>
+
+        <button class="nav-item" data-module="magazzino" onclick="showModule('magazzino')">
+          <i class="fa-solid fa-boxes-stacked"></i> <span class="nav-label">Magazzino</span> <span class="nav-unread-badge sem-verde" id="magazzino-nav-badge" title="Magazzino: rosso = da riordinare o critici, giallo = in esaurimento o lotti in scadenza">0</span>
+        </button>
+
+        <button class="nav-item" data-module="statistiche" onclick="showModule('statistiche')">
+          <i class="fa-solid fa-chart-line"></i> <span class="nav-label">Statistiche</span>
+        </button>
+
+        <div class="nav-divider">Altre funzioni</div>
+        <button class="nav-item" data-module="professionisti" onclick="showModule('professionisti')">
+          <i class="fa-solid fa-user-doctor"></i> <span class="nav-label">Professionisti</span> <span class="nav-unread-badge sem-verde" id="pro-nav-badge" title="Professionisti: rosso = da confermare (collegamenti o appuntamenti), giallo = messaggi non letti">0</span>
+        </button>
+        <button class="nav-item" data-module="groom" onclick="showModule('groom')">
+          <i class="fa-solid fa-id-badge"></i> <span class="nav-label">Gestione Groom</span>
+        </button>
+        <button class="nav-item" data-module="store" onclick="showModule('store')">
+          <i class="fa-solid fa-store"></i> <span class="nav-label">Store</span> <span class="badge">SOON</span>
+        </button>
+        <button class="nav-item" data-module="fatturazione" onclick="showModule('fatturazione')">
+          <i class="fa-solid fa-file-invoice"></i> <span class="nav-label">Fatturazione SDI</span> <span class="badge">SOON</span>
+        </button>
+        <button class="nav-item" data-module="ai" onclick="showModule('ai')">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-label">Agenti AI</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" onclick="openUserMenu()">
+          <div class="avatar" id="user-avatar">U</div>
+          <div class="u-text">
+            <div class="u-name" id="user-name">Utente</div>
+            <div class="u-role" id="user-role">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <button class="athena-fab" id="athena-fab" onclick="apriAthena()" aria-label="Athena, la tua segreteria AI" title="Athena · segreteria AI">
+        <span class="athena-ic"><img src="assets/agenti/athena.webp" alt="" width="56" height="56"></span>
+      </button>
+      <div class="sfondo-pagina" id="sfondo-a" aria-hidden="true"></div>
+      <div class="sfondo-pagina" id="sfondo-b" aria-hidden="true"></div>
+      <div class="topbar">
+        <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-title" id="topbar-title">Home</div>
+        <button type="button" class="scud-lente" onclick="apriCercaScud()" aria-label="Cerca nel gestionale"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <div class="avatar" id="user-avatar-mobile" onclick="openUserMenu()">U</div>
+      </div>
+      <div class="content">
+
+        <!-- MODULO: HOME -->

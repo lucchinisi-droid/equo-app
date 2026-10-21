@@ -1,0 +1,12 @@
+<div class="modal-overlay" id="modal-delete-contatto" onclick="closeOut(event,'modal-delete-contatto')">
+  <div class="modal">
+    <div class="modal-title">Elimina contatto <span class="x" onclick="closeModal('modal-delete-contatto')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo contatto?</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-contatto')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteContatto()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: modifica dati societari e pagamenti -->

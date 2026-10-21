@@ -1,0 +1,19 @@
+/* ---------- MODAL ---------- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(25,22,11,.45);z-index:100;
+  align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}
+.legal-tab-active{background:var(--primary)!important;color:var(--primary-fg)!important}
+.legal-body h3{font-size:14px;margin:16px 0 6px}
+.legal-body h3:first-child{margin-top:0}
+.legal-body p,.legal-body li{font-size:12.5px;line-height:1.6}
+.legal-body ul{padding-left:18px;margin:6px 0}
+.legal-body .legal-note{font-size:11.5px;color:var(--muted);font-style:italic;margin-bottom:12px}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:440px;
+  max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-title{font-size:17px;font-weight:700;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between}
+.modal-title .x{cursor:pointer;color:var(--muted);font-size:16px}
+.join-code-box{display:flex;align-items:center;gap:10px;background:var(--muted-bg);border:1px dashed var(--border);
+  border-radius:var(--radius);padding:12px 14px;font-family:ui-monospace,monospace;font-size:15px;font-weight:700;
+  letter-spacing:.05em}
+.join-code-box button{margin-left:auto}
+

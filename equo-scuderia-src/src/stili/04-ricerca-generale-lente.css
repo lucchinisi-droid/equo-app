@@ -1,0 +1,30 @@
+
+/* ---------- RICERCA GENERALE (lente) ---------- */
+.scud-lente{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:15px;padding:0}
+.scud-lente:hover{border-color:var(--primary);color:var(--primary)}
+.topbar .scud-lente{width:34px;height:34px;margin-left:auto;margin-right:10px}
+.home-testa{display:flex;align-items:center;gap:18px;flex-wrap:nowrap;width:100%}
+.home-testa > div:first-child{flex:none;min-width:0}
+.home-testa .meteo-box{--meteo-acc:var(--primary);flex:1;max-width:560px;margin:0 auto}
+@media (max-width:900px){.home-testa{flex-wrap:wrap}.home-testa .meteo-box{order:3;flex:1 1 100%;max-width:none}.home-testa .scud-lente.home{margin-left:auto}}
+@media (max-width:900px){.home-testa .scud-lente.home{display:none}}
+.sc-cerca{display:none;position:fixed;inset:0;z-index:140;background:rgba(10,10,6,.45);align-items:flex-start;justify-content:center;padding:6vh 14px 14px}
+.sc-cerca.on{display:flex}
+.sc-box{background:var(--bg);color:var(--text);width:100%;max-width:640px;max-height:84vh;border-radius:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border)}
+.sc-testa{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.sc-testa i{color:var(--muted)}
+.sc-testa input{flex:1;border:0;background:none;color:var(--text);font:inherit;font-size:16px;outline:none;padding:6px 0}
+.sc-chiudi{border:0;background:none;color:var(--primary);font:inherit;font-weight:600;cursor:pointer;padding:6px}
+.sc-ris{overflow-y:auto;padding:4px 12px 14px}
+.sc-gruppo{margin-top:12px}
+.sc-titolo{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 6px}
+.sc-titolo span{font-weight:500}
+.sc-riga{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;text-align:left;font:inherit;color:var(--text);cursor:pointer}
+.sc-riga:hover,.sc-riga:focus{outline:2px solid var(--primary);outline-offset:-2px}
+.sc-ico{width:32px;height:32px;border-radius:10px;background:var(--muted-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+.sc-testi{flex:1;min-width:0;display:flex;flex-direction:column}
+.sc-testi b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-testi small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-altri,.sc-sugg{font-size:12px;color:var(--muted);padding:2px 4px 4px;line-height:1.5}
+.sc-sugg{margin-top:14px;text-align:center}
+.sc-nulla{text-align:center;color:var(--muted);font-size:13.5px;padding:34px 10px}

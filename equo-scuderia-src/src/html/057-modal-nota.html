@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-nota" onclick="closeOut(event,'modal-nota')">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">Nuovo post-it <span class="x" onclick="closeModal('modal-nota')">✕</span></div>
+    <div class="field"><label>Promemoria</label><textarea class="input" id="nota-testo" rows="3" placeholder="Scrivi il promemoria..." style="resize:vertical"></textarea></div>
+    <div class="field">
+      <label>Colore</label>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <div class="color-swatch postit-giallo selected" data-colore="giallo" onclick="selectNotaColore('giallo')"></div>
+        <div class="color-swatch postit-rosa" data-colore="rosa" onclick="selectNotaColore('rosa')"></div>
+        <div class="color-swatch postit-blu" data-colore="blu" onclick="selectNotaColore('blu')"></div>
+      </div>
+    </div>
+    <div class="auth-error" id="nota-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveNota()">Aggiungi post-it</button>
+  </div>
+</div>
+
+<!-- MODAL: nuovo messaggio -->

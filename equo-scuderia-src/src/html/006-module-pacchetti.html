@@ -1,0 +1,25 @@
+        <div class="module-page" id="module-pacchetti" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-ticket"></i></span> Pacchetti &amp; Abbonamenti</h1>
+              <p>Carnet, abbonamenti e cruscotto scadenze del centro.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-nuovo-pacchetto" onclick="openPacchettoForm()"><i class="fa-solid fa-plus"></i> Nuovo pacchetto</button>
+          </div>
+
+          <h3 style="margin:0 0 10px">Cruscotto scadenze</h3>
+          <div class="grid grid-3" id="cruscotto-grid" style="margin-bottom:24px"></div>
+
+          <h3 style="margin:0 0 10px">Pacchetti e abbonamenti attivi</h3>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Tipo</th><th>Dettaglio</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead>
+                <tbody id="pacchetti-table-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="pacchetti-empty" style="display:none">
+              <i class="fa-solid fa-ticket"></i><div>Nessun pacchetto registrato ancora.</div>
+            </div>
+          </div>
+        </div>

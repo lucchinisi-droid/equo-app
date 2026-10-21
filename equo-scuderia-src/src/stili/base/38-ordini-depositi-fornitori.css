@@ -1,0 +1,15 @@
+/* ordini, depositi, fornitori */
+.mag-sez{display:grid;gap:14px}
+.mag-riordino-g h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
+.mag-riordino-row{display:grid;grid-template-columns:1fr 90px 110px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+.mag-riordino-row:last-child{border-bottom:none}
+.mag-riordino-row input{width:100%;padding:7px 9px;border-radius:9px;border:1px solid var(--border);background:var(--bg);text-align:right}
+.mag-ordine{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mag-ordine .t{flex:1;min-width:180px}
+.mag-ubi{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:var(--surface)}
+.mag-ubi h4{margin:0;display:flex;align-items:center;gap:8px;font-size:14.5px}
+.mag-ubi .figli{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mag-ubi .figlio{border:1px dashed var(--border);border-radius:10px;padding:7px 10px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.mag-forn{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.mag-forn .t{flex:1;min-width:180px}
+.mag-forn .t small{color:var(--muted);display:block}

@@ -1,0 +1,10 @@
+<div class="modal-overlay" id="modal-upsell" onclick="closeOut(event,'modal-upsell')">
+  <div class="modal">
+    <div class="modal-title"><span></span><span class="x" onclick="closeModal('modal-upsell')">✕</span></div>
+    <div id="upsell-corpo"></div>
+    <button class="btn btn-primary btn-block" id="upsell-cta"><i class="fa-solid fa-arrow-up"></i> Richiedi il passaggio</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:6px" onclick="closeModal('modal-upsell');showModule('centro');setTimeout(()=>document.getElementById('pk-card')?.scrollIntoView({behavior:'smooth'}),200)">Confronta i pacchetti</button>
+  </div>
+</div>
+
+<!-- MODAL: dati del centro (admin) -->

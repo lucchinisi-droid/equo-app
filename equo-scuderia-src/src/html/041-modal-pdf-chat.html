@@ -1,0 +1,10 @@
+<div class="modal-overlay" id="modal-pdf-chat" onclick="closeOut(event,'modal-pdf-chat')">
+  <div class="modal">
+    <div class="modal-title"><span><i class="fa-solid fa-paper-plane" style="color:var(--primary)"></i> Invia la scheda in chat</span> <span class="x" onclick="closeModal('modal-pdf-chat')">✕</span></div>
+    <div class="field"><label>A chi</label><select class="input" id="pdf-chat-dest"></select></div>
+    <div class="field"><label>Messaggio <span style="color:var(--muted);font-weight:400">(facoltativo)</span></label><input class="input" id="pdf-chat-testo" maxlength="500"></div>
+    <button class="btn btn-primary btn-block" id="pdf-chat-btn" onclick="inviaSchedaChat()"><i class="fa-solid fa-paper-plane"></i> Invia PDF</button>
+  </div>
+</div>
+
+<!-- MODAL: funzione non inclusa nel pacchetto -->

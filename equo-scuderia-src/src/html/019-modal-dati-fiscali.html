@@ -1,0 +1,24 @@
+<div class="modal-overlay" id="modal-dati-fiscali" onclick="closeOut(event,'modal-dati-fiscali')">
+  <div class="modal">
+    <div class="modal-title">Dati societari e pagamenti <span class="x" onclick="closeModal('modal-dati-fiscali')">✕</span></div>
+    <div class="field"><label>Denominazione</label><input class="input" id="df-denominazione" placeholder="Ragione sociale"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>P.IVA</label><input class="input" id="df-piva"></div>
+      <div class="field"><label>Cod. REA</label><input class="input" id="df-cod_rea"></div>
+    </div>
+    <div class="field"><label>IBAN</label><input class="input" id="df-iban" placeholder="IT60 X054..."></div>
+    <div class="grid grid-2">
+      <div class="field"><label>PEC</label><input class="input" id="df-pec" type="email"></div>
+      <div class="field"><label>Codice SDI</label><input class="input" id="df-sdi"></div>
+    </div>
+    <div class="field"><label>Indirizzo</label><input class="input" id="df-indirizzo" placeholder="Via, città, provincia"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Telefono fisso</label><input class="input" id="df-telefono_fisso" placeholder="+39 ..."></div>
+      <div class="field"><label>Cellulare</label><input class="input" id="df-cellulare" placeholder="+39 ..."></div>
+    </div>
+    <div class="auth-error" id="dati-fiscali-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveDatiFiscali()">Salva dati</button>
+  </div>
+</div>
+
+<!-- MODAL: conferma Hard Reset (codice usa e getta Equo) -->

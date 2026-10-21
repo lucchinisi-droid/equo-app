@@ -1,0 +1,14 @@
+<div class="modal-overlay" id="modal-chat" onclick="closeOut(event,'modal-chat')">
+  <div class="modal" style="max-width:420px;display:flex;flex-direction:column;max-height:82vh">
+    <div class="modal-title"><span id="chat-membro-nome">Chat</span> <span class="x" onclick="closeChatModal()">✕</span></div>
+    <div id="chat-messages" style="flex:1;overflow-y:auto;min-height:220px;max-height:340px;display:flex;flex-direction:column;gap:8px;padding:6px 2px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="file" id="chat-allegato-input" accept="image/*,application/pdf,.pdf" style="display:none" onchange="inviaAllegatoChat(event)">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('chat-allegato-input').click()" title="Allega foto o PDF"><i class="fa-solid fa-paperclip"></i></button>
+      <input class="input" id="chat-input" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter'){inviaChatMessaggio()}">
+      <button class="btn btn-primary btn-sm" onclick="inviaChatMessaggio()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: nuova chat cliente (inserisci codice proprietario) -->

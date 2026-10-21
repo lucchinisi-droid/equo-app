@@ -1,0 +1,6 @@
+/* contatori a semaforo (valori in SOGLIE_CONTATORI) */
+.nav-item .nav-unread-badge.sem-verde{background:#2f8a4e}
+.nav-item .nav-unread-badge.sem-giallo{background:#e0a100;color:#2b2100}
+.nav-item .nav-unread-badge.sem-rosso{background:var(--danger);color:#fff}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px 0;gap:0}
+.sidebar.collapsed .nav-item .nav-label,.sidebar.collapsed .nav-item .badge{display:none}

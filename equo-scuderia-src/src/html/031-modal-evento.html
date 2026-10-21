@@ -1,0 +1,28 @@
+<div class="modal-overlay" id="modal-evento" onclick="closeOut(event,'modal-evento')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-evento-title">Registra evento sanitario</span> <span class="x" onclick="closeModal('modal-evento')">✕</span></div>
+    <div class="field">
+      <label>Tipo</label>
+      <select class="input" id="ev-tipo" onchange="toggleEventoAltro()">
+        <option value="vaccino">Vaccino</option>
+        <option value="coggins">Coggins test</option>
+        <option value="ferratura">Ferratura</option>
+        <option value="sverminazione">Sverminazione</option>
+        <option value="altro">Altro (lavaggio, fasciatura, ecc.)</option>
+      </select>
+    </div>
+    <div class="field" id="ev-tipo-altro-field" style="display:none">
+      <label>Specifica</label>
+      <input class="input" id="ev-tipo-altro" placeholder="Es. Lavaggio, fasciatura...">
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data evento</label><input class="input" id="ev-data" type="date"></div>
+      <div class="field"><label>Prossima scadenza</label><input class="input" id="ev-scadenza" type="date" placeholder="Facoltativo per Altro"></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="ev-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="evento-error"></div>
+    <button class="btn btn-primary btn-block" id="evento-save-btn" onclick="saveEvento()">Salva evento</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina cavallo -->

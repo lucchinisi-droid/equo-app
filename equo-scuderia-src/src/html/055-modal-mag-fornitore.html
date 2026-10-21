@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="modal-mag-fornitore" onclick="closeOut(event,'modal-mag-fornitore')">
+  <div class="modal">
+    <div class="modal-title"><span id="mag-forn-titolo">Nuovo fornitore</span> <span class="x" onclick="closeModal('modal-mag-fornitore')">✕</span></div>
+    <div class="field"><label>Nome / ragione sociale</label><input class="input" id="mag-forn-nome" maxlength="120" placeholder="Es. Consorzio Agrario"></div>
+    <div class="field"><label>Referente</label><input class="input" id="mag-forn-referente" maxlength="120" placeholder="Facoltativo"></div>
+    <div class="mag-2col">
+      <div class="field"><label>Telefono / WhatsApp</label><input class="input" id="mag-forn-telefono" maxlength="40" placeholder="+39 …"></div>
+      <div class="field"><label>Email</label><input class="input" id="mag-forn-email" type="email" maxlength="160"></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="mag-forn-note" maxlength="1000" placeholder="Es. consegna il martedì, ordine minimo 10 sacchi"></div>
+    <div class="auth-error" id="mag-forn-err"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger" id="mag-forn-archivia" style="display:none" onclick="magArchiviaFornitore()"><i class="fa-solid fa-box-archive"></i></button>
+      <button class="btn btn-primary" style="flex:1" onclick="magSalvaFornitore()"><i class="fa-solid fa-check"></i> Salva</button>
+    </div>
+  </div>
+</div>
+

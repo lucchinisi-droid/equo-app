@@ -1,0 +1,34 @@
+<div class="modal-overlay" id="modal-pacchetto" onclick="closeOut(event,'modal-pacchetto')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-pacchetto-title">Nuovo pacchetto</span> <span class="x" onclick="closeModal('modal-pacchetto')">✕</span></div>
+    <div class="field"><label>Cliente</label><input class="input" id="pac-cliente" placeholder="Nome allievo / proprietario"></div>
+    <div class="field">
+      <label>Collega a un membro del team (opzionale, per Chatta)</label>
+      <select class="input" id="pac-membro"><option value="">— nessuno (solo testo libero) —</option></select>
+    </div>
+    <div class="field">
+      <label>Tipo</label>
+      <select class="input" id="pac-tipo" onchange="toggleTipoPacchetto()">
+        <option value="carnet">Carnet lezioni (a scalare)</option>
+        <option value="abbonamento">Abbonamento periodico</option>
+        <option value="pensione">Pensione cavallo</option>
+      </select>
+    </div>
+    <div class="field" id="pac-cavallo-field" style="display:none"><label>Cavallo <span style="color:var(--muted);font-weight:400">(per pensioni e abbonamenti: serve al margine per cavallo nelle Statistiche)</span></label>
+      <select class="input" id="pac-cavallo"><option value="">— nessuno —</option></select></div>
+    <div class="grid grid-2" id="pac-carnet-fields">
+      <div class="field"><label>Lezioni totali</label><input class="input" id="pac-unita-totali" type="number" min="1" placeholder="Es. 10"></div>
+      <div class="field"><label>Lezioni usate</label><input class="input" id="pac-unita-usate" type="number" min="0" value="0"></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data inizio</label><input class="input" id="pac-inizio" type="date"></div>
+      <div class="field"><label>Scadenza</label><input class="input" id="pac-scadenza" type="date"></div>
+    </div>
+    <div class="field"><label>Prezzo (€, facoltativo)</label><input class="input" id="pac-prezzo" type="number" min="0" step="0.01" placeholder="Es. 250"></div>
+    <div class="field"><label>Note</label><input class="input" id="pac-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="pacchetto-error"></div>
+    <button class="btn btn-primary btn-block" onclick="savePacchetto()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina pacchetto -->

@@ -1,0 +1,4 @@
+/* il contenuto non deve mai allargare la pagina (i caroselli scorrono dentro il loro spazio) */
+.main{min-width:0}
+#module-magazzino{min-width:0;max-width:100%}
+

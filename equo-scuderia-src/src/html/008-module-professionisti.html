@@ -1,0 +1,38 @@
+        <div class="module-page" id="module-professionisti" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-user-doctor"></i></span> Professionisti</h1>
+              <p>Professionisti esterni con P.IVA o codice fiscale che lavorano con il centro: chat e appuntamenti con doppia conferma.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-aggiungi-pro" onclick="apriAggiungiProfessionista()"><i class="fa-solid fa-plus"></i> Aggiungi maniscalco</button>
+          </div>
+          <div class="pro-tabs">
+            <button class="pro-tab active" data-pro-tab="maniscalchi" onclick="selezionaTabPro('maniscalchi')"><i class="fa-solid fa-hammer"></i> Maniscalchi</button>
+            <button class="pro-tab" data-pro-tab="veterinari" onclick="selezionaTabPro('veterinari')"><i class="fa-solid fa-stethoscope"></i> Veterinari <span class="soon">COMING SOON</span></button>
+            <button class="pro-tab" data-pro-tab="istruttori" onclick="selezionaTabPro('istruttori')"><i class="fa-solid fa-person-running"></i> Istruttori/Trainer <span class="soon">COMING SOON</span></button>
+          </div>
+          <div id="pro-tab-maniscalchi">
+            <div class="card">
+              <div id="pro-maniscalchi-list"></div>
+              <div class="empty-state" id="pro-maniscalchi-empty" style="display:none">
+                <i class="fa-solid fa-hammer"></i>
+                <div>Nessun maniscalco collegato. Tocca "Aggiungi maniscalco" e inserisci il suo codice professionista (lo trova in Equo App nel menu profilo).</div>
+              </div>
+            </div>
+            <p style="color:var(--muted);font-size:12.5px;margin-top:10px" id="pro-codice-centro-hint"></p>
+          </div>
+          <div id="pro-tab-veterinari" style="display:none">
+            <div class="card coming-soon" style="text-align:center;padding:36px 20px">
+              <span class="badge-pill badge-yellow">COMING SOON</span>
+              <h2 style="font-size:17px;margin:6px 0">Veterinari</h2>
+              <p style="color:var(--muted);font-size:13.5px;max-width:460px;margin:0 auto">Chat, visite, vaccini e Coggins con i veterinari esterni del centro, con conferma da entrambe le parti.</p>
+            </div>
+          </div>
+          <div id="pro-tab-istruttori" style="display:none">
+            <div class="card coming-soon" style="text-align:center;padding:36px 20px">
+              <span class="badge-pill badge-yellow">COMING SOON</span>
+              <h2 style="font-size:17px;margin:6px 0">Istruttori / Trainer</h2>
+              <p style="color:var(--muted);font-size:13.5px;max-width:460px;margin:0 auto">Chat, allenamenti e lezioni con istruttori e trainer esterni del centro, con conferma da entrambe le parti.</p>
+            </div>
+          </div>
+        </div>

@@ -1,0 +1,112 @@
+        <div class="module-page" id="module-centro" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1 id="centro-page-title"><span class="page-icon"><i class="fa-solid fa-house-chimney"></i></span> Il tuo Centro</h1>
+              <p>Anagrafica del centro, team e codice invito.</p>
+            </div>
+          </div>
+          <div class="grid grid-2" style="align-items:start">
+            <div class="card">
+              <h3 style="margin-top:0">Dati centro</h3>
+              <div class="field"><label>Nome</label><div id="centro-view-nome" style="font-weight:600">—</div></div>
+              <div class="field"><label>Indirizzo</label><div id="centro-view-indirizzo" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Telefono</label><div id="centro-view-telefono" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Zona (città, provincia, regione)</label><div id="centro-view-zona" style="color:var(--muted)">—</div></div>
+              <button class="btn btn-outline btn-sm btn-variazione" id="btn-modifica-centro" style="margin-bottom:12px" onclick="apriModificaCentro()"><i class="fa-solid fa-pen"></i> Modifica dati</button>
+              <div class="field">
+                <label>Codice invito</label>
+                <div class="join-code-box">
+                  <span id="centro-view-code">—</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyJoinCode()"><i class="fa-solid fa-copy"></i></button>
+                </div>
+                <p style="margin:6px 0 0;color:var(--muted);font-size:12px">Condividi questo codice per far entrare un nuovo membro nel team: lo inserirà in fase di registrazione.</p>
+              </div>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0">Team (<span id="team-count">0</span>)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Nome</th><th>Ruolo</th><th>Livello</th><th></th></tr></thead>
+                  <tbody id="team-table-body"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="team-empty" style="display:none">
+                <i class="fa-solid fa-users"></i><div>Nessun altro membro nel team ancora.</div>
+              </div>
+              <div id="team-groom" style="display:none;margin-top:18px">
+                <h3 style="margin:0 0 8px;font-size:15px">Groom (<span id="team-groom-count">0</span>) <button class="btn btn-ghost btn-sm" onclick="showModule('groom')" style="float:right">Gestisci</button></h3>
+                <div id="team-groom-lista"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card pk-card" id="pk-card"></div>
+
+          <div class="card" style="margin-top:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <h3 style="margin:0">Contatti utili (<span id="contatti-count">0</span>)</h3>
+              <button class="btn btn-outline btn-sm" id="btn-aggiungi-contatto" onclick="openContattoForm()"><i class="fa-solid fa-plus"></i> Aggiungi contatto</button>
+            </div>
+            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Persone che collaborano con il centro ippico ma non usano l'app: commercialista, giardiniere, veterinario esterno, ecc.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nome</th><th>Ruolo</th><th>Telefono</th><th>Email</th><th></th></tr></thead>
+                <tbody id="contatti-table-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="contatti-empty" style="display:none">
+              <i class="fa-solid fa-address-book"></i><div>Nessun contatto registrato ancora.</div>
+            </div>
+          </div>
+
+          <div class="card" id="card-dati-fiscali" style="margin-top:16px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <h3 style="margin:0"><i class="fa-solid fa-building-columns"></i> Dati societari e pagamenti</h3>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline btn-sm" onclick="copyDatiFiscali()"><i class="fa-solid fa-copy"></i> Copia tutto</button>
+                <button class="btn btn-outline btn-sm btn-variazione" onclick="openDatiFiscaliForm()"><i class="fa-solid fa-pen"></i> Modifica</button>
+              </div>
+            </div>
+            <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Visibili solo all'amministratore. Usa "Copia tutto" per incollarli in una mail, un preventivo o un modulo di pagamento.</p>
+            <div class="grid grid-2" id="dati-fiscali-view">
+              <div class="field"><label>Denominazione</label><div id="df-view-denominazione" style="font-weight:600">—</div></div>
+              <div class="field"><label>P.IVA</label><div id="df-view-piva" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Cod. REA</label><div id="df-view-cod_rea" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>IBAN</label><div id="df-view-iban" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>PEC</label><div id="df-view-pec" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>SDI</label><div id="df-view-sdi" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Indirizzo</label><div id="df-view-indirizzo" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Telefono fisso</label><div id="df-view-telefono_fisso" style="color:var(--muted)">—</div></div>
+              <div class="field"><label>Cellulare</label><div id="df-view-cellulare" style="color:var(--muted)">—</div></div>
+            </div>
+          </div>
+
+          <div class="card" id="card-hard-reset" style="margin-top:16px;display:none;border:1px solid #ef4444">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h3 style="margin:0;color:#ef4444"><i class="fa-solid fa-lock" id="hard-reset-lock"></i> Hard Reset <span style="font-size:12px;font-weight:500;color:var(--muted)">— area protetta</span></h3>
+              <button class="btn btn-outline btn-sm" id="hard-reset-toggle" onclick="toggleHardReset()">Apri</button>
+            </div>
+            <div id="hard-reset-body" style="display:none;margin-top:12px">
+              <p style="margin:0 0 14px;color:var(--muted);font-size:12.5px">Operazioni riservate all'amministratore. Cancellano definitivamente i dati del centro e non sono reversibili. Per sicurezza serve un <strong>codice usa e getta di 6 cifre</strong> fornito da Equo: vale 30 minuti, una sola volta e solo per il reset richiesto.</p>
+              <div class="field">
+                <label>Cosa vuoi cancellare</label>
+                <select class="input" id="reset-modulo-select">
+                  <option value="cavalli">Cavalli (e storico sanitario collegato)</option>
+                  <option value="eventi">Solo eventi sanitari</option>
+                  <option value="lezioni">Lezioni</option>
+                  <option value="pacchetti">Pacchetti/abbonamenti</option>
+                  <option value="messaggi">Messaggi</option>
+                  <option value="note">Post-it</option>
+                  <option value="totale">TUTTO — reset totale (cavalli, eventi, lezioni, pacchetti, messaggi, post-it, contatti, dati societari)</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                <button class="btn btn-outline btn-sm" style="flex:1;min-width:200px" onclick="richiediCodiceReset()"><i class="fa-solid fa-envelope"></i> 1. Richiedi il codice a Equo</button>
+                <button class="btn btn-danger btn-sm" style="flex:1;min-width:200px" onclick="askHardReset()"><i class="fa-solid fa-key"></i> 2. Ho il codice: esegui il reset</button>
+              </div>
+              <p style="margin:10px 0 0;color:var(--muted);font-size:11.5px">Centro e team restano sempre intatti. Se l'email non si apre, scrivi a <strong>gestione.equo@gmail.com</strong> indicando il centro e cosa vuoi cancellare.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULI GESTIONE -->

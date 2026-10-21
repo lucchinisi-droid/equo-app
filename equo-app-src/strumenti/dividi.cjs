@@ -1,11 +1,14 @@
 // Divide equo-app/index.html in tanti file piccoli dentro equo-app-src/src/.
 // Il risultato, rimesso insieme da unisci.cjs, e IDENTICO byte per byte all'originale.
-// Uso: node equo-app-src/strumenti/dividi.cjs   (dalla cartella Equo)
+// Uso: node equo-app-src/strumenti/dividi.cjs [--app equo-scuderia]   (dalla cartella Equo)
+// ATTENZIONE: serve solo la PRIMA volta. Se i sorgenti esistono gia si ferma (si lavora nei sorgenti, non nell'index.html).
 const fs = require("fs");
 const path = require("path");
 const RADICE = path.resolve(__dirname, "..", "..");
-const ORIGINE = path.join(RADICE, "equo-app", "index.html");
-const SRC = path.join(RADICE, "equo-app-src", "src");
+const APP = (process.argv[process.argv.indexOf("--app") + 1] && process.argv.includes("--app")) ? process.argv[process.argv.indexOf("--app") + 1] : "equo-app";
+const ORIGINE = path.join(RADICE, APP, "index.html");
+const SRC = path.join(RADICE, APP + "-src", "src");
+if(fs.existsSync(SRC) && !process.argv.includes("--forza")){ console.error("I sorgenti esistono gia in " + APP + "-src/src: non li sovrascrivo."); process.exit(1); }
 const S = fs.readFileSync(ORIGINE, "utf8");
 if(S.includes("<!--@ ")) throw new Error("index.html contiene gia la sequenza <!--@ : scegliere un altro segnaposto");
 
@@ -50,8 +53,8 @@ const maxScript = Math.max(...blocchi.filter(b => b.tipo === "script").map(b => 
 let modello = "", pos = 0, nStile = 0, nScript = 0, nHtml = 0;
 function html(testo){
   // il testo HTML con pagine e finestre (modali) va diviso: un file per pagina o finestra
-  if(/<div class="(page-content|modal-overlay)/.test(testo)){
-    const pezzi = aPezzi(testo, r => r.match(/^\s*<div class="(?:page-content|modal-overlay)[^"]*" id="([^"]+)"/), (mm) => mm[1]);
+  if(/<div class="(page-content|modal-overlay|module-page)/.test(testo)){
+    const pezzi = aPezzi(testo, r => r.match(/^\s*<div class="(?:page-content|modal-overlay|module-page)[^"]*" id="([^"]+)"/), (mm) => mm[1]);
     return pezzi.map(p => scrivi("html/" + pad(++nHtml) + "-" + slug(p.nome) + ".html", p.testo)).join("");
   }
   return testo;

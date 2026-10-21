@@ -1,0 +1,32 @@
+<div class="modal-overlay" id="modal-contatto" onclick="closeOut(event,'modal-contatto')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-contatto-title">Nuovo contatto</span> <span class="x" onclick="closeModal('modal-contatto')">✕</span></div>
+    <div class="field">
+      <label>Ruolo</label>
+      <select class="input" id="cont-tipo" onchange="toggleContattoAltro()">
+        <option value="istruttore_esterno">Istruttore esterno</option>
+        <option value="veterinario">Veterinario</option>
+        <option value="maniscalco">Maniscalco</option>
+        <option value="commercialista">Commercialista</option>
+        <option value="giardiniere">Giardiniere / Manutenzione verde</option>
+        <option value="manutenzione">Manutenzione centro ippico</option>
+        <option value="fornitore">Fornitore</option>
+        <option value="altro">Altro...</option>
+      </select>
+    </div>
+    <div class="field" id="cont-tipo-altro-field" style="display:none">
+      <label>Specifica ruolo</label>
+      <input class="input" id="cont-tipo-altro" placeholder="Es. Elettricista">
+    </div>
+    <div class="field"><label>Nome</label><input class="input" id="cont-nome" placeholder="Nome e cognome / ragione sociale"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Telefono</label><input class="input" id="cont-telefono" placeholder="+39 ..."></div>
+      <div class="field"><label>Email</label><input class="input" id="cont-email" type="email" placeholder="mail@esempio.it"></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="cont-note" placeholder="Facoltativo"></div>
+    <div class="auth-error" id="contatto-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveContatto()">Salva contatto</button>
+  </div>
+</div>
+
+<!-- MODAL: elimina contatto -->

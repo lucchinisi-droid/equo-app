@@ -1,0 +1,88 @@
+        <div class="module-page" id="module-magazzino" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-boxes-stacked"></i></span> Magazzino</h1>
+              <p>Scorte, depositi e riordini del centro: il semaforo ti dice subito cosa manca, cosa sta finendo e cosa scade.</p>
+            </div>
+            <div class="mag-actions">
+              <label class="vs-toggle" data-tip="Semplice: solo cosa manca e cosa usi. Completa: depositi, lotti, consumi, fornitori."><span>Semplice</span><input type="checkbox" id="vs-magazzino" onchange="vistaCambia('magazzino', this.checked)"><i></i><span>Completa</span></label>
+              <button class="btn btn-outline" id="mag-btn-articolo" onclick="magApriArticolo()"><i class="fa-solid fa-plus"></i> Articolo</button>
+              <button class="btn btn-primary" onclick="magApriMovimento()"><i class="fa-solid fa-bolt"></i> Movimento rapido</button>
+            </div>
+          </div>
+
+          <!-- COLPO D'OCCHIO -->
+          <div id="mag-semplice" style="display:none"></div>
+          <section class="mag-hero" id="mag-hero">
+            <div class="card mag-health">
+              <div class="mag-ring" id="mag-ring"></div>
+              <div style="font-weight:700;font-size:14px">Stato del magazzino</div>
+              <div class="mag-legenda" id="mag-legenda"></div>
+            </div>
+            <div class="mag-destra">
+              <div class="mag-kpis" id="mag-kpis"></div>
+              <div class="mag-sotto">
+                <div class="card mag-todo">
+                  <h3><i class="fa-solid fa-clipboard-check" style="color:var(--primary)"></i> Da fare adesso</h3>
+                  <div class="mag-todo-list" id="mag-todo"></div>
+                </div>
+                <div class="card mag-chart">
+                  <h3><i class="fa-solid fa-chart-column" style="color:var(--primary)"></i> Consumi ultime 8 settimane</h3>
+                  <div class="mag-bars" id="mag-bars"></div>
+                  <div class="mag-chart-leg" id="mag-bars-leg"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <nav class="mag-subnav" id="mag-subnav">
+            <button class="active" data-mag-vista="giacenze" onclick="magVista('giacenze')"><i class="fa-solid fa-cubes-stacked"></i> Giacenze</button>
+            <button data-mag-vista="movimenti" onclick="magVista('movimenti')"><i class="fa-solid fa-arrow-right-arrow-left"></i> Movimenti</button>
+            <button data-mag-vista="ordini" onclick="magVista('ordini')"><i class="fa-solid fa-truck-ramp-box"></i> Riordini & ordini <span class="n" id="mag-n-riordino" style="display:none">0</span></button>
+            <button data-mag-vista="depositi" onclick="magVista('depositi')"><i class="fa-solid fa-warehouse"></i> Depositi</button>
+            <button data-mag-vista="fornitori" onclick="magVista('fornitori')"><i class="fa-solid fa-handshake"></i> Fornitori</button>
+          </nav>
+
+          <div id="mag-v-giacenze">
+            <div class="mag-cats" id="mag-cats"></div>
+            <div class="mag-subcats" id="mag-subcats"></div>
+            <div class="mag-toolbar">
+              <div class="mag-search"><i class="fa-solid fa-magnifying-glass"></i><input class="input" id="mag-cerca" placeholder="Cerca articolo, marca, deposito…" oninput="magRender()"></div>
+              <select class="input" id="mag-filtro" onchange="magRender()">
+                <option value="">Tutti gli stati</option>
+                <option value="rosso">🔴 Da riordinare / critici</option>
+                <option value="giallo">🟡 In esaurimento / attenzione</option>
+                <option value="verde">🟢 In ordine</option>
+                <option value="scadenze">⏳ Lotti in scadenza</option>
+              </select>
+              <select class="input" id="mag-ordina" onchange="magRender()">
+                <option value="stato">Ordina: priorità</option>
+                <option value="nome">Ordina: nome</option>
+                <option value="copertura">Ordina: giorni di scorta</option>
+                <option value="valore">Ordina: valore</option>
+              </select>
+              <div class="mag-vista">
+                <button id="mag-vista-griglia" class="active" onclick="magLayout('griglia')" title="Schede"><i class="fa-solid fa-grip"></i></button>
+                <button id="mag-vista-elenco" onclick="magLayout('elenco')" title="Elenco"><i class="fa-solid fa-list"></i></button>
+              </div>
+            </div>
+            <div class="mag-grid" id="mag-grid"></div>
+            <div class="empty-state card" id="mag-vuoto" style="display:none"></div>
+          </div>
+
+          <div id="mag-v-movimenti" style="display:none">
+            <div class="mag-toolbar">
+              <div class="mag-search"><i class="fa-solid fa-magnifying-glass"></i><input class="input" id="mag-mov-cerca" placeholder="Cerca articolo, persona, cavallo, nota…" oninput="magRenderMovimenti()"></div>
+              <select class="input" id="mag-mov-tipo" onchange="magRenderMovimenti()">
+                <option value="">Tutti i movimenti</option><option value="carico">Carichi</option><option value="scarico">Scarichi</option>
+                <option value="rettifica">Rettifiche inventario</option><option value="trasferimento">Spostamenti</option>
+              </select>
+            </div>
+            <div class="card" id="mag-mov-lista"></div>
+          </div>
+
+          <div id="mag-v-ordini" style="display:none"><div class="mag-sez" id="mag-ordini"></div></div>
+          <div id="mag-v-depositi" style="display:none"><div class="mag-sez" id="mag-depositi"></div></div>
+          <div id="mag-v-fornitori" style="display:none"><div class="mag-sez" id="mag-fornitori"></div></div>
+        </div>
+        <!-- MODULO: STATISTICHE (base in ADVANCE, complete + radar di Merlino in PREMIUM) -->

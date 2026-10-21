@@ -1,0 +1,9 @@
+/* interruttore stile iPhone: Semplice / Completa */
+.vs-toggle{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;user-select:none;padding:4px 6px}
+.vs-toggle input{position:absolute;opacity:0;width:0;height:0}
+.vs-toggle i{position:relative;width:44px;height:26px;border-radius:99px;background:#d9d4c7;transition:background .2s;flex-shrink:0}
+.vs-toggle i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.vs-toggle input:checked + i{background:#1d4a35}
+.vs-toggle input:checked + i::after{transform:translateX(18px)}
+.vs-toggle input:not(:checked) ~ span:last-child,.vs-toggle input:checked ~ span:first-child{opacity:.55}
+.vs-toggle input:not(:checked) ~ span:first-child,.vs-toggle input:checked ~ span:last-child{color:var(--text)}

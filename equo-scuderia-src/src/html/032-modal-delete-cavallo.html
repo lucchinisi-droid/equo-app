@@ -1,0 +1,12 @@
+<div class="modal-overlay" id="modal-delete-cavallo" onclick="closeOut(event,'modal-delete-cavallo')">
+  <div class="modal">
+    <div class="modal-title">Elimina cavallo <span class="x" onclick="closeModal('modal-delete-cavallo')">✕</span></div>
+    <p style="color:var(--muted);font-size:13.5px">Confermi di voler eliminare questo cavallo e tutto il suo storico sanitario? L'azione non è reversibile.</p>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('modal-delete-cavallo')">Annulla</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDeleteCavallo()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: elimina evento -->

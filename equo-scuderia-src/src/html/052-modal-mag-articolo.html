@@ -1,0 +1,39 @@
+<div class="modal-overlay" id="modal-mag-articolo" onclick="closeOut(event,'modal-mag-articolo')">
+  <div class="modal mag-wide">
+    <div class="modal-title"><span id="mag-art-titolo">Nuovo articolo</span> <span class="x" onclick="closeModal('modal-mag-articolo')">✕</span></div>
+    <div class="mag-2col">
+      <div class="field"><label>Categoria</label><select class="input" id="mag-art-cat" onchange="magArtCatCambiata()"></select></div>
+      <div class="field"><label>Sottocategoria</label><select class="input" id="mag-art-sub" onchange="magArtSubCambiata()"></select></div>
+    </div>
+    <div class="field" id="mag-art-sub-nuova-box" style="display:none"><label>Nome della nuova sottocategoria</label><input class="input" id="mag-art-sub-nuova" maxlength="60" placeholder="Es. Integratori per puledri"></div>
+    <div class="field"><label>Nome articolo</label><input class="input" id="mag-art-nome" maxlength="120" placeholder="Es. Fieno di prato polifita"></div>
+    <div class="mag-2col">
+      <div class="field"><label>Marca</label><input class="input" id="mag-art-marca" maxlength="80" placeholder="Facoltativa"></div>
+      <div class="field"><label>Formato / taglia</label><input class="input" id="mag-art-formato" maxlength="80" placeholder="Es. sacco 25 kg, misura 2, 145 cm" oninput="magArtFormatoCambiato()"></div>
+      <div class="field"><label>Lo conti in</label><select class="input" id="mag-art-unita" onchange="magArtUnitaScelta=true;magArtAggiornaUnita()"></select></div>
+      <div class="field"><label>Costo <span class="u-lbl" data-pre="per ">per pz</span> €</label><input class="input" type="number" step="0.01" min="0" id="mag-art-costo" placeholder="Per calcolare il valore"></div>
+    </div>
+    <div class="mag-unita-hint" id="mag-art-unita-hint"></div>
+    <div class="mag-2col">
+      <div class="field"><label>Soglia minima <span class="u-lbl" data-pre="in ">in pz</span> <span style="text-transform:none;font-weight:500">(sotto = rosso)</span></label><input class="input" type="number" step="any" min="0" id="mag-art-soglia" value="0"></div>
+      <div class="field"><label>Scorta ottimale <span class="u-lbl" data-pre="in ">in pz</span> <span style="text-transform:none;font-weight:500">(per i riordini)</span></label><input class="input" type="number" step="any" min="0" id="mag-art-ottimale" placeholder="Facoltativa"></div>
+      <div class="field"><label>Deposito / ubicazione</label><select class="input" id="mag-art-ubicazione"></select></div>
+      <div class="field"><label>Fornitore abituale</label><select class="input" id="mag-art-fornitore"></select></div>
+    </div>
+    <div class="mag-2col" id="mag-art-durevoli">
+      <div class="field"><label>Condizione</label><select class="input" id="mag-art-condizione">
+        <option value="">— non serve —</option><option value="ok">In ordine</option><option value="da_lavare">Da lavare</option>
+        <option value="da_riparare">Da riparare</option><option value="da_sostituire">Da sostituire</option></select></div>
+      <div class="field"><label>Assegnato al cavallo</label><select class="input" id="mag-art-cavallo"></select></div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;margin:-4px 0 12px;cursor:pointer"><input type="checkbox" id="mag-art-lotti"> Gestisci lotti e scadenze (farmaci, integratori, mangimi)</label>
+    <div class="field" id="mag-art-iniziale-box"><label>Quantità iniziale in magazzino <span class="u-lbl" data-pre="in ">in pz</span></label><input class="input" type="number" step="any" min="0" id="mag-art-iniziale" value="0"></div>
+    <div class="field"><label>Note</label><input class="input" id="mag-art-note" maxlength="1000" placeholder="Facoltative"></div>
+    <div class="auth-error" id="mag-art-err"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger" id="mag-art-archivia" style="display:none" onclick="magArchiviaArticolo()"><i class="fa-solid fa-box-archive"></i> Archivia</button>
+      <button class="btn btn-primary" style="flex:1" id="mag-art-salva" onclick="magSalvaArticolo()"><i class="fa-solid fa-check"></i> Salva</button>
+    </div>
+  </div>
+</div>
+

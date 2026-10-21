@@ -1,0 +1,21 @@
+<div class="modal-overlay" id="modal-centro-dati" onclick="closeOut(event,'modal-centro-dati')">
+  <div class="modal">
+    <div class="modal-title">Dati del centro <span class="x" onclick="closeModal('modal-centro-dati')">✕</span></div>
+    <div class="field"><label>Nome</label><input class="input" id="cz-nome" maxlength="120"></div>
+    <div class="field"><label>Indirizzo</label><input class="input" id="cz-indirizzo" maxlength="200" placeholder="Via, numero civico"></div>
+    <div class="field"><label>Telefono</label><input class="input" id="cz-telefono" maxlength="40"></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Città</label><input class="input" id="cz-citta" maxlength="80" placeholder="Es. Colleferro"></div>
+      <div class="field"><label>Provincia (sigla)</label><input class="input" id="cz-provincia" maxlength="4" placeholder="Es. RM"></div>
+    </div>
+    <div class="field"><label>Regione</label>
+      <select class="input" id="cz-regione"><option value="">—</option>
+        <option>Abruzzo</option><option>Basilicata</option><option>Calabria</option><option>Campania</option><option>Emilia-Romagna</option><option>Friuli-Venezia Giulia</option><option>Lazio</option><option>Liguria</option><option>Lombardia</option><option>Marche</option><option>Molise</option><option>Piemonte</option><option>Puglia</option><option>Sardegna</option><option>Sicilia</option><option>Toscana</option><option>Trentino-Alto Adige</option><option>Umbria</option><option>Valle d'Aosta</option><option>Veneto</option>
+      </select></div>
+    <p style="color:var(--muted);font-size:12px;margin:-4px 0 12px">La zona serve a Merlino per il radar della concorrenza e al confronto anonimo con i centri simili.</p>
+    <div class="auth-error" id="cz-error" style="display:none"></div>
+    <button class="btn btn-primary btn-block" onclick="salvaDatiCentro()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL: ticket di assistenza (Home → Serve aiuto?) -->

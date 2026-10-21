@@ -1,0 +1,10 @@
+/* ---------- COMING SOON ---------- */
+.coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:70px 24px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);min-height:360px}
+.coming-soon .ic{width:56px;height:56px;border-radius:var(--radius-lg);background:var(--secondary);
+  color:var(--primary-hover);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px}
+.coming-soon .badge-pill{margin-bottom:14px}
+.coming-soon h2{margin:0 0 8px;font-size:19px}
+.coming-soon p{margin:0;color:var(--muted);font-size:14px;max-width:420px}
+

@@ -1,0 +1,34 @@
+
+.sc-pill,.sc-piu,.sc-velo,.sc-menu{display:none}
+.sc-side-ath{display:flex;align-items:center;gap:10px;margin:8px 12px;padding:10px 12px;border:1px solid var(--border);border-radius:16px;background:var(--surface);cursor:pointer;font:inherit;color:var(--text);text-align:left;width:calc(100% - 24px)}
+.sc-side-ath i{width:38px;height:38px;border-radius:50%;background:url(assets/agenti/athena.webp) center/cover;flex-shrink:0}
+.sc-side-ath b{display:block;font-size:13px}.sc-side-ath small{color:var(--muted);font-size:11px}
+.app-shell.collapsed .sc-side-ath{justify-content:center;padding:8px}.app-shell.collapsed .sc-side-ath span{display:none}
+.ag-card .av.img{background-size:cover;background-position:center;font-size:0}
+@media (max-width:900px){
+ .athena-fab{display:none!important}
+ .sc-pill{display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));height:68px;border-radius:34px;z-index:70;align-items:center;justify-content:space-between;padding:0 6px;background:rgba(255,250,240,.84);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 28px rgba(40,30,10,.16)}
+ .sc-pill button{position:relative;flex:0 0 68px;width:68px;height:56px;border:0;background:none;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:9px;font-weight:500;color:#6c6450;cursor:pointer}
+ .sc-pill svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+ .sc-pill button.on{background:#3f5d3a;color:#f6e7c1}
+ .sc-pill .sc-ath{overflow:visible}
+ .sc-pill .sc-ath i{position:absolute;top:-34px;width:66px;height:66px;border-radius:50%;background:url(assets/agenti/athena.webp) center/cover;box-shadow:0 6px 16px rgba(60,30,40,.3);border:2px solid #fff8ea}
+ .sc-pill .sc-ath i::before{content:"";position:absolute;inset:-4px;border-radius:50%;animation:scGiro 12s linear infinite}
+ .sc-pill .sc-ath i::after{content:"";position:absolute;top:-5px;left:calc(50% - 2.5px);width:5px;height:5px;border-radius:50%;background:#e0b45a;box-shadow:0 0 6px #e0b45a;transform-origin:2.5px 38px;animation:scGiro 12s linear infinite}
+ .sc-pill .sc-ath span{position:absolute;bottom:2px}
+ .sc-pill b{position:absolute;top:8px;right:16px;width:8px;height:8px;border-radius:50%;background:#c9473f;display:none}
+ .sc-pill b.on{display:block}
+ @keyframes scGiro{to{transform:rotate(360deg)}}
+ .sc-piu{display:flex;position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;border:0;background:#e0a93f;color:#14301c;align-items:center;justify-content:center;z-index:72;box-shadow:0 6px 16px rgba(120,80,10,.3)}
+ .sc-piu svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transition:transform .2s}
+ .sc-piu.aperto{background:#3f5d3a;color:#f6e7c1}.sc-piu.aperto svg{transform:rotate(45deg)}
+ .sc-velo{display:block;position:fixed;inset:0;background:rgba(30,25,10,.28);z-index:71;opacity:0;pointer-events:none;transition:opacity .2s}
+ .sc-velo.aperto{opacity:1;pointer-events:auto}
+ .sc-menu{display:grid;position:fixed;left:14px;right:14px;bottom:calc(152px + env(safe-area-inset-bottom));z-index:72;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px;border-radius:22px;background:rgba(255,250,240,.96);box-shadow:0 14px 40px rgba(40,30,10,.25);opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}
+ .sc-menu.aperto{opacity:1;pointer-events:auto;transform:none}
+ .sc-menu button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;border:1px solid #eadfc6;background:#fffdf7;font:inherit;font-size:11px;font-weight:600;color:#2b2a1f;cursor:pointer}
+ .sc-menu button i{width:34px;height:34px;border-radius:50%;background:#e0a93f;color:#14301c;display:flex;align-items:center;justify-content:center;font-size:15px}
+ .sc-menu button small{font-size:8.500px;color:#8a7b50;font-weight:700;letter-spacing:.04em}
+ .content{padding-bottom:170px!important}
+}
+@media (prefers-reduced-motion:reduce){.sc-pill .sc-ath i::after{animation:none}}

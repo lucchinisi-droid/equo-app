@@ -1,0 +1,11 @@
+/* pannello del box */
+.bp-testa{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.bp-testa .box-foto{width:64px;height:64px}
+.bp-ic-griglia{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 14px}
+@media (max-width:420px){.bp-ic-griglia{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.bp-ic{border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font-family:inherit;color:var(--muted)}
+.bp-ic .i{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--muted-bg)}
+.bp-ic .i svg{width:17px;height:17px}
+.bp-ic b{font-size:11px;color:var(--text);line-height:1.15;text-align:center}
+.bp-ic small{font-size:9.5px;min-height:11px}
+.bp-ic.on{border-color:var(--ic-col,#3f7a45)}.bp-ic.on .i{background:var(--ic-col,#3f7a45);color:#fff}
