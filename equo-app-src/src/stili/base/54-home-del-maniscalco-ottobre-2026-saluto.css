@@ -1,7 +1,5 @@
 /* ---------- HOME DEL MANISCALCO (ottobre 2026): saluto + meteo, banner, 5 cerchi, righe, Messaggi e «+» flottanti, Hammer al centro ---------- */
 #hm{display:none}
-body.home-man #page-pro-home > :not(#hm){display:none!important}
-body.home-man #page-pro-home > #hm{display:block!important}
 body.home-man .ai-fab{display:none!important}
 .hm{--verde:#14482c;--oro:#e2ab45;--oro-chiaro:#f3d58e}
 .hm-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}

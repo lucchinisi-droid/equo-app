@@ -2096,7 +2096,6 @@ dl.cavpro-kv dt{color:var(--muted)} dl.cavpro-kv dd{margin:0;font-weight:600;min
 /* ---------- Home a widget ---------- */
 .wh{display:none}
 body.vista-widget .wh{display:grid}
-body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh),
 body.vista-widget #home-main{display:none!important}
 .wg-meteo{display:inline-flex;align-items:center;gap:2px;margin-left:8px;vertical-align:middle;flex:none}
 .wg-meteo .mi{width:22px;height:22px}
@@ -2225,8 +2224,6 @@ body.incassi-nascosti .wh .wg-messaggi-largo{grid-column:1/-1}
 
 /* ---------- HOME DEL MANISCALCO (ottobre 2026): saluto + meteo, banner, 5 cerchi, righe, Messaggi e «+» flottanti, Hammer al centro ---------- */
 #hm{display:none}
-body.home-man #page-pro-home > :not(#hm){display:none!important}
-body.home-man #page-pro-home > #hm{display:block!important}
 body.home-man .ai-fab{display:none!important}
 .hm{--verde:#14482c;--oro:#e2ab45;--oro-chiaro:#f3d58e}
 .hm-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
@@ -2693,7 +2690,6 @@ body.pl-owner #meteo-owner{display:none}
 .lb-tg{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13.5px}
 </style>
 <style id="tr-css">
-body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
 .tr-h{font-family:Fraunces,serif;font-size:19px;margin:2px 0 2px}.tr-sub{color:var(--muted);font-size:12.5px;margin-bottom:14px}
 .tr-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px}
 .tr-card h4{margin:0 0 8px;font-size:14.5px;display:flex;justify-content:space-between;align-items:center}
@@ -2767,6 +2763,24 @@ body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
 .tr2-cp{background:var(--surface);border-top:1px solid var(--border);padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:8px;align-items:center}
 .tr2-cp input{flex:1;border:1px solid var(--border);border-radius:999px;padding:0 16px;min-height:44px;font:inherit;font-size:16px;background:var(--bg,#fff);color:var(--text)}
 .tr2-pl{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);font-size:22px;color:#14482c;cursor:pointer}.tr2-sd{width:44px;height:44px;border-radius:50%;border:2px solid #e2ab45;background:#14482c;color:#fbf3e2;font-size:18px;cursor:pointer}
+</style>
+<style id="regole-ruoli">
+/* ========== CHI SI VEDE NELLA HOME DEI PROFESSIONISTI (#page-pro-home) ==========
+   UNICO punto in cui si decide cosa mostra la Home di ogni ruolo professionale (21/10/2026).
+   Ogni ruolo ha le sue regole e nessuna regola vale per due ruoli: cambiare quella di un ruolo
+   non puo nascondere la Home di un altro. NON scrivere altrove regole su "#page-pro-home > ...":
+   unisci.cjs si ferma con un errore se ne trova. */
+
+/* maniscalco (Home nuova: #hm) */
+body.home-man #page-pro-home > :not(#hm){display:none!important}
+body.home-man #page-pro-home > #hm{display:block!important}
+
+/* istruttore / trainer (#tr-home) */
+body.pl-istr #page-pro-home > :not(#tr-home){display:none!important}
+body.pl-istr #page-pro-home > #tr-home{display:block!important}
+
+/* veterinario e altri professionisti con la Home a widget */
+body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):not(.wh){display:none!important}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -19668,7 +19682,7 @@ plAggiorna();
  }
  window.trRenderHome=async function(){
   var home=q("page-pro-home");if(!home)return;
-  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";box.className="wh-keep";home.appendChild(box);}
+  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";home.appendChild(box);}
   if(!TR.caricato){box.innerHTML='<div class="loading"><div class="spinner"></div></div>';await carica();}
   var nome=(currentUser&&(currentUser.fullName||currentUser.nome||currentUser.full_name))||"";
   var ora=new Date().getHours(),sal=ora<13?"Buongiorno":ora<18?"Buon pomeriggio":"Buonasera";

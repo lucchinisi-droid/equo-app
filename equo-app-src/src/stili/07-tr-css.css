@@ -1,5 +1,4 @@
 
-body.pl-istr #page-pro-home>*:not(#tr-home){display:none!important}
 .tr-h{font-family:Fraunces,serif;font-size:19px;margin:2px 0 2px}.tr-sub{color:var(--muted);font-size:12.5px;margin-bottom:14px}
 .tr-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px}
 .tr-card h4{margin:0 0 8px;font-size:14.5px;display:flex;justify-content:space-between;align-items:center}

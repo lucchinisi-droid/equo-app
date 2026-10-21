@@ -48,7 +48,7 @@
  }
  window.trRenderHome=async function(){
   var home=q("page-pro-home");if(!home)return;
-  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";box.className="wh-keep";home.appendChild(box);}
+  var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";home.appendChild(box);}
   if(!TR.caricato){box.innerHTML='<div class="loading"><div class="spinner"></div></div>';await carica();}
   var nome=(currentUser&&(currentUser.fullName||currentUser.nome||currentUser.full_name))||"";
   var ora=new Date().getHours(),sal=ora<13?"Buongiorno":ora<18?"Buon pomeriggio":"Buonasera";

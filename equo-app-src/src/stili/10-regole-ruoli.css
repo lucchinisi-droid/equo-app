@@ -1,0 +1,17 @@
+
+/* ========== CHI SI VEDE NELLA HOME DEI PROFESSIONISTI (#page-pro-home) ==========
+   UNICO punto in cui si decide cosa mostra la Home di ogni ruolo professionale (21/10/2026).
+   Ogni ruolo ha le sue regole e nessuna regola vale per due ruoli: cambiare quella di un ruolo
+   non puo nascondere la Home di un altro. NON scrivere altrove regole su "#page-pro-home > ...":
+   unisci.cjs si ferma con un errore se ne trova. */
+
+/* maniscalco (Home nuova: #hm) */
+body.home-man #page-pro-home > :not(#hm){display:none!important}
+body.home-man #page-pro-home > #hm{display:block!important}
+
+/* istruttore / trainer (#tr-home) */
+body.pl-istr #page-pro-home > :not(#tr-home){display:none!important}
+body.pl-istr #page-pro-home > #tr-home{display:block!important}
+
+/* veterinario e altri professionisti con la Home a widget */
+body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):not(.wh){display:none!important}

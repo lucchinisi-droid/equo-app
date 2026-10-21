@@ -1,7 +1,6 @@
 /* ---------- Home a widget ---------- */
 .wh{display:none}
 body.vista-widget .wh{display:grid}
-body.vista-widget #page-pro-home > :not(.wh-keep):not(.wh),
 body.vista-widget #home-main{display:none!important}
 .wg-meteo{display:inline-flex;align-items:center;gap:2px;margin-left:8px;vertical-align:middle;flex:none}
 .wg-meteo .mi{width:22px;height:22px}
