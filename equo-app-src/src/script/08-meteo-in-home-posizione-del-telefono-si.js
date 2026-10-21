@@ -507,7 +507,7 @@ async function albumNascondi(){
 /* ---- aggancio a Home e navigazione ---- */
 (function(){
   const _rh = renderHome; renderHome = function(){ _rh(); try{ diarioHomeRender(); }catch(e){} };
-  const _sp = showPage; showPage = function(p){ _sp(p); if(p === "diario") diarioCarica(); };
+  quandoApriPagina(function(p){ if(p === "diario") diarioCarica(); });
   const _od = openHorseDetail; openHorseDetail = async function(id){ await _od(id); try{ albumRender(id); }catch(e){} };
 })();
 

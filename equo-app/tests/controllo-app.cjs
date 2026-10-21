@@ -47,6 +47,15 @@ const SENZA_PIU = ["pro-inbox", "chat"]; // pagine dove il "+" e nascosto appost
       await pg.evaluate(async (r) => { currentUser.ruolo = r; await enterApp(r); }, ruolo);
       await pg.waitForTimeout(3500);
 
+      // navigazione unica: showPage e plAggiorna non devono essere riassegnate da altri file
+      const nav = await pg.evaluate(() => ({
+        bus: typeof quandoApriPagina === "function",
+        show: typeof showPage === "function" && showPage.toString().includes("ascoltiPagina"),
+        barra: typeof plAggiorna === "function" && plAggiorna.toString().includes("ascoltiBarra"),
+      }));
+      if(!nav.bus || !nav.show) male("showPage e stata riassegnata: usare quandoApriPagina(fn)");
+      if(!nav.barra) male("plAggiorna e stata riassegnata: usare quandoAggiornaBarra(fn)");
+
       const h = await pg.evaluate((sel) => {
         const el = document.querySelector(sel); if(!el) return null;
         const r = el.getBoundingClientRect();

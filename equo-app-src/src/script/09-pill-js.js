@@ -24,9 +24,13 @@ function plAggiorna(){
   const tono = r ? ((PL_TONI[r] || {})[pg] || 1) : null;
   if(tono) b.dataset.tono = tono; else delete b.dataset.tono;
   b.classList.toggle("pl-fab", (r === "owner" || r === "man") && pg !== "chat" && pg !== "pro-inbox");
+  // estensioni della barra (es. veterinario e istruttore in pl2-js): si iscrivono con quandoAggiornaBarra
+  for(const fn of ascoltiBarra){ try{ fn(); }catch(e){ console.error("quandoAggiornaBarra:", e); } }
 }
-const _plShowPage = showPage;
-showPage = function(){ const x = _plShowPage.apply(this, arguments); plAggiorna(); return x; };
+// NON riassegnare plAggiorna in altri file: usare quandoAggiornaBarra(fn)
+const ascoltiBarra = [];
+function quandoAggiornaBarra(fn){ ascoltiBarra.push(fn); }
+quandoApriPagina(function(){ plAggiorna(); });
 const _plApplicaHm = applicaHomeMan;
 applicaHomeMan = function(){ const x = _plApplicaHm.apply(this, arguments); plAggiorna(); return x; };
 setInterval(function(){ plAggiorna(); }, 1200);

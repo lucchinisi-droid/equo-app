@@ -7979,6 +7979,12 @@ function renderPaymentMethods(){
 }
 
 /* ---------- NAV ---------- */
+// NAVIGAZIONE UNICA (21/10/2026). showPage mostra la pagina e poi avvisa, in ordine, chi si e iscritto
+// con quandoApriPagina(fn). NON riassegnare mai showPage in altri file: per fare qualcosa quando
+// si apre una pagina usare quandoApriPagina(function(pagina){ ... }). Un errore in un iscritto
+// non blocca la navigazione ne gli altri iscritti.
+const ascoltiPagina = [];
+function quandoApriPagina(fn){ ascoltiPagina.push(fn); }
 function showPage(page){
   if(page === "home" || page === "pro-home") setTimeout(() => { try{ meteoHome(); }catch(e){} }, 0);
   Registro.pagina(page);
@@ -7987,6 +7993,7 @@ function showPage(page){
   document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
   if(typeof hmNavAttivo === "function") hmNavAttivo(page);
   if(page === "pro-agenda" && typeof renderAgendaSettimana === "function"){ agGiorniAperti = null; renderAgendaSettimana(); }  // entrando si apre oggi
+  for(const fn of ascoltiPagina){ try{ fn(page); }catch(e){ console.error("quandoApriPagina:", e); } }
 }
 
 function openModal(id){ document.getElementById(id).classList.add("active"); }
@@ -19213,7 +19220,7 @@ async function albumNascondi(){
 /* ---- aggancio a Home e navigazione ---- */
 (function(){
   const _rh = renderHome; renderHome = function(){ _rh(); try{ diarioHomeRender(); }catch(e){} };
-  const _sp = showPage; showPage = function(p){ _sp(p); if(p === "diario") diarioCarica(); };
+  quandoApriPagina(function(p){ if(p === "diario") diarioCarica(); });
   const _od = openHorseDetail; openHorseDetail = async function(id){ await _od(id); try{ albumRender(id); }catch(e){} };
 })();
 
@@ -19245,9 +19252,13 @@ function plAggiorna(){
   const tono = r ? ((PL_TONI[r] || {})[pg] || 1) : null;
   if(tono) b.dataset.tono = tono; else delete b.dataset.tono;
   b.classList.toggle("pl-fab", (r === "owner" || r === "man") && pg !== "chat" && pg !== "pro-inbox");
+  // estensioni della barra (es. veterinario e istruttore in pl2-js): si iscrivono con quandoAggiornaBarra
+  for(const fn of ascoltiBarra){ try{ fn(); }catch(e){ console.error("quandoAggiornaBarra:", e); } }
 }
-const _plShowPage = showPage;
-showPage = function(){ const x = _plShowPage.apply(this, arguments); plAggiorna(); return x; };
+// NON riassegnare plAggiorna in altri file: usare quandoAggiornaBarra(fn)
+const ascoltiBarra = [];
+function quandoAggiornaBarra(fn){ ascoltiBarra.push(fn); }
+quandoApriPagina(function(){ plAggiorna(); });
 const _plApplicaHm = applicaHomeMan;
 applicaHomeMan = function(){ const x = _plApplicaHm.apply(this, arguments); plAggiorna(); return x; };
 setInterval(function(){ plAggiorna(); }, 1200);
@@ -19331,16 +19342,14 @@ function plNavAltri(){
   nav.dataset.alt = r; delete nav.dataset.man;
   nav.querySelectorAll(".nav-btn[data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === plPagina()));
 }
-const _pl2Agg = plAggiorna;
-plAggiorna = function(){
-  _pl2Agg.apply(this, arguments);
+quandoAggiornaBarra(function(){
   plNavAltri();
   const r = plRuolo();
   if(PL_AGENTE[r]){
     const pg = plPagina();
     document.body.classList.toggle("pl-fab", pg !== "pro-inbox");
   }
-};
+});
 const _pl2Menu = plCostruisciMenu;
 plCostruisciMenu = function(){
   const r = plRuolo();
@@ -20142,15 +20151,12 @@ plAggiorna();
    plSez("Vai a",[plTile(HM_IC.ferro,"Cavalli seguiti","showPage('tr-cavalli')"),plTile(HM_IC.inbox,"Messaggi","showPage('pro-inbox'); loadColleghiList();"),plTile(HM_IC.qr,"Il mio codice","trMioCodice()"),plTile(HM_IC.aiuto,"Serve aiuto?","apriTicketAssistenza()")]);
   m.classList.add("pl-menu");
  };
- var _sp=window.showPage;
- window.showPage=function(p){
-  var r=_sp.apply(this,arguments);
+ quandoApriPagina(function(p){
   try{
    if(isTr()){ if(p==="pro-home")trRenderHome(); else if(p==="tr-sedute")trRenderSedute(); else if(p==="tr-cavalli")trRenderCavalli(); else if(p==="tr-agenda")trRenderAgenda(); else if(p==="pro-inbox")setTimeout(function(){try{renderChatCartelle();}catch(e){}},60); }
    else if(p==="home"&&typeof trOwnerCard==="function")trOwnerCard(true);
   }catch(e){console.error(e);}
-  return r;
- };
+ });
  // Ares: l'immagine al centro (stile come Galeno/Hammer)
  document.addEventListener("DOMContentLoaded",function(){["tr-sedute","tr-cavalli","tr-agenda"].forEach(pagina);});
   /* ===== AGENDA LEZIONI + CHAT CON I PROPRIETARI (17/10/2026) ===== */

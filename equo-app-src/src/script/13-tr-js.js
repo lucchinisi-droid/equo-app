@@ -531,15 +531,12 @@
    plSez("Vai a",[plTile(HM_IC.ferro,"Cavalli seguiti","showPage('tr-cavalli')"),plTile(HM_IC.inbox,"Messaggi","showPage('pro-inbox'); loadColleghiList();"),plTile(HM_IC.qr,"Il mio codice","trMioCodice()"),plTile(HM_IC.aiuto,"Serve aiuto?","apriTicketAssistenza()")]);
   m.classList.add("pl-menu");
  };
- var _sp=window.showPage;
- window.showPage=function(p){
-  var r=_sp.apply(this,arguments);
+ quandoApriPagina(function(p){
   try{
    if(isTr()){ if(p==="pro-home")trRenderHome(); else if(p==="tr-sedute")trRenderSedute(); else if(p==="tr-cavalli")trRenderCavalli(); else if(p==="tr-agenda")trRenderAgenda(); else if(p==="pro-inbox")setTimeout(function(){try{renderChatCartelle();}catch(e){}},60); }
    else if(p==="home"&&typeof trOwnerCard==="function")trOwnerCard(true);
   }catch(e){console.error(e);}
-  return r;
- };
+ });
  // Ares: l'immagine al centro (stile come Galeno/Hammer)
  document.addEventListener("DOMContentLoaded",function(){["tr-sedute","tr-cavalli","tr-agenda"].forEach(pagina);});
   /* ===== AGENDA LEZIONI + CHAT CON I PROPRIETARI (17/10/2026) ===== */

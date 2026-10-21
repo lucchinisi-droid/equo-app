@@ -14,16 +14,14 @@ function plNavAltri(){
   nav.dataset.alt = r; delete nav.dataset.man;
   nav.querySelectorAll(".nav-btn[data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === plPagina()));
 }
-const _pl2Agg = plAggiorna;
-plAggiorna = function(){
-  _pl2Agg.apply(this, arguments);
+quandoAggiornaBarra(function(){
   plNavAltri();
   const r = plRuolo();
   if(PL_AGENTE[r]){
     const pg = plPagina();
     document.body.classList.toggle("pl-fab", pg !== "pro-inbox");
   }
-};
+});
 const _pl2Menu = plCostruisciMenu;
 plCostruisciMenu = function(){
   const r = plRuolo();
