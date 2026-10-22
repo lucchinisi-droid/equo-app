@@ -1,0 +1,232 @@
+// Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
+import { cavalliEditCache, messaggioErroreCollegaCliente, openClienteDetail, renderCavalliEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
+import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
+import { MISURA_SISTEMA_LABEL, MISURE_FERRO } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
+import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
+/* ---------- FERRATURA DEL CAVALLO (scheda = libretto): Ferrato / Mezza / Pareggio, misura, tipo di ferro, note ----------
+   Si imposta una volta e vale per tutti gli appuntamenti; ogni cambio resta nello storico del cavallo (trigger nel database).
+   Completa: tipo di ferro separato davanti / dietro (ferro_tipo = davanti, ferro_tipo_post = dietro). */
+const LAVORO_CAV = {
+  completa: { t: "Ferrato", s: "4 ferri", q: 4, tipo: "ferratura" },
+  mezza:    { t: "Mezza", s: "2 davanti", q: 2, tipo: "mezza_ferratura" },
+  pareggio: { t: "Pareggio", s: "senza ferri", q: null, tipo: "pareggio" }
+};
+function lavoroCav(cv){ return cv && LAVORO_CAV[cv.ferratura_tipo] ? cv.ferratura_tipo : "completa"; }
+function tipoDaScheda(cv){ return LAVORO_CAV[lavoroCav(cv)].tipo; }
+function testoTipoFerro(ft, ftp, note){
+  let t = ftp && ftp !== ft ? (ft === "correttivo" ? "correttivo davanti" : "correttivo dietro") : (ft === "correttivo" ? "correttivo" : "standard");
+  if(note && t !== "standard") t += " (" + note + ")";
+  return t;
+}
+// testo del ferro salvato in un intervento (ferro_tipo può essere standard, correttivo, corr_davanti, corr_dietro)
+function testoFerroIntervento(i){
+  if(!i || !i.ferro_tipo || i.ferro_tipo === "standard") return null;
+  const t = i.ferro_tipo === "corr_davanti" ? "correttivo davanti" : i.ferro_tipo === "corr_dietro" ? "correttivo dietro" : "correttivo";
+  return t + (i.ferro_note ? " (" + i.ferro_note + ")" : "");
+}
+// «Ferrato · 4 ferri n. 2 IT · standard»
+function descrFerraturaCavallo(cv){
+  const k = lavoroCav(cv), l = LAVORO_CAV[k];
+  if(k === "pareggio") return "Pareggio · senza ferri";
+  return [l.t, l.s + (cv.ferro_numero ? " " + siglaFerro(cv.ferro_sistema, cv.ferro_numero) : ""),
+    testoTipoFerro(cv.ferro_tipo, k === "completa" ? cv.ferro_tipo_post : null, cv.ferro_note)].join(" · ");
+}
+let ferStato = null;
+// cv: cavallo (chiave, id, nome, campi ferro); clienteId: per creare la riga se il cavallo è solo «su Equo»; dopo: callback(cv)
+function apriSchedaFerratura(cv, clienteId, dopo, extra){
+  if(!cv) return;
+  const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(String(cv.ferro_numero)) : -1;
+  ferStato = { cv, clienteId, dopo, lavoro: lavoroCav(cv), s: cv.ferro_sistema || "italiana", idx: n >= 0 ? n : -1,
+    ft: cv.ferro_tipo || "standard", ftp: cv.ferro_tipo_post || null };
+  document.getElementById("fer-titolo").textContent = (cv.nome || "Cavallo") + " · Ferratura";
+  document.getElementById("fer-sistema").value = ferStato.s;
+  document.getElementById("fer-note").value = cv.ferro_note || "";
+  const av = document.getElementById("fer-avviso"); av.value = cv.avviso_sicurezza || ""; ferStato.avviso = cv.avviso_sicurezza || "";
+  if(cv.id && cv.avviso_sicurezza === undefined && !DEMO_MODE){
+    sb.from("cavalli_clienti_mascalcia").select("avviso_sicurezza").eq("id", cv.id).maybeSingle().then(({ data }) => {
+      if(data && ferStato && ferStato.cv === cv && !av.value){ av.value = data.avviso_sicurezza || ""; ferStato.avviso = av.value; }
+    }, () => {});
+  }
+  document.getElementById("fer-errore").style.display = "none";
+  document.getElementById("fer-dati").innerHTML = extra || "";
+  ferRender();
+  openModal("modal-ferratura");
+}
+function ferRender(){
+  const f = ferStato; if(!f) return;
+  document.querySelectorAll("#fer-lavoro button").forEach(b => b.classList.toggle("on", b.dataset.v === f.lavoro));
+  document.getElementById("fer-con-ferri").style.display = f.lavoro === "pareggio" ? "none" : "";
+  document.getElementById("fer-misura").textContent = f.idx >= 0 ? "n. " + MISURE_FERRO[f.s][f.idx] + " " + MISURA_SISTEMA_LABEL[f.s] : "non impostata";
+  // Completa con 4 ferri: davanti e dietro separati
+  const dd = vistaCompleta() && f.lavoro === "completa";
+  document.getElementById("fer-tipo-label").textContent = dd ? "Tipo di ferro · davanti e dietro" : "Tipo di ferro";
+  document.querySelector("#fer-riga-unico span").textContent = dd ? "Davanti" : "";
+  document.getElementById("fer-riga-dietro").style.display = dd ? "" : "none";
+  const ftp = f.ftp || f.ft;
+  document.querySelectorAll('#modal-ferratura .fer-scelta[data-k="ft"] button').forEach(b => b.classList.toggle("on", b.dataset.v === f.ft));
+  document.querySelectorAll('#modal-ferratura .fer-scelta[data-k="ftp"] button').forEach(b => b.classList.toggle("on", b.dataset.v === ftp));
+}
+function ferLavoro(v){ if(ferStato){ ferStato.lavoro = v; ferRender(); } }
+function ferSistema(){
+  const f = ferStato; if(!f) return;
+  const nuovo = document.getElementById("fer-sistema").value;
+  if(f.idx >= 0){ const i = f.idx; f.s = nuovo; f.idx = Math.min(i, MISURE_FERRO[nuovo].length - 1); } else f.s = nuovo;  // stessa riga = misura equivalente
+  ferRender();
+}
+function ferMisura(d){
+  const f = ferStato; if(!f) return;
+  const max = MISURE_FERRO[f.s].length - 1;
+  f.idx = f.idx < 0 ? MISURA_INDICE_PARTENZA : Math.max(0, Math.min(max, f.idx + d));
+  ferRender();
+}
+function ferTipo(k, v){
+  const f = ferStato; if(!f) return;
+  if(k === "ft"){ const dietro = f.ftp || f.ft; f.ft = v; if(vistaCompleta() && f.lavoro === "completa") f.ftp = dietro; else f.ftp = null; }
+  else f.ftp = v;
+  if(f.ftp === f.ft) f.ftp = null;
+  ferRender();
+}
+async function salvaSchedaFerratura(){
+  const f = ferStato; if(!f) return;
+  const cv = f.cv;
+  const err = m => { const e = document.getElementById("fer-errore"); e.textContent = m; e.style.display = "block"; };
+  const campi = { ferratura_tipo: f.lavoro };
+  if(f.lavoro !== "pareggio"){
+    if(f.idx >= 0){ campi.ferro_sistema = f.s; campi.ferro_numero = MISURE_FERRO[f.s][f.idx]; }
+    campi.ferro_tipo = f.ft;
+    // davanti/dietro si tocca solo nella Completa con 4 ferri; altrove resta com'era (salvo cambio del tipo unico)
+    if(vistaCompleta() && f.lavoro === "completa") campi.ferro_tipo_post = f.ftp || null;
+    else if(f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_tipo_post = null;
+    campi.ferro_note = document.getElementById("fer-note").value.trim() || null;
+  }
+  const avviso = document.getElementById("fer-avviso").value.trim();
+  if(avviso !== (f.avviso || "")) campi.avviso_sicurezza = avviso || null;
+  // solo i campi davvero cambiati (lo storico registra ogni cambio)
+  Object.keys(campi).forEach(k => {
+    const prima = k === "ferratura_tipo" ? lavoroCav(cv) : k === "ferro_tipo" ? (cv.ferro_tipo || "standard") : k === "avviso_sicurezza" ? (f.avviso || null) : (cv[k] ?? null);
+    if(String(prima ?? "") === String(campi[k] ?? "")) delete campi[k];
+  });
+  if(!Object.keys(campi).length){ closeModal("modal-ferratura"); if(f.dopo) f.dopo(cv, false); return; }
+  const btn = document.getElementById("fer-salva"); btn.disabled = true;
+  try{
+    let id = cv.id;
+    if(!id && f.clienteId){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(f.clienteId, cv)); }
+    if(!id) return err("Non riuscito, riprova.");
+    const { error } = await DB.updateCavalloCliente(id, campi);
+    if(error) return err(/ferratura_tipo|ferro_tipo_post/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+    Object.assign(cv, campi, { id });
+    // tiene allineate le altre copie del cavallo in memoria
+    [schedaCavalli, cavalliEditCache, cavalliClienteCorrente, cavalliMieiLista].forEach(l => (l || []).forEach(x => { if(x !== cv && x.id === id) Object.assign(x, campi); }));
+    closeModal("modal-ferratura");
+    showToast(`${cv.nome || "Cavallo"}: ${descrFerraturaCavallo(cv)}`);
+    if(f.dopo) f.dopo(cv, true);
+  } finally { btn.disabled = false; }
+}
+
+// tiene allineato il vecchio campo testo nome_cavallo (usato in lista clienti/inbox)
+async function syncNomeCavalloCliente(){
+  const cav = await DB.listCavalliCliente(currentClienteId);
+  const nome_cavallo = cav.map(x => x.nome).join(", ");
+  await DB.updateClienteMascalcia(currentClienteId, { nome_cavallo });
+}
+
+// aggiunge (o sposta qui) un cavallo con il suo codice Equo: una sola scheda per cavallo, storico a vita
+async function aggiungiCavalloCodice(btn){
+  const inp = document.getElementById("edit-cliente-codice-cavallo");
+  const codice = inp.value.trim();
+  if(!codice){ showToast("Scrivi il codice Equo del cavallo"); inp.focus(); return; }
+  if(DEMO_MODE){ showToast("In demo l'aggiunta con codice non è disponibile."); return; }
+  if(btn) btn.disabled = true;
+  try{
+    let { data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: false });
+    if(error){ showToast("Errore: " + error.message); return; }
+    if(data && data.chiedi){
+      if(!confirm(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
+      ({ data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: true }));
+      if(error){ showToast("Errore: " + error.message); return; }
+    }
+    if(!data?.ok){ showToast(data?.errore || "Non riuscito, riprova."); return; }
+    inp.value = "";
+    showToast(data.azione === "gia" ? `${data.nome} è già tra i cavalli di questo cliente.`
+      : data.azione === "spostato" ? `${data.nome} spostato qui da ${data.da} (codice ${data.codice}).`
+      : `${data.nome} aggiunto (codice ${data.codice}).`);
+    await renderCavalliEditCliente();
+    await syncNomeCavalloCliente();
+    try{ await loadClientiMascalcia(); }catch(e){}
+  } finally { if(btn) btn.disabled = false; }
+}
+
+async function aggiungiCavalloEditCliente(){
+  const nome = document.getElementById("edit-cliente-nuovo-cavallo").value.trim();
+  const chip = document.getElementById("edit-cliente-nuovo-chip").value.trim();
+  if(!nome){ showToast("Inserisci il nome del cavallo"); return; }
+  const razza = razzaValore("edit-cliente-nuovo-razza");
+  if(razza === false) return;
+  const { error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: currentClienteId, nome, microchip: chip || null, razza });
+  if(error){ showToast("Errore: " + error.message); return; }
+  document.getElementById("edit-cliente-nuovo-cavallo").value = "";
+  document.getElementById("edit-cliente-nuovo-chip").value = "";
+  razzaImposta("edit-cliente-nuovo-razza", "");
+  await renderCavalliEditCliente();
+  await syncNomeCavalloCliente();
+}
+
+async function eliminaCavalloEditCliente(id){
+  if(!confirm("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
+  const { error } = await DB.deleteCavalloCliente(id);
+  if(error){ showToast("Errore: " + error.message); return; }
+  await renderCavalliEditCliente();
+  await syncNomeCavalloCliente();
+}
+
+async function salvaEditCliente(){
+  const errBox = document.getElementById("edit-cliente-error");
+  errBox.style.display = "none";
+  const nome = document.getElementById("edit-cliente-nome").value.trim();
+  const telefono = document.getElementById("edit-cliente-telefono").value.trim();
+  const note = document.getElementById("edit-cliente-note").value.trim();
+  if(!nome){ errBox.textContent = "Il nome del cliente è obbligatorio."; errBox.style.display = "block"; return; }
+  const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
+  const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
+  const { error } = await DB.updateClienteMascalcia(currentClienteId, { nome, telefono, note, tipo_cliente });
+  if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }
+  // indirizzo salvato a parte: se il database non avesse ancora la colonna, il resto è già salvo
+  const indirizzo = document.getElementById("edit-cliente-indirizzo").value.trim();
+  const cPrima = clientiMascalcia.find(x => x.id === currentClienteId);
+  if((cPrima?.indirizzo || "") !== indirizzo) await DB.updateClienteMascalcia(currentClienteId, { indirizzo: indirizzo || null });
+  // promemoria pagamenti (solo clienti collegati su Equo); a parte, così il resto resta salvo anche senza la colonna
+  if(cPrima?.cliente_user_id){
+    const prom = !!document.getElementById("edit-cliente-promemoria").checked;
+    if((cPrima.promemoria_pagamenti !== false) !== prom) await DB.updateClienteMascalcia(currentClienteId, { promemoria_pagamenti: prom });
+  }
+  if(codiceEquo){
+    const res = await DB.collegaClienteDaCodice(currentClienteId, codiceEquo);
+    if(!res.ok){
+      errBox.textContent = "Dati salvati, ma " + messaggioErroreCollegaCliente(res).replace(/^./, x => x.toLowerCase());
+      errBox.style.display = "block";
+      await loadClientiMascalcia();
+      return;
+    }
+    showToast("Collegato a Equo: gli è arrivato il tuo primo messaggio");
+  }
+  closeModal("modal-edit-cliente");
+  if(!codiceEquo) showToast("Cliente aggiornato");
+  const id = currentClienteId;
+  await loadClientiMascalcia();
+  await openClienteDetail(id);
+}
+
+function closeClienteDetail(){
+  currentClienteId = null;
+  schedaDaCartella = false;
+  schedaCavalloKey = null;
+  const vp = document.getElementById("cavallo-pro-view"); if(vp) vp.style.display = "none";
+  document.getElementById("clienti-list-view").style.display = "block";
+  document.getElementById("clienti-detail-view").style.display = "none";
+}
+
+
+export { LAVORO_CAV, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };

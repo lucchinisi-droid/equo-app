@@ -21,6 +21,14 @@ const RUOLI = [
   { ruolo: "istruttore", home: "#tr-home" },
   { ruolo: "veterinario", home: "#page-pro-home" },
 ];
+// Cerca negli attributi onclick/onchange/... della pagina le funzioni chiamate che non esistono.
+const PULSANTI_SENZA_FUNZIONE = () => {
+  const kw = new Set(["if","return","function","typeof","await","switch","for","while","catch","event","String","Number","Math","Date","JSON","parseInt","parseFloat","encodeURIComponent","alert","confirm","setTimeout","Promise","Array","Object","Boolean","new"]);
+  const ids = new Set();
+  for(const el of document.querySelectorAll("*")) for(const a of el.attributes) if(/^on/.test(a.name))
+    for(const m of a.value.matchAll(/(^|[^\w$.'"])([A-Za-z_$][\w$]*)\s*\(/g)) ids.add(m[2]);
+  return [...ids].filter(i => !kw.has(i) && typeof window[i] === "undefined" && (() => { try { return typeof (0, eval)(i) === "undefined"; } catch(e){ return true; } })()).sort();
+};
 const SENZA_PIU = ["pro-inbox", "chat"]; // pagine dove il "+" e nascosto apposta
 
 (async () => {
@@ -84,6 +92,9 @@ const SENZA_PIU = ["pro-inbox", "chat"]; // pagine dove il "+" e nascosto appost
         if(!s || s.id !== "page-" + p) male("la barra non apre " + p + " (aperta: " + (s && s.id) + ")");
         else if(s.testo < 20) male("pagina " + p + " vuota");
         if(!SENZA_PIU.includes(p) && !(await piu())) male("tasto + sparito dopo 1,6 s in " + p);
+        // ogni pulsante della pagina deve chiamare una funzione che esiste (moduli: va messa nell'API pubblica in moduli/index.js)
+        const senza = await pg.evaluate(PULSANTI_SENZA_FUNZIONE);
+        if(senza.length) male("in " + p + " ci sono pulsanti che chiamano funzioni inesistenti: " + senza.join(", "));
       }
       jsErr.forEach(e => male("errore JavaScript: " + e));
       console.log((errori.some(x => x.startsWith(ruolo + ":")) ? "KO " : "OK ") + ruolo + " · pagine: " + (pagine || []).join(", "));
