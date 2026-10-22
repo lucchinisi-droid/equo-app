@@ -1,5 +1,7 @@
+// Equo App · agenti · modulo (moduli ES, costruiti con Vite in ruoli/agenti/costruito.js)
+import { sendChatMessage } from "./082-analizza-una-foto-focus.js";
 /* ---------- EQUO AI — allegati (Step 2): foto ridotte a max 1600px JPEG, PDF fino a 4 MB ---------- */
-let aiAllegati = []; // { media_type, data (base64), anteprima (dataURL o null), nome }
+/* -> stato-condiviso.js */ // { media_type, data (base64), anteprima (dataURL o null), nome }
 function leggiFileComeDataUrl(file){
   return new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = ko; r.readAsDataURL(file); });
 }
@@ -48,7 +50,7 @@ function rimuoviAllegatoAi(i){ aiAllegati.splice(i, 1); renderAllegatiAi(); }
    Avvii rapidi: Chiedi · Analizza una foto (modalità Focus, nel Free vale 3 messaggi) · Consulta un caso (domande con le
    risposte pronte da toccare) · Riassumi lo storico. L'esito della foto si può scaricare in PDF (resta sul telefono),
    condividere nel libretto del cavallo (allegato) o eliminare. */
-let hpContesto = null, hpCasoAttivo = false;
+/* -> stato-condiviso.js */
 function hpCalcolaContesto(){
   if(!agenteAiHammer() || !document.getElementById("page-pro-clienti")?.classList.contains("active")) return null;
   const vp = document.getElementById("cavallo-pro-view");
@@ -114,3 +116,5 @@ function hpLimiteHtml(data){
     <button type="button" class="hp-b o" onclick="showToast('I crediti Hammer arrivano a breve: intanto con Premium hai 500 messaggi al mese.')">Acquista crediti Hammer</button>` : ""}</div>`;
 }
 
+
+export { aggiungiAllegatiAi, hpCaso, hpChiedi, hpEstraiScelte, hpFineCaso, hpLimiteHtml, hpPreparaPannello, hpScelta, hpStorico, hpTogliContesto, renderAllegatiAi, riduciImmagine, rimuoviAllegatoAi };

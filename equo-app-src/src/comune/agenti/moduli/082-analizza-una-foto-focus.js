@@ -1,3 +1,6 @@
+// Equo App · agenti · modulo (moduli ES, costruiti con Vite in ruoli/agenti/costruito.js)
+import { detectDemoEvent } from "./080-ai-chat.js";
+import { hpEstraiScelte, hpFineCaso, hpLimiteHtml, renderAllegatiAi, riduciImmagine } from "./081-equo-ai-allegati-step-2-foto-ridotte-a-m.js";
 /* ---------- Analizza una foto (Focus) ---------- */
 const HP_SCATTI = [
   { k: "laterale", t: "Laterale", g: "Zoccolo di lato, a terra, telefono all'altezza del piede" },
@@ -182,7 +185,7 @@ async function hpElimina(){
 /* Schede di conferma per le azioni proposte dall'AI (evento, spesa, lezione, richiesta al maniscalco) */
 const aiAzioniInAttesa = {};
 const CAT_SPESA_LABEL = { pensione: "Pensione", mangime: "Mangime", veterinario: "Veterinario", maniscalco: "Maniscalco", attrezzatura: "Attrezzatura", altro: "Altro" };
-const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
+/* -> stato-condiviso.js */
 const ETICHETTA_CONFERMA_AI = {
   richiesta_maniscalco: () => "Invia richiesta",
   accetta_richiesta: () => "Accetta",
@@ -485,3 +488,5 @@ async function confirmEventProposal(id, proposed){
   await loadDeadlines();
 }
 
+
+export { aggiornaViteManiscalco, aiNaviga, cancelEventProposal, confermaAzioneAi, confirmEventProposal, hpAnalizza, hpApriFoto, hpChiudiFoto, hpCondividi, hpElimina, hpFotoScelta, hpPdf, hpScatto, sendChatMessage };

@@ -1,3 +1,4 @@
+// Equo App · agenti · modulo (moduli ES, costruiti con Vite in ruoli/agenti/costruito.js)
 /* ---------- AI CHAT ---------- */
 // Parole chiave molto semplici usate SOLO in DEMO_MODE per simulare la proposta
 // di un evento sanitario, così il flusso di conferma è testabile senza API key.
@@ -22,3 +23,5 @@ function detectDemoEvent(text){
   return { horse_name: horse.name, type, date, next_due_date: null, notes: null };
 }
 
+
+export { detectDemoEvent };

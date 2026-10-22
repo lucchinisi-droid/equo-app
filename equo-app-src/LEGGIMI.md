@@ -12,7 +12,7 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
   ... `db-10-profilo.js`). Un solo oggetto `DB` creato in `db-00-inizio.js`; ogni file aggiunge le sue funzioni con
   `Object.assign(DB, {...})`. Una funzione nuova va nel file del suo argomento. Lo stato della demo e in `core/script/003b-stato-demo.js`.
 - `src/comune/` — parti condivise da piu ruoli: `barra/` (barra in basso e tasto +: quandoAggiornaBarra),
-  `chat/` (chat, allegati, vocali, notifiche dei messaggi; dal 22/10 in moduli: `chat/moduli/` + API pubblica in `moduli/index.js`, `chat/stato-condiviso.js` con EMOJI_LIST e contatori, costruito in `chat/costruito.js` al posto del vecchio file 062), `agenti/` (chat con Pegasus/Hammer/Ares, foto).
+  `chat/` (chat, allegati, vocali, notifiche dei messaggi; dal 22/10 in moduli: `chat/moduli/` + API pubblica in `moduli/index.js`, `chat/stato-condiviso.js` con EMOJI_LIST e contatori, costruito in `chat/costruito.js` al posto del vecchio file 062), `agenti/` (chat con Pegasus/Hammer/Ares, foto; dal 22/10 in moduli: `agenti/moduli/` + `agenti/stato-condiviso.js`, costruito in `agenti/costruito.js`).
 - `src/ruoli/proprietario/` — cavalli, codice cavallo, libretto, diario, calendario, spese, chat col maniscalco; pagine del proprietario.
   Dal 22/10/2026 in MODULI ES (`moduli/023-*.js ... 101-*.js` + `moduli/index.js` con l'API pubblica), costruiti da Vite in
   `costruito.js`; `stato-condiviso.js` = 25 variabili lette o cambiate anche da altre parti (ml, mlProb, currentFarrier...).
