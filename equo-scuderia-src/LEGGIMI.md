@@ -22,3 +22,13 @@ L'app Groom (`equo-scuderia/groom.html`) ha i suoi sorgenti in `equo-scuderia-sr
 argomento: accesso, dati e sincronizzazione, vista box, azioni, scanner QR, installazione, demo).
 - Rimettere insieme: `node equo-app-src/strumenti/unisci.cjs --app equo-scuderia --pagina groom.html`
 - Controllare: aggiungere `--verifica`. Poi `node equo-scuderia/tests/controllo-groom.cjs`.
+
+## Sezioni in moduli ES con Vite (dal 22/10/2026)
+Le sezioni con piu file sono moduli veri: `sezioni/<magazzino|cavalli|messaggi|centro|home|lezioni-pacchetti-comunicazioni>/`
+- `moduli/*.js` + `moduli/index.js` (API PUBBLICA: le funzioni chiamate dai pulsanti e dalle altre parti, messe su window)
+- `stato-condiviso.js`: variabili lette o cambiate anche fuori dalla sezione (solo dati)
+- `costruito.js`: GENERATO da Vite, NON modificare a mano.
+Dopo una modifica in `moduli/`: `VITE_DIR=$HOME/strumenti-vite node equo-app-src/strumenti/costruisci-moduli.mjs`, poi
+`node equo-app-src/strumenti/unisci.cjs --app equo-scuderia`, poi `node equo-scuderia/tests/controllo-scuderia.cjs`
+(che ora controlla anche che ogni pulsante chiami una funzione esistente).
+Restano file singoli (gia isolati): agenti, professionisti, statistiche, e gli script separati della Home (09-11) e del codice cavallo (13).
