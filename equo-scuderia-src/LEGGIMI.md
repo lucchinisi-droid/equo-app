@@ -9,7 +9,6 @@ Da qui si modifica il gestionale. `equo-scuderia/index.html` (quello che Netlify
   magazzino, statistiche, agenti (Athena), groom, altre (store, fatturazione).
 - `src/comune/barra/` — barra a pillola e tasto + del telefono.
 - `src/finestre/` — tutte le finestre (modal).
-- Le cartelle vuote `src/html`, `src/script/app`, `src/stili/base` sono resti dello spostamento del 22/10 (cancellabili).
 
 Comandi (dalla cartella Equo):
 1. `node equo-app-src/strumenti/unisci.cjs --app equo-scuderia` — rimette insieme i file in `equo-scuderia/index.html`.

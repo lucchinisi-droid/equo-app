@@ -27,4 +27,3 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
 - Si modifica in `src`, si esegue 1, poi 3; commit solo se il controllo e verde.
 - Non riassegnare showPage, plAggiorna (usare quandoApriPagina / quandoAggiornaBarra): il controllo fallisce.
 - Regole "#page-pro-home > ..." solo in core/stili/10-regole-ruoli.css: unisci.cjs si ferma.
-- Le cartelle vuote `src/html`, `src/script/app`, `src/stili/base` e `vecchi/` sono resti dello spostamento del 22/10 (cancellabili).
