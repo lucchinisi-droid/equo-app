@@ -1,7 +1,7 @@
 -- 22/10/2026 GUIDA DEGLI AGENTI: schede aggiornate alle novita del 20-22 ottobre
 -- (Diario con settimana e Instagram, cavalli bloccati col piano Free, notifiche del codice cavallo,
 --  codice Equo in Scuderia, PDF solo da Validato, conferme dell'istruttore).
--- Si puo rieseguire: aggiorna per titolo e inserisce solo le schede che mancano.
+-- Si puo rieseguire: aggiorna per titolo e inserisce solo le schede che mancano (il titolo e unico in tutta la tabella).
 
 -- 1) Diario (proprietario): settimana scorrevole con icone, Condividi su Instagram
 update public.ai_conoscenze set aggiornato_il = now(), verificato_il = current_date, contenuto = $t$Dove: barra in basso → "Diario" (oppure il tasto "+" al centro della barra, oppure la carta "Oggi" nella Home)
@@ -67,11 +67,11 @@ Passi:
 Esempio: il proprietario di Ares completa la data di nascita e conferma; l'amministratore del centro apre la Home, trova Ares in "Da confermare", controlla i dati e conferma: Ares diventa Validato e si può generare la sua scheda PDF.
 Note: Admin e istruttori del centro ricevono la notifica "Da confermare: (nome)" quando cambiano i dati di un cavallo del centro. Confermate solo cavalli che conoscete davvero. Il livello Certificato arriva con la verifica di Equo.
 Parole chiave: codice equo, codice cavallo, provvisorio, validato, certificato, PRV, da confermare, confermo i dati, conferma, codice definitivo, scheda pdf bloccata$t$, current_date, true
-where not exists (select 1 from public.ai_conoscenze where categoria = 'guida' and ambito = 'scuderia' and titolo = 'Codice Equo del cavallo in Scuderia (Provvisorio, Validato, Certificato)');
+where not exists (select 1 from public.ai_conoscenze where titolo = 'Codice Equo del cavallo in Scuderia (Provvisorio, Validato, Certificato)');
 
 -- 6) NUOVA (istruttore): conferme del codice cavallo nella Home del Trainer
 insert into public.ai_conoscenze (ambito, categoria, titolo, contenuto, verificato_il, attivo)
-select 'istruttore', 'guida', 'Come confermo i dati di un cavallo (Da confermare)', $t$Dove: "Home" del Trainer → riquadro "Da confermare"
+select 'istruttore', 'guida', 'Come confermo i dati di un cavallo che seguo (Trainer)', $t$Dove: "Home" del Trainer → riquadro "Da confermare"
 Passi:
 1. Nel riquadro compaiono i cavalli che segui con nome, razza e data di nascita completi e che non hai ancora confermato.
 2. Controlla che i dati siano giusti e tocca "Confermo".
@@ -80,7 +80,7 @@ Passi:
 Esempio: Marco completa la data di nascita di Rio; il suo istruttore Riccardo trova Rio in "Da confermare" nella Home, conferma e Rio diventa Validato.
 Note: Ricevi anche la notifica "Da confermare: (nome)". Una persona vale una conferma sola. Se non conosci davvero il cavallo non confermare.
 Parole chiave: da confermare, conferma, validato, codice definitivo, codice cavallo, seconda conferma, dati cambiati, trainer, istruttore$t$, current_date, true
-where not exists (select 1 from public.ai_conoscenze where categoria = 'guida' and ambito = 'istruttore' and titolo = 'Come confermo i dati di un cavallo (Da confermare)');
+where not exists (select 1 from public.ai_conoscenze where titolo = 'Come confermo i dati di un cavallo che seguo (Trainer)');
 
 -- 7) Maniscalco: la scheda "Da confermare" cita anche la notifica
 update public.ai_conoscenze set aggiornato_il = now(), verificato_il = current_date,
