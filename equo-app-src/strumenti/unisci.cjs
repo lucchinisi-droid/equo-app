@@ -19,10 +19,10 @@ const out = modello.replace(/<!--@ ([^ ]+) -->/g, (_, rel) => {
 const tutti = []; (function giro(d, pre){ for(const f of fs.readdirSync(d, { withFileTypes: true })){ const r = pre + f.name; if(f.isDirectory()) giro(path.join(d, f.name), r + "/"); else if(r !== "index.modello.html") tutti.push(r); } })(SRC, "");
 const orfani = tutti.filter(r => !usati.has(r));
 if(orfani.length){ console.error("File non collegati nel modello:\n- " + orfani.join("\n- ")); process.exit(1); }
-// regola di confinamento: cosa mostra la Home dei professionisti si decide SOLO in stili/10-regole-ruoli.css
-const violazioni = APP !== "equo-app" ? [] : tutti.filter(r => r.startsWith("stili/") && r !== "stili/10-regole-ruoli.css")
+// regola di confinamento: cosa mostra la Home dei professionisti si decide SOLO in core/stili/10-regole-ruoli.css
+const violazioni = APP !== "equo-app" ? [] : tutti.filter(r => r.endsWith(".css") && r !== "core/stili/10-regole-ruoli.css")
   .filter(r => /#page-pro-home\s*>/.test(fs.readFileSync(path.join(SRC, r), "utf8")));
-if(violazioni.length){ console.error("Regole su \"#page-pro-home > ...\" fuori da stili/10-regole-ruoli.css:\n- " + violazioni.join("\n- ")); process.exit(1); }
+if(violazioni.length){ console.error("Regole su \"#page-pro-home > ...\" fuori da core/stili/10-regole-ruoli.css:\n- " + violazioni.join("\n- ")); process.exit(1); }
 if(process.argv.includes("--verifica")){
   const ora = fs.readFileSync(DEST, "utf8");
   if(ora !== out){ console.error(APP + "/index.html NON corrisponde ai sorgenti in " + APP + "-src/src: rilanciare unisci.cjs"); process.exit(1); }
