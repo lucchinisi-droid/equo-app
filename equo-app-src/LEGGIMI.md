@@ -11,6 +11,10 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
 - `src/comune/` — parti condivise da piu ruoli: `barra/` (barra in basso e tasto +: quandoAggiornaBarra),
   `chat/` (chat, allegati, vocali, notifiche dei messaggi), `agenti/` (chat con Pegasus/Hammer/Ares, foto).
 - `src/ruoli/proprietario/` — cavalli, codice cavallo, libretto, diario, calendario, spese, chat col maniscalco; pagine del proprietario.
+  Dal 22/10/2026 in MODULI ES (`moduli/023-*.js ... 101-*.js` + `moduli/index.js` con l'API pubblica), costruiti da Vite in
+  `costruito.js`; `stato-condiviso.js` = 25 variabili lette o cambiate anche da altre parti (ml, mlProb, currentFarrier...).
+  Entrano nella pagina subito prima di `core/script/084-helpers.js` (084 li usa al caricamento; la chat usa EMOJI_LIST di 062).
+  Restano script separati: `script/08-meteo...` (diario in Home), `script/11-hv3-js.js`, `script/12-lib3-js.js`.
 - `src/ruoli/maniscalco/` — clienti, agenda, giro, incassi, conti, ferrature, modalita Lavoro, Home del maniscalco.
   Dal 22/10/2026 in MODULI ES (`moduli/031-*.js ... 100-*.js` + `moduli/index.js`), costruiti da Vite in `costruito.js`.
   - `stato-condiviso.js`: le 56 variabili che anche altre parti dell'app leggono o cambiano (clientiMascalcia, wgPro,
@@ -32,13 +36,13 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
 1. `node equo-app-src/strumenti/unisci.cjs` — rimette insieme i file in `equo-app/index.html`.
 2. `node equo-app-src/strumenti/unisci.cjs --verifica` — controlla che `index.html` corrisponda ai sorgenti.
 3. `cd equo-app && npm run controllo` — prova l'app nei 4 ruoli.
-0. (solo se tocchi `ruoli/allenatore/moduli/` o `ruoli/maniscalco/moduli/`) `VITE_DIR=$HOME/strumenti-vite node equo-app-src/strumenti/costruisci-moduli.mjs`
-   — ricostruisce i due `costruito.js` con Vite; poi 1. Con `--verifica` controlla che corrispondano ai moduli.
+0. (solo se tocchi una cartella `moduli/`: allenatore, maniscalco, proprietario) `VITE_DIR=$HOME/strumenti-vite node equo-app-src/strumenti/costruisci-moduli.mjs`
+   — ricostruisce i tre `costruito.js` con Vite; poi 1. Con `--verifica` controlla che corrispondano ai moduli.
    Vite e installato solo nella macchina di lavoro (`$HOME/strumenti-vite`), non nel repository: il sito online
    non lo usa, riceve gia il file costruito.
 
 ## Regole
 - Si modifica in `src`, si esegue 1, poi 3; commit solo se il controllo e verde.
 - Non riassegnare showPage, plAggiorna (usare quandoApriPagina / quandoAggiornaBarra): il controllo fallisce.
-- Non modificare i `costruito.js` (allenatore, maniscalco) a mano: si cambia il modulo e si ricostruisce.
+- Non modificare i `costruito.js` (allenatore, maniscalco, proprietario) a mano: si cambia il modulo e si ricostruisce.
 - Regole "#page-pro-home > ..." solo in core/stili/10-regole-ruoli.css: unisci.cjs si ferma.

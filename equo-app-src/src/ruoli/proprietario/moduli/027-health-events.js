@@ -1,5 +1,6 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 /* ---------- HEALTH EVENTS ---------- */
-const EVENT_LABELS = { vaccino: "Vaccino", coggins: "Test Coggins", ferratura: "Ferratura", sverminazione: "Sverminazione" };
+/* -> stato-condiviso.js */
 
 async function loadHorseEvents(horseId){
   const box = document.getElementById("horse-events-list");
@@ -116,3 +117,5 @@ async function loadDeadlines(){
   `).join("");
 }
 
+
+export { deleteHorseEventFromModal, loadDeadlines, loadHorseEvents, openAddEventModal, openEditEventModal, saveHorseEvent };

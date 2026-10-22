@@ -1,5 +1,7 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { previewAllegato } from "./073-chat-col-proprio-maniscalco-lato-proprie.js";
 /* ---------- CHAT PROPRIETARIO↔PROPRIETARIO ---------- */
-let currentConversazioneId = null;
+/* -> stato-condiviso.js */
 const OWNER_EMOJI_LIST = EMOJI_LIST;
 
 function populateOwnerEmojiPicker(){
@@ -46,7 +48,7 @@ async function loadOwnerChatList(){
   }).join("");
 }
 
-let currentStableMembro = null; // { membro_id, centro_id, nome }
+/* -> stato-condiviso.js */ // { membro_id, centro_id, nome }
 
 async function loadStableChatSection(){
   const section = document.getElementById("stable-chat-section");
@@ -85,3 +87,5 @@ async function openStableChatThread(membroId, centroId, nome){
   refreshChatBadge();
 }
 
+
+export { insertOwnerEmoji, loadOwnerChatList, loadStableChatSection, openStableChatThread, toggleOwnerEmojiPicker };

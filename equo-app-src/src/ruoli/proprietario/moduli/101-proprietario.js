@@ -1,3 +1,9 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { openHorseDetail, openHorseForm } from "./026-ultimo-messaggio-home.js";
+import { openAddEventModal } from "./027-health-events.js";
+import { loadStableChatSection, openStableChatThread } from "./069-chat-proprietario-proprietario.js";
+import { loadFarrierChatSection } from "./073-chat-col-proprio-maniscalco-lato-proprie.js";
+import { incassiNascosti, vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
 /* ---------- PROPRIETARIO ---------- */
 let wgOwn = { scadenze: null, spese: null, appuntamento: null, lezioni: null, unread: 0, caricato: 0 };
 async function wgCaricaOwner(){
@@ -267,3 +273,5 @@ async function wgControllaResetPin(){
   }, true);
 })();
 
+
+export { cambiaIncassi, renderWidgetOwner, wgApriAppMan, wgCaricaOwner, wgChattaAppuntamento, wgControllaResetPin, wgFissaManiscalco, wgNuovoEvento, wgOwn };

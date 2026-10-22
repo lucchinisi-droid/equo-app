@@ -1,3 +1,7 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { loadFarrierChatSection } from "./073-chat-col-proprio-maniscalco-lato-proprie.js";
+import { vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
+import { wgCaricaOwner, wgOwn } from "./101-proprietario.js";
 /* ---------- APPUNTAMENTI COL MANISCALCO (lato proprietario, Step 5d) ---------- */
 const STATO_APP_LABEL = {
   richiesto: ['In attesa', 'background:rgba(232,176,75,.18);color:var(--accent)'],
@@ -107,3 +111,5 @@ async function annullaRichiestaAppuntamento(id){
   await renderFarrierChatThread();
 }
 
+
+export { annullaRichiestaAppuntamento, apriAppuntamentiManiscalco, inviaRichiestaAppuntamento, toggleRichiestaCampi, vistoModificaAppuntamento };

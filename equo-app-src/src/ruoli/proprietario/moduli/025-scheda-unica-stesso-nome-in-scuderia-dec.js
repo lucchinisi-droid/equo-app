@@ -1,3 +1,10 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { loadHomeLastMessage, openHorseDetail, renderHorsesList } from "./026-ultimo-messaggio-home.js";
+import { loadDeadlines } from "./027-health-events.js";
+import { caricaDaSaldare } from "./071-pagamenti-da-saldare-al-maniscalco-propr.js";
+import { loadExpensesSummary } from "./079-expenses.js";
+import { vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
+import { wgCaricaOwner } from "./101-proprietario.js";
 /* ---------- SCHEDA UNICA: stesso nome in scuderia → decide il proprietario ---------- */
 let stessoCavalloCoda = null, stessoCavalloAttuale = null;
 async function controllaStessoCavallo(){
@@ -67,3 +74,5 @@ function renderHomeBase(){
   if(typeof wgCaricaOwner === "function" && typeof vistaWidgetAttiva === "function" && vistaWidgetAttiva()) wgCaricaOwner();
 }
 
+
+export { controllaStessoCavallo, renderHome, rispondiStessoCavallo };

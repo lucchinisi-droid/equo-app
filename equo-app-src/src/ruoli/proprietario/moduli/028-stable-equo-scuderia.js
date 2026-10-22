@@ -1,3 +1,4 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 /* ---------- STABLE (Equo Scuderia) ---------- */
 async function joinStable(){
   const code = document.getElementById("stable-code").value.trim().toUpperCase();
@@ -18,3 +19,5 @@ async function joinStable(){
   alert("Collegato a " + stable.name + "!");
 }
 
+
+export { joinStable };

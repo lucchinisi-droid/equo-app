@@ -1,3 +1,6 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { loadHorses } from "./023-horses.js";
+import { openHorseDetail, renderHorsesList } from "./026-ultimo-messaggio-home.js";
 /* ---------- CODICE CAVALLO 2C: proposte, livelli, conferme ---------- */
 const LIVELLI_CODICE = { provvisorio: ["Provvisorio", "#5B6B62", "#E9EEEB"], validato: ["Validato", "#14573A", "#E3F1E9"], certificato: ["Certificato", "#7A5A00", "#F8EDD2"] };
 function badgeLivelloCodice(l){
@@ -195,3 +198,5 @@ async function proponiCavalliCliente(clienteId){
 }
 
 
+
+export { accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };

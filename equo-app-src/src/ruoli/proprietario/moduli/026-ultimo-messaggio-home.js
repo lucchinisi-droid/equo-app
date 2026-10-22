@@ -1,5 +1,11 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { loadHorses } from "./023-horses.js";
+import { cavalliBloccati, renderHorseBloccato, renderLivelloCavallo } from "./024-codice-cavallo-2c-proposte-livelli-confe.js";
+import { loadHorseEvents } from "./027-health-events.js";
+import { loadOwnerChatList, loadStableChatSection, openStableChatThread } from "./069-chat-proprietario-proprietario.js";
+import { loadFarrierChatSection, previewAllegato, previewMessaggioMascalcia } from "./073-chat-col-proprio-maniscalco-lato-proprie.js";
 /* ---------- ULTIMO MESSAGGIO (home) ---------- */
-let homeLastMessageTarget = null;
+/* -> stato-condiviso.js */
 async function loadHomeLastMessage(){
   const card = document.getElementById("home-last-message-card");
   if(!card) return;
@@ -75,10 +81,10 @@ function renderHorsesList(){
   }).join("");
 }
 
-let editingHorseId = null;
+/* -> stato-condiviso.js */
 const TIPO_PROPRIETA_LABELS = { proprieta: "Cavallo di proprietà", noleggio: "Cavallo a noleggio" };
 
-const LIMITE_CAVALLI_FREE = 1;
+/* -> stato-condiviso.js */
 function openHorseForm(id){
   if(!id && !isPremium() && horses.length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return; }
   editingHorseId = id || null;
@@ -241,3 +247,5 @@ async function confirmDeleteHorse(){
   await loadHorses();
 }
 
+
+export { askDeleteHorse, askDeleteHorseStep2, closeHorseDetail, confermaSalvaSenzaMicrochip, confirmDeleteHorse, eseguiSalvataggioHorse, goToLastMessage, loadHomeLastMessage, openHorseDetail, openHorseForm, renderHorseInfoBox, renderHorsesList, saveHorse, tornaAInserireMicrochip };

@@ -1,3 +1,4 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 /* ---------- SERVICES MAP ---------- */
 let servicesMapInstance = null;
 let servicesMapMarkers = [];
@@ -145,3 +146,5 @@ function focusServiceOnMap(id){
   if(marker) marker.openPopup();
 }
 
+
+export { filterServices, focusServiceOnMap, loadServicesData, openServicesMap };

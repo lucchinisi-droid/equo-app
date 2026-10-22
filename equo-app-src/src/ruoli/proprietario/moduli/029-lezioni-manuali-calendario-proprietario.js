@@ -1,7 +1,9 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { loadCalendarioScuderia } from "./030-calendario-lezioni-ed-eventi-sanitari-da.js";
 /* ---------- LEZIONI MANUALI (calendario proprietario) ---------- */
-const LEZIONE_TIPO_LABELS = { lezione: "Lezione", allenamento: "Allenamento libero", gara: "Gara", altro: "Altro" };
+/* -> stato-condiviso.js */
 let lezioniCache = [];
-let editingLezioneId = null;
+/* -> stato-condiviso.js */
 
 async function loadLezioni(){
   loadCalendarioScuderia();
@@ -24,3 +26,5 @@ async function loadLezioni(){
   `).join("");
 }
 
+
+export { lezioniCache, loadLezioni };

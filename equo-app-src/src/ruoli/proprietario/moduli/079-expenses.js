@@ -1,3 +1,4 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 /* ---------- EXPENSES ---------- */
 async function loadExpensesSummary(){
   const horseIds = horses.map(h => h.id);
@@ -33,7 +34,7 @@ async function loadExpenses(){
 }
 
 let editingExpenseId = null;
-let currentExpensesData = [];
+/* -> stato-condiviso.js */
 function openAddExpenseModal(){
   editingExpenseId = null;
   document.getElementById("modal-add-expense-title").textContent = "Nuova spesa";
@@ -90,3 +91,5 @@ async function deleteExpenseFromModal(){
 // nome vecchio
 const createExpense = saveExpense;
 
+
+export { deleteExpenseFromModal, loadExpenses, loadExpensesSummary, openAddExpenseModal, openEditExpenseModal, saveExpense };

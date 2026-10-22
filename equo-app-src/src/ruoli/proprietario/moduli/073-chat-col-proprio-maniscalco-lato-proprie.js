@@ -1,5 +1,6 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 /* ---------- CHAT COL PROPRIO MANISCALCO (lato proprietario) ---------- */
-let currentFarrier = null; // { cliente_mascalcia_id, nome }
+/* -> stato-condiviso.js */ // { cliente_mascalcia_id, nome }
 
 // Corpo di una bolla con allegato (foto o PDF), uguale in tutte le chat
 function bollaAllegato(tipo, url, nome, testo){
@@ -83,3 +84,5 @@ async function collegaManiscalco(){
   await proponiAbbinamentoCavalli(res.cliente_mascalcia_id, nomeMan, () => openFarrierChatThread(res.cliente_mascalcia_id, nomeMan));
 }
 
+
+export { bollaAllegato, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia };

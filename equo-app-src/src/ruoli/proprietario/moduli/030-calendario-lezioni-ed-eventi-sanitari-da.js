@@ -1,3 +1,7 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { cavalliUsabili } from "./024-codice-cavallo-2c-proposte-livelli-confe.js";
+import { lezioniCache, loadLezioni } from "./029-lezioni-manuali-calendario-proprietario.js";
+import { openStableChatThread } from "./069-chat-proprietario-proprietario.js";
 /* ---------- CALENDARIO: lezioni ed eventi sanitari dalla scuderia collegata ----------
    Dati via RPC sicure (mie_lezioni_scuderia, miei_eventi_scuderia). Quando la scuderia crea,
    sposta o annulla una lezione, o registra un evento sanitario sul cavallo, il database scrive
@@ -183,3 +187,5 @@ async function deleteLezioneCorrente(){
   await loadLezioni();
 }
 
+
+export { accettaLezioneScuderia, createLezione, deleteLezioneCorrente, loadCalendarioScuderia, modificaLezioneScuderia, openAddLezioneModal };

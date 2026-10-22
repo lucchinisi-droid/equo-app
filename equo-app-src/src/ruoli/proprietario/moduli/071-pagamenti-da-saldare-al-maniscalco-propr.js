@@ -1,7 +1,8 @@
+// Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 /* ---------- PAGAMENTI DA SALDARE AL MANISCALCO (proprietario) ----------
    Riquadro discreto in Home: aperto (con pallino anche su Chat) la prima volta e poi ogni 5 giorni,
    altrimenti una riga sola. «Ho già pagato» avvisa il maniscalco in chat e ferma il promemoria. */
-let daSaldareStato = { righe: [], daRicordare: false, aperto: false, pagaAperto: null };
+/* -> stato-condiviso.js */
 async function caricaDaSaldare(){
   const box = document.getElementById("home-da-saldare");
   if(!box) return;
@@ -65,3 +66,5 @@ async function segnalaGiaPagato(id, btn){
   }catch(e){ showToast("Non riuscito, riprova."); if(btn) btn.disabled = false; }
 }
 
+
+export { caricaDaSaldare, copiaTestoDs, daSaldareVisto, renderDaSaldare, segnalaGiaPagato };

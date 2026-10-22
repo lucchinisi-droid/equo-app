@@ -1,4 +1,4 @@
-// Costruisce con Vite i moduli ES dell'app (allenatore, maniscalco) in un unico file che unisci.cjs inserisce nella pagina.
+// Costruisce con Vite i moduli ES dell'app (allenatore, maniscalco, proprietario) in un unico file che unisci.cjs inserisce nella pagina.
 // Uso (serve Vite installato): node equo-app-src/strumenti/costruisci-moduli.mjs [--verifica]
 //   VITE_DIR = cartella che contiene node_modules/vite (se Vite non e installato accanto al progetto)
 // Il risultato (ruoli/allenatore/costruito.js) si salva nel repository: cosi unisci.cjs resta senza dipendenze.
@@ -10,6 +10,7 @@ const { build } = await import(pathToFileURL(path.join(viteDir, "node_modules", 
 const MODULI = [
   { nome: "allenatore", ingresso: "ruoli/allenatore/moduli/index.js", uscita: "ruoli/allenatore/costruito.js", globale: "EquoAllenatore" },
   { nome: "maniscalco", ingresso: "ruoli/maniscalco/moduli/index.js", uscita: "ruoli/maniscalco/costruito.js", globale: "EquoManiscalco" },
+  { nome: "proprietario", ingresso: "ruoli/proprietario/moduli/index.js", uscita: "ruoli/proprietario/costruito.js", globale: "EquoProprietario" },
 ];
 let diversi = 0;
 for(const m of MODULI){
