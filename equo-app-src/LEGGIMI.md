@@ -17,7 +17,8 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
   Dal 22/10/2026 in MODULI ES (`moduli/023-*.js ... 101-*.js` + `moduli/index.js` con l'API pubblica), costruiti da Vite in
   `costruito.js`; `stato-condiviso.js` = 25 variabili lette o cambiate anche da altre parti (ml, mlProb, currentFarrier...).
   Entrano nella pagina subito prima di `core/script/084-helpers.js` (084 li usa al caricamento; la chat usa EMOJI_LIST di 062).
-  Restano script separati: `script/08-meteo...` (diario in Home), `script/11-hv3-js.js`, `script/12-lib3-js.js`.
+  Restano script separati: `home-diario/08a...08h` (meteo, Diario, condivisione Instagram, album: un solo <script>,
+  diviso per argomento), `script/11-hv3-js.js`, `script/12-lib3-js.js`.
 - `src/ruoli/maniscalco/` — clienti, agenda, giro, incassi, conti, ferrature, modalita Lavoro, Home del maniscalco.
   Dal 22/10/2026 in MODULI ES (`moduli/031-*.js ... 100-*.js` + `moduli/index.js`), costruiti da Vite in `costruito.js`.
   - `stato-condiviso.js`: le 56 variabili che anche altre parti dell'app leggono o cambiano (clientiMascalcia, wgPro,
@@ -33,6 +34,7 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
   si importano da li e se ne cambiano i campi, non si sostituiscono mai.
   Ares (`script/14-ares-js.js`) e lo stile restano fuori dai moduli.
 - `src/ruoli/professionisti/pagine/` — pagine comuni ai professionisti (pro-home, pro-agenda, pro-clienti...).
+- `src/comune/home-widget/` — stile dei riquadri della Home (wg-...), usati da proprietario, maniscalco e veterinario.
 - `src/finestre/` — tutte le finestre (modal) dell'app.
 
 ## Comandi (dalla cartella Equo)
