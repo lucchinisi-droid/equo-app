@@ -6,8 +6,10 @@ const fs = require("fs");
 const path = require("path");
 const RADICE = path.resolve(__dirname, "..", "..");
 const APP = (process.argv[process.argv.indexOf("--app") + 1] && process.argv.includes("--app")) ? process.argv[process.argv.indexOf("--app") + 1] : "equo-app";
-const ORIGINE = path.join(RADICE, APP, "index.html");
-const SRC = path.join(RADICE, APP + "-src", "src");
+// --pagina groom.html: un'altra pagina della stessa app (sorgenti in <app>-src/<nome pagina>, es. equo-scuderia-src/groom)
+const PAGINA = process.argv.includes("--pagina") ? process.argv[process.argv.indexOf("--pagina") + 1] : "index.html";
+const SRC = path.join(RADICE, APP + "-src", PAGINA === "index.html" ? "src" : PAGINA.replace(/\.html$/, ""));
+const ORIGINE = path.join(RADICE, APP, PAGINA);
 if(fs.existsSync(SRC) && !process.argv.includes("--forza")){ console.error("I sorgenti esistono gia in " + APP + "-src/src: non li sovrascrivo."); process.exit(1); }
 const S = fs.readFileSync(ORIGINE, "utf8");
 if(S.includes("<!--@ ")) throw new Error("index.html contiene gia la sequenza <!--@ : scegliere un altro segnaposto");

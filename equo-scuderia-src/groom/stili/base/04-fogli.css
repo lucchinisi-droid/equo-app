@@ -1,0 +1,18 @@
+/* fogli */
+.velo{ position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50; display:flex; align-items:flex-end; justify-content:center; }
+.foglio{ background:#fff; width:100%; max-width:520px; border-radius:22px 22px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom)); }
+.foglio h3{ margin:0 0 8px; font-size:19px; display:flex; gap:10px; align-items:center; }
+.foglio p{ margin:0 0 14px; color:var(--muted); font-size:15.5px; line-height:1.4; }
+.foglio .nota-testo{ background:#fdeceb; border:1px solid #f3c4bf; color:#5c1a13; border-radius:12px; padding:12px; font-size:17px; line-height:1.4; white-space:pre-wrap; }
+.foglio .azioni{ display:flex; gap:10px; margin-top:14px; }
+.foglio .azioni button{ flex:1; border-radius:14px; padding:15px; font-weight:700; font-size:16px; border:1px solid var(--bordo); background:#fff; }
+.foglio .azioni .pri{ background:var(--rosso); border-color:var(--rosso); color:#fff; }
+.foglio .azioni .ver{ background:var(--verde); border-color:var(--verde); color:#fff; }
+.lingue{ display:grid; gap:8px; }
+.lingue button{ border:1px solid var(--bordo); background:#fff; border-radius:14px; padding:14px; font-size:18px; text-align:start; display:flex; justify-content:space-between; align-items:center; }
+.lingue button.on{ border-color:var(--verde2); background:#eef5f0; font-weight:700; }
+.scan-wrap{ position:relative; border-radius:16px; overflow:hidden; background:#000; aspect-ratio:1; }
+.scan-wrap video{ width:100%; height:100%; object-fit:cover; }
+.scan-wrap .mirino{ position:absolute; inset:18%; border:3px solid #fff; border-radius:18px; }
+.toast{ position:fixed; z-index:60; left:50%; transform:translateX(-50%); bottom:calc(92px + env(safe-area-inset-bottom)); background:#1b241f; color:#fff; padding:12px 16px; border-radius:12px; font-size:15px; max-width:90vw; text-align:center; }
+.vuota{ text-align:center; color:var(--muted); padding:40px 20px; font-size:16px; }

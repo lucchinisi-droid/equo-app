@@ -1,0 +1,8 @@
+
+:root{ --verde:#0b341e; --verde2:#1d4a35; --sfondo:#f3f1ea; --card:#fff; --testo:#1b241f; --muted:#6b746e; --bordo:#e2ddd0; --rosso:#c0392b; --giallo:#e0a526; --ok:#2e8b57; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; background:var(--sfondo); color:var(--testo); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans","Noto Sans Bengali","Noto Sans Devanagari","Noto Sans Gurmukhi","Noto Sans Arabic",Arial,sans-serif; }
+body{ min-height:100vh; padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
+button{ font:inherit; color:inherit; cursor:pointer; }
+.hidden{ display:none !important; }
+

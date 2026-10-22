@@ -6,8 +6,10 @@ const path = require("path");
 const RADICE = path.resolve(__dirname, "..", "..");
 // --app equo-scuderia per Equo Scuderia (sorgenti in equo-scuderia-src/src); senza: l'app Equo
 const APP = process.argv.includes("--app") ? process.argv[process.argv.indexOf("--app") + 1] : "equo-app";
-const SRC = path.join(RADICE, APP + "-src", "src");
-const DEST = path.join(RADICE, APP, "index.html");
+// --pagina groom.html: un'altra pagina della stessa app (sorgenti in <app>-src/<nome pagina>, es. equo-scuderia-src/groom)
+const PAGINA = process.argv.includes("--pagina") ? process.argv[process.argv.indexOf("--pagina") + 1] : "index.html";
+const SRC = path.join(RADICE, APP + "-src", PAGINA === "index.html" ? "src" : PAGINA.replace(/\.html$/, ""));
+const DEST = path.join(RADICE, APP, PAGINA);
 const modello = fs.readFileSync(path.join(SRC, "index.modello.html"), "utf8");
 const usati = new Set();
 const out = modello.replace(/<!--@ ([^ ]+) -->/g, (_, rel) => {
@@ -26,9 +28,9 @@ const violazioni = APP !== "equo-app" ? [] : tutti.filter(r => r.endsWith(".css"
 if(violazioni.length){ console.error("Regole su \"#page-pro-home > ...\" fuori da core/stili/10-regole-ruoli.css:\n- " + violazioni.join("\n- ")); process.exit(1); }
 if(process.argv.includes("--verifica")){
   const ora = fs.readFileSync(DEST, "utf8");
-  if(ora !== out){ console.error(APP + "/index.html NON corrisponde ai sorgenti in " + APP + "-src/src: rilanciare unisci.cjs"); process.exit(1); }
-  console.log("OK: " + APP + "/index.html corrisponde ai sorgenti (" + usati.size + " file).");
+  if(ora !== out){ console.error(APP + "/" + PAGINA + " NON corrisponde ai sorgenti in " + APP + "-src/src: rilanciare unisci.cjs"); process.exit(1); }
+  console.log("OK: " + APP + "/" + PAGINA + " corrisponde ai sorgenti (" + usati.size + " file).");
 } else {
   fs.writeFileSync(DEST, out);
-  console.log("Scritto " + APP + "/index.html da " + usati.size + " file (" + out.length + " caratteri).");
+  console.log("Scritto " + APP + "/" + PAGINA + " da " + usati.size + " file (" + out.length + " caratteri).");
 }

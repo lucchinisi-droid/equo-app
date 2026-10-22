@@ -16,3 +16,9 @@ Comandi (dalla cartella Equo):
 3. `node equo-scuderia/tests/controllo-scuderia.cjs` — prova il gestionale in demo su computer e telefono.
 
 Regola: si modifica in `src`, si esegue 1, poi 3; commit solo se il controllo e verde.
+
+## Groom (dal 22/10/2026)
+L'app Groom (`equo-scuderia/groom.html`) ha i suoi sorgenti in `equo-scuderia-src/groom/` (stili, script divisi per
+argomento: accesso, dati e sincronizzazione, vista box, azioni, scanner QR, installazione, demo).
+- Rimettere insieme: `node equo-app-src/strumenti/unisci.cjs --app equo-scuderia --pagina groom.html`
+- Controllare: aggiungere `--verifica`. Poi `node equo-scuderia/tests/controllo-groom.cjs`.
