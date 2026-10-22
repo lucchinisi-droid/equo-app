@@ -35,9 +35,7 @@
  };
  // ---- Identità
  function h(){return (typeof horses!=="undefined"&&typeof currentHorseId!=="undefined")?horses.find(function(x){return x.id===currentHorseId;}):null;}
- var _ri=window.renderHorseInfoBox;
- window.renderHorseInfoBox=function(hh){
-  _ri.apply(this,arguments);
+ estendiDopo("renderHorseInfoBox",function(hh){
   try{
    var box=q("horse-info-box");if(!box)return;
    var rows=box.children;
@@ -46,7 +44,7 @@
     rows[i].lastElementChild.appendChild(b);}}
    libFoto(hh);libVis(hh);libStorico(hh);
   }catch(e){console.error(e);}
- };
+ });
  estendiPrima("openHorseDetail",function(){schede();TAB="identita";});
  estendiDopo("openHorseDetail",function(){schede();});
  async function libUrl(path){try{var r=await sb.storage.from("cavalli-album").createSignedUrl(path,3600);return r.data&&r.data.signedUrl;}catch(e){return null;}}
@@ -97,19 +95,17 @@
   }catch(e){}
  }
  // avviso quando si cambia il microchip
- var _es=window.eseguiSalvataggioHorse;
- window.eseguiSalvataggioHorse=async function(payload){
+ estendiPrima("eseguiSalvataggioHorse",async function(payload){
   try{
    if(typeof editingHorseId!=="undefined"&&editingHorseId){
     var vecchio=(horses.find(function(x){return x.id===editingHorseId;})||{}).microchip;
     if(vecchio&&payload.microchip&&String(vecchio).trim()!==String(payload.microchip).trim()){
      var ok=await chiediSiNo("Cambiare il microchip?","Il numero resta nello storico del cavallo (prima e dopo) e il nuovo numero risulterà «dichiarato» finché un professionista non lo verifica. Chi segue il cavallo vede il cambio.");
-     if(!ok)return;
+     if(!ok)return false;
     }
    }
   }catch(e){}
-  return _es.apply(this,arguments);
- };
+ });
  // ---- Sport (Premium)
  async function libSport(){
   var c=q("lb-sport");if(!c)return;var hh=h();if(!hh)return;

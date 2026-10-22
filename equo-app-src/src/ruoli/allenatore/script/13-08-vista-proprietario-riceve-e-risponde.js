@@ -1,5 +1,6 @@
  // ----- vista proprietario (riceve e risponde)
- window.trOwnerCard=async function(forza){
+ window.trOwnerCard=async function(forza){ var r=await trOwnerCardBase(forza); await eseguiEstensioni(estensioniDopo,"trOwnerCard",[forza]); return r; };
+ async function trOwnerCardBase(forza){
   if(isTr()||DEMO())return;
   try{
    if(TR.ricevuteOk&&!forza)return;

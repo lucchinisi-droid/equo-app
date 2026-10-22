@@ -14,7 +14,8 @@ function nomeAgenteAi(){
 }
 const BENVENUTO_PEGASUS = 'Ciao, sono <strong>Pegasus</strong> 🪽. Tengo d\'occhio i tuoi cavalli: scadenze, spese, appuntamenti col maniscalco e lezioni, e ti dico cosa fare e quando. Prova a chiedermi <em>"Cosa scade questo mese?"</em> o <em>"Quanto ho speso in pensione quest\'anno?"</em>. Con la 📎 mandami una fattura o il certificato vaccinale: preparo io le schede da confermare.';
 const BENVENUTO_EQUO_AI = document.getElementById("ai-benvenuto")?.innerHTML || "";
-function aggiornaTestataAi(){
+function aggiornaTestataAi(){ const x = aggiornaTestataAiBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "aggiornaTestataAi"); return x; }
+function aggiornaTestataAiBase(){
   const hammer = agenteAiHammer();
   const pegasus = !hammer && vistaAi() === "proprietario";
   const titolo = document.getElementById("ai-sheet-titolo");

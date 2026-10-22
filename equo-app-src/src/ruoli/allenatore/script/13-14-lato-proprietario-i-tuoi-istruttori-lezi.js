@@ -17,8 +17,7 @@
   }catch(e){console.error(e);}
  };
  // aggancio: card del proprietario e chat dal menu «I miei istruttori»
- var _toc=window.trOwnerCard;
- window.trOwnerCard=async function(){var r=await _toc.apply(this,arguments);try{await trOwnerLezCard();}catch(e){}return r;};
+ estendiDopo("trOwnerCard",function(){return trOwnerLezCard();});
 
  try{["tr-sedute","tr-cavalli","tr-agenda"].forEach(pagina);}catch(e){}
 })();

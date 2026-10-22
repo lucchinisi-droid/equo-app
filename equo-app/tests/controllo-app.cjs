@@ -56,8 +56,8 @@ const SENZA_PIU = ["pro-inbox", "chat"]; // pagine dove il "+" e nascosto appost
       if(!nav.bus || !nav.show) male("showPage e stata riassegnata: usare quandoApriPagina(fn)");
       if(!nav.barra) male("plAggiorna e stata riassegnata: usare quandoAggiornaBarra(fn)");
       // funzioni che si estendono con estendiPrima/estendiDopo: non devono essere riassegnate
-      const riassegnate = await pg.evaluate(() => ["renderHome", "openHorseDetail", "diarioHomeRender", "firmaUrl"].concat(typeof plRuolo === "function" && plRuolo() === "istr" ? ["trRenderHome"] : [])
-        .filter(n => typeof window[n] !== "function" || !window[n].toString().includes("eseguiEstensioni")));
+      const riassegnate = await pg.evaluate(() => ["renderHome", "openHorseDetail", "diarioHomeRender", "firmaUrl", "applicaHomeMan", "hmPiu", "openAiSheet", "aggiornaSwitchHome", "plCostruisciMenu", "plNavAltri", "renderChatCartelle", "aggiornaTestataAi", "renderHorseInfoBox", "eseguiSalvataggioHorse"].concat(typeof plRuolo === "function" && plRuolo() === "istr" ? ["trRenderHome"] : [])
+        .filter(n => typeof window[n] !== "function" || !/eseguiEstensioni|eseguiPrimaConStop|versioneDelRuolo/.test(window[n].toString())));
       riassegnate.forEach(n => male(n + " e stata riassegnata: usare estendiPrima/estendiDopo"));
 
       const h = await pg.evaluate((sel) => {

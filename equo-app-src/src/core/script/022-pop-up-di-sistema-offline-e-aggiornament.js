@@ -118,7 +118,8 @@ if(window.visualViewport){
   window.visualViewport.addEventListener("resize", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
   window.visualViewport.addEventListener("scroll", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
 }
-async function openAiSheet(){
+async function openAiSheet(){ const alt = versioneDelRuolo("openAiSheet"); if(alt) return alt.apply(this, arguments); return openAiSheetBase.apply(this, arguments); }
+async function openAiSheetBase(){
   Registro.pagina("assistente-ai");
   try{ hpPreparaPannello(); }catch(e){ console.error("pannello Hammer:", e); }
   aggiornaAltezzaAiSheet();

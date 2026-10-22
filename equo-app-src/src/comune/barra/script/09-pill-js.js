@@ -31,8 +31,7 @@ function plAggiorna(){
 const ascoltiBarra = [];
 function quandoAggiornaBarra(fn){ ascoltiBarra.push(fn); }
 quandoApriPagina(function(){ plAggiorna(); });
-const _plApplicaHm = applicaHomeMan;
-applicaHomeMan = function(){ const x = _plApplicaHm.apply(this, arguments); plAggiorna(); return x; };
+estendiDopo("applicaHomeMan", function(){ plAggiorna(); });
 setInterval(function(){ plAggiorna(); }, 1200);
 document.addEventListener("DOMContentLoaded", plAggiorna);
 
@@ -48,7 +47,8 @@ function plTile(ic, t, az, o, cls, sotto){
   return `<button class="pl-tl${o ? " o" : ""} ${cls || ""}" onclick="hmChiudi();${az}"><span class="pi-c">${ic}</span>${t}${sotto ? `<small>${sotto}</small>` : ""}</button>`;
 }
 function plSez(t, tiles){ return `<h5>${t}</h5><div class="pl-tg">${tiles.join("")}</div>`; }
-function plCostruisciMenu(){
+function plCostruisciMenu(){ const alt = versioneDelRuolo("plCostruisciMenu"); const x = alt ? alt.apply(this, arguments) : plCostruisciMenuBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "plCostruisciMenu"); return x; }
+function plCostruisciMenuBase(){
   const m = document.getElementById("hm-menu-piu"); if(!m) return;
   const r = plRuolo(); let h = "";
   if(r === "owner"){
@@ -80,20 +80,11 @@ function plCostruisciMenu(){
   } else return;
   m.innerHTML = h; m.classList.add("pl-menu");
 }
-const _plHmPiu = hmPiu;
-hmPiu = function(){ plCostruisciMenu(); return _plHmPiu.apply(this, arguments); };
+estendiPrima("hmPiu", function(){ plCostruisciMenu(); });
 // vet e istruttori: l'agente non c'è ancora → «presto disponibile»
-const _plOpenAi = openAiSheet;
-openAiSheet = function(){
-  const r = plRuolo();
-  if(r === "vet"){ showToast(nomeAgenteAi() + " è presto disponibile"); return; }
-  return _plOpenAi.apply(this, arguments);
-};
+registraPerRuolo("openAiSheet", "vet", function(){ showToast(nomeAgenteAi() + " è presto disponibile"); });
 // l'etichetta «Versione» del menu profilo compare solo se c'è l'interruttore Completa/Semplice
-const _plAggSw = aggiornaSwitchHome;
-aggiornaSwitchHome = function(){
-  const x = _plAggSw.apply(this, arguments);
+estendiDopo("aggiornaSwitchHome", function(){
   const row = document.getElementById("menu-vista-man-row"), lab = document.getElementById("menu-home-label");
   if(lab) lab.style.display = row && row.style.display !== "none" ? "" : "none";
-  return x;
-};
+});

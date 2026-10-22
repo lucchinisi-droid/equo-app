@@ -29,13 +29,9 @@
    return '<div class="inbox-item'+(x.n?' unread':'')+'"'+(att||x.m?' onclick="trChatApri(\''+c.id+'\',\'trainer\')"':' style="opacity:.75"')+'><div class="horse-avatar" style="font-weight:800;font-size:14px">'+esc(iniz(c.proprietario))+'</div><div style="flex:1;min-width:0"><div class="inbox-name" style="font-size:14px">'+esc(c.proprietario)+'</div><div class="muted" style="font-size:11.5px;color:#8a6516;font-weight:700">'+esc(c.cavallo)+'</div><div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(prev)+'</div></div>'+(x.n?'<span class="inbox-unread-dot"></span>':'')+'</div>';}).join(""):'<div class="muted" style="font-size:13px;line-height:1.6;text-align:center;padding:6px 0">Nessun proprietario collegato ancora.<br>Collega un cavallo da «Cavalli seguiti»: quando il proprietario accetta potete scrivervi qui.</div>')+'</div>'+
    '<div class="muted" style="font-size:12px;line-height:1.6;text-align:center">Si scrive solo con i proprietari collegati. Se il proprietario interrompe il collegamento, lo storico resta ma non si può più scrivere.</div>';
   s.innerHTML=h;
-  try{_rcc.call(window);}catch(e){}
+  try{renderChatCartelleBase.call(window);}catch(e){}
  };
- var _rcc=window.renderChatCartelle;
- window.renderChatCartelle=function(){
-  _rcc.apply(this,arguments);
-  if(isTr()){chatSez();trRenderChatProp();}
- };
+ estendiDopo("renderChatCartelle",function(){if(isTr()){chatSez();trRenderChatProp();}});
  // schermata chat (allenatore e proprietario)
  function ensureChat(){
   if(q("tr2-chat"))return;

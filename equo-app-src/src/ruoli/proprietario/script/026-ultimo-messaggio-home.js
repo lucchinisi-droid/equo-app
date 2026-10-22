@@ -142,7 +142,8 @@ async function confermaSalvaSenzaMicrochip(){
   await eseguiSalvataggioHorse(raccogliDatiHorseForm());
 }
 
-async function eseguiSalvataggioHorse(payload){
+async function eseguiSalvataggioHorse(payload){ if(!(await eseguiPrimaConStop("eseguiSalvataggioHorse", [payload]))) return; return eseguiSalvataggioHorseBase(payload); }
+async function eseguiSalvataggioHorseBase(payload){
   const errBox = document.getElementById("horse-error");
   const btn = document.getElementById("horse-save-btn");
   btn.disabled = true;
@@ -170,7 +171,8 @@ async function eseguiSalvataggioHorse(payload){
   }
 }
 
-function renderHorseInfoBox(h){
+function renderHorseInfoBox(h){ const x = renderHorseInfoBoxBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "renderHorseInfoBox", [h]); return x; }
+function renderHorseInfoBoxBase(h){
   const box = document.getElementById("horse-info-box");
   if(!box) return;
   const righe = [

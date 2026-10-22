@@ -265,7 +265,8 @@ const HM_NAV = `
   <button class="nav-btn" data-page="pro-clienti" data-cart="clienti" onclick="hmCartella('clienti')"><span class="icon hm-ico">${HM_IC.users}</span><small>Clienti</small></button>`;
 let hmNavOriginale = null;
 function homeManAttiva(){ return !!currentUser && agenteAiHammer(); }
-function applicaHomeMan(){
+function applicaHomeMan(){ const x = applicaHomeManBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "applicaHomeMan"); return x; }
+function applicaHomeManBase(){
   const on = homeManAttiva();
   document.body.classList.toggle("home-man", on);
   const nav = document.getElementById("bottom-nav-pro");
@@ -317,7 +318,8 @@ async function hmGiaFatto(){
   const g = document.getElementById("intervento-gia-fatto"); if(g) g.checked = true;
 }
 // «+»: × verde quando è aperto
-function hmPiu(){
+function hmPiu(){ eseguiEstensioniSubito(estensioniPrima, "hmPiu"); return hmPiuBase.apply(this, arguments); }
+function hmPiuBase(){
   const aperto = document.getElementById("hm-menu-piu").classList.contains("on");
   hmChiudi();
   if(aperto) return;

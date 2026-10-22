@@ -2,7 +2,8 @@
 /* Veterinario e istruttore: stessa pillola del maniscalco, con il loro agente (Galeno / Ares) al centro.
    L'agente non c'è ancora: al tocco compare «presto disponibile» (vedi openAiSheet sopra). */
 const PL_AGENTE = { vet: ["Galeno", "veterinario"], istr: ["Ares", "istruttore"] };
-function plNavAltri(){
+function plNavAltri(){ eseguiEstensioniSubito(estensioniPrima, "plNavAltri"); const alt = versioneDelRuolo("plNavAltri"); return alt ? alt.apply(this, arguments) : plNavAltriBase.apply(this, arguments); }
+function plNavAltriBase(){
   const r = plRuolo(), nav = document.getElementById("bottom-nav-pro");
   if(!nav || !PL_AGENTE[r]) return;
   if(nav.dataset.alt === r) return;
@@ -22,10 +23,7 @@ quandoAggiornaBarra(function(){
     document.body.classList.toggle("pl-fab", pg !== "pro-inbox");
   }
 });
-const _pl2Menu = plCostruisciMenu;
-plCostruisciMenu = function(){
-  const r = plRuolo();
-  if(!PL_AGENTE[r]) return _pl2Menu.apply(this, arguments);
+registraPerRuolo("plCostruisciMenu", Object.keys(PL_AGENTE), function(){
   const m = document.getElementById("hm-menu-piu"); if(!m) return;
   m.innerHTML = plSez("Vai a", [
     plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
@@ -35,5 +33,5 @@ plCostruisciMenu = function(){
     plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
   ]);
   m.classList.add("pl-menu");
-};
+});
 plAggiorna();

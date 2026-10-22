@@ -8013,12 +8013,20 @@ function showPage(page){
 // ESTENSIONI (22/10/2026): per fare qualcosa PRIMA o DOPO una funzione definita in un altro file
 // NON la si riassegna: ci si iscrive con estendiPrima("nome", fn) / estendiDopo("nome", fn).
 // La funzione originale esegue gli iscritti in ordine; un errore in uno non blocca gli altri ne la funzione.
-// Oggi le usano: renderHome, openHorseDetail, diarioHomeRender, firmaUrl, trRenderHome.
+// Oggi le usano: renderHome, openHorseDetail, diarioHomeRender, firmaUrl, trRenderHome, applicaHomeMan, hmPiu,
+// aggiornaSwitchHome, renderChatCartelle, aggiornaTestataAi, renderHorseInfoBox, eseguiSalvataggioHorse, plCostruisciMenu, plNavAltri.
 const estensioniPrima = {}, estensioniDopo = {};
 function estendiPrima(nome, fn){ (estensioniPrima[nome] = estensioniPrima[nome] || []).push(fn); }
 function estendiDopo(nome, fn){ (estensioniDopo[nome] = estensioniDopo[nome] || []).push(fn); }
 async function eseguiEstensioni(elenco, nome, args){ for(const fn of (elenco[nome] || [])){ try{ await fn.apply(null, args || []); }catch(e){ console.error("estensione " + nome + ":", e); } } }
 function eseguiEstensioniSubito(elenco, nome, args){ for(const fn of (elenco[nome] || [])){ try{ fn.apply(null, args || []); }catch(e){ console.error("estensione " + nome + ":", e); } } }
+// "prima" che puo fermare la funzione: se un iscritto restituisce false, la funzione non prosegue
+async function eseguiPrimaConStop(nome, args){ for(const fn of (estensioniPrima[nome] || [])){ try{ if(await fn.apply(null, args || []) === false) return false; }catch(e){ console.error("estensione " + nome + ":", e); } } return true; }
+// SOSTITUZIONI PER RUOLO (22/10/2026): una funzione puo avere una versione diversa per un ruolo (plRuolo(): owner, man, vet, istr, pro).
+// Si registra con registraPerRuolo("nome", ["vet","istr"], fn): l'ultima registrazione per un ruolo vince.
+const sostituzioniPerRuolo = {};
+function registraPerRuolo(nome, ruoli, fn){ for(const r of [].concat(ruoli)) (sostituzioniPerRuolo[nome] = sostituzioniPerRuolo[nome] || {})[r] = fn; }
+function versioneDelRuolo(nome){ const r = typeof plRuolo === "function" ? plRuolo() : null; return (sostituzioniPerRuolo[nome] || {})[r] || null; }
 
 function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
@@ -8040,7 +8048,8 @@ function nomeAgenteAi(){
 }
 const BENVENUTO_PEGASUS = 'Ciao, sono <strong>Pegasus</strong> 🪽. Tengo d\'occhio i tuoi cavalli: scadenze, spese, appuntamenti col maniscalco e lezioni, e ti dico cosa fare e quando. Prova a chiedermi <em>"Cosa scade questo mese?"</em> o <em>"Quanto ho speso in pensione quest\'anno?"</em>. Con la 📎 mandami una fattura o il certificato vaccinale: preparo io le schede da confermare.';
 const BENVENUTO_EQUO_AI = document.getElementById("ai-benvenuto")?.innerHTML || "";
-function aggiornaTestataAi(){
+function aggiornaTestataAi(){ const x = aggiornaTestataAiBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "aggiornaTestataAi"); return x; }
+function aggiornaTestataAiBase(){
   const hammer = agenteAiHammer();
   const pegasus = !hammer && vistaAi() === "proprietario";
   const titolo = document.getElementById("ai-sheet-titolo");
@@ -8233,7 +8242,8 @@ if(window.visualViewport){
   window.visualViewport.addEventListener("resize", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
   window.visualViewport.addEventListener("scroll", () => { if(document.body.classList.contains("ai-aperta")) aggiornaAltezzaAiSheet(); });
 }
-async function openAiSheet(){
+async function openAiSheet(){ const alt = versioneDelRuolo("openAiSheet"); if(alt) return alt.apply(this, arguments); return openAiSheetBase.apply(this, arguments); }
+async function openAiSheetBase(){
   Registro.pagina("assistente-ai");
   try{ hpPreparaPannello(); }catch(e){ console.error("pannello Hammer:", e); }
   aggiornaAltezzaAiSheet();
@@ -8742,7 +8752,8 @@ async function confermaSalvaSenzaMicrochip(){
   await eseguiSalvataggioHorse(raccogliDatiHorseForm());
 }
 
-async function eseguiSalvataggioHorse(payload){
+async function eseguiSalvataggioHorse(payload){ if(!(await eseguiPrimaConStop("eseguiSalvataggioHorse", [payload]))) return; return eseguiSalvataggioHorseBase(payload); }
+async function eseguiSalvataggioHorseBase(payload){
   const errBox = document.getElementById("horse-error");
   const btn = document.getElementById("horse-save-btn");
   btn.disabled = true;
@@ -8770,7 +8781,8 @@ async function eseguiSalvataggioHorse(payload){
   }
 }
 
-function renderHorseInfoBox(h){
+function renderHorseInfoBox(h){ const x = renderHorseInfoBoxBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "renderHorseInfoBox", [h]); return x; }
+function renderHorseInfoBoxBase(h){
   const box = document.getElementById("horse-info-box");
   if(!box) return;
   const righe = [
@@ -14564,7 +14576,8 @@ function sceltaCartellaChat(k){
   if(typeof cercaAzzera === "function") cercaAzzera("inbox");
   renderChatCartelle();
 }
-function renderChatCartelle(){
+function renderChatCartelle(){ const x = renderChatCartelleBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "renderChatCartelle"); return x; }
+function renderChatCartelleBase(){
   const box = document.getElementById("chat-cartelle");
   if(!box) return;
   const soloColleghi = typeof plRuolo === "function" && plRuolo() === "istr";
@@ -17148,7 +17161,8 @@ const HM_NAV = `
   <button class="nav-btn" data-page="pro-clienti" data-cart="clienti" onclick="hmCartella('clienti')"><span class="icon hm-ico">${HM_IC.users}</span><small>Clienti</small></button>`;
 let hmNavOriginale = null;
 function homeManAttiva(){ return !!currentUser && agenteAiHammer(); }
-function applicaHomeMan(){
+function applicaHomeMan(){ const x = applicaHomeManBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "applicaHomeMan"); return x; }
+function applicaHomeManBase(){
   const on = homeManAttiva();
   document.body.classList.toggle("home-man", on);
   const nav = document.getElementById("bottom-nav-pro");
@@ -17200,7 +17214,8 @@ async function hmGiaFatto(){
   const g = document.getElementById("intervento-gia-fatto"); if(g) g.checked = true;
 }
 // «+»: × verde quando è aperto
-function hmPiu(){
+function hmPiu(){ eseguiEstensioniSubito(estensioniPrima, "hmPiu"); return hmPiuBase.apply(this, arguments); }
+function hmPiuBase(){
   const aperto = document.getElementById("hm-menu-piu").classList.contains("on");
   hmChiudi();
   if(aperto) return;
@@ -17776,7 +17791,8 @@ async function cambiaVistaHome(widget){
   }
   showToast(widget ? "Vista Widget attiva" : "Vista Standard attiva");
 }
-function aggiornaSwitchHome(){
+function aggiornaSwitchHome(){ const x = aggiornaSwitchHomeBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "aggiornaSwitchHome"); return x; }
+function aggiornaSwitchHomeBase(){
   const sw = document.getElementById("vista-widget-switch");
   if(sw) sw.checked = vistaWidgetAttiva();
   // il maniscalco ha la sua Home (niente scelta widget / classica)
@@ -19297,8 +19313,7 @@ function plAggiorna(){
 const ascoltiBarra = [];
 function quandoAggiornaBarra(fn){ ascoltiBarra.push(fn); }
 quandoApriPagina(function(){ plAggiorna(); });
-const _plApplicaHm = applicaHomeMan;
-applicaHomeMan = function(){ const x = _plApplicaHm.apply(this, arguments); plAggiorna(); return x; };
+estendiDopo("applicaHomeMan", function(){ plAggiorna(); });
 setInterval(function(){ plAggiorna(); }, 1200);
 document.addEventListener("DOMContentLoaded", plAggiorna);
 
@@ -19314,7 +19329,8 @@ function plTile(ic, t, az, o, cls, sotto){
   return `<button class="pl-tl${o ? " o" : ""} ${cls || ""}" onclick="hmChiudi();${az}"><span class="pi-c">${ic}</span>${t}${sotto ? `<small>${sotto}</small>` : ""}</button>`;
 }
 function plSez(t, tiles){ return `<h5>${t}</h5><div class="pl-tg">${tiles.join("")}</div>`; }
-function plCostruisciMenu(){
+function plCostruisciMenu(){ const alt = versioneDelRuolo("plCostruisciMenu"); const x = alt ? alt.apply(this, arguments) : plCostruisciMenuBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "plCostruisciMenu"); return x; }
+function plCostruisciMenuBase(){
   const m = document.getElementById("hm-menu-piu"); if(!m) return;
   const r = plRuolo(); let h = "";
   if(r === "owner"){
@@ -19346,29 +19362,21 @@ function plCostruisciMenu(){
   } else return;
   m.innerHTML = h; m.classList.add("pl-menu");
 }
-const _plHmPiu = hmPiu;
-hmPiu = function(){ plCostruisciMenu(); return _plHmPiu.apply(this, arguments); };
+estendiPrima("hmPiu", function(){ plCostruisciMenu(); });
 // vet e istruttori: l'agente non c'è ancora → «presto disponibile»
-const _plOpenAi = openAiSheet;
-openAiSheet = function(){
-  const r = plRuolo();
-  if(r === "vet"){ showToast(nomeAgenteAi() + " è presto disponibile"); return; }
-  return _plOpenAi.apply(this, arguments);
-};
+registraPerRuolo("openAiSheet", "vet", function(){ showToast(nomeAgenteAi() + " è presto disponibile"); });
 // l'etichetta «Versione» del menu profilo compare solo se c'è l'interruttore Completa/Semplice
-const _plAggSw = aggiornaSwitchHome;
-aggiornaSwitchHome = function(){
-  const x = _plAggSw.apply(this, arguments);
+estendiDopo("aggiornaSwitchHome", function(){
   const row = document.getElementById("menu-vista-man-row"), lab = document.getElementById("menu-home-label");
   if(lab) lab.style.display = row && row.style.display !== "none" ? "" : "none";
-  return x;
-};
+});
 </script>
 <script id="pl2-js">
 /* Veterinario e istruttore: stessa pillola del maniscalco, con il loro agente (Galeno / Ares) al centro.
    L'agente non c'è ancora: al tocco compare «presto disponibile» (vedi openAiSheet sopra). */
 const PL_AGENTE = { vet: ["Galeno", "veterinario"], istr: ["Ares", "istruttore"] };
-function plNavAltri(){
+function plNavAltri(){ eseguiEstensioniSubito(estensioniPrima, "plNavAltri"); const alt = versioneDelRuolo("plNavAltri"); return alt ? alt.apply(this, arguments) : plNavAltriBase.apply(this, arguments); }
+function plNavAltriBase(){
   const r = plRuolo(), nav = document.getElementById("bottom-nav-pro");
   if(!nav || !PL_AGENTE[r]) return;
   if(nav.dataset.alt === r) return;
@@ -19388,10 +19396,7 @@ quandoAggiornaBarra(function(){
     document.body.classList.toggle("pl-fab", pg !== "pro-inbox");
   }
 });
-const _pl2Menu = plCostruisciMenu;
-plCostruisciMenu = function(){
-  const r = plRuolo();
-  if(!PL_AGENTE[r]) return _pl2Menu.apply(this, arguments);
+registraPerRuolo("plCostruisciMenu", Object.keys(PL_AGENTE), function(){
   const m = document.getElementById("hm-menu-piu"); if(!m) return;
   m.innerHTML = plSez("Vai a", [
     plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
@@ -19401,7 +19406,7 @@ plCostruisciMenu = function(){
     plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
   ]);
   m.classList.add("pl-menu");
-};
+});
 plAggiorna();
 </script>
 <script id="hv3-js">
@@ -19543,9 +19548,7 @@ plAggiorna();
  };
  // ---- Identità
  function h(){return (typeof horses!=="undefined"&&typeof currentHorseId!=="undefined")?horses.find(function(x){return x.id===currentHorseId;}):null;}
- var _ri=window.renderHorseInfoBox;
- window.renderHorseInfoBox=function(hh){
-  _ri.apply(this,arguments);
+ estendiDopo("renderHorseInfoBox",function(hh){
   try{
    var box=q("horse-info-box");if(!box)return;
    var rows=box.children;
@@ -19554,7 +19557,7 @@ plAggiorna();
     rows[i].lastElementChild.appendChild(b);}}
    libFoto(hh);libVis(hh);libStorico(hh);
   }catch(e){console.error(e);}
- };
+ });
  estendiPrima("openHorseDetail",function(){schede();TAB="identita";});
  estendiDopo("openHorseDetail",function(){schede();});
  async function libUrl(path){try{var r=await sb.storage.from("cavalli-album").createSignedUrl(path,3600);return r.data&&r.data.signedUrl;}catch(e){return null;}}
@@ -19605,19 +19608,17 @@ plAggiorna();
   }catch(e){}
  }
  // avviso quando si cambia il microchip
- var _es=window.eseguiSalvataggioHorse;
- window.eseguiSalvataggioHorse=async function(payload){
+ estendiPrima("eseguiSalvataggioHorse",async function(payload){
   try{
    if(typeof editingHorseId!=="undefined"&&editingHorseId){
     var vecchio=(horses.find(function(x){return x.id===editingHorseId;})||{}).microchip;
     if(vecchio&&payload.microchip&&String(vecchio).trim()!==String(payload.microchip).trim()){
      var ok=await chiediSiNo("Cambiare il microchip?","Il numero resta nello storico del cavallo (prima e dopo) e il nuovo numero risulterà «dichiarato» finché un professionista non lo verifica. Chi segue il cavallo vede il cambio.");
-     if(!ok)return;
+     if(!ok)return false;
     }
    }
   }catch(e){}
-  return _es.apply(this,arguments);
- };
+ });
  // ---- Sport (Premium)
  async function libSport(){
   var c=q("lb-sport");if(!c)return;var hh=h();if(!hh)return;
@@ -20101,7 +20102,8 @@ plAggiorna();
   closeModal("modal-dr-sheet");q("tr-invia").style.display="none";toast("Seduta inviata");
  };
  // ----- vista proprietario (riceve e risponde)
- window.trOwnerCard=async function(forza){
+ window.trOwnerCard=async function(forza){ var r=await trOwnerCardBase(forza); await eseguiEstensioni(estensioniDopo,"trOwnerCard",[forza]); return r; };
+ async function trOwnerCardBase(forza){
   if(isTr()||DEMO())return;
   try{
    if(TR.ricevuteOk&&!forza)return;
@@ -20176,17 +20178,16 @@ plAggiorna();
   nav.dataset.alt="istr2";delete nav.dataset.man;
   var pg=typeof plPagina==="function"?plPagina():"";nav.querySelectorAll(".nav-btn[data-page]").forEach(function(b){b.classList.toggle("active",b.dataset.page===pg);});
  }
- var _pna=window.plNavAltri;
- window.plNavAltri=function(){if(isTr()){navTr();return;}var n=document.getElementById("bottom-nav-pro");if(n&&n.dataset.alt==="istr2"){delete n.dataset.alt;}return _pna&&_pna.apply(this,arguments);};
+ registraPerRuolo("plNavAltri","istr",function(){navTr();});
+ estendiPrima("plNavAltri",function(){if(isTr())return;var n=document.getElementById("bottom-nav-pro");if(n&&n.dataset.alt==="istr2"){delete n.dataset.alt;}});
  if(typeof PL_TONI!=="undefined")PL_TONI.istr={"pro-home":1,"tr-sedute":2,"pro-inbox":4,"tr-agenda":5,"tr-cavalli":5};
- var _pcm=window.plCostruisciMenu;
- window.plCostruisciMenu=function(){
-  if(!isTr()){var rr=_pcm.apply(this,arguments);try{if(typeof plRuolo==="function"&&plRuolo()==="owner"){var mm=document.getElementById("hm-menu-piu");if(mm)mm.insertAdjacentHTML("beforeend",plSez("Allenamento",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"I miei istruttori","trCollOwner()")]));}}catch(e){}return rr;}
+ estendiDopo("plCostruisciMenu",function(){if(isTr())return;try{if(typeof plRuolo==="function"&&plRuolo()==="owner"){var mm=document.getElementById("hm-menu-piu");if(mm)mm.insertAdjacentHTML("beforeend",plSez("Allenamento",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"I miei istruttori","trCollOwner()")]));}}catch(e){}});
+ registraPerRuolo("plCostruisciMenu","istr",function(){
   var m=document.getElementById("hm-menu-piu");if(!m)return;
   m.innerHTML=plSez("Crea subito",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"Nuova seduta","trNuova()",1),plTile(HM_IC.ferro,"Cavallo seguito","trNuovoCavallo()",1),plTile('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="hm-svg"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',"Nuova lezione","trLezForm()",1)])+
    plSez("Vai a",[plTile(HM_IC.ferro,"Cavalli seguiti","showPage('tr-cavalli')"),plTile(HM_IC.inbox,"Messaggi","showPage('pro-inbox'); loadColleghiList();"),plTile(HM_IC.qr,"Il mio codice","trMioCodice()"),plTile(HM_IC.aiuto,"Serve aiuto?","apriTicketAssistenza()")]);
   m.classList.add("pl-menu");
- };
+ });
  quandoApriPagina(function(p){
   try{
    if(isTr()){ if(p==="pro-home")trRenderHome(); else if(p==="tr-sedute")trRenderSedute(); else if(p==="tr-cavalli")trRenderCavalli(); else if(p==="tr-agenda")trRenderAgenda(); else if(p==="pro-inbox")setTimeout(function(){try{renderChatCartelle();}catch(e){}},60); }
@@ -20369,13 +20370,9 @@ plAggiorna();
    return '<div class="inbox-item'+(x.n?' unread':'')+'"'+(att||x.m?' onclick="trChatApri(\''+c.id+'\',\'trainer\')"':' style="opacity:.75"')+'><div class="horse-avatar" style="font-weight:800;font-size:14px">'+esc(iniz(c.proprietario))+'</div><div style="flex:1;min-width:0"><div class="inbox-name" style="font-size:14px">'+esc(c.proprietario)+'</div><div class="muted" style="font-size:11.5px;color:#8a6516;font-weight:700">'+esc(c.cavallo)+'</div><div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(prev)+'</div></div>'+(x.n?'<span class="inbox-unread-dot"></span>':'')+'</div>';}).join(""):'<div class="muted" style="font-size:13px;line-height:1.6;text-align:center;padding:6px 0">Nessun proprietario collegato ancora.<br>Collega un cavallo da «Cavalli seguiti»: quando il proprietario accetta potete scrivervi qui.</div>')+'</div>'+
    '<div class="muted" style="font-size:12px;line-height:1.6;text-align:center">Si scrive solo con i proprietari collegati. Se il proprietario interrompe il collegamento, lo storico resta ma non si può più scrivere.</div>';
   s.innerHTML=h;
-  try{_rcc.call(window);}catch(e){}
+  try{renderChatCartelleBase.call(window);}catch(e){}
  };
- var _rcc=window.renderChatCartelle;
- window.renderChatCartelle=function(){
-  _rcc.apply(this,arguments);
-  if(isTr()){chatSez();trRenderChatProp();}
- };
+ estendiDopo("renderChatCartelle",function(){if(isTr()){chatSez();trRenderChatProp();}});
  // schermata chat (allenatore e proprietario)
  function ensureChat(){
   if(q("tr2-chat"))return;
@@ -20501,8 +20498,7 @@ plAggiorna();
   }catch(e){console.error(e);}
  };
  // aggancio: card del proprietario e chat dal menu «I miei istruttori»
- var _toc=window.trOwnerCard;
- window.trOwnerCard=async function(){var r=await _toc.apply(this,arguments);try{await trOwnerLezCard();}catch(e){}return r;};
+ estendiDopo("trOwnerCard",function(){return trOwnerLezCard();});
 
  try{["tr-sedute","tr-cavalli","tr-agenda"].forEach(pagina);}catch(e){}
 })();
@@ -20510,9 +20506,7 @@ plAggiorna();
 <script id="ares-js">
 /* Ares · agente degli istruttori/trainer: testata, benvenuto e segnaposto della chat */
 (function(){
-  var _t = aggiornaTestataAi;
-  aggiornaTestataAi = function(){
-    var r = _t.apply(this, arguments);
+  estendiDopo("aggiornaTestataAi", function(){
     try{
       if(typeof plRuolo === "function" && plRuolo() === "istr"){
         var t = document.getElementById("ai-sheet-titolo"); if(t) t.textContent = "Ares · allenamento e sedute";
@@ -20521,8 +20515,7 @@ plAggiorna();
         var i = document.getElementById("chat-input"); if(i) i.placeholder = "Chiedi ad Ares…";
       }
     }catch(e){ console.error("ares-js:", e); }
-    return r;
-  };
+  });
   try{ VERSIONI.ares = "1.0"; }catch(e){}
 })();
 </script>

@@ -1,9 +1,7 @@
 
 /* Ares · agente degli istruttori/trainer: testata, benvenuto e segnaposto della chat */
 (function(){
-  var _t = aggiornaTestataAi;
-  aggiornaTestataAi = function(){
-    var r = _t.apply(this, arguments);
+  estendiDopo("aggiornaTestataAi", function(){
     try{
       if(typeof plRuolo === "function" && plRuolo() === "istr"){
         var t = document.getElementById("ai-sheet-titolo"); if(t) t.textContent = "Ares · allenamento e sedute";
@@ -12,7 +10,6 @@
         var i = document.getElementById("chat-input"); if(i) i.placeholder = "Chiedi ad Ares…";
       }
     }catch(e){ console.error("ares-js:", e); }
-    return r;
-  };
+  });
   try{ VERSIONI.ares = "1.0"; }catch(e){}
 })();

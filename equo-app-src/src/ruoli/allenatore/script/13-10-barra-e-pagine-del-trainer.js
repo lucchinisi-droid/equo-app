@@ -9,17 +9,16 @@
   nav.dataset.alt="istr2";delete nav.dataset.man;
   var pg=typeof plPagina==="function"?plPagina():"";nav.querySelectorAll(".nav-btn[data-page]").forEach(function(b){b.classList.toggle("active",b.dataset.page===pg);});
  }
- var _pna=window.plNavAltri;
- window.plNavAltri=function(){if(isTr()){navTr();return;}var n=document.getElementById("bottom-nav-pro");if(n&&n.dataset.alt==="istr2"){delete n.dataset.alt;}return _pna&&_pna.apply(this,arguments);};
+ registraPerRuolo("plNavAltri","istr",function(){navTr();});
+ estendiPrima("plNavAltri",function(){if(isTr())return;var n=document.getElementById("bottom-nav-pro");if(n&&n.dataset.alt==="istr2"){delete n.dataset.alt;}});
  if(typeof PL_TONI!=="undefined")PL_TONI.istr={"pro-home":1,"tr-sedute":2,"pro-inbox":4,"tr-agenda":5,"tr-cavalli":5};
- var _pcm=window.plCostruisciMenu;
- window.plCostruisciMenu=function(){
-  if(!isTr()){var rr=_pcm.apply(this,arguments);try{if(typeof plRuolo==="function"&&plRuolo()==="owner"){var mm=document.getElementById("hm-menu-piu");if(mm)mm.insertAdjacentHTML("beforeend",plSez("Allenamento",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"I miei istruttori","trCollOwner()")]));}}catch(e){}return rr;}
+ estendiDopo("plCostruisciMenu",function(){if(isTr())return;try{if(typeof plRuolo==="function"&&plRuolo()==="owner"){var mm=document.getElementById("hm-menu-piu");if(mm)mm.insertAdjacentHTML("beforeend",plSez("Allenamento",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"I miei istruttori","trCollOwner()")]));}}catch(e){}});
+ registraPerRuolo("plCostruisciMenu","istr",function(){
   var m=document.getElementById("hm-menu-piu");if(!m)return;
   m.innerHTML=plSez("Crea subito",[plTile(IC.film.replace("<svg","<svg class=\"hm-svg\""),"Nuova seduta","trNuova()",1),plTile(HM_IC.ferro,"Cavallo seguito","trNuovoCavallo()",1),plTile('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="hm-svg"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',"Nuova lezione","trLezForm()",1)])+
    plSez("Vai a",[plTile(HM_IC.ferro,"Cavalli seguiti","showPage('tr-cavalli')"),plTile(HM_IC.inbox,"Messaggi","showPage('pro-inbox'); loadColleghiList();"),plTile(HM_IC.qr,"Il mio codice","trMioCodice()"),plTile(HM_IC.aiuto,"Serve aiuto?","apriTicketAssistenza()")]);
   m.classList.add("pl-menu");
- };
+ });
  quandoApriPagina(function(p){
   try{
    if(isTr()){ if(p==="pro-home")trRenderHome(); else if(p==="tr-sedute")trRenderSedute(); else if(p==="tr-cavalli")trRenderCavalli(); else if(p==="tr-agenda")trRenderAgenda(); else if(p==="pro-inbox")setTimeout(function(){try{renderChatCartelle();}catch(e){}},60); }

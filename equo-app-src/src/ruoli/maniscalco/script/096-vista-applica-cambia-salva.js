@@ -20,7 +20,8 @@ async function cambiaVistaHome(widget){
   }
   showToast(widget ? "Vista Widget attiva" : "Vista Standard attiva");
 }
-function aggiornaSwitchHome(){
+function aggiornaSwitchHome(){ const x = aggiornaSwitchHomeBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "aggiornaSwitchHome"); return x; }
+function aggiornaSwitchHomeBase(){
   const sw = document.getElementById("vista-widget-switch");
   if(sw) sw.checked = vistaWidgetAttiva();
   // il maniscalco ha la sua Home (niente scelta widget / classica)

@@ -8,7 +8,8 @@ function sceltaCartellaChat(k){
   if(typeof cercaAzzera === "function") cercaAzzera("inbox");
   renderChatCartelle();
 }
-function renderChatCartelle(){
+function renderChatCartelle(){ const x = renderChatCartelleBase.apply(this, arguments); eseguiEstensioniSubito(estensioniDopo, "renderChatCartelle"); return x; }
+function renderChatCartelleBase(){
   const box = document.getElementById("chat-cartelle");
   if(!box) return;
   const soloColleghi = typeof plRuolo === "function" && plRuolo() === "istr";

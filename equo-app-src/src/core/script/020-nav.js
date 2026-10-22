@@ -19,12 +19,20 @@ function showPage(page){
 // ESTENSIONI (22/10/2026): per fare qualcosa PRIMA o DOPO una funzione definita in un altro file
 // NON la si riassegna: ci si iscrive con estendiPrima("nome", fn) / estendiDopo("nome", fn).
 // La funzione originale esegue gli iscritti in ordine; un errore in uno non blocca gli altri ne la funzione.
-// Oggi le usano: renderHome, openHorseDetail, diarioHomeRender, firmaUrl, trRenderHome.
+// Oggi le usano: renderHome, openHorseDetail, diarioHomeRender, firmaUrl, trRenderHome, applicaHomeMan, hmPiu,
+// aggiornaSwitchHome, renderChatCartelle, aggiornaTestataAi, renderHorseInfoBox, eseguiSalvataggioHorse, plCostruisciMenu, plNavAltri.
 const estensioniPrima = {}, estensioniDopo = {};
 function estendiPrima(nome, fn){ (estensioniPrima[nome] = estensioniPrima[nome] || []).push(fn); }
 function estendiDopo(nome, fn){ (estensioniDopo[nome] = estensioniDopo[nome] || []).push(fn); }
 async function eseguiEstensioni(elenco, nome, args){ for(const fn of (elenco[nome] || [])){ try{ await fn.apply(null, args || []); }catch(e){ console.error("estensione " + nome + ":", e); } } }
 function eseguiEstensioniSubito(elenco, nome, args){ for(const fn of (elenco[nome] || [])){ try{ fn.apply(null, args || []); }catch(e){ console.error("estensione " + nome + ":", e); } } }
+// "prima" che puo fermare la funzione: se un iscritto restituisce false, la funzione non prosegue
+async function eseguiPrimaConStop(nome, args){ for(const fn of (estensioniPrima[nome] || [])){ try{ if(await fn.apply(null, args || []) === false) return false; }catch(e){ console.error("estensione " + nome + ":", e); } } return true; }
+// SOSTITUZIONI PER RUOLO (22/10/2026): una funzione puo avere una versione diversa per un ruolo (plRuolo(): owner, man, vet, istr, pro).
+// Si registra con registraPerRuolo("nome", ["vet","istr"], fn): l'ultima registrazione per un ruolo vince.
+const sostituzioniPerRuolo = {};
+function registraPerRuolo(nome, ruoli, fn){ for(const r of [].concat(ruoli)) (sostituzioniPerRuolo[nome] = sostituzioniPerRuolo[nome] || {})[r] = fn; }
+function versioneDelRuolo(nome){ const r = typeof plRuolo === "function" ? plRuolo() : null; return (sostituzioniPerRuolo[nome] || {})[r] || null; }
 
 function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
