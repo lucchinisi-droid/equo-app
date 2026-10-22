@@ -1,3 +1,6 @@
+// Equo App · allenatore · modulo "barra-e-pagine-del-trainer" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { DEMO, IC, TR, isTr } from "./00-strumenti.js";
+import { pagina } from "./02-home.js";
  // ----- barra, «+» e pagine del trainer
  function navTr(){
   var nav=document.getElementById("bottom-nav-pro");if(!nav||!isTr()||nav.dataset.alt==="istr2")return;
@@ -58,3 +61,5 @@
  function proprDi(l){var c=l.collegamento_id?collId(l.collegamento_id,"trainer"):null;return c?c.proprietario:"";}
  function cavDi(l){return TR.cavalli.find(function(c){return c.id===l.cavallo_id;});}
  function chipL(s){var t=STL[s]||["",""];return '<span class="tr-chip '+(s==="confermata"?"i":s==="annullata"?"n":s==="solo_tua"?"s":"b")+'">'+t[0]+'</span>';}
+
+export { GG, MESI, T2, TIPI, caricaLez, chipL, collCav, collId, collT2, dataLunga, demoSeed, fineOra, hh, iniz, iso, lun, pIso, proprDi };

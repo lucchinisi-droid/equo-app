@@ -1,5 +1,4 @@
-
-(function(){
+// Equo App · allenatore · modulo "strumenti" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
  var BK="sedute-media";
  var TR={cavalli:[],sedute:[],media:{},slot:{usati:0,limite:10},cur:null,ann:[],comm:[],vurl:null,tool:null,forme:[],lavCol:"#e2ab45",lavK:"linea",lente:null,rec:null,caricato:false,owner:false};
  var DEMO=function(){return typeof DEMO_MODE!=="undefined"&&DEMO_MODE;};
@@ -14,3 +13,5 @@
   lente:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg>',
   lavagna:'<svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>',
   rallenta:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>'};
+
+export { BK, DEMO, IC, TR, esc, fmt, isTr, q, toast };

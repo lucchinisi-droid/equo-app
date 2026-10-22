@@ -1,3 +1,7 @@
+// Equo App · allenatore · modulo "chat-con-i-proprietari" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { DEMO, IC, TR, esc, fmt, isTr, q, toast } from "./00-strumenti.js";
+import { carica } from "./01-dati.js";
+import { MESI, T2, collId, collT2, dataLunga, demoSeed, fineOra, hh, iniz, iso } from "./10-barra-e-pagine-del-trainer.js";
  // ----- Chat con i proprietari
  function chatSez(){
   var pg=q("page-pro-inbox");if(!pg)return null;
@@ -138,3 +142,5 @@
   toast(ok?"Lezione confermata":"Hai chiesto un altro orario");
   if(T2.cur)await chatCarica(true);trOwnerLezCard();
  };
+
+export { badgeInbox, caricaMsgTutti, chatCarica };

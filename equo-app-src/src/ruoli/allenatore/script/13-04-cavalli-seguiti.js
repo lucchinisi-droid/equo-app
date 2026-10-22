@@ -1,2 +1,0 @@
- // ----- Cavalli seguiti
-

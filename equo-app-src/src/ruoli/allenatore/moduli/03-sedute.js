@@ -1,3 +1,7 @@
+// Equo App · allenatore · modulo "sedute" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { TR } from "./00-strumenti.js";
+import { carica, righe, slotHtml } from "./01-dati.js";
+import { pagina } from "./02-home.js";
  // ----- Sedute
  window.trRenderSedute=async function(){
   var p=pagina("tr-sedute");if(!TR.caricato)await carica();

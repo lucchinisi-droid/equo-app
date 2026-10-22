@@ -1,3 +1,8 @@
+// Equo App · allenatore · modulo "agenda" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { TR, esc } from "./00-strumenti.js";
+import { carica } from "./01-dati.js";
+import { pagina } from "./02-home.js";
+import { GG, MESI, T2, TIPI, caricaLez, chipL, dataLunga, hh, iso, lun, proprDi } from "./10-barra-e-pagine-del-trainer.js";
  // ----- Agenda
  window.trRenderAgenda=async function(){
   var p=pagina("tr-agenda");if(!TR.caricato)await carica();if(!T2.loadedL)await caricaLez();

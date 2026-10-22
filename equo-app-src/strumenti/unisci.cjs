@@ -17,7 +17,8 @@ const out = modello.replace(/<!--@ ([^ ]+) -->/g, (_, rel) => {
 });
 // file dimenticati: esistono in src ma il modello non li usa
 const tutti = []; (function giro(d, pre){ for(const f of fs.readdirSync(d, { withFileTypes: true })){ const r = pre + f.name; if(f.isDirectory()) giro(path.join(d, f.name), r + "/"); else if(r !== "index.modello.html") tutti.push(r); } })(SRC, "");
-const orfani = tutti.filter(r => !usati.has(r));
+// i moduli ES (cartelle "moduli/") non entrano direttamente: Vite li costruisce in un file "costruito.js" (costruisci-moduli.mjs)
+const orfani = tutti.filter(r => !usati.has(r) && !r.includes("/moduli/"));
 if(orfani.length){ console.error("File non collegati nel modello:\n- " + orfani.join("\n- ")); process.exit(1); }
 // regola di confinamento: cosa mostra la Home dei professionisti si decide SOLO in core/stili/10-regole-ruoli.css
 const violazioni = APP !== "equo-app" ? [] : tutti.filter(r => r.endsWith(".css") && r !== "core/stili/10-regole-ruoli.css")

@@ -1,3 +1,8 @@
+// Equo App · allenatore · modulo "lato-proprietario-i-tuoi-istruttori-lezi" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { DEMO, TR, esc, isTr, q } from "./00-strumenti.js";
+import { pagina } from "./02-home.js";
+import { ownerColl } from "./09-lato-proprietario-richieste-di-collegame.js";
+import { TIPI, chipL, dataLunga, iniz } from "./10-barra-e-pagine-del-trainer.js";
  // ----- lato proprietario: I tuoi istruttori + lezioni
  window.trOwnerLezCard=async function(){
   if(isTr()||DEMO())return;
@@ -20,4 +25,3 @@
  estendiDopo("trOwnerCard",function(){return trOwnerLezCard();});
 
  try{["tr-sedute","tr-cavalli","tr-agenda"].forEach(pagina);}catch(e){}
-})();

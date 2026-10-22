@@ -1,3 +1,7 @@
+// Equo App · allenatore · modulo "nuova-modifica-lezione" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { DEMO, IC, TR, esc, q, toast } from "./00-strumenti.js";
+import { T2, TIPI, caricaLez, chipL, collCav, collId, dataLunga, fineOra, hh, iso, lun, pIso } from "./10-barra-e-pagine-del-trainer.js";
+import { badgeInbox, caricaMsgTutti, chatCarica } from "./13-chat-con-i-proprietari.js";
  // ----- Nuova / modifica lezione
  window.trLezForm=function(id,cavId){
   if(!TR.cavalli.length){toast("Aggiungi prima un cavallo da seguire");showPage("tr-cavalli");return;}

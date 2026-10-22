@@ -1,3 +1,6 @@
+// Equo App · allenatore · modulo "home" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { TR, esc, q } from "./00-strumenti.js";
+import { carica, premium, righe, slotHtml } from "./01-dati.js";
  // ----- Home
  function pagina(id){
   var el=q("page-"+id);if(el)return el;
@@ -19,3 +22,5 @@
    '<div class="tr-card"><h4><span>Cavalli seguiti</span><button onclick="showPage(\'tr-cavalli\')">'+TR.cavalli.length+(premium()?'':' di 10')+' ›</button></h4><div class="muted" style="font-size:12.5px">'+(TR.cavalli.length?TR.cavalli.slice(0,4).map(function(c){return esc(c.nome);}).join(", "):'Aggiungi i cavalli che alleni per collegare le sedute.')+'</div></div>';
   if(typeof caricaConfermePro==="function")caricaConfermePro(true,"tr-conferme");
  };
+
+export { pagina };

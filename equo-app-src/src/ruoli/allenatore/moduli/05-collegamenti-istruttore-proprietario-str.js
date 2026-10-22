@@ -1,3 +1,7 @@
+// Equo App · allenatore · modulo "collegamenti-istruttore-proprietario-str" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { DEMO, IC, TR, esc, q, toast } from "./00-strumenti.js";
+import { carica, premium } from "./01-dati.js";
+import { pagina } from "./02-home.js";
  // ----- COLLEGAMENTI istruttore ↔ proprietario ↔ struttura
  function collT(){return (TR.coll||[]).filter(function(x){return x.mio_ruolo==="trainer";});}
  function collDi(hid){return hid?collT().find(function(x){return x.horse_id===hid;}):null;}

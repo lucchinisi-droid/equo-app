@@ -1,3 +1,6 @@
+// Equo App · allenatore · modulo "nuova-seduta" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { BK, DEMO, TR, esc, fmt, q, toast } from "./00-strumenti.js";
+import { carica, premium } from "./01-dati.js";
  // ----- Nuova seduta
  window.trNuova=async function(){
   if(!TR.caricato)await carica();

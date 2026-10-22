@@ -1,3 +1,6 @@
+// Equo App · allenatore · modulo "vista-proprietario-riceve-e-risponde" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
+import { DEMO, IC, TR, esc, isTr, q } from "./00-strumenti.js";
+import { trOwnerCollCard } from "./09-lato-proprietario-richieste-di-collegame.js";
  // ----- vista proprietario (riceve e risponde)
  window.trOwnerCard=async function(forza){ var r=await trOwnerCardBase(forza); await eseguiEstensioni(estensioniDopo,"trOwnerCard",[forza]); return r; };
  async function trOwnerCardBase(forza){
