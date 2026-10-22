@@ -45,7 +45,8 @@ function diarioCavallo(){
   return lista.find(h => h.id === diarioHorseId);
 }
 const firmaTs = {};
-async function firmaUrl(bucket, paths, mappa){
+async function firmaUrl(bucket, paths, mappa){ await firmaUrlBase(bucket, paths, mappa); await eseguiEstensioni(estensioniDopo, "firmaUrl", [bucket, paths, mappa]); }
+async function firmaUrlBase(bucket, paths, mappa){
   const adesso = Date.now();
   const valido = (u) => u && !/undefined/.test(u);
   // rifirma anche gli indirizzi piu vecchi di 40 minuti (durano 60): l'app resta aperta a lungo
@@ -393,7 +394,8 @@ async function diarioSalva(){
   finally{ btn.disabled = false; }
 }
 /* ---- carta «Oggi» nella Home ---- */
-async function diarioHomeRender(){
+async function diarioHomeRender(){ const r = await diarioHomeRenderBase(); await eseguiEstensioni(estensioniDopo, "diarioHomeRender"); return r; }
+async function diarioHomeRenderBase(){
   const box = document.getElementById("home-oggi"); if(!box) return;
   const h = diarioCavallo();
   if(!h){ box.innerHTML = ""; return; }
@@ -507,8 +509,8 @@ async function albumNascondi(){
 }
 /* ---- aggancio a Home e navigazione ---- */
 (function(){
-  const _rh = renderHome; renderHome = function(){ _rh(); try{ diarioHomeRender(); }catch(e){} };
+  estendiDopo("renderHome", function(){ diarioHomeRender(); });
   quandoApriPagina(function(p){ if(p === "diario") diarioCarica(); });
-  const _od = openHorseDetail; openHorseDetail = async function(id){ await _od(id); try{ albumRender(id); }catch(e){} };
+  estendiDopo("openHorseDetail", function(id){ albumRender(id); });
 })();
 

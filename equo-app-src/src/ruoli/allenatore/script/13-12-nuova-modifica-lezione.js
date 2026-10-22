@@ -77,9 +77,7 @@
   closeModal("modal-dr-sheet");toast("Lezione annullata");trRenderAgenda();if(T2.cur)chatCarica(true);
  };
  // Home: prossime lezioni
- var _trh=window.trRenderHome;
- window.trRenderHome=async function(){
-  await _trh.apply(this,arguments);
+ estendiDopo("trRenderHome",async function(){
   try{
    caricaMsgTutti().then(badgeInbox).catch(function(){});
    if(!T2.loadedL)await caricaLez();
@@ -90,4 +88,4 @@
    d.innerHTML='<h4><span>Prossime lezioni</span><button onclick="showPage(\'tr-agenda\')">Agenda ›</button></h4>'+(p.length?p.map(function(l){return '<div class="tr-riga" onclick="trLezApri(\''+l.id+'\')"><div class="th" style="font-size:11px;font-weight:800;line-height:1.1;text-align:center">'+hh(l.ora)+'</div><div><b>'+esc(l.cavallo_nome)+'</b><small>'+(l.data===oggi?"Oggi":dataLunga(l.data))+' · '+(TIPI[l.tipo]||"Lezione")+'</small></div>'+chipL(l.stato)+'</div>';}).join(""):'<div class="muted" style="font-size:12.5px">Nessuna lezione in programma. <a href="#" onclick="trLezForm();return false" style="color:#8a6516;font-weight:800">Aggiungine una</a></div>');
    cta.insertAdjacentElement("afterend",d);
   }catch(e){console.error(e);}
- };
+ });

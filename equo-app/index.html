@@ -8010,6 +8010,16 @@ function showPage(page){
   for(const fn of ascoltiPagina){ try{ fn(page); }catch(e){ console.error("quandoApriPagina:", e); } }
 }
 
+// ESTENSIONI (22/10/2026): per fare qualcosa PRIMA o DOPO una funzione definita in un altro file
+// NON la si riassegna: ci si iscrive con estendiPrima("nome", fn) / estendiDopo("nome", fn).
+// La funzione originale esegue gli iscritti in ordine; un errore in uno non blocca gli altri ne la funzione.
+// Oggi le usano: renderHome, openHorseDetail, diarioHomeRender, firmaUrl, trRenderHome.
+const estensioniPrima = {}, estensioniDopo = {};
+function estendiPrima(nome, fn){ (estensioniPrima[nome] = estensioniPrima[nome] || []).push(fn); }
+function estendiDopo(nome, fn){ (estensioniDopo[nome] = estensioniDopo[nome] || []).push(fn); }
+async function eseguiEstensioni(elenco, nome, args){ for(const fn of (elenco[nome] || [])){ try{ await fn.apply(null, args || []); }catch(e){ console.error("estensione " + nome + ":", e); } } }
+function eseguiEstensioniSubito(elenco, nome, args){ for(const fn of (elenco[nome] || [])){ try{ fn.apply(null, args || []); }catch(e){ console.error("estensione " + nome + ":", e); } } }
+
 function openModal(id){ document.getElementById(id).classList.add("active"); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
@@ -8567,7 +8577,8 @@ async function rispondiStessoCavallo(stesso){
   mostraStessoCavallo();
 }
 
-function renderHome(){
+function renderHome(){ renderHomeBase(); eseguiEstensioniSubito(estensioniDopo, "renderHome"); }
+function renderHomeBase(){
   renderHomeGreeting();
   const setupBox = document.getElementById("home-setup");
   const mainBox = document.getElementById("home-main");
@@ -8780,6 +8791,12 @@ function renderHorseInfoBox(h){
 }
 
 async function openHorseDetail(id){
+  await eseguiEstensioni(estensioniPrima, "openHorseDetail", [id]);
+  const r = await openHorseDetailBase(id);
+  await eseguiEstensioni(estensioniDopo, "openHorseDetail", [id]);
+  return r;
+}
+async function openHorseDetailBase(id){
   currentHorseId = id;
   const horse = horses.find(h => h.id === id);
   if(!horse) return;
@@ -18776,7 +18793,8 @@ function diarioCavallo(){
   return lista.find(h => h.id === diarioHorseId);
 }
 const firmaTs = {};
-async function firmaUrl(bucket, paths, mappa){
+async function firmaUrl(bucket, paths, mappa){ await firmaUrlBase(bucket, paths, mappa); await eseguiEstensioni(estensioniDopo, "firmaUrl", [bucket, paths, mappa]); }
+async function firmaUrlBase(bucket, paths, mappa){
   const adesso = Date.now();
   const valido = (u) => u && !/undefined/.test(u);
   // rifirma anche gli indirizzi piu vecchi di 40 minuti (durano 60): l'app resta aperta a lungo
@@ -19124,7 +19142,8 @@ async function diarioSalva(){
   finally{ btn.disabled = false; }
 }
 /* ---- carta «Oggi» nella Home ---- */
-async function diarioHomeRender(){
+async function diarioHomeRender(){ const r = await diarioHomeRenderBase(); await eseguiEstensioni(estensioniDopo, "diarioHomeRender"); return r; }
+async function diarioHomeRenderBase(){
   const box = document.getElementById("home-oggi"); if(!box) return;
   const h = diarioCavallo();
   if(!h){ box.innerHTML = ""; return; }
@@ -19238,9 +19257,9 @@ async function albumNascondi(){
 }
 /* ---- aggancio a Home e navigazione ---- */
 (function(){
-  const _rh = renderHome; renderHome = function(){ _rh(); try{ diarioHomeRender(); }catch(e){} };
+  estendiDopo("renderHome", function(){ diarioHomeRender(); });
   quandoApriPagina(function(p){ if(p === "diario") diarioCarica(); });
-  const _od = openHorseDetail; openHorseDetail = async function(id){ await _od(id); try{ albumRender(id); }catch(e){} };
+  estendiDopo("openHorseDetail", function(id){ albumRender(id); });
 })();
 
 </script>
@@ -19395,9 +19414,7 @@ plAggiorna();
  function q(i){return document.getElementById(i);}
  // 1) BUG foto: dopo la firma, le prime immagini si scaricano e diventano blob (il link firmato sul telefono a volte non carica)
  var blobTent={};
- var _firma=window.firmaUrl;
- window.firmaUrl=async function(bucket,paths,mappa){
-  await _firma.apply(this,arguments);
+ estendiDopo("firmaUrl",async function(bucket,paths,mappa){
   try{
    var da=(paths||[]).filter(function(p){return p&&!blobTent[bucket+"/"+p];}).slice(0,12);
    await Promise.all(da.map(async function(p){
@@ -19405,7 +19422,7 @@ plAggiorna();
     try{var r=await sb.storage.from(bucket).download(p);if(r&&r.data&&r.data.size)mappa[p]=URL.createObjectURL(r.data);}catch(e){}
    }));
   }catch(e){}
- };
+ });
  // 2) meteo a pastiglia
  function meteoPastiglia(){
   var m=q("meteo-owner");if(!m||m.parentNode.classList.contains("hv3-met"))return;
@@ -19485,8 +19502,7 @@ plAggiorna();
   if(tit&&sc&&main){var f=q("hv3-daequo");if(!f){f=document.createElement("div");f.id="hv3-daequo";main.appendChild(f);}f.innerHTML="";f.appendChild(tit);f.appendChild(sc);}
   homeV3Chat();
  }
- var _dhr=window.diarioHomeRender;
- window.diarioHomeRender=async function(){var r=await _dhr.apply(this,arguments);try{post();}catch(e){console.error(e);}return r;};
+ estendiDopo("diarioHomeRender",function(){post();});
  setInterval(function(){try{meteoPastiglia();scadenze();contaScad();}catch(e){}},2000);
 })();
 </script>
@@ -19539,8 +19555,8 @@ plAggiorna();
    libFoto(hh);libVis(hh);libStorico(hh);
   }catch(e){console.error(e);}
  };
- var _ohd=window.openHorseDetail;
- window.openHorseDetail=async function(id){schede();TAB="identita";var r=await _ohd.apply(this,arguments);schede();return r;};
+ estendiPrima("openHorseDetail",function(){schede();TAB="identita";});
+ estendiDopo("openHorseDetail",function(){schede();});
  async function libUrl(path){try{var r=await sb.storage.from("cavalli-album").createSignedUrl(path,3600);return r.data&&r.data.signedUrl;}catch(e){return null;}}
  async function libFoto(hh){
   var c=q("lb-foto-card");if(!c)return;
@@ -19685,7 +19701,8 @@ plAggiorna();
   var el=q("page-"+id);if(el)return el;
   var home=q("page-pro-home");el=document.createElement("div");el.className="page-content";el.id="page-"+id;home.parentNode.insertBefore(el,home.nextSibling);return el;
  }
- window.trRenderHome=async function(){
+ window.trRenderHome=async function(){ await trRenderHomeBase(); await eseguiEstensioni(estensioniDopo,"trRenderHome"); };
+ async function trRenderHomeBase(){
   var home=q("page-pro-home");if(!home)return;
   var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";home.appendChild(box);}
   if(!TR.caricato){box.innerHTML='<div class="loading"><div class="spinner"></div></div>';await carica();}
@@ -20147,8 +20164,7 @@ plAggiorna();
   h+='<h5 style="margin:12px 0 6px">Invita il tuo istruttore</h5><select class="tr-field" id="tri-h"><option value="">Scegli il cavallo…</option>'+hs.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+'</option>';}).join("")+'</select><input class="tr-field" id="tri-k" placeholder="Codice dell\'istruttore (EQUO-TRA-…)" autocapitalize="characters"><button class="btn btn-primary" style="width:100%" onclick="trCollInvita()">Invita</button><div class="muted" style="font-size:12px;line-height:1.5;margin-top:8px">L\'istruttore trova il suo codice nell\'app Trainer → Cavalli seguiti → «Il tuo codice trainer».</div>';
   diarioSheet("I miei istruttori",h);
  };
- var _dhr2=window.diarioHomeRender;
- if(_dhr2)window.diarioHomeRender=async function(){var r=await _dhr2.apply(this,arguments);try{trOwnerCard(true);}catch(e){}return r;};
+ estendiDopo("diarioHomeRender",function(){trOwnerCard(true);});
  // ----- barra, «+» e pagine del trainer
  function navTr(){
   var nav=document.getElementById("bottom-nav-pro");if(!nav||!isTr()||nav.dataset.alt==="istr2")return;
@@ -20310,9 +20326,7 @@ plAggiorna();
   closeModal("modal-dr-sheet");toast("Lezione annullata");trRenderAgenda();if(T2.cur)chatCarica(true);
  };
  // Home: prossime lezioni
- var _trh=window.trRenderHome;
- window.trRenderHome=async function(){
-  await _trh.apply(this,arguments);
+ estendiDopo("trRenderHome",async function(){
   try{
    caricaMsgTutti().then(badgeInbox).catch(function(){});
    if(!T2.loadedL)await caricaLez();
@@ -20323,7 +20337,7 @@ plAggiorna();
    d.innerHTML='<h4><span>Prossime lezioni</span><button onclick="showPage(\'tr-agenda\')">Agenda ›</button></h4>'+(p.length?p.map(function(l){return '<div class="tr-riga" onclick="trLezApri(\''+l.id+'\')"><div class="th" style="font-size:11px;font-weight:800;line-height:1.1;text-align:center">'+hh(l.ora)+'</div><div><b>'+esc(l.cavallo_nome)+'</b><small>'+(l.data===oggi?"Oggi":dataLunga(l.data))+' · '+(TIPI[l.tipo]||"Lezione")+'</small></div>'+chipL(l.stato)+'</div>';}).join(""):'<div class="muted" style="font-size:12.5px">Nessuna lezione in programma. <a href="#" onclick="trLezForm();return false" style="color:#8a6516;font-weight:800">Aggiungine una</a></div>');
    cta.insertAdjacentElement("afterend",d);
   }catch(e){console.error(e);}
- };
+ });
  // ----- Chat con i proprietari
  function chatSez(){
   var pg=q("page-pro-inbox");if(!pg)return null;

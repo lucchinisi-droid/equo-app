@@ -47,8 +47,8 @@
    libFoto(hh);libVis(hh);libStorico(hh);
   }catch(e){console.error(e);}
  };
- var _ohd=window.openHorseDetail;
- window.openHorseDetail=async function(id){schede();TAB="identita";var r=await _ohd.apply(this,arguments);schede();return r;};
+ estendiPrima("openHorseDetail",function(){schede();TAB="identita";});
+ estendiDopo("openHorseDetail",function(){schede();});
  async function libUrl(path){try{var r=await sb.storage.from("cavalli-album").createSignedUrl(path,3600);return r.data&&r.data.signedUrl;}catch(e){return null;}}
  async function libFoto(hh){
   var c=q("lb-foto-card");if(!c)return;

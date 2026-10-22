@@ -46,7 +46,8 @@ async function rispondiStessoCavallo(stesso){
   mostraStessoCavallo();
 }
 
-function renderHome(){
+function renderHome(){ renderHomeBase(); eseguiEstensioniSubito(estensioniDopo, "renderHome"); }
+function renderHomeBase(){
   renderHomeGreeting();
   const setupBox = document.getElementById("home-setup");
   const mainBox = document.getElementById("home-main");

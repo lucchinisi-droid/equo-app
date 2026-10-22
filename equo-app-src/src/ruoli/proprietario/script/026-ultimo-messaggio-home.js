@@ -191,6 +191,12 @@ function renderHorseInfoBox(h){
 }
 
 async function openHorseDetail(id){
+  await eseguiEstensioni(estensioniPrima, "openHorseDetail", [id]);
+  const r = await openHorseDetailBase(id);
+  await eseguiEstensioni(estensioniDopo, "openHorseDetail", [id]);
+  return r;
+}
+async function openHorseDetailBase(id){
   currentHorseId = id;
   const horse = horses.find(h => h.id === id);
   if(!horse) return;

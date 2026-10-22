@@ -3,7 +3,8 @@
   var el=q("page-"+id);if(el)return el;
   var home=q("page-pro-home");el=document.createElement("div");el.className="page-content";el.id="page-"+id;home.parentNode.insertBefore(el,home.nextSibling);return el;
  }
- window.trRenderHome=async function(){
+ window.trRenderHome=async function(){ await trRenderHomeBase(); await eseguiEstensioni(estensioniDopo,"trRenderHome"); };
+ async function trRenderHomeBase(){
   var home=q("page-pro-home");if(!home)return;
   var box=q("tr-home");if(!box){box=document.createElement("div");box.id="tr-home";home.appendChild(box);}
   if(!TR.caricato){box.innerHTML='<div class="loading"><div class="spinner"></div></div>';await carica();}

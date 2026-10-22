@@ -8,9 +8,7 @@
  function q(i){return document.getElementById(i);}
  // 1) BUG foto: dopo la firma, le prime immagini si scaricano e diventano blob (il link firmato sul telefono a volte non carica)
  var blobTent={};
- var _firma=window.firmaUrl;
- window.firmaUrl=async function(bucket,paths,mappa){
-  await _firma.apply(this,arguments);
+ estendiDopo("firmaUrl",async function(bucket,paths,mappa){
   try{
    var da=(paths||[]).filter(function(p){return p&&!blobTent[bucket+"/"+p];}).slice(0,12);
    await Promise.all(da.map(async function(p){
@@ -18,7 +16,7 @@
     try{var r=await sb.storage.from(bucket).download(p);if(r&&r.data&&r.data.size)mappa[p]=URL.createObjectURL(r.data);}catch(e){}
    }));
   }catch(e){}
- };
+ });
  // 2) meteo a pastiglia
  function meteoPastiglia(){
   var m=q("meteo-owner");if(!m||m.parentNode.classList.contains("hv3-met"))return;
@@ -98,7 +96,6 @@
   if(tit&&sc&&main){var f=q("hv3-daequo");if(!f){f=document.createElement("div");f.id="hv3-daequo";main.appendChild(f);}f.innerHTML="";f.appendChild(tit);f.appendChild(sc);}
   homeV3Chat();
  }
- var _dhr=window.diarioHomeRender;
- window.diarioHomeRender=async function(){var r=await _dhr.apply(this,arguments);try{post();}catch(e){console.error(e);}return r;};
+ estendiDopo("diarioHomeRender",function(){post();});
  setInterval(function(){try{meteoPastiglia();scadenze();contaScad();}catch(e){}},2000);
 })();

@@ -45,5 +45,4 @@
   h+='<h5 style="margin:12px 0 6px">Invita il tuo istruttore</h5><select class="tr-field" id="tri-h"><option value="">Scegli il cavallo…</option>'+hs.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+'</option>';}).join("")+'</select><input class="tr-field" id="tri-k" placeholder="Codice dell\'istruttore (EQUO-TRA-…)" autocapitalize="characters"><button class="btn btn-primary" style="width:100%" onclick="trCollInvita()">Invita</button><div class="muted" style="font-size:12px;line-height:1.5;margin-top:8px">L\'istruttore trova il suo codice nell\'app Trainer → Cavalli seguiti → «Il tuo codice trainer».</div>';
   diarioSheet("I miei istruttori",h);
  };
- var _dhr2=window.diarioHomeRender;
- if(_dhr2)window.diarioHomeRender=async function(){var r=await _dhr2.apply(this,arguments);try{trOwnerCard(true);}catch(e){}return r;};
+ estendiDopo("diarioHomeRender",function(){trOwnerCard(true);});
