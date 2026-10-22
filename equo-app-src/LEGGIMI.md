@@ -15,6 +15,8 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
 - `src/ruoli/allenatore/` — app dell'istruttore in MODULI ES veri (dal 22/10/2026): `moduli/00-strumenti.js` ...
   `moduli/14-*.js` + `moduli/index.js`. Ogni modulo dichiara cosa usa (`import`) e cosa offre (`export`).
   Vite li unisce in `costruito.js` (GENERATO, non modificare), che e cio che entra in index.html.
+  I dati condivisi (TR = sedute/video/cavalli seguiti, T2 = agenda/lezioni/chat) stanno solo in `moduli/stato.js`:
+  si importano da li e se ne cambiano i campi, non si sostituiscono mai.
   Ares (`script/14-ares-js.js`) e lo stile restano fuori dai moduli.
 - `src/ruoli/professionisti/pagine/` — pagine comuni ai professionisti (pro-home, pro-agenda, pro-clienti...).
 - `src/finestre/` — tutte le finestre (modal) dell'app.

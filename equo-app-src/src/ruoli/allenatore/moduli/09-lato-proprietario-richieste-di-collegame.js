@@ -1,5 +1,6 @@
 // Equo App · allenatore · modulo "lato-proprietario-richieste-di-collegame" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { DEMO, IC, TR, esc, isTr, q, toast } from "./00-strumenti.js";
+import { TR } from "./stato.js";
+import { DEMO, IC, esc, isTr, q, toast } from "./00-strumenti.js";
  // ----- lato proprietario: richieste di collegamento e «I miei istruttori»
  async function ownerColl(){var r=await sb.rpc("equo_miei_collegamenti");return (Array.isArray(r.data)?r.data:[]).filter(function(x){return x.mio_ruolo==="proprietario";});}
  async function trOwnerCollCard(){

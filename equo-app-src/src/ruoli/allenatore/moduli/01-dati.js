@@ -1,5 +1,6 @@
 // Equo App · allenatore · modulo "dati" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { DEMO, IC, TR, esc } from "./00-strumenti.js";
+import { TR } from "./stato.js";
+import { DEMO, IC, esc } from "./00-strumenti.js";
  // ----- dati
  function demoDati(){
   if(!TR.demoInit){TR.demoInit=true;TR.cavalli=[{id:"dc1",nome:"Aurora",cavaliere:"Giulia Verdi",horse_id:"h1"},{id:"dc2",nome:"Rio",cavaliere:"Marco Bianchi",horse_id:"h2"},{id:"dc3",nome:"Fiamma",cavaliere:"Anna Neri"}];TR.sedute=[];TR.slot={usati:0,limite:10};TR.coll=[{id:"k1",stato:"attivo",mio_ruolo:"trainer",horse_id:"h1",cavallo:"Aurora",proprietario:"Giulia Verdi",origine:"trainer"},{id:"k2",stato:"da_confermare_proprietario",mio_ruolo:"trainer",horse_id:"h2",cavallo:"Rio",proprietario:"Marco Bianchi",origine:"trainer",da_rispondere:false},{id:"k3",stato:"da_confermare_trainer",mio_ruolo:"trainer",horse_id:"h3",cavallo:"Luna",proprietario:"Sara Rossi",origine:"proprietario",da_rispondere:true}];TR.centri=[{id:"c1",nome:"Centro Ippico Blu",ruolo:"istruttore"}];}

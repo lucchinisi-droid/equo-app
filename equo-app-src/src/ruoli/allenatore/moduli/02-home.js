@@ -1,5 +1,6 @@
 // Equo App · allenatore · modulo "home" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { TR, esc, q } from "./00-strumenti.js";
+import { TR } from "./stato.js";
+import { esc, q } from "./00-strumenti.js";
 import { carica, premium, righe, slotHtml } from "./01-dati.js";
  // ----- Home
  function pagina(id){

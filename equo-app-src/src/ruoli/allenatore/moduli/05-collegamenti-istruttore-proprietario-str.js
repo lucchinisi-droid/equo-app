@@ -1,5 +1,6 @@
 // Equo App · allenatore · modulo "collegamenti-istruttore-proprietario-str" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { DEMO, IC, TR, esc, q, toast } from "./00-strumenti.js";
+import { TR } from "./stato.js";
+import { DEMO, IC, esc, q, toast } from "./00-strumenti.js";
 import { carica, premium } from "./01-dati.js";
 import { pagina } from "./02-home.js";
  // ----- COLLEGAMENTI istruttore ↔ proprietario ↔ struttura

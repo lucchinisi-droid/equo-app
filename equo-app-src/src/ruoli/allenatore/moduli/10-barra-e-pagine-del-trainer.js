@@ -1,5 +1,6 @@
 // Equo App · allenatore · modulo "barra-e-pagine-del-trainer" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { DEMO, IC, TR, isTr } from "./00-strumenti.js";
+import { T2, TR } from "./stato.js";
+import { DEMO, IC, isTr } from "./00-strumenti.js";
 import { pagina } from "./02-home.js";
  // ----- barra, «+» e pagine del trainer
  function navTr(){
@@ -31,7 +32,6 @@ import { pagina } from "./02-home.js";
  // Ares: l'immagine al centro (stile come Galeno/Hammer)
  document.addEventListener("DOMContentLoaded",function(){["tr-sedute","tr-cavalli","tr-agenda"].forEach(pagina);});
   /* ===== AGENDA LEZIONI + CHAT CON I PROPRIETARI (17/10/2026) ===== */
- var T2={lez:[],week:null,sel:null,msgs:{},cur:null,poll:null,loadedL:false,sed:{},lezC:{},form:{dur:45,tipo:"lezione",id:null},lastFetch:0,dm:{},dl:false};
  var GG=["Dom","Lun","Mar","Mer","Gio","Ven","Sab"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
  var TIPI={lezione:"Lezione",piano:"Lavoro in piano",salto:"Salto",passeggiata:"Passeggiata",altro:"Altro"};
  var STL={solo_tua:["Solo tua","so"],proposta:["In attesa","pr"],confermata:["Confermata",""],altro_orario:["Chiede altro orario","pr"],annullata:["Annullata","an"]};
@@ -62,4 +62,4 @@ import { pagina } from "./02-home.js";
  function cavDi(l){return TR.cavalli.find(function(c){return c.id===l.cavallo_id;});}
  function chipL(s){var t=STL[s]||["",""];return '<span class="tr-chip '+(s==="confermata"?"i":s==="annullata"?"n":s==="solo_tua"?"s":"b")+'">'+t[0]+'</span>';}
 
-export { GG, MESI, T2, TIPI, caricaLez, chipL, collCav, collId, collT2, dataLunga, demoSeed, fineOra, hh, iniz, iso, lun, pIso, proprDi };
+export { GG, MESI, TIPI, caricaLez, chipL, collCav, collId, collT2, dataLunga, demoSeed, fineOra, hh, iniz, iso, lun, pIso, proprDi };

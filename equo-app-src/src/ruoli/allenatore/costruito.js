@@ -1,8 +1,7 @@
 
 // === GENERATO da equo-app-src/strumenti/costruisci-moduli.mjs: NON modificare qui, modificare ruoli/allenatore/moduli/ ===
 (function() {
-	// equo-app-src/src/ruoli/allenatore/moduli/00-strumenti.js
-	var BK = "sedute-media";
+	// equo-app-src/src/ruoli/allenatore/moduli/stato.js
 	var TR = {
 		cavalli: [],
 		sedute: [],
@@ -24,6 +23,27 @@
 		caricato: false,
 		owner: false
 	};
+	var T2 = {
+		lez: [],
+		week: null,
+		sel: null,
+		msgs: {},
+		cur: null,
+		poll: null,
+		loadedL: false,
+		sed: {},
+		lezC: {},
+		form: {
+			dur: 45,
+			tipo: "lezione",
+			id: null
+		},
+		lastFetch: 0,
+		dm: {},
+		dl: false
+	};
+	// equo-app-src/src/ruoli/allenatore/moduli/00-strumenti.js
+	var BK = "sedute-media";
 	var DEMO = function() {
 		return typeof DEMO_MODE !== "undefined" && DEMO_MODE;
 	};
@@ -1495,25 +1515,6 @@
 			"tr-agenda"
 		].forEach(pagina);
 	});
-	var T2 = {
-		lez: [],
-		week: null,
-		sel: null,
-		msgs: {},
-		cur: null,
-		poll: null,
-		loadedL: false,
-		sed: {},
-		lezC: {},
-		form: {
-			dur: 45,
-			tipo: "lezione",
-			id: null
-		},
-		lastFetch: 0,
-		dm: {},
-		dl: false
-	};
 	var GG = [
 		"Dom",
 		"Lun",

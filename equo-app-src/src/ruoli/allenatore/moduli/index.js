@@ -1,4 +1,5 @@
 // Ingresso dei moduli dell'allenatore: l'ordine qui sotto e l'ordine originale delle sezioni.
+import "./stato.js";
 import "./00-strumenti.js";
 import "./01-dati.js";
 import "./02-home.js";

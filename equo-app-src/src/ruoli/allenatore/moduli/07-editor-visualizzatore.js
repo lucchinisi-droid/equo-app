@@ -1,5 +1,6 @@
 // Equo App · allenatore · modulo "editor-visualizzatore" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { BK, DEMO, IC, TR, esc, fmt, isTr, q, toast } from "./00-strumenti.js";
+import { TR } from "./stato.js";
+import { BK, DEMO, IC, esc, fmt, isTr, q, toast } from "./00-strumenti.js";
 import { premium } from "./01-dati.js";
  // ----- Editor / visualizzatore
  function ensureEd(){

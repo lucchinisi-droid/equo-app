@@ -1,7 +1,8 @@
 // Equo App · allenatore · modulo "chat-con-i-proprietari" (moduli ES, costruiti con Vite in ruoli/allenatore/costruito.js)
-import { DEMO, IC, TR, esc, fmt, isTr, q, toast } from "./00-strumenti.js";
+import { T2, TR } from "./stato.js";
+import { DEMO, IC, esc, fmt, isTr, q, toast } from "./00-strumenti.js";
 import { carica } from "./01-dati.js";
-import { MESI, T2, collId, collT2, dataLunga, demoSeed, fineOra, hh, iniz, iso } from "./10-barra-e-pagine-del-trainer.js";
+import { MESI, collId, collT2, dataLunga, demoSeed, fineOra, hh, iniz, iso } from "./10-barra-e-pagine-del-trainer.js";
  // ----- Chat con i proprietari
  function chatSez(){
   var pg=q("page-pro-inbox");if(!pg)return null;
