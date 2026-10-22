@@ -1,7 +1,7 @@
 /* righe */
-.hm-righe{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-.hm-riga{position:relative;display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:12px 14px;overflow:hidden;min-height:76px;font:inherit;color:var(--text);text-align:left;cursor:pointer;width:100%}
-.hm-riga::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 45%,var(--tinta) 100%);opacity:.55;pointer-events:none}
+:where(body:not(.pl-owner)) .hm-righe{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+:where(body:not(.pl-owner)) .hm-riga{position:relative;display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:12px 14px;overflow:hidden;min-height:76px;font:inherit;color:var(--text);text-align:left;cursor:pointer;width:100%}
+:where(body:not(.pl-owner)) .hm-riga::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 45%,var(--tinta) 100%);opacity:.55;pointer-events:none}
 .hm-riga .ic{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tinta);color:var(--colore);flex-shrink:0;position:relative}
 .hm-riga .ic svg{width:23px;height:23px}
 .hm-riga .tx{flex:1;position:relative;min-width:0}
@@ -9,8 +9,8 @@
 .hm-riga .tx span{font-size:13px;color:var(--muted)}
 .hm-riga .tx span strong{color:var(--text)}
 .hm-riga .fondo{position:absolute;right:34px;top:50%;transform:translateY(-50%) rotate(-10deg);width:78px;height:78px;color:var(--colore);opacity:.12;pointer-events:none}
-.hm-riga .fr{position:relative;color:var(--muted);display:flex}
-.hm-riga .fr svg{width:20px;height:20px}
+:where(body:not(.pl-owner)) .hm-riga .fr{position:relative;color:var(--muted);display:flex}
+:where(body:not(.pl-owner)) .hm-riga .fr svg{width:20px;height:20px}
 .hm-svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .hm-svg.pieno{fill:currentColor;stroke:none}
 .r-cav{--tinta:#d6ead9;--colore:#1f7a4a}

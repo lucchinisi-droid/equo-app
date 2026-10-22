@@ -1,13 +1,13 @@
 /* proprietario */
 .wg-app-data{font-size:12px;font-weight:700;color:var(--accent);text-transform:capitalize}
 .wg-app-tit{font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-top:2px}
-.wg-cavalli{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-.wg-cavalli::-webkit-scrollbar{display:none}
-.wg-cavallo{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:58px;font:inherit;color:var(--text);cursor:pointer;padding:0}
-.wg-cavallo span{width:46px;height:46px;border-radius:50%;background:var(--surface2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:19px}
+:where(body.pl-owner) .wg-cavalli{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+:where(body.pl-owner) .wg-cavalli::-webkit-scrollbar{display:none}
+:where(body.pl-owner) .wg-cavallo{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:58px;font:inherit;color:var(--text);cursor:pointer;padding:0}
+:where(body.pl-owner) .wg-cavallo span{width:46px;height:46px;border-radius:50%;background:var(--surface2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:19px}
 .wg-cavallo.nuovo span{background:#14482c;color:#e8b04b}
-.wg-cavallo span svg{width:20px;height:20px}
-.wg-cavallo small{font-size:11.5px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(body.pl-owner) .wg-cavallo span svg{width:20px;height:20px}
+:where(body.pl-owner) .wg-cavallo small{font-size:11.5px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wg-app-mappa{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:14px;background:var(--surface2);margin-bottom:8px;font:inherit;font-weight:600;font-size:15px;color:var(--text);text-decoration:none;border:0;cursor:pointer;text-align:left}
 .wg-app-mappa i{width:34px;height:34px;border-radius:9px;display:block;flex-shrink:0;font-style:normal}
 .wg-app-mappa .wg-luogo-ico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--accent,#e8b04b);color:#fff;font-size:16px}

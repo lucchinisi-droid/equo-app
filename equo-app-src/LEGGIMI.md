@@ -48,4 +48,10 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
 - Si modifica in `src`, si esegue 1, poi 3; commit solo se il controllo e verde.
 - Non riassegnare showPage, plAggiorna (usare quandoApriPagina / quandoAggiornaBarra): il controllo fallisce.
 - Non modificare i `costruito.js` a mano: si cambia il modulo e si ricostruisce.
+- STILI PER RUOLO (dal 22/10/2026): una regola che vale solo per il proprietario si scrive con davanti
+  `:where(body.pl-owner)`; una che vale solo per i professionisti (maniscalco, veterinario, istruttore) con
+  `:where(body:not(.pl-owner))`. `:where()` non cambia la priorita della regola, la limita solo al suo mondo.
+  Cosi niente di scritto per il maniscalco tocca l'app del proprietario e viceversa. Le classi pl-owner/pl-man/
+  pl-vet/pl-istr/pl-pro sul body le mette plAggiorna (comune/barra/script/09-pill-js.js), anche nell'istante in
+  cui l'app appare. Le regole dei componenti usati da tutti (riquadri wg-, messaggi, avatar...) restano senza prefisso.
 - Regole "#page-pro-home > ..." solo in core/stili/10-regole-ruoli.css: unisci.cjs si ferma.

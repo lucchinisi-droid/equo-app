@@ -1,9 +1,9 @@
 /* settimana */
-.wg-barre{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:end;height:78px}
-.wg-barra{display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
-.wg-barra i{display:block;width:100%;border-radius:6px;background:var(--accent);min-height:4px}
+:where(body:not(.pl-owner)) .wg-barre{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:end;height:78px}
+:where(body:not(.pl-owner)) .wg-barra{display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+:where(body:not(.pl-owner)) .wg-barra i{display:block;width:100%;border-radius:6px;background:var(--accent);min-height:4px}
 .wg-barra.oggi i{background:#14482c}
 :root:not([data-theme="light"]) .wg-barra.oggi i{background:var(--green)}
-.wg-barra b{font-size:11px}
-.wg-barra small{font-size:10.5px;color:var(--muted);font-weight:600}
+:where(body:not(.pl-owner)) .wg-barra b{font-size:11px}
+:where(body:not(.pl-owner)) .wg-barra small{font-size:10.5px;color:var(--muted);font-weight:600}
 .wg-barra.oggi small{color:var(--text)}

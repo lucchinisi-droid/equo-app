@@ -1,22 +1,22 @@
 /* clienti a cartelle */
-.cli-cartelle{display:flex;gap:2px;border-bottom:1.5px solid var(--border);overflow-x:auto;margin-bottom:6px}
-.cli-cartelle button{font:inherit;font-size:14px;font-weight:800;border:none;background:none;color:var(--muted);padding:9px 10px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+:where(body:not(.pl-owner)) .cli-cartelle{display:flex;gap:2px;border-bottom:1.5px solid var(--border);overflow-x:auto;margin-bottom:6px}
+:where(body:not(.pl-owner)) .cli-cartelle button{font:inherit;font-size:14px;font-weight:800;border:none;background:none;color:var(--muted);padding:9px 10px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
 .cli-cartelle button .n{font-size:11.5px;font-weight:800;min-width:22px;height:20px;border-radius:10px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted)}
 .cli-cartelle button.on{color:var(--text);border-bottom-color:var(--accent)}
 .cli-cartelle button.on .n{background:var(--accent);color:var(--surface)}
 .cli-cartelle button .n.nonletti{background:var(--red);color:#fff}
 .chat-sez[hidden]{display:none!important}
-.cli-cartella-sotto{font-size:12px;margin:0 2px 10px}
-.cli-lista{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+:where(body:not(.pl-owner)) .cli-cartella-sotto{font-size:12px;margin:0 2px 10px}
+:where(body:not(.pl-owner)) .cli-lista{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .cli-riga{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer}
 .cli-riga:last-child{border-bottom:none}
-.cli-av{position:relative;width:40px;height:40px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:18px;color:var(--accent);flex:none}
-.cli-av .cav-sem{top:-3px;right:-3px}
-.cli-c{flex:1;min-width:0;display:flex;flex-direction:column}
-.cli-c b{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cli-c > span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cli-dx{font-size:11.5px;color:var(--muted);text-align:right;flex:none;line-height:1.3;display:flex;flex-direction:column;align-items:flex-end}
-.cli-dx b{color:var(--text)} .cli-dx b.rosso{color:var(--red)}
+:where(body:not(.pl-owner)) .cli-av{position:relative;width:40px;height:40px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:18px;color:var(--accent);flex:none}
+:where(body:not(.pl-owner)) .cli-av .cav-sem{top:-3px;right:-3px}
+:where(body:not(.pl-owner)) .cli-c{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body:not(.pl-owner)) .cli-c b{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(body:not(.pl-owner)) .cli-c > span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(body:not(.pl-owner)) .cli-dx{font-size:11.5px;color:var(--muted);text-align:right;flex:none;line-height:1.3;display:flex;flex-direction:column;align-items:flex-end}
+:where(body:not(.pl-owner)) .cli-dx b{color:var(--text)} .cli-dx b.rosso{color:var(--red)}
 .cli-riga.nuovo{color:var(--accent)}
 .cli-riga.nuovo .cli-av{border:2px dashed var(--accent);background:transparent;font-family:inherit;font-size:22px;font-weight:700}
 .cli-riga.nuovo b{color:var(--accent)}

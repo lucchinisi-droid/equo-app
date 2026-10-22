@@ -4,14 +4,14 @@
 .hm-foglio .man{width:44px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 12px}
 .hm-foglio h3{font-family:'Fraunces',serif;font-size:22px;margin:0 0 3px}
 .hm-foglio .s{font-size:13px;color:var(--muted);margin-bottom:10px}
-.hm-tappa{display:flex;gap:12px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:11px 12px;margin-bottom:8px;cursor:pointer;width:100%;font:inherit;color:var(--text);text-align:left}
+:where(body:not(.pl-owner)) .hm-tappa{display:flex;gap:12px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:11px 12px;margin-bottom:8px;cursor:pointer;width:100%;font:inherit;color:var(--text);text-align:left}
 .hm-tappa.su{border:2px solid #14482c}
 .hm-tappa .o{font-weight:800;font-size:16px;width:46px;color:var(--accent);flex:none;display:flex}
 .hm-tappa .o svg{width:20px;height:20px}
 .hm-tappa .c{flex:1;min-width:0}.hm-tappa .c b{display:block;font-size:15.5px}.hm-tappa .c span{font-size:12.5px;color:var(--muted)}
 .hm-tappa .vai{background:#14482c;color:#f3d58e;border-radius:12px;padding:9px 12px;font-weight:800;font-size:13.5px;display:flex;gap:6px;align-items:center;flex:none}
 .hm-tappa .vai svg{width:15px;height:15px}
-.hm-griglia{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.hm-griglia button{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border-radius:18px;border:1px solid var(--border);background:var(--bg);font:inherit;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;text-align:center;line-height:1.2}
-.hm-griglia button span{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2ab45;color:#14482c}
-.hm-griglia button span svg{width:20px;height:20px}
+:where(body:not(.pl-owner)) .hm-griglia{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+:where(body:not(.pl-owner)) .hm-griglia button{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border-radius:18px;border:1px solid var(--border);background:var(--bg);font:inherit;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;text-align:center;line-height:1.2}
+:where(body:not(.pl-owner)) .hm-griglia button span{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2ab45;color:#14482c}
+:where(body:not(.pl-owner)) .hm-griglia button span svg{width:20px;height:20px}

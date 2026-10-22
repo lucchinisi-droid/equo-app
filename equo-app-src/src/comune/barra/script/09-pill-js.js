@@ -33,6 +33,9 @@ function quandoAggiornaBarra(fn){ ascoltiBarra.push(fn); }
 quandoApriPagina(function(){ plAggiorna(); });
 estendiDopo("applicaHomeMan", function(){ plAggiorna(); });
 setInterval(function(){ plAggiorna(); }, 1200);
+// classe del ruolo (pl-owner, pl-man...) aggiornata nello stesso istante in cui l'app diventa visibile, prima che lo schermo
+// venga disegnato: gli stili confinati per ruolo (":where(body.pl-owner)") non devono mancare nemmeno per un fotogramma.
+(function(){ const app = document.getElementById("screen-app"); if(app && window.MutationObserver) new MutationObserver(function(){ plAggiorna(); }).observe(app, { attributes: true, attributeFilter: ["class"] }); })();
 document.addEventListener("DOMContentLoaded", plAggiorna);
 
 const PLI = {

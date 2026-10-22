@@ -1,10 +1,10 @@
 /* incassi: vista Semplice / Completa */
-.inc-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
-.inc-vista{display:flex;background:var(--surface2);border-radius:999px;padding:3px;flex-shrink:0}
-.inc-vista button{font:inherit;font-size:12.5px;font-weight:800;border:none;border-radius:999px;padding:6px 12px;background:transparent;color:var(--muted);cursor:pointer}
+:where(body:not(.pl-owner)) .inc-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+:where(body:not(.pl-owner)) .inc-vista{display:flex;background:var(--surface2);border-radius:999px;padding:3px;flex-shrink:0}
+:where(body:not(.pl-owner)) .inc-vista button{font:inherit;font-size:12.5px;font-weight:800;border:none;border-radius:999px;padding:6px 12px;background:transparent;color:var(--muted);cursor:pointer}
 .inc-vista button.on{background:var(--accent);color:var(--surface)}
 .inc-vista .stella{font-size:10px;margin-left:3px}
-.inc-cassa{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:15px 16px;margin-bottom:10px;cursor:pointer}
+:where(body:not(.pl-owner)) .inc-cassa{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:15px 16px;margin-bottom:10px;cursor:pointer}
 .inc-cassa.aperta{border:2px solid var(--accent);padding:14px 15px}
 .inc-cassa .l{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
 .inc-cassa .v{font-family:Fraunces,serif;font-size:38px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -12,8 +12,8 @@
 .inc-cassa .d{font-size:13px;color:var(--muted)}
 .inc-cassa .d.su{color:var(--green)} .inc-cassa .d.giu{color:var(--red)}
 .inc-det[hidden],#inc-semplice[hidden],#inc-completa[hidden]{display:none}
-.inc-det{margin-bottom:6px}
-.inc-stat-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+:where(body:not(.pl-owner)) .inc-det{margin-bottom:6px}
+:where(body:not(.pl-owner)) .inc-stat-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .inc-stat-kpis .k{background:var(--surface2);border-radius:12px;padding:9px 11px;min-width:0}
 .inc-stat-kpis .k.grande{grid-column:1/-1}
 .inc-stat-kpis .l{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -21,23 +21,23 @@
 .inc-stat-kpis .k.grande .v{font-size:28px}
 .inc-stat-kpis .d{font-size:11.5px;color:var(--muted)}
 .inc-stat-kpis .d.su{color:var(--green)} .inc-stat-kpis .d.giu{color:var(--red)}
-.inc-tit em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:700}
+:where(body:not(.pl-owner)) .inc-tit em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:700}
 .inc-avviso{display:flex;gap:10px;align-items:center;background:color-mix(in srgb,#e0892f 14%,var(--surface));border:1px solid color-mix(in srgb,#e0892f 45%,var(--border));border-radius:12px;padding:9px 11px;font-size:12.5px;margin-top:10px;line-height:1.4}
 .inc-avviso b{color:#c0661a}
 .inc-avviso .btn{margin-left:auto;flex-shrink:0}
-.inc-tab{width:100%;border-collapse:collapse;font-size:12.5px}
-.inc-tab th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;font-weight:800;padding:4px 0 6px}
-.inc-tab th:first-child,.inc-tab td:first-child{text-align:left}
-.inc-tab td{padding:7px 0;border-top:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .inc-tab{width:100%;border-collapse:collapse;font-size:12.5px}
+:where(body:not(.pl-owner)) .inc-tab th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;font-weight:800;padding:4px 0 6px}
+:where(body:not(.pl-owner)) .inc-tab th:first-child,:where(body:not(.pl-owner)) .inc-tab td:first-child{text-align:left}
+:where(body:not(.pl-owner)) .inc-tab td{padding:7px 0;border-top:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
 .inc-tab tr.cli{cursor:pointer}
-.inc-tab td:first-child{font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(body:not(.pl-owner)) .inc-tab td:first-child{font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .inc-tab td small{display:block;font-weight:500;color:var(--muted);font-size:11px}
-.inc-misure{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.inc-misura{display:grid;grid-template-columns:64px 1fr 36px;gap:8px;align-items:center;font-size:12.5px;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .inc-misure{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+:where(body:not(.pl-owner)) .inc-misura{display:grid;grid-template-columns:64px 1fr 36px;gap:8px;align-items:center;font-size:12.5px;font-variant-numeric:tabular-nums}
 .inc-misura .f{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden}
 .inc-misura .f i{display:block;height:100%;background:var(--accent);border-radius:5px}
-.inc-misura b{text-align:right}
-.inc-nota{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+:where(body:not(.pl-owner)) .inc-misura b{text-align:right}
+:where(body:not(.pl-owner)) .inc-nota{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
 .inc-bloccata{position:relative;min-height:470px}
 .inc-bloccata .sotto{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none}
 .inc-bloccata .lucchetto{position:absolute;left:6px;right:6px;top:30px;background:var(--surface);border:2px solid var(--accent);border-radius:20px;padding:18px;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.2)}

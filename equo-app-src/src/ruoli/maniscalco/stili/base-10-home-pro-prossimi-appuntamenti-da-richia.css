@@ -5,16 +5,16 @@
 .hp-conta{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
 .hp-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--surface2);white-space:nowrap}
 .hp-pill i{width:7px;height:7px;border-radius:50%;display:inline-block}
-.hp-gruppo{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
-.hp-gruppo:first-child{margin-top:4px}
-.hp-riga{display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer}
+:where(body:not(.pl-owner)) .hp-gruppo{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+:where(body:not(.pl-owner)) .hp-gruppo:first-child{margin-top:4px}
+:where(body:not(.pl-owner)) .hp-riga{display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer}
 .hp-riga + .hp-riga{border-top:1px solid var(--border)}
-.hp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+:where(body:not(.pl-owner)) .hp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .hp-dot.rosso{background:#c0473d}.hp-dot.ocra{background:#d9a13b}.hp-dot.verde{background:#3f7a45}
 .hp-ora{width:40px;font-weight:700;font-size:12.5px;flex-shrink:0}
-.hp-main{flex:1;min-width:0}
-.hp-main b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hp-main span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(body:not(.pl-owner)) .hp-main{flex:1;min-width:0}
+:where(body:not(.pl-owner)) .hp-main b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(body:not(.pl-owner)) .hp-main span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hp-main span.rosso{color:#c0473d;font-weight:600}.hp-main span.ocra{color:#9a6b12;font-weight:600}
 .hp-tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--surface2);color:var(--muted);margin-left:4px}
 .hp-vedi{width:100%;margin-top:8px}
