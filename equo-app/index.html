@@ -14253,7 +14253,7 @@ document.addEventListener("visibilitychange", () => {
   Registro.nascostoDa = null;
 });
 window.addEventListener("pagehide", () => { Registro.battito(); Registro.svuota(); });
-
+/* ---------- STATO DELLA DEMO (dati finti in memoria per la modalita demo) ---------- */
 let demoIdCounter = 1;
 const demoState = {
   horses: [
@@ -14304,8 +14304,12 @@ const demoState = {
     { id: "dm-2", cliente_mascalcia_id: "dc-1", mittente_tipo: "maniscalco", testo: "Ciao Marco, ti confermo per venerdì mattina.", letto: true, created_at: "2026-09-14T18:20:00" },
   ],
 };
-
-const DB = {
+/* ---------- DB: tutte le letture e scritture su Supabase dell'app ----------
+   Un solo oggetto DB, diviso per argomento nei file core/dati/db-*.js: ogni file aggiunge le sue funzioni
+   con Object.assign(DB, {...}). Si usa sempre come DB.nomeFunzione(...). */
+const DB = {};
+/* ---------- DB · Cavalli, eventi sanitari, spese e lezioni del proprietario ---------- */
+Object.assign(DB, {
   async listHorses(){
     if(DEMO_MODE) return demoState.horses;
     const { data, error } = await sb.from("horses").select("*").eq("owner_id", currentUser.id).order("created_at", { ascending: true });
@@ -14462,6 +14466,9 @@ const DB = {
     const { error } = await sb.from("lezioni_manuali").delete().eq("id", id);
     return { error };
   },
+});
+/* ---------- DB · Chat tra proprietari e tra colleghi professionisti ---------- */
+Object.assign(DB, {
   /* -- Chat tra proprietari -- */
   async findProprietarioByCodice(codice){
     if(DEMO_MODE) return demoState.altriProprietari.find(p => p.codice_proprietario === codice.toUpperCase()) || null;
@@ -14606,7 +14613,9 @@ const DB = {
     if(!error) currentUser.codiceProprietario = codice;
     return currentUser.codiceProprietario;
   },
-
+});
+/* ---------- DB · Chat con la scuderia collegata, allegati chat, collegamento a una scuderia ---------- */
+Object.assign(DB, {
   /* -- Chat con la/le scuderie collegate (riusa chat_messaggi già usata da Equo Scuderia) -- */
   async listScuderieCollegate(){
     if(DEMO_MODE) return [];
@@ -14676,7 +14685,9 @@ const DB = {
     }
     await sb.from("horses").update({ stable_id: stableId }).eq("id", horseId);
   },
-
+});
+/* ---------- DB · Mascalcia: clienti e interventi del maniscalco ---------- */
+Object.assign(DB, {
   /* -- Mascalcia (clienti + interventi del professionista) -- */
   async listClientiMascalcia(){
     if(DEMO_MODE) return demoState.clientiMascalcia.slice().sort((a,b) => a.nome.localeCompare(b.nome));
@@ -14860,6 +14871,9 @@ const DB = {
     }
     return righe.filter(r => !successivi.some(x => x.id !== r.id && chiave(x) === chiave(r) && x.data_intervento > r.data_intervento));
   },
+});
+/* ---------- DB · Cavalli dei clienti del maniscalco, spostamenti, ricerca centri ---------- */
+Object.assign(DB, {
   /* -- Cavalli dei clienti del maniscalco (opzione B+C) -- */
   // Ritorna i cavalli selezionabili per un cliente:
   //  - "equo": cavalli veri del proprietario collegato (tabella horses, solo se condiviso_ecosistema)
@@ -14995,6 +15009,9 @@ const DB = {
       .eq("maniscalco_id", currentUser.id).not("stato", "in", "(richiesto,rifiutato,proposto,annullato)").order("data_intervento", { ascending: false });
     return error ? [] : (data || []);
   },
+});
+/* ---------- DB · Home del professionista: da richiamare, prossimi appuntamenti e scadenze ---------- */
+Object.assign(DB, {
   // Home pro → "Da richiamare": l'ultimo richiamo aperto per ogni cavallo (vedi funzione SQL richiami_maniscalco)
   async listRichiami(giorni = 60){
     if(DEMO_MODE){
@@ -15062,6 +15079,9 @@ const DB = {
       .order("prossima_scadenza", { ascending: true }).limit(limit);
     return error ? [] : (data || []);
   },
+});
+/* ---------- DB · Lato cliente del maniscalco (proprietario su Equo App) ---------- */
+Object.assign(DB, {
   /* --- Lato CLIENTE del maniscalco (proprietario su Equo App) --- */
   async riscattaCodiceManiscalco(codice){
     if(DEMO_MODE){
@@ -15137,6 +15157,9 @@ const DB = {
     if(data && data.ok === false){ console.error("abbinaCavalloManiscalco:", data); return { error: { message: data.errore } }; }
     return { error: null };
   },
+});
+/* ---------- DB · Richieste di appuntamento, collegamento cliente da codice, certificazione ---------- */
+Object.assign(DB, {
   /* --- Richieste di appuntamento (Step 5d) --- */
   // Maniscalco: tutte le richieste ancora da confermare
   async listRichiestePendenti(){
@@ -15230,6 +15253,9 @@ const DB = {
     if(error) console.error("richiediCertificazione:", error);
     return { error };
   },
+});
+/* ---------- DB · Servizi vicino, segnalazioni, chat e documenti della mascalcia ---------- */
+Object.assign(DB, {
   async listServices(){
     if(DEMO_MODE) return demoState.services;
     const { data, error } = await sb.from("services").select("*");
@@ -15292,7 +15318,9 @@ const DB = {
     const { data } = sb.storage.from("mascalcia-note-vocali").getPublicUrl(path);
     return { url: data?.publicUrl || null, error: null };
   },
-
+});
+/* ---------- DB · Profilo: avatar, dati di pagamento, codice personale ---------- */
+Object.assign(DB, {
   /* -- Profilo: avatar, dati di pagamento, codice personale -- */
   async uploadAvatar(file){
     if(DEMO_MODE){
@@ -15337,8 +15365,7 @@ const DB = {
     if(!error) currentUser.codiceProfessionista = codice;
     return currentUser.codiceProfessionista;
   },
-};
-
+});
 /* ---------- ONBOARDING (bivio ruolo) ---------- */
 const ROLE_LABELS = {
   proprietario: "Proprietario",

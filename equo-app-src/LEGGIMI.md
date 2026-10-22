@@ -8,6 +8,9 @@ e deciso da `src/index.modello.html` (segnaposto `<!--@ percorso -->`), non dall
 - `src/core/` — fondamenta comuni a tutti: accesso, avvio, navigazione (`script/020-nav.js`: quandoApriPagina),
   pagamenti e piani, legale, notifiche, ricerca; stile comune; `stili/10-regole-ruoli.css` = UNICO posto che decide
   cosa si vede nella Home dei professionisti.
+- `src/core/dati/` — DB: tutte le letture e scritture su Supabase, un file per argomento (`db-01-cavalli-salute-spese-lezioni.js`
+  ... `db-10-profilo.js`). Un solo oggetto `DB` creato in `db-00-inizio.js`; ogni file aggiunge le sue funzioni con
+  `Object.assign(DB, {...})`. Una funzione nuova va nel file del suo argomento. Lo stato della demo e in `core/script/003b-stato-demo.js`.
 - `src/comune/` — parti condivise da piu ruoli: `barra/` (barra in basso e tasto +: quandoAggiornaBarra),
   `chat/` (chat, allegati, vocali, notifiche dei messaggi), `agenti/` (chat con Pegasus/Hammer/Ares, foto).
 - `src/ruoli/proprietario/` — cavalli, codice cavallo, libretto, diario, calendario, spese, chat col maniscalco; pagine del proprietario.
