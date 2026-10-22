@@ -1,6 +1,8 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
+import { avviaChatLive, fermaChatLive, renderChatThread } from "./065-chat-fluida-stile-whatsapp.js";
+import { cancelVoiceRecording, loadInboxMascalcia, mediaRecorder } from "./067-note-vocali.js";
 /* ---------- CHAT MASCALCIA (stile WhatsApp) ---------- */
-const EMOJI_LIST = ["😀","😂","😊","😉","😍","🙂","😅","😎","🤔","👍","🙏","👏","💪","🤝","❤️","🔥",
-  "✅","⏰","📅","📍","🐴","🐎","🧑‍🌾","🔨","👢","🩺","💬","📞","🚗","☀️","🌧️","⚠️"];
+/* -> stato-condiviso.js */
 
 function populateEmojiPicker(){
   const box = document.getElementById("mchat-emoji-picker");
@@ -62,3 +64,5 @@ function formatChatDay(iso){
   return d.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
 }
 
+
+export { closeChatThread, formatChatDay, formatChatTime, insertEmoji, openChatThread, toggleEmojiPicker };

@@ -1,6 +1,7 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
 /* ---------- MESSAGGI A CARTELLE (stile Telegram): Clienti · Scuderie · Colleghi ---------- */
 let chatCartella = "clienti";
-const chatContatori = { proprietari: { n: 0, nonLetti: 0 }, clienti: { n: 0, nonLetti: 0 }, scuderie: { n: 0, nonLetti: 0 }, colleghi: { n: 0, nonLetti: 0 } };
+/* -> stato-condiviso.js */
 try{ chatCartella = localStorage.getItem("equo-chat-cartella") || "clienti"; }catch(_){}
 function sceltaCartellaChat(k){
   chatCartella = k;
@@ -51,3 +52,5 @@ function renderInboxStrutture(strutture, unreadByCliente){
   }).join("");
 }
 
+
+export { renderChatCartelle, renderChatCartelleBase, renderInboxStrutture, sceltaCartellaChat };

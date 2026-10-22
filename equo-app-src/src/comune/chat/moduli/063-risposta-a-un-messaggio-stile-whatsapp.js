@@ -1,3 +1,4 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
 /* ---------- RISPOSTA A UN MESSAGGIO (stile WhatsApp) ----------
    Scorri una bolla verso destra (o doppio clic) → barra «Rispondi a …» sopra il campo di testo.
    Il messaggio inviato porta con sé una copia breve di quello citato (colonna risposta: id, nome, testo, tipo). */
@@ -78,3 +79,5 @@ function consumaRisposta(){
   });
 })();
 
+
+export { annullaRisposta, citazioneHtml, consumaRisposta, rispostaInCorso, vaiAlMessaggio };

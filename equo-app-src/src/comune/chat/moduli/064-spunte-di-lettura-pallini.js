@@ -1,3 +1,5 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
+import { formatChatTime } from "./062-chat-mascalcia-stile-whatsapp.js";
 /* ---------- SPUNTE DI LETTURA (pallini) ---------- */
 const FERRO_D = "M0.8 11.6V6A5.2 5.2 0 0 1 11.2 6V11.6H8.5V6.2A2.5 2.5 0 0 0 3.5 6.2V11.6Z M1.8 7.4h1v1.1h-1Z M1.8 9.6h1v1.1h-1Z M9.2 7.4h1v1.1h-1Z M9.2 9.6h1v1.1h-1Z M2.4 3.9l.8-.8.8.8-.8.8Z M7.9 3.9l.8-.8.8.8-.8.8Z";
 function statoSpunta(m){ return m.letto ? "letto" : (m.consegnato_at ? "consegnato" : "inviato"); }
@@ -57,3 +59,5 @@ function avviaSpunte(){
 }
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible"){ segnaConsegnati(); aggiornaSpunte(); } });
 
+
+export { attrBolla, avviaSpunte, oraBolla };

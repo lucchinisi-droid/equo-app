@@ -11,6 +11,7 @@ const MODULI = [
   { nome: "allenatore", ingresso: "ruoli/allenatore/moduli/index.js", uscita: "ruoli/allenatore/costruito.js", globale: "EquoAllenatore" },
   { nome: "maniscalco", ingresso: "ruoli/maniscalco/moduli/index.js", uscita: "ruoli/maniscalco/costruito.js", globale: "EquoManiscalco" },
   { nome: "proprietario", ingresso: "ruoli/proprietario/moduli/index.js", uscita: "ruoli/proprietario/costruito.js", globale: "EquoProprietario" },
+  { nome: "chat", ingresso: "comune/chat/moduli/index.js", uscita: "comune/chat/costruito.js", globale: "EquoChat" },
 ];
 let diversi = 0;
 for(const m of MODULI){

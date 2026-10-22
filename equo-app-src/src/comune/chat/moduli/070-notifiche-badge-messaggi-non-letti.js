@@ -1,3 +1,4 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
 /* ---------- NOTIFICHE / BADGE MESSAGGI NON LETTI ---------- */
 // "Letto" vive nel database (colonna chat_messaggi.letto), non nel browser:
 // così il contatore è identico su qualsiasi dispositivo del proprietario.
@@ -10,7 +11,7 @@ function contaNonLettiScuderia(membroId, messaggi){
   return (messaggi || []).filter(m => m.mittente_user_id !== currentUser.id && !m.letto).length;
 }
 
-let chatBadgePollTimer = null;
+/* -> stato-condiviso.js */
 async function computeChatUnreadTotal(){
   let total = 0;
   const conversazioni = await DB.listConversazioniProprietario();
@@ -31,3 +32,5 @@ async function refreshChatBadge(){
   if(badge) badge.style.display = total > 0 || daSaldareStato.daRicordare ? "block" : "none";
 }
 
+
+export { computeChatUnreadTotal, contaNonLettiScuderia, refreshChatBadge, segnaLettiChatApp };

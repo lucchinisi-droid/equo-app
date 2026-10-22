@@ -1,3 +1,4 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
 /* ---------- CONDIVISIONE ESTERNA (watermark + share sheet nativo) ----------
    Si sblocca solo su contenuti già condivisi dentro Equo (foto nella chat proprietario↔proprietario).
    Solo foto in questa fase: il watermark su video richiederebbe elaborazione pesante, rimandato. */
@@ -62,3 +63,5 @@ async function shareContentExternally(mediaUrl){
   }
 }
 
+
+export { shareContentExternally };

@@ -1,3 +1,7 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
+import { aggiornaChatLive, bollaInAttesa, bollaNonInviata, renderChatThread } from "./065-chat-fluida-stile-whatsapp.js";
+import { loadInboxMascalcia } from "./067-note-vocali.js";
+import { aggiornaListeChatProprietari, bloccaPremiumColleghi, chatColleghiAperta, handleOwnerChatMediaChange, renderOwnerChatThread } from "./077-chat-tra-colleghi-vista-professionista.js";
 /* ---------- ALLEGATI IN CHAT (foto da fotocamera/galleria, PDF) ---------- */
 let allegatoChatTarget = null; // "mchat" (maniscalco→cliente) | "fchat" (cliente→maniscalco) | "schat" (proprietario→scuderia) | "ochat" (tra proprietari)
 function apriMenuAllegati(chat){
@@ -102,3 +106,5 @@ async function sendMascalciaMessage(){
   loadInboxMascalcia();
 }
 
+
+export { allegatoScelto, apriMenuAllegati, chiudiMenuAllegati, scegliAllegato, sendMascalciaMessage };

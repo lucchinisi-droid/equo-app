@@ -1,3 +1,11 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
+import { formatChatDay } from "./062-chat-mascalcia-stile-whatsapp.js";
+import { citazioneHtml } from "./063-risposta-a-un-messaggio-stile-whatsapp.js";
+import { attrBolla, oraBolla } from "./064-spunte-di-lettura-pallini.js";
+import { aggiornaChatLive, applicaThread, avviaChatLive, bollaInAttesa, bollaNonInviata, fermaChatLive, inizioThread } from "./065-chat-fluida-stile-whatsapp.js";
+import { formatRecTimer } from "./067-note-vocali.js";
+import { renderChatCartelle } from "./068-messaggi-a-cartelle-stile-telegram-clien.js";
+import { refreshChatBadge } from "./070-notifiche-badge-messaggi-non-letti.js";
 /* ---------- CHAT TRA COLLEGHI (vista professionista) ---------- */
 let chatColleghiAperta = false; // true quando l'overlay chat (ochat) è usato per un collega
 async function loadColleghiList(){
@@ -262,3 +270,5 @@ async function stopAndSendOwnerVoiceRecording(){
   ownerMediaRecorder.stop();
 }
 
+
+export { aggiornaListeChatProprietari, apriChatCollega, apriNuovoCollega, avviaChatCollega, bloccaPremiumColleghi, cancelOwnerVoiceRecording, chatColleghiAperta, closeOwnerChatThread, handleOwnerChatMediaChange, invitaCollega, loadColleghiList, openOwnerChatThread, renderOwnerChatThread, sendOwnerChatMessage, startNewChat, startOwnerVoiceRecording, stopAndSendOwnerVoiceRecording };

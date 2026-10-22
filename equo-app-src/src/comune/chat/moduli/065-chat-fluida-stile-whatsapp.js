@@ -1,3 +1,8 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
+import { formatChatDay, formatChatTime } from "./062-chat-mascalcia-stile-whatsapp.js";
+import { citazioneHtml, rispostaInCorso } from "./063-risposta-a-un-messaggio-stile-whatsapp.js";
+import { attrBolla, oraBolla } from "./064-spunte-di-lettura-pallini.js";
+import { refreshChatBadge } from "./070-notifiche-badge-messaggi-non-letti.js";
 /* ---------- CHAT FLUIDA (stile WhatsApp) ----------
    - apertura istantanea: si mostra subito l'ultima versione del thread in memoria, poi si aggiorna;
    - aggiornamento senza sfarfallio: si aggiungono solo i messaggi nuovi (niente ricarica completa,
@@ -184,3 +189,5 @@ async function renderChatThread(clienteId){
   applicaThread(box, chiaveThread, html);
 }
 
+
+export { aggiornaChatLive, applicaThread, avviaChatLive, bollaInAttesa, bollaNonInviata, fermaChatLive, inizioThread, renderChatThread };

@@ -1,3 +1,6 @@
+// Equo App · chat · modulo (moduli ES, costruiti con Vite in ruoli/chat/costruito.js)
+import { renderChatThread } from "./065-chat-fluida-stile-whatsapp.js";
+import { renderChatCartelle, renderInboxStrutture } from "./068-messaggi-a-cartelle-stile-telegram-clien.js";
 /* ---------- NOTE VOCALI ---------- */
 let mediaRecorder = null;
 let recordedChunks = [];
@@ -161,3 +164,5 @@ async function loadInboxMascalcia(){
   }).join("");
 }
 
+
+export { cancelVoiceRecording, formatRecTimer, loadInboxMascalcia, mediaRecorder, shareInviteCodeFromChat, startVoiceRecording, stopAndSendVoiceRecording };
