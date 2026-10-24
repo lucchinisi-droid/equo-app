@@ -71,4 +71,24 @@ async function confermaDaHomeScud(i){
   caricaDaConfermareScud(true);
   loadCavalli();
 }
-quandoApriSezione(function(k){ if(k === "home") caricaDaConfermareScud(); });
+/* «Non lo seguo più» (24/10/2026, caso Rio): un maniscalco chiede di non seguire più un cavallo del centro; l'admin conferma o rifiuta */
+let lasciatiScud = [];
+async function caricaLasciatiScud(){
+  const box = document.getElementById("scud-lasciati");
+  if(!box || DEMO_MODE) return;
+  try{ const { data, error } = await sb.rpc("equo_richieste_lasciati"); lasciatiScud = (!error && Array.isArray(data)) ? data : []; }catch(e){ lasciatiScud = []; }
+  if(!lasciatiScud.length){ box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="card" style="margin-bottom:20px"><h3 style="margin:0">Richieste dei maniscalchi (${lasciatiScud.length})</h3>
+    <p style="margin:4px 0 8px;color:var(--muted);font-size:12.5px">Il maniscalco chiede di non seguire più questi cavalli. Se confermi, escono dalla sua lista e i suoi appuntamenti ancora da fare si annullano; lo storico resta.</p>
+    ${lasciatiScud.map((x, i) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border)">
+      <div><b>${escapeHtml(x.cavallo || "")}</b> <span style="color:var(--muted);font-size:12px">· ${escapeHtml(x.maniscalco || "maniscalco")}${x.motivo ? " · «" + escapeHtml(x.motivo) + "»" : ""}</span></div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-primary btn-sm" onclick="rispondiLasciatoScud(${i}, true)">Conferma</button><button class="btn btn-sm" onclick="rispondiLasciatoScud(${i}, false)">Rifiuta</button></div></div>`).join("")}</div>`;
+}
+async function rispondiLasciatoScud(i, conferma){
+  const x = lasciatiScud[i]; if(!x) return;
+  const { data, error } = await sb.rpc("equo_rispondi_lasciato", { p_id: x.id, p_conferma: !!conferma });
+  if(error || !data?.ok){ showToast("Operazione non riuscita. Riprova."); return; }
+  showToast(conferma ? "Confermato: il maniscalco non segue più il cavallo" : "Rifiutato: il maniscalco continua a seguirlo");
+  caricaLasciatiScud();
+}
+quandoApriSezione(function(k){ if(k === "home"){ caricaDaConfermareScud(); caricaLasciatiScud(); } });

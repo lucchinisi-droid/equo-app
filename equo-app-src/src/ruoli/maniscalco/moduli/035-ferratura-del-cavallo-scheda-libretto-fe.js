@@ -264,7 +264,9 @@ async function salvaEditCliente(){
   if(!nome){ errBox.textContent = "Il nome del cliente è obbligatorio."; errBox.style.display = "block"; return; }
   const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
   const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
-  const { error } = await DB.updateClienteMascalcia(currentClienteId, { nome, telefono, note, tipo_cliente });
+  const campiCli = { nome, telefono, note };
+  if(!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;   // collegato a Equo: il tipo non si cambia
+  const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);
   if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }
   // indirizzo salvato a parte: se il database non avesse ancora la colonna, il resto è già salvo
   const indirizzo = document.getElementById("edit-cliente-indirizzo").value.trim();
@@ -302,4 +304,4 @@ function closeClienteDetail(){
 }
 
 
-export { DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };
+export { syncNomeCavalloCliente, DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };

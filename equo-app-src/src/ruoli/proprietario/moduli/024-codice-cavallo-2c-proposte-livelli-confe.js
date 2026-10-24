@@ -17,6 +17,38 @@ async function caricaProposteCavalli(){
     proposteCav = (!error && Array.isArray(data)) ? data : [];
   } catch(e){ proposteCav = []; }
   renderProposteCavalli();
+  caricaRichiesteLasciati();
+}
+/* «Non lo seguo più» (24/10/2026, caso Rio): il maniscalco chiede di non seguire più un tuo cavallo; tu confermi o rifiuti */
+let richiesteLasciati = [];
+async function caricaRichiesteLasciati(){
+  const box = document.getElementById("home-lasciati");
+  if(!box) return;
+  if(DEMO_MODE){ box.innerHTML = ""; return; }
+  try{
+    const { data, error } = await sb.rpc("equo_richieste_lasciati");
+    richiesteLasciati = (!error && Array.isArray(data)) ? data : [];
+  } catch(e){ richiesteLasciati = []; }
+  if(!richiesteLasciati.length){ box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="card" style="margin-bottom:14px">
+    <div class="section-title" style="margin-bottom:4px">Richieste del maniscalco</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Il maniscalco chiede di non seguire più questi cavalli. Se confermi, il cavallo esce dalla sua lista e i suoi appuntamenti ancora da fare si annullano; lo storico resta.</div>
+    ${richiesteLasciati.map(r => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
+      <div style="min-width:0"><div style="font-weight:600">${escapeHtml(r.cavallo || "")}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml(r.maniscalco || "Il maniscalco")}${r.motivo ? " · «" + escapeHtml(r.motivo) + "»" : ""}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-primary btn-sm" onclick="rispondiLasciato('${r.id}', true)">Conferma</button>
+        <button class="btn btn-ghost btn-sm" onclick="rispondiLasciato('${r.id}', false)">Rifiuta</button>
+      </div>
+    </div>`).join("")}
+  </div>`;
+}
+async function rispondiLasciato(id, conferma){
+  const { data, error } = await sb.rpc("equo_rispondi_lasciato", { p_id: id, p_conferma: !!conferma });
+  if(error || !data?.ok){ showToast("Operazione non riuscita. Riprova."); return; }
+  showToast(conferma ? "Confermato: il maniscalco non segue più il cavallo" : "Rifiutato: il maniscalco continua a seguirlo");
+  caricaRichiesteLasciati();
 }
 function renderProposteCavalli(){
   const box = document.getElementById("home-proposte");
@@ -199,4 +231,4 @@ async function proponiCavalliCliente(clienteId){
 
 
 
-export { accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };
+export { caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };

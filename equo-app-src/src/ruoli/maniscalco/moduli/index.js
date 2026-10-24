@@ -43,6 +43,7 @@ import "./099-meteo-accanto-agli-appuntamenti-indirizz.js";
 import { wgCercaLuogoVai, wgLuogoAMano, wgMostraMappe, wgNaviga, wgSceltaLuogo } from "./100-naviga.js";
 import { usaPosizioneQui } from "./106-posizione-attuale.js";
 import { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
+import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 import { allineaRender, apriAllineaScadenze, cicloCambia, cicloTogli, confermaAllineaScadenze } from "./102-scadenze-della-struttura.js";
@@ -315,5 +316,9 @@ Object.assign(window, {
   wgRidisegna,
   wgScegli,
   wgSceltaLuogo,
-  wgScriviRichiamo
+  wgScriviRichiamo,
+  annullaLasciaCavallo,
+  apriLasciaCavallo,
+  confermaLasciaCavallo,
+  ripristinaCavallo
 });

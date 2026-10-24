@@ -7087,12 +7087,13 @@
 		}
 		const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
 		const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
-		const { error } = await DB.updateClienteMascalcia(currentClienteId, {
+		const campiCli = {
 			nome,
 			telefono,
-			note,
-			tipo_cliente
-		});
+			note
+		};
+		if (!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;
+		const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);
 		if (error) {
 			errBox.textContent = "Errore: " + error.message;
 			errBox.style.display = "block";
@@ -7418,6 +7419,12 @@
 		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
 		if (!c) return;
 		document.getElementById("edit-cliente-tipo").value = isStruttura(c) ? "struttura" : "proprietario";
+		{
+			const bloccato = !!(c.cliente_user_id || c.centro_id);
+			document.getElementById("edit-cliente-tipo").disabled = bloccato;
+			const n = document.getElementById("edit-cliente-tipo-nota");
+			if (n) n.style.display = bloccato ? "block" : "none";
+		}
 		razzaImposta("edit-cliente-nuovo-razza", "");
 		document.getElementById("edit-cliente-codice-equo").value = "";
 		document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
@@ -7444,11 +7451,17 @@
 	async function renderCavalliEditCliente() {
 		const box = document.getElementById("edit-cliente-cavalli");
 		box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Caricamento…</div>";
-		const cav = await DB.listCavalliCliente(currentClienteId);
+		const [cav, attesa, arch] = await Promise.all([
+			DB.listCavalliCliente(currentClienteId),
+			DB.listLasciatiInAttesa(),
+			DB.listCavalliArchiviati(currentClienteId)
+		]);
 		cavalliEditCache = cav;
-		box.innerHTML = cav.length ? cav.map((x) => `
+		const collegato = (x) => !!(x.tipo === "equo" || x.horse_id || x.scuderia_cavallo_id);
+		const tastoLascia = (x) => x.id && attesa.has(x.id) ? `<button class="btn btn-ghost btn-sm" onclick="annullaLasciaCavallo('${x.id}')">Annulla richiesta</button>` : `<button class="btn btn-outline btn-sm" onclick="apriLasciaCavallo('${x.key}')" aria-label="${collegato(x) ? "Non lo seguo più" : "Archivia cavallo"}" title="${collegato(x) ? "Non lo seguo più" : "Archivia"}"><span class="fa-icon"><i class="fa-solid ${collegato(x) ? "fa-user-slash" : "fa-box-archive"}"></i></span></button>`;
+		box.innerHTML = (cav.length ? cav.map((x) => `
     <div class="event-item" style="padding:8px 0">
-      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? " <span class=\"badge badge-accent\" style=\"font-size:10.5px\">su Equo</span>" : ""}
+      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? " <span class=\"badge badge-accent\" style=\"font-size:10.5px\">su Equo</span>" : ""}${x.id && attesa.has(x.id) ? " <span class=\"badge\" style=\"font-size:10.5px\">In attesa di conferma</span>" : ""}
         <div class="muted" style="font-size:11.5px">${[
 			x.codice_equo ? "<b class=\"cod-equo\">" + escapeHtml(x.codice_equo) + "</b>" : "",
 			x.razza ? escapeHtml(x.razza) : "",
@@ -7456,12 +7469,15 @@
 			x.presso ? "📍 presso " + escapeHtml(x.presso) : "",
 			x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
 		].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button><button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button>` : ""}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">
       <button class="btn btn-primary btn-sm btn-conferma" onclick="salvaRazzaCavallo('${x.id}')">OK</button>
-    </div>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun cavallo.</div>";
+    </div>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun cavallo.</div>") + (arch.length ? `<details class="cav-archiviati" style="margin-top:8px"><summary class="muted" style="font-size:13px;cursor:pointer">Cavalli archiviati (${arch.length})</summary>
+      ${arch.map((a) => `<div class="event-item" style="padding:6px 0"><div style="font-size:14px">${escapeHtml(a.nome || "")}
+        <div class="muted" style="font-size:11.5px">${a.horse_id || a.scuderia_cavallo_id ? "Non lo segui più" : "Archiviato"}${a.archiviato_il ? " dal " + formatDate(String(a.archiviato_il).slice(0, 10)) : ""}</div></div>
+        <button class="btn btn-outline btn-sm" onclick="ripristinaCavallo('${a.id}')">Ripristina</button></div>`).join("")}</details>` : "");
 		return cav;
 	}
 	function apriRazzaCavallo(id) {
@@ -9100,6 +9116,68 @@
 			btn.disabled = false;
 		}
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/107-lascia-cavallo.js
+	var lasciaSel = null;
+	function apriLasciaCavallo(key) {
+		const x = (cavalliEditCache || []).find((c) => c.key === key);
+		if (!x) return;
+		lasciaSel = x;
+		const coll = !!(x.tipo === "equo" || x.horse_id || x.scuderia_cavallo_id);
+		document.getElementById("lc-tit").textContent = coll ? "Non seguo più " + x.nome : "Archivia " + x.nome;
+		document.getElementById("lc-testo").textContent = coll ? "Il cavallo è collegato al proprietario o alla scuderia: riceveranno la tua richiesta e la confermeranno. Finché non rispondono, il cavallo resta nella tua lista. Il suo storico non si cancella." : "Il cavallo esce dalla tua lista, ma il suo storico resta. Lo ritrovi in «Cavalli archiviati» e puoi ripristinarlo quando vuoi.";
+		document.getElementById("lc-motivo-box").style.display = coll ? "block" : "none";
+		document.getElementById("lc-motivo").value = "";
+		const ok = document.getElementById("lc-ok");
+		ok.textContent = coll ? "Invia la richiesta" : "Archivia";
+		ok.disabled = false;
+		openModal("modal-lascia-cavallo");
+	}
+	async function aggiornaDopoLascia() {
+		await renderCavalliEditCliente();
+		await syncNomeCavalloCliente().catch(() => {});
+		await caricaCavalliMiei().catch(() => {});
+	}
+	async function confermaLasciaCavallo() {
+		const x = lasciaSel;
+		if (!x) return;
+		const ok = document.getElementById("lc-ok");
+		ok.disabled = true;
+		let id = x.id;
+		if (!id) id = (await DB.risolviCavalloPerIntervento(currentClienteId, x)).cavallo_cliente_id;
+		if (!id) {
+			ok.disabled = false;
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		const res = await DB.lasciaCavallo(id, document.getElementById("lc-motivo").value.trim());
+		ok.disabled = false;
+		if (!res || !res.ok) {
+			showToast(res?.motivo === "manca_db" ? "Funzione non ancora attiva: serve l'aggiornamento del database." : "Operazione non riuscita. Riprova.");
+			return;
+		}
+		closeModal("modal-lascia-cavallo");
+		lasciaSel = null;
+		showToast(res.archiviato ? "Cavallo archiviato" : "Richiesta inviata: aspetta la conferma del proprietario o della scuderia");
+		await aggiornaDopoLascia();
+	}
+	async function annullaLasciaCavallo(id) {
+		const res = await DB.riprendiCavallo(id);
+		if (!res || !res.ok) {
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		showToast("Richiesta annullata: continui a seguirlo");
+		await aggiornaDopoLascia();
+	}
+	async function ripristinaCavallo(id) {
+		const res = await DB.riprendiCavallo(id);
+		if (!res || !res.ok) {
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		showToast("Cavallo ripristinato");
+		await aggiornaDopoLascia();
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/105-resoconto-pdf.js
 	var resCtx = null;
 	async function apriResoconto(clienteId) {
@@ -9860,7 +9938,11 @@
 		wgRidisegna,
 		wgScegli,
 		wgSceltaLuogo,
-		wgScriviRichiamo
+		wgScriviRichiamo,
+		annullaLasciaCavallo,
+		apriLasciaCavallo,
+		confermaLasciaCavallo,
+		ripristinaCavallo
 	});
 })();
 

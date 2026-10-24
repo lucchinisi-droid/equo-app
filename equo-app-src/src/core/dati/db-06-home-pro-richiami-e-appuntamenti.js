@@ -10,7 +10,8 @@ Object.assign(DB, {
       const ultimi = {};
       tutti.filter(i => i.stato === "fatto").forEach(i => { const k = chiave(i); if(!ultimi[k] || i.data_intervento > ultimi[k].data_intervento) ultimi[k] = i; });
       const st = demoState.richiamiStato || (demoState.richiamiStato = {});
-      return Object.entries(ultimi).filter(([k, i]) => i.prossima_scadenza && !inAgenda.has(k) && !st[i.id]?.chiuso_il)
+      const viaDemo = new Set((demoState.cavalliClientiMascalcia || []).filter(c => c.archiviato_il).map(c => c.id));
+      return Object.entries(ultimi).filter(([k, i]) => i.prossima_scadenza && !inAgenda.has(k) && !st[i.id]?.chiuso_il && !viaDemo.has(i.cavallo_cliente_id))
         .map(([k, i]) => {
           const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
           const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
@@ -21,9 +22,14 @@ Object.assign(DB, {
             data_intervento: i.data_intervento, prossima_scadenza: i.prossima_scadenza, scadenza: scad, rimandato: !!st[i.id]?.rimandato_al, giorni: giorniTra(oggi, scad) };
         }).filter(r => r.giorni <= giorni).sort((a, b) => a.scadenza.localeCompare(b.scadenza));
     }
-    const { data, error } = await sb.rpc("richiami_maniscalco", { p_giorni: giorni });
+    const [{ data, error }, arch] = await Promise.all([
+      sb.rpc("richiami_maniscalco", { p_giorni: giorni }),
+      sb.from("cavalli_clienti_mascalcia").select("id").eq("maniscalco_id", currentUser.id).not("archiviato_il", "is", null)
+    ]);
     if(error){ console.error("listRichiami:", error); return []; }
-    return data || [];
+    // cavalli archiviati o che il maniscalco non segue più: niente richiami
+    const via = new Set(arch.error ? [] : (arch.data || []).map(x => x.id));
+    return (data || []).filter(r => !r.cavallo_cliente_id || !via.has(r.cavallo_cliente_id));
   },
   async setRichiamoStato(interventoId, campi){
     if(DEMO_MODE){

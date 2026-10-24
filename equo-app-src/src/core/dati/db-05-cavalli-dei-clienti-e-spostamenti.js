@@ -7,7 +7,7 @@ Object.assign(DB, {
   async listCavalliCliente(clienteId){
     if(!clienteId) return [];
     if(DEMO_MODE){
-      return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
+      return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId && !c.archiviato_il)
         .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null,
           ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ferro_note: c.ferro_note || null, ferro_tipo_post: c.ferro_tipo_post || null, ferro_dettagli: c.ferro_dettagli || null, ferro_dettagli_post: c.ferro_dettagli_post || null, intervallo_giorni: c.intervallo_giorni ?? null, prezzo_ferratura: c.prezzo_ferratura ?? null, anno_nascita: c.anno_nascita ?? null, altezza_cm: c.altezza_cm ?? null, mantello: c.mantello ?? null, disciplina: c.disciplina ?? null, sesso: c.sesso ?? null, segni_particolari: c.segni_particolari ?? null, peso_kg: c.peso_kg ?? null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, ub: ubicDi(c) }));
     }
@@ -28,15 +28,19 @@ Object.assign(DB, {
         manuali = await window.__cavalliInCreazione[clienteId];
       }
     }
+    // schede archiviate («Archivia» / «Non lo seguo più» confermato): fuori dalla lista
+    const archiviatiH = new Set(manuali.filter(m => m.archiviato_il && m.horse_id).map(m => m.horse_id));
+    manuali = manuali.filter(m => !m.archiviato_il);
+    const condV = condivisi.filter(h => !archiviatiH.has(h.id));
     const idCondivisi = new Set(condivisi.map(h => h.id));
-    const senzaCopia = condivisi.filter(h => !manuali.some(m => m.horse_id === h.id)).map(h => h.id);
+    const senzaCopia = condV.filter(h => !manuali.some(m => m.horse_id === h.id)).map(h => h.id);
     let altrove = [];
     if(senzaCopia.length){
       let r = await sb.from("cavalli_clienti_mascalcia").select("*, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
       if(r.error) r = await sb.from("cavalli_clienti_mascalcia").select("id, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, ferro_note, scuderia_cavallo_id, microchip, cliente_mascalcia_id, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
       altrove = r.data || [];
     }
-    const out = condivisi.map(h => {
+    const out = condV.map(h => {
       const mirror = manuali.find(m => m.horse_id === h.id) || altrove.find(m => m.horse_id === h.id);
       const presso = mirror && mirror.cliente_mascalcia_id && mirror.cliente_mascalcia_id !== clienteId ? (mirror.clienti_mascalcia?.nome || "un altro cliente") : null;
       return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || h.codice_equo || null, razza: h.breed || null, presso, ferro_sistema: mirror?.ferro_sistema || null, ferro_numero: mirror?.ferro_numero || null,
@@ -47,6 +51,45 @@ Object.assign(DB, {
         ferratura_tipo: m.ferratura_tipo || "completa", ferro_tipo: m.ferro_tipo || "standard", ferro_note: m.ferro_note || null, ferro_tipo_post: m.ferro_tipo_post || null, ferro_dettagli: m.ferro_dettagli || null, ferro_dettagli_post: m.ferro_dettagli_post || null, intervallo_giorni: m.intervallo_giorni ?? null, prezzo_ferratura: m.prezzo_ferratura ?? null, anno_nascita: m.anno_nascita ?? null, altezza_cm: m.altezza_cm ?? null, mantello: m.mantello ?? null, disciplina: m.disciplina ?? null, sesso: m.sesso ?? null, segni_particolari: m.segni_particolari ?? null, peso_kg: m.peso_kg ?? null, scuderia_cavallo_id: m.scuderia_cavallo_id || null, ub: ubicDi(m) });
     });
     return out;
+  },
+  /* -- «Non lo seguo più» / «Archivia» (24/10/2026): i cavalli non si eliminano più --
+     collegati a proprietario o scuderia: richiesta che loro confermano o rifiutano; solo del maniscalco: archiviati (si ripristinano) */
+  async lasciaCavallo(id, motivo){
+    if(DEMO_MODE){
+      const c = demoState.cavalliClientiMascalcia.find(x => x.id === id);
+      if(!c) return { ok: false, motivo: "non_trovato" };
+      if(!c.horse_id && !c.scuderia_cavallo_id){ c.archiviato_il = new Date().toISOString(); return { ok: true, archiviato: true }; }
+      (demoState.cavalliLasciati = demoState.cavalliLasciati || []).push({ cavallo_cliente_id: id, stato: "in_attesa", motivo: motivo || null });
+      return { ok: true, in_attesa: true };
+    }
+    const { data, error } = await sb.rpc("pro_lascia_cavallo", { p_riga: id, p_motivo: motivo || null });
+    if(error){ console.error("lasciaCavallo:", error); return { ok: false, motivo: /pro_lascia_cavallo/.test(error.message || "") ? "manca_db" : "errore" }; }
+    return data || { ok: false, motivo: "errore" };
+  },
+  async riprendiCavallo(id){
+    if(DEMO_MODE){
+      const c = demoState.cavalliClientiMascalcia.find(x => x.id === id);
+      if(c) c.archiviato_il = null;
+      demoState.cavalliLasciati = (demoState.cavalliLasciati || []).filter(x => x.cavallo_cliente_id !== id);
+      return { ok: true };
+    }
+    const { data, error } = await sb.rpc("pro_riprendi_cavallo", { p_riga: id });
+    if(error){ console.error("riprendiCavallo:", error); return { ok: false, motivo: "errore" }; }
+    return data || { ok: false, motivo: "errore" };
+  },
+  // id delle schede con una richiesta «Non lo seguo più» in attesa di conferma
+  async listLasciatiInAttesa(){
+    if(DEMO_MODE) return new Set((demoState.cavalliLasciati || []).filter(x => x.stato === "in_attesa").map(x => x.cavallo_cliente_id));
+    const { data, error } = await sb.from("cavalli_lasciati").select("cavallo_cliente_id").eq("stato", "in_attesa");
+    return new Set(error ? [] : (data || []).map(x => x.cavallo_cliente_id));
+  },
+  async listCavalliArchiviati(clienteId){
+    if(!clienteId) return [];
+    if(DEMO_MODE) return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId && c.archiviato_il)
+      .map(c => ({ id: c.id, nome: c.nome, horse_id: c.horse_id || null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, archiviato_il: c.archiviato_il }));
+    const { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, nome, horse_id, scuderia_cavallo_id, archiviato_il")
+      .eq("cliente_mascalcia_id", clienteId).not("archiviato_il", "is", null).order("nome", { ascending: true });
+    return error ? [] : (data || []);
   },
   async insertCavalloCliente({ cliente_mascalcia_id, nome, microchip = null, horse_id = null, razza = null, ferratura_tipo = null }){
     const row = { cliente_mascalcia_id, nome, microchip: microchip ? microchip.trim().toUpperCase() : null, horse_id };
@@ -72,11 +115,11 @@ Object.assign(DB, {
   },
   // Ricerca: tutti i cavalli dei clienti del professionista (per cercare un cliente dal nome del cavallo)
   async listCavalliMiei(){
-    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null, horse_id: c.horse_id || null, codice_equo: c.codice_equo || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null, ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", intervallo_giorni: c.intervallo_giorni ?? null, prezzo_ferratura: c.prezzo_ferratura ?? null, anno_nascita: c.anno_nascita ?? null, altezza_cm: c.altezza_cm ?? null, mantello: c.mantello ?? null, disciplina: c.disciplina ?? null, sesso: c.sesso ?? null, segni_particolari: c.segni_particolari ?? null, peso_kg: c.peso_kg ?? null, ...ubicDi(c) }));
-    let { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, intervallo_giorni, prezzo_ferratura, " + UBIC_CAMPI.join(", ")).eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
-    if(error && /ubicazione/.test(error.message || "")) ({ data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true }));
+    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).filter(c => !c.archiviato_il).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null, horse_id: c.horse_id || null, codice_equo: c.codice_equo || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null, ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", intervallo_giorni: c.intervallo_giorni ?? null, prezzo_ferratura: c.prezzo_ferratura ?? null, anno_nascita: c.anno_nascita ?? null, altezza_cm: c.altezza_cm ?? null, mantello: c.mantello ?? null, disciplina: c.disciplina ?? null, sesso: c.sesso ?? null, segni_particolari: c.segni_particolari ?? null, peso_kg: c.peso_kg ?? null, ...ubicDi(c) }));
+    let { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, intervallo_giorni, prezzo_ferratura, archiviato_il, " + UBIC_CAMPI.join(", ")).eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
+    if(error && /ubicazione|archiviato_il/.test(error.message || "")) ({ data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true }));
     if(error) console.error("listCavalliMiei:", error);
-    return error ? [] : (data || []);
+    return error ? [] : (data || []).filter(c => !c.archiviato_il);
   },
   // SPOSTA CAVALLO
   async spostaCavallo(p){

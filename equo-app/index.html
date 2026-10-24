@@ -3035,6 +3035,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     <div id="home-da-saldare" style="display:none"></div>
     <div class="wh" id="wh-owner"></div>
     <div id="home-proposte"></div>
+    <div id="home-lasciati"></div>
     <div id="home-setup" style="display:none">
       <div class="card" style="text-align:center;padding:28px">
         <div class="fa-icon" style="width:40px;height:40px;font-size:36px;color:var(--accent);margin:0 auto 12px"><i class="fa-solid fa-horse-head"></i></div>
@@ -4117,6 +4118,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
           <option value="proprietario">Proprietario</option>
           <option value="struttura">Scuderia o centro ippico</option>
         </select>
+        <div class="muted" id="edit-cliente-tipo-nota" style="display:none;font-size:12px;margin-top:4px">Collegato a un account Equo: il tipo di cliente non si cambia.</div>
       </div>
       <div class="input-group">
         <label class="input-label">Nome cliente</label>
@@ -5537,6 +5539,20 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span><span id="res-tit">Resoconto</span></div>
     <div id="res-corpo"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-lascia-cavallo" onclick="closeOut(event,'modal-lascia-cavallo')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-lascia-cavallo')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="lc-tit">Non lo seguo più</div>
+    <div class="muted" id="lc-testo" style="font-size:13px;line-height:1.55;margin-bottom:12px"></div>
+    <div id="lc-motivo-box">
+      <label class="input-label" for="lc-motivo">Motivo (facoltativo)</label>
+      <input class="input" id="lc-motivo" maxlength="300" placeholder="Es. il proprietario ha cambiato maniscalco" style="margin-bottom:12px">
+    </div>
+    <button class="btn btn-primary" id="lc-ok" style="width:100%" onclick="confermaLasciaCavallo()">Invia la richiesta</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px" onclick="closeModal('modal-lascia-cavallo')">Annulla</button>
   </div>
 </div>
 <div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
@@ -12732,12 +12748,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}
 		const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
 		const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
-		const { error } = await DB.updateClienteMascalcia(currentClienteId, {
+		const campiCli = {
 			nome,
 			telefono,
-			note,
-			tipo_cliente
-		});
+			note
+		};
+		if (!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;
+		const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);
 		if (error) {
 			errBox.textContent = "Errore: " + error.message;
 			errBox.style.display = "block";
@@ -13063,6 +13080,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
 		if (!c) return;
 		document.getElementById("edit-cliente-tipo").value = isStruttura(c) ? "struttura" : "proprietario";
+		{
+			const bloccato = !!(c.cliente_user_id || c.centro_id);
+			document.getElementById("edit-cliente-tipo").disabled = bloccato;
+			const n = document.getElementById("edit-cliente-tipo-nota");
+			if (n) n.style.display = bloccato ? "block" : "none";
+		}
 		razzaImposta("edit-cliente-nuovo-razza", "");
 		document.getElementById("edit-cliente-codice-equo").value = "";
 		document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
@@ -13089,11 +13112,17 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	async function renderCavalliEditCliente() {
 		const box = document.getElementById("edit-cliente-cavalli");
 		box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Caricamento…</div>";
-		const cav = await DB.listCavalliCliente(currentClienteId);
+		const [cav, attesa, arch] = await Promise.all([
+			DB.listCavalliCliente(currentClienteId),
+			DB.listLasciatiInAttesa(),
+			DB.listCavalliArchiviati(currentClienteId)
+		]);
 		cavalliEditCache = cav;
-		box.innerHTML = cav.length ? cav.map((x) => `
+		const collegato = (x) => !!(x.tipo === "equo" || x.horse_id || x.scuderia_cavallo_id);
+		const tastoLascia = (x) => x.id && attesa.has(x.id) ? `<button class="btn btn-ghost btn-sm" onclick="annullaLasciaCavallo('${x.id}')">Annulla richiesta</button>` : `<button class="btn btn-outline btn-sm" onclick="apriLasciaCavallo('${x.key}')" aria-label="${collegato(x) ? "Non lo seguo più" : "Archivia cavallo"}" title="${collegato(x) ? "Non lo seguo più" : "Archivia"}"><span class="fa-icon"><i class="fa-solid ${collegato(x) ? "fa-user-slash" : "fa-box-archive"}"></i></span></button>`;
+		box.innerHTML = (cav.length ? cav.map((x) => `
     <div class="event-item" style="padding:8px 0">
-      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? " <span class=\"badge badge-accent\" style=\"font-size:10.5px\">su Equo</span>" : ""}
+      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? " <span class=\"badge badge-accent\" style=\"font-size:10.5px\">su Equo</span>" : ""}${x.id && attesa.has(x.id) ? " <span class=\"badge\" style=\"font-size:10.5px\">In attesa di conferma</span>" : ""}
         <div class="muted" style="font-size:11.5px">${[
 			x.codice_equo ? "<b class=\"cod-equo\">" + escapeHtml(x.codice_equo) + "</b>" : "",
 			x.razza ? escapeHtml(x.razza) : "",
@@ -13101,12 +13130,15 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			x.presso ? "📍 presso " + escapeHtml(x.presso) : "",
 			x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
 		].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button><button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button>` : ""}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">
       <button class="btn btn-primary btn-sm btn-conferma" onclick="salvaRazzaCavallo('${x.id}')">OK</button>
-    </div>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun cavallo.</div>";
+    </div>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun cavallo.</div>") + (arch.length ? `<details class="cav-archiviati" style="margin-top:8px"><summary class="muted" style="font-size:13px;cursor:pointer">Cavalli archiviati (${arch.length})</summary>
+      ${arch.map((a) => `<div class="event-item" style="padding:6px 0"><div style="font-size:14px">${escapeHtml(a.nome || "")}
+        <div class="muted" style="font-size:11.5px">${a.horse_id || a.scuderia_cavallo_id ? "Non lo segui più" : "Archiviato"}${a.archiviato_il ? " dal " + formatDate(String(a.archiviato_il).slice(0, 10)) : ""}</div></div>
+        <button class="btn btn-outline btn-sm" onclick="ripristinaCavallo('${a.id}')">Ripristina</button></div>`).join("")}</details>` : "");
 		return cav;
 	}
 	function apriRazzaCavallo(id) {
@@ -14745,6 +14777,68 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			btn.disabled = false;
 		}
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/107-lascia-cavallo.js
+	var lasciaSel = null;
+	function apriLasciaCavallo(key) {
+		const x = (cavalliEditCache || []).find((c) => c.key === key);
+		if (!x) return;
+		lasciaSel = x;
+		const coll = !!(x.tipo === "equo" || x.horse_id || x.scuderia_cavallo_id);
+		document.getElementById("lc-tit").textContent = coll ? "Non seguo più " + x.nome : "Archivia " + x.nome;
+		document.getElementById("lc-testo").textContent = coll ? "Il cavallo è collegato al proprietario o alla scuderia: riceveranno la tua richiesta e la confermeranno. Finché non rispondono, il cavallo resta nella tua lista. Il suo storico non si cancella." : "Il cavallo esce dalla tua lista, ma il suo storico resta. Lo ritrovi in «Cavalli archiviati» e puoi ripristinarlo quando vuoi.";
+		document.getElementById("lc-motivo-box").style.display = coll ? "block" : "none";
+		document.getElementById("lc-motivo").value = "";
+		const ok = document.getElementById("lc-ok");
+		ok.textContent = coll ? "Invia la richiesta" : "Archivia";
+		ok.disabled = false;
+		openModal("modal-lascia-cavallo");
+	}
+	async function aggiornaDopoLascia() {
+		await renderCavalliEditCliente();
+		await syncNomeCavalloCliente().catch(() => {});
+		await caricaCavalliMiei().catch(() => {});
+	}
+	async function confermaLasciaCavallo() {
+		const x = lasciaSel;
+		if (!x) return;
+		const ok = document.getElementById("lc-ok");
+		ok.disabled = true;
+		let id = x.id;
+		if (!id) id = (await DB.risolviCavalloPerIntervento(currentClienteId, x)).cavallo_cliente_id;
+		if (!id) {
+			ok.disabled = false;
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		const res = await DB.lasciaCavallo(id, document.getElementById("lc-motivo").value.trim());
+		ok.disabled = false;
+		if (!res || !res.ok) {
+			showToast(res?.motivo === "manca_db" ? "Funzione non ancora attiva: serve l'aggiornamento del database." : "Operazione non riuscita. Riprova.");
+			return;
+		}
+		closeModal("modal-lascia-cavallo");
+		lasciaSel = null;
+		showToast(res.archiviato ? "Cavallo archiviato" : "Richiesta inviata: aspetta la conferma del proprietario o della scuderia");
+		await aggiornaDopoLascia();
+	}
+	async function annullaLasciaCavallo(id) {
+		const res = await DB.riprendiCavallo(id);
+		if (!res || !res.ok) {
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		showToast("Richiesta annullata: continui a seguirlo");
+		await aggiornaDopoLascia();
+	}
+	async function ripristinaCavallo(id) {
+		const res = await DB.riprendiCavallo(id);
+		if (!res || !res.ok) {
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		showToast("Cavallo ripristinato");
+		await aggiornaDopoLascia();
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/105-resoconto-pdf.js
 	var resCtx = null;
 	async function apriResoconto(clienteId) {
@@ -15505,7 +15599,11 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		wgRidisegna,
 		wgScegli,
 		wgSceltaLuogo,
-		wgScriviRichiamo
+		wgScriviRichiamo,
+		annullaLasciaCavallo,
+		apriLasciaCavallo,
+		confermaLasciaCavallo,
+		ripristinaCavallo
 	});
 })();
 
@@ -16484,7 +16582,7 @@ Object.assign(DB, {
   async listCavalliCliente(clienteId){
     if(!clienteId) return [];
     if(DEMO_MODE){
-      return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
+      return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId && !c.archiviato_il)
         .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null,
           ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ferro_note: c.ferro_note || null, ferro_tipo_post: c.ferro_tipo_post || null, ferro_dettagli: c.ferro_dettagli || null, ferro_dettagli_post: c.ferro_dettagli_post || null, intervallo_giorni: c.intervallo_giorni ?? null, prezzo_ferratura: c.prezzo_ferratura ?? null, anno_nascita: c.anno_nascita ?? null, altezza_cm: c.altezza_cm ?? null, mantello: c.mantello ?? null, disciplina: c.disciplina ?? null, sesso: c.sesso ?? null, segni_particolari: c.segni_particolari ?? null, peso_kg: c.peso_kg ?? null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, ub: ubicDi(c) }));
     }
@@ -16505,15 +16603,19 @@ Object.assign(DB, {
         manuali = await window.__cavalliInCreazione[clienteId];
       }
     }
+    // schede archiviate («Archivia» / «Non lo seguo più» confermato): fuori dalla lista
+    const archiviatiH = new Set(manuali.filter(m => m.archiviato_il && m.horse_id).map(m => m.horse_id));
+    manuali = manuali.filter(m => !m.archiviato_il);
+    const condV = condivisi.filter(h => !archiviatiH.has(h.id));
     const idCondivisi = new Set(condivisi.map(h => h.id));
-    const senzaCopia = condivisi.filter(h => !manuali.some(m => m.horse_id === h.id)).map(h => h.id);
+    const senzaCopia = condV.filter(h => !manuali.some(m => m.horse_id === h.id)).map(h => h.id);
     let altrove = [];
     if(senzaCopia.length){
       let r = await sb.from("cavalli_clienti_mascalcia").select("*, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
       if(r.error) r = await sb.from("cavalli_clienti_mascalcia").select("id, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, ferro_note, scuderia_cavallo_id, microchip, cliente_mascalcia_id, clienti_mascalcia(nome)").in("horse_id", senzaCopia);
       altrove = r.data || [];
     }
-    const out = condivisi.map(h => {
+    const out = condV.map(h => {
       const mirror = manuali.find(m => m.horse_id === h.id) || altrove.find(m => m.horse_id === h.id);
       const presso = mirror && mirror.cliente_mascalcia_id && mirror.cliente_mascalcia_id !== clienteId ? (mirror.clienti_mascalcia?.nome || "un altro cliente") : null;
       return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || h.codice_equo || null, razza: h.breed || null, presso, ferro_sistema: mirror?.ferro_sistema || null, ferro_numero: mirror?.ferro_numero || null,
@@ -16524,6 +16626,45 @@ Object.assign(DB, {
         ferratura_tipo: m.ferratura_tipo || "completa", ferro_tipo: m.ferro_tipo || "standard", ferro_note: m.ferro_note || null, ferro_tipo_post: m.ferro_tipo_post || null, ferro_dettagli: m.ferro_dettagli || null, ferro_dettagli_post: m.ferro_dettagli_post || null, intervallo_giorni: m.intervallo_giorni ?? null, prezzo_ferratura: m.prezzo_ferratura ?? null, anno_nascita: m.anno_nascita ?? null, altezza_cm: m.altezza_cm ?? null, mantello: m.mantello ?? null, disciplina: m.disciplina ?? null, sesso: m.sesso ?? null, segni_particolari: m.segni_particolari ?? null, peso_kg: m.peso_kg ?? null, scuderia_cavallo_id: m.scuderia_cavallo_id || null, ub: ubicDi(m) });
     });
     return out;
+  },
+  /* -- «Non lo seguo più» / «Archivia» (24/10/2026): i cavalli non si eliminano più --
+     collegati a proprietario o scuderia: richiesta che loro confermano o rifiutano; solo del maniscalco: archiviati (si ripristinano) */
+  async lasciaCavallo(id, motivo){
+    if(DEMO_MODE){
+      const c = demoState.cavalliClientiMascalcia.find(x => x.id === id);
+      if(!c) return { ok: false, motivo: "non_trovato" };
+      if(!c.horse_id && !c.scuderia_cavallo_id){ c.archiviato_il = new Date().toISOString(); return { ok: true, archiviato: true }; }
+      (demoState.cavalliLasciati = demoState.cavalliLasciati || []).push({ cavallo_cliente_id: id, stato: "in_attesa", motivo: motivo || null });
+      return { ok: true, in_attesa: true };
+    }
+    const { data, error } = await sb.rpc("pro_lascia_cavallo", { p_riga: id, p_motivo: motivo || null });
+    if(error){ console.error("lasciaCavallo:", error); return { ok: false, motivo: /pro_lascia_cavallo/.test(error.message || "") ? "manca_db" : "errore" }; }
+    return data || { ok: false, motivo: "errore" };
+  },
+  async riprendiCavallo(id){
+    if(DEMO_MODE){
+      const c = demoState.cavalliClientiMascalcia.find(x => x.id === id);
+      if(c) c.archiviato_il = null;
+      demoState.cavalliLasciati = (demoState.cavalliLasciati || []).filter(x => x.cavallo_cliente_id !== id);
+      return { ok: true };
+    }
+    const { data, error } = await sb.rpc("pro_riprendi_cavallo", { p_riga: id });
+    if(error){ console.error("riprendiCavallo:", error); return { ok: false, motivo: "errore" }; }
+    return data || { ok: false, motivo: "errore" };
+  },
+  // id delle schede con una richiesta «Non lo seguo più» in attesa di conferma
+  async listLasciatiInAttesa(){
+    if(DEMO_MODE) return new Set((demoState.cavalliLasciati || []).filter(x => x.stato === "in_attesa").map(x => x.cavallo_cliente_id));
+    const { data, error } = await sb.from("cavalli_lasciati").select("cavallo_cliente_id").eq("stato", "in_attesa");
+    return new Set(error ? [] : (data || []).map(x => x.cavallo_cliente_id));
+  },
+  async listCavalliArchiviati(clienteId){
+    if(!clienteId) return [];
+    if(DEMO_MODE) return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId && c.archiviato_il)
+      .map(c => ({ id: c.id, nome: c.nome, horse_id: c.horse_id || null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, archiviato_il: c.archiviato_il }));
+    const { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, nome, horse_id, scuderia_cavallo_id, archiviato_il")
+      .eq("cliente_mascalcia_id", clienteId).not("archiviato_il", "is", null).order("nome", { ascending: true });
+    return error ? [] : (data || []);
   },
   async insertCavalloCliente({ cliente_mascalcia_id, nome, microchip = null, horse_id = null, razza = null, ferratura_tipo = null }){
     const row = { cliente_mascalcia_id, nome, microchip: microchip ? microchip.trim().toUpperCase() : null, horse_id };
@@ -16549,11 +16690,11 @@ Object.assign(DB, {
   },
   // Ricerca: tutti i cavalli dei clienti del professionista (per cercare un cliente dal nome del cavallo)
   async listCavalliMiei(){
-    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null, horse_id: c.horse_id || null, codice_equo: c.codice_equo || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null, ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", intervallo_giorni: c.intervallo_giorni ?? null, prezzo_ferratura: c.prezzo_ferratura ?? null, anno_nascita: c.anno_nascita ?? null, altezza_cm: c.altezza_cm ?? null, mantello: c.mantello ?? null, disciplina: c.disciplina ?? null, sesso: c.sesso ?? null, segni_particolari: c.segni_particolari ?? null, peso_kg: c.peso_kg ?? null, ...ubicDi(c) }));
-    let { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, intervallo_giorni, prezzo_ferratura, " + UBIC_CAMPI.join(", ")).eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
-    if(error && /ubicazione/.test(error.message || "")) ({ data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true }));
+    if(DEMO_MODE) return (demoState.cavalliClientiMascalcia || []).filter(c => !c.archiviato_il).map(c => ({ id: c.id, cliente_mascalcia_id: c.cliente_mascalcia_id, nome: c.nome, microchip: c.microchip || null, horse_id: c.horse_id || null, codice_equo: c.codice_equo || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null, ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", intervallo_giorni: c.intervallo_giorni ?? null, prezzo_ferratura: c.prezzo_ferratura ?? null, anno_nascita: c.anno_nascita ?? null, altezza_cm: c.altezza_cm ?? null, mantello: c.mantello ?? null, disciplina: c.disciplina ?? null, sesso: c.sesso ?? null, segni_particolari: c.segni_particolari ?? null, peso_kg: c.peso_kg ?? null, ...ubicDi(c) }));
+    let { data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo, intervallo_giorni, prezzo_ferratura, archiviato_il, " + UBIC_CAMPI.join(", ")).eq("maniscalco_id", currentUser.id).order("nome", { ascending: true });
+    if(error && /ubicazione|archiviato_il/.test(error.message || "")) ({ data, error } = await sb.from("cavalli_clienti_mascalcia").select("id, cliente_mascalcia_id, nome, microchip, horse_id, codice_equo, ferro_sistema, ferro_numero, ferratura_tipo, ferro_tipo").eq("maniscalco_id", currentUser.id).order("nome", { ascending: true }));
     if(error) console.error("listCavalliMiei:", error);
-    return error ? [] : (data || []);
+    return error ? [] : (data || []).filter(c => !c.archiviato_il);
   },
   // SPOSTA CAVALLO
   async spostaCavallo(p){
@@ -16625,7 +16766,8 @@ Object.assign(DB, {
       const ultimi = {};
       tutti.filter(i => i.stato === "fatto").forEach(i => { const k = chiave(i); if(!ultimi[k] || i.data_intervento > ultimi[k].data_intervento) ultimi[k] = i; });
       const st = demoState.richiamiStato || (demoState.richiamiStato = {});
-      return Object.entries(ultimi).filter(([k, i]) => i.prossima_scadenza && !inAgenda.has(k) && !st[i.id]?.chiuso_il)
+      const viaDemo = new Set((demoState.cavalliClientiMascalcia || []).filter(c => c.archiviato_il).map(c => c.id));
+      return Object.entries(ultimi).filter(([k, i]) => i.prossima_scadenza && !inAgenda.has(k) && !st[i.id]?.chiuso_il && !viaDemo.has(i.cavallo_cliente_id))
         .map(([k, i]) => {
           const c = demoState.clientiMascalcia.find(x => x.id === i.cliente_mascalcia_id);
           const cv = demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id);
@@ -16636,9 +16778,14 @@ Object.assign(DB, {
             data_intervento: i.data_intervento, prossima_scadenza: i.prossima_scadenza, scadenza: scad, rimandato: !!st[i.id]?.rimandato_al, giorni: giorniTra(oggi, scad) };
         }).filter(r => r.giorni <= giorni).sort((a, b) => a.scadenza.localeCompare(b.scadenza));
     }
-    const { data, error } = await sb.rpc("richiami_maniscalco", { p_giorni: giorni });
+    const [{ data, error }, arch] = await Promise.all([
+      sb.rpc("richiami_maniscalco", { p_giorni: giorni }),
+      sb.from("cavalli_clienti_mascalcia").select("id").eq("maniscalco_id", currentUser.id).not("archiviato_il", "is", null)
+    ]);
     if(error){ console.error("listRichiami:", error); return []; }
-    return data || [];
+    // cavalli archiviati o che il maniscalco non segue più: niente richiami
+    const via = new Set(arch.error ? [] : (arch.data || []).map(x => x.id));
+    return (data || []).filter(r => !r.cavallo_cliente_id || !via.has(r.cavallo_cliente_id));
   },
   async setRichiamoStato(interventoId, campi){
     if(DEMO_MODE){
@@ -22049,6 +22196,51 @@ const mlSigla = k => String(k || "").toUpperCase();
 			proposteCav = [];
 		}
 		renderProposteCavalli();
+		caricaRichiesteLasciati();
+	}
+	var richiesteLasciati = [];
+	async function caricaRichiesteLasciati() {
+		const box = document.getElementById("home-lasciati");
+		if (!box) return;
+		if (DEMO_MODE) {
+			box.innerHTML = "";
+			return;
+		}
+		try {
+			const { data, error } = await sb.rpc("equo_richieste_lasciati");
+			richiesteLasciati = !error && Array.isArray(data) ? data : [];
+		} catch (e) {
+			richiesteLasciati = [];
+		}
+		if (!richiesteLasciati.length) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = `<div class="card" style="margin-bottom:14px">
+    <div class="section-title" style="margin-bottom:4px">Richieste del maniscalco</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Il maniscalco chiede di non seguire più questi cavalli. Se confermi, il cavallo esce dalla sua lista e i suoi appuntamenti ancora da fare si annullano; lo storico resta.</div>
+    ${richiesteLasciati.map((r) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
+      <div style="min-width:0"><div style="font-weight:600">${escapeHtml(r.cavallo || "")}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml(r.maniscalco || "Il maniscalco")}${r.motivo ? " · «" + escapeHtml(r.motivo) + "»" : ""}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-primary btn-sm" onclick="rispondiLasciato('${r.id}', true)">Conferma</button>
+        <button class="btn btn-ghost btn-sm" onclick="rispondiLasciato('${r.id}', false)">Rifiuta</button>
+      </div>
+    </div>`).join("")}
+  </div>`;
+	}
+	async function rispondiLasciato(id, conferma) {
+		const { data, error } = await sb.rpc("equo_rispondi_lasciato", {
+			p_id: id,
+			p_conferma: !!conferma
+		});
+		if (error || !data?.ok) {
+			showToast("Operazione non riuscita. Riprova.");
+			return;
+		}
+		showToast(conferma ? "Confermato: il maniscalco non segue più il cavallo" : "Rifiutato: il maniscalco continua a seguirlo");
+		caricaRichiesteLasciati();
 	}
 	function renderProposteCavalli() {
 		const box = document.getElementById("home-proposte");
@@ -24020,6 +24212,8 @@ const mlSigla = k => String(k || "").toUpperCase();
 		renderProposteCliente,
 		renderWidgetOwner,
 		rifiutaProposta,
+		rispondiLasciato,
+		caricaRichiesteLasciati,
 		rispondiStessoCavallo,
 		saveExpense,
 		saveHorse,

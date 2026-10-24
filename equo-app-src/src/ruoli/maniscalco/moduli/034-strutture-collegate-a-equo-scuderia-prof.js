@@ -260,6 +260,10 @@ async function openEditCliente(){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
   if(!c) return;
   document.getElementById("edit-cliente-tipo").value = isStruttura(c) ? "struttura" : "proprietario";
+  // collegato a un account Equo o a Equo Scuderia: il tipo di cliente non si cambia (caso Riccardo/Simone, 24/10)
+  { const bloccato = !!(c.cliente_user_id || c.centro_id);
+    document.getElementById("edit-cliente-tipo").disabled = bloccato;
+    const n = document.getElementById("edit-cliente-tipo-nota"); if(n) n.style.display = bloccato ? "block" : "none"; }
   razzaImposta("edit-cliente-nuovo-razza", "");
   document.getElementById("edit-cliente-codice-equo").value = "";
   document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
@@ -281,18 +285,26 @@ let cavalliEditCache = [];
 async function renderCavalliEditCliente(){
   const box = document.getElementById("edit-cliente-cavalli");
   box.innerHTML = '<div class="muted" style="font-size:13px">Caricamento…</div>';
-  const cav = await DB.listCavalliCliente(currentClienteId);
+  const [cav, attesa, arch] = await Promise.all([DB.listCavalliCliente(currentClienteId), DB.listLasciatiInAttesa(), DB.listCavalliArchiviati(currentClienteId)]);
   cavalliEditCache = cav;
-  box.innerHTML = cav.length ? cav.map(x => `
+  const collegato = x => !!(x.tipo === "equo" || x.horse_id || x.scuderia_cavallo_id);
+  const tastoLascia = x => x.id && attesa.has(x.id)
+    ? `<button class="btn btn-ghost btn-sm" onclick="annullaLasciaCavallo('${x.id}')">Annulla richiesta</button>`
+    : `<button class="btn btn-outline btn-sm" onclick="apriLasciaCavallo('${x.key}')" aria-label="${collegato(x) ? "Non lo seguo più" : "Archivia cavallo"}" title="${collegato(x) ? "Non lo seguo più" : "Archivia"}"><span class="fa-icon"><i class="fa-solid ${collegato(x) ? "fa-user-slash" : "fa-box-archive"}"></i></span></button>`;
+  box.innerHTML = (cav.length ? cav.map(x => `
     <div class="event-item" style="padding:8px 0">
-      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? ' <span class="badge badge-accent" style="font-size:10.5px">su Equo</span>' : ""}
+      <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? ' <span class="badge badge-accent" style="font-size:10.5px">su Equo</span>' : ""}${x.id && attesa.has(x.id) ? ' <span class="badge" style="font-size:10.5px">In attesa di conferma</span>' : ""}
         <div class="muted" style="font-size:11.5px">${[x.codice_equo ? '<b class="cod-equo">' + escapeHtml(x.codice_equo) + '</b>' : "", x.razza ? escapeHtml(x.razza) : "", x.microchip ? "chip " + escapeHtml(x.microchip) : "", x.presso ? "📍 presso " + escapeHtml(x.presso) : "", x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button><button class="btn btn-outline btn-sm" onclick="eliminaCavalloEditCliente('${x.id}')" aria-label="Elimina cavallo"><span class="fa-icon"><i class="fa-solid fa-trash"></i></span></button>` : ""}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">
       <button class="btn btn-primary btn-sm btn-conferma" onclick="salvaRazzaCavallo('${x.id}')">OK</button>
-    </div>`).join("") : '<div class="muted" style="font-size:13px">Nessun cavallo.</div>';
+    </div>`).join("") : '<div class="muted" style="font-size:13px">Nessun cavallo.</div>')
+    + (arch.length ? `<details class="cav-archiviati" style="margin-top:8px"><summary class="muted" style="font-size:13px;cursor:pointer">Cavalli archiviati (${arch.length})</summary>
+      ${arch.map(a => `<div class="event-item" style="padding:6px 0"><div style="font-size:14px">${escapeHtml(a.nome || "")}
+        <div class="muted" style="font-size:11.5px">${a.horse_id || a.scuderia_cavallo_id ? "Non lo segui più" : "Archiviato"}${a.archiviato_il ? " dal " + formatDate(String(a.archiviato_il).slice(0, 10)) : ""}</div></div>
+        <button class="btn btn-outline btn-sm" onclick="ripristinaCavallo('${a.id}')">Ripristina</button></div>`).join("")}</details>` : "");
   return cav;
 }
 
