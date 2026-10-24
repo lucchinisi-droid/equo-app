@@ -27,3 +27,9 @@
 :where(body:not(.pl-owner)) .res-riep span{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
 :where(body:not(.pl-owner)) .res-riep b{font-size:17px}
 :where(body:not(.pl-owner)) .res-riep .da b{color:var(--red,#a33b2b)}
+/* «📍 Usa la mia posizione attuale» sotto l'indirizzo (24/10/2026) */
+:where(body:not(.pl-owner)) .pos-link{border:0;background:none;padding:6px 0 0;font:inherit;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;text-align:left}
+:where(body:not(.pl-owner)) .pos-link:disabled{opacity:.5}
+:where(body:not(.pl-owner)) .pos-nota{font-size:12px;line-height:1.45;color:var(--muted);min-height:0}
+:where(body:not(.pl-owner)) .pos-nota.ok{color:var(--green,#14482c)}
+:where(body:not(.pl-owner)) .pos-nota.male{color:var(--red,#a33b2b)}

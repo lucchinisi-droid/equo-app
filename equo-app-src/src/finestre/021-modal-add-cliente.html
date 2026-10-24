@@ -25,6 +25,7 @@
       <div class="input-group">
         <label class="input-label">Indirizzo (opzionale, per «Naviga»)</label>
         <input class="input" id="cliente-indirizzo" autocomplete="street-address" placeholder="es. Via Casilina km 51, Colleferro">
+        <button type="button" class="pos-link" onclick="usaPosizioneQui('cliente-indirizzo', this)">📍 Usa la mia posizione attuale</button><div class="pos-nota" id="cliente-indirizzo-pos-nota"></div>
       </div>
       <div class="input-group">
         <label class="input-label">Note (opzionale)</label>

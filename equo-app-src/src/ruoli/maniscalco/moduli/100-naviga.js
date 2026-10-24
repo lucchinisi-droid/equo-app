@@ -1,6 +1,7 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { openClienteDetail, openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { wgClienteDi } from "./098-professionista.js";
+import { coordDaIndirizzo } from "./106-posizione-attuale.js";
 /* ---------- Naviga ---------- */
 /* Naviga: indirizzo in quest'ordine
    1) quello scritto dal maniscalco nella scheda cliente
@@ -38,12 +39,14 @@ function wgMappeOv(){
   return ov;
 }
 function wgMostraMappe(c, indirizzo, nota){
-  const q = encodeURIComponent(indirizzo);
+  // posizione salvata con «📍 Usa la mia posizione»: si naviga al punto esatto
+  const xy = coordDaIndirizzo(indirizzo);
+  const q = encodeURIComponent(xy ? xy.lat + "," + xy.lon : indirizzo);
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const app = [
     ["Google Maps", `https://www.google.com/maps/dir/?api=1&destination=${q}`, "linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"],
     ...(ios ? [["Apple Mappe", `https://maps.apple.com/?daddr=${q}`, "linear-gradient(160deg,#7fd27b,#3aa0f0)"]] : []),
-    ["Waze", `https://waze.com/ul?q=${q}&navigate=yes`, "#33ccff"],
+    ["Waze", xy ? `https://waze.com/ul?ll=${q}&navigate=yes` : `https://waze.com/ul?q=${q}&navigate=yes`, "#33ccff"],
   ];
   const ov = wgMappeOv();
   ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>

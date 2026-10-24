@@ -144,11 +144,38 @@ async function nomeLuogo(lat, lon){
   } catch(_){ return ""; }
 }
 
+// coordinate scritte nell'indirizzo del cliente («📍 Usa la mia posizione», 24/10/2026): «Via Casilina, Colleferro (41.83412, 12.98765)»
+function coordDaTesto(t){
+  const m = String(t || "").match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
+  if(!m) return null;
+  const lat = Number(m[1]), lon = Number(m[2]);
+  return Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? { lat, lon } : null;
+}
+// coordinate → via e comune (SENZA numero civico) per «📍 Usa la mia posizione attuale» del maniscalco
+const cacheVia = new Map();
+async function viaVicina(lat, lon){
+  const k = `${arrot(lat, 4)},${arrot(lon, 4)}`;
+  const c = cacheVia.get(k);
+  if(c && Date.now() - c.t < 30 * 24 * 3600e3) return c.v;
+  try{
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&addressdetails=1&accept-language=it&lat=${lat}&lon=${lon}`, { headers: { "User-Agent": UA } });
+    const d = await r.json().catch(() => ({}));
+    const a = d.address || {};
+    const v = { via: a.road || a.pedestrian || a.footway || a.path || a.track || a.hamlet || a.neighbourhood || a.suburb || "",
+                comune: a.city || a.town || a.village || a.municipality || "" };
+    cacheVia.set(k, { t: Date.now(), v });
+    if(cacheVia.size > 2000) cacheVia.delete(cacheVia.keys().next().value);
+    return v;
+  } catch(_){ return { via: "", comune: "" }; }
+}
+
 // calcolo della previsione (usato dalla funzione e dagli agenti AI, senza login: il login lo controlla chi chiama)
 async function previsione(b){
   b = b || {};
   let lat = Number(b.lat), lon = Number(b.lon), luogo = String(b.luogo || "").slice(0, 80);
-  if(!(Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (b.lat != null))){
+  const daTesto = !(b.lat != null) ? coordDaTesto(b.indirizzo) : null;
+  if(daTesto){ lat = daTesto.lat; lon = daTesto.lon; }
+  if(!daTesto && !(Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (b.lat != null))){
     const indirizzo = String(b.indirizzo || "").replace(/\s+/g, " ").trim().slice(0, 200);
     const citta = String(b.citta || "").replace(/\s+/g, " ").trim().slice(0, 120);
     if(!indirizzo && !citta) return { errore: "posizione_mancante" };
@@ -191,6 +218,11 @@ exports.handler = async (event) => {
 
   let b = {};
   try { b = JSON.parse(event.body || "{}"); } catch(_) { return risposta(400, { error: "Richiesta non valida" }); }
+  if(b.azione === "via"){
+    const lat = Number(b.lat), lon = Number(b.lon);
+    if(!(Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180)) return risposta(400, { error: "Posizione non valida" });
+    return risposta(200, await viaVicina(lat, lon));
+  }
   const r = await previsione(b);
   if(r.errore === "posizione_mancante") return risposta(400, { error: "Posizione mancante" });
   return risposta(200, r, r.giorni ? { "Cache-Control": "private, max-age=900" } : {});

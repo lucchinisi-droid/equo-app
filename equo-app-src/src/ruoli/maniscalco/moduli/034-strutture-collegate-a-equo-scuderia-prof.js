@@ -112,6 +112,7 @@ function mostraLimiteClienti(){ openModal("modal-limite-clienti"); }
 function apriNuovoCliente(tipo){
   if(!isPremium() && clientiAttivi().length >= LIMITE_CLIENTI_FREE){ mostraLimiteClienti(); return; }
   ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+  { const n = document.getElementById("cliente-indirizzo-pos-nota"); if(n){ n.textContent = ""; n.className = "pos-nota"; } }
   document.getElementById("cliente-error").style.display = "none";
   document.getElementById("cliente-tipo").value = tipo === "struttura" ? "struttura" : "proprietario";
   aggiornaEtichetteNuovoCliente();
@@ -267,6 +268,7 @@ async function openEditCliente(){
   document.getElementById("edit-cliente-nome").value = c.nome || "";
   document.getElementById("edit-cliente-telefono").value = c.telefono || "";
   document.getElementById("edit-cliente-indirizzo").value = c.indirizzo || "";
+  { const n = document.getElementById("edit-cliente-indirizzo-pos-nota"); if(n){ n.textContent = ""; n.className = "pos-nota"; } }
   document.getElementById("edit-cliente-note").value = c.note || "";
   document.getElementById("edit-cliente-nuovo-cavallo").value = "";
   document.getElementById("edit-cliente-nuovo-chip").value = "";
