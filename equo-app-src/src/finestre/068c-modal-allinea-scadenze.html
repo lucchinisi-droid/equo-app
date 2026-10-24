@@ -1,0 +1,12 @@
+<div class="modal-overlay" id="modal-allinea" onclick="closeOut(event,'modal-allinea')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-allinea')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="all-tit">Allinea le scadenze</div>
+    <div class="muted" style="font-size:12.5px;line-height:1.55;margin-bottom:12px">Tutti i cavalli della struttura avranno la stessa prossima scadenza: in agenda la struttura compare una volta sola, con tutti i cavalli insieme.</div>
+    <label class="input-label">Nuova scadenza per tutti</label>
+    <input class="input" type="date" id="all-data" oninput="allineaRender()" style="margin-bottom:12px">
+    <div id="all-righe" class="all-righe"></div>
+    <button class="btn btn-primary" id="all-ok" style="width:100%;margin-top:12px" onclick="confermaAllineaScadenze()">Allinea</button>
+  </div>
+</div>

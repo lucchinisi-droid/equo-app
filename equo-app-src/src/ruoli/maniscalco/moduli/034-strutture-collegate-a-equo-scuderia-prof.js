@@ -6,6 +6,7 @@ import { loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cav
 import { renderCorpoCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { isPremium } from "./042-incassi-pro.js";
+import { renderCicloStruttura } from "./102-scadenze-della-struttura.js";
 import { MISURE_FERRO, misuraPredefinita, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { ferroStd, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 /* ---------- STRUTTURE COLLEGATE A EQUO SCUDERIA (Professionisti, opzione A) ----------
@@ -187,7 +188,9 @@ async function openClienteDetail(id){
     <div class="cli-chip-row">
       <button class="cli-chip" onclick="openChatThread(currentClienteId)"><span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi</button>
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
-    </div>`;
+    </div>
+    <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>`;
+  renderCicloStruttura(c);
   renderProposteCliente(c);
   const chipQr = document.getElementById("cli-chip-qr");
   if(chipQr) chipQr.style.display = isStruttura(c) && c.centro_id ? "none" : "";

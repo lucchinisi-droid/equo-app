@@ -538,7 +538,7 @@ async function salvaInterventoMascalcia(){
         else if(diventaFatto) prossima_scadenza = scadenzaComune;
         else if(stato === "fatto") prossima_scadenza = interventoInModifica?.prossima_scadenza || null;
         else {
-          const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id);
+          const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id, cliente_mascalcia_id);
           prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
         }
       }

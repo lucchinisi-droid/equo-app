@@ -54,7 +54,7 @@ function mlRender(){
 async function mlProssima(){
   const e = mlEventi.find(x => TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura]);
   const el = document.getElementById("ml-prox"); if(!e || !el) return;
-  const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+  const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
   if(s.giorni && document.getElementById("ml-prox")) el.textContent = `Prossima volta qui: tra ${s.giorni} giorni · ${formatDataBreve(aggiungiGiorniIso(mlOggi(), s.giorni))}`;
 }
 function mlImporto(id, v){ ml.importi[id] = v; mlSalva(); const t = document.querySelector("#ml .ml-tot b"); if(t) t.textContent = formatEuro(mlEventi.reduce((s, e) => s + (Number(ml.importi[e.id]) || 0), 0)); }

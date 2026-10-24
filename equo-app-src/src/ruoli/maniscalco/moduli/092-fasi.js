@@ -31,7 +31,7 @@ async function mlChiudi(){
       upd.stato_pagamento = ml.pag;
     }
     if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
-      const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+      const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
       // con 0 € la prossima data resta quella di prima («come prima»)
       upd.prossima_scadenza = upd.importo === 0 && s.prima ? s.prima : (s.giorni ? aggiungiGiorniIso(oggi, s.giorni) : null);
     }

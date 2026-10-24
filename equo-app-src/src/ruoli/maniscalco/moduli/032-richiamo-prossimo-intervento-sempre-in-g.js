@@ -5,6 +5,7 @@ import { aggiungiGiorniIso } from "./051-modal-appuntamento-maniscalco-nuovo-mod
 import { agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { caricaCavalliMiei } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
+import { intervalloStruttura } from "./102-scadenze-della-struttura.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 /* ---------- RICHIAMO (prossimo intervento) — sempre in GIORNI ----------
    Quando il maniscalco segna FATTO una ferratura/mezza ferratura/pareggio si apre il pop-up
@@ -41,7 +42,7 @@ async function salvaRichiamiPredefiniti(){
 }
 function giorniTra(a, b){ const [y1,m1,d1] = a.split("-").map(Number), [y2,m2,d2] = b.split("-").map(Number); return Math.round((new Date(y2,m2-1,d2) - new Date(y1,m1-1,d1)) / 86400000); }
 // giorni proposti per un nuovo richiamo: ultima scelta per quel cavallo e tipo → predefiniti del maniscalco
-async function giorniRichiamoSuggeriti(tipo, cavallo_cliente_id, horse_id, escludiId){
+async function giorniRichiamoSuggeriti(tipo, cavallo_cliente_id, horse_id, escludiId, clienteId){
   if(!TIPO_FERRATURA_INTERVALLI[tipo]) return { giorni: null };
   if(!richiamiPredefiniti) await caricaRichiamiPredefiniti();
   const base = Number(richiamiPredefiniti?.[tipo]) || TIPO_FERRATURA_INTERVALLI[tipo];
@@ -61,6 +62,9 @@ async function giorniRichiamoSuggeriti(tipo, cavallo_cliente_id, horse_id, esclu
   }
   const g = prec ? giorniTra(prec.data_intervento, prec.prossima_scadenza) : null;
   const prima = prec ? prec.prossima_scadenza : null;   // con 0 € la prossima data resta questa («come prima»)
+  // struttura con «Ferratura ogni N giorni»: vale per tutti i suoi cavalli (scadenze allineate)
+  const gs = clienteId ? intervalloStruttura(clienteId) : null;
+  if(gs) return { giorni: gs, daStruttura: true, prima };
   return g >= 1 && g <= 60 ? { giorni: g, daCavallo: true, prima } : { giorni: base, prima };
 }
 function dataRichiamoTesto(iso, giorni){
@@ -68,9 +72,9 @@ function dataRichiamoTesto(iso, giorni){
   return new Date(y, m - 1, d).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 }
 // apre il pop-up e restituisce i giorni scelti (Promise). giorni = null → solo importo e pagamento (es. «Altro»)
-function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, pagamento, importo, importi, prima, ferri }){
+function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, daStruttura, pagamento, importo, importi, prima, ferri }){
   return new Promise(resolve => {
-    richiamoStato = { resolve, giorni, data_intervento, etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "), daCavallo, pagamento,
+    richiamoStato = { resolve, giorni, data_intervento, etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "), daCavallo, daStruttura, pagamento,
       prima: prima && giorni != null ? prima : null, comePrima: false, ferri: ferri && vistaCompleta() ? { ...ferri, n: ferri.q || 4 } : null };
     const conRichiamo = giorni != null;
     document.getElementById("ric-tit").textContent = conRichiamo ? "Prossimo intervento" : "Intervento fatto";
@@ -185,7 +189,7 @@ function richiamoAggiornaTesti(){
   if(r.giorni == null) return;
   document.getElementById("ric-giorni-txt").textContent = r.giorni + (r.giorni === 1 ? " giorno" : " giorni");
   const quando = dataRichiamoTesto(r.data_intervento, r.giorni);
-  document.getElementById("ric-dettaglio").textContent = `${r.etichetta} · ${quando}` + (r.daCavallo ? " (come l'ultima volta)" : "");
+  document.getElementById("ric-dettaglio").textContent = `${r.etichetta} · ${quando}` + (r.daStruttura ? " (intervallo della struttura)" : r.daCavallo ? " (come l'ultima volta)" : "");
   document.getElementById("ric-dettaglio2").textContent = `Prossimo intervento: ${quando}`;
 }
 function richiamoCambia(){
@@ -231,7 +235,7 @@ let richiamoComePrimaScelto = null;
 // flusso completo per un intervento che sta per diventare FATTO: chiede i giorni del richiamo (se il tipo li prevede),
 // l'importo di ogni cavallo e il pagamento; restituisce la data del richiamo (gli importi con prendiImportiScelti)
 async function richiamoPerFatto(e){
-  const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+  const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
   richiamoPagamentoScelto = null; richiamoImportiScelti = null; richiamoFerriScelti = null; richiamoComePrimaScelto = null;
   const conFerri = e.tipo_ferratura === "ferratura" || e.tipo_ferratura === "mezza_ferratura";
   const ferri = e.ferri !== undefined ? e.ferri : conFerri
@@ -241,7 +245,7 @@ async function richiamoPerFatto(e){
     : [{ nome: e.cavallo || agNomeCavalloSicuro(e), cavallo_cliente_id: e.cavallo_cliente_id, horse_id: e.horse_id, importo: e.importo }];
   const proposti = incassiNascosti() ? cavalli.map(() => null) : await importiSuggeriti(e, cavalli);
   const giorni = await chiediRichiamo({ tipo: e.tipo_ferratura, tipo_altro: e.tipo_altro, data_intervento: e.data_intervento,
-    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni || null, daCavallo: s.daCavallo,
+    cavallo: e.cavallo || agNomeCavalloSicuro(e), giorni: s.giorni || null, daCavallo: s.daCavallo, daStruttura: s.daStruttura,
     pagamento: e.stato_pagamento || "da_saldare", prima: s.prima, ferri,
     importi: cavalli.map((c, i) => ({ nome: c.nome, importo: proposti[i] })) });
   const comePrima = richiamoComePrimaScelto; richiamoComePrimaScelto = null;

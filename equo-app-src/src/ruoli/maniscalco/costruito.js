@@ -1802,7 +1802,7 @@
 		const e = mlEventi.find((x) => TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura]);
 		const el = document.getElementById("ml-prox");
 		if (!e || !el) return;
-		const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+		const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
 		if (s.giorni && document.getElementById("ml-prox")) el.textContent = `Prossima volta qui: tra ${s.giorni} giorni · ${formatDataBreve(aggiungiGiorniIso(mlOggi(), s.giorni))}`;
 	}
 	function mlImporto(id, v) {
@@ -1854,7 +1854,7 @@
 				upd.stato_pagamento = ml.pag;
 			}
 			if (TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) {
-				const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+				const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
 				upd.prossima_scadenza = upd.importo === 0 && s.prima ? s.prima : s.giorni ? aggiungiGiorniIso(oggi, s.giorni) : null;
 			}
 			const { error } = await DB.updateInterventoMascalcia(e.id, upd);
@@ -6017,7 +6017,7 @@
 					else if (diventaFatto) prossima_scadenza = scadenzaComune;
 					else if (stato === "fatto") prossima_scadenza = interventoInModifica?.prossima_scadenza || null;
 					else {
-						const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id);
+						const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id, cliente_mascalcia_id);
 						prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
 					}
 				}
@@ -6580,6 +6580,129 @@
 		document.getElementById("clienti-list-view").style.display = "block";
 		document.getElementById("clienti-detail-view").style.display = "none";
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/102-scadenze-della-struttura.js
+	var CICLO_MIN = 7;
+	var CICLO_MAX = 180;
+	var CICLO_PARTENZA = 35;
+	var TIPI_CICLO = [
+		"ferratura",
+		"mezza_ferratura",
+		"pareggio"
+	];
+	var cicloTimer = null;
+	function intervalloStruttura(clienteId) {
+		const c = (clientiMascalcia || []).find((x) => x.id === clienteId);
+		const g = c ? Number(c.intervallo_giorni) : NaN;
+		return g >= CICLO_MIN && g <= CICLO_MAX ? g : null;
+	}
+	function renderCicloStruttura(c) {
+		const box = document.getElementById("cli-ciclo");
+		if (!box) return;
+		if (!c || !isStruttura(c) || c.archiviato_il) {
+			box.innerHTML = "";
+			box.style.display = "none";
+			return;
+		}
+		box.style.display = "";
+		const g = intervalloStruttura(c.id);
+		box.innerHTML = `<div class="ciclo-tit">Scadenze della struttura</div>
+    <div class="ciclo-riga"><span>Ferratura ogni</span>
+      ${g ? `<div class="ciclo-step"><button type="button" onclick="cicloCambia(-1)" aria-label="Meno giorni">−</button><b id="ciclo-val">${g}</b><button type="button" onclick="cicloCambia(1)" aria-label="Più giorni">+</button></div><span>giorni</span>` : `<button type="button" class="btn btn-outline btn-sm" onclick="cicloCambia(0)">Imposta</button>`}</div>
+    <div class="ciclo-nota">${g ? `Quando segni fatto un cavallo di questa struttura, la prossima scadenza è tra ${g} giorni. <button type="button" class="ciclo-link" onclick="cicloTogli()">Togli</button>` : "Non impostato: ogni cavallo usa il suo intervallo."}</div>
+    <button type="button" class="btn btn-outline btn-sm ciclo-allinea" onclick="apriAllineaScadenze()">Allinea le scadenze dei cavalli</button>`;
+	}
+	function cicloCambia(d) {
+		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
+		if (!c) return;
+		const g = intervalloStruttura(c.id);
+		const nuovo = !g ? CICLO_PARTENZA : Math.max(CICLO_MIN, Math.min(CICLO_MAX, g + d));
+		c.intervallo_giorni = nuovo;
+		renderCicloStruttura(c);
+		clearTimeout(cicloTimer);
+		cicloTimer = setTimeout(() => cicloSalva(c.id, nuovo), 700);
+	}
+	async function cicloSalva(id, v) {
+		const { error } = await DB.updateClienteMascalcia(id, { intervallo_giorni: v });
+		if (error) {
+			showToast(/intervallo_giorni/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+			return;
+		}
+		showToast(v ? `Struttura: ferratura ogni ${v} giorni` : "Intervallo della struttura tolto");
+	}
+	function cicloTogli() {
+		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
+		if (!c) return;
+		clearTimeout(cicloTimer);
+		c.intervallo_giorni = null;
+		renderCicloStruttura(c);
+		cicloSalva(c.id, null);
+	}
+	var allineaLista = [];
+	async function apriAllineaScadenze() {
+		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
+		if (!c) return;
+		document.getElementById("all-tit").textContent = "Allinea le scadenze · " + c.nome;
+		document.getElementById("all-righe").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Caricamento...</div>";
+		document.getElementById("all-ok").disabled = true;
+		openModal("modal-allinea");
+		const tutti = await DB.ultimiFattiCliente(c.id, TIPI_CICLO);
+		const visti = /* @__PURE__ */ new Set();
+		allineaLista = [];
+		tutti.forEach((i) => {
+			const k = i.cavallo_cliente_id || i.horse_id;
+			if (!k || visti.has(k)) return;
+			visti.add(k);
+			if (i.prossima_scadenza) allineaLista.push(i);
+		});
+		allineaLista.sort((a, b) => a.prossima_scadenza.localeCompare(b.prossima_scadenza) || nomeAll(a).localeCompare(nomeAll(b)));
+		const inp = document.getElementById("all-data");
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		const prima = allineaLista.length ? allineaLista[0].prossima_scadenza : aggiungiGiorniIso(oggi, intervalloStruttura(c.id) || CICLO_PARTENZA);
+		inp.min = oggi;
+		inp.value = prima < oggi ? oggi : prima;
+		allineaRender();
+	}
+	function nomeAll(i) {
+		return i.cavalli_clienti_mascalcia?.nome || "Cavallo";
+	}
+	function allineaRender() {
+		const d = document.getElementById("all-data").value;
+		const box = document.getElementById("all-righe"), ok = document.getElementById("all-ok");
+		if (!allineaLista.length) {
+			box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Nessun cavallo di questa struttura ha una prossima scadenza: prima segna fatta una ferratura.</div>";
+			ok.disabled = true;
+			ok.textContent = "Allinea";
+			return;
+		}
+		const daCambiare = allineaLista.filter((i) => i.prossima_scadenza !== d).length;
+		box.innerHTML = allineaLista.map((i) => `<div class="all-riga${i.prossima_scadenza === d ? " uguale" : ""}"><b>${escapeHtml(nomeAll(i))}</b>
+      <span>${escapeHtml(formatDataBreve(i.prossima_scadenza))}${i.prossima_scadenza === d ? "" : " → " + escapeHtml(formatDataBreve(d))}</span></div>`).join("");
+		ok.disabled = !d || !daCambiare;
+		ok.textContent = !daCambiare ? "Già tutte allineate" : `Allinea ${daCambiare === 1 ? "1 cavallo" : daCambiare + " cavalli"} al ${formatDataBreve(d)}`;
+	}
+	async function confermaAllineaScadenze() {
+		const d = document.getElementById("all-data").value;
+		if (!d) {
+			showToast("Scegli la data");
+			return;
+		}
+		const ids = allineaLista.filter((i) => i.prossima_scadenza !== d).map((i) => i.id);
+		if (!ids.length) return;
+		const ok = document.getElementById("all-ok");
+		ok.disabled = true;
+		const { error } = await DB.allineaScadenze(ids, d);
+		if (error) {
+			ok.disabled = false;
+			showToast("Errore: " + error.message);
+			return;
+		}
+		closeModal("modal-allinea");
+		showToast(`${ids.length === 1 ? "1 cavallo" : ids.length + " cavalli"}: prossima scadenza ${formatDataBreve(d)}`);
+		try {
+			await openClienteDetail(currentClienteId);
+			await renderProDeadlines();
+		} catch (e) {}
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/034-strutture-collegate-a-equo-scuderia-prof.js
 	function isManiscalcoUtente() {
 		return !!currentUser && [
@@ -6798,7 +6921,9 @@
     <div class="cli-chip-row">
       <button class="cli-chip" onclick="openChatThread(currentClienteId)"><span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi</button>
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
-    </div>`;
+    </div>
+    <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>`;
+		renderCicloStruttura(c);
 		renderProposteCliente(c);
 		const chipQr = document.getElementById("cli-chip-qr");
 		if (chipQr) chipQr.style.display = isStruttura(c) && c.centro_id ? "none" : "";
@@ -7252,7 +7377,7 @@
 		const [y1, m1, d1] = a.split("-").map(Number), [y2, m2, d2] = b.split("-").map(Number);
 		return Math.round((new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1)) / 864e5);
 	}
-	async function giorniRichiamoSuggeriti(tipo, cavallo_cliente_id, horse_id, escludiId) {
+	async function giorniRichiamoSuggeriti(tipo, cavallo_cliente_id, horse_id, escludiId, clienteId) {
 		if (!TIPO_FERRATURA_INTERVALLI[tipo]) return { giorni: null };
 		if (!richiamiPredefiniti) await caricaRichiamiPredefiniti();
 		const base = Number(richiamiPredefiniti?.[tipo]) || TIPO_FERRATURA_INTERVALLI[tipo];
@@ -7268,6 +7393,12 @@
 		}
 		const g = prec ? giorniTra(prec.data_intervento, prec.prossima_scadenza) : null;
 		const prima = prec ? prec.prossima_scadenza : null;
+		const gs = clienteId ? intervalloStruttura(clienteId) : null;
+		if (gs) return {
+			giorni: gs,
+			daStruttura: true,
+			prima
+		};
 		return g >= 1 && g <= 60 ? {
 			giorni: g,
 			daCavallo: true,
@@ -7286,7 +7417,7 @@
 			year: "numeric"
 		});
 	}
-	function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, pagamento, importo, importi, prima, ferri }) {
+	function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, daCavallo, daStruttura, pagamento, importo, importi, prima, ferri }) {
 		return new Promise((resolve) => {
 			richiamoStato = {
 				resolve,
@@ -7294,6 +7425,7 @@
 				data_intervento,
 				etichetta: [TIPO_INTERVENTO_LABEL_APP[tipo] || tipo_altro || "Intervento", cavallo].filter(Boolean).join(" · "),
 				daCavallo,
+				daStruttura,
 				pagamento,
 				prima: prima && giorni != null ? prima : null,
 				comePrima: false,
@@ -7434,7 +7566,7 @@
 		if (r.giorni == null) return;
 		document.getElementById("ric-giorni-txt").textContent = r.giorni + (r.giorni === 1 ? " giorno" : " giorni");
 		const quando = dataRichiamoTesto(r.data_intervento, r.giorni);
-		document.getElementById("ric-dettaglio").textContent = `${r.etichetta} · ${quando}` + (r.daCavallo ? " (come l'ultima volta)" : "");
+		document.getElementById("ric-dettaglio").textContent = `${r.etichetta} · ${quando}` + (r.daStruttura ? " (intervallo della struttura)" : r.daCavallo ? " (come l'ultima volta)" : "");
 		document.getElementById("ric-dettaglio2").textContent = `Prossimo intervento: ${quando}`;
 	}
 	function richiamoCambia() {
@@ -7487,7 +7619,7 @@
 	}
 	var richiamoComePrimaScelto = null;
 	async function richiamoPerFatto(e) {
-		const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id);
+		const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
 		richiamoPagamentoScelto = null;
 		richiamoImportiScelti = null;
 		richiamoFerriScelti = null;
@@ -7513,6 +7645,7 @@
 			cavallo: e.cavallo || agNomeCavalloSicuro(e),
 			giorni: s.giorni || null,
 			daCavallo: s.daCavallo,
+			daStruttura: s.daStruttura,
 			pagamento: e.stato_pagamento || "da_saldare",
 			prima: s.prima,
 			ferri,
@@ -8509,6 +8642,11 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		allineaRender,
+		apriAllineaScadenze,
+		cicloCambia,
+		cicloTogli,
+		confermaAllineaScadenze,
 		ferDettaglio,
 		ferStatoSistema,
 		impostaMisuraPredefinita,

@@ -205,4 +205,20 @@ Object.assign(DB, {
   async importDecidi(id, scelta, importo){
     return await sb.rpc("equo_import_decidi", { p_id: id, p_scelta: scelta, p_importo: importo });
   },
+  /* -- Scadenze della struttura (24/10/2026): ultimi interventi fatti dei cavalli di un cliente, allineamento -- */
+  async ultimiFattiCliente(clienteId, tipi){
+    if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => i.cliente_mascalcia_id === clienteId && i.stato === "fatto" && tipi.includes(i.tipo_ferratura))
+      .map(i => ({ ...i, cavalli_clienti_mascalcia: { nome: (demoState.cavalliClientiMascalcia || []).find(c => c.id === i.cavallo_cliente_id)?.nome || null } }))
+      .sort((a, b) => b.data_intervento.localeCompare(a.data_intervento));
+    const { data, error } = await sb.from("interventi_mascalcia").select("id,data_intervento,prossima_scadenza,cavallo_cliente_id,horse_id,tipo_ferratura,cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).eq("cliente_mascalcia_id", clienteId).eq("stato", "fatto").in("tipo_ferratura", tipi)
+      .order("data_intervento", { ascending: false }).order("created_at", { ascending: false }).limit(1000);
+    if(error) console.warn("ultimiFattiCliente:", error.message);
+    return error ? [] : (data || []);
+  },
+  async allineaScadenze(ids, data){
+    if(DEMO_MODE){ (demoState.interventiMascalcia || []).forEach(i => { if(ids.includes(i.id)) i.prossima_scadenza = data; }); return { error: null }; }
+    const { error } = await sb.from("interventi_mascalcia").update({ prossima_scadenza: data }).in("id", ids).eq("maniscalco_id", currentUser.id);
+    return { error };
+  },
 });
