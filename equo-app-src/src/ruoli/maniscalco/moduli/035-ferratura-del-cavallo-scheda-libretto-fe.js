@@ -2,7 +2,7 @@
 import { loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { cavalliEditCache, messaggioErroreCollegaCliente, openClienteDetail, renderCavalliEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
-import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraNorm, misuraPredefinita } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
@@ -48,7 +48,7 @@ let ferStato = null;
 // cv: cavallo (chiave, id, nome, campi ferro); clienteId: per creare la riga se il cavallo è solo «su Equo»; dopo: callback(cv)
 function apriSchedaFerratura(cv, clienteId, dopo, extra){
   if(!cv) return;
-  const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(String(cv.ferro_numero)) : -1;
+  const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(misuraNorm(cv.ferro_numero)) : -1;
   // senza misura salvata si parte dalla misura che il maniscalco usa di solito
   ferStato = { cv, clienteId, dopo, lavoro: lavoroCav(cv), s: cv.ferro_numero ? (cv.ferro_sistema || "italiana") : misuraPredefinita(), idx: n >= 0 ? n : -1,
     ft: cv.ferro_tipo || "standard", ftp: cv.ferro_tipo_post || null,

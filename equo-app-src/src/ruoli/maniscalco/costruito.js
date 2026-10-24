@@ -1152,9 +1152,9 @@
 			"9"
 		],
 		olandese: [
-			"4/0",
-			"3/0",
-			"2/0",
+			"4x0",
+			"3x0",
+			"2x0",
 			"0",
 			"1",
 			"2",
@@ -1163,7 +1163,7 @@
 			"5"
 		],
 		tedesca: [
-			"2/0",
+			"2x0",
 			"0",
 			"1",
 			"2",
@@ -1175,10 +1175,13 @@
 		]
 	};
 	var MISURA_SISTEMA_LABEL = {
-		italiana: "IT",
-		olandese: "NL",
-		tedesca: "DE"
+		italiana: "italiana",
+		olandese: "olandese",
+		tedesca: "tedesca"
 	};
+	function misuraNorm(n) {
+		return n == null ? n : String(n).replace("/", "x");
+	}
 	var misuraScrollTimer = null;
 	function isoLocale(d) {
 		const p = (n) => String(n).padStart(2, "0");
@@ -1234,7 +1237,7 @@
 		riga.style.display = vedi ? "flex" : "none";
 		if (!vedi) document.getElementById("intervento-gia-fatto").checked = false;
 	}
-	function misuraPredefinita(ripiego = "italiana") {
+	function misuraPredefinita(ripiego = "olandese") {
 		return currentUser && MISURE_FERRO[currentUser.ferroSistema] ? currentUser.ferroSistema : ripiego;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/042-incassi-pro.js
@@ -2939,13 +2942,13 @@
 		let misuraTxt = "";
 		if (e.numero_ferro) {
 			const sis = e.misura_sistema || "italiana";
-			const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(String(e.numero_ferro)) : -1;
-			misuraTxt = e.numero_ferro + " (" + {
-				italiana: "Italiana",
-				olandese: "Olandese/Int.",
-				tedesca: "Tedesca"
+			const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(misuraNorm(e.numero_ferro)) : -1;
+			misuraTxt = misuraNorm(e.numero_ferro) + " (" + {
+				italiana: "italiana",
+				olandese: "olandese",
+				tedesca: "tedesca"
 			}[sis] + ")";
-			if (idx >= 0) misuraTxt += " — IT " + MISURE_FERRO.italiana[idx] + " · NL " + MISURE_FERRO.olandese[idx] + " · DE " + MISURE_FERRO.tedesca[idx];
+			if (idx >= 0) misuraTxt += " — italiana " + MISURE_FERRO.italiana[idx] + " · olandese " + MISURE_FERRO.olandese[idx] + " · tedesca " + MISURE_FERRO.tedesca[idx];
 		}
 		const righe = [
 			["Cavallo", agNomeCavallo(e) || "—"],
@@ -5714,7 +5717,7 @@
 	var ferroEditKey = null;
 	var quantitaToccata = false;
 	function siglaFerro(s, n) {
-		return n ? "n. " + n + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : "";
+		return n ? "n. " + misuraNorm(n) + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : "";
 	}
 	function ferroStd(c) {
 		return c && c.ferro_numero ? {
@@ -5724,8 +5727,8 @@
 	}
 	function ferroUguale(a, b) {
 		if (!a || !b) return !a && !b;
-		const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(String(a.n)) : -1;
-		const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(String(b.n)) : -1;
+		const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(misuraNorm(a.n)) : -1;
+		const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(misuraNorm(b.n)) : -1;
 		return a.s === b.s ? String(a.n) === String(b.n) : ia >= 0 && ia === ib;
 	}
 	function cavalliSceltiIntervento() {
@@ -6524,7 +6527,7 @@
 	var ferStato = null;
 	function apriSchedaFerratura(cv, clienteId, dopo, extra) {
 		if (!cv) return;
-		const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(String(cv.ferro_numero)) : -1;
+		const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(misuraNorm(cv.ferro_numero)) : -1;
 		ferStato = {
 			cv,
 			clienteId,
@@ -7245,7 +7248,7 @@
 			n: null
 		};
 		document.getElementById("ferro-misura-sistema").value = f.s;
-		const idx = f.n ? MISURE_FERRO[f.s].indexOf(String(f.n)) : -1;
+		const idx = f.n ? MISURE_FERRO[f.s].indexOf(misuraNorm(f.n)) : -1;
 		misuraIndiceFerro = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
 		document.getElementById("ferro-cav-togli").style.display = cv.ferro_numero ? "block" : "none";
 		openModal("modal-ferro-cavallo");

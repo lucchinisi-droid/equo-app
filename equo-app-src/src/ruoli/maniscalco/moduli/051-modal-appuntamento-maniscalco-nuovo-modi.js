@@ -3,11 +3,13 @@
 // Tabella misure ferri: stessa riga = stessa misura nei 3 sistemi (IT 1-9)
 const MISURE_FERRO = {
   italiana: ["1","2","3","4","5","6","7","8","9"],
-  olandese: ["4/0","3/0","2/0","0","1","2","3","4","5"],
-  tedesca:  ["2/0","0","1","2","3","4","5","6","7"]
+  olandese: ["4x0","3x0","2x0","0","1","2","3","4","5"],
+  tedesca:  ["2x0","0","1","2","3","4","5","6","7"]
 };
 /* -> stato-condiviso.js */ // riga IT 4 = NL 0 = DE 2
-const MISURA_SISTEMA_LABEL = { italiana: "IT", olandese: "NL", tedesca: "DE" };
+// 24/10/2026: nome intero del sistema (prima IT / NL / DE) e misure piccole con la «x» (4x0, prima 4/0)
+const MISURA_SISTEMA_LABEL = { italiana: "italiana", olandese: "olandese", tedesca: "tedesca" };
+function misuraNorm(n){ return n == null ? n : String(n).replace("/", "x"); }
 /* -> stato-condiviso.js */
 let misuraScrollTimer = null;
 /* -> stato-condiviso.js */
@@ -69,6 +71,6 @@ function aggiornaGiaFatto(){
 
 
 // misura che il maniscalco usa di solito (profiles.ferro_sistema_predefinito): i cavalli senza misura partono da questa
-function misuraPredefinita(ripiego = "italiana"){ return (currentUser && MISURE_FERRO[currentUser.ferroSistema]) ? currentUser.ferroSistema : ripiego; }
+function misuraPredefinita(ripiego = "olandese"){ return (currentUser && MISURE_FERRO[currentUser.ferroSistema]) ? currentUser.ferroSistema : ripiego; }
 
-export { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, renderMisuraWheel, selezionaMisura };
+export { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraNorm, misuraPredefinita, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, renderMisuraWheel, selezionaMisura };

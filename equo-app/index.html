@@ -4424,9 +4424,9 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
         <button type="button" onclick="ferMisura(1)" aria-label="Misura più grande">+</button>
       </div>
       <select class="input" id="fer-sistema" onchange="ferSistema()" style="margin:8px 0 4px">
+        <option value="olandese">Misura olandese / internazionale</option>
         <option value="italiana">Misura italiana</option>
-        <option value="olandese">Olandese / Internazionale</option>
-        <option value="tedesca">Tedesca</option>
+        <option value="tedesca">Misura tedesca</option>
       </select>
       <div class="fer-sistema-pref" id="fer-sistema-pref"></div>
       <label class="input-label" id="fer-tipo-label">Tipo di ferro</label>
@@ -6755,9 +6755,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			"9"
 		],
 		olandese: [
-			"4/0",
-			"3/0",
-			"2/0",
+			"4x0",
+			"3x0",
+			"2x0",
 			"0",
 			"1",
 			"2",
@@ -6766,7 +6766,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			"5"
 		],
 		tedesca: [
-			"2/0",
+			"2x0",
 			"0",
 			"1",
 			"2",
@@ -6778,10 +6778,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		]
 	};
 	var MISURA_SISTEMA_LABEL = {
-		italiana: "IT",
-		olandese: "NL",
-		tedesca: "DE"
+		italiana: "italiana",
+		olandese: "olandese",
+		tedesca: "tedesca"
 	};
+	function misuraNorm(n) {
+		return n == null ? n : String(n).replace("/", "x");
+	}
 	var misuraScrollTimer = null;
 	function isoLocale(d) {
 		const p = (n) => String(n).padStart(2, "0");
@@ -6837,7 +6840,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		riga.style.display = vedi ? "flex" : "none";
 		if (!vedi) document.getElementById("intervento-gia-fatto").checked = false;
 	}
-	function misuraPredefinita(ripiego = "italiana") {
+	function misuraPredefinita(ripiego = "olandese") {
 		return currentUser && MISURE_FERRO[currentUser.ferroSistema] ? currentUser.ferroSistema : ripiego;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/042-incassi-pro.js
@@ -8542,13 +8545,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		let misuraTxt = "";
 		if (e.numero_ferro) {
 			const sis = e.misura_sistema || "italiana";
-			const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(String(e.numero_ferro)) : -1;
-			misuraTxt = e.numero_ferro + " (" + {
-				italiana: "Italiana",
-				olandese: "Olandese/Int.",
-				tedesca: "Tedesca"
+			const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(misuraNorm(e.numero_ferro)) : -1;
+			misuraTxt = misuraNorm(e.numero_ferro) + " (" + {
+				italiana: "italiana",
+				olandese: "olandese",
+				tedesca: "tedesca"
 			}[sis] + ")";
-			if (idx >= 0) misuraTxt += " — IT " + MISURE_FERRO.italiana[idx] + " · NL " + MISURE_FERRO.olandese[idx] + " · DE " + MISURE_FERRO.tedesca[idx];
+			if (idx >= 0) misuraTxt += " — italiana " + MISURE_FERRO.italiana[idx] + " · olandese " + MISURE_FERRO.olandese[idx] + " · tedesca " + MISURE_FERRO.tedesca[idx];
 		}
 		const righe = [
 			["Cavallo", agNomeCavallo(e) || "—"],
@@ -11317,7 +11320,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	var ferroEditKey = null;
 	var quantitaToccata = false;
 	function siglaFerro(s, n) {
-		return n ? "n. " + n + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : "";
+		return n ? "n. " + misuraNorm(n) + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : "";
 	}
 	function ferroStd(c) {
 		return c && c.ferro_numero ? {
@@ -11327,8 +11330,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	function ferroUguale(a, b) {
 		if (!a || !b) return !a && !b;
-		const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(String(a.n)) : -1;
-		const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(String(b.n)) : -1;
+		const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(misuraNorm(a.n)) : -1;
+		const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(misuraNorm(b.n)) : -1;
 		return a.s === b.s ? String(a.n) === String(b.n) : ia >= 0 && ia === ib;
 	}
 	function cavalliSceltiIntervento() {
@@ -12127,7 +12130,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	var ferStato = null;
 	function apriSchedaFerratura(cv, clienteId, dopo, extra) {
 		if (!cv) return;
-		const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(String(cv.ferro_numero)) : -1;
+		const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(misuraNorm(cv.ferro_numero)) : -1;
 		ferStato = {
 			cv,
 			clienteId,
@@ -12848,7 +12851,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			n: null
 		};
 		document.getElementById("ferro-misura-sistema").value = f.s;
-		const idx = f.n ? MISURE_FERRO[f.s].indexOf(String(f.n)) : -1;
+		const idx = f.n ? MISURE_FERRO[f.s].indexOf(misuraNorm(f.n)) : -1;
 		misuraIndiceFerro = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
 		document.getElementById("ferro-cav-togli").style.display = cv.ferro_numero ? "block" : "none";
 		openModal("modal-ferro-cavallo");

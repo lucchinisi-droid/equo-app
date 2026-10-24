@@ -6,7 +6,7 @@ import { iniziale, loadClienteInterventi } from "./037-scheda-cliente-a-box-sche
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { chiediPrezzi, promemoriaPrezzoAttivo } from "./049-prezzo-mancante-promemoria-salvando-un-a.js";
-import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraNorm, misuraPredefinita, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
 import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
@@ -16,12 +16,12 @@ import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js
 let ferroOverride = {};      // chiave cavallo → { s, n, origine } ferro diverso solo per questo appuntamento
 let ferroEditKey = null;
 let quantitaCorrente = 4, quantitaToccata = false, quantitaTimer = null, quantitaRenderAt = 0;
-function siglaFerro(s, n){ return n ? "n. " + n + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : ""; }
+function siglaFerro(s, n){ return n ? "n. " + misuraNorm(n) + " " + (MISURA_SISTEMA_LABEL[s || "italiana"] || "") : ""; }
 function ferroStd(c){ return c && c.ferro_numero ? { s: c.ferro_sistema || "italiana", n: String(c.ferro_numero) } : null; }
 function ferroUguale(a, b){
   if(!a || !b) return !a && !b;
-  const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(String(a.n)) : -1;
-  const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(String(b.n)) : -1;
+  const ia = MISURE_FERRO[a.s] ? MISURE_FERRO[a.s].indexOf(misuraNorm(a.n)) : -1;
+  const ib = MISURE_FERRO[b.s] ? MISURE_FERRO[b.s].indexOf(misuraNorm(b.n)) : -1;
   return a.s === b.s ? String(a.n) === String(b.n) : (ia >= 0 && ia === ib);
 }
 function tipoConFerri(){ const t = document.getElementById("intervento-tipo").value; return t === "ferratura" || t === "mezza_ferratura"; }
@@ -57,7 +57,7 @@ function apriEditorFerro(k){
   ferroEditKey = k;
   const f = ferroOverride[k] || ferroStd(cavalliClienteCorrente.find(c => c.key === k)) || { s: misuraPredefinita("olandese"), n: null };
   document.getElementById("intervento-misura-sistema").value = f.s || misuraPredefinita("olandese");
-  const idx = f.n ? MISURE_FERRO[f.s || misuraPredefinita("olandese")].indexOf(String(f.n)) : -1;
+  const idx = f.n ? MISURE_FERRO[f.s || misuraPredefinita("olandese")].indexOf(misuraNorm(f.n)) : -1;
   misuraIndiceCorrente = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
   document.getElementById("intervento-ferro-editor-tit").textContent = `Ferro per ${nomeCavalloKey(k)}` + (k === "__nuovo_cavallo__" ? "" : " · solo per questo appuntamento");
   document.getElementById("intervento-ferro-editor").style.display = "block";

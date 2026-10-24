@@ -1,5 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { MISURE_FERRO } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURE_FERRO, misuraNorm } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipo, agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
 /* ---------- PDF APPUNTAMENTO + INVIO IN CHAT (maniscalco) ---------- */
 let jsPdfPromise = null;
@@ -74,9 +74,9 @@ async function creaPdfEvento(e){
   let misuraTxt = "";
   if(e.numero_ferro){
     const sis = e.misura_sistema || "italiana";
-    const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(String(e.numero_ferro)) : -1;
-    misuraTxt = e.numero_ferro + " (" + ({ italiana: "Italiana", olandese: "Olandese/Int.", tedesca: "Tedesca" }[sis]) + ")";
-    if(idx >= 0) misuraTxt += " — IT " + MISURE_FERRO.italiana[idx] + " · NL " + MISURE_FERRO.olandese[idx] + " · DE " + MISURE_FERRO.tedesca[idx];
+    const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(misuraNorm(e.numero_ferro)) : -1;
+    misuraTxt = misuraNorm(e.numero_ferro) + " (" + ({ italiana: "italiana", olandese: "olandese", tedesca: "tedesca" }[sis]) + ")";
+    if(idx >= 0) misuraTxt += " — italiana " + MISURE_FERRO.italiana[idx] + " · olandese " + MISURE_FERRO.olandese[idx] + " · tedesca " + MISURE_FERRO.tedesca[idx];
   }
   const righe = [
     ["Cavallo", agNomeCavallo(e) || "—"],
