@@ -1,6 +1,8 @@
 -- 24/10/2026 IMPORTAZIONE FRANCESCO BIZZARRI · PARTE 2 di 2: strutture, cavalli, ferrature e scelte per il pop-up
 -- Da eseguire DOPO la parte 1. Tocca solo l'account di Francesco Bizzarri (maniscalco).
 -- Se e gia stata eseguita si ferma con un messaggio e non cambia nulla. Se qualcosa va storto non resta niente a meta.
+-- Guarda i dati di Francesco nel momento in cui gira: non crea doppioni di strutture o cavalli che ha gia aggiunto,
+-- non aggiunge ferrature a cavalli che ne hanno gia una, e prepara solo le scelte ancora aperte.
 do $imp$
 declare
   v_m uuid := 'f170bc74-a189-4d68-bab5-31d9613726bb';
@@ -17,11 +19,11 @@ begin
   end if;
 
   -- 1) clienti gia presenti: nomi della vecchia app, tutti strutture, intervalli noti
-  update clienti_mascalcia set nome = 'Bracalenti F.', tipo_cliente = 'struttura', intervallo_giorni = 35 where id = '1a98270a-f70c-43fa-a77d-0dc745dfde48' and maniscalco_id = v_m;
-  update clienti_mascalcia set nome = 'Centro Ippico Levante' where id = 'ad654c6f-6bb8-46be-8eea-f34971a4618b' and maniscalco_id = v_m;
-  update clienti_mascalcia set nome = 'Corsieri Jumping Horse' where id = '8c63bab4-7fe9-4052-bd22-526aea44313d' and maniscalco_id = v_m;
-  update clienti_mascalcia set nome = 'Tor Carbone', intervallo_giorni = 35 where id = '64a276f6-5359-4656-a54a-ed7c0ca66d1d' and maniscalco_id = v_m;
-  update clienti_mascalcia set nome = 'Trekking Club' where id = 'c550648d-2283-4fa8-b1f8-06fd2978215d' and maniscalco_id = v_m;
+  update clienti_mascalcia set nome = 'Bracalenti F.', tipo_cliente = 'struttura', intervallo_giorni = 35 where id = '1a98270a-f70c-43fa-a77d-0dc745dfde48' and maniscalco_id = v_m and nome = 'Bracalenti';
+  update clienti_mascalcia set nome = 'Centro Ippico Levante' where id = 'ad654c6f-6bb8-46be-8eea-f34971a4618b' and maniscalco_id = v_m and nome = 'Centro ippico levante';
+  update clienti_mascalcia set nome = 'Corsieri Jumping Horse' where id = '8c63bab4-7fe9-4052-bd22-526aea44313d' and maniscalco_id = v_m and nome = 'Jumping horse';
+  update clienti_mascalcia set nome = 'Tor Carbone', intervallo_giorni = 35 where id = '64a276f6-5359-4656-a54a-ed7c0ca66d1d' and maniscalco_id = v_m and nome = 'Tor carbone';
+  update clienti_mascalcia set nome = 'Trekking Club' where id = 'c550648d-2283-4fa8-b1f8-06fd2978215d' and maniscalco_id = v_m and nome = 'Trekking club';
   update clienti_mascalcia set intervallo_giorni = 40 where id = '6bc7bedf-3908-4ece-ad63-7d6a5b713bf8' and maniscalco_id = v_m;
 
   -- 2) il doppione vuoto "Centro ippico levante" (proprietario, senza cavalli ne ferrature) viene archiviato
@@ -31,10 +33,10 @@ begin
      and not exists (select 1 from interventi_mascalcia where cliente_mascalcia_id = 'cb8a8130-ac56-4089-b253-93e8757b67f9');
 
   -- 3) cavalli gia presenti: nomi della vecchia app
-  update cavalli_clienti_mascalcia set nome = 'Beddeche' where id = '799a15c8-69ff-4dc1-9f13-39de7fc94029' and maniscalco_id = v_m;
-  update cavalli_clienti_mascalcia set nome = 'Waky flayed' where id = '9763636f-b783-4c3f-8592-6b371a1e5769' and maniscalco_id = v_m;
-  update cavalli_clienti_mascalcia set nome = 'Mystral' where id = 'f5f21c8f-2d34-44e2-a8a6-dbd865a96614' and maniscalco_id = v_m;
-  update cavalli_clienti_mascalcia set nome = 'Blu' where id = 'a7f3a635-9188-4198-ae07-836ec3645362' and maniscalco_id = v_m;
+  update cavalli_clienti_mascalcia set nome = 'Beddeche' where id = '799a15c8-69ff-4dc1-9f13-39de7fc94029' and maniscalco_id = v_m and nome = 'Beddeke';
+  update cavalli_clienti_mascalcia set nome = 'Waky flayed' where id = '9763636f-b783-4c3f-8592-6b371a1e5769' and maniscalco_id = v_m and nome = 'Waky Flayer';
+  update cavalli_clienti_mascalcia set nome = 'Mystral' where id = 'f5f21c8f-2d34-44e2-a8a6-dbd865a96614' and maniscalco_id = v_m and nome = 'Mistral';
+  update cavalli_clienti_mascalcia set nome = 'Blu' where id = 'a7f3a635-9188-4198-ae07-836ec3645362' and maniscalco_id = v_m and nome = 'Blue';
 
   -- 4) le 2 ferrature di In the mood passano sulla scheda di Corsieri Jumping Horse (il debitore lo sceglie Francesco)
   update interventi_mascalcia set cavallo_cliente_id = '40cb46f8-36a0-4e18-b5b8-6811a6f5bd59'
@@ -48,6 +50,12 @@ begin
     'Tevere Time', 'f8add543-63c1-42d0-b4f6-9c84cf82b0a4', 'Tor Carbone', '64a276f6-5359-4656-a54a-ed7c0ca66d1d',
     'Trekking Club', 'c550648d-2283-4fa8-b1f8-06fd2978215d');
   for r in select * from jsonb_array_elements(p->'nuove') loop
+    select id into v_id from clienti_mascalcia where maniscalco_id = v_m and archiviato_il is null and lower(trim(nome)) = lower(trim(r->>'nome')) limit 1;
+    if v_id is not null then
+      update clienti_mascalcia set intervallo_giorni = coalesce(intervallo_giorni, (r->>'intervallo')::integer), tipo_cliente = 'struttura' where id = v_id;
+      v_cli_mappa := v_cli_mappa || jsonb_build_object(r->>'nome', v_id);
+      continue;
+    end if;
     loop
       v_cod := 'EQUO-' || upper(substr(md5(random()::text || clock_timestamp()::text), 1, 5));
       exit when not exists (select 1 from clienti_mascalcia where codice_invito = v_cod);
@@ -61,7 +69,10 @@ begin
   for r in select * from jsonb_array_elements(p->'cavalli') loop
     v_cli := (v_cli_mappa->>(r->>'s'))::uuid;
     if v_cli is null then raise exception 'Struttura non trovata: %', r->>'s'; end if;
-    insert into cavalli_clienti_mascalcia (maniscalco_id, cliente_mascalcia_id, nome) values (v_m, v_cli, r->>'n') returning id into v_id;
+    select id into v_id from cavalli_clienti_mascalcia where maniscalco_id = v_m and cliente_mascalcia_id = v_cli and lower(trim(nome)) = lower(trim(r->>'n')) limit 1;
+    if v_id is null then
+      insert into cavalli_clienti_mascalcia (maniscalco_id, cliente_mascalcia_id, nome) values (v_m, v_cli, r->>'n') returning id into v_id;
+    end if;
     v_cav_mappa := v_cav_mappa || jsonb_build_object((r->>'s') || '|' || (r->>'n'), v_id);
   end loop;
 
@@ -70,6 +81,7 @@ begin
     v_cli := (v_cli_mappa->>(r->>'s'))::uuid;
     v_cav := coalesce((r->>'id')::uuid, (v_cav_mappa->>((r->>'s') || '|' || (r->>'n')))::uuid);
     if v_cli is null or v_cav is null then raise exception 'Cavallo o struttura non trovati: % / %', r->>'s', r->>'n'; end if;
+    if exists (select 1 from interventi_mascalcia where cavallo_cliente_id = v_cav and stato = 'fatto') then continue; end if;
     insert into interventi_mascalcia (maniscalco_id, cliente_mascalcia_id, cavallo_cliente_id, tipo_ferratura, stato,
       data_intervento, prossima_scadenza, stato_pagamento, importo, note, data_da_confermare)
     values (v_m, v_cli, v_cav, 'ferratura', 'fatto', (r->>'data')::date, (r->>'prossima')::date, r->>'pag', (r->>'imp')::numeric, v_nota, (r->>'conf')::boolean)
@@ -85,22 +97,51 @@ begin
   end loop;
 
   -- 8) le scelte di Francesco per il pop-up
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 10, 'rinomina_cavallo', $t$Prince · Macchiarella$t$, $t$Su Equo a Macchiarella c'è il cavallo "Prince". Nella vecchia app a Macchiarella c'è "Prince M". Sono lo stesso cavallo?$t$, $t$[{"k": "si", "t": "Sì, è lo stesso: rinominalo \"Prince M\""}, {"k": "no", "t": "No, sono due cavalli diversi: aggiungi \"Prince M\""}]$t$::jsonb, $t${"cavallo_id": "a0bf60b8-0b5e-4b74-8e82-ba2f0c5e64a1", "nuovo_nome": "Prince M", "se_no": {"cliente_id": "dfccdda6-fb01-44bf-97d6-4d87d8e275ed", "nome": "Prince M", "data": "2026-10-09", "prossima": "2026-11-18", "pagamento": "saldato"}}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 20, 'debitore', $t$In the mood · Corsieri Jumping Horse$t$, $t$Le 2 ferrature di In the mood del 07/10/2026 e del 18/10/2026 (saldate) erano registrate sotto il cliente "Ciani R.", che hai archiviato. Il cavallo ora è sotto Corsieri Jumping Horse. Chi era il debitore di queste ferrature?$t$, $t$[{"k": "ciani", "t": "Ciani R."}, {"k": "struttura", "t": "Corsieri Jumping Horse"}]$t$::jsonb, $t${"interventi": ["7ef2fa84-6adc-4f13-8d0b-c8564ca38156", "bebfd5d9-45c6-4d23-ae37-a3130c1a569d"], "cliente_struttura": "8c63bab4-7fe9-4052-bd22-526aea44313d"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 100, 'pagamento_conflitto', $t$Principessa · Centro ippico Cascianese$t$, $t$Ferratura del 18/10/2026 da 10 €: su Equo risulta saldata, nella vecchia app risulta da saldare. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Saldata (come su Equo)"}, {"k": "vecchia", "t": "Da saldare (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "700400e3-e170-498b-8512-602cf8d20805", "vecchia_pagamento": "da_saldare"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 101, 'pagamento_conflitto', $t$Lascaux · Macchiarella$t$, $t$Ferratura del 23/10/2026 da 12 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "e610c1c8-751f-475e-b2ec-b6ff77e78872", "vecchia_pagamento": "saldato"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 102, 'pagamento_conflitto', $t$Prince · Macchiarella$t$, $t$Ferratura del 23/10/2026 da 14 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "aad91b33-3e20-42c4-893e-1b53b51868a8", "vecchia_pagamento": "saldato"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 103, 'pagamento_conflitto', $t$Jolinda · Macchiarella$t$, $t$Ferratura del 23/10/2026 da 10 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "71e41ff7-de7e-42aa-958f-13cad681cb00", "vecchia_pagamento": "saldato"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 104, 'pagamento_conflitto', $t$Fantastico · Tor Carbone$t$, $t$Ferratura del 19/10/2026 da 12 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "e14924d6-ce24-448c-88fd-0c854aa735e3", "vecchia_pagamento": "saldato"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 105, 'pagamento_conflitto', $t$Falin · Trekking Club$t$, $t$Ferratura del 23/10/2026 da 9 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "3c0bc607-1215-47c2-ad96-7c9583c6866a", "vecchia_pagamento": "saldato"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 106, 'pagamento_conflitto', $t$Redival · Trekking Club$t$, $t$Ferratura del 23/10/2026 da 9 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "d07a081b-cd0e-4dfa-a255-981955194b81", "vecchia_pagamento": "saldato"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 200, 'appuntamento_vecchio', $t$Ridam · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (10 €) rimasto in agenda e mai chiuso. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "70c60fdc-37c0-46b1-9639-2d5141cb2176"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 201, 'appuntamento_vecchio', $t$Jolinda · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (10 €) rimasto in agenda e mai chiuso. Su Equo c'è già la ferratura del 23/10/2026. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "2fc88c9e-5b78-4ed7-a2de-293405cb85d7"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 202, 'appuntamento_vecchio', $t$Bombastik · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (10 €) rimasto in agenda e mai chiuso. Nella vecchia app Bombastik risulta da saldare 10 €. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "2df381c5-2ffe-4e53-9607-3f8fe626c5ea"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 203, 'appuntamento_vecchio', $t$Lascaux · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (12 €) rimasto in agenda e mai chiuso. Su Equo c'è già la ferratura del 23/10/2026. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "7ae4f3e9-c6b1-4d32-82c1-ce6034138de4"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 204, 'appuntamento_vecchio', $t$Prince · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (14 €) rimasto in agenda e mai chiuso. Su Equo c'è già la ferratura del 23/10/2026. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "b8d984f3-3319-485a-823c-4fac7cc4f8fc"}$t$::jsonb);
-  insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 205, 'appuntamento_vecchio', $t$Senza cavallo · Corsieri Jumping Horse$t$, $t$Appuntamento del 21/10/2026 (10 €) rimasto in agenda e mai chiuso. Nell'appuntamento non è indicato il cavallo. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "c66568e3-a61c-4ee5-9f92-f7c7da773386"}$t$::jsonb);
-
+  if exists (select 1 from cavalli_clienti_mascalcia where id = 'a0bf60b8-0b5e-4b74-8e82-ba2f0c5e64a1' and nome = 'Prince') and not exists (select 1 from cavalli_clienti_mascalcia where maniscalco_id = v_m and cliente_mascalcia_id = 'dfccdda6-fb01-44bf-97d6-4d87d8e275ed' and lower(trim(nome)) = 'prince m') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 10, 'rinomina_cavallo', $t$Prince · Macchiarella$t$, $t$Su Equo a Macchiarella c'è il cavallo "Prince". Nella vecchia app a Macchiarella c'è "Prince M". Sono lo stesso cavallo?$t$, $t$[{"k": "si", "t": "Sì, è lo stesso: rinominalo \"Prince M\""}, {"k": "no", "t": "No, sono due cavalli diversi: aggiungi \"Prince M\""}]$t$::jsonb, $t${"cavallo_id": "a0bf60b8-0b5e-4b74-8e82-ba2f0c5e64a1", "nuovo_nome": "Prince M", "se_no": {"cliente_id": "dfccdda6-fb01-44bf-97d6-4d87d8e275ed", "nome": "Prince M", "data": "2026-10-09", "prossima": "2026-11-18", "pagamento": "saldato"}}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id in ('7ef2fa84-6adc-4f13-8d0b-c8564ca38156', 'bebfd5d9-45c6-4d23-ae37-a3130c1a569d') and cliente_mascalcia_id = 'e3018f29-7f1c-492c-b3a5-66b705b3daad') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 20, 'debitore', $t$In the mood · Corsieri Jumping Horse$t$, $t$Le 2 ferrature di In the mood del 07/10/2026 e del 18/10/2026 (saldate) erano registrate sotto il cliente "Ciani R.", che hai archiviato. Il cavallo ora è sotto Corsieri Jumping Horse. Chi era il debitore di queste ferrature?$t$, $t$[{"k": "ciani", "t": "Ciani R."}, {"k": "struttura", "t": "Corsieri Jumping Horse"}]$t$::jsonb, $t${"interventi": ["7ef2fa84-6adc-4f13-8d0b-c8564ca38156", "bebfd5d9-45c6-4d23-ae37-a3130c1a569d"], "cliente_struttura": "8c63bab4-7fe9-4052-bd22-526aea44313d"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '700400e3-e170-498b-8512-602cf8d20805' and stato = 'fatto' and stato_pagamento <> 'da_saldare') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 100, 'pagamento_conflitto', $t$Principessa · Centro ippico Cascianese$t$, $t$Ferratura del 18/10/2026 da 10 €: su Equo risulta saldata, nella vecchia app risulta da saldare. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Saldata (come su Equo)"}, {"k": "vecchia", "t": "Da saldare (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "700400e3-e170-498b-8512-602cf8d20805", "vecchia_pagamento": "da_saldare"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = 'e610c1c8-751f-475e-b2ec-b6ff77e78872' and stato = 'fatto' and stato_pagamento <> 'saldato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 101, 'pagamento_conflitto', $t$Lascaux · Macchiarella$t$, $t$Ferratura del 23/10/2026 da 12 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "e610c1c8-751f-475e-b2ec-b6ff77e78872", "vecchia_pagamento": "saldato"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = 'aad91b33-3e20-42c4-893e-1b53b51868a8' and stato = 'fatto' and stato_pagamento <> 'saldato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 102, 'pagamento_conflitto', $t$Prince · Macchiarella$t$, $t$Ferratura del 23/10/2026 da 14 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "aad91b33-3e20-42c4-893e-1b53b51868a8", "vecchia_pagamento": "saldato"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '71e41ff7-de7e-42aa-958f-13cad681cb00' and stato = 'fatto' and stato_pagamento <> 'saldato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 103, 'pagamento_conflitto', $t$Jolinda · Macchiarella$t$, $t$Ferratura del 23/10/2026 da 10 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "71e41ff7-de7e-42aa-958f-13cad681cb00", "vecchia_pagamento": "saldato"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = 'e14924d6-ce24-448c-88fd-0c854aa735e3' and stato = 'fatto' and stato_pagamento <> 'saldato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 104, 'pagamento_conflitto', $t$Fantastico · Tor Carbone$t$, $t$Ferratura del 19/10/2026 da 12 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "e14924d6-ce24-448c-88fd-0c854aa735e3", "vecchia_pagamento": "saldato"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '3c0bc607-1215-47c2-ad96-7c9583c6866a' and stato = 'fatto' and stato_pagamento <> 'saldato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 105, 'pagamento_conflitto', $t$Falin · Trekking Club$t$, $t$Ferratura del 23/10/2026 da 9 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "3c0bc607-1215-47c2-ad96-7c9583c6866a", "vecchia_pagamento": "saldato"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = 'd07a081b-cd0e-4dfa-a255-981955194b81' and stato = 'fatto' and stato_pagamento <> 'saldato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 106, 'pagamento_conflitto', $t$Redival · Trekking Club$t$, $t$Ferratura del 23/10/2026 da 9 €: su Equo risulta da saldare, nella vecchia app risulta saldata. Qual è giusto?$t$, $t$[{"k": "equo", "t": "Da saldare (come su Equo)"}, {"k": "vecchia", "t": "Saldata (come nella vecchia app)"}]$t$::jsonb, $t${"intervento_id": "d07a081b-cd0e-4dfa-a255-981955194b81", "vecchia_pagamento": "saldato"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '70c60fdc-37c0-46b1-9639-2d5141cb2176' and stato = 'programmato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 200, 'appuntamento_vecchio', $t$Ridam · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (10 €) rimasto in agenda e mai chiuso. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "70c60fdc-37c0-46b1-9639-2d5141cb2176"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '2fc88c9e-5b78-4ed7-a2de-293405cb85d7' and stato = 'programmato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 201, 'appuntamento_vecchio', $t$Jolinda · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (10 €) rimasto in agenda e mai chiuso. Su Equo c'è già la ferratura del 23/10/2026. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "2fc88c9e-5b78-4ed7-a2de-293405cb85d7"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '2df381c5-2ffe-4e53-9607-3f8fe626c5ea' and stato = 'programmato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 202, 'appuntamento_vecchio', $t$Bombastik · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (10 €) rimasto in agenda e mai chiuso. Nella vecchia app Bombastik risulta da saldare 10 €. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "2df381c5-2ffe-4e53-9607-3f8fe626c5ea"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = '7ae4f3e9-c6b1-4d32-82c1-ce6034138de4' and stato = 'programmato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 203, 'appuntamento_vecchio', $t$Lascaux · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (12 €) rimasto in agenda e mai chiuso. Su Equo c'è già la ferratura del 23/10/2026. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "7ae4f3e9-c6b1-4d32-82c1-ce6034138de4"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = 'b8d984f3-3319-485a-823c-4fac7cc4f8fc' and stato = 'programmato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 204, 'appuntamento_vecchio', $t$Prince · Macchiarella$t$, $t$Appuntamento del 14/10/2026 (14 €) rimasto in agenda e mai chiuso. Su Equo c'è già la ferratura del 23/10/2026. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "b8d984f3-3319-485a-823c-4fac7cc4f8fc"}$t$::jsonb);
+  end if;
+  if exists (select 1 from interventi_mascalcia where id = 'c66568e3-a61c-4ee5-9f92-f7c7da773386' and stato = 'programmato') then
+    insert into import_decisioni (maniscalco_id, ordine, tipo, titolo, testo, opzioni, dati) values (v_m, 205, 'appuntamento_vecchio', $t$Senza cavallo · Corsieri Jumping Horse$t$, $t$Appuntamento del 21/10/2026 (10 €) rimasto in agenda e mai chiuso. Nell'appuntamento non è indicato il cavallo. Com'è andata?$t$, $t$[{"k": "fatto_saldato", "t": "Fatto e pagato"}, {"k": "fatto_da_saldare", "t": "Fatto, da saldare"}, {"k": "annullato", "t": "Non fatto (annullalo)"}]$t$::jsonb, $t${"intervento_id": "c66568e3-a61c-4ee5-9f92-f7c7da773386"}$t$::jsonb);
+  end if;
   raise notice 'Importazione completata.';
 end
 $imp$;
