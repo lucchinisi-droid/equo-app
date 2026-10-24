@@ -11,7 +11,7 @@ async function openCodicePersonaleModal(){
   }
   const qrBox = document.getElementById("codice-personale-qr");
   qrBox.innerHTML = "";
-  if(window.QRCode){ new QRCode(qrBox, { text: codice, width: 160, height: 160 }); }
+  if(window.QRCode){ new QRCode(qrBox, { text: linkCodiceEquo(codice), width: 160, height: 160 }); }   // il QR apre Equo e collega
   closeModal("modal-menu");
   openModal("modal-codice-personale");
 }
@@ -19,7 +19,7 @@ async function openCodicePersonaleModal(){
 function copyCodicePersonale(){
   const codice = currentUser.codiceProfessionista;
   if(!codice) return;
-  const text = `Contattami su Equo con il codice ${codice} — scarica l'app su https://app.equohub.com`;
+  const text = codice + "\nhttps://app.equohub.com";
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(() => showToast("Codice copiato negli appunti!"))
       .catch(() => showToast("Non sono riuscito a copiare, riprova."));
@@ -31,7 +31,7 @@ function copyCodicePersonale(){
 function shareCodicePersonale(){
   const codice = currentUser.codiceProfessionista;
   if(!codice) return;
-  const text = `Contattami su Equo con il codice ${codice} — scarica l'app su https://app.equohub.com`;
+  const text = codice + "\nhttps://app.equohub.com";
   if(navigator.share){
     navigator.share({ text }).catch(() => {});
     return;

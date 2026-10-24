@@ -213,14 +213,14 @@ async function referralControlla(){
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", refMostraAvvisi); else setTimeout(refMostraAvvisi, 0);
 
 /* ==================== INVITO DEL PROFESSIONISTA DAL QR (25/10/2026) ====================
-   Link/QR app.equohub.com/?invito=EQUO-XXXXX (PDF di appuntamento, conto e resoconto; scheda cliente; «Invia l'invito»).
+   Link/QR app.equohub.com/?invito=EQUO-XXXXX (PDF di appuntamento, conto e resoconto; scheda cliente; «Condividi l'invito»).
    Il codice si ricorda 30 giorni sul telefono; appena c'è un profilo proprietario il collegamento parte da solo
    (riscatta_codice_maniscalco, la stessa di Chat → «Il tuo maniscalco» → Collega), poi la proposta dei cavalli preparati. */
 const INV_KEY = "equo-invito";
 (function invitoDaUrl(){
   const p = new URLSearchParams(location.search);
   const v = (p.get("invito") || "").trim().toUpperCase();
-  if(v && /^EQUO-[A-Z0-9-]{3,20}$/.test(v)){
+  if(v && tipoCodiceEquo(v)){
     lsSet(INV_KEY, JSON.stringify({ codice: v, t: Date.now() }));
     p.delete("invito");
     history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
@@ -249,6 +249,13 @@ async function invitoControlla(){
   if(!r) return;
   const ruoli = [currentUser.ruolo, currentUser.ruoloSecondario].filter(Boolean);
   if(!ruoli.includes("proprietario")) return;   // lo teniamo: si applica quando c'è il profilo proprietario
+  // codice personale di un proprietario o di un istruttore: chat o richiesta all'istruttore (stesse schermate del lettore QR)
+  if(["own", "tra", "med"].includes(tipoCodiceEquo(r.codice))){
+    if(currentUser.vistaAttiva !== "proprietario") return;
+    invitoCancella();
+    if(typeof gestisciCodiceScansionato === "function") gestisciCodiceScansionato(r.codice);
+    return;
+  }
   invitoInCorso = true;
   try{
     const res = await DB.riscattaCodiceManiscalco(r.codice);

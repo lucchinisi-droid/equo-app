@@ -85,7 +85,7 @@
 	function condividiInvitoCliente() {
 		const c = clienteDaInvitare((typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === currentClienteId));
 		if (!c) return;
-		const testo = "Ciao! Ti aspetto su Equo: vedi lavori, scadenze e pagamenti dei tuoi cavalli. Apri il link, crea il tuo account e siamo collegati: " + linkInvito(c.codice_invito);
+		const testo = c.codice_invito + "\n" + linkInvito(c.codice_invito);
 		if (navigator.share) {
 			navigator.share({ text: testo }).catch(() => {});
 			return;
@@ -7335,6 +7335,7 @@
 	var ERRORI_COLLEGA_CLIENTE = {
 		codice_non_valido: "Codice Equo non trovato. Controlla di averlo scritto bene.",
 		codice_tuo: "Questo è il tuo codice: serve quello del cliente.",
+		codice_professionista: "Questo è il codice di un professionista, non di un cliente. Il cliente trova il suo codice in Equo, menu → «Il tuo codice».",
 		gia_collegato_altro: "Questo cliente è già collegato a un altro account Equo.",
 		cliente_non_trovato: "Cliente non trovato.",
 		non_autenticato: "Sessione scaduta: esci e rientra."
@@ -7468,7 +7469,7 @@
 		document.querySelectorAll(".btn-archivia-cliente").forEach((b) => b.textContent = c.archiviato_il ? "Ripristina cliente" : "Archivia cliente");
 		document.getElementById("detail-cliente-code").textContent = c.codice_invito;
 		const linkHint = document.getElementById("detail-cliente-link-hint");
-		if (linkHint) linkHint.innerHTML = c.cliente_user_id ? "<strong style=\"color:var(--primary)\">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell'app." : isStruttura(c) ? "Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → \"Il tuo maniscalco\" → Collega), presto anche da Equo Scuderia." : "Fallo inquadrare al cliente con la fotocamera: si apre Equo, crea l'account e siete collegati. Oppure mandagli l'invito.";
+		if (linkHint) linkHint.innerHTML = c.cliente_user_id ? "<strong style=\"color:var(--primary)\">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell'app." : isStruttura(c) ? "Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → \"Il tuo maniscalco\" → Collega), presto anche da Equo Scuderia." : "Fallo inquadrare al cliente con la fotocamera: si apre Equo, crea l'account e siete collegati. Oppure condividi l'invito.";
 		const daInvitare = clienteDaInvitare(c);
 		const qrBox = document.getElementById("detail-cliente-qr");
 		qrBox.innerHTML = "";
@@ -9034,6 +9035,12 @@
 			video.srcObject = stream;
 			video.setAttribute("playsinline", true);
 			video.play();
+			qrRilevatore = null;
+			try {
+				if ("BarcodeDetector" in window) qrRilevatore = new BarcodeDetector({ formats: ["qr_code"] });
+			} catch (e) {
+				qrRilevatore = null;
+			}
 			qrScanRAF = requestAnimationFrame(scanQrLoop);
 		}).catch(() => {
 			showToast("Non riesco ad accedere alla fotocamera.");
@@ -9049,31 +9056,55 @@
 		}
 		closeModal("modal-qr-scan");
 	}
-	function scanQrLoop() {
+	var qrRilevatore = null;
+	var qrInLettura = false;
+	function qrTrovato(testo) {
+		if (!qrScanStream) return;
+		closeQrScanner();
+		gestisciCodiceScansionato(testo);
+	}
+	async function scanQrLoop() {
 		const video = document.getElementById("qr-scan-video");
 		const canvas = document.getElementById("qr-scan-canvas");
-		if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+		if (!qrScanStream) return;
+		if (!video || video.readyState !== video.HAVE_ENOUGH_DATA || qrInLettura) {
 			qrScanRAF = requestAnimationFrame(scanQrLoop);
 			return;
 		}
-		canvas.width = video.videoWidth;
-		canvas.height = video.videoHeight;
-		const ctx = canvas.getContext("2d");
-		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
-		if (code && code.data) {
-			closeQrScanner();
-			gestisciCodiceScansionato(code.data);
-			return;
+		qrInLettura = true;
+		try {
+			if (qrRilevatore) try {
+				const trovati = await qrRilevatore.detect(video);
+				if (trovati && trovati[0] && trovati[0].rawValue) {
+					qrTrovato(trovati[0].rawValue);
+					return;
+				}
+			} catch (e) {
+				qrRilevatore = null;
+			}
+			if (window.jsQR) {
+				const lato = Math.max(video.videoWidth, video.videoHeight) || 1;
+				const k = Math.min(1, 720 / lato);
+				canvas.width = Math.round(video.videoWidth * k);
+				canvas.height = Math.round(video.videoHeight * k);
+				const ctx = canvas.getContext("2d", { willReadFrequently: true });
+				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+				const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+				if (code && code.data) {
+					qrTrovato(code.data);
+					return;
+				}
+			}
+		} finally {
+			qrInLettura = false;
 		}
-		qrScanRAF = requestAnimationFrame(scanQrLoop);
+		if (qrScanStream) qrScanRAF = requestAnimationFrame(scanQrLoop);
 	}
 	function gestisciCodiceScansionato(testo) {
-		const raw = String(testo || "").trim().toUpperCase();
-		const m = raw.match(/EQUO-(?:PRO-|OWN-|TRA-|MED-)?[A-Z0-9]{4,8}/);
-		const codice = m ? m[0] : raw;
-		if (codice.startsWith("EQUO-OWN-") || codice === "EQUO-OWN-DEMO") {
+		const codice = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
+		const tipo = tipoCodiceEquo(codice);
+		if (tipo === "own") {
 			closeModal("modal-collega-maniscalco");
 			document.getElementById("new-chat-codice").value = codice;
 			document.getElementById("new-chat-error").style.display = "none";
@@ -9081,7 +9112,7 @@
 			startNewChat();
 			return;
 		}
-		if (codice.startsWith("EQUO-TRA-") && typeof trCollOwner === "function") {
+		if (tipo === "tra" && typeof trCollOwner === "function") {
 			closeModal("modal-new-chat");
 			trCollOwner().then(() => {
 				const k = document.getElementById("tri-k");

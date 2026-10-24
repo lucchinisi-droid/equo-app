@@ -184,7 +184,8 @@
 		codice_non_valido: "Codice non valido. Controlla di averlo scritto bene.",
 		codice_gia_usato: "Questo codice è già stato usato da un altro account. Chiedi al tuo maniscalco di verificarlo.",
 		codice_tuo: "Questo è un codice creato da te: va dato al tuo cliente.",
-		non_autenticato: "Sessione scaduta: esci e rientra."
+		non_autenticato: "Sessione scaduta: esci e rientra.",
+		codice_altro_tipo: "Questo non è il codice di un maniscalco: controlla di averlo copiato bene."
 	};
 	async function collegaManiscalco() {
 		const input = document.getElementById("collega-maniscalco-codice");
@@ -197,6 +198,14 @@
 		const res = await DB.riscattaCodiceManiscalco(codice);
 		btn.disabled = false;
 		if (!res || !res.ok) {
+			if (res?.errore === "codice_altro_tipo" && res.tipo === "own") {
+				gestisciCodiceScansionato(codice);
+				return;
+			}
+			if (res?.errore === "codice_altro_tipo" && res.tipo === "tra" && typeof trCollOwner === "function") {
+				gestisciCodiceScansionato(codice);
+				return;
+			}
 			errBox.textContent = (ERRORI_CODICE_MANISCALCO[res?.errore] || "Errore, riprova." + (res?.messaggio ? " (" + res.messaggio + ")" : "")) + (DEMO_MODE && res?.errore === "codice_non_valido" ? " (in demo prova EQUO-DC1AB)" : "");
 			errBox.style.display = "block";
 			return;
@@ -1298,7 +1307,7 @@
 	(function invitoDaUrl() {
 		const p = new URLSearchParams(location.search);
 		const v = (p.get("invito") || "").trim().toUpperCase();
-		if (v && /^EQUO-[A-Z0-9-]{3,20}$/.test(v)) {
+		if (v && tipoCodiceEquo(v)) {
 			lsSet(INV_KEY, JSON.stringify({
 				codice: v,
 				t: Date.now()
@@ -1332,6 +1341,16 @@
 		const r = invitoLeggi();
 		if (!r) return;
 		if (![currentUser.ruolo, currentUser.ruoloSecondario].filter(Boolean).includes("proprietario")) return;
+		if ([
+			"own",
+			"tra",
+			"med"
+		].includes(tipoCodiceEquo(r.codice))) {
+			if (currentUser.vistaAttiva !== "proprietario") return;
+			invitoCancella();
+			if (typeof gestisciCodiceScansionato === "function") gestisciCodiceScansionato(r.codice);
+			return;
+		}
 		invitoInCorso = true;
 		try {
 			const res = await DB.riscattaCodiceManiscalco(r.codice);

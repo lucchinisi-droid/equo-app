@@ -29,13 +29,13 @@ Object.assign(DB, {
     // PRO = maniscalchi, TRA = allenatori, MED = veterinari
     const ruoliPro = [currentUser.ruolo, currentUser.ruoloSecondario];
     const pref = ruoliPro.includes("maniscalco") ? "PRO" : ruoliPro.includes("istruttore") ? "TRA" : ruoliPro.includes("veterinario") ? "MED" : "PRO";
-    if(pref === "TRA" && !DEMO_MODE && !String(currentUser.codiceProfessionista || "").startsWith("EQUO-TRA-")){
+    if(pref === "TRA" && !DEMO_MODE && tipoCodiceEquo(currentUser.codiceProfessionista) !== "tra"){
       const r = await sb.rpc("equo_mio_codice_trainer");
       if(!r.error && r.data) currentUser.codiceProfessionista = r.data;
       return currentUser.codiceProfessionista;
     }
     if(currentUser.codiceProfessionista) return currentUser.codiceProfessionista;
-    const codice = "EQUO-" + pref + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    const codice = nuovoCodiceEquo(pref);
     if(DEMO_MODE){
       currentUser.codiceProfessionista = codice;
       return codice;

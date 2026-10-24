@@ -2011,7 +2011,7 @@ textarea.input{resize:vertical}
       <div class="card" id="onboard-join" style="display:none;margin-top:6px">
         <div class="field">
           <label>Codice invito</label>
-          <input class="input" id="join-code" placeholder="Es. EQUO-XXXX" style="text-transform:uppercase">
+          <input class="input" id="join-code" placeholder="Es. EQUO3F8A2" style="text-transform:uppercase">
         </div>
         <div class="field">
           <label>Il tuo ruolo</label>
@@ -2816,7 +2816,7 @@ textarea.input{resize:vertical}
     <div class="modal-title">Aggiungi maniscalco <span class="x" onclick="closeModal('modal-aggiungi-pro')">✕</span></div>
     <div class="field">
       <label>Codice professionista</label>
-      <input class="input" id="pro-codice-input" placeholder="Es. EQUO-PRO-AB12C" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaInvitoProfessionista()">
+      <input class="input" id="pro-codice-input" placeholder="Es. EQUOPRO0FKEM" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaInvitoProfessionista()">
       <p style="color:var(--muted);font-size:12px;margin-top:4px">Il maniscalco trova il suo codice in Equo App (menu profilo). Riceverà l'invito e dovrà accettarlo. Se nel suo profilo mancano P.IVA o codice fiscale te lo segnaliamo, ma puoi collegarlo lo stesso.</p>
     </div>
     <div class="auth-error" id="pro-codice-error"></div>
@@ -2914,7 +2914,7 @@ textarea.input{resize:vertical}
     <div class="modal-title">Nuova chat con un cliente <span class="x" onclick="closeModal('modal-nuova-chat-cliente')">✕</span></div>
     <div class="field">
       <label>Codice app proprietario</label>
-      <input class="input" id="nuova-chat-codice" placeholder="Es. EQUO-OWN-1234" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')avviaNuovaChatCliente()">
+      <input class="input" id="nuova-chat-codice" placeholder="Es. EQUOOWN3Q9NM" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')avviaNuovaChatCliente()">
       <p style="color:var(--muted);font-size:12px;margin-top:4px">Chiedi al proprietario il suo codice personale (lo trova nel menu profilo di Equo App). Se ha già inserito il suo cavallo, verrà collegato automaticamente.</p>
     </div>
     <div class="auth-error" id="nuova-chat-cliente-error"></div>
@@ -2997,7 +2997,7 @@ textarea.input{resize:vertical}
     <div class="field"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario"></div>
     <div class="field">
       <label>Codice app proprietario <span style="color:var(--muted);font-weight:400">(facoltativo)</span></label>
-      <input class="input" id="cav-codice-proprietario" placeholder="Es. EQUO-OWN-1234" style="text-transform:uppercase">
+      <input class="input" id="cav-codice-proprietario" placeholder="Es. EQUOOWN3Q9NM" style="text-transform:uppercase">
       <p style="color:var(--muted);font-size:12px;margin-top:4px">Se il proprietario ha Equo App, chiedigli il suo codice personale per collegarlo e poterci chattare direttamente.</p>
     </div>
     <div class="field">
@@ -3955,7 +3955,7 @@ async function createCentro(){
   if(!nome){ errBox.textContent = "Inserisci il nome del centro."; errBox.style.display = "block"; return; }
   if(!checkConsentOrBlock()) return;
 
-  const join_code = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const join_code = "EQUO" + Array.from({ length: 5 }, () => "0123456789ABCDEFGHJKMNPQRSTUVWXYZ"[Math.floor(Math.random() * 33)]).join("");   // senza trattini e senza I, L, O
   try{
     const { data, error } = await sb.from("centri").insert({
       nome, indirizzo: indirizzo || null, telefono: telefono || null,

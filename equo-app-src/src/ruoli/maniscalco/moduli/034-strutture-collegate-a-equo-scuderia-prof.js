@@ -98,6 +98,7 @@ async function confermaScollegaStruttura(){
 const ERRORI_COLLEGA_CLIENTE = {
   codice_non_valido: "Codice Equo non trovato. Controlla di averlo scritto bene.",
   codice_tuo: "Questo è il tuo codice: serve quello del cliente.",
+  codice_professionista: "Questo è il codice di un professionista, non di un cliente. Il cliente trova il suo codice in Equo, menu → «Il tuo codice».",
   gia_collegato_altro: "Questo cliente è già collegato a un altro account Equo.",
   cliente_non_trovato: "Cliente non trovato.",
   non_autenticato: "Sessione scaduta: esci e rientra.",
@@ -206,7 +207,7 @@ async function openClienteDetail(id){
       ? '<strong style="color:var(--primary)">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell\'app.'
       : isStruttura(c)
         ? 'Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → "Il tuo maniscalco" → Collega), presto anche da Equo Scuderia.'
-        : 'Fallo inquadrare al cliente con la fotocamera: si apre Equo, crea l\'account e siete collegati. Oppure mandagli l\'invito.';
+        : 'Fallo inquadrare al cliente con la fotocamera: si apre Equo, crea l\'account e siete collegati. Oppure condividi l\'invito.';
   }
   // proprietario non ancora collegato: il QR è il link di invito (apre Equo e collega da solo); scuderie: il codice
   const daInvitare = clienteDaInvitare(c);

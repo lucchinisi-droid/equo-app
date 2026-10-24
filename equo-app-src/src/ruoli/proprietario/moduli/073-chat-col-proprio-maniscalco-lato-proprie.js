@@ -59,6 +59,7 @@ const ERRORI_CODICE_MANISCALCO = {
   codice_gia_usato: "Questo codice è già stato usato da un altro account. Chiedi al tuo maniscalco di verificarlo.",
   codice_tuo: "Questo è un codice creato da te: va dato al tuo cliente.",
   non_autenticato: "Sessione scaduta: esci e rientra.",
+  codice_altro_tipo: "Questo non è il codice di un maniscalco: controlla di averlo copiato bene.",
 };
 
 async function collegaManiscalco(){
@@ -72,6 +73,8 @@ async function collegaManiscalco(){
   const res = await DB.riscattaCodiceManiscalco(codice);
   btn.disabled = false;
   if(!res || !res.ok){
+    if(res?.errore === "codice_altro_tipo" && res.tipo === "own"){ gestisciCodiceScansionato(codice); return; }   // codice di un proprietario: chat
+    if(res?.errore === "codice_altro_tipo" && res.tipo === "tra" && typeof trCollOwner === "function"){ gestisciCodiceScansionato(codice); return; }
     errBox.textContent = (ERRORI_CODICE_MANISCALCO[res?.errore] || ("Errore, riprova." + (res?.messaggio ? " (" + res.messaggio + ")" : "")))
       + (DEMO_MODE && res?.errore === "codice_non_valido" ? " (in demo prova EQUO-DC1AB)" : "");
     errBox.style.display = "block";

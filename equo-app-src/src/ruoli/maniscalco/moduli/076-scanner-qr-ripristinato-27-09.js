@@ -15,6 +15,8 @@ function openQrScanner(){
     video.srcObject = stream;
     video.setAttribute("playsinline", true);
     video.play();
+    qrRilevatore = null;
+    try{ if("BarcodeDetector" in window) qrRilevatore = new BarcodeDetector({ formats: ["qr_code"] }); }catch(e){ qrRilevatore = null; }
     qrScanRAF = requestAnimationFrame(scanQrLoop);
   }).catch(() => {
     showToast("Non riesco ad accedere alla fotocamera.");
@@ -29,33 +31,50 @@ function closeQrScanner(){
   closeModal("modal-qr-scan");
 }
 
-function scanQrLoop(){
+// lettura: lettore del telefono se c'è (Android), altrimenti jsQR (incluso nell'app) su un'immagine ridotta, più veloce
+let qrRilevatore = null, qrInLettura = false;
+function qrTrovato(testo){
+  if(!qrScanStream) return;
+  closeQrScanner();
+  gestisciCodiceScansionato(testo);
+}
+async function scanQrLoop(){
   const video = document.getElementById("qr-scan-video");
   const canvas = document.getElementById("qr-scan-canvas");
-  if(!video || video.readyState !== video.HAVE_ENOUGH_DATA){
+  if(!qrScanStream) return;
+  if(!video || video.readyState !== video.HAVE_ENOUGH_DATA || qrInLettura){
     qrScanRAF = requestAnimationFrame(scanQrLoop);
     return;
   }
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
-  if(code && code.data){
-    closeQrScanner();
-    gestisciCodiceScansionato(code.data);
-    return;
-  }
-  qrScanRAF = requestAnimationFrame(scanQrLoop);
+  qrInLettura = true;
+  try{
+    if(qrRilevatore){
+      try{
+        const trovati = await qrRilevatore.detect(video);
+        if(trovati && trovati[0] && trovati[0].rawValue){ qrTrovato(trovati[0].rawValue); return; }
+      }catch(e){ qrRilevatore = null; }
+    }
+    if(window.jsQR){
+      const lato = Math.max(video.videoWidth, video.videoHeight) || 1;
+      const k = Math.min(1, 720 / lato);
+      canvas.width = Math.round(video.videoWidth * k);
+      canvas.height = Math.round(video.videoHeight * k);
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+      if(code && code.data){ qrTrovato(code.data); return; }
+    }
+  } finally { qrInLettura = false; }
+  if(qrScanStream) qrScanRAF = requestAnimationFrame(scanQrLoop);
 }
 
-// Instrada il codice letto dal QR: EQUO-OWN-… = chat tra proprietari, EQUO-PRO-… o EQUO-XXXXX = collega il maniscalco
+// Instrada il codice letto dal QR o scritto: OWN = chat tra proprietari, TRA = istruttore, PRO o invito = collega il maniscalco
+// (accetta anche i link app.equohub.com/?invito=..., maiuscole/minuscole, con o senza trattini)
 function gestisciCodiceScansionato(testo){
-  const raw = String(testo || "").trim().toUpperCase();
-  const m = raw.match(/EQUO-(?:PRO-|OWN-|TRA-|MED-)?[A-Z0-9]{4,8}/);
-  const codice = m ? m[0] : raw;
-  if(codice.startsWith("EQUO-OWN-") || codice === "EQUO-OWN-DEMO"){
+  const codice = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
+  const tipo = tipoCodiceEquo(codice);
+  if(tipo === "own"){
     closeModal("modal-collega-maniscalco");
     document.getElementById("new-chat-codice").value = codice;
     document.getElementById("new-chat-error").style.display = "none";
@@ -63,7 +82,7 @@ function gestisciCodiceScansionato(testo){
     startNewChat();
     return;
   }
-  if(codice.startsWith("EQUO-TRA-") && typeof trCollOwner === "function"){
+  if(tipo === "tra" && typeof trCollOwner === "function"){
     closeModal("modal-new-chat");
     trCollOwner().then(() => { const k = document.getElementById("tri-k"); if(k) k.value = codice; });
     return;

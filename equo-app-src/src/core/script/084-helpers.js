@@ -1,4 +1,40 @@
 /* ---------- HELPERS ---------- */
+/* Codici Equo (25/10/2026): si accettano maiuscole/minuscole, con o senza trattini e spazi, O per 0 e I/L per 1
+   (stessa regola del database, equo_norm_codice). I nuovi nascono senza trattini e senza I, L, O: EQUOPRO0FKEM. */
+function normCodiceEquo(t){
+  const s = String(t || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if(!s) return "";
+  const mappa = x => x.replace(/O/g, "0").replace(/[IL]/g, "1");
+  if(s.slice(0, 4).replace(/0/g, "O") !== "EQUO") return mappa(s);
+  const r = s.slice(4), t3 = r.slice(0, 3).replace(/0/g, "O").replace(/1/g, "I");
+  if(r.length >= 7 && ["PRO", "OWN", "TRA", "MED"].includes(t3)) return "EQUO" + t3 + mappa(r.slice(3));
+  return "EQUO" + mappa(r);
+}
+// "pro" | "tra" | "med" | "own" (codici personali) | "invito" (cliente del maniscalco o struttura) | null
+function tipoCodiceEquo(t){
+  const n = normCodiceEquo(t);
+  let m = n.match(/^EQUO(PRO|TRA|MED|OWN)[A-Z0-9]{3,8}$/);
+  if(m) return m[1].toLowerCase();
+  return /^EQUO[A-Z0-9]{3,8}$/.test(n) ? "invito" : null;
+}
+// trova un codice Equo dentro un testo (anche un link app.equohub.com/?invito=...)
+function codiceEquoDaTesto(t){
+  const raw = String(t || "").trim();
+  try{ const u = new URL(raw); const v = u.searchParams.get("invito"); if(v) return v; }catch(e){}
+  const m = raw.toUpperCase().match(/EQU[O0][\s-]*(?:(?:PR[O0]|[O0]WN|TRA|MED)[\s-]*)?[A-Z0-9]{4,6}\b/);
+  return m ? m[0] : raw;
+}
+// nuovo codice: "EQUO" + tipo + 5 caratteri senza I, L, O
+function nuovoCodiceEquo(tipo){
+  const alfabeto = "0123456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  let s = "";
+  const rnd = new Uint32Array(5);
+  try{ crypto.getRandomValues(rnd); }catch(e){ for(let i = 0; i < 5; i++) rnd[i] = Math.floor(Math.random() * 1e9); }
+  for(let i = 0; i < 5; i++) s += alfabeto[rnd[i] % alfabeto.length];
+  return "EQUO" + (tipo || "") + s;
+}
+// link di Equo con il codice: chi lo apre arriva su Equo e si collega da solo
+function linkCodiceEquo(codice){ return "https://app.equohub.com/?invito=" + encodeURIComponent(String(codice || "")); }
 function escapeHtml(str){
   return String(str ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }

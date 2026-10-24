@@ -779,7 +779,7 @@
 		const r = await DB.creaChatCollega(codice);
 		if (!r || !r.ok) {
 			errBox.textContent = ({
-				codice_non_valido: "Codice non valido: controlla che sia un codice professionista (EQUO-PRO-…, EQUO-TRA-… o EQUO-MED-…).",
+				codice_non_valido: "Codice non valido: controlla che sia un codice professionista (es. EQUOPRO0FKEM).",
 				codice_tuo: "Questo è il tuo codice.",
 				solo_professionisti: "La chat tra colleghi è per i professionisti."
 			}[r?.errore] || "Non sono riuscito ad avviare la chat, riprova.") + (DEMO_MODE ? " (in demo prova EQUO-PRO-DEMO)" : "");
@@ -812,7 +812,11 @@
 		const errBox = document.getElementById("new-chat-error");
 		errBox.style.display = "none";
 		if (!codice) return;
-		if (codice.startsWith("EQUO-PRO-") || /^EQUO-[A-Z0-9]{5}$/.test(codice)) {
+		if ([
+			"pro",
+			"tra",
+			"invito"
+		].includes(tipoCodiceEquo(codice))) {
 			gestisciCodiceScansionato(codice);
 			return;
 		}

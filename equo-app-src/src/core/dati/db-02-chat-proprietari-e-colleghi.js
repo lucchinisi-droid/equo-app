@@ -135,7 +135,7 @@ Object.assign(DB, {
   },
   async ensureCodiceProprietario(){
     if(currentUser.codiceProprietario) return currentUser.codiceProprietario;
-    const codice = "EQUO-OWN-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    const codice = nuovoCodiceEquo("OWN");
     if(DEMO_MODE){
       currentUser.codiceProprietario = codice;
       return codice;

@@ -32,7 +32,7 @@ import { pagina } from "./02-home.js";
   h+='<div class="tr-card">'+(TR.cavalli.length?TR.cavalli.map(function(c){var k=collDi(c.horse_id);return '<div class="tr-riga" onclick="trCavSheet(\''+c.id+'\')"><div class="th">'+IC.film+'</div><div><b>'+esc(c.nome)+'</b><small>'+esc(c.cavaliere||"Cavaliere non indicato")+(c.centro_id?" · centro":"")+'</small></div>'+chipColl(k,c)+'</div>';}).join(""):'<div class="tr-vuoto">Nessun cavallo ancora.</div>')+'</div>';
   h+='<div class="tr-card"><h4><span>Strutture</span><button onclick="trEntraCentro()">+ Entra</button></h4>'+
    ((TR.centri||[]).length?TR.centri.map(function(c){return '<div class="tr-riga" onclick="trCentroSheet(\''+c.id+'\')"><div class="th">'+IC.film+'</div><div><b>'+esc(c.nome)+'</b><small>Tocca per seguire i cavalli del centro</small></div></div>';}).join(""):'<div class="muted" style="font-size:12.5px;line-height:1.5">Lavori in un centro ippico? Entra con il suo codice invito: potrai seguire i suoi cavalli e inviare le sedute anche agli allievi e allo staff.</div>')+'</div>';
-  h+='<div class="tr-card"><h4><span>Il tuo codice trainer</span><button onclick="trMioCodice()">Mostra</button></h4><div class="muted" style="font-size:12.5px;line-height:1.5">Un proprietario può invitarti con questo codice (EQUO-TRA-…): tu accetti e il cavallo compare qui. Nessuna seduta arriva a un proprietario senza il suo consenso.</div></div>';
+  h+='<div class="tr-card"><h4><span>Il tuo codice trainer</span><button onclick="trMioCodice()">Mostra</button></h4><div class="muted" style="font-size:12.5px;line-height:1.5">Un proprietario può invitarti con questo codice (EQUOTRA…): tu accetti e il cavallo compare qui. Nessuna seduta arriva a un proprietario senza il suo consenso.</div></div>';
   p.innerHTML=h;
  };
  window.trCavSheet=function(id){
@@ -66,12 +66,12 @@ import { pagina } from "./02-home.js";
  };
  window.trMioCodice=async function(){
   var cod="";
-  if(DEMO())cod="EQUO-TRA-7K2M9";
+  if(DEMO())cod="EQUOTRA7K2M9";
   else{var r=await sb.rpc("equo_mio_codice_trainer");if(r.error||!r.data){toast("Non riesco a creare il codice");return;}cod=r.data;}
   diarioSheet("Il tuo codice trainer",'<div style="text-align:center;font-size:24px;font-weight:900;letter-spacing:1px;color:#14482c;margin:6px 0 10px">'+esc(cod)+'</div><div style="font-size:13px;line-height:1.5;margin-bottom:12px">Dallo a un proprietario: nell\'app Equo va su «+» → <b>I miei istruttori</b>, sceglie il cavallo e inserisce questo codice. Poi tu accetti qui in Cavalli seguiti.</div><button class="btn btn-primary" style="width:100%" onclick="trCopiaCodice(\''+esc(cod)+'\')">Copia / condividi</button>');
  };
  window.trCopiaCodice=function(c){
-  var t="Il mio codice trainer su Equo: "+c;
+  var t=c+"\nhttps://app.equohub.com";
   if(navigator.share){navigator.share({text:t}).catch(function(){});return;}
   try{navigator.clipboard.writeText(t);toast("Codice copiato");}catch(e){toast(t);}
  };

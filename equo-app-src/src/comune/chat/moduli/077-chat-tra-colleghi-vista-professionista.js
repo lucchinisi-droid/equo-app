@@ -47,7 +47,7 @@ async function avviaChatCollega(){
   if(!codice) return;
   const r = await DB.creaChatCollega(codice);
   if(!r || !r.ok){
-    const msg = { codice_non_valido: "Codice non valido: controlla che sia un codice professionista (EQUO-PRO-…, EQUO-TRA-… o EQUO-MED-…).", codice_tuo: "Questo è il tuo codice.", solo_professionisti: "La chat tra colleghi è per i professionisti." }[r?.errore];
+    const msg = { codice_non_valido: "Codice non valido: controlla che sia un codice professionista (es. EQUOPRO0FKEM).", codice_tuo: "Questo è il tuo codice.", solo_professionisti: "La chat tra colleghi è per i professionisti." }[r?.errore];
     errBox.textContent = (msg || "Non sono riuscito ad avviare la chat, riprova.") + (DEMO_MODE ? " (in demo prova EQUO-PRO-DEMO)" : "");
     errBox.style.display = "block";
     return;
@@ -79,7 +79,7 @@ async function startNewChat(){
   errBox.style.display = "none";
   if(!codice) return;
   // codice di un maniscalco inserito per errore qui: lo colleghiamo come maniscalco
-  if(codice.startsWith("EQUO-PRO-") || /^EQUO-[A-Z0-9]{5}$/.test(codice)){ gestisciCodiceScansionato(codice); return; }
+  if(["pro", "tra", "invito"].includes(tipoCodiceEquo(codice))){ gestisciCodiceScansionato(codice); return; }
   const altro = await DB.findProprietarioByCodice(codice);
   if(!altro){
     errBox.textContent = "Codice non valido." + (DEMO_MODE ? " (in demo prova EQUO-OWN-DEMO)" : "");

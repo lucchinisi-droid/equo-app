@@ -3,7 +3,7 @@ import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 /* ---------- «COLLEGHIAMOCI SU EQUO» (25/10/2026) ----------
    Link di invito app.equohub.com/?invito=EQUO-XXXXX: chi lo apre arriva su Equo, crea l'account e si collega da solo
    (l'app del proprietario ricorda il codice e chiama riscatta_codice_maniscalco). Usato nel QR dei PDF (appuntamento,
-   conto, resoconto), nel QR della scheda cliente e in «Invia l'invito». Solo per clienti proprietari non ancora collegati:
+   conto, resoconto), nel QR della scheda cliente e in «Condividi l'invito». Solo per clienti proprietari non ancora collegati:
    le scuderie si collegano con Equo Scuderia. */
 const URL_APP_EQUO = "https://app.equohub.com/";
 function linkInvito(codice){ return URL_APP_EQUO + "?invito=" + encodeURIComponent(String(codice || "").toUpperCase()); }
@@ -54,11 +54,11 @@ function riquadroInvitoPdf(doc, cli, y, W, M, nuovaPagina){
   doc.text("Codice invito: " + c.codice_invito, xt, y + H - 6);
   return y + H + 4;
 }
-// «Invia l'invito» dalla scheda cliente: condivisione di sistema (WhatsApp, SMS...) con il link
+// «Condividi l'invito» dalla scheda cliente: condivisione di sistema (WhatsApp, SMS...) con il link
 function condividiInvitoCliente(){
   const c = clienteDaInvitare((typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find(x => x.id === currentClienteId));
   if(!c) return;
-  const testo = "Ciao! Ti aspetto su Equo: vedi lavori, scadenze e pagamenti dei tuoi cavalli. Apri il link, crea il tuo account e siamo collegati: " + linkInvito(c.codice_invito);
+  const testo = c.codice_invito + "\n" + linkInvito(c.codice_invito);
   if(navigator.share){ navigator.share({ text: testo }).catch(() => {}); return; }
   window.open("https://wa.me/?text=" + encodeURIComponent(testo), "_blank");
 }

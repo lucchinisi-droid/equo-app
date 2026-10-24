@@ -31,7 +31,7 @@ async function createCentro(){
   if(!nome){ errBox.textContent = "Inserisci il nome del centro."; errBox.style.display = "block"; return; }
   if(!checkConsentOrBlock()) return;
 
-  const join_code = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const join_code = "EQUO" + Array.from({ length: 5 }, () => "0123456789ABCDEFGHJKMNPQRSTUVWXYZ"[Math.floor(Math.random() * 33)]).join("");   // senza trattini e senza I, L, O
   try{
     const { data, error } = await sb.from("centri").insert({
       nome, indirizzo: indirizzo || null, telefono: telefono || null,

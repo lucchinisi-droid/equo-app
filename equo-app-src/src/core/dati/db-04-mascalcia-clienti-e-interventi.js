@@ -14,7 +14,7 @@ Object.assign(DB, {
       if(!DEMO_MODE){ const { count } = await sb.from("clienti_mascalcia").select("id", { count: "exact", head: true }).eq("maniscalco_id", currentUser.id).is("archiviato_il", null); if(typeof count === "number") n = count; }
       if(n >= LIMITE_CLIENTI_FREE){ mostraLimiteClienti(); return { error: { message: "Hai raggiunto i " + LIMITE_CLIENTI_FREE + " clienti del piano Free." }, data: null }; }
     }
-    const codice_invito = "EQUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    const codice_invito = nuovoCodiceEquo("");
     if(DEMO_MODE){
       const nuovo = { id: "dc-" + (++demoIdCounter), nome, nome_cavallo, telefono, note, cliente_user_id: null, codice_invito, tipo_cliente, created_at: new Date().toISOString() };
       demoState.clientiMascalcia.push(nuovo);
