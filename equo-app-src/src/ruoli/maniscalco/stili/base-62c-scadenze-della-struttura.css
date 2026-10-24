@@ -33,3 +33,8 @@
 :where(body:not(.pl-owner)) .pos-nota{font-size:12px;line-height:1.45;color:var(--muted);min-height:0}
 :where(body:not(.pl-owner)) .pos-nota.ok{color:var(--green,#14482c)}
 :where(body:not(.pl-owner)) .pos-nota.male{color:var(--red,#a33b2b)}
+/* anagrafica del cavallo: sesso a tasti (24/10/2026) */
+:where(body:not(.pl-owner)) .acav-sesso{display:flex;gap:6px}
+:where(body:not(.pl-owner)) .acav-sesso button{flex:1;border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--text);cursor:pointer}
+:where(body:not(.pl-owner)) .acav-sesso button.on{background:var(--green,#14482c);border-color:var(--green,#14482c);color:#fff}
+:where(body:not(.pl-owner)) #acav-base[hidden],:where(body:not(.pl-owner)) #acav-equo-nota[hidden]{display:none}

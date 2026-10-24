@@ -3,10 +3,27 @@
     <button class="modal-close-x" onclick="closeModal('modal-anagrafica-cavallo')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span id="acav-tit">Anagrafica</span></div>
-    <div class="input-group"><label class="input-label" for="acav-nome">Nome</label><input class="input" id="acav-nome" maxlength="80"></div>
-    <div class="input-group"><label class="input-label" for="acav-chip">Microchip</label><input class="input" id="acav-chip" autocapitalize="characters" maxlength="40" placeholder="(opzionale)"></div>
-    <div class="input-group"><label class="input-label" for="acav-razza">Razza</label><div style="min-width:0"><input class="input" id="acav-razza" placeholder="Razza (opz.) · scrivi per cercare"></div></div>
-    <div class="muted" style="font-size:12px;line-height:1.5;margin:2px 0 8px">Il codice Equo resta lo stesso: storico e interventi restano con il cavallo.</div>
+    <div class="muted" style="font-size:12px;line-height:1.5;margin:-6px 0 10px">Tutti i campi sono facoltativi: compila solo quello che sai.</div>
+    <div id="acav-base">
+      <div class="input-group"><label class="input-label" for="acav-nome">Nome</label><input class="input" id="acav-nome" maxlength="80"></div>
+      <div class="input-group"><label class="input-label" for="acav-chip">Microchip</label><input class="input" id="acav-chip" autocapitalize="characters" maxlength="40"></div>
+      <div class="input-group"><label class="input-label" for="acav-razza">Razza</label><div style="min-width:0"><input class="input" id="acav-razza" placeholder="Scrivi per cercare"></div></div>
+      <div class="input-row-2">
+        <div class="input-group" style="flex:1"><label class="input-label" for="acav-anno">Anno di nascita</label><input class="input" id="acav-anno" type="number" inputmode="numeric" min="1970" max="2100" placeholder="es. 2017"></div>
+        <div class="input-group" style="flex:1;min-width:0"><label class="input-label" for="acav-mantello">Mantello</label><input class="input" id="acav-mantello" list="acav-mantelli" maxlength="60" placeholder="es. Baio"></div>
+      </div>
+    </div>
+    <div class="muted" id="acav-equo-nota" style="font-size:12.5px;line-height:1.5;margin-bottom:10px" hidden>Nome, razza, nascita e mantello li gestisce il proprietario nella sua app. Qui aggiungi i tuoi dati.</div>
+    <div class="input-row-2">
+      <div class="input-group" style="flex:1"><label class="input-label" for="acav-altezza">Altezza (cm)</label><input class="input" id="acav-altezza" type="number" inputmode="numeric" min="50" max="220" placeholder="al garrese, es. 165"></div>
+      <div class="input-group" style="flex:1"><label class="input-label" for="acav-peso">Peso (kg, stimato)</label><input class="input" id="acav-peso" type="number" inputmode="numeric" min="30" max="1500" placeholder="es. 520"></div>
+    </div>
+    <div class="input-group"><label class="input-label">Sesso</label>
+      <div class="acav-sesso" id="acav-sesso"><button type="button" data-v="femmina" onclick="acavSesso('femmina')">Femmina</button><button type="button" data-v="castrone" onclick="acavSesso('castrone')">Castrone</button><button type="button" data-v="stallone" onclick="acavSesso('stallone')">Stallone</button></div></div>
+    <div class="input-group"><label class="input-label" for="acav-disciplina">Disciplina</label><input class="input" id="acav-disciplina" list="acav-discipline" maxlength="60" placeholder="Scegli o scrivi"></div>
+    <div class="input-group"><label class="input-label" for="acav-segni">Segni particolari</label><textarea class="input" id="acav-segni" rows="2" maxlength="300" placeholder="es. stella in fronte, balzana posteriore sinistra"></textarea></div>
+    <datalist id="acav-mantelli"><option value="Baio"><option value="Baio scuro"><option value="Sauro"><option value="Sauro bruciato"><option value="Grigio"><option value="Grigio pomellato"><option value="Grigio trotinato"><option value="Bianco"><option value="Morello"><option value="Roano"><option value="Pezzato"><option value="Palomino"><option value="Isabella"><option value="Cremello"><option value="Leardo"><option value="Falbo"><option value="Appaloosa"></datalist>
+    <datalist id="acav-discipline"><option value="Salto ostacoli"><option value="Dressage"><option value="Completo"><option value="Endurance"><option value="Western / Reining"><option value="Monta da lavoro"><option value="Trekking / passeggiata"><option value="Scuola"><option value="Attacchi"><option value="Trotto"><option value="Galoppo"><option value="Volteggio"><option value="Polo"><option value="A riposo"></datalist>
     <div class="auth-error" id="acav-errore" style="display:none"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaAnagraficaCavallo(this)">Salva</button>
   </div>

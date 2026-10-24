@@ -10,7 +10,7 @@ import { MISURA_SISTEMA_LABEL, isoLocale } from "./051-modal-appuntamento-manisc
 import { chiediSiNo, openInterventoModal, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_MESI } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
-import { apriAnagraficaCavallo, riquadroIntervalloPrezzo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
+import { anagraficaRighe, apriAnagraficaCavallo, riquadroIntervalloPrezzo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 /* ---------- AVVISO «SEMBRA LO STESSO CAVALLO» ----------
    Una scheda inserita a mano e una inserita dal proprietario con nomi uguali si uniscono da sole (database).
    Con nomi solo simili (es. «White» e «White night») si propone l'unione con un tocco: vince il nome del proprietario. */
@@ -273,16 +273,16 @@ function renderCorpoCavalloPro(){
   const modificabile = cv.tipo === "manuale";
   const allegatiPrima = document.getElementById("cavpro-allegati")?.innerHTML;
   document.getElementById("cavpro-corpo").innerHTML =
-    sez("ana", "Anagrafica", modificabile ? `<button class="btn btn-outline btn-sm" onclick="modificaAnagraficaCavalloPro()">Modifica</button>` : "", `
+    sez("ana", "Anagrafica", `<button class="btn btn-outline btn-sm" onclick="modificaAnagraficaCavalloPro()">Modifica</button>`, `
       <dl class="cavpro-kv">
         <dt>Codice Equo</dt><dd>${escapeHtml(cv.codice_equo || "—")}</dd>
         <dt>Microchip</dt><dd>${escapeHtml(cv.microchip || "—")}</dd>
         <dt>Razza</dt><dd>${escapeHtml(cv.razza || "—")}</dd>
-        ${cv.nascita ? `<dt>Nascita</dt><dd>${formatDate(cv.nascita)}</dd>` : ""}
+        ${anagraficaRighe(cv).map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v))}</dd>`).join("")}
         <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find(x => x.id === currentClienteId)?.nome || "—")}${modificabile && !cv.horse_id ? ` <button type="button" class="cavpro-link" onclick="apriCambiaProprietario(false)">Cambia</button>` : ""}</dd>
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
-      ${cv.tipo === "equo" ? '<div class="muted" style="font-size:11.5px;margin-top:8px">L\'anagrafica la gestisce il proprietario nella sua app.</div>' : ""}`)
+      ${cv.tipo === "equo" ? '<div class="muted" style="font-size:11.5px;margin-top:8px">Nome, razza e nascita li gestisce il proprietario nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>' : ""}`)
     + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>

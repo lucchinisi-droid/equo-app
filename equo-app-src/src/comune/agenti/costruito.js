@@ -871,6 +871,7 @@
 				].filter(Boolean).join(" · "));
 				const testo = [
 					`Scheda del cavallo ${cv.nome}${cv.codice_equo ? " (codice Equo " + cv.codice_equo + ")" : ""}${cv.razza ? ", " + cv.razza : ""}${cv.nascita ? ", nato il " + cv.nascita : ""}; cliente ${cli?.nome || "—"}.`,
+					typeof testoAnagraficaCavallo === "function" && testoAnagraficaCavallo(cv) ? `Anagrafica: ${testoAnagraficaCavallo(cv)}.` : "",
 					`Ferratura in scheda: ${descrFerraturaCavallo(cv)}.`,
 					st.prossimo ? `Prossimo lavoro: ${st.prossimo.data}.` : "",
 					righe.length ? "Storico (più recenti prima):\n" + righe.join("\n") : "Nessun lavoro registrato."

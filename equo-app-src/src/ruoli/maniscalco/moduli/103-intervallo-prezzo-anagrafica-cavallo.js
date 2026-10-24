@@ -73,37 +73,91 @@ function prezzoCavallo(cv, tipo){
   return v >= 0 ? v : null;
 }
 
-// «Modifica» dell'anagrafica: nome, microchip, razza del cavallo
+// «Modifica» dell'anagrafica: nome, microchip, razza, anno di nascita, mantello (cavalli inseriti dal maniscalco)
+// + altezza, peso stimato, sesso, disciplina, segni particolari (per tutti, anche i cavalli collegati al proprietario)
+const SESSO_TESTO = { femmina: "Femmina", castrone: "Castrone", stallone: "Stallone" };
+let acavSessoScelto = null;
+function acavSesso(v){
+  acavSessoScelto = acavSessoScelto === v ? null : v;
+  document.querySelectorAll("#acav-sesso button").forEach(b => b.classList.toggle("on", b.dataset.v === acavSessoScelto));
+}
 function apriAnagraficaCavallo(){
   const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
   if(!cv) return;
-  if(cv.tipo !== "manuale"){ showToast("L'anagrafica di questo cavallo la gestisce il proprietario nella sua app."); return; }
+  const manuale = cv.tipo === "manuale" && !cv.horse_id;
   document.getElementById("acav-tit").textContent = "Anagrafica · " + (cv.nome || "Cavallo");
-  document.getElementById("acav-nome").value = cv.nome || "";
-  document.getElementById("acav-chip").value = cv.microchip || "";
-  razzaImposta("acav-razza", cv.razza || "");
+  document.getElementById("acav-base").hidden = !manuale;
+  document.getElementById("acav-equo-nota").hidden = manuale;
+  if(manuale){
+    document.getElementById("acav-nome").value = cv.nome || "";
+    document.getElementById("acav-chip").value = cv.microchip || "";
+    razzaImposta("acav-razza", cv.razza || "");
+    document.getElementById("acav-anno").value = cv.anno_nascita || "";
+    document.getElementById("acav-mantello").value = cv.mantello || "";
+  }
+  document.getElementById("acav-altezza").value = cv.altezza_cm || "";
+  document.getElementById("acav-peso").value = cv.peso_kg || "";
+  document.getElementById("acav-disciplina").value = cv.disciplina || "";
+  document.getElementById("acav-segni").value = cv.segni_particolari || "";
+  acavSessoScelto = null; acavSesso(cv.sesso || null);
   document.getElementById("acav-errore").style.display = "none";
   openModal("modal-anagrafica-cavallo");
 }
 async function salvaAnagraficaCavallo(btn){
   const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
   if(!cv) return;
+  const manuale = cv.tipo === "manuale" && !cv.horse_id;
   const err = document.getElementById("acav-errore");
   const errore = t => { err.textContent = t; err.style.display = "block"; };
-  const nome = document.getElementById("acav-nome").value.trim();
-  if(!nome) return errore("Scrivi il nome del cavallo.");
-  const razza = razzaValore("acav-razza");
-  if(razza === false) return;
-  const campi = { nome, microchip: document.getElementById("acav-chip").value.trim() || null, razza: razza || null };
+  const num = (id, min, max, nome) => {
+    const v = document.getElementById(id).value.trim();
+    if(v === "") return null;
+    const n = Math.round(Number(v));
+    if(!(n >= min && n <= max)) throw new Error(nome);
+    return n;
+  };
+  const testo = id => document.getElementById(id).value.trim() || null;
+  const campi = {};
+  try{
+    if(manuale){
+      const nome = document.getElementById("acav-nome").value.trim();
+      if(!nome) return errore("Scrivi il nome del cavallo.");
+      const razza = razzaValore("acav-razza");
+      if(razza === false) return;
+      Object.assign(campi, { nome, microchip: testo("acav-chip"), razza: razza || null,
+        anno_nascita: num("acav-anno", 1970, new Date().getFullYear(), "Controlla l'anno di nascita (es. 2017)."), mantello: testo("acav-mantello") });
+    }
+    Object.assign(campi, { altezza_cm: num("acav-altezza", 50, 220, "Controlla l'altezza: in centimetri al garrese (es. 165)."),
+      peso_kg: num("acav-peso", 30, 1500, "Controlla il peso: in kg (es. 520)."),
+      sesso: acavSessoScelto, disciplina: testo("acav-disciplina"), segni_particolari: testo("acav-segni") });
+  }catch(e){ return errore(e.message); }
+  err.style.display = "none";
   Object.keys(campi).forEach(k => { if(String(cv[k] ?? "") === String(campi[k] ?? "")) delete campi[k]; });
   if(!Object.keys(campi).length){ closeModal("modal-anagrafica-cavallo"); return; }
   btn.disabled = true;
   try{
-    const ok = await salvaCampiCavallo(cv, campi, "Anagrafica di " + nome + " salvata");
+    const ok = await salvaCampiCavallo(cv, campi, "Anagrafica di " + (campi.nome || cv.nome) + " salvata");
     if(!ok) return;
     closeModal("modal-anagrafica-cavallo");
     await apriSchedaCavalloPro(cv.key, true);
   } finally { btn.disabled = false; }
 }
+// righe dell'anagrafica per la scheda (solo i campi compilati)
+function anagraficaRighe(cv){
+  const anno = cv.anno_nascita || (cv.nascita ? Number(String(cv.nascita).slice(0, 4)) : null);
+  const r = [];
+  if(anno) r.push(["Anno di nascita", anno + " (" + Math.max(0, new Date().getFullYear() - anno) + " anni)"]);
+  if(cv.sesso) r.push(["Sesso", SESSO_TESTO[cv.sesso] || cv.sesso]);
+  if(cv.mantello) r.push(["Mantello", cv.mantello]);
+  if(cv.altezza_cm) r.push(["Altezza", cv.altezza_cm + " cm"]);
+  if(cv.peso_kg) r.push(["Peso stimato", "≈ " + cv.peso_kg + " kg"]);
+  if(cv.disciplina) r.push(["Disciplina", cv.disciplina]);
+  if(cv.segni_particolari) r.push(["Segni particolari", cv.segni_particolari]);
+  return r;
+}
+// per Hammer (quello che il maniscalco sta guardando)
+function testoAnagraficaCavallo(cv){
+  return anagraficaRighe(cv || {}).map(([k, v]) => k.toLowerCase() + " " + v).join(", ");
+}
 
-export { apriAnagraficaCavallo, cavIntervalloCambia, intervalloCavallo, intervalloEffettivo, prezzoCavallo, riquadroIntervalloPrezzo, salvaAnagraficaCavallo, salvaCampiCavallo };
+export { acavSesso, anagraficaRighe, apriAnagraficaCavallo, testoAnagraficaCavallo, cavIntervalloCambia, intervalloCavallo, intervalloEffettivo, prezzoCavallo, riquadroIntervalloPrezzo, salvaAnagraficaCavallo, salvaCampiCavallo };
