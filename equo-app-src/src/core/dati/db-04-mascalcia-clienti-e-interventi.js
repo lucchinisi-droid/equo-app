@@ -221,4 +221,47 @@ Object.assign(DB, {
     const { error } = await sb.from("interventi_mascalcia").update({ prossima_scadenza: data }).in("id", ids).eq("maniscalco_id", currentUser.id);
     return { error };
   },
+  /* -- Cambia proprietario e resoconto (24/10/2026) -- */
+  async lavoriApertiCavalli(ids, clienteId){
+    if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => ids.includes(i.cavallo_cliente_id) && i.cliente_mascalcia_id === clienteId && i.stato === "fatto" && i.stato_pagamento === "da_saldare");
+    const { data, error } = await sb.from("interventi_mascalcia").select("id, importo").eq("maniscalco_id", currentUser.id)
+      .in("cavallo_cliente_id", ids).eq("cliente_mascalcia_id", clienteId).eq("stato", "fatto").eq("stato_pagamento", "da_saldare");
+    if(error || !data?.length) return [];
+    const u = await sb.from("conti_mascalcia_righe").select("intervento_id, conti_mascalcia!inner(stato)").in("intervento_id", data.map(r => r.id)).neq("conti_mascalcia.stato", "annullato");
+    const usati = new Set((u.data || []).map(r => r.intervento_id));
+    return data.filter(r => !usati.has(r.id));
+  },
+  async cambiaProprietario(ids, clienteId, aperti){
+    if(DEMO_MODE){
+      let n = 0, lav = 0;
+      (demoState.cavalliClientiMascalcia || []).forEach(cv => {
+        if(!ids.includes(cv.id) || cv.cliente_mascalcia_id === clienteId) return;
+        const da = (demoState.clientiMascalcia || []).find(c => c.id === cv.cliente_mascalcia_id);
+        (demoState.interventiMascalcia || []).forEach(i => {
+          if(i.cavallo_cliente_id !== cv.id) return;
+          if(["programmato", "richiesto", "proposto"].includes(i.stato)) i.cliente_mascalcia_id = clienteId;
+          else if(aperti && i.stato === "fatto" && i.stato_pagamento === "da_saldare" && i.cliente_mascalcia_id === cv.cliente_mascalcia_id){ i.luogo_cliente_id = i.luogo_cliente_id || cv.cliente_mascalcia_id; i.cliente_mascalcia_id = clienteId; lav++; }
+        });
+        if(!cv.ubicazione_tipo && da && (da.tipo_cliente === "struttura" || da.centro_id)) Object.assign(cv, { ubicazione_tipo: "scuderia", ubicazione_cliente_id: da.id, ubicazione_nome: da.nome, ubicazione_dal: new Date().toISOString().slice(0, 10) });
+        cv.cliente_mascalcia_id = clienteId; n++;
+      });
+      return { ok: true, spostati: n, lavori: lav };
+    }
+    const { data, error } = await sb.rpc("pro_cambia_proprietario", { p_cavalli: ids, p_cliente: clienteId, p_aperti: !!aperti });
+    if(error) return { ok: false, errore: /pro_cambia_proprietario/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Non riuscito, riprova." };
+    return data || { ok: false };
+  },
+  // tutti gli interventi fatti di un cliente o di un luogo (scuderia), pagati e no, in un periodo
+  async interventiResoconto(clienteId, da, a){
+    if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => i.stato === "fatto" && (i.cliente_mascalcia_id === clienteId || i.luogo_cliente_id === clienteId)
+        && (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a))
+      .map(i => ({ ...i, cavalli_clienti_mascalcia: { nome: (demoState.cavalliClientiMascalcia || []).find(c => c.id === i.cavallo_cliente_id)?.nome || null } }));
+    let q = sb.from("interventi_mascalcia").select("id, data_intervento, tipo_ferratura, tipo_altro, importo, stato_pagamento, cliente_mascalcia_id, luogo_cliente_id, cavallo_cliente_id, horse_id, quantita_ferri, ferro_tipo, cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`);
+    if(da) q = q.gte("data_intervento", da);
+    if(a) q = q.lte("data_intervento", a);
+    const { data, error } = await q.order("data_intervento", { ascending: true }).limit(2000);
+    if(error) console.warn("interventiResoconto:", error.message);
+    return error ? [] : (data || []);
+  },
 });

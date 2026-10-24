@@ -5325,7 +5325,7 @@
         <dt>Microchip</dt><dd>${escapeHtml(cv.microchip || "—")}</dd>
         <dt>Razza</dt><dd>${escapeHtml(cv.razza || "—")}</dd>
         ${cv.nascita ? `<dt>Nascita</dt><dd>${formatDate(cv.nascita)}</dd>` : ""}
-        <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find((x) => x.id === currentClienteId)?.nome || "—")}</dd>
+        <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find((x) => x.id === currentClienteId)?.nome || "—")}${modificabile && !cv.horse_id ? ` <button type="button" class="cavpro-link" onclick="apriCambiaProprietario(false)">Cambia</button>` : ""}</dd>
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
       ${cv.tipo === "equo" ? "<div class=\"muted\" style=\"font-size:11.5px;margin-top:8px\">L'anagrafica la gestisce il proprietario nella sua app.</div>" : ""}`) + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
@@ -5427,7 +5427,8 @@
 		if (currentClienteId !== clienteId) return;
 		const badge = (s) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
 		box.innerHTML = `<div class="card" style="margin:14px 0">
-    <button class="btn btn-primary" style="width:100%" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
+    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
+      <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
     ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map((c) => `
       <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
         <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
@@ -7102,6 +7103,7 @@
     <div class="cli-chip-row">
       <button class="cli-chip" onclick="openChatThread(currentClienteId)"><span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi</button>
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
+      ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> Proprietari dei cavalli</button>` : ""}
     </div>
     <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>`;
 		renderCicloStruttura(c);
@@ -8706,6 +8708,493 @@
 		openModal("modal-collega-maniscalco");
 		collegaManiscalco();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/104-cambia-proprietario.js
+	var cpCtx = null;
+	async function apriCambiaProprietario(daStruttura) {
+		const cli = clienteDiId(currentClienteId);
+		if (!cli) return;
+		let cavalli;
+		if (daStruttura) {
+			await caricaCavalliMiei().catch(() => {});
+			cavalli = (cavalliMieiLista || []).filter((c) => c.cliente_mascalcia_id === cli.id && !c.horse_id).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+			if (!cavalli.length) {
+				showToast("In questa struttura non ci sono cavalli da assegnare.");
+				return;
+			}
+		} else {
+			const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
+			if (!cv) return;
+			if (cv.tipo !== "manuale" || cv.horse_id) {
+				showToast("Questo cavallo è collegato al suo proprietario su Equo: il proprietario non si cambia da qui.");
+				return;
+			}
+			if (!cv.id) {
+				showToast("Salva prima il cavallo, poi cambia il proprietario.");
+				return;
+			}
+			cavalli = [cv];
+		}
+		cpCtx = {
+			daId: cli.id,
+			daNome: cli.nome,
+			struttura: isStruttura(cli),
+			cavalli,
+			sel: new Set(daStruttura ? [] : [cavalli[0].id]),
+			multi: !!daStruttura,
+			aperti: null
+		};
+		document.getElementById("cp-tit").textContent = daStruttura ? "Proprietari dei cavalli · " + cli.nome : "Cambia proprietario · " + (cavalli[0].nome || "cavallo");
+		const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
+		const pr = clientiAttivi().filter((c) => c.id !== cli.id && !isStruttura(c)).sort(alf), sc = clientiAttivi().filter((c) => c.id !== cli.id && isStruttura(c)).sort(alf);
+		document.getElementById("cp-dest").innerHTML = "<option value=\"\">Scegli il proprietario…</option><option value=\"__nuovo\">+ Nuovo proprietario</option>" + (pr.length ? `<optgroup label="Proprietari">${pr.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + (sc.length ? `<optgroup label="Altre scuderie">${sc.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "");
+		document.getElementById("cp-nuovo").hidden = true;
+		document.getElementById("cp-nuovo-nome").value = "";
+		document.getElementById("cp-nuovo-tel").value = "";
+		document.getElementById("cp-errore").style.display = "none";
+		document.getElementById("cp-nota").textContent = cpCtx.struttura ? `${daStruttura ? "I cavalli scelti restano" : "Il cavallo resta"} in «${cli.nome}» (lo trovi in «Qui stanno»): cambia solo chi paga. Gli appuntamenti futuri passano al nuovo proprietario.` : "Cambia solo chi paga: gli appuntamenti futuri passano al nuovo proprietario.";
+		cpRenderCavalli();
+		openModal("modal-cambia-proprietario");
+		await cpContaAperti();
+	}
+	function cpRenderCavalli() {
+		const c = cpCtx;
+		if (!c) return;
+		const box = document.getElementById("cp-cavalli");
+		box.hidden = !c.multi;
+		if (c.multi) box.innerHTML = `<div class="cp-sez">Quali cavalli? <span class="muted">(${c.sel.size} scelti)</span></div>` + c.cavalli.map((cv) => `<label class="cp-cav">
+      <input type="checkbox" ${c.sel.has(cv.id) ? "checked" : ""} onchange="cpScegliCavallo('${cv.id}', this.checked)"><b>${escapeHtml(cv.nome || "Cavallo")}</b>
+      ${cv.codice_equo ? `<small>${escapeHtml(cv.codice_equo)}</small>` : ""}</label>`).join("");
+	}
+	function cpScegliCavallo(id, on) {
+		if (!cpCtx) return;
+		on ? cpCtx.sel.add(id) : cpCtx.sel.delete(id);
+		const t = document.querySelector("#cp-cavalli .cp-sez .muted");
+		if (t) t.textContent = `(${cpCtx.sel.size} scelti)`;
+		clearTimeout(cpCtx.timer);
+		cpCtx.timer = setTimeout(cpContaAperti, 300);
+	}
+	function cpDestCambiata(sel) {
+		document.getElementById("cp-nuovo").hidden = sel.value !== "__nuovo";
+		if (sel.value === "__nuovo") document.getElementById("cp-nuovo-nome").focus();
+	}
+	async function cpContaAperti() {
+		const c = cpCtx;
+		if (!c) return;
+		const ids = [...c.sel];
+		const box = document.getElementById("cp-aperti");
+		if (!ids.length || incassiNascosti()) {
+			c.aperti = null;
+			box.hidden = true;
+			return;
+		}
+		const lav = await DB.lavoriApertiCavalli(ids, c.daId);
+		if (cpCtx !== c) return;
+		c.aperti = lav;
+		if (!lav.length) {
+			box.hidden = true;
+			return;
+		}
+		const tot = lav.reduce((s, i) => s + (Number(i.importo) || 0), 0);
+		box.hidden = false;
+		box.innerHTML = `<div class="cp-sez">${lav.length === 1 ? "C'è 1 lavoro già fatto" : "Ci sono " + lav.length + " lavori già fatti"} e da saldare (${escapeHtml(contoEuro(tot))}). Chi li paga?</div>
+    <label class="cp-opz"><input type="radio" name="cp-aperti" value="si" checked> Il nuovo proprietario</label>
+    <label class="cp-opz"><input type="radio" name="cp-aperti" value="no"> Restano a «${escapeHtml(c.daNome)}»</label>
+    <div class="muted" style="font-size:12px;margin-top:4px">I lavori già saldati restano sempre a «${escapeHtml(c.daNome)}».</div>`;
+	}
+	async function confermaCambiaProprietario(btn) {
+		const c = cpCtx;
+		if (!c) return;
+		const err = document.getElementById("cp-errore");
+		const errore = (t) => {
+			err.textContent = t;
+			err.style.display = "block";
+		};
+		err.style.display = "none";
+		const ids = [...c.sel];
+		if (!ids.length) return errore("Scegli almeno un cavallo.");
+		let dest = document.getElementById("cp-dest").value;
+		if (!dest) return errore("Scegli il proprietario (oppure «+ Nuovo proprietario»).");
+		const aperti = !!(c.aperti && c.aperti.length && document.querySelector("input[name=\"cp-aperti\"]:checked")?.value === "si");
+		btn.disabled = true;
+		try {
+			if (dest === "__nuovo") {
+				const nome = document.getElementById("cp-nuovo-nome").value.trim();
+				if (!nome) return errore("Scrivi il nome del nuovo proprietario.");
+				const { data, error } = await DB.insertClienteMascalcia({
+					nome,
+					telefono: document.getElementById("cp-nuovo-tel").value.trim() || null,
+					tipo_cliente: "proprietario"
+				});
+				if (error || !data) return errore(error?.message || "Proprietario non creato, riprova.");
+				dest = data.id;
+			}
+			const res = await DB.cambiaProprietario(ids, dest, aperti);
+			if (!res || !res.ok) return errore(res?.errore || "Non riuscito, riprova.");
+			closeModal("modal-cambia-proprietario");
+			await loadClientiMascalcia();
+			await caricaCavalliMiei().catch(() => {});
+			const nomeDest = clienteDiId(dest)?.nome || "nuovo proprietario";
+			showToast(`${res.spostati === 1 ? "1 cavallo" : res.spostati + " cavalli"} intestati a «${nomeDest}»` + (res.lavori ? ` · ${res.lavori === 1 ? "1 lavoro da saldare passato" : res.lavori + " lavori da saldare passati"}` : ""));
+			cpCtx = null;
+			await openClienteDetail(c.daId);
+		} finally {
+			btn.disabled = false;
+		}
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/105-resoconto-pdf.js
+	var resCtx = null;
+	async function apriResoconto(clienteId) {
+		if (incassiNascosti()) {
+			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il resoconto.");
+			return;
+		}
+		const cli = clienteDiId(clienteId);
+		if (!cli) return;
+		resCtx = {
+			clienteId,
+			struttura: isStruttura(cli),
+			periodo: "mese",
+			da: "",
+			a: "",
+			chi: "tutti",
+			tutti: [],
+			lavori: []
+		};
+		document.getElementById("res-tit").textContent = "Resoconto · " + cli.nome;
+		document.getElementById("res-corpo").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico gli interventi…</div>";
+		openModal("modal-resoconto");
+		resCtx.tutti = await DB.interventiResoconto(clienteId, null, null);
+		resApplica();
+	}
+	function resPeriodo(p) {
+		if (!resCtx) return;
+		resCtx.periodo = p;
+		if (p !== "date") resApplica();
+		else resRender();
+	}
+	function resDate() {
+		if (!resCtx) return;
+		resCtx.da = document.getElementById("res-da").value;
+		resCtx.a = document.getElementById("res-a").value;
+		resApplica();
+	}
+	function resChi(v) {
+		if (!resCtx) return;
+		resCtx.chi = v;
+		resApplica();
+	}
+	function resIntervallo() {
+		const c = resCtx, oggi = /* @__PURE__ */ new Date(), iso = isoLocale;
+		if (c.periodo === "mese") return [iso(new Date(oggi.getFullYear(), oggi.getMonth(), 1)), iso(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0))];
+		if (c.periodo === "scorso") return [iso(new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1)), iso(new Date(oggi.getFullYear(), oggi.getMonth(), 0))];
+		if (c.periodo === "tre") return [iso(new Date(oggi.getFullYear(), oggi.getMonth() - 2, 1)), iso(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0))];
+		if (c.periodo === "date") return [c.da || "", c.a || ""];
+		return ["", ""];
+	}
+	function resProprietario(i) {
+		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
+	}
+	function resApplica() {
+		const c = resCtx;
+		if (!c) return;
+		const [da, a] = resIntervallo();
+		c.pDa = da;
+		c.pA = a;
+		c.lavori = c.tutti.filter((i) => (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a) && (c.chi === "tutti" || i.cliente_mascalcia_id === c.chi));
+		resRender();
+	}
+	function resTotali(l) {
+		const tot = l.reduce((s, i) => s + (Number(i.importo) || 0), 0);
+		const pag = l.filter((i) => i.stato_pagamento === "saldato").reduce((s, i) => s + (Number(i.importo) || 0), 0);
+		return {
+			tot,
+			pag,
+			da: tot - pag
+		};
+	}
+	function resRender() {
+		const c = resCtx;
+		if (!c) return;
+		const chip = (k, t) => `<button type="button" class="btn ${c.periodo === k ? "btn-primary" : "btn-outline"} btn-sm" onclick="resPeriodo('${k}')">${t}</button>`;
+		const proprietari = [...new Map(c.tutti.map((i) => [i.cliente_mascalcia_id, resProprietario(i)])).entries()].sort((x, y) => x[1].localeCompare(y[1], "it"));
+		const t = resTotali(c.lavori);
+		const nProp = new Set(c.lavori.map((i) => i.cliente_mascalcia_id)).size;
+		document.getElementById("res-corpo").innerHTML = `
+    ${c.struttura && proprietari.length > 1 ? `<div class="clienti-sez-title" style="margin:4px 0 6px">PER CHI</div>
+      <select class="input" onchange="resChi(this.value)"><option value="tutti"${c.chi === "tutti" ? " selected" : ""}>Tutta la struttura (diviso per proprietario)</option>
+      ${proprietari.map(([id, n]) => `<option value="${id}"${c.chi === id ? " selected" : ""}>Solo ${escapeHtml(n)}</option>`).join("")}</select>` : ""}
+    <div class="clienti-sez-title" style="margin:14px 0 6px">PERIODO</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${chip("mese", "Questo mese")}${chip("scorso", "Mese scorso")}${chip("tre", "Ultimi 3 mesi")}${chip("tutto", "Tutto")}${chip("date", "Scegli le date")}</div>
+    ${c.periodo === "date" ? `<div style="display:flex;gap:8px;margin-top:8px"><input class="input" type="date" id="res-da" value="${c.da}" onchange="resDate()"><input class="input" type="date" id="res-a" value="${c.a}" onchange="resDate()"></div>` : ""}
+    <div class="res-riep">
+      <div><span>Interventi</span><b>${c.lavori.length}</b></div>
+      <div><span>Totale</span><b>${contoEuro(t.tot)}</b></div>
+      <div><span>Pagato</span><b>${contoEuro(t.pag)}</b></div>
+      <div class="da"><span>Da pagare</span><b>${contoEuro(t.da)}</b></div>
+    </div>
+    ${c.struttura && c.chi === "tutti" && nProp > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Nel PDF gli interventi sono divisi per i ${nProp} proprietari, con i totali di ognuno.</div>` : ""}
+    <div class="ag-azioni" style="margin-top:14px">
+      <button class="btn btn-primary" ${c.lavori.length ? "" : "disabled"} onclick="resCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Condividi il PDF (WhatsApp, email…)</button>
+      <button class="btn btn-outline" ${c.lavori.length ? "" : "disabled"} onclick="resScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>
+    </div>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il resoconto riepiloga tutti gli interventi del periodo, pagati e da pagare. Non cambia i pagamenti e non è una fattura. Per chiedere il pagamento usa «Fai il conto».</div>`;
+	}
+	function resNomeFile() {
+		const c = resCtx;
+		const chi = c.chi === "tutti" ? clienteDiId(c.clienteId)?.nome : clienteDiId(c.chi)?.nome;
+		return [
+			"Equo",
+			"Resoconto",
+			String(chi || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, ""),
+			c.pDa || "",
+			c.pA || ""
+		].filter(Boolean).join("_") + ".pdf";
+	}
+	async function creaPdfResoconto() {
+		const c = resCtx;
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const W = 210, M = 18, verde = [
+			20,
+			49,
+			42
+		], oro = [
+			201,
+			143,
+			46
+		], grigio = [
+			95,
+			111,
+			103
+		], rosso = [
+			163,
+			59,
+			43
+		];
+		const piede = () => {
+			doc.setDrawColor(227, 221, 204);
+			doc.line(M, 280, 192, 280);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.5);
+			doc.setTextColor(...grigio);
+			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
+		};
+		doc.setFillColor(...verde);
+		doc.rect(0, 0, W, 32, "F");
+		doc.setTextColor(255, 255, 255);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(22);
+		doc.text("Equo", M, 20);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.text("Prenditi cura del tuo cavallo", M, 26);
+		doc.text(contoData(isoLocale(/* @__PURE__ */ new Date())), 192, 20, { align: "right" });
+		doc.setFillColor(...oro);
+		doc.rect(0, 32, W, 1.5, "F");
+		let y = 48;
+		const luogo = clienteDiId(c.clienteId);
+		const solo = c.chi !== "tutti" ? clienteDiId(c.chi) : null;
+		doc.setTextColor(...verde);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(17);
+		doc.text("Resoconto interventi", M, y);
+		y += 9;
+		doc.setFontSize(15);
+		doc.text(solo ? solo.nome : luogo?.nome || "", M, y);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10.5);
+		doc.setTextColor(...grigio);
+		if (solo && c.struttura && solo.id !== c.clienteId) {
+			y += 6;
+			doc.text("Cavalli presso " + (luogo?.nome || ""), M, y);
+		}
+		const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
+		if (pro) {
+			y += 6;
+			doc.text("Maniscalco: " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
+		}
+		y += 5.5;
+		doc.text("Periodo: " + (c.pDa || c.pA ? (c.pDa ? "dal " + contoData(c.pDa) + " " : "") + (c.pA ? "al " + contoData(c.pA) : "") : "tutti gli interventi"), M, y);
+		y += 10;
+		const colData = 20, colCav = 42, colLav = 84, colStato = 162, colImp = 190;
+		const testa = () => {
+			doc.setFillColor(...verde);
+			doc.rect(M, y - 5, 174, 8, "F");
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(9.5);
+			doc.setTextColor(255, 255, 255);
+			doc.text("DATA", colData, y);
+			doc.text("CAVALLO", colCav, y);
+			doc.text("LAVORO", colLav, y);
+			doc.text("STATO", colStato, y);
+			doc.text("IMPORTO", colImp, y, { align: "right" });
+			y += 8;
+		};
+		testa();
+		const nuovaPagina = () => {
+			piede();
+			doc.addPage();
+			y = 22;
+			testa();
+		};
+		const gruppi = /* @__PURE__ */ new Map();
+		c.lavori.forEach((i) => {
+			const n = resProprietario(i);
+			(gruppi.get(n) || gruppi.set(n, []).get(n)).push(i);
+		});
+		const nomi = [...gruppi.keys()].sort((a, b) => a.localeCompare(b, "it"));
+		const conGruppi = nomi.length > 1;
+		let k = 0;
+		nomi.forEach((n) => {
+			const lista = gruppi.get(n).slice().sort((a, b) => (agNomeCavallo(a) || "").localeCompare(agNomeCavallo(b) || "", "it") || String(a.data_intervento).localeCompare(String(b.data_intervento)));
+			if (conGruppi) {
+				if (y > 262) nuovaPagina();
+				doc.setFont("helvetica", "bold");
+				doc.setFontSize(10.5);
+				doc.setTextColor(...oro);
+				doc.text(n, colData, y);
+				y += 6;
+			}
+			lista.forEach((i) => {
+				const lav = doc.splitTextToSize(String(agDescrizioneTipo(i) || ""), 75);
+				const h = Math.max(7.5, lav.length * 4.8 + 2.6);
+				if (y + h > 268) nuovaPagina();
+				if (k++ % 2 === 0) {
+					doc.setFillColor(248, 246, 240);
+					doc.rect(M, y - 4.6, 174, h, "F");
+				}
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(10);
+				doc.setTextColor(...grigio);
+				doc.text(contoData(i.data_intervento), colData, y);
+				doc.setFont("helvetica", "bold");
+				doc.setTextColor(...verde);
+				doc.text(doc.splitTextToSize(String(agNomeCavallo(i) || "—"), 39), colCav, y);
+				doc.setFont("helvetica", "normal");
+				doc.setTextColor(...grigio);
+				doc.text(lav, colLav, y);
+				const saldato = i.stato_pagamento === "saldato";
+				doc.setFont("helvetica", "bold");
+				doc.setFontSize(9);
+				doc.setTextColor(...saldato ? verde : rosso);
+				doc.text(saldato ? "Pagato" : "Da pagare", colStato, y);
+				doc.setFontSize(10);
+				doc.setTextColor(...verde);
+				doc.text(Number(i.importo) > 0 ? contoEuro(i.importo) : "—", colImp, y, { align: "right" });
+				y += h;
+			});
+			if (conGruppi) {
+				const t = resTotali(gruppi.get(n));
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(9.5);
+				doc.setTextColor(...grigio);
+				doc.text(`Totale ${n}: ${contoEuro(t.tot)}  ·  pagato ${contoEuro(t.pag)}  ·  da pagare`, 44, y);
+				doc.setFont("helvetica", "bold");
+				doc.setTextColor(...t.da > 0 ? rosso : verde);
+				doc.text(contoEuro(t.da), colImp, y, { align: "right" });
+				y += 8;
+			}
+		});
+		if (y > 240) nuovaPagina();
+		const t = resTotali(c.lavori);
+		y += 4;
+		doc.setDrawColor(...oro);
+		doc.setLineWidth(.6);
+		doc.line(M, y, 192, y);
+		y += 8;
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(11);
+		doc.setTextColor(...grigio);
+		doc.text(`${c.lavori.length === 1 ? "1 intervento" : c.lavori.length + " interventi"}`, M, y);
+		doc.text("Totale", 147, y);
+		doc.setFont("helvetica", "bold");
+		doc.setTextColor(...verde);
+		doc.text(contoEuro(t.tot), 192, y, { align: "right" });
+		y += 6.5;
+		doc.setFont("helvetica", "normal");
+		doc.setTextColor(...grigio);
+		doc.text("Pagato", 147, y);
+		doc.setFont("helvetica", "bold");
+		doc.setTextColor(...verde);
+		doc.text(contoEuro(t.pag), 192, y, { align: "right" });
+		y += 8;
+		doc.setFontSize(15);
+		doc.setTextColor(...t.da > 0 ? rosso : verde);
+		doc.text("DA PAGARE  " + contoEuro(t.da), 192, y, { align: "right" });
+		y += 12;
+		if (t.da > 0 && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
+			if (y > 250) nuovaPagina();
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...verde);
+			doc.text("Dati per il pagamento", M, y);
+			y += 7;
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...grigio);
+			if (currentUser.datiPagamentoNome) {
+				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoIban) {
+				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoPaypal) {
+				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
+				y += 6;
+			}
+		}
+		piede();
+		return {
+			blob: doc.output("blob"),
+			nome: resNomeFile()
+		};
+	}
+	function resScaricaBlob(blob, nome) {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = nome;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 3e4);
+	}
+	async function resCondividi() {
+		if (!resCtx) return;
+		showToast("Creo il PDF…");
+		try {
+			const { blob, nome } = await creaPdfResoconto();
+			const file = new File([blob], nome, { type: "application/pdf" });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
+				await navigator.share({
+					files: [file],
+					title: nome
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			resScaricaBlob(blob, nome);
+			showToast("Il PDF è stato scaricato: allegalo alla tua email o a WhatsApp.");
+		} catch (err) {
+			console.error("resCondividi:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	async function resScarica() {
+		if (!resCtx) return;
+		try {
+			const { blob, nome } = await creaPdfResoconto();
+			resScaricaBlob(blob, nome);
+		} catch (err) {
+			console.error("resScarica:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/101-importazione-vecchia-app.js
 	var impScelte = [];
 	var impDate = [];
@@ -8848,6 +9337,16 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		apriCambiaProprietario,
+		confermaCambiaProprietario,
+		cpDestCambiata,
+		cpScegliCavallo,
+		apriResoconto,
+		resChi,
+		resCondividi,
+		resDate,
+		resPeriodo,
+		resScarica,
 		ferIntervallo,
 		ferIntervalloImposta,
 		apriAnagraficaCavallo,

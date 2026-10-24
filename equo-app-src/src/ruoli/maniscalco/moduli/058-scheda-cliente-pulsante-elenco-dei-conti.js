@@ -9,7 +9,8 @@ async function caricaContiCliente(clienteId){
   if(currentClienteId !== clienteId) return;
   const badge = s => s === "pagato" ? '<span class="badge badge-green">Pagato</span>' : s === "annullato" ? '<span class="badge" style="opacity:.7">Annullato</span>' : '<span class="badge badge-red">Da incassare</span>';
   box.innerHTML = `<div class="card" style="margin:14px 0">
-    <button class="btn btn-primary" style="width:100%" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
+    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
+      <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
     ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map(c => `
       <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
         <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>

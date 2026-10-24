@@ -279,7 +279,7 @@ function renderCorpoCavalloPro(){
         <dt>Microchip</dt><dd>${escapeHtml(cv.microchip || "—")}</dd>
         <dt>Razza</dt><dd>${escapeHtml(cv.razza || "—")}</dd>
         ${cv.nascita ? `<dt>Nascita</dt><dd>${formatDate(cv.nascita)}</dd>` : ""}
-        <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find(x => x.id === currentClienteId)?.nome || "—")}</dd>
+        <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find(x => x.id === currentClienteId)?.nome || "—")}${modificabile && !cv.horse_id ? ` <button type="button" class="cavpro-link" onclick="apriCambiaProprietario(false)">Cambia</button>` : ""}</dd>
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
       ${cv.tipo === "equo" ? '<div class="muted" style="font-size:11.5px;margin-top:8px">L\'anagrafica la gestisce il proprietario nella sua app.</div>' : ""}`)
