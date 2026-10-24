@@ -44,3 +44,9 @@
 :where(body:not(.pl-owner)) .cav-prox span{color:var(--accent);font-weight:800}
 :where(body:not(.pl-owner)) .cav-prox.scad,:where(body:not(.pl-owner)) .cav-prox.scad b{color:var(--red,#a33b2b);font-weight:700}
 :where(body:not(.pl-owner)) .ricaz-sposta{flex-wrap:wrap}
+/* prezzo abituale toccabile nella scheda del cavallo (24/10/2026) */
+:where(body:not(.pl-owner)) .cav-prezzo-riga{border:0;background:none;padding:2px 0;font:inherit;font-size:13px;color:var(--muted);cursor:pointer;text-align:left}
+:where(body:not(.pl-owner)) .cav-prezzo-riga b{color:var(--text)}
+:where(body:not(.pl-owner)) .cav-prezzo-riga span{color:var(--accent);font-weight:800;margin-left:4px}
+:where(body:not(.pl-owner)) .cav-prezzo-edit{display:flex;gap:6px;align-items:center}
+:where(body:not(.pl-owner)) .cav-prezzo-edit .prezzi-campo{flex:1;min-width:0}

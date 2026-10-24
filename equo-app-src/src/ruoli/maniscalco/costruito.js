@@ -5015,7 +5015,36 @@
       <span class="cav-int-t">Intervallo di ferratura: <b id="cav-int-val">${e.giorni} giorni</b>${mio ? "" : ` <small>(${TESTO_DA[e.da]})</small>`}</span>
       <span class="cav-int-step"><button type="button" onclick="cavIntervalloCambia(-1)" aria-label="Meno giorni">−</button><button type="button" onclick="cavIntervalloCambia(1)" aria-label="Più giorni">+</button></span>
     </div>
-    ${prezzo != null ? `<div class="cav-prezzo solo-incassi">Prezzo abituale: <b>${escapeHtml(formatEuro(prezzo))}</b></div>` : ""}`;
+    <div class="cav-prezzo" id="cav-prezzo">${prezzoRigaHtml(prezzo)}</div>`;
+	}
+	function prezzoRigaHtml(prezzo) {
+		return `<button type="button" class="cav-prezzo-riga" onclick="cavPrezzoModifica()">Prezzo abituale: ${prezzo != null ? `<b>${escapeHtml(formatEuro(prezzo))}</b>` : "<i>non impostato</i>"} <span>✎</span></button>`;
+	}
+	function cavPrezzoModifica() {
+		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
+		const box = document.getElementById("cav-prezzo");
+		if (!cv || !box) return;
+		box.innerHTML = `<div class="cav-prezzo-edit"><label class="prezzi-campo"><span>€</span><input type="number" min="0" max="10000" step="0.5" inputmode="decimal" id="cav-prezzo-val" value="${cv.prezzo_ferratura != null && cv.prezzo_ferratura !== "" ? Number(cv.prezzo_ferratura) : ""}" placeholder="es. 12"
+      onkeydown="if(event.key==='Enter')cavPrezzoSalva();if(event.key==='Escape')renderCorpoCavalloPro()"></label>
+    <button type="button" class="btn btn-primary btn-sm" onclick="cavPrezzoSalva()">Salva</button><button type="button" class="btn btn-outline btn-sm" onclick="renderCorpoCavalloPro()">Annulla</button></div>`;
+		document.getElementById("cav-prezzo-val").focus();
+	}
+	async function cavPrezzoSalva() {
+		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
+		const inp = document.getElementById("cav-prezzo-val");
+		if (!cv || !inp) return;
+		const raw = inp.value.trim();
+		if (raw !== "" && !(Number(raw) >= 0 && Number(raw) <= 1e4)) {
+			showToast("Controlla il prezzo");
+			inp.focus();
+			return;
+		}
+		const v = raw === "" ? null : Math.round(Number(raw) * 100) / 100;
+		if ((cv.prezzo_ferratura == null || cv.prezzo_ferratura === "" ? null : Number(cv.prezzo_ferratura)) === v) {
+			renderCorpoCavalloPro();
+			return;
+		}
+		await salvaCampiCavallo(cv, { prezzo_ferratura: v }, v == null ? `${cv.nome}: prezzo abituale tolto` : `${cv.nome}: prezzo abituale ${formatEuro(v)}`);
 	}
 	var cavIntTimer = null;
 	function cavIntervalloCambia(d) {
@@ -9567,6 +9596,8 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		cavPrezzoModifica,
+		cavPrezzoSalva,
 		apriScadenzaCavallo,
 		richiamoAnteprima,
 		richiamoCambiaData,

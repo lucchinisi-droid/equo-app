@@ -44,13 +44,15 @@ import { wgCercaLuogoVai, wgLuogoAMano, wgMostraMappe, wgNaviga, wgSceltaLuogo }
 import { usaPosizioneQui } from "./106-posizione-attuale.js";
 import { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
-import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
+import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 import { allineaRender, apriAllineaScadenze, cicloCambia, cicloTogli, confermaAllineaScadenze } from "./102-scadenze-della-struttura.js";
 import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } from "./101-importazione-vecchia-app.js";
 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  cavPrezzoModifica,
+  cavPrezzoSalva,
   apriScadenzaCavallo,
   richiamoAnteprima,
   richiamoCambiaData,
