@@ -33,3 +33,15 @@
 :where(body:not(.pl-owner)) .fer-det{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
 :where(body:not(.pl-owner)) .fer-det button{border:1.5px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer}
 :where(body:not(.pl-owner)) .fer-det button.on{background:#a8721c;border-color:#a8721c;color:#fff}
+/* intervallo e prezzo del cavallo (24/10/2026) */
+:where(body:not(.pl-owner)) .fer-int-rapidi{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+:where(body:not(.pl-owner)) .fer-int-rapidi button{border:1.5px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer}
+:where(body:not(.pl-owner)) .fer-int-rapidi button.on{background:var(--green,#14482c);border-color:var(--green,#14482c);color:#fff}
+:where(body:not(.pl-owner)) .fer-int-rapidi button.togli{color:var(--red,#a33b2b)}
+:where(body:not(.pl-owner)) .cav-int{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,var(--green,#14482c) 9%,var(--surface));font-size:13.5px}
+:where(body:not(.pl-owner)) .cav-int-t{flex:1;min-width:0}
+:where(body:not(.pl-owner)) .cav-int-t small{color:var(--muted);font-weight:500}
+:where(body:not(.pl-owner)) .cav-int-step{display:inline-flex;gap:6px}
+:where(body:not(.pl-owner)) .cav-int-step button{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);font:inherit;font-size:17px;font-weight:800;color:var(--text);cursor:pointer}
+:where(body:not(.pl-owner)) .cav-prezzo{font-size:13px;margin-top:8px;color:var(--muted)}
+:where(body:not(.pl-owner)) .cav-prezzo b{color:var(--text)}

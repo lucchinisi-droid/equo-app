@@ -1,0 +1,109 @@
+// Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { giorniTra, intervalloPredefinito } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
+import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
+import { apriSchedaCavalloPro, renderCorpoCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
+import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
+import { intervalloStruttura } from "./102-scadenze-della-struttura.js";
+/* ---------- SCHEDA DEL CAVALLO: INTERVALLO, PREZZO, ANAGRAFICA (24/10/2026, richieste di Francesco Bizzarri e Alessandro Pica) ----------
+   - intervallo di ferratura del singolo cavallo (cavalli_clienti_mascalcia.intervallo_giorni): vale prima di quello della struttura;
+   - prezzo abituale del cavallo (prezzo_ferratura): importo proposto quando si segna fatto; solo del maniscalco;
+   - «Modifica» dell'anagrafica apre i dati del cavallo (non la scheda del cliente). */
+const INT_MIN = 7, INT_MAX = 180;
+const TIPO_DI_LAVORO = { completa: "ferratura", mezza: "mezza_ferratura", pareggio: "pareggio" };
+
+function intervalloCavallo(cv){
+  const g = cv ? Number(cv.intervallo_giorni) : NaN;
+  return g >= INT_MIN && g <= INT_MAX ? g : null;
+}
+// quello che Equo userebbe per la prossima scadenza: cavallo > struttura > ultima volta > predefinito
+function intervalloEffettivo(cv, clienteId, storico){
+  const gc = intervalloCavallo(cv);
+  if(gc) return { giorni: gc, da: "cavallo" };
+  const gs = intervalloStruttura(clienteId);
+  if(gs) return { giorni: gs, da: "struttura" };
+  const tipo = TIPO_DI_LAVORO[cv?.ferratura_tipo] || "ferratura";
+  const ult = (storico || []).filter(i => i.stato === "fatto" && i.tipo_ferratura === tipo && i.prossima_scadenza)
+    .sort((a, b) => b.data_intervento.localeCompare(a.data_intervento))[0];
+  const gu = ult ? giorniTra(ult.data_intervento, ult.prossima_scadenza) : null;
+  if(gu >= 1 && gu <= 60) return { giorni: gu, da: "ultima" };
+  return { giorni: intervalloPredefinito(tipo), da: "predefinito" };
+}
+const TESTO_DA = { struttura: "della struttura", ultima: "come l'ultima volta", predefinito: "il tuo predefinito" };
+// riquadro nella sezione Ferratura della scheda del cavallo
+function riquadroIntervalloPrezzo(cv, clienteId, storico){
+  const e = intervalloEffettivo(cv, clienteId, storico);
+  const mio = e.da === "cavallo";
+  const prezzo = cv.prezzo_ferratura != null && cv.prezzo_ferratura !== "" ? Number(cv.prezzo_ferratura) : null;
+  return `<div class="cav-int">
+      <span class="cav-int-ic" aria-hidden="true">📅</span>
+      <span class="cav-int-t">Intervallo di ferratura: <b id="cav-int-val">${e.giorni} giorni</b>${mio ? "" : ` <small>(${TESTO_DA[e.da]})</small>`}</span>
+      <span class="cav-int-step"><button type="button" onclick="cavIntervalloCambia(-1)" aria-label="Meno giorni">−</button><button type="button" onclick="cavIntervalloCambia(1)" aria-label="Più giorni">+</button></span>
+    </div>
+    ${prezzo != null ? `<div class="cav-prezzo solo-incassi">Prezzo abituale: <b>${escapeHtml(formatEuro(prezzo))}</b></div>` : ""}`;
+}
+let cavIntTimer = null;
+function cavIntervalloCambia(d){
+  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
+  if(!cv) return;
+  const base = intervalloCavallo(cv) || intervalloEffettivo(cv, currentClienteId, schedaStoricoCavallo).giorni;
+  const nuovo = Math.max(INT_MIN, Math.min(INT_MAX, base + d));
+  cv.intervallo_giorni = nuovo;
+  const v = document.getElementById("cav-int-val"); if(v) v.textContent = nuovo + " giorni";
+  const nota = v?.parentNode?.querySelector("small"); if(nota) nota.remove();
+  clearTimeout(cavIntTimer);
+  cavIntTimer = setTimeout(() => salvaCampiCavallo(cv, { intervallo_giorni: nuovo }, `${cv.nome}: ferratura ogni ${nuovo} giorni`), 700);
+}
+async function salvaCampiCavallo(cv, campi, messaggio){
+  let id = cv.id;
+  if(!id){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(currentClienteId, cv)); }
+  if(!id){ showToast("Non riuscito, riprova."); return false; }
+  const { error } = await DB.updateCavalloCliente(id, campi);
+  if(error){ showToast(/intervallo_giorni|prezzo_ferratura/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message); return false; }
+  Object.assign(cv, campi, { id });
+  [schedaCavalli, cavalliMieiLista].forEach(l => (l || []).forEach(x => { if(x !== cv && x.id === id) Object.assign(x, campi); }));
+  if(messaggio) showToast(messaggio);
+  if(document.getElementById("cavallo-pro-view")?.style.display === "block") renderCorpoCavalloPro();
+  return true;
+}
+// prezzo abituale per un cavallo e un tipo di lavoro (solo se il lavoro è il suo solito)
+function prezzoCavallo(cv, tipo){
+  if(!cv || cv.prezzo_ferratura == null || cv.prezzo_ferratura === "") return null;
+  if(tipo && TIPO_DI_LAVORO[cv.ferratura_tipo || "completa"] !== tipo) return null;
+  const v = Number(cv.prezzo_ferratura);
+  return v >= 0 ? v : null;
+}
+
+// «Modifica» dell'anagrafica: nome, microchip, razza del cavallo
+function apriAnagraficaCavallo(){
+  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
+  if(!cv) return;
+  if(cv.tipo !== "manuale"){ showToast("L'anagrafica di questo cavallo la gestisce il proprietario nella sua app."); return; }
+  document.getElementById("acav-tit").textContent = "Anagrafica · " + (cv.nome || "Cavallo");
+  document.getElementById("acav-nome").value = cv.nome || "";
+  document.getElementById("acav-chip").value = cv.microchip || "";
+  razzaImposta("acav-razza", cv.razza || "");
+  document.getElementById("acav-errore").style.display = "none";
+  openModal("modal-anagrafica-cavallo");
+}
+async function salvaAnagraficaCavallo(btn){
+  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
+  if(!cv) return;
+  const err = document.getElementById("acav-errore");
+  const errore = t => { err.textContent = t; err.style.display = "block"; };
+  const nome = document.getElementById("acav-nome").value.trim();
+  if(!nome) return errore("Scrivi il nome del cavallo.");
+  const razza = razzaValore("acav-razza");
+  if(razza === false) return;
+  const campi = { nome, microchip: document.getElementById("acav-chip").value.trim() || null, razza: razza || null };
+  Object.keys(campi).forEach(k => { if(String(cv[k] ?? "") === String(campi[k] ?? "")) delete campi[k]; });
+  if(!Object.keys(campi).length){ closeModal("modal-anagrafica-cavallo"); return; }
+  btn.disabled = true;
+  try{
+    const ok = await salvaCampiCavallo(cv, campi, "Anagrafica di " + nome + " salvata");
+    if(!ok) return;
+    closeModal("modal-anagrafica-cavallo");
+    await apriSchedaCavalloPro(cv.key, true);
+  } finally { btn.disabled = false; }
+}
+
+export { apriAnagraficaCavallo, cavIntervalloCambia, intervalloCavallo, intervalloEffettivo, prezzoCavallo, riquadroIntervalloPrezzo, salvaAnagraficaCavallo, salvaCampiCavallo };

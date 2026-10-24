@@ -10,6 +10,7 @@ import { MISURA_SISTEMA_LABEL, isoLocale } from "./051-modal-appuntamento-manisc
 import { chiediSiNo, openInterventoModal, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_MESI } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
+import { apriAnagraficaCavallo, riquadroIntervalloPrezzo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 /* ---------- AVVISO «SEMBRA LO STESSO CAVALLO» ----------
    Una scheda inserita a mano e una inserita dal proprietario con nomi uguali si uniscono da sole (database).
    Con nomi solo simili (es. «White» e «White night») si propone l'unione con un tocco: vince il nome del proprietario. */
@@ -287,6 +288,7 @@ function renderCorpoCavalloPro(){
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
         ${ultimiNuovi ? '<span class="solo-completa">Ultimi ferri nuovi: ' + formatDataBreve(ultimiNuovi.data_intervento) + "<br></span>" : ""}
         Prossima: <b style="color:var(--text)">${st.prossimo ? formatDataBreve(st.prossimo.data) : "—"}</b></div></div>
+      ${riquadroIntervalloPrezzo(cv, currentClienteId, schedaStoricoCavallo)}
       <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Vale per tutti i suoi appuntamenti: nel nuovo appuntamento basta scegliere il cavallo. Lavoro e tipo di ferro vanno anche nel libretto del proprietario e nella scheda della scuderia; «ferri nuovi/rimessa» resta solo tuo.</div>`)
     + sez("sto", "Storico di " + escapeHtml(cv.nome), `<span style="display:flex;gap:6px"><button class="btn btn-outline btn-sm solo-completa" onclick="nuovoInterventoCavalloPro('straordinario')">Straordinario</button><button class="btn btn-outline btn-sm" onclick="nuovoInterventoCavalloPro()">+ Intervento</button></span>`, storicoCavalloHtml(schedaStoricoCavallo, schedaSpostamenti))
     + (vedi("all") ? `<div class="card cavpro-sez"><div class="cavpro-sez-testa"><span>Allegati</span><button class="btn btn-outline btn-sm" onclick="document.getElementById('cavpro-allegati-file').click()">+ Carica</button></div>
@@ -335,12 +337,8 @@ async function salvaFerraturaCavallo(campi){
     : campi.ferro_tipo ? `${cv.nome}: ferro ${campi.ferro_tipo}` : "Note del ferro salvate");
   renderCorpoCavalloPro();
 }
-async function modificaAnagraficaCavalloPro(){
-  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
-  if(!cv || cv.tipo !== "manuale") return;
-  await openEditCliente();
-  showToast("Modifica nome, microchip e razza nella sezione Cavalli");
-}
+// «Modifica» dell'anagrafica: apre i dati del cavallo (prima apriva per errore la scheda del cliente)
+function modificaAnagraficaCavalloPro(){ apriAnagraficaCavallo(); }
 /* -> stato-condiviso.js */
 function storicoNomeCavallo(i){ return i.cavalli_clienti_mascalcia?.nome || ""; }
 function filtraStoricoCavallo(k){ storicoFiltroCavallo = k; renderStoricoCliente(); }

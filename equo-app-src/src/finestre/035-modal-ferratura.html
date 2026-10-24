@@ -31,6 +31,16 @@
       <input class="input" id="fer-note" maxlength="160" placeholder="Note: modello o lavorazione (es. barra a uovo davanti)" style="margin-top:8px">
       <div class="muted solo-completa" id="fer-dati" style="font-size:12px;margin-top:8px"></div>
     </div>
+    <label class="input-label" style="margin-top:12px">Intervallo di ferratura</label>
+    <div class="fer-int">
+      <div class="fer-step"><button type="button" onclick="ferIntervallo(-1)" aria-label="Meno giorni">−</button><div class="val" id="fer-int-val">—</div><button type="button" onclick="ferIntervallo(1)" aria-label="Più giorni">+</button></div>
+      <div class="fer-int-rapidi" id="fer-int-rapidi"></div>
+      <div class="muted" id="fer-int-nota" style="font-size:12px;line-height:1.45;margin-top:4px"></div>
+    </div>
+    <div class="solo-incassi">
+      <label class="input-label" style="margin-top:12px" for="fer-prezzo">Prezzo abituale <span class="muted" style="font-weight:500">(solo tuo, proposto quando segni fatto)</span></label>
+      <label class="prezzi-campo"><span>€</span><input type="number" min="0" step="0.5" inputmode="decimal" id="fer-prezzo" placeholder="es. 12"></label>
+    </div>
     <label class="input-label" style="margin-top:12px">Avviso di sicurezza <span class="muted" style="font-weight:500">(lo leggi all'arrivo)</span></label>
     <input class="input" id="fer-avviso" maxlength="160" placeholder="Es. scalcia dietro, non legarlo corto">
     <div class="auth-error" id="fer-errore" style="display:none"></div>

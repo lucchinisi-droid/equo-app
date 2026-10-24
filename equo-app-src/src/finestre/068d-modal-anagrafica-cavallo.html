@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-anagrafica-cavallo" onclick="closeOut(event,'modal-anagrafica-cavallo')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-anagrafica-cavallo')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-horse-head"></i></span><span id="acav-tit">Anagrafica</span></div>
+    <div class="input-group"><label class="input-label" for="acav-nome">Nome</label><input class="input" id="acav-nome" maxlength="80"></div>
+    <div class="input-group"><label class="input-label" for="acav-chip">Microchip</label><input class="input" id="acav-chip" autocapitalize="characters" maxlength="40" placeholder="(opzionale)"></div>
+    <div class="input-group"><label class="input-label" for="acav-razza">Razza</label><div style="min-width:0"><input class="input" id="acav-razza" placeholder="Razza (opz.) · scrivi per cercare"></div></div>
+    <div class="muted" style="font-size:12px;line-height:1.5;margin:2px 0 8px">Il codice Equo resta lo stesso: storico e interventi restano con il cavallo.</div>
+    <div class="auth-error" id="acav-errore" style="display:none"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaAnagraficaCavallo(this)">Salva</button>
+  </div>
+</div>

@@ -6,6 +6,7 @@ import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita } from "./051-mod
 import { siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
+import { intervalloCavallo, intervalloEffettivo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 /* ---------- FERRATURA DEL CAVALLO (scheda = libretto): Ferrato / Mezza / Pareggio, misura, tipo di ferro, note ----------
    Si imposta una volta e vale per tutti gli appuntamenti; ogni cambio resta nello storico del cavallo (trigger nel database).
    Completa: tipo di ferro separato davanti / dietro (ferro_tipo = davanti, ferro_tipo_post = dietro). */
@@ -51,7 +52,9 @@ function apriSchedaFerratura(cv, clienteId, dopo, extra){
   // senza misura salvata si parte dalla misura che il maniscalco usa di solito
   ferStato = { cv, clienteId, dopo, lavoro: lavoroCav(cv), s: cv.ferro_numero ? (cv.ferro_sistema || "italiana") : misuraPredefinita(), idx: n >= 0 ? n : -1,
     ft: cv.ferro_tipo || "standard", ftp: cv.ferro_tipo_post || null,
-    det: (cv.ferro_dettagli || []).slice(), detp: (cv.ferro_dettagli_post || []).slice() };
+    det: (cv.ferro_dettagli || []).slice(), detp: (cv.ferro_dettagli_post || []).slice(),
+    int: intervalloCavallo(cv), intEff: intervalloEffettivo({ ...cv, intervallo_giorni: null }, clienteId || currentClienteId, schedaStoricoCavallo) };
+  document.getElementById("fer-prezzo").value = cv.prezzo_ferratura != null && cv.prezzo_ferratura !== "" ? Number(cv.prezzo_ferratura) : "";
   document.getElementById("fer-titolo").textContent = (cv.nome || "Cavallo") + " · Ferratura";
   document.getElementById("fer-sistema").value = ferStato.s;
   document.getElementById("fer-note").value = cv.ferro_note || "";
@@ -86,6 +89,14 @@ function ferRender(){
   bu.innerHTML = f.ft === "correttivo" ? chips("det", f.det) : "";
   bd.style.display = dd && ftp === "correttivo" ? "" : "none";
   bd.innerHTML = dd && ftp === "correttivo" ? chips("detp", f.detp) : "";
+  // intervallo di ferratura del cavallo
+  const da = { struttura: "della struttura", ultima: "come l'ultima volta", predefinito: "il tuo predefinito" };
+  document.getElementById("fer-int-val").textContent = (f.int || f.intEff.giorni) + " giorni";
+  document.getElementById("fer-int-rapidi").innerHTML = [30, 35, 40, 45].map(g => `<button type="button" class="${f.int === g ? "on" : ""}" onclick="ferIntervalloImposta(${g})">${g}</button>`).join("")
+    + (f.int ? `<button type="button" class="togli" onclick="ferIntervalloImposta(null)">Togli</button>` : "");
+  document.getElementById("fer-int-nota").textContent = f.int
+    ? "Vale dalla prossima ferratura: la prossima data già fissata non cambia."
+    : `Non impostato: usa ${f.intEff.giorni} giorni (${da[f.intEff.da] || ""}). Tocca − o + per fissarlo per questo cavallo.`;
   // misura preferita: «Usa sempre questa misura» oppure «È la tua misura di sempre»
   const pref = document.getElementById("fer-sistema-pref");
   if(pref){
@@ -93,6 +104,14 @@ function ferRender(){
     pref.innerHTML = mia ? '<i class="fa-solid fa-check"></i> La tua misura di sempre' : `<button type="button" onclick="impostaMisuraPredefinita(ferStatoSistema())">Usa sempre la ${escapeHtml(TESTO_MISURA[f.s] || f.s)}</button>`;
   }
 }
+// intervallo del cavallo: − / +, valori rapidi, «Togli» (senza valore vale quello della struttura o il solito)
+function ferIntervallo(d){
+  const f = ferStato; if(!f) return;
+  const base = f.int || f.intEff.giorni;
+  f.int = Math.max(7, Math.min(180, base + d));
+  ferRender();
+}
+function ferIntervalloImposta(v){ const f = ferStato; if(!f) return; f.int = v; ferRender(); }
 const TESTO_MISURA = { italiana: "misura italiana", olandese: "misura olandese / internazionale", tedesca: "misura tedesca" };
 function ferStatoSistema(){ return ferStato ? ferStato.s : null; }
 function ferDettaglio(lato, v){
@@ -150,11 +169,17 @@ async function salvaSchedaFerratura(){
     if(vistaCompleta() && f.lavoro === "completa") campi.ferro_dettagli_post = (f.ftp || f.ft) === "correttivo" && f.detp.length ? f.detp.slice() : null;
     else if(f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_dettagli_post = null;
   }
+  // intervallo e prezzo valgono anche per il pareggio
+  campi.intervallo_giorni = f.int || null;
+  const pz = document.getElementById("fer-prezzo").value;
+  if(pz !== "" && !(Number(pz) >= 0 && Number(pz) <= 10000)) return err("Controlla il prezzo.");
+  campi.prezzo_ferratura = pz === "" ? null : Math.round(Number(pz) * 100) / 100;
   const avviso = document.getElementById("fer-avviso").value.trim();
   if(avviso !== (f.avviso || "")) campi.avviso_sicurezza = avviso || null;
   // solo i campi davvero cambiati (lo storico registra ogni cambio)
   Object.keys(campi).forEach(k => {
     const prima = k === "ferratura_tipo" ? lavoroCav(cv) : k === "ferro_tipo" ? (cv.ferro_tipo || "standard") : k === "avviso_sicurezza" ? (f.avviso || null) : (cv[k] ?? null);
+    if(k === "prezzo_ferratura" || k === "intervallo_giorni"){ const a = prima == null || prima === "" ? null : Number(prima), b = campi[k] == null ? null : Number(campi[k]); if(a === b) delete campi[k]; return; }
     if(String(prima ?? "") === String(campi[k] ?? "")) delete campi[k];
   });
   if(!Object.keys(campi).length){ closeModal("modal-ferratura"); if(f.dopo) f.dopo(cv, false); return; }
@@ -164,7 +189,7 @@ async function salvaSchedaFerratura(){
     if(!id && f.clienteId){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(f.clienteId, cv)); }
     if(!id) return err("Non riuscito, riprova.");
     const { error } = await DB.updateCavalloCliente(id, campi);
-    if(error) return err(/ferratura_tipo|ferro_tipo_post|ferro_dettagli/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+    if(error) return err(/ferratura_tipo|ferro_tipo_post|ferro_dettagli|intervallo_giorni|prezzo_ferratura/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
     Object.assign(cv, campi, { id });
     // tiene allineate le altre copie del cavallo in memoria
     [schedaCavalli, cavalliEditCache, cavalliClienteCorrente, cavalliMieiLista].forEach(l => (l || []).forEach(x => { if(x !== cv && x.id === id) Object.assign(x, campi); }));
@@ -277,4 +302,4 @@ function closeClienteDetail(){
 }
 
 
-export { DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };
+export { DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };

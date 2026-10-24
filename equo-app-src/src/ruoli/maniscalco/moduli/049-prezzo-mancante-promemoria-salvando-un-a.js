@@ -3,9 +3,14 @@ import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js
 import { INC_ORIZZONTE } from "./048-vista-completa-premium-previsionale-clie.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
+import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
+import { prezzoCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 /* ---------- PREZZO MANCANTE: promemoria (salvando un appuntamento) e «Aggiungi» dal previsionale ---------- */
 let prezziResolve = null;
 function prezzoSuggerito(clienteId, cavalloId, tipo){
+  // prezzo abituale fissato nella scheda del cavallo
+  const ab = cavalloId ? prezzoCavallo((cavalliMieiLista || []).find(c => c.id === cavalloId), tipo) : null;
+  if(ab != null) return { v: ab, fonte: "prezzo abituale del cavallo" };
   const conPrezzo = (incTutti || []).filter(i => Number(i.importo) > 0 && i.cliente_mascalcia_id === clienteId && i.tipo_ferratura === tipo)
     .sort((a, b) => b.data_intervento.localeCompare(a.data_intervento));
   const stesso = cavalloId ? conPrezzo.find(i => i.cavallo_cliente_id === cavalloId) : null;
