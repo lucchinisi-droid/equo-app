@@ -183,4 +183,26 @@ Object.assign(DB, {
     }
     return righe.filter(r => !successivi.some(x => x.id !== r.id && chiave(x) === chiave(r) && x.data_intervento > r.data_intervento));
   },
+  /* -- Importazione dalla vecchia app (24/10/2026): pop-up al primo accesso -- */
+  async importScelteAperte(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.from("import_decisioni").select("id,ordine,tipo,titolo,testo,opzioni")
+      .eq("maniscalco_id", currentUser.id).is("risolta_il", null).order("ordine", { ascending: true });
+    if(error) console.warn("importScelteAperte:", error.message);
+    return error ? [] : (data || []);
+  },
+  async importDateDaConfermare(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.from("interventi_mascalcia")
+      .select("id,data_intervento,prossima_scadenza,cliente_mascalcia_id,cavallo_cliente_id,clienti_mascalcia(nome),cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).eq("data_da_confermare", true).limit(1000);
+    if(error) console.warn("importDateDaConfermare:", error.message);
+    return error ? [] : (data || []);
+  },
+  async importConfermaDate(righe){
+    return await sb.rpc("equo_import_conferma_date", { p: righe });
+  },
+  async importDecidi(id, scelta, importo){
+    return await sb.rpc("equo_import_decidi", { p_id: id, p_scelta: scelta, p_importo: importo });
+  },
 });

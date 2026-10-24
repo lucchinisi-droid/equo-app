@@ -2412,6 +2412,28 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
 .hp-es-disc{font-size:12px;color:var(--muted);background:var(--surface2);border-radius:12px;padding:8px 10px;margin-bottom:6px;line-height:1.45}
 @media (prefers-reduced-motion:reduce){.hp-f-cornice.gira .hp-f-gira{animation:none}}
 
+/* importazione dalla vecchia app: pop-up al primo accesso (scelte + date da confermare) */
+:where(body:not(.pl-owner)) .imp-modal{max-height:90vh}
+:where(body:not(.pl-owner)) .imp-intro{font-size:13.5px;line-height:1.55;color:var(--muted);margin:0 0 12px}
+:where(body:not(.pl-owner)) .imp-scheda{border:1.5px solid var(--border);border-radius:16px;padding:14px;background:var(--surface)}
+:where(body:not(.pl-owner)) .imp-cosa{font-weight:800;font-size:15px;margin-bottom:6px}
+:where(body:not(.pl-owner)) .imp-scheda p{font-size:14px;line-height:1.55;margin:0 0 12px}
+:where(body:not(.pl-owner)) .imp-opz{display:flex;flex-direction:column;gap:8px}
+:where(body:not(.pl-owner)) .imp-opz .btn{width:100%;white-space:normal;text-align:center}
+:where(body:not(.pl-owner)) .imp-importo{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--border);padding-top:8px}
+:where(body:not(.pl-owner)) .imp-resta{font-size:12.5px;font-weight:700;color:var(--accent);margin:0 0 10px}
+:where(body:not(.pl-owner)) .imp-gruppo{border:1.5px solid var(--border);border-radius:14px;margin-bottom:8px;background:var(--surface)}
+:where(body:not(.pl-owner)) .imp-gruppo summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;font-size:14px}
+:where(body:not(.pl-owner)) .imp-gruppo summary::-webkit-details-marker{display:none}
+:where(body:not(.pl-owner)) .imp-gruppo summary span{min-width:26px;text-align:center;font-size:12px;font-weight:800;border-radius:999px;padding:2px 8px;background:var(--surface2);color:var(--muted)}
+:where(body:not(.pl-owner)) .imp-gruppo[open] summary{border-bottom:1px solid var(--border)}
+:where(body:not(.pl-owner)) .imp-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+:where(body:not(.pl-owner)) .imp-riga .n{min-width:0;display:flex;flex-direction:column;font-size:14px}
+:where(body:not(.pl-owner)) .imp-riga .n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(body:not(.pl-owner)) .imp-riga .n small{font-size:11.5px;color:var(--muted)}
+:where(body:not(.pl-owner)) .imp-riga input[type=date]{flex-shrink:0;font:inherit;font-size:14px;border:1.5px solid var(--border);border-radius:10px;padding:6px 8px;background:var(--bg);color:var(--text)}
+:where(body:not(.pl-owner)) .imp-conferma{width:calc(100% - 28px);margin:10px 14px 12px}
+:where(body:not(.pl-owner)) .imp-dopo{width:100%;margin-top:12px}
 /* ---------- Tablet e computer (da 768 px) ---------- */
 @media (min-width:768px){
   body{display:block;background:var(--bg)}
@@ -5343,6 +5365,14 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
 </div>
 
 <!-- Piano Free proprietario: 1 cavallo -->
+<div class="modal-overlay" id="modal-import-vecchia">
+  <div class="modal imp-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="imp-tit">Dalla vecchia app</div>
+    <div id="imp-corpo"></div>
+    <button class="btn btn-outline imp-dopo" onclick="impPiuTardi()">Più tardi</button>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -13753,8 +13783,152 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		openModal("modal-collega-maniscalco");
 		collegaManiscalco();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/101-importazione-vecchia-app.js
+	var impScelte = [];
+	var impDate = [];
+	var impFatte = 0;
+	var impTotScelte = 0;
+	var impRimandato = false;
+	var impInCorso = false;
+	function impManiscalco() {
+		return !DEMO_MODE && !!currentUser && vistaAi() === "professionista" && (currentUser.vistaAttiva || currentUser.ruolo) === "maniscalco";
+	}
+	async function impCarica() {
+		const [s, d] = await Promise.all([DB.importScelteAperte(), DB.importDateDaConfermare()]);
+		impScelte = s;
+		impDate = d;
+	}
+	async function controllaImportVecchiaApp() {
+		if (impRimandato || impInCorso || !impManiscalco()) return;
+		if (document.getElementById("eq-pop-vista")?.classList.contains("attivo")) {
+			setTimeout(controllaImportVecchiaApp, 3e3);
+			return;
+		}
+		impInCorso = true;
+		try {
+			await impCarica();
+			if (!impScelte.length && !impDate.length) return;
+			impFatte = 0;
+			impTotScelte = impScelte.length;
+			impDisegna();
+			openModal("modal-import-vecchia");
+		} catch (e) {
+			console.warn("importazione vecchia app:", e);
+		} finally {
+			impInCorso = false;
+		}
+	}
+	function impPiuTardi() {
+		impRimandato = true;
+		closeModal("modal-import-vecchia");
+		const n = impScelte.length, d = impDate.length;
+		const parti = [];
+		if (n) parti.push(n === 1 ? "1 scelta" : n + " scelte");
+		if (d) parti.push(d === 1 ? "1 data" : d + " date");
+		if (parti.length) showToast("Ti mancano " + parti.join(" e ") + ": te le richiedo al prossimo accesso");
+	}
+	function impDisegna() {
+		const tit = document.getElementById("imp-tit"), corpo = document.getElementById("imp-corpo");
+		if (impScelte.length) {
+			const s = impScelte[0];
+			tit.textContent = "Dalla vecchia app: " + (impFatte + 1) + " di " + impTotScelte;
+			const intro = impFatte === 0 ? `<p class="imp-intro">Abbiamo portato su Equo strutture, cavalli, scadenze e pagamenti della tua vecchia app. Su alcune cose decidi tu: una alla volta, poi controlli le date.</p>` : "";
+			const bottoni = (s.opzioni || []).map((o) => {
+				if (s.tipo === "pagamento_ignoto" && o.k === "da_saldare") return `<div class="imp-importo"><label class="prezzi-campo"><span>€</span><input type="number" min="0" step="0.01" inputmode="decimal" id="imp-importo" placeholder="importo"></label>
+          <button class="btn btn-outline" onclick="impScegli('${o.k}')">${escapeHtml(o.t)}</button></div>`;
+				return `<button class="btn btn-outline" onclick="impScegli('${o.k}')">${escapeHtml(o.t)}</button>`;
+			}).join("");
+			corpo.innerHTML = `${intro}<div class="imp-scheda"><div class="imp-cosa">${escapeHtml(s.titolo)}</div>
+      <p>${escapeHtml(s.testo || "")}</p><div class="imp-opz">${bottoni}</div></div>`;
+			return;
+		}
+		tit.textContent = "Le date delle ultime ferrature";
+		const gruppi = /* @__PURE__ */ new Map();
+		impDate.forEach((i) => {
+			const k = i.cliente_mascalcia_id || "-";
+			if (!gruppi.has(k)) gruppi.set(k, {
+				nome: i.clienti_mascalcia?.nome || "Senza struttura",
+				righe: []
+			});
+			gruppi.get(k).righe.push(i);
+		});
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		const elenco = [...gruppi.entries()].sort((a, b) => a[1].nome.localeCompare(b[1].nome));
+		corpo.innerHTML = `<p class="imp-intro">La vecchia app segnava solo la prossima scadenza: la data dell'ultima ferratura l'abbiamo stimata.
+      Apri ogni struttura, correggi le date sbagliate e tocca «Confermo». Le scadenze restano quelle della vecchia app.</p>
+    <div class="imp-resta">${impDate.length === 1 ? "Manca 1 cavallo" : "Mancano " + impDate.length + " cavalli"} in ${elenco.length === 1 ? "1 struttura" : elenco.length + " strutture"}</div>
+    ${elenco.map(([, g]) => `<details class="imp-gruppo"><summary><b>${escapeHtml(g.nome)}</b><span>${g.righe.length}</span></summary>
+      ${g.righe.sort((a, b) => (a.cavalli_clienti_mascalcia?.nome || "").localeCompare(b.cavalli_clienti_mascalcia?.nome || "")).map((i) => `<div class="imp-riga">
+        <div class="n"><b>${escapeHtml(i.cavalli_clienti_mascalcia?.nome || "Cavallo")}</b>${i.prossima_scadenza ? `<small>scade ${escapeHtml(formatDataBreve(i.prossima_scadenza))}</small>` : ""}</div>
+        <input type="date" data-id="${i.id}" value="${String(i.data_intervento || "").slice(0, 10)}" min="2020-01-01" max="${oggi}"></div>`).join("")}
+      <button class="btn btn-primary imp-conferma" onclick="impConfermaGruppo(this)">Confermo ${g.righe.length === 1 ? "la data" : "le " + g.righe.length + " date"}</button></details>`).join("")}`;
+	}
+	async function impScegli(k) {
+		const s = impScelte[0];
+		if (!s) return;
+		let importo = null;
+		if (s.tipo === "pagamento_ignoto" && k === "da_saldare") {
+			importo = Number(document.getElementById("imp-importo")?.value);
+			if (!(importo > 0)) {
+				showToast("Scrivi l'importo da saldare");
+				document.getElementById("imp-importo")?.focus();
+				return;
+			}
+		}
+		document.querySelectorAll("#imp-corpo button").forEach((b) => b.disabled = true);
+		const { data, error } = await DB.importDecidi(s.id, k, importo);
+		if (error || !data || data.ok === false) {
+			document.querySelectorAll("#imp-corpo button").forEach((b) => b.disabled = false);
+			showToast("Non sono riuscito a salvare: " + (error?.message || data?.motivo || "riprova"));
+			return;
+		}
+		impScelte.shift();
+		impFatte++;
+		if (!impScelte.length) impDate = await DB.importDateDaConfermare();
+		if (!impScelte.length && !impDate.length) return impFinito();
+		impDisegna();
+	}
+	async function impConfermaGruppo(btn) {
+		const box = btn.closest(".imp-gruppo");
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		const righe = [...box.querySelectorAll("input[type=date]")].map((x) => ({
+			id: x.dataset.id,
+			data: x.value
+		}));
+		if (righe.some((r) => !r.data || r.data > oggi || r.data < "2020-01-01")) {
+			showToast("Controlla le date: non possono essere vuote né nel futuro");
+			return;
+		}
+		btn.disabled = true;
+		const { data, error } = await DB.importConfermaDate(righe);
+		if (error) {
+			btn.disabled = false;
+			showToast("Non sono riuscito a salvare: " + error.message);
+			return;
+		}
+		const fatte = new Set(righe.map((r) => r.id));
+		impDate = impDate.filter((i) => !fatte.has(i.id));
+		showToast((data === 1 ? "1 data confermata" : (data || righe.length) + " date confermate") + " · " + (box.querySelector("summary b")?.textContent || ""));
+		if (!impDate.length) return impFinito();
+		box.remove();
+		const nStr = document.querySelectorAll("#imp-corpo .imp-gruppo").length, resta = document.querySelector("#imp-corpo .imp-resta");
+		if (resta) resta.textContent = (impDate.length === 1 ? "Manca 1 cavallo" : "Mancano " + impDate.length + " cavalli") + " in " + (nStr === 1 ? "1 struttura" : nStr + " strutture");
+	}
+	async function impFinito() {
+		closeModal("modal-import-vecchia");
+		showToast("Fatto: i dati della vecchia app sono a posto");
+		try {
+			await loadClientiMascalcia();
+			await renderIncassi();
+			await renderProDeadlines();
+		} catch (e) {}
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		controllaImportVecchiaApp,
+		impConfermaGruppo,
+		impPiuTardi,
+		impScegli,
 		accettaRichiesta,
 		agNomeCavallo,
 		agOrdinaGiro,
@@ -14871,6 +15045,28 @@ Object.assign(DB, {
     }
     return righe.filter(r => !successivi.some(x => x.id !== r.id && chiave(x) === chiave(r) && x.data_intervento > r.data_intervento));
   },
+  /* -- Importazione dalla vecchia app (24/10/2026): pop-up al primo accesso -- */
+  async importScelteAperte(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.from("import_decisioni").select("id,ordine,tipo,titolo,testo,opzioni")
+      .eq("maniscalco_id", currentUser.id).is("risolta_il", null).order("ordine", { ascending: true });
+    if(error) console.warn("importScelteAperte:", error.message);
+    return error ? [] : (data || []);
+  },
+  async importDateDaConfermare(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.from("interventi_mascalcia")
+      .select("id,data_intervento,prossima_scadenza,cliente_mascalcia_id,cavallo_cliente_id,clienti_mascalcia(nome),cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).eq("data_da_confermare", true).limit(1000);
+    if(error) console.warn("importDateDaConfermare:", error.message);
+    return error ? [] : (data || []);
+  },
+  async importConfermaDate(righe){
+    return await sb.rpc("equo_import_conferma_date", { p: righe });
+  },
+  async importDecidi(id, scelta, importo){
+    return await sb.rpc("equo_import_decidi", { p_id: id, p_scelta: scelta, p_importo: importo });
+  },
 });
 /* ---------- DB · Cavalli dei clienti del maniscalco, spostamenti, ricerca centri ---------- */
 Object.assign(DB, {
@@ -15726,6 +15922,7 @@ async function enterApp(ruolo){
   if(typeof applicaHomeMan === "function") applicaHomeMan();
   if(typeof wgControllaResetPin === "function") setTimeout(wgControllaResetPin, 800);
   if(typeof mostraSceltaVistaManiscalco === "function") setTimeout(mostraSceltaVistaManiscalco, 1200);
+  if(typeof controllaImportVecchiaApp === "function") setTimeout(controllaImportVecchiaApp, 2000);
 }
 
 function setupOwnerNav(){

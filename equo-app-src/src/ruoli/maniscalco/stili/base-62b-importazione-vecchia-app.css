@@ -1,0 +1,22 @@
+/* importazione dalla vecchia app: pop-up al primo accesso (scelte + date da confermare) */
+:where(body:not(.pl-owner)) .imp-modal{max-height:90vh}
+:where(body:not(.pl-owner)) .imp-intro{font-size:13.5px;line-height:1.55;color:var(--muted);margin:0 0 12px}
+:where(body:not(.pl-owner)) .imp-scheda{border:1.5px solid var(--border);border-radius:16px;padding:14px;background:var(--surface)}
+:where(body:not(.pl-owner)) .imp-cosa{font-weight:800;font-size:15px;margin-bottom:6px}
+:where(body:not(.pl-owner)) .imp-scheda p{font-size:14px;line-height:1.55;margin:0 0 12px}
+:where(body:not(.pl-owner)) .imp-opz{display:flex;flex-direction:column;gap:8px}
+:where(body:not(.pl-owner)) .imp-opz .btn{width:100%;white-space:normal;text-align:center}
+:where(body:not(.pl-owner)) .imp-importo{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--border);padding-top:8px}
+:where(body:not(.pl-owner)) .imp-resta{font-size:12.5px;font-weight:700;color:var(--accent);margin:0 0 10px}
+:where(body:not(.pl-owner)) .imp-gruppo{border:1.5px solid var(--border);border-radius:14px;margin-bottom:8px;background:var(--surface)}
+:where(body:not(.pl-owner)) .imp-gruppo summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;font-size:14px}
+:where(body:not(.pl-owner)) .imp-gruppo summary::-webkit-details-marker{display:none}
+:where(body:not(.pl-owner)) .imp-gruppo summary span{min-width:26px;text-align:center;font-size:12px;font-weight:800;border-radius:999px;padding:2px 8px;background:var(--surface2);color:var(--muted)}
+:where(body:not(.pl-owner)) .imp-gruppo[open] summary{border-bottom:1px solid var(--border)}
+:where(body:not(.pl-owner)) .imp-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent)}
+:where(body:not(.pl-owner)) .imp-riga .n{min-width:0;display:flex;flex-direction:column;font-size:14px}
+:where(body:not(.pl-owner)) .imp-riga .n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(body:not(.pl-owner)) .imp-riga .n small{font-size:11.5px;color:var(--muted)}
+:where(body:not(.pl-owner)) .imp-riga input[type=date]{flex-shrink:0;font:inherit;font-size:14px;border:1.5px solid var(--border);border-radius:10px;padding:6px 8px;background:var(--bg);color:var(--text)}
+:where(body:not(.pl-owner)) .imp-conferma{width:calc(100% - 28px);margin:10px 14px 12px}
+:where(body:not(.pl-owner)) .imp-dopo{width:100%;margin-top:12px}

@@ -41,10 +41,15 @@ import { applicaVistaManiscalco, cambiaPromemoriaPagamenti, cambiaVistaManiscalc
 import { wgClienteDi, wgScegli, wgScriviRichiamo } from "./098-professionista.js";
 import "./099-meteo-accanto-agli-appuntamenti-indirizz.js";
 import { wgCercaLuogoVai, wgLuogoAMano, wgMostraMappe, wgNaviga, wgSceltaLuogo } from "./100-naviga.js";
+import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } from "./101-importazione-vecchia-app.js";
 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  controllaImportVecchiaApp,
+  impConfermaGruppo,
+  impPiuTardi,
+  impScegli,
   accettaRichiesta,
   agNomeCavallo,
   agOrdinaGiro,

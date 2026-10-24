@@ -121,6 +121,7 @@ async function enterApp(ruolo){
   if(typeof applicaHomeMan === "function") applicaHomeMan();
   if(typeof wgControllaResetPin === "function") setTimeout(wgControllaResetPin, 800);
   if(typeof mostraSceltaVistaManiscalco === "function") setTimeout(mostraSceltaVistaManiscalco, 1200);
+  if(typeof controllaImportVecchiaApp === "function") setTimeout(controllaImportVecchiaApp, 2000);
 }
 
 function setupOwnerNav(){
