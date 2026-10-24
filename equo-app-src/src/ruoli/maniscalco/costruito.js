@@ -4608,7 +4608,11 @@
 		} else if (tipo === "rimanda") {
 			document.getElementById("ricaz-azioni").style.display = "none";
 			document.getElementById("ricaz-rimanda").style.display = "block";
-			document.getElementById("ricaz-data").value = aggiungiGiorniIso(isoLocale(/* @__PURE__ */ new Date()), 7);
+			const inp = document.getElementById("ricaz-data");
+			inp.min = isoLocale(/* @__PURE__ */ new Date());
+			inp.value = r.scadenza < inp.min ? inp.min : r.scadenza;
+			document.getElementById("ricaz-attuale").textContent = "Scadenza attuale: " + formatDataBreve(r.scadenza) + " (" + hpQuando(r) + ")";
+			richiamoAnteprima();
 		} else if (tipo === "chiudi") {
 			if (!confirm(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
 			const { error } = await DB.setRichiamoStato(r.intervento_id, { chiuso_il: (/* @__PURE__ */ new Date()).toISOString() });
@@ -4620,6 +4624,89 @@
 			showToast("Fatto, non te lo ricordo più");
 			await renderProDeadlines();
 		}
+	}
+	function richiamoSposta(d) {
+		const r = hpRichiami[hpRichiamoId];
+		if (!r) return;
+		const inp = document.getElementById("ricaz-data"), oggi = isoLocale(/* @__PURE__ */ new Date());
+		let v = aggiungiGiorniIso(inp.value || r.scadenza, d);
+		if (v < oggi) v = oggi;
+		inp.value = v;
+		richiamoAnteprima();
+	}
+	function richiamoAnteprima() {
+		const v = document.getElementById("ricaz-data").value, box = document.getElementById("ricaz-anteprima");
+		if (!v) {
+			box.textContent = "";
+			return;
+		}
+		const g = giorniTra(isoLocale(/* @__PURE__ */ new Date()), v);
+		box.textContent = "Nuova scadenza: " + formatDataBreve(v) + " (" + (g < 0 ? "nel passato" : g === 0 ? "oggi" : g === 1 ? "domani" : "tra " + g + " giorni") + ")";
+		box.style.color = g < 0 ? "var(--red)" : "";
+	}
+	async function richiamoCambiaData() {
+		const r = hpRichiami[hpRichiamoId];
+		if (!r) return;
+		const data = document.getElementById("ricaz-data").value;
+		if (!data) {
+			showToast("Scegli la data");
+			return;
+		}
+		if (data < isoLocale(/* @__PURE__ */ new Date())) {
+			showToast("La scadenza non può essere nel passato");
+			return;
+		}
+		const { error } = await DB.updateInterventoMascalcia(r.intervento_id, { prossima_scadenza: data });
+		if (error) {
+			showToast("Errore: " + error.message);
+			return;
+		}
+		if (r.rimandato) await DB.setRichiamoStato(r.intervento_id, { rimandato_al: null });
+		closeModal("modal-richiamo-az");
+		showToast("Nuova scadenza" + (r.cavallo_nome ? " di " + r.cavallo_nome : "") + ": " + formatDataBreve(data));
+		await renderProDeadlines();
+		if (schedaCavalloKey && document.getElementById("cavallo-pro-view")?.style.display === "block") await apriSchedaCavalloPro(schedaCavalloKey, true);
+	}
+	async function apriScadenzaCavallo() {
+		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
+		if (!cv) return;
+		const st = statoCavalloPro(cv, schedaStoricoCavallo || []);
+		if (st.prossimo?.fissato) {
+			const app = (schedaStoricoCavallo || []).filter((i) => [
+				"programmato",
+				"richiesto",
+				"proposto"
+			].includes(i.stato) && i.data_intervento === st.prossimo.data)[0];
+			if (app) return openInterventoModal(null, app);
+		}
+		const u = st.ultimo;
+		if (!u || !u.prossima_scadenza) {
+			showToast("Nessuna scadenza: si crea quando segni fatto un lavoro.");
+			return;
+		}
+		if (!hpRichiami[u.id]) {
+			const cli = clientiMascalcia.find((c) => c.id === u.cliente_mascalcia_id);
+			hpRichiami[u.id] = {
+				intervento_id: u.id,
+				cliente_mascalcia_id: u.cliente_mascalcia_id,
+				cliente_nome: cli?.nome || "",
+				tipo_cliente: cli?.tipo_cliente || null,
+				cavallo_cliente_id: u.cavallo_cliente_id,
+				horse_id: u.horse_id,
+				cavallo_nome: cv.nome,
+				tipo_ferratura: u.tipo_ferratura,
+				tipo_altro: u.tipo_altro,
+				misura_sistema: u.misura_sistema,
+				numero_ferro: u.numero_ferro,
+				quantita_ferri: u.quantita_ferri,
+				data_intervento: u.data_intervento,
+				prossima_scadenza: u.prossima_scadenza,
+				scadenza: u.prossima_scadenza,
+				rimandato: false,
+				giorni: giorniTra(isoLocale(/* @__PURE__ */ new Date()), u.prossima_scadenza)
+			};
+		}
+		apriRichiamo(u.id);
 	}
 	async function richiamoRimanda(giorni) {
 		const r = hpRichiami[hpRichiamoId];
@@ -5457,7 +5544,11 @@
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
         ${ultimiNuovi ? "<span class=\"solo-completa\">Ultimi ferri nuovi: " + formatDataBreve(ultimiNuovi.data_intervento) + "<br></span>" : ""}
-        Prossima: <b style="color:var(--text)">${st.prossimo ? formatDataBreve(st.prossimo.data) : "—"}</b></div></div>
+        ${st.prossimo ? (() => {
+			const g = giorniTra(isoLocale(/* @__PURE__ */ new Date()), st.prossimo.data);
+			const q = g < 0 ? `scaduta da ${-g} ${-g === 1 ? "giorno" : "giorni"}` : g === 0 ? "oggi" : g === 1 ? "domani" : `tra ${g} giorni`;
+			return `<button type="button" class="cav-prox${g < 0 ? " scad" : ""}" onclick="apriScadenzaCavallo()">Prossima: <b>${formatDataBreve(st.prossimo.data)}</b> · ${q}${st.prossimo.fissato ? " · appuntamento" : ""} <span>›</span></button>`;
+		})() : "Prossima: <b style=\"color:var(--text)\">—</b>"}</div></div>
       ${riquadroIntervalloPrezzo(cv, currentClienteId, schedaStoricoCavallo)}
       <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Vale per tutti i suoi appuntamenti: nel nuovo appuntamento basta scegliere il cavallo. Lavoro e tipo di ferro vanno anche nel libretto del proprietario e nella scheda della scuderia; «ferri nuovi/rimessa» resta solo tuo.</div>`) + sez("sto", "Storico di " + escapeHtml(cv.nome), `<span style="display:flex;gap:6px"><button class="btn btn-outline btn-sm solo-completa" onclick="nuovoInterventoCavalloPro('straordinario')">Straordinario</button><button class="btn btn-outline btn-sm" onclick="nuovoInterventoCavalloPro()">+ Intervento</button></span>`, storicoCavalloHtml(schedaStoricoCavallo, schedaSpostamenti)) + (vedi("all") ? `<div class="card cavpro-sez"><div class="cavpro-sez-testa"><span>Allegati</span><button class="btn btn-outline btn-sm" onclick="document.getElementById('cavpro-allegati-file').click()">+ Carica</button></div>
         <input type="file" id="cavpro-allegati-file" accept="application/pdf,image/*" style="display:none" onchange="caricaAllegatoCavallo(this, 'cavpro-allegati', 'maniscalco')">
@@ -9476,6 +9567,10 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		apriScadenzaCavallo,
+		richiamoAnteprima,
+		richiamoCambiaData,
+		richiamoSposta,
 		acavSesso,
 		testoAnagraficaCavallo,
 		usaPosizioneQui,

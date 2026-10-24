@@ -10,6 +10,7 @@ import { MISURA_SISTEMA_LABEL, isoLocale } from "./051-modal-appuntamento-manisc
 import { chiediSiNo, openInterventoModal, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_MESI } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
+import { giorniTra } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { anagraficaRighe, apriAnagraficaCavallo, riquadroIntervalloPrezzo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 /* ---------- AVVISO «SEMBRA LO STESSO CAVALLO» ----------
    Una scheda inserita a mano e una inserita dal proprietario con nomi uguali si uniscono da sole (database).
@@ -287,7 +288,10 @@ function renderCorpoCavalloPro(){
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
         ${ultimiNuovi ? '<span class="solo-completa">Ultimi ferri nuovi: ' + formatDataBreve(ultimiNuovi.data_intervento) + "<br></span>" : ""}
-        Prossima: <b style="color:var(--text)">${st.prossimo ? formatDataBreve(st.prossimo.data) : "—"}</b></div></div>
+        ${st.prossimo ? (() => { const g = giorniTra(isoLocale(new Date()), st.prossimo.data);
+          const q = g < 0 ? `scaduta da ${-g} ${-g === 1 ? "giorno" : "giorni"}` : g === 0 ? "oggi" : g === 1 ? "domani" : `tra ${g} giorni`;
+          return `<button type="button" class="cav-prox${g < 0 ? " scad" : ""}" onclick="apriScadenzaCavallo()">Prossima: <b>${formatDataBreve(st.prossimo.data)}</b> · ${q}${st.prossimo.fissato ? " · appuntamento" : ""} <span>›</span></button>`; })()
+          : 'Prossima: <b style="color:var(--text)">—</b>'}</div></div>
       ${riquadroIntervalloPrezzo(cv, currentClienteId, schedaStoricoCavallo)}
       <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Vale per tutti i suoi appuntamenti: nel nuovo appuntamento basta scegliere il cavallo. Lavoro e tipo di ferro vanno anche nel libretto del proprietario e nella scheda della scuderia; «ferri nuovi/rimessa» resta solo tuo.</div>`)
     + sez("sto", "Storico di " + escapeHtml(cv.nome), `<span style="display:flex;gap:6px"><button class="btn btn-outline btn-sm solo-completa" onclick="nuovoInterventoCavalloPro('straordinario')">Straordinario</button><button class="btn btn-outline btn-sm" onclick="nuovoInterventoCavalloPro()">+ Intervento</button></span>`, storicoCavalloHtml(schedaStoricoCavallo, schedaSpostamenti))

@@ -38,3 +38,9 @@
 :where(body:not(.pl-owner)) .acav-sesso button{flex:1;border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--text);cursor:pointer}
 :where(body:not(.pl-owner)) .acav-sesso button.on{background:var(--green,#14482c);border-color:var(--green,#14482c);color:#fff}
 :where(body:not(.pl-owner)) #acav-base[hidden],:where(body:not(.pl-owner)) #acav-equo-nota[hidden]{display:none}
+/* scheda del cavallo: «Prossima … · tra N giorni» toccabile (24/10/2026) */
+:where(body:not(.pl-owner)) .cav-prox{border:0;background:none;padding:2px 0;font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;text-align:left}
+:where(body:not(.pl-owner)) .cav-prox b{color:var(--text)}
+:where(body:not(.pl-owner)) .cav-prox span{color:var(--accent);font-weight:800}
+:where(body:not(.pl-owner)) .cav-prox.scad,:where(body:not(.pl-owner)) .cav-prox.scad b{color:var(--red,#a33b2b);font-weight:700}
+:where(body:not(.pl-owner)) .ricaz-sposta{flex-wrap:wrap}

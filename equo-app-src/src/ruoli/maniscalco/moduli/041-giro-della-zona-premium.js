@@ -1,6 +1,9 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { hpColoreApp, hpColoreRic, hpListaApp, hpListaRic, hpQuando, hpTipo, renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
+import { giorniTra } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
+import { statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { apriSchedaCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { isPremium } from "./042-incassi-pro.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
@@ -160,7 +163,11 @@ async function richiamoAzione(tipo){
   } else if(tipo === "rimanda"){
     document.getElementById("ricaz-azioni").style.display = "none";
     document.getElementById("ricaz-rimanda").style.display = "block";
-    document.getElementById("ricaz-data").value = aggiungiGiorniIso(isoLocale(new Date()), 7);
+    const inp = document.getElementById("ricaz-data");
+    inp.min = isoLocale(new Date());
+    inp.value = r.scadenza < inp.min ? inp.min : r.scadenza;
+    document.getElementById("ricaz-attuale").textContent = "Scadenza attuale: " + formatDataBreve(r.scadenza) + " (" + hpQuando(r) + ")";
+    richiamoAnteprima();
   } else if(tipo === "chiudi"){
     if(!confirm(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
     const { error } = await DB.setRichiamoStato(r.intervento_id, { chiuso_il: new Date().toISOString() });
@@ -169,6 +176,55 @@ async function richiamoAzione(tipo){
     showToast("Fatto, non te lo ricordo più");
     await renderProDeadlines();
   }
+}
+// «Cambia data»: sposta la scadenza vera (prossima_scadenza dell'ultimo intervento), avanti o indietro, mai nel passato
+function richiamoSposta(d){
+  const r = hpRichiami[hpRichiamoId]; if(!r) return;
+  const inp = document.getElementById("ricaz-data"), oggi = isoLocale(new Date());
+  let v = aggiungiGiorniIso(inp.value || r.scadenza, d);
+  if(v < oggi) v = oggi;
+  inp.value = v;
+  richiamoAnteprima();
+}
+function richiamoAnteprima(){
+  const v = document.getElementById("ricaz-data").value, box = document.getElementById("ricaz-anteprima");
+  if(!v){ box.textContent = ""; return; }
+  const g = giorniTra(isoLocale(new Date()), v);
+  box.textContent = "Nuova scadenza: " + formatDataBreve(v) + " (" + (g < 0 ? "nel passato" : g === 0 ? "oggi" : g === 1 ? "domani" : "tra " + g + " giorni") + ")";
+  box.style.color = g < 0 ? "var(--red)" : "";
+}
+async function richiamoCambiaData(){
+  const r = hpRichiami[hpRichiamoId]; if(!r) return;
+  const data = document.getElementById("ricaz-data").value;
+  if(!data){ showToast("Scegli la data"); return; }
+  if(data < isoLocale(new Date())){ showToast("La scadenza non può essere nel passato"); return; }
+  const { error } = await DB.updateInterventoMascalcia(r.intervento_id, { prossima_scadenza: data });
+  if(error){ showToast("Errore: " + error.message); return; }
+  if(r.rimandato) await DB.setRichiamoStato(r.intervento_id, { rimandato_al: null });
+  closeModal("modal-richiamo-az");
+  showToast("Nuova scadenza" + (r.cavallo_nome ? " di " + r.cavallo_nome : "") + ": " + formatDataBreve(data));
+  await renderProDeadlines();
+  if(schedaCavalloKey && document.getElementById("cavallo-pro-view")?.style.display === "block") await apriSchedaCavalloPro(schedaCavalloKey, true);
+}
+// dalla scheda del cavallo: la stessa finestra della lista «Scadenze»
+async function apriScadenzaCavallo(){
+  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
+  if(!cv) return;
+  const st = statoCavalloPro(cv, schedaStoricoCavallo || []);
+  if(st.prossimo?.fissato){
+    const app = (schedaStoricoCavallo || []).filter(i => ["programmato", "richiesto", "proposto"].includes(i.stato) && i.data_intervento === st.prossimo.data)[0];
+    if(app) return openInterventoModal(null, app);
+  }
+  const u = st.ultimo;
+  if(!u || !u.prossima_scadenza){ showToast("Nessuna scadenza: si crea quando segni fatto un lavoro."); return; }
+  if(!hpRichiami[u.id]){
+    const cli = clientiMascalcia.find(c => c.id === u.cliente_mascalcia_id);
+    hpRichiami[u.id] = { intervento_id: u.id, cliente_mascalcia_id: u.cliente_mascalcia_id, cliente_nome: cli?.nome || "", tipo_cliente: cli?.tipo_cliente || null,
+      cavallo_cliente_id: u.cavallo_cliente_id, horse_id: u.horse_id, cavallo_nome: cv.nome, tipo_ferratura: u.tipo_ferratura, tipo_altro: u.tipo_altro,
+      misura_sistema: u.misura_sistema, numero_ferro: u.numero_ferro, quantita_ferri: u.quantita_ferri, data_intervento: u.data_intervento,
+      prossima_scadenza: u.prossima_scadenza, scadenza: u.prossima_scadenza, rimandato: false, giorni: giorniTra(isoLocale(new Date()), u.prossima_scadenza) };
+  }
+  apriRichiamo(u.id);
 }
 async function richiamoRimanda(giorni){
   const r = hpRichiami[hpRichiamoId]; if(!r) return;
@@ -182,4 +238,4 @@ async function richiamoRimanda(giorni){
 }
 
 
-export { apriGiro, apriListaHome, apriRichiamo, confermaGiro, hpFiltra, hpGiri, hpRigaGiro, hpSegnaFatto, renderListaHome, richiamoAzione, richiamoMostraAzioni, richiamoRimanda };
+export { apriScadenzaCavallo, richiamoAnteprima, richiamoCambiaData, richiamoSposta, apriGiro, apriListaHome, apriRichiamo, confermaGiro, hpFiltra, hpGiri, hpRigaGiro, hpSegnaFatto, renderListaHome, richiamoAzione, richiamoMostraAzioni, richiamoRimanda };

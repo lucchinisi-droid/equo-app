@@ -7,20 +7,20 @@
     <div class="ag-azioni" id="ricaz-azioni">
       <button class="btn btn-primary btn-conferma" onclick="richiamoAzione('fissa')"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span> Fissa appuntamento</button>
       <button class="btn btn-outline" id="ricaz-scrivi" onclick="richiamoAzione('scrivi')"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Scrivi al cliente</button>
-      <button class="btn btn-outline btn-variazione" onclick="richiamoAzione('rimanda')"><span class="fa-icon"><i class="fa-solid fa-clock"></i></span> Rimanda</button>
+      <button class="btn btn-outline btn-variazione" onclick="richiamoAzione('rimanda')"><span class="fa-icon"><i class="fa-solid fa-calendar-days"></i></span> Cambia data (anticipa o posticipa)</button>
       <button class="btn btn-outline" style="color:var(--red)" onclick="richiamoAzione('chiudi')"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Non serve più</button>
     </div>
     <div id="ricaz-rimanda" style="display:none">
-      <div style="font-weight:700;font-size:13.5px;margin:6px 0 10px">Ricordamelo tra…</div>
-      <div class="hp-giorni">
-        <button onclick="richiamoRimanda(3)">3 giorni</button><button onclick="richiamoRimanda(7)">7 giorni</button>
-        <button onclick="richiamoRimanda(14)">14 giorni</button><button onclick="richiamoRimanda(30)">30 giorni</button>
+      <div style="font-weight:700;font-size:13.5px;margin:6px 0 2px">Cambia la data della scadenza</div>
+      <div class="muted" id="ricaz-attuale" style="font-size:12.5px;margin-bottom:10px"></div>
+      <div class="hp-giorni ricaz-sposta">
+        <button onclick="richiamoSposta(-7)">−7 giorni</button><button onclick="richiamoSposta(-3)">−3</button><button onclick="richiamoSposta(3)">+3</button><button onclick="richiamoSposta(7)">+7</button><button onclick="richiamoSposta(14)">+14</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
-        <input type="date" class="input" id="ricaz-data" style="flex:1">
-        <button class="btn btn-primary btn-conferma btn-sm" onclick="richiamoRimanda(null)">OK</button>
-      </div>
-      <button class="btn btn-outline btn-sm" style="margin-top:12px;width:100%" onclick="richiamoMostraAzioni()">Indietro</button>
+      <input type="date" class="input" id="ricaz-data" oninput="richiamoAnteprima()" style="margin-top:12px">
+      <div id="ricaz-anteprima" style="font-size:13px;font-weight:700;margin-top:6px"></div>
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">La nuova data va anche nel libretto del proprietario e nella scheda della scuderia.</div>
+      <button class="btn btn-primary btn-conferma" style="width:100%;margin-top:10px" onclick="richiamoCambiaData()">Salva la nuova data</button>
+      <button class="btn btn-outline btn-sm" style="margin-top:10px;width:100%" onclick="richiamoMostraAzioni()">Indietro</button>
     </div>
   </div>
 </div>

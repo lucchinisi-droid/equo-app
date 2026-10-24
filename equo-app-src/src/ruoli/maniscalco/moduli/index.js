@@ -9,7 +9,7 @@ import { loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-b
 import { aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderBoxCavalliCliente, renderCorpoCavalloPro, renderTabCavalloPro, unisciSimili } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { razzaImposta, razzaSegnala, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { hpGiornoEtichetta, renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
-import { apriGiro, apriListaHome, apriRichiamo, confermaGiro, hpFiltra, hpSegnaFatto, richiamoAzione, richiamoMostraAzioni, richiamoRimanda } from "./041-giro-della-zona-premium.js";
+import { apriGiro, apriListaHome, apriRichiamo, apriScadenzaCavallo, confermaGiro, hpFiltra, hpSegnaFatto, richiamoAnteprima, richiamoAzione, richiamoCambiaData, richiamoMostraAzioni, richiamoRimanda, richiamoSposta } from "./041-giro-della-zona-premium.js";
 import { isPremium } from "./042-incassi-pro.js";
 import { incApri, renderIncassi, renderIncassiSaldati, sceltaMesiIncassi, sceltaPeriodoIncassi, sceltaVistaIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { renderIncassiCompleta } from "./048-vista-completa-premium-previsionale-clie.js";
@@ -51,6 +51,10 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  apriScadenzaCavallo,
+  richiamoAnteprima,
+  richiamoCambiaData,
+  richiamoSposta,
   acavSesso,
   testoAnagraficaCavallo,
   usaPosizioneQui,
