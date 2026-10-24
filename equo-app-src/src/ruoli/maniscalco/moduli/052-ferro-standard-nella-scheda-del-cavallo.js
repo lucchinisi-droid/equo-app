@@ -6,7 +6,7 @@ import { iniziale, loadClienteInterventi } from "./037-scheda-cliente-a-box-sche
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { chiediPrezzi, promemoriaPrezzoAttivo } from "./049-prezzo-mancante-promemoria-salvando-un-a.js";
-import { MISURA_SISTEMA_LABEL, MISURE_FERRO, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
 import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
@@ -55,9 +55,9 @@ function modificaFerraturaDaIntervento(k){
 }
 function apriEditorFerro(k){
   ferroEditKey = k;
-  const f = ferroOverride[k] || ferroStd(cavalliClienteCorrente.find(c => c.key === k)) || { s: "olandese", n: null };
-  document.getElementById("intervento-misura-sistema").value = f.s || "olandese";
-  const idx = f.n ? MISURE_FERRO[f.s || "olandese"].indexOf(String(f.n)) : -1;
+  const f = ferroOverride[k] || ferroStd(cavalliClienteCorrente.find(c => c.key === k)) || { s: misuraPredefinita("olandese"), n: null };
+  document.getElementById("intervento-misura-sistema").value = f.s || misuraPredefinita("olandese");
+  const idx = f.n ? MISURE_FERRO[f.s || misuraPredefinita("olandese")].indexOf(String(f.n)) : -1;
   misuraIndiceCorrente = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
   document.getElementById("intervento-ferro-editor-tit").textContent = `Ferro per ${nomeCavalloKey(k)}` + (k === "__nuovo_cavallo__" ? "" : " · solo per questo appuntamento");
   document.getElementById("intervento-ferro-editor").style.display = "block";

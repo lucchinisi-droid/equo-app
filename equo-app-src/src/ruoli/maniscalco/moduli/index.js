@@ -3,7 +3,7 @@ import "./031-mascalcia-clienti-interventi-del-profess.js";
 import { caricaRichiamiPredefiniti, clientiAttivi, giorniRichiamoSuggeriti, giorniTra, importiSuggeriti, loadClientiMascalcia, richiamoCambia, richiamoConferma, richiamoFerriN, richiamoFerriRender, richiamoPagamento, richiamoRuotaScroll, richiamoTotale, richiamoVaiA, salvaRichiamiPredefiniti } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { apriCavalloDaCartella, apriNuovoCavalloCartella, isStruttura, isStrutturaCollegata, ncavClienteCambiato, salvaNuovoCavalloCartella, sceltaCartellaClienti } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { aggiornaEtichetteNuovoCliente, apriCollegaStruttura, apriFerroCavallo, apriNuovoCliente, apriRazzaCavallo, confermaScollegaStruttura, creaCavalliDaTesto, createClienteMascalcia, inviaRichiestaStruttura, mostraLimiteClienti, openClienteDetail, openEditCliente, rispondiInvitoStruttura, salvaFerroCavallo, salvaRazzaCavallo, scollegaStrutturaCorrente, toggleQrCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
-import { aggiungiCavalloCodice, aggiungiCavalloEditCliente, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
+import { aggiungiCavalloCodice, aggiungiCavalloEditCliente, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferDettaglio, ferLavoro, ferMisura, ferSistema, ferStatoSistema, ferTipo, impostaMisuraPredefinita, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 import { confermaArchiviaCliente, deleteCurrentCliente, mostraSpostaCavalli, spostaCavalliCliente } from "./036-archivia-elimina-cliente.js";
 import { loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
 import { aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderBoxCavalliCliente, renderCorpoCavalloPro, renderTabCavalloPro, unisciSimili } from "./038-avviso-sembra-lo-stesso-cavallo.js";
@@ -46,6 +46,9 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  ferDettaglio,
+  ferStatoSistema,
+  impostaMisuraPredefinita,
   controllaImportVecchiaApp,
   impConfermaGruppo,
   impPiuTardi,

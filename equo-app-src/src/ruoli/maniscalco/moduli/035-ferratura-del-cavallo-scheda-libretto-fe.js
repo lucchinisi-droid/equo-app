@@ -2,7 +2,7 @@
 import { loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { cavalliEditCache, messaggioErroreCollegaCliente, openClienteDetail, renderCavalliEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
-import { MISURA_SISTEMA_LABEL, MISURE_FERRO } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
@@ -16,9 +16,18 @@ const LAVORO_CAV = {
 };
 function lavoroCav(cv){ return cv && LAVORO_CAV[cv.ferratura_tipo] ? cv.ferratura_tipo : "completa"; }
 function tipoDaScheda(cv){ return LAVORO_CAV[lavoroCav(cv)].tipo; }
-function testoTipoFerro(ft, ftp, note){
+// dettagli del correttivo (24/10/2026, richiesta di Francesco Bizzarri): si scelgono a tocchi, le note restano per il resto
+const DETTAGLI_CORRETTIVO = ["Pad", "Soletta", "Alluminio", "Pianella", "Banda larga in punta", "Ferro asimmetrico"];
+// stesso testo della funzione equo_testo_ferro_dettagli del database: «pad, soletta · note» / «davanti: pad; dietro: alluminio»
+function testoDettagliFerro(det, detp, note){
+  const l = a => (a || []).map(x => String(x).toLowerCase()).join(", ");
+  const d = (detp || []).length ? [det && det.length ? "davanti: " + l(det) : "", "dietro: " + l(detp)].filter(Boolean).join("; ") : l(det);
+  return [d, (note || "").trim()].filter(Boolean).join(" · ");
+}
+function testoTipoFerro(ft, ftp, note, det, detp){
   let t = ftp && ftp !== ft ? (ft === "correttivo" ? "correttivo davanti" : "correttivo dietro") : (ft === "correttivo" ? "correttivo" : "standard");
-  if(note && t !== "standard") t += " (" + note + ")";
+  const extra = testoDettagliFerro(det, detp, note);
+  if(extra && t !== "standard") t += " (" + extra + ")";
   return t;
 }
 // testo del ferro salvato in un intervento (ferro_tipo può essere standard, correttivo, corr_davanti, corr_dietro)
@@ -32,15 +41,17 @@ function descrFerraturaCavallo(cv){
   const k = lavoroCav(cv), l = LAVORO_CAV[k];
   if(k === "pareggio") return "Pareggio · senza ferri";
   return [l.t, l.s + (cv.ferro_numero ? " " + siglaFerro(cv.ferro_sistema, cv.ferro_numero) : ""),
-    testoTipoFerro(cv.ferro_tipo, k === "completa" ? cv.ferro_tipo_post : null, cv.ferro_note)].join(" · ");
+    testoTipoFerro(cv.ferro_tipo, k === "completa" ? cv.ferro_tipo_post : null, cv.ferro_note, cv.ferro_dettagli, k === "completa" ? cv.ferro_dettagli_post : null)].join(" · ");
 }
 let ferStato = null;
 // cv: cavallo (chiave, id, nome, campi ferro); clienteId: per creare la riga se il cavallo è solo «su Equo»; dopo: callback(cv)
 function apriSchedaFerratura(cv, clienteId, dopo, extra){
   if(!cv) return;
   const n = cv.ferro_numero ? MISURE_FERRO[cv.ferro_sistema || "italiana"]?.indexOf(String(cv.ferro_numero)) : -1;
-  ferStato = { cv, clienteId, dopo, lavoro: lavoroCav(cv), s: cv.ferro_sistema || "italiana", idx: n >= 0 ? n : -1,
-    ft: cv.ferro_tipo || "standard", ftp: cv.ferro_tipo_post || null };
+  // senza misura salvata si parte dalla misura che il maniscalco usa di solito
+  ferStato = { cv, clienteId, dopo, lavoro: lavoroCav(cv), s: cv.ferro_numero ? (cv.ferro_sistema || "italiana") : misuraPredefinita(), idx: n >= 0 ? n : -1,
+    ft: cv.ferro_tipo || "standard", ftp: cv.ferro_tipo_post || null,
+    det: (cv.ferro_dettagli || []).slice(), detp: (cv.ferro_dettagli_post || []).slice() };
   document.getElementById("fer-titolo").textContent = (cv.nome || "Cavallo") + " · Ferratura";
   document.getElementById("fer-sistema").value = ferStato.s;
   document.getElementById("fer-note").value = cv.ferro_note || "";
@@ -68,6 +79,39 @@ function ferRender(){
   const ftp = f.ftp || f.ft;
   document.querySelectorAll('#modal-ferratura .fer-scelta[data-k="ft"] button').forEach(b => b.classList.toggle("on", b.dataset.v === f.ft));
   document.querySelectorAll('#modal-ferratura .fer-scelta[data-k="ftp"] button').forEach(b => b.classList.toggle("on", b.dataset.v === ftp));
+  // dettagli del correttivo sotto la riga che è «Correttivo»
+  const chips = (lato, lista) => DETTAGLI_CORRETTIVO.map(v => `<button type="button" class="${lista.includes(v) ? "on" : ""}" onclick="ferDettaglio('${lato}','${v}')">${escapeHtml(v)}</button>`).join("");
+  const bu = document.getElementById("fer-det-unico"), bd = document.getElementById("fer-det-dietro");
+  bu.style.display = f.ft === "correttivo" ? "" : "none";
+  bu.innerHTML = f.ft === "correttivo" ? chips("det", f.det) : "";
+  bd.style.display = dd && ftp === "correttivo" ? "" : "none";
+  bd.innerHTML = dd && ftp === "correttivo" ? chips("detp", f.detp) : "";
+  // misura preferita: «Usa sempre questa misura» oppure «È la tua misura di sempre»
+  const pref = document.getElementById("fer-sistema-pref");
+  if(pref){
+    const mia = currentUser && currentUser.ferroSistema === f.s;
+    pref.innerHTML = mia ? '<i class="fa-solid fa-check"></i> La tua misura di sempre' : `<button type="button" onclick="impostaMisuraPredefinita(ferStatoSistema())">Usa sempre la ${escapeHtml(TESTO_MISURA[f.s] || f.s)}</button>`;
+  }
+}
+const TESTO_MISURA = { italiana: "misura italiana", olandese: "misura olandese / internazionale", tedesca: "misura tedesca" };
+function ferStatoSistema(){ return ferStato ? ferStato.s : null; }
+function ferDettaglio(lato, v){
+  const f = ferStato; if(!f || !DETTAGLI_CORRETTIVO.includes(v)) return;
+  const l = f[lato] || [];
+  f[lato] = l.includes(v) ? l.filter(x => x !== v) : DETTAGLI_CORRETTIVO.filter(x => x === v || l.includes(x));
+  ferRender();
+}
+// misura che il maniscalco usa di solito (dalla scheda Ferratura o dal menu)
+async function impostaMisuraPredefinita(v){
+  if(!currentUser || !MISURE_FERRO[v]) return;
+  if(!DEMO_MODE){
+    const { error } = await sb.from("profiles").update({ ferro_sistema_predefinito: v }).eq("id", currentUser.id);
+    if(error){ showToast(/ferro_sistema_predefinito/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message); return; }
+  }
+  currentUser.ferroSistema = v;
+  const sel = document.getElementById("misura-pref-select"); if(sel) sel.value = v;
+  if(document.getElementById("modal-ferratura")?.classList.contains("active")) ferRender();
+  showToast("Da ora i cavalli senza misura partono dalla " + (TESTO_MISURA[v] || v));
 }
 function ferLavoro(v){ if(ferStato){ ferStato.lavoro = v; ferRender(); } }
 function ferSistema(){
@@ -101,6 +145,10 @@ async function salvaSchedaFerratura(){
     if(vistaCompleta() && f.lavoro === "completa") campi.ferro_tipo_post = f.ftp || null;
     else if(f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_tipo_post = null;
     campi.ferro_note = document.getElementById("fer-note").value.trim() || null;
+    // dettagli del correttivo: solo per il lato che è correttivo
+    campi.ferro_dettagli = f.ft === "correttivo" && f.det.length ? f.det.slice() : null;
+    if(vistaCompleta() && f.lavoro === "completa") campi.ferro_dettagli_post = (f.ftp || f.ft) === "correttivo" && f.detp.length ? f.detp.slice() : null;
+    else if(f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_dettagli_post = null;
   }
   const avviso = document.getElementById("fer-avviso").value.trim();
   if(avviso !== (f.avviso || "")) campi.avviso_sicurezza = avviso || null;
@@ -116,7 +164,7 @@ async function salvaSchedaFerratura(){
     if(!id && f.clienteId){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(f.clienteId, cv)); }
     if(!id) return err("Non riuscito, riprova.");
     const { error } = await DB.updateCavalloCliente(id, campi);
-    if(error) return err(/ferratura_tipo|ferro_tipo_post/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+    if(error) return err(/ferratura_tipo|ferro_tipo_post|ferro_dettagli/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
     Object.assign(cv, campi, { id });
     // tiene allineate le altre copie del cavallo in memoria
     [schedaCavalli, cavalliEditCache, cavalliClienteCorrente, cavalliMieiLista].forEach(l => (l || []).forEach(x => { if(x !== cv && x.id === id) Object.assign(x, campi); }));
@@ -229,4 +277,4 @@ function closeClienteDetail(){
 }
 
 
-export { LAVORO_CAV, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };
+export { DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };

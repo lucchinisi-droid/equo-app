@@ -1234,6 +1234,9 @@
 		riga.style.display = vedi ? "flex" : "none";
 		if (!vedi) document.getElementById("intervento-gia-fatto").checked = false;
 	}
+	function misuraPredefinita(ripiego = "italiana") {
+		return currentUser && MISURE_FERRO[currentUser.ferroSistema] ? currentUser.ferroSistema : ripiego;
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/042-incassi-pro.js
 	function premiumSoloProprietario() {
 		return !!(currentUser && currentUser.piano === "premium" && currentUser.premiumLivello === "proprietario");
@@ -2353,6 +2356,10 @@
 		if (rv) rv.style.display = pro ? "" : "none";
 		const sv = document.getElementById("vista-man-switch");
 		if (sv) sv.checked = vistaCompleta();
+		const rm = document.getElementById("menu-misura-row");
+		if (rm) rm.style.display = typeof agenteAiHammer === "function" && agenteAiHammer() ? "" : "none";
+		const sm = document.getElementById("misura-pref-select");
+		if (sm) sm.value = currentUser?.ferroSistema || "";
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/047-incassi-saldati-per-periodo-da-saldare-p.js
 	var incMesi = (() => {
@@ -6218,9 +6225,22 @@
 	function tipoDaScheda(cv) {
 		return LAVORO_CAV[lavoroCav(cv)].tipo;
 	}
-	function testoTipoFerro(ft, ftp, note) {
+	var DETTAGLI_CORRETTIVO = [
+		"Pad",
+		"Soletta",
+		"Alluminio",
+		"Pianella",
+		"Banda larga in punta",
+		"Ferro asimmetrico"
+	];
+	function testoDettagliFerro(det, detp, note) {
+		const l = (a) => (a || []).map((x) => String(x).toLowerCase()).join(", ");
+		return [(detp || []).length ? [det && det.length ? "davanti: " + l(det) : "", "dietro: " + l(detp)].filter(Boolean).join("; ") : l(det), (note || "").trim()].filter(Boolean).join(" · ");
+	}
+	function testoTipoFerro(ft, ftp, note, det, detp) {
 		let t = ftp && ftp !== ft ? ft === "correttivo" ? "correttivo davanti" : "correttivo dietro" : ft === "correttivo" ? "correttivo" : "standard";
-		if (note && t !== "standard") t += " (" + note + ")";
+		const extra = testoDettagliFerro(det, detp, note);
+		if (extra && t !== "standard") t += " (" + extra + ")";
 		return t;
 	}
 	function testoFerroIntervento(i) {
@@ -6233,7 +6253,7 @@
 		return [
 			l.t,
 			l.s + (cv.ferro_numero ? " " + siglaFerro(cv.ferro_sistema, cv.ferro_numero) : ""),
-			testoTipoFerro(cv.ferro_tipo, k === "completa" ? cv.ferro_tipo_post : null, cv.ferro_note)
+			testoTipoFerro(cv.ferro_tipo, k === "completa" ? cv.ferro_tipo_post : null, cv.ferro_note, cv.ferro_dettagli, k === "completa" ? cv.ferro_dettagli_post : null)
 		].join(" · ");
 	}
 	var ferStato = null;
@@ -6245,10 +6265,12 @@
 			clienteId,
 			dopo,
 			lavoro: lavoroCav(cv),
-			s: cv.ferro_sistema || "italiana",
+			s: cv.ferro_numero ? cv.ferro_sistema || "italiana" : misuraPredefinita(),
 			idx: n >= 0 ? n : -1,
 			ft: cv.ferro_tipo || "standard",
-			ftp: cv.ferro_tipo_post || null
+			ftp: cv.ferro_tipo_post || null,
+			det: (cv.ferro_dettagli || []).slice(),
+			detp: (cv.ferro_dettagli_post || []).slice()
 		};
 		document.getElementById("fer-titolo").textContent = (cv.nome || "Cavallo") + " · Ferratura";
 		document.getElementById("fer-sistema").value = ferStato.s;
@@ -6280,6 +6302,44 @@
 		const ftp = f.ftp || f.ft;
 		document.querySelectorAll("#modal-ferratura .fer-scelta[data-k=\"ft\"] button").forEach((b) => b.classList.toggle("on", b.dataset.v === f.ft));
 		document.querySelectorAll("#modal-ferratura .fer-scelta[data-k=\"ftp\"] button").forEach((b) => b.classList.toggle("on", b.dataset.v === ftp));
+		const chips = (lato, lista) => DETTAGLI_CORRETTIVO.map((v) => `<button type="button" class="${lista.includes(v) ? "on" : ""}" onclick="ferDettaglio('${lato}','${v}')">${escapeHtml(v)}</button>`).join("");
+		const bu = document.getElementById("fer-det-unico"), bd = document.getElementById("fer-det-dietro");
+		bu.style.display = f.ft === "correttivo" ? "" : "none";
+		bu.innerHTML = f.ft === "correttivo" ? chips("det", f.det) : "";
+		bd.style.display = dd && ftp === "correttivo" ? "" : "none";
+		bd.innerHTML = dd && ftp === "correttivo" ? chips("detp", f.detp) : "";
+		const pref = document.getElementById("fer-sistema-pref");
+		if (pref) pref.innerHTML = currentUser && currentUser.ferroSistema === f.s ? "<i class=\"fa-solid fa-check\"></i> La tua misura di sempre" : `<button type="button" onclick="impostaMisuraPredefinita(ferStatoSistema())">Usa sempre la ${escapeHtml(TESTO_MISURA[f.s] || f.s)}</button>`;
+	}
+	var TESTO_MISURA = {
+		italiana: "misura italiana",
+		olandese: "misura olandese / internazionale",
+		tedesca: "misura tedesca"
+	};
+	function ferStatoSistema() {
+		return ferStato ? ferStato.s : null;
+	}
+	function ferDettaglio(lato, v) {
+		const f = ferStato;
+		if (!f || !DETTAGLI_CORRETTIVO.includes(v)) return;
+		const l = f[lato] || [];
+		f[lato] = l.includes(v) ? l.filter((x) => x !== v) : DETTAGLI_CORRETTIVO.filter((x) => x === v || l.includes(x));
+		ferRender();
+	}
+	async function impostaMisuraPredefinita(v) {
+		if (!currentUser || !MISURE_FERRO[v]) return;
+		if (!DEMO_MODE) {
+			const { error } = await sb.from("profiles").update({ ferro_sistema_predefinito: v }).eq("id", currentUser.id);
+			if (error) {
+				showToast(/ferro_sistema_predefinito/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+				return;
+			}
+		}
+		currentUser.ferroSistema = v;
+		const sel = document.getElementById("misura-pref-select");
+		if (sel) sel.value = v;
+		if (document.getElementById("modal-ferratura")?.classList.contains("active")) ferRender();
+		showToast("Da ora i cavalli senza misura partono dalla " + (TESTO_MISURA[v] || v));
 	}
 	function ferLavoro(v) {
 		if (ferStato) {
@@ -6336,6 +6396,9 @@
 			if (vistaCompleta() && f.lavoro === "completa") campi.ferro_tipo_post = f.ftp || null;
 			else if (f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_tipo_post = null;
 			campi.ferro_note = document.getElementById("fer-note").value.trim() || null;
+			campi.ferro_dettagli = f.ft === "correttivo" && f.det.length ? f.det.slice() : null;
+			if (vistaCompleta() && f.lavoro === "completa") campi.ferro_dettagli_post = (f.ftp || f.ft) === "correttivo" && f.detp.length ? f.detp.slice() : null;
+			else if (f.ft !== (cv.ferro_tipo || "standard")) campi.ferro_dettagli_post = null;
 		}
 		const avviso = document.getElementById("fer-avviso").value.trim();
 		if (avviso !== (f.avviso || "")) campi.avviso_sicurezza = avviso || null;
@@ -6355,7 +6418,7 @@
 			if (!id && f.clienteId) ({cavallo_cliente_id: id} = await DB.risolviCavalloPerIntervento(f.clienteId, cv));
 			if (!id) return err("Non riuscito, riprova.");
 			const { error } = await DB.updateCavalloCliente(id, campi);
-			if (error) return err(/ferratura_tipo|ferro_tipo_post/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+			if (error) return err(/ferratura_tipo|ferro_tipo_post|ferro_dettagli/.test(error.message || "") || /avviso_sicurezza/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
 			Object.assign(cv, campi, { id });
 			[
 				schedaCavalli,
@@ -6870,7 +6933,7 @@
 		ferroCavalloKey = key;
 		document.getElementById("ferro-cav-titolo").textContent = "Ferro standard · " + cv.nome;
 		const f = ferroStd(cv) || {
-			s: "olandese",
+			s: misuraPredefinita("olandese"),
 			n: null
 		};
 		document.getElementById("ferro-misura-sistema").value = f.s;
@@ -8446,6 +8509,9 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		ferDettaglio,
+		ferStatoSistema,
+		impostaMisuraPredefinita,
 		controllaImportVecchiaApp,
 		impConfermaGruppo,
 		impPiuTardi,

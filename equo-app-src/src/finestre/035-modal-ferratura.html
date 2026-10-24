@@ -17,14 +17,17 @@
         <div class="val" id="fer-misura">—</div>
         <button type="button" onclick="ferMisura(1)" aria-label="Misura più grande">+</button>
       </div>
-      <select class="input" id="fer-sistema" onchange="ferSistema()" style="margin:8px 0 12px">
+      <select class="input" id="fer-sistema" onchange="ferSistema()" style="margin:8px 0 4px">
         <option value="italiana">Misura italiana</option>
         <option value="olandese">Olandese / Internazionale</option>
         <option value="tedesca">Tedesca</option>
       </select>
+      <div class="fer-sistema-pref" id="fer-sistema-pref"></div>
       <label class="input-label" id="fer-tipo-label">Tipo di ferro</label>
       <div class="fer-riga" id="fer-riga-unico"><span></span><div class="fer-scelta" data-k="ft"><button type="button" data-v="standard" onclick="ferTipo('ft','standard')">Standard</button><button type="button" data-v="correttivo" onclick="ferTipo('ft','correttivo')">Correttivo</button></div></div>
+      <div class="fer-det" id="fer-det-unico" style="display:none"></div>
       <div class="fer-riga" id="fer-riga-dietro" style="display:none"><span>Dietro</span><div class="fer-scelta" data-k="ftp"><button type="button" data-v="standard" onclick="ferTipo('ftp','standard')">Standard</button><button type="button" data-v="correttivo" onclick="ferTipo('ftp','correttivo')">Correttivo</button></div></div>
+      <div class="fer-det" id="fer-det-dietro" style="display:none"></div>
       <input class="input" id="fer-note" maxlength="160" placeholder="Note: modello o lavorazione (es. barra a uovo davanti)" style="margin-top:8px">
       <div class="muted solo-completa" id="fer-dati" style="font-size:12px;margin-top:8px"></div>
     </div>

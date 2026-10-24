@@ -35,6 +35,7 @@ async function boot(){
   // letto a parte: se la colonna non esistesse ancora, le altre preferenze restano intatte
   try{ const { data: pp } = await sb.from("profiles").select("promemoria_pagamenti").eq("id", user.id).maybeSingle(); currentUser.promemoriaPagamenti = pp ? pp.promemoria_pagamenti !== false : true; }catch(e){ currentUser.promemoriaPagamenti = true; }
   try{ const { data: pl } = await sb.from("profiles").select("premium_livello").eq("id", user.id).maybeSingle(); currentUser.premiumLivello = pl?.premium_livello || null; }catch(e){ currentUser.premiumLivello = null; }
+  try{ const { data: fs, error: fsErr } = await sb.from("profiles").select("ferro_sistema_predefinito").eq("id", user.id).maybeSingle(); currentUser.ferroSistema = fsErr ? null : (fs?.ferro_sistema_predefinito || null); }catch(e){ currentUser.ferroSistema = null; }
   try{ const { data: vm, error: vmErr } = await sb.from("profiles").select("vista_maniscalco").eq("id", user.id).maybeSingle(); currentUser.vistaMan = vmErr ? "completa" : (vm?.vista_maniscalco || null); }catch(e){ currentUser.vistaMan = "completa"; }
   document.getElementById("profile-name").textContent = profile?.full_name || "Il tuo profilo";
   currentUser.ruolo = profile?.ruolo || null;

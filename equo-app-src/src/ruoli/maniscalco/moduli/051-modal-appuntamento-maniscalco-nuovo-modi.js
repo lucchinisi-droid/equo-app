@@ -68,4 +68,7 @@ function aggiornaGiaFatto(){
 }
 
 
-export { MISURA_SISTEMA_LABEL, MISURE_FERRO, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, renderMisuraWheel, selezionaMisura };
+// misura che il maniscalco usa di solito (profiles.ferro_sistema_predefinito): i cavalli senza misura partono da questa
+function misuraPredefinita(ripiego = "italiana"){ return (currentUser && MISURE_FERRO[currentUser.ferroSistema]) ? currentUser.ferroSistema : ripiego; }
+
+export { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraPredefinita, aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, renderMisuraWheel, selezionaMisura };

@@ -44,6 +44,11 @@ function aggiornaSwitchHomeBase(){
   if(rv) rv.style.display = pro ? "" : "none";
   const sv = document.getElementById("vista-man-switch");
   if(sv) sv.checked = vistaCompleta();
+  // misura dei ferri preferita: solo maniscalco
+  const rm = document.getElementById("menu-misura-row");
+  if(rm) rm.style.display = typeof agenteAiHammer === "function" && agenteAiHammer() ? "" : "none";
+  const sm = document.getElementById("misura-pref-select");
+  if(sm) sm.value = currentUser?.ferroSistema || "";
 }
 
 

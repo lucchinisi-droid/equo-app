@@ -9,7 +9,7 @@ Object.assign(DB, {
     if(DEMO_MODE){
       return demoState.cavalliClientiMascalcia.filter(c => c.cliente_mascalcia_id === clienteId)
         .map(c => ({ key: "m:" + c.id, tipo: "manuale", id: c.id, nome: c.nome, microchip: c.microchip, horse_id: c.horse_id, codice_equo: c.codice_equo || null, razza: c.razza || null, ferro_sistema: c.ferro_sistema || null, ferro_numero: c.ferro_numero || null,
-          ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ferro_note: c.ferro_note || null, ferro_tipo_post: c.ferro_tipo_post || null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, ub: ubicDi(c) }));
+          ferratura_tipo: c.ferratura_tipo || "completa", ferro_tipo: c.ferro_tipo || "standard", ferro_note: c.ferro_note || null, ferro_tipo_post: c.ferro_tipo_post || null, ferro_dettagli: c.ferro_dettagli || null, ferro_dettagli_post: c.ferro_dettagli_post || null, scuderia_cavallo_id: c.scuderia_cavallo_id || null, ub: ubicDi(c) }));
     }
     const [manRes, eqRes] = await Promise.all([
       sb.from("cavalli_clienti_mascalcia").select("*").eq("cliente_mascalcia_id", clienteId).order("nome", { ascending: true }),
@@ -40,11 +40,11 @@ Object.assign(DB, {
       const mirror = manuali.find(m => m.horse_id === h.id) || altrove.find(m => m.horse_id === h.id);
       const presso = mirror && mirror.cliente_mascalcia_id && mirror.cliente_mascalcia_id !== clienteId ? (mirror.clienti_mascalcia?.nome || "un altro cliente") : null;
       return { key: "h:" + h.id, tipo: "equo", id: mirror ? mirror.id : null, nome: h.name, microchip: h.microchip, horse_id: h.id, codice_equo: mirror?.codice_equo || h.codice_equo || null, razza: h.breed || null, presso, ferro_sistema: mirror?.ferro_sistema || null, ferro_numero: mirror?.ferro_numero || null,
-        ferratura_tipo: mirror?.ferratura_tipo || "completa", ferro_tipo: mirror?.ferro_tipo || "standard", ferro_note: mirror?.ferro_note || null, ferro_tipo_post: mirror?.ferro_tipo_post || null, scuderia_cavallo_id: mirror?.scuderia_cavallo_id || null, nascita: h.birth_date || null, ub: ubicDi(mirror, clienteId) };
+        ferratura_tipo: mirror?.ferratura_tipo || "completa", ferro_tipo: mirror?.ferro_tipo || "standard", ferro_note: mirror?.ferro_note || null, ferro_tipo_post: mirror?.ferro_tipo_post || null, ferro_dettagli: mirror?.ferro_dettagli || null, ferro_dettagli_post: mirror?.ferro_dettagli_post || null, scuderia_cavallo_id: mirror?.scuderia_cavallo_id || null, nascita: h.birth_date || null, ub: ubicDi(mirror, clienteId) };
     });
     manuali.filter(m => !m.horse_id || !idCondivisi.has(m.horse_id)).forEach(m => {
       out.push({ key: "m:" + m.id, tipo: "manuale", id: m.id, nome: m.nome, microchip: m.microchip, horse_id: m.horse_id, codice_equo: m.codice_equo || null, razza: m.razza || null, ferro_sistema: m.ferro_sistema || null, ferro_numero: m.ferro_numero || null,
-        ferratura_tipo: m.ferratura_tipo || "completa", ferro_tipo: m.ferro_tipo || "standard", ferro_note: m.ferro_note || null, ferro_tipo_post: m.ferro_tipo_post || null, scuderia_cavallo_id: m.scuderia_cavallo_id || null, ub: ubicDi(m) });
+        ferratura_tipo: m.ferratura_tipo || "completa", ferro_tipo: m.ferro_tipo || "standard", ferro_note: m.ferro_note || null, ferro_tipo_post: m.ferro_tipo_post || null, ferro_dettagli: m.ferro_dettagli || null, ferro_dettagli_post: m.ferro_dettagli_post || null, scuderia_cavallo_id: m.scuderia_cavallo_id || null, ub: ubicDi(m) });
     });
     return out;
   },

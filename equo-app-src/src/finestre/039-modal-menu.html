@@ -44,6 +44,18 @@
         <span class="switch-track"><span class="switch-thumb"></span></span>
       </label>
     </div>
+    <div class="menu-row" id="menu-misura-row" style="display:none;margin-top:8px">
+      <div class="menu-row-label">
+        <span class="fa-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><use href="#i-ferro"/></svg></span>
+        <span>Misura dei ferri<br><small class="muted" style="font-size:11px">I cavalli senza misura partono da questa</small></span>
+      </div>
+      <select class="input" id="misura-pref-select" onchange="impostaMisuraPredefinita(this.value)" style="width:auto;max-width:150px;padding:6px 8px;font-size:13px">
+        <option value="" disabled>Scegli</option>
+        <option value="italiana">Italiana</option>
+        <option value="olandese">Olandese / Int.</option>
+        <option value="tedesca">Tedesca</option>
+      </select>
+    </div>
     <div class="menu-row" id="menu-incassi-row" style="display:none;margin-top:8px">
       <div class="menu-row-label">
         <span class="fa-icon"><i class="fa-solid fa-euro-sign"></i></span>

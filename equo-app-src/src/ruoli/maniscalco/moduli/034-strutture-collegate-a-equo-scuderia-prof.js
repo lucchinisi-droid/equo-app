@@ -6,7 +6,7 @@ import { loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cav
 import { renderCorpoCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { isPremium } from "./042-incassi-pro.js";
-import { MISURE_FERRO, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURE_FERRO, misuraPredefinita, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { ferroStd, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 /* ---------- STRUTTURE COLLEGATE A EQUO SCUDERIA (Professionisti, opzione A) ----------
    La struttura è un cliente "struttura" con centro_id. Collegamento con doppia conferma:
@@ -325,7 +325,7 @@ function apriFerroCavallo(key){
   }
   ferroCavalloKey = key;
   document.getElementById("ferro-cav-titolo").textContent = "Ferro standard · " + cv.nome;
-  const f = ferroStd(cv) || { s: "olandese", n: null };
+  const f = ferroStd(cv) || { s: misuraPredefinita("olandese"), n: null };
   document.getElementById("ferro-misura-sistema").value = f.s;
   const idx = f.n ? MISURE_FERRO[f.s].indexOf(String(f.n)) : -1;
   misuraIndiceFerro = idx >= 0 ? idx : MISURA_INDICE_PARTENZA;
