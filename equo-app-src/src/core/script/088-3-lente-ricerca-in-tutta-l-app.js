@@ -101,7 +101,9 @@ function cercaTuttoMostra(){
         vai(() => { showPage("pro-clienti"); openClienteDetail(c.id); })));
     const nomeCliente = id => ((d.clienti || clientiMascalcia || []).find(c => c.id === id) || {}).nome || "";
     const cavalli = (d.cavalli || []).filter(c => ok(c.nome, c.microchip, nomeCliente(c.cliente_mascalcia_id)))
-      .map(c => ctRiga("fa-horse-head", c.nome || "Cavallo", "di " + (nomeCliente(c.cliente_mascalcia_id) || "cliente"), vai(() => { showPage("pro-clienti"); openClienteDetail(c.cliente_mascalcia_id); })));
+      .map(c => ctRiga("fa-horse-head", c.nome || "Cavallo", "di " + (nomeCliente(c.cliente_mascalcia_id) || "cliente"), vai(async () => {
+        // apre la scheda del cavallo (dentro il suo cliente); «indietro» torna al cliente, non alla cartella Cavalli
+        showPage("pro-clienti"); await apriCavalloDaCartella(c.cliente_mascalcia_id, c.id); schedaDaCartella = false; })));
     const tipo = i => (TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "Intervento") + (i.tipo_ferratura === "altro" && i.tipo_altro ? " · " + i.tipo_altro : "");
     const interventi = (d.interventi || []).filter(i => ok(i.clienti_mascalcia?.nome, i.cavalli_clienti_mascalcia?.nome, tipo(i), formatDate(i.data_intervento), i.data_intervento, i.note,
         i.stato === "programmato" ? "da fare programmato" : "fatto", incassiNascosti() ? "" : (i.stato_pagamento === "saldato" ? "saldato pagato" : "da saldare non pagato")))
