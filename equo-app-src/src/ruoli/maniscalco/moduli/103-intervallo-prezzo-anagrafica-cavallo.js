@@ -109,7 +109,7 @@ function acavSesso(v){
 function apriAnagraficaCavallo(){
   const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
   if(!cv) return;
-  const manuale = cv.tipo === "manuale" && !cv.horse_id;
+  const manuale = cv.tipo === "manuale" && !cv.horse_id && !cv.scuderia_cavallo_id;   // cavallo del proprietario o della scuderia: anagrafica loro
   document.getElementById("acav-tit").textContent = "Anagrafica · " + (cv.nome || "Cavallo");
   document.getElementById("acav-base").hidden = !manuale;
   document.getElementById("acav-equo-nota").hidden = manuale;
@@ -131,7 +131,7 @@ function apriAnagraficaCavallo(){
 async function salvaAnagraficaCavallo(btn){
   const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
   if(!cv) return;
-  const manuale = cv.tipo === "manuale" && !cv.horse_id;
+  const manuale = cv.tipo === "manuale" && !cv.horse_id && !cv.scuderia_cavallo_id;
   const err = document.getElementById("acav-errore");
   const errore = t => { err.textContent = t; err.style.display = "block"; };
   const num = (id, min, max, nome) => {

@@ -264,7 +264,8 @@ async function salvaEditCliente(){
   if(!nome){ errBox.textContent = "Il nome del cliente è obbligatorio."; errBox.style.display = "block"; return; }
   const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
   const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
-  const campiCli = { nome, telefono, note };
+  const campiCli = { telefono, note };
+  if(!document.getElementById("edit-cliente-nome").disabled) campiCli.nome = nome;   // collegato a Equo: il nome viene dal profilo
   if(!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;   // collegato a Equo: il tipo non si cambia
   const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);
   if(error){ errBox.textContent = "Errore: " + error.message; errBox.style.display = "block"; return; }

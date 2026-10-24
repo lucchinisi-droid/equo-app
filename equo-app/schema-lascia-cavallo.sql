@@ -3,7 +3,8 @@
 -- 1) cavalli collegati a un proprietario o a una scuderia: «Non lo seguo più» = richiesta che proprietario o scuderia confermano o rifiutano
 -- 2) cavalli inseriti solo dal maniscalco: «Archivia» (si ripristinano), mai cancellati
 -- 3) il database rifiuta l'eliminazione di una scheda collegata (salvo le unioni di schede doppie)
--- 4) il «tipo di cliente» di una scheda collegata a un account Equo non si cambia (proprietario resta proprietario)
+-- 4) profili certificati (TRUE) non modificabili da altri: scheda cliente collegata (nome e tipo dal profilo) e anagrafica dei cavalli
+--    del proprietario o della scuderia; le schede create dal professionista (PENDING) restano modificabili finché il cliente non si collega
 -- Si puo rieseguire senza danni.
 
 alter table public.cavalli_clienti_mascalcia add column if not exists archiviato_il timestamptz;
@@ -183,30 +184,66 @@ drop trigger if exists trg_cavalli_clienti_no_elimina on public.cavalli_clienti_
 create trigger trg_cavalli_clienti_no_elimina before delete on public.cavalli_clienti_mascalcia
   for each row execute function public.cavalli_clienti_no_elimina_collegati();
 
--- 4) tipo di cliente: una scheda collegata a un account Equo resta «proprietario» (tranne gli account dei gestori di struttura);
---    una scheda collegata a Equo Scuderia resta «struttura»
-create or replace function public.clienti_mascalcia_tipo_bloccato() returns trigger
+-- 4) PROFILI CERTIFICATI (TRUE) E NON CERTI (PENDING)
+--    TRUE = creato dalla persona stessa (proprietario o professionista che si registra, scuderia con Equo Scuderia):
+--           nessun altro lo modifica. PENDING = scheda creata da un professionista per un cliente non ancora su Equo:
+--           la modifica chi l'ha creata, finché il cliente non si collega (allora diventa TRUE).
+-- 4a) scheda cliente collegata (TRUE): nome e tipo vengono dal profilo
+--     account Equo -> nome del profilo, «proprietario» (tranne gli account dei gestori di struttura)
+--     Equo Scuderia -> nome del centro, «struttura»
+drop trigger if exists trg_clienti_mascalcia_tipo_bloccato on public.clienti_mascalcia;
+drop function if exists public.clienti_mascalcia_tipo_bloccato();
+create or replace function public.clienti_mascalcia_dati_certificati() returns trigger
 language plpgsql security definer set search_path to 'public' as $fn$
+declare v_nome text;
 begin
   if new.centro_id is not null then
     new.tipo_cliente := 'struttura';
-  elsif new.cliente_user_id is not null and not exists (
-      select 1 from profiles p where p.id = new.cliente_user_id and 'gestore_struttura' in (p.ruolo, coalesce(p.ruolo_secondario, ''))) then
-    new.tipo_cliente := 'proprietario';
+    select nullif(trim(nome), '') into v_nome from centri where id = new.centro_id;
+  elsif new.cliente_user_id is not null then
+    if not exists (select 1 from profiles p where p.id = new.cliente_user_id and 'gestore_struttura' in (p.ruolo, coalesce(p.ruolo_secondario, ''))) then
+      new.tipo_cliente := 'proprietario';
+    end if;
+    v_nome := nullif(trim(coalesce(equo_nome_profilo(new.cliente_user_id), '')), '');
+  end if;
+  if v_nome is not null then
+    new.nome := v_nome;
+  elsif tg_op = 'UPDATE' and (old.cliente_user_id is not null or old.centro_id is not null) then
+    new.nome := old.nome;
   end if;
   return new;
 end $fn$;
-drop trigger if exists trg_clienti_mascalcia_tipo_bloccato on public.clienti_mascalcia;
-create trigger trg_clienti_mascalcia_tipo_bloccato before insert or update of tipo_cliente, cliente_user_id, centro_id on public.clienti_mascalcia
-  for each row execute function public.clienti_mascalcia_tipo_bloccato();
+drop trigger if exists trg_clienti_mascalcia_zz_certificati on public.clienti_mascalcia;
+create trigger trg_clienti_mascalcia_zz_certificati before insert or update of nome, tipo_cliente, cliente_user_id, centro_id on public.clienti_mascalcia
+  for each row execute function public.clienti_mascalcia_dati_certificati();
 
--- la scheda di Riccardo collegata all'account di Simone torna «proprietario»
-update public.clienti_mascalcia set tipo_cliente = 'proprietario'
- where id = 'c399ca41-d243-4574-915b-0c771f2d66b9' and tipo_cliente <> 'proprietario';
+-- 4b) cavallo del proprietario (horse_id) o della scuderia (scuderia_cavallo_id) = TRUE:
+--     il maniscalco non cambia nome, razza, microchip, anno di nascita e mantello (restano i suoi dati: altezza, peso, sesso,
+--     disciplina, segni, ferratura, intervallo, prezzo). I cavalli inseriti da lui e non ancora accettati restano modificabili.
+create or replace function public.cavalli_clienti_anagrafica_certificata() returns trigger
+language plpgsql security definer set search_path to 'public' as $fn$
+begin
+  if auth.uid() is null or auth.uid() <> old.maniscalco_id or (old.horse_id is null and old.scuderia_cavallo_id is null)
+     or coalesce(current_setting('equo.unisci_righe', true), '') = 'on' or coalesce(current_setting('equo.unisci_manuali', true), '') = 'on' then
+    return new;
+  end if;
+  new.nome := old.nome; new.razza := old.razza; new.microchip := old.microchip;
+  new.anno_nascita := old.anno_nascita; new.mantello := old.mantello;
+  return new;
+end $fn$;
+drop trigger if exists trg_cavalli_clienti_anagrafica_certificata on public.cavalli_clienti_mascalcia;
+create trigger trg_cavalli_clienti_anagrafica_certificata before update of nome, razza, microchip, anno_nascita, mantello on public.cavalli_clienti_mascalcia
+  for each row execute function public.cavalli_clienti_anagrafica_certificata();
 
--- controllo: atteso 1 | 1 | 4 | 2 | proprietario
+-- schede già collegate: nome e tipo dal profilo (la scheda di Riccardo per Simone torna «proprietario»,
+-- la scheda della Scuderia Colleferro prende il nome del centro)
+update public.clienti_mascalcia set nome = nome where cliente_user_id is not null or centro_id is not null;
+
+-- controllo: atteso 1 | 1 | 4 | 3 | proprietario | Simone Lucchini | Scuderia Colleferro
 select (select count(*) from information_schema.columns where table_name = 'cavalli_clienti_mascalcia' and column_name = 'archiviato_il') archivio,
        (select count(*) from information_schema.tables where table_name = 'cavalli_lasciati') richieste,
        (select count(*) from pg_proc where proname in ('pro_lascia_cavallo', 'pro_riprendi_cavallo', 'equo_richieste_lasciati', 'equo_rispondi_lasciato')) funzioni,
-       (select count(*) from pg_trigger where tgname in ('trg_cavalli_clienti_no_elimina', 'trg_clienti_mascalcia_tipo_bloccato')) trigger,
-       (select tipo_cliente from public.clienti_mascalcia where id = 'c399ca41-d243-4574-915b-0c771f2d66b9') scheda_simone;
+       (select count(*) from pg_trigger where tgname in ('trg_cavalli_clienti_no_elimina', 'trg_clienti_mascalcia_zz_certificati', 'trg_cavalli_clienti_anagrafica_certificata')) trigger,
+       (select tipo_cliente from public.clienti_mascalcia where id = 'c399ca41-d243-4574-915b-0c771f2d66b9') scheda_simone,
+       (select nome from public.clienti_mascalcia where id = 'c399ca41-d243-4574-915b-0c771f2d66b9') nome_simone,
+       (select nome from public.clienti_mascalcia where id = '86623743-6117-4834-8c4d-e8fd90bbdf82') nome_scuderia;

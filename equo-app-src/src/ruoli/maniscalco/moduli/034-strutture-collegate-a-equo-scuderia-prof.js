@@ -263,6 +263,7 @@ async function openEditCliente(){
   // collegato a un account Equo o a Equo Scuderia: il tipo di cliente non si cambia (caso Riccardo/Simone, 24/10)
   { const bloccato = !!(c.cliente_user_id || c.centro_id);
     document.getElementById("edit-cliente-tipo").disabled = bloccato;
+    document.getElementById("edit-cliente-nome").disabled = bloccato;   // profilo certificato: il nome viene dal profilo
     const n = document.getElementById("edit-cliente-tipo-nota"); if(n) n.style.display = bloccato ? "block" : "none"; }
   razzaImposta("edit-cliente-nuovo-razza", "");
   document.getElementById("edit-cliente-codice-equo").value = "";
@@ -295,7 +296,7 @@ async function renderCavalliEditCliente(){
     <div class="event-item" style="padding:8px 0">
       <div style="font-size:14px">${escapeHtml(x.nome)}${x.tipo === "equo" ? ' <span class="badge badge-accent" style="font-size:10.5px">su Equo</span>' : ""}${x.id && attesa.has(x.id) ? ' <span class="badge" style="font-size:10.5px">In attesa di conferma</span>' : ""}
         <div class="muted" style="font-size:11.5px">${[x.codice_equo ? '<b class="cod-equo">' + escapeHtml(x.codice_equo) + '</b>' : "", x.razza ? escapeHtml(x.razza) : "", x.microchip ? "chip " + escapeHtml(x.microchip) : "", x.presso ? "📍 presso " + escapeHtml(x.presso) : "", x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" && !x.horse_id && !x.scuderia_cavallo_id ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">

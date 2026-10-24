@@ -5099,7 +5099,7 @@
 	function apriAnagraficaCavallo() {
 		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
 		if (!cv) return;
-		const manuale = cv.tipo === "manuale" && !cv.horse_id;
+		const manuale = cv.tipo === "manuale" && !cv.horse_id && !cv.scuderia_cavallo_id;
 		document.getElementById("acav-tit").textContent = "Anagrafica · " + (cv.nome || "Cavallo");
 		document.getElementById("acav-base").hidden = !manuale;
 		document.getElementById("acav-equo-nota").hidden = manuale;
@@ -5122,7 +5122,7 @@
 	async function salvaAnagraficaCavallo(btn) {
 		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
 		if (!cv) return;
-		const manuale = cv.tipo === "manuale" && !cv.horse_id;
+		const manuale = cv.tipo === "manuale" && !cv.horse_id && !cv.scuderia_cavallo_id;
 		const err = document.getElementById("acav-errore");
 		const errore = (t) => {
 			err.textContent = t;
@@ -5569,7 +5569,7 @@
         <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find((x) => x.id === currentClienteId)?.nome || "—")}${modificabile && !cv.horse_id ? ` <button type="button" class="cavpro-link" onclick="apriCambiaProprietario(false)">Cambia</button>` : ""}</dd>
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
-      ${cv.tipo === "equo" ? "<div class=\"muted\" style=\"font-size:11.5px;margin-top:8px\">Nome, razza e nascita li gestisce il proprietario nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>" : ""}`) + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
+      ${cv.tipo === "equo" || cv.horse_id || cv.scuderia_cavallo_id ? "<div class=\"muted\" style=\"font-size:11.5px;margin-top:8px\">Nome, razza e nascita li gestisce " + (cv.tipo !== "equo" && !cv.horse_id ? "la scuderia" : "il proprietario") + " nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>" : ""}`) + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
         ${ultimiNuovi ? "<span class=\"solo-completa\">Ultimi ferri nuovi: " + formatDataBreve(ultimiNuovi.data_intervento) + "<br></span>" : ""}
@@ -7088,10 +7088,10 @@
 		const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
 		const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
 		const campiCli = {
-			nome,
 			telefono,
 			note
 		};
+		if (!document.getElementById("edit-cliente-nome").disabled) campiCli.nome = nome;
 		if (!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;
 		const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);
 		if (error) {
@@ -7422,6 +7422,7 @@
 		{
 			const bloccato = !!(c.cliente_user_id || c.centro_id);
 			document.getElementById("edit-cliente-tipo").disabled = bloccato;
+			document.getElementById("edit-cliente-nome").disabled = bloccato;
 			const n = document.getElementById("edit-cliente-tipo-nota");
 			if (n) n.style.display = bloccato ? "block" : "none";
 		}
@@ -7469,7 +7470,7 @@
 			x.presso ? "📍 presso " + escapeHtml(x.presso) : "",
 			x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
 		].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" && !x.horse_id && !x.scuderia_cavallo_id ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">

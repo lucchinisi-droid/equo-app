@@ -283,7 +283,7 @@ function renderCorpoCavalloPro(){
         <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find(x => x.id === currentClienteId)?.nome || "—")}${modificabile && !cv.horse_id ? ` <button type="button" class="cavpro-link" onclick="apriCambiaProprietario(false)">Cambia</button>` : ""}</dd>
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
-      ${cv.tipo === "equo" ? '<div class="muted" style="font-size:11.5px;margin-top:8px">Nome, razza e nascita li gestisce il proprietario nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>' : ""}`)
+      ${cv.tipo === "equo" || cv.horse_id || cv.scuderia_cavallo_id ? '<div class="muted" style="font-size:11.5px;margin-top:8px">Nome, razza e nascita li gestisce ' + (cv.tipo !== "equo" && !cv.horse_id ? "la scuderia" : "il proprietario") + ' nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>' : ""}`)
     + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
