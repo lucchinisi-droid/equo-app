@@ -2,6 +2,7 @@
 import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { caricaJsPdf, contoCodice, contoData, contoEuro, contoLavori } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { contoNomeFile } from "./060-foglio-di-invio-gestione-del-conto.js";
+import { etichettaPro, riquadroInvitoPdf } from "./108-invito-qr.js";
 /* ---- PDF del conto: dai dati salvati (snapshot), mai ferri nuovi né note private ---- */
 async function creaPdfConto(c){
   const JsPDF = await caricaJsPdf();
@@ -24,7 +25,7 @@ async function creaPdfConto(c){
   y += 9; doc.setFontSize(15); doc.setTextColor(...verde); doc.text(cli?.nome || "", M, y);
   const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
   doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...grigio);
-  if(pro){ y += 6; doc.text("Maniscalco: " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y); }
+  if(pro){ y += 6; doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y); }
   if(c.periodo_da || c.periodo_a){ y += 5.5; doc.text("Periodo: " + (c.periodo_da ? "dal " + contoData(c.periodo_da) + " " : "") + (c.periodo_a ? "al " + contoData(c.periodo_a) : ""), M, y); }
   y += 10;
   const colData = M + 2, colCav = M + 26, colLav = M + 78, colImp = W - M - 2;
@@ -81,6 +82,7 @@ async function creaPdfConto(c){
   } else if(c.stato === "pagato"){
     doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...verde); doc.text("Conto saldato" + (c.pagato_il ? " il " + contoData(c.pagato_il) : ""), M, y);
   }
+  y = riquadroInvitoPdf(doc, cli, y + 6, W, M, () => { piede(); doc.addPage(); return 22; });
   piede();
   return { blob: doc.output("blob"), nome: contoNomeFile(c) };
 }

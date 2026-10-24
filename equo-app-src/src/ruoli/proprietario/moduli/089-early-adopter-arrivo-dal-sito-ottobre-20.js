@@ -212,6 +212,64 @@ async function referralControlla(){
 }
 if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", refMostraAvvisi); else setTimeout(refMostraAvvisi, 0);
 
+/* ==================== INVITO DEL PROFESSIONISTA DAL QR (25/10/2026) ====================
+   Link/QR app.equohub.com/?invito=EQUO-XXXXX (PDF di appuntamento, conto e resoconto; scheda cliente; «Invia l'invito»).
+   Il codice si ricorda 30 giorni sul telefono; appena c'è un profilo proprietario il collegamento parte da solo
+   (riscatta_codice_maniscalco, la stessa di Chat → «Il tuo maniscalco» → Collega), poi la proposta dei cavalli preparati. */
+const INV_KEY = "equo-invito";
+(function invitoDaUrl(){
+  const p = new URLSearchParams(location.search);
+  const v = (p.get("invito") || "").trim().toUpperCase();
+  if(v && /^EQUO-[A-Z0-9-]{3,20}$/.test(v)){
+    lsSet(INV_KEY, JSON.stringify({ codice: v, t: Date.now() }));
+    p.delete("invito");
+    history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
+  }
+})();
+function invitoLeggi(){
+  try{
+    const v = JSON.parse(lsGet(INV_KEY) || "null");
+    if(v && v.codice && Date.now() - v.t < 30 * 86400000) return v;
+  }catch(e){}
+  return null;
+}
+function invitoCancella(){ lsDel(INV_KEY); document.querySelectorAll(".inv-avviso").forEach(el => el.remove()); }
+function invitoMostraAvvisi(){
+  if(!invitoLeggi() || (typeof DEMO_MODE !== "undefined" && DEMO_MODE)) return;
+  const html = t => `<div class="ref-avviso inv-avviso"><span class="early-medaglia">★</span><div><b>Colleghiamoci su Equo</b><span>Il tuo professionista ti ha invitato</span><small>${t}</small></div></div>`;
+  const tag = document.querySelector("#screen-auth .auth-tagline");
+  if(tag && !document.querySelector("#screen-auth .inv-avviso")) tag.insertAdjacentHTML("afterend", html("Crea il tuo account gratuito e scegli «Ho un cavallo»: il collegamento parte da solo."));
+  const lista = document.querySelector("#onb-step-1 .role-list");
+  if(lista && !document.querySelector("#onb-step-1 .inv-avviso")) lista.insertAdjacentHTML("beforebegin", html("Scegli «Ho un cavallo»: ti colleghiamo subito."));
+}
+let invitoInCorso = false;
+async function invitoControlla(){
+  if(DEMO_MODE || !currentUser || invitoInCorso) return;
+  const r = invitoLeggi();
+  if(!r) return;
+  const ruoli = [currentUser.ruolo, currentUser.ruoloSecondario].filter(Boolean);
+  if(!ruoli.includes("proprietario")) return;   // lo teniamo: si applica quando c'è il profilo proprietario
+  invitoInCorso = true;
+  try{
+    const res = await DB.riscattaCodiceManiscalco(r.codice);
+    if(res?.ok){
+      invitoCancella();
+      const nome = res.nome_maniscalco || "il tuo professionista";
+      showToast("Collegato a " + nome + "!");
+      if(currentUser.vistaAttiva === "proprietario"){
+        if(typeof loadFarrierChatSection === "function") await loadFarrierChatSection().catch(() => {});
+        if(typeof proponiAbbinamentoCavalli === "function") await proponiAbbinamentoCavalli(res.cliente_mascalcia_id, nome, () => { if(typeof openFarrierChatThread === "function") openFarrierChatThread(res.cliente_mascalcia_id, nome); });
+      }
+      return;
+    }
+    if(res?.errore === "errore" || res?.errore === "non_autenticato") return;   // problema di rete o sessione: riprova al prossimo accesso
+    invitoCancella();
+    const msg = { codice_non_valido: "Il codice invito non è più valido: chiedi al tuo professionista di mandartelo di nuovo.", codice_gia_usato: "Questo invito è già stato usato da un altro account.", codice_tuo: "Questo è un tuo invito: va dato al cliente." }[res?.errore];
+    if(msg) showToast(msg);
+  } finally { invitoInCorso = false; }
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", invitoMostraAvvisi); else setTimeout(invitoMostraAvvisi, 0);
+
 
 /* ==================== HOME A WIDGET (ottobre 2026) ====================
    Vista Widget (predefinita) o Standard: interruttore nel menu profilo, salvato in profiles.home_vista.
@@ -387,4 +445,4 @@ async function mlCarica(){
 function mlRigaCavallo(e){ return { nome: agNomeCavallo(e) || "Cavallo", cli: e.clienti_mascalcia?.nome || clienteDiId(e.cliente_mascalcia_id)?.nome || "" }; }
 
 
-export { applicaHomeMan, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva };
+export { invitoControlla, applicaHomeMan, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva };

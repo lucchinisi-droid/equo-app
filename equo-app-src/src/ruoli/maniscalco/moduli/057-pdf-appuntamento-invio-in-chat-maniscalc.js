@@ -1,6 +1,7 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { MISURE_FERRO, misuraNorm } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipo, agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
+import { etichettaPro, riquadroInvitoPdf } from "./108-invito-qr.js";
 /* ---------- PDF APPUNTAMENTO + INVIO IN CHAT (maniscalco) ---------- */
 let jsPdfPromise = null;
 function caricaJsPdf(){
@@ -62,7 +63,7 @@ async function creaPdfEvento(e){
   const professionista = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "";
   if(professionista){
     doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...grigio);
-    doc.text("Maniscalco: " + professionista + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y + 2); y += 6;
+    doc.text(etichettaPro() + ": " + professionista + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y + 2); y += 6;
   }
   y += 6;
 
@@ -114,10 +115,15 @@ async function creaPdfEvento(e){
     if(currentUser.datiPagamentoPaypal){ doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y); y += 6; }
   }
 
+  // «Colleghiamoci su Equo»: QR di invito se il cliente non è ancora su Equo
+  const piede = () => {
+    doc.setDrawColor(227, 221, 204); doc.setLineWidth(0.2); doc.line(M, 280, W - M, 280);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...grigio);
+    doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
+  };
+  y = riquadroInvitoPdf(doc, (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find(x => x.id === e.cliente_mascalcia_id), y + 4, W, M, () => { piede(); doc.addPage(); return 22; });
   // piè di pagina
-  doc.setDrawColor(227, 221, 204); doc.line(M, 280, W - M, 280);
-  doc.setFontSize(8.5); doc.setTextColor(...grigio);
-  doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
+  piede();
 
   const nome = pdfNomeFile(e);
   return { blob: doc.output("blob"), nome };

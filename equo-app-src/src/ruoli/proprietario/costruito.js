@@ -152,7 +152,7 @@
 		if (tipo === "audio") return "🎙️ Nota vocale";
 		return testo || "";
 	}
-	async function loadFarrierChatSection() {
+	async function loadFarrierChatSection$1() {
 		const box = document.getElementById("farrier-chat-list");
 		if (!box) return;
 		const lista = await DB.listManiscalchiCollegati();
@@ -203,7 +203,7 @@
 		}
 		closeModal("modal-collega-maniscalco");
 		showToast("Collegato a " + (res.nome_maniscalco || "il tuo maniscalco") + "!");
-		await loadFarrierChatSection();
+		await loadFarrierChatSection$1();
 		const nomeMan = res.nome_maniscalco || "Il tuo maniscalco";
 		await proponiAbbinamentoCavalli(res.cliente_mascalcia_id, nomeMan, () => openFarrierChatThread(res.cliente_mascalcia_id, nomeMan));
 	}
@@ -363,7 +363,7 @@
 			loadStableChatSection().then(() => openStableChatThread(s.membro_id, s.centro_id, s.nome));
 		} else if (homeLastMessageTarget.tipo === "maniscalco") {
 			const f = homeLastMessageTarget.target;
-			loadFarrierChatSection().then(() => openFarrierChatThread(f.cliente_mascalcia_id, f.nome_maniscalco || "Il tuo maniscalco"));
+			loadFarrierChatSection$1().then(() => openFarrierChatThread(f.cliente_mascalcia_id, f.nome_maniscalco || "Il tuo maniscalco"));
 		} else {
 			const c = homeLastMessageTarget.target;
 			loadOwnerChatList().then(() => openOwnerChatThread(c.id, c.altro?.full_name || "Utente Equo"));
@@ -1294,6 +1294,73 @@
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", refMostraAvvisi);
 	else setTimeout(refMostraAvvisi, 0);
+	var INV_KEY = "equo-invito";
+	(function invitoDaUrl() {
+		const p = new URLSearchParams(location.search);
+		const v = (p.get("invito") || "").trim().toUpperCase();
+		if (v && /^EQUO-[A-Z0-9-]{3,20}$/.test(v)) {
+			lsSet(INV_KEY, JSON.stringify({
+				codice: v,
+				t: Date.now()
+			}));
+			p.delete("invito");
+			history.replaceState({}, "", location.pathname + (p.toString() ? "?" + p.toString() : ""));
+		}
+	})();
+	function invitoLeggi() {
+		try {
+			const v = JSON.parse(lsGet(INV_KEY) || "null");
+			if (v && v.codice && Date.now() - v.t < 2592e6) return v;
+		} catch (e) {}
+		return null;
+	}
+	function invitoCancella() {
+		lsDel(INV_KEY);
+		document.querySelectorAll(".inv-avviso").forEach((el) => el.remove());
+	}
+	function invitoMostraAvvisi() {
+		if (!invitoLeggi() || typeof DEMO_MODE !== "undefined" && DEMO_MODE) return;
+		const html = (t) => `<div class="ref-avviso inv-avviso"><span class="early-medaglia">★</span><div><b>Colleghiamoci su Equo</b><span>Il tuo professionista ti ha invitato</span><small>${t}</small></div></div>`;
+		const tag = document.querySelector("#screen-auth .auth-tagline");
+		if (tag && !document.querySelector("#screen-auth .inv-avviso")) tag.insertAdjacentHTML("afterend", html("Crea il tuo account gratuito e scegli «Ho un cavallo»: il collegamento parte da solo."));
+		const lista = document.querySelector("#onb-step-1 .role-list");
+		if (lista && !document.querySelector("#onb-step-1 .inv-avviso")) lista.insertAdjacentHTML("beforebegin", html("Scegli «Ho un cavallo»: ti colleghiamo subito."));
+	}
+	var invitoInCorso = false;
+	async function invitoControlla() {
+		if (DEMO_MODE || !currentUser || invitoInCorso) return;
+		const r = invitoLeggi();
+		if (!r) return;
+		if (![currentUser.ruolo, currentUser.ruoloSecondario].filter(Boolean).includes("proprietario")) return;
+		invitoInCorso = true;
+		try {
+			const res = await DB.riscattaCodiceManiscalco(r.codice);
+			if (res?.ok) {
+				invitoCancella();
+				const nome = res.nome_maniscalco || "il tuo professionista";
+				showToast("Collegato a " + nome + "!");
+				if (currentUser.vistaAttiva === "proprietario") {
+					if (typeof loadFarrierChatSection === "function") await loadFarrierChatSection().catch(() => {});
+					if (typeof proponiAbbinamentoCavalli === "function") await proponiAbbinamentoCavalli(res.cliente_mascalcia_id, nome, () => {
+						if (typeof openFarrierChatThread === "function") openFarrierChatThread(res.cliente_mascalcia_id, nome);
+					});
+				}
+				return;
+			}
+			if (res?.errore === "errore" || res?.errore === "non_autenticato") return;
+			invitoCancella();
+			const msg = {
+				codice_non_valido: "Il codice invito non è più valido: chiedi al tuo professionista di mandartelo di nuovo.",
+				codice_gia_usato: "Questo invito è già stato usato da un altro account.",
+				codice_tuo: "Questo è un tuo invito: va dato al cliente."
+			}[res?.errore];
+			if (msg) showToast(msg);
+		} finally {
+			invitoInCorso = false;
+		}
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", invitoMostraAvvisi);
+	else setTimeout(invitoMostraAvvisi, 0);
 	function vistaWidgetAttiva() {
 		return true;
 	}
@@ -1688,13 +1755,13 @@
 	function wgApriAppMan(clienteId) {
 		showPage("chat");
 		const f = (wgOwn.appMan || []).find((a) => a.f.cliente_mascalcia_id === clienteId)?.f;
-		if (typeof loadFarrierChatSection === "function") loadFarrierChatSection().then(() => {
+		if (typeof loadFarrierChatSection$1 === "function") loadFarrierChatSection$1().then(() => {
 			if (f) openFarrierChatThread(f.cliente_mascalcia_id, f.nome_maniscalco || "Il tuo maniscalco");
 		});
 	}
 	function wgFissaManiscalco() {
 		showPage("chat");
-		if (typeof loadFarrierChatSection === "function") loadFarrierChatSection().then(() => {
+		if (typeof loadFarrierChatSection$1 === "function") loadFarrierChatSection$1().then(() => {
 			const a = wgOwn.appuntamento;
 			if (a && a.tipo === "maniscalco") openFarrierChatThread(a.f.cliente_mascalcia_id, a.f.nome_maniscalco || "Il tuo maniscalco");
 		});
@@ -1703,7 +1770,7 @@
 		const a = wgOwn.appuntamento;
 		if (!a) return;
 		showPage("chat");
-		if (a.tipo === "maniscalco") loadFarrierChatSection().then(() => openFarrierChatThread(a.f.cliente_mascalcia_id, a.f.nome_maniscalco || "Il tuo maniscalco"));
+		if (a.tipo === "maniscalco") loadFarrierChatSection$1().then(() => openFarrierChatThread(a.f.cliente_mascalcia_id, a.f.nome_maniscalco || "Il tuo maniscalco"));
 		else loadStableChatSection().then(async () => {
 			const s = (await DB.listScuderieCollegate()).find((x) => !a.l.scuderia || x.nome === a.l.scuderia) || null;
 			if (s) openStableChatThread(s.membro_id, s.centro_id, s.nome);
@@ -2361,7 +2428,7 @@
 		document.getElementById("rich-note").value = "";
 		await renderAppuntamentiManiscalco();
 		await renderFarrierChatThread();
-		loadFarrierChatSection();
+		loadFarrierChatSection$1();
 	}
 	async function annullaRichiestaAppuntamento(id) {
 		if (!confirm("Annullare questa richiesta?")) return;
@@ -2585,7 +2652,7 @@
 		loadDeadlines,
 		loadExpenses,
 		loadExpensesSummary,
-		loadFarrierChatSection,
+		loadFarrierChatSection: loadFarrierChatSection$1,
 		loadHorseEvents,
 		loadHorses,
 		loadLezioni,
@@ -2614,6 +2681,7 @@
 		previewMessaggioMascalcia,
 		proponiCavalliCliente,
 		referralControlla,
+		invitoControlla,
 		renderDaSaldare,
 		renderHome,
 		renderHorseInfoBox,

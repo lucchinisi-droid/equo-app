@@ -1,6 +1,97 @@
 
 // === GENERATO da equo-app-src/strumenti/costruisci-moduli.mjs: NON modificare qui, modificare ruoli/maniscalco/moduli/ ===
 (function() {
+	// equo-app-src/src/ruoli/maniscalco/moduli/108-invito-qr.js
+	function linkInvito(codice) {
+		return "https://app.equohub.com/?invito=" + encodeURIComponent(String(codice || "").toUpperCase());
+	}
+	function clienteDaInvitare(c) {
+		return c && !c.cliente_user_id && !c.centro_id && !isStruttura(c) && c.codice_invito ? c : null;
+	}
+	function etichettaPro() {
+		return {
+			maniscalco: "Maniscalco",
+			veterinario: "Veterinario",
+			istruttore: "Istruttore"
+		}[currentUser?.vistaAttiva || currentUser?.ruolo] || "Professionista";
+	}
+	function moduliQr(testo) {
+		if (typeof QRCode !== "function") return null;
+		try {
+			const div = document.createElement("div");
+			new QRCode(div, {
+				text: testo,
+				width: 64,
+				height: 64
+			});
+			const svg = div.querySelector("svg"), path = svg && svg.querySelector("path");
+			if (!svg || !path) return null;
+			const n = Number(String(svg.getAttribute("viewBox")).split(" ")[2]);
+			const punti = [...String(path.getAttribute("d")).matchAll(/M(\d+),(\d+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+			return n > 0 && punti.length ? {
+				n,
+				punti
+			} : null;
+		} catch (e) {
+			return null;
+		}
+	}
+	function riquadroInvitoPdf(doc, cli, y, W, M, nuovaPagina) {
+		const c = clienteDaInvitare(cli);
+		if (!c) return y;
+		const q = moduliQr(linkInvito(c.codice_invito));
+		if (!q) return y;
+		const H = 46;
+		if (y + H > 274) y = nuovaPagina();
+		const verde = [
+			20,
+			49,
+			42
+		], oro = [
+			201,
+			143,
+			46
+		], grigio = [
+			95,
+			111,
+			103
+		];
+		y += 4;
+		doc.setFillColor(248, 246, 240);
+		doc.setDrawColor(...oro);
+		doc.setLineWidth(.5);
+		doc.roundedRect(M, y, W - M * 2, H, 3, 3, "FD");
+		const lato = 36, x0 = M + 5, y0 = y + 5, m = lato / q.n;
+		doc.setFillColor(255, 255, 255);
+		doc.rect(x0 - 1.5, y0 - 1.5, 39, 39, "F");
+		doc.setFillColor(0, 0, 0);
+		q.punti.forEach(([cx, cy]) => doc.rect(x0 + cx * m, y0 + cy * m, m + .02, m + .02, "F"));
+		const xt = x0 + lato + 8, lw = W - M - 5 - xt;
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(14);
+		doc.setTextColor(...verde);
+		doc.text("Colleghiamoci su Equo", xt, y + 12);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.setTextColor(...grigio);
+		const righe = doc.splitTextToSize("Inquadra il codice con la fotocamera del telefono: si apre Equo, crei il tuo account gratuito e siamo collegati. Vedrai lavori, scadenze e pagamenti dei tuoi cavalli.", lw);
+		doc.text(righe, xt, y + 19);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(10.5);
+		doc.setTextColor(...oro);
+		doc.text("Codice invito: " + c.codice_invito, xt, y + H - 6);
+		return y + H + 4;
+	}
+	function condividiInvitoCliente() {
+		const c = clienteDaInvitare((typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === currentClienteId));
+		if (!c) return;
+		const testo = "Ciao! Ti aspetto su Equo: vedi lavori, scadenze e pagamenti dei tuoi cavalli. Apri il link, crea il tuo account e siamo collegati: " + linkInvito(c.codice_invito);
+		if (navigator.share) {
+			navigator.share({ text: testo }).catch(() => {});
+			return;
+		}
+		window.open("https://wa.me/?text=" + encodeURIComponent(testo), "_blank");
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/039-razza-menu-con-ricerca-stesso-codice-in.js
 	var RAZZE_EQUO = [
 		[
@@ -2923,7 +3014,7 @@
 			doc.setFont("helvetica", "normal");
 			doc.setFontSize(10.5);
 			doc.setTextColor(...grigio);
-			doc.text("Maniscalco: " + professionista + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y + 2);
+			doc.text(etichettaPro() + ": " + professionista + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y + 2);
 			y += 6;
 		}
 		y += 6;
@@ -3003,11 +3094,21 @@
 				y += 6;
 			}
 		}
-		doc.setDrawColor(227, 221, 204);
-		doc.line(M, 280, 192, 280);
-		doc.setFontSize(8.5);
-		doc.setTextColor(...grigio);
-		doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
+		const piede = () => {
+			doc.setDrawColor(227, 221, 204);
+			doc.setLineWidth(.2);
+			doc.line(M, 280, 192, 280);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.5);
+			doc.setTextColor(...grigio);
+			doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
+		};
+		y = riquadroInvitoPdf(doc, (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === e.cliente_mascalcia_id), y + 4, W, M, () => {
+			piede();
+			doc.addPage();
+			return 22;
+		});
+		piede();
 		const nome = pdfNomeFile(e);
 		return {
 			blob: doc.output("blob"),
@@ -7367,14 +7468,19 @@
 		document.querySelectorAll(".btn-archivia-cliente").forEach((b) => b.textContent = c.archiviato_il ? "Ripristina cliente" : "Archivia cliente");
 		document.getElementById("detail-cliente-code").textContent = c.codice_invito;
 		const linkHint = document.getElementById("detail-cliente-link-hint");
-		if (linkHint) linkHint.innerHTML = c.cliente_user_id ? "<strong style=\"color:var(--primary)\">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell'app." : isStruttura(c) ? "Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → \"Il tuo maniscalco\" → Collega), presto anche da Equo Scuderia." : "Dai questo codice al cliente: su Equo App va in Chat → \"Il tuo maniscalco\" → Collega.";
+		if (linkHint) linkHint.innerHTML = c.cliente_user_id ? "<strong style=\"color:var(--primary)\">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell'app." : isStruttura(c) ? "Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → \"Il tuo maniscalco\" → Collega), presto anche da Equo Scuderia." : "Fallo inquadrare al cliente con la fotocamera: si apre Equo, crea l'account e siete collegati. Oppure mandagli l'invito.";
+		const daInvitare = clienteDaInvitare(c);
 		const qrBox = document.getElementById("detail-cliente-qr");
 		qrBox.innerHTML = "";
 		if (window.QRCode) new QRCode(qrBox, {
-			text: c.codice_invito,
+			text: daInvitare ? linkInvito(c.codice_invito) : c.codice_invito,
 			width: 140,
 			height: 140
 		});
+		{
+			const b = document.getElementById("detail-cliente-invia-invito");
+			if (b) b.style.display = daInvitare ? "" : "none";
+		}
 		const qrCard = document.getElementById("detail-cliente-qr-card");
 		let boxScud = document.getElementById("detail-cliente-scuderia");
 		if (!boxScud) {
@@ -8345,7 +8451,7 @@
 		doc.setTextColor(...grigio);
 		if (pro) {
 			y += 6;
-			doc.text("Maniscalco: " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
+			doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
 		}
 		if (c.periodo_da || c.periodo_a) {
 			y += 5.5;
@@ -8466,6 +8572,11 @@
 			doc.setTextColor(...verde);
 			doc.text("Conto saldato" + (c.pagato_il ? " il " + contoData(c.pagato_il) : ""), M, y);
 		}
+		y = riquadroInvitoPdf(doc, cli, y + 6, W, M, () => {
+			piede();
+			doc.addPage();
+			return 22;
+		});
 		piede();
 		return {
 			blob: doc.output("blob"),
@@ -9351,7 +9462,7 @@
 		const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
 		if (pro) {
 			y += 6;
-			doc.text("Maniscalco: " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
+			doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
 		}
 		y += 5.5;
 		doc.text("Periodo: " + (c.pDa || c.pA ? (c.pDa ? "dal " + contoData(c.pDa) + " " : "") + (c.pA ? "al " + contoData(c.pA) : "") : "tutti gli interventi"), M, y);
@@ -9485,6 +9596,11 @@
 				y += 6;
 			}
 		}
+		y = riquadroInvitoPdf(doc, solo || luogo, y + 4, W, M, () => {
+			piede();
+			doc.addPage();
+			return 22;
+		});
 		piede();
 		return {
 			blob: doc.output("blob"),
@@ -9943,7 +10059,8 @@
 		annullaLasciaCavallo,
 		apriLasciaCavallo,
 		confermaLasciaCavallo,
-		ripristinaCavallo
+		ripristinaCavallo,
+		condividiInvitoCliente
 	});
 })();
 

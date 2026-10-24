@@ -4,6 +4,7 @@ import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { agDescrizioneTipo, agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
 import { caricaJsPdf, contoData, contoEuro } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
+import { etichettaPro, riquadroInvitoPdf } from "./108-invito-qr.js";
 /* ---------- RESOCONTO PDF (24/10/2026) ----------
    Diverso dal «conto»: riepiloga TUTTI gli interventi di un periodo (pagati e da pagare), non prende un numero e non cambia
    lo stato dei pagamenti. Dalla scheda di una struttura: tutta la struttura (diviso per proprietario) oppure un proprietario;
@@ -100,7 +101,7 @@ async function creaPdfResoconto(){
   doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...grigio);
   if(solo && c.struttura && solo.id !== c.clienteId){ y += 6; doc.text("Cavalli presso " + (luogo?.nome || ""), M, y); }
   const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
-  if(pro){ y += 6; doc.text("Maniscalco: " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y); }
+  if(pro){ y += 6; doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y); }
   y += 5.5; doc.text("Periodo: " + (c.pDa || c.pA ? (c.pDa ? "dal " + contoData(c.pDa) + " " : "") + (c.pA ? "al " + contoData(c.pA) : "") : "tutti gli interventi"), M, y);
   y += 10;
   const colData = M + 2, colCav = M + 24, colLav = M + 66, colStato = W - M - 30, colImp = W - M - 2;
@@ -156,6 +157,7 @@ async function creaPdfResoconto(){
     if(currentUser.datiPagamentoIban){ doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y); y += 6; }
     if(currentUser.datiPagamentoPaypal){ doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y); y += 6; }
   }
+  y = riquadroInvitoPdf(doc, solo || luogo, y + 4, W, M, () => { piede(); doc.addPage(); return 22; });
   piede();
   return { blob: doc.output("blob"), nome: resNomeFile() };
 }

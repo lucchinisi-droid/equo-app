@@ -92,6 +92,7 @@ async function enterApp(ruolo){
   setTimeout(invitoInstallaControlla, 4000);
   setTimeout(() => { if(typeof earlyControlla === "function") earlyControlla(); }, 1200);
   setTimeout(() => { if(typeof referralControlla === "function") referralControlla(); }, 2200);
+  setTimeout(() => { if(typeof invitoControlla === "function") invitoControlla(); }, 2600);
   document.getElementById("screen-onboarding").classList.remove("active");
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();

@@ -1,4 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { clienteDaInvitare, linkInvito } from "./108-invito-qr.js";
 import { clientiAttivi, loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { apriSchedaFerratura } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
@@ -205,11 +206,14 @@ async function openClienteDetail(id){
       ? '<strong style="color:var(--primary)">✓ Collegato a Equo</strong> — riceve i tuoi messaggi e PDF nell\'app.'
       : isStruttura(c)
         ? 'Dai questo codice alla scuderia: può collegarsi da Equo App (Chat → "Il tuo maniscalco" → Collega), presto anche da Equo Scuderia.'
-        : 'Dai questo codice al cliente: su Equo App va in Chat → "Il tuo maniscalco" → Collega.';
+        : 'Fallo inquadrare al cliente con la fotocamera: si apre Equo, crea l\'account e siete collegati. Oppure mandagli l\'invito.';
   }
+  // proprietario non ancora collegato: il QR è il link di invito (apre Equo e collega da solo); scuderie: il codice
+  const daInvitare = clienteDaInvitare(c);
   const qrBox = document.getElementById("detail-cliente-qr");
   qrBox.innerHTML = "";
-  if(window.QRCode){ new QRCode(qrBox, { text: c.codice_invito, width: 140, height: 140 }); }
+  if(window.QRCode){ new QRCode(qrBox, { text: daInvitare ? linkInvito(c.codice_invito) : c.codice_invito, width: 140, height: 140 }); }
+  { const b = document.getElementById("detail-cliente-invia-invito"); if(b) b.style.display = daInvitare ? "" : "none"; }
   // Strutture: collegamento con Equo Scuderia al posto del codice invito
   const qrCard = document.getElementById("detail-cliente-qr-card");
   let boxScud = document.getElementById("detail-cliente-scuderia");
