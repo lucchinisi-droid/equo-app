@@ -149,7 +149,7 @@ function agTile(d){
   const riposo = d.k === 6 && !d.ev.length;
   return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
       <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? '<span class="ag-tile-oggi">oggi</span>' : ""}</span>
-      ${sc ? `<span class="ag-scad" title="${sc} ${sc === 1 ? "scadenza" : "scadenze"}">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
+      ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
       ${riposo ? '<span class="ag-riposo">Riposo</span>' : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
     </button>`;
@@ -165,9 +165,8 @@ function agPannello(d){
     gruppi.get(l.key).righe.push(riga(x, di));
   };
   agOrdinaGiro(d.ev).forEach(e => metti(e, false, agRigaEvento));
-  const scad = agScadGiorno(d);
-  scad.forEach(sc => metti(sc, true, agRigaScadenza));
-  const cavalli = new Set([...d.ev, ...scad].map(x => x.cavallo_cliente_id || x.horse_id || ("r:" + x.id))).size;
+  const scad = agScadGiorno(d);   // 27/10/2026: le scadenze non sono più righe del giorno, si aprono dal piccolo «N ⚠»
+  const cavalli = new Set([...d.ev].map(x => x.cavallo_cliente_id || x.horse_id || ("r:" + x.id))).size;
   const nCli = gruppi.size;
   const nomeEsteso = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"][d.k];
   const corpo = [...gruppi.entries()].map(([k, gr]) => `
@@ -180,6 +179,7 @@ function agPannello(d){
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
         <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
+      ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
       ${d.ev.length > 1 ? '<div class="ag-sugger">Tieni premuto ⋮⋮ e trascina per cambiare l\'ordine del giro.</div>' : ""}
       <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${d.iso}')">+ Aggiungi in questo giorno</button>
     </div>`;

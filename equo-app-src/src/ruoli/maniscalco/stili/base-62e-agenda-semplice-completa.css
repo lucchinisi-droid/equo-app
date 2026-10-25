@@ -66,3 +66,9 @@
 .ag-invito-t{flex:1;min-width:0}
 .ag-invito-t b{display:block;font-size:13.5px}
 .ag-invito-t span{display:block;font-size:12px;color:var(--muted)}
+/* 27/10/2026: il «N ⚠» si tocca e apre «Da fissare»; nel giorno aperto solo un rimando */
+:where(body:not(.pl-owner)) .ag-tile .ag-scad{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ag-tile .ag-scad:active{transform:scale(.94)}
+.ag-dafissare{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:8px;margin-top:8px;padding:10px 12px;border-radius:12px;border:1.5px dashed var(--border);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer}
+.ag-dafissare b{margin-left:auto;color:var(--accent);font-weight:800}
+#modal-da-fissare .ag-gruppo{background:var(--bg)}

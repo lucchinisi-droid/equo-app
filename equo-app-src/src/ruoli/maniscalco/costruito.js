@@ -2862,18 +2862,6 @@
         <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
       </div>`;
 	}
-	function agRigaScadenza(sc, di) {
-		const cav = agNomeCavallo(sc);
-		return `
-      <div class="ag-ev promemoria">
-        <div class="ag-ev-time" style="font-size:11px;color:var(--muted)">scad.</div>
-        <div class="ag-ev-main" onclick="fissaDaScadenza('${sc.id}')">
-          <div class="ag-ev-title">${cav ? escapeHtml(cav) : "<span style=\"color:var(--muted);font-weight:500\">Cavallo non indicato</span>"}</div>
-          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}Da ripetere: ${escapeHtml(TIPO_FERRATURA_LABELS[sc.tipo_ferratura] || sc.tipo_ferratura)} (ultimo ${formatDate(sc.data_intervento)})</div>
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="fissaDaScadenza('${sc.id}')">Fissa</button>
-      </div>`;
-	}
 	function agendaCompleta() {
 		try {
 			return localStorage.getItem("equo-agenda-vista") === "completa";
@@ -2888,7 +2876,7 @@
 		const riposo = d.k === 6 && !d.ev.length;
 		return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
       <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
-      ${sc ? `<span class="ag-scad" title="${sc} ${sc === 1 ? "scadenza" : "scadenze"}">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
+      ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
       ${riposo ? "<span class=\"ag-riposo\">Riposo</span>" : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
     </button>`;
@@ -2910,8 +2898,7 @@
 		};
 		agOrdinaGiro(d.ev).forEach((e) => metti(e, false, agRigaEvento));
 		const scad = agScadGiorno(d);
-		scad.forEach((sc) => metti(sc, true, agRigaScadenza));
-		const cavalli = new Set([...d.ev, ...scad].map((x) => x.cavallo_cliente_id || x.horse_id || "r:" + x.id)).size;
+		const cavalli = new Set([...d.ev].map((x) => x.cavallo_cliente_id || x.horse_id || "r:" + x.id)).size;
 		const nCli = gruppi.size;
 		const nomeEsteso = [
 			"Lunedì",
@@ -2932,6 +2919,7 @@
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
         <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
+      ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
       ${d.ev.length > 1 ? "<div class=\"ag-sugger\">Tieni premuto ⋮⋮ e trascina per cambiare l'ordine del giro.</div>" : ""}
       <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${d.iso}')">+ Aggiungi in questo giorno</button>
     </div>`;
@@ -10692,11 +10680,12 @@
 		if (!sc) return;
 		openInterventoModal(sc.cliente_mascalcia_id, null, agPresetScadenza(sc, agDataProposta(sc.prossima_scadenza)));
 	}
-	function agFissaTutti(clienteId) {
-		const righe = agDati.prog.filter((x) => x.cliente_mascalcia_id === clienteId);
+	function agFissaTutti(clienteId, daGiorno) {
+		const righe = daGiorno ? agScadDelGiorno(daGiorno).filter((x) => x.cliente_mascalcia_id === clienteId) : agDati.prog.filter((x) => x.cliente_mascalcia_id === clienteId);
 		if (!righe.length) return;
+		if (daGiorno) closeModal("modal-da-fissare");
 		const prima = righe.slice().sort((a, b) => a.prossima_scadenza.localeCompare(b.prossima_scadenza))[0];
-		const preset = agPresetScadenza(prima, agDataProposta(prima.prossima_scadenza));
+		const preset = agPresetScadenza(prima, daGiorno || agDataProposta(prima.prossima_scadenza));
 		if (isStrutturaCollegata(clienteId)) return apriPropostaStruttura(clienteId, {
 			...preset,
 			cavalli: righe.map((r) => r.cavallo_cliente_id).filter(Boolean)
@@ -10705,6 +10694,25 @@
 			...preset,
 			cavalli: righe.map((r) => r.cavallo_cliente_id ? "m:" + r.cavallo_cliente_id : r.horse_id ? "h:" + r.horse_id : null).filter(Boolean)
 		});
+	}
+	function agScadDelGiorno(iso) {
+		const d = (typeof agGiorniDati !== "undefined" ? agGiorniDati : []).find((x) => x.iso === iso);
+		return d ? d.sc : [];
+	}
+	function apriDaFissare(iso) {
+		const lista = agScadDelGiorno(iso);
+		if (!lista.length) return;
+		const [y, m, g] = iso.split("-").map(Number);
+		document.getElementById("df-tit").textContent = `Da fissare · ${formatDataBreve(iso)}`;
+		const oggi = oggiIso();
+		document.getElementById("df-lista").innerHTML = perCliente(lista).map((gr) => `<div class="ag-gruppo">
+      <div class="ag-gruppo-t"><div><b>${escapeHtml(gr.nome)}</b><small>${gr.righe.length} ${gr.righe.length === 1 ? "cavallo" : "cavalli"}</small></div>${gr.righe.length > 1 && gr.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="agFissaTutti('${gr.id}', '${iso}')">Fissa tutti</button>` : ""}</div>
+      ${gr.righe.map((sc) => {
+			const gg = giorniTra(oggi, sc.prossima_scadenza);
+			return `<div class="ag-riga"><div class="ag-riga-c"><b>${escapeHtml(nomeCav(sc))}</b><small>${escapeHtml(tipoLav(sc))} · ultimo ${formatDataBreve(sc.data_intervento)}${sc.prossima_scadenza !== iso ? " · scade " + formatDataBreve(sc.prossima_scadenza) : ""}</small></div>${gg < 0 ? `<span class="ag-pill r">scaduta</span>` : ""}<button type="button" class="btn btn-primary btn-sm" onclick="closeModal('modal-da-fissare');fissaDaScadenza('${sc.id}')">Fissa</button></div>`;
+		}).join("")}
+    </div>`).join("");
+		openModal("modal-da-fissare");
 	}
 	function agGruppiNonFatti() {
 		const m = /* @__PURE__ */ new Map();
@@ -11673,6 +11681,7 @@
 		ecvSpec,
 		ecvTogliElemento,
 		ecvTogliVoce,
+		apriDaFissare,
 		agAggiornaSchede: agAggiornaSchede$1,
 		agApplicaVistaAgenda,
 		agDsApri,

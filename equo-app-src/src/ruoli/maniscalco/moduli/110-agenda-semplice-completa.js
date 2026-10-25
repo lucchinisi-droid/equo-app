@@ -130,13 +130,33 @@ function agFissaScadenza(id){
   if(!sc) return;
   openInterventoModal(sc.cliente_mascalcia_id, null, agPresetScadenza(sc, agDataProposta(sc.prossima_scadenza)));
 }
-function agFissaTutti(clienteId){
-  const righe = agDati.prog.filter(x => x.cliente_mascalcia_id === clienteId);
+function agFissaTutti(clienteId, daGiorno){
+  const righe = daGiorno ? agScadDelGiorno(daGiorno).filter(x => x.cliente_mascalcia_id === clienteId) : agDati.prog.filter(x => x.cliente_mascalcia_id === clienteId);
   if(!righe.length) return;
+  if(daGiorno) closeModal("modal-da-fissare");
   const prima = righe.slice().sort((a, b) => a.prossima_scadenza.localeCompare(b.prossima_scadenza))[0];
-  const preset = agPresetScadenza(prima, agDataProposta(prima.prossima_scadenza));
+  const preset = agPresetScadenza(prima, daGiorno || agDataProposta(prima.prossima_scadenza));
   if(isStrutturaCollegata(clienteId)) return apriPropostaStruttura(clienteId, { ...preset, cavalli: righe.map(r => r.cavallo_cliente_id).filter(Boolean) });
   openInterventoModal(clienteId, null, { ...preset, cavalli: righe.map(r => r.cavallo_cliente_id ? "m:" + r.cavallo_cliente_id : r.horse_id ? "h:" + r.horse_id : null).filter(Boolean) });
+}
+
+/* DA FISSARE DEL GIORNO (27/10/2026): si apre toccando il piccolo «N ⚠» della casella o «Vedi» nel giorno aperto */
+function agScadDelGiorno(iso){
+  const d = (typeof agGiorniDati !== "undefined" ? agGiorniDati : []).find(x => x.iso === iso);
+  return d ? d.sc : [];
+}
+function apriDaFissare(iso){
+  const lista = agScadDelGiorno(iso);
+  if(!lista.length) return;
+  const [y, m, g] = iso.split("-").map(Number);
+  document.getElementById("df-tit").textContent = `Da fissare · ${formatDataBreve(iso)}`;
+  const oggi = oggiIso();
+  document.getElementById("df-lista").innerHTML = perCliente(lista).map(gr => `<div class="ag-gruppo">
+      <div class="ag-gruppo-t"><div><b>${escapeHtml(gr.nome)}</b><small>${gr.righe.length} ${gr.righe.length === 1 ? "cavallo" : "cavalli"}</small></div>${gr.righe.length > 1 && gr.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="agFissaTutti('${gr.id}', '${iso}')">Fissa tutti</button>` : ""}</div>
+      ${gr.righe.map(sc => { const gg = giorniTra(oggi, sc.prossima_scadenza);
+        return `<div class="ag-riga"><div class="ag-riga-c"><b>${escapeHtml(nomeCav(sc))}</b><small>${escapeHtml(tipoLav(sc))} · ultimo ${formatDataBreve(sc.data_intervento)}${sc.prossima_scadenza !== iso ? " · scade " + formatDataBreve(sc.prossima_scadenza) : ""}</small></div>${gg < 0 ? `<span class="ag-pill r">scaduta</span>` : ""}<button type="button" class="btn btn-primary btn-sm" onclick="closeModal('modal-da-fissare');fissaDaScadenza('${sc.id}')">Fissa</button></div>`; }).join("")}
+    </div>`).join("");
+  openModal("modal-da-fissare");
 }
 
 /* NON FATTI */
@@ -222,4 +242,4 @@ async function condividiInvitoAgenda(){
   if(typeof shareCodicePersonale === "function") shareCodicePersonale();
 }
 
-export { agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda };
+export { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda };
