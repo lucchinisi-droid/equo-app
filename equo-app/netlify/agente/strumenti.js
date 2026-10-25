@@ -107,6 +107,16 @@ const STRUMENTI_GESTIONE = [
       destinazione: { type: "string", description: "Nome del cliente, della struttura o del cavallo." } }, required: ["destinazione"] } },
   { name: "proponi_segna_saldato", description: "Propone di segnare come saldati uno o più interventi (id da incassi).", input_schema: { type: "object", properties: {
       ids: { type: "array", items: { type: "string" }, description: "Id degli interventi." } }, required: ["ids"] } },
+  { name: "proponi_promemoria_personale", description: "Promemoria PER IL MANISCALCO STESSO («ricordami di…», «domani devo…»): all'ora scelta gli scrivi qui in chat (messaggio importante) e gli arriva la notifica. L'app mostra una scheda da confermare. Se si riferisce a un cliente indicalo; con azione = conto il promemoria avrà il tasto «Fai il conto» di quel cliente.", input_schema: { type: "object", properties: {
+      testo: { type: "string", description: "Cosa ricordare, breve e chiaro (max 300 caratteri), es. «Prendere i rock and roll», «Mandare il conto a Centro Ippico Levante»." },
+      data: { type: "string", description: "YYYY-MM-DD" },
+      ora: { type: "string", description: "HH:MM. Se l'utente dice «mattina» usa 08:00, «pomeriggio» 15:00, «sera» 19:00; se non dice nulla 08:00." },
+      cliente: { type: "string", description: "Nome del cliente o della scuderia, se il promemoria riguarda un cliente (facoltativo)." },
+      azione: { type: "string", enum: ["nessuna", "conto", "chat", "naviga"], description: "Tasto da mettere nel promemoria: conto = «Fai il conto» del cliente, chat = «Scrivi al cliente», naviga = «Naviga» verso il cliente." } },
+    required: ["testo", "data"] } },
+  { name: "i_miei_promemoria", description: "Promemoria personali del maniscalco ancora da fare (con id, testo, data e ora, cliente) e quelli fatti negli ultimi 7 giorni.", input_schema: { type: "object", properties: {} } },
+  { name: "proponi_conto", description: "Prepara il conto di un cliente o di una scuderia: dice quanti lavori fatti e non pagati sono ancora fuori da un conto (con totale) e quali conti sono già stati fatti e non ancora pagati. L'app mostra una scheda con i tasti «Fai il conto» (si apre già sul cliente, dove si possono togliere i cavalli) e «Apri il conto» per quelli già fatti.", input_schema: { type: "object", properties: {
+      cliente: { type: "string", description: "Nome del cliente o della scuderia." } }, required: ["cliente"] } },
 ];
 
 const STRUMENTI_HAMMER = [

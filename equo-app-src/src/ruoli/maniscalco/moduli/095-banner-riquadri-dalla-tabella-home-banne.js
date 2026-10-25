@@ -94,6 +94,7 @@ function hmBannerAvanti(){
 function renderHomeMan(){
   if(!document.getElementById("hm")) return;
   caricaConfermePro(false, "hm-conferme");
+  if(typeof pmRenderHome === "function") pmRenderHome();
   document.getElementById("hm-saluto").textContent = testoSaluto();
   document.getElementById("hm-data").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   // scadenze: in ritardo + entro 7 giorni

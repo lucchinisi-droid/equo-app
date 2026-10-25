@@ -17,6 +17,10 @@
 [functions."invia-annunci"]
   schedule = "*/15 * * * *"
 
+# Promemoria personali (Hammer): all'ora giusta messaggio importante in chat + push (o email se la push non parte), ogni 5 minuti.
+[functions."invia-promemoria"]
+  schedule = "*/5 * * * *"
+
 # Pegasus: riepilogo settimanale il lunedì, ogni ora 6-9 UTC (8-11 in estate, 7-10 in inverno).
 # Più giri = più utenti elaborati senza superare i 30 s delle funzioni programmate.
 [functions."riepilogo-settimanale"]

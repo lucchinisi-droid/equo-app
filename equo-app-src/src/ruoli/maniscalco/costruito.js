@@ -1990,7 +1990,7 @@
 		try {
 			await renderProDeadlines();
 			await renderIncassi$1();
-			if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 		} catch (e) {}
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/097-versione-semplice-completa-dell-app-mani.js
@@ -2371,6 +2371,7 @@
 	function renderHomeMan() {
 		if (!document.getElementById("hm")) return;
 		caricaConfermePro(false, "hm-conferme");
+		if (typeof pmRenderHome === "function") pmRenderHome();
 		document.getElementById("hm-saluto").textContent = testoSaluto();
 		document.getElementById("hm-data").textContent = (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", {
 			weekday: "long",
@@ -3141,6 +3142,772 @@
 		} catch (e) {}
 		renderIncassiCompleta();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/061-pdf-del-conto-dai-dati-salvati-snapshot.js
+	async function creaPdfConto(c) {
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const W = 210, M = 18, verde = [
+			20,
+			49,
+			42
+		], oro = [
+			201,
+			143,
+			46
+		], grigio = [
+			95,
+			111,
+			103
+		];
+		const cli = clienteDiId(c.cliente_mascalcia_id);
+		const piede = () => {
+			doc.setDrawColor(227, 221, 204);
+			doc.line(M, 280, 192, 280);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.5);
+			doc.setTextColor(...grigio);
+			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
+		};
+		doc.setFillColor(...verde);
+		doc.rect(0, 0, W, 32, "F");
+		doc.setTextColor(255, 255, 255);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(22);
+		doc.text("Equo", M, 20);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.text("Prenditi cura del tuo cavallo", M, 26);
+		doc.text(contoData(c.creato_il), 192, 20, { align: "right" });
+		doc.setFillColor(...oro);
+		doc.rect(0, 32, W, 1.5, "F");
+		let y = 48;
+		doc.setTextColor(...verde);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(17);
+		doc.text("Resoconto lavori", M, y);
+		doc.setFontSize(12);
+		doc.setTextColor(...oro);
+		doc.text(contoCodice(c), 192, y, { align: "right" });
+		y += 9;
+		doc.setFontSize(15);
+		doc.setTextColor(...verde);
+		doc.text(cli?.nome || "", M, y);
+		const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10.5);
+		doc.setTextColor(...grigio);
+		if (pro) {
+			y += 6;
+			doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
+		}
+		if (c.periodo_da || c.periodo_a) {
+			y += 5.5;
+			doc.text("Periodo: " + (c.periodo_da ? "dal " + contoData(c.periodo_da) + " " : "") + (c.periodo_a ? "al " + contoData(c.periodo_a) : ""), M, y);
+		}
+		y += 10;
+		const colData = 20, colCav = 44, colLav = 96, colImp = 190;
+		const testa = () => {
+			doc.setFillColor(...verde);
+			doc.rect(M, y - 5, 174, 8, "F");
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(9.5);
+			doc.setTextColor(255, 255, 255);
+			doc.text("DATA", colData, y);
+			doc.text("CAVALLO", colCav, y);
+			doc.text("LAVORO", colLav, y);
+			doc.text("IMPORTO", colImp, y, { align: "right" });
+			y += 8;
+		};
+		testa();
+		const nuovaPagina = () => {
+			piede();
+			doc.addPage();
+			y = 22;
+			testa();
+		};
+		const gruppi = {};
+		(c.righe || []).forEach((r) => {
+			(gruppi[r.proprietario_nome || "—"] = gruppi[r.proprietario_nome || "—"] || []).push(r);
+		});
+		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
+		const conGruppi = c.modo === "unico" && nomi.length > 1 || nomi.length > 1;
+		let k = 0;
+		nomi.forEach((n) => {
+			const lista = gruppi[n].slice().sort((a, b) => String(a.data_intervento).localeCompare(String(b.data_intervento)));
+			if (conGruppi) {
+				if (y > 262) nuovaPagina();
+				doc.setFont("helvetica", "bold");
+				doc.setFontSize(10.5);
+				doc.setTextColor(...oro);
+				doc.text(n, colData, y);
+				y += 6;
+			}
+			lista.forEach((r) => {
+				const lav = doc.splitTextToSize(String(r.descrizione || ""), 70);
+				const h = Math.max(7.5, lav.length * 4.8 + 2.6);
+				if (y + h > 268) nuovaPagina();
+				if (k++ % 2 === 0) {
+					doc.setFillColor(248, 246, 240);
+					doc.rect(M, y - 4.6, 174, h, "F");
+				}
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(10);
+				doc.setTextColor(...grigio);
+				doc.text(contoData(r.data_intervento), colData, y);
+				doc.setFont("helvetica", "bold");
+				doc.setTextColor(...verde);
+				doc.text(doc.splitTextToSize(String(r.cavallo_nome || ""), 49), colCav, y);
+				doc.setFont("helvetica", "normal");
+				doc.setTextColor(...grigio);
+				doc.text(lav, colLav, y);
+				doc.setFont("helvetica", "bold");
+				doc.setTextColor(...verde);
+				doc.text(contoEuro(r.importo), colImp, y, { align: "right" });
+				y += h;
+			});
+			if (conGruppi) {
+				const sub = gruppi[n].reduce((s, r) => s + Number(r.importo), 0);
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(9.5);
+				doc.setTextColor(...grigio);
+				doc.text("Subtotale " + n, 136, y, { align: "left" });
+				doc.setFont("helvetica", "bold");
+				doc.text(contoEuro(sub), colImp, y, { align: "right" });
+				y += 8;
+			}
+		});
+		if (y > 246) nuovaPagina();
+		y += 4;
+		doc.setDrawColor(...oro);
+		doc.setLineWidth(.6);
+		doc.line(M, y, 192, y);
+		y += 9;
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(12);
+		doc.setTextColor(...grigio);
+		doc.text(contoLavori(c.n_lavori), M, y);
+		doc.setFontSize(17);
+		doc.setTextColor(...verde);
+		doc.text("TOTALE  " + contoEuro(c.totale), 192, y, { align: "right" });
+		y += 12;
+		if (c.stato !== "pagato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
+			if (y > 250) nuovaPagina();
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...verde);
+			doc.text("Dati per il pagamento", M, y);
+			y += 7;
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...grigio);
+			if (currentUser.datiPagamentoNome) {
+				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoIban) {
+				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoPaypal) {
+				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
+				y += 6;
+			}
+			doc.text("Causale: Conto " + contoCodice(c), M, y);
+		} else if (c.stato === "pagato") {
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...verde);
+			doc.text("Conto saldato" + (c.pagato_il ? " il " + contoData(c.pagato_il) : ""), M, y);
+		}
+		y = riquadroInvitoPdf(doc, cli, y + 6, W, M, () => {
+			piede();
+			doc.addPage();
+			return 22;
+		});
+		piede();
+		return {
+			blob: doc.output("blob"),
+			nome: contoNomeFile(c)
+		};
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/060-foglio-di-invio-gestione-del-conto.js
+	async function apriInvioConto(id) {
+		const c = await ContoDB.completo(id);
+		if (!c) {
+			showToast("Conto non trovato");
+			return;
+		}
+		contoAperto = c;
+		const cli = clienteDiId(c.cliente_mascalcia_id);
+		const stato = c.stato === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : c.stato === "annullato" ? "<span class=\"badge\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
+		document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
+		document.getElementById("conto-invio-corpo").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div></div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
+    <div class="ag-azioni" style="margin-top:14px">
+      ${c.stato !== "annullato" ? `
+      <button class="btn btn-primary" onclick="contoInviaChat()"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat Equo</button>
+      <button class="btn btn-outline" onclick="contoCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Email, WhatsApp, altro…</button>
+      <button class="btn btn-outline" onclick="contoScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>` : ""}
+      ${c.stato === "da_incassare" ? `
+      <button class="btn btn-outline" onclick="contoSegnaPagato()"><span class="fa-icon"><i class="fa-solid fa-check"></i></span> Segna pagato</button>
+      <button class="btn btn-outline" style="color:var(--red)" onclick="contoAnnulla()"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla il conto</button>` : ""}
+    </div>`;
+		openModal("modal-conto-invio");
+	}
+	async function contoInviaChat() {
+		const c = contoAperto;
+		if (!c) return;
+		closeModal("modal-conto-invio");
+		await openChatThread(c.cliente_mascalcia_id);
+		document.getElementById("mchat-input").value = `Conto ${contoCodice(c)}: ${c.n_lavori} lavori · totale ${contoEuro(c.totale)}`;
+		chatAllegatoEvento = { __conto: c };
+		document.getElementById("mchat-allegato-nome").textContent = contoNomeFile(c);
+		document.getElementById("mchat-allegato").classList.add("active");
+	}
+	function contoNomeFile(c) {
+		const n = String(clienteDiId(c.cliente_mascalcia_id)?.nome || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+		return [
+			"Equo",
+			"Conto",
+			contoCodice(c),
+			n
+		].filter(Boolean).join("_") + ".pdf";
+	}
+	async function contoCondividi() {
+		const c = contoAperto;
+		if (!c) return;
+		showToast("Creo il PDF…");
+		try {
+			const { blob, nome } = await creaPdfConto(c);
+			const file = new File([blob], nome, { type: "application/pdf" });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
+				await navigator.share({
+					files: [file],
+					title: nome,
+					text: `Conto ${contoCodice(c)} · totale ${contoEuro(c.totale)}`
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			contoScaricaBlob(blob, nome);
+			showToast("Il PDF è stato scaricato: allegalo alla tua email o a WhatsApp.");
+		} catch (err) {
+			console.error("contoCondividi:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	function contoScaricaBlob(blob, nome) {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = nome;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 3e4);
+	}
+	async function contoScarica() {
+		const c = contoAperto;
+		if (!c) return;
+		try {
+			const { blob, nome } = await creaPdfConto(c);
+			contoScaricaBlob(blob, nome);
+		} catch (err) {
+			console.error("contoScarica:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	async function contoSegnaPagato() {
+		const c = contoAperto;
+		if (!c) return;
+		if (!await chiediSiNo("Conto pagato?", `${c.n_lavori === 1 ? "Il lavoro" : "Tutti i " + c.n_lavori + " lavori"} del conto ${contoCodice(c)} (${contoEuro(c.totale)}) ${c.n_lavori === 1 ? "risulterà saldato" : "risulteranno saldati"}.`)) return;
+		const { error } = await ContoDB.pagato(c.id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		closeModal("modal-conto-invio");
+		showToast("Conto pagato: lavori saldati");
+		if (currentClienteId) {
+			caricaContiCliente(currentClienteId);
+			loadClienteInterventi(currentClienteId);
+		}
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	async function contoAnnulla() {
+		const c = contoAperto;
+		if (!c) return;
+		if (!await chiediSiNo("Annullare il conto?", `Il conto ${contoCodice(c)} resta nell'elenco come «annullato» e i suoi lavori tornano da saldare: potrai rifarlo.`)) return;
+		const { error } = await ContoDB.annulla(c.id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		closeModal("modal-conto-invio");
+		showToast("Conto annullato");
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/059-foglio-fai-il-conto.js
+	async function apriNuovoConto(clienteId) {
+		if (incassiNascosti()) {
+			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il conto.");
+			return;
+		}
+		if (!clienteDiId(clienteId)) await loadClientiMascalcia().catch(() => {});
+		const cli = clienteDiId(clienteId);
+		contoCtx = {
+			clienteId,
+			scuderia: eLuogoScuderia(cli),
+			modo: "unico",
+			periodo: "tutto",
+			da: "",
+			a: "",
+			tutti: [],
+			lavori: [],
+			sel: /* @__PURE__ */ new Set()
+		};
+		document.getElementById("conto-nuovo-titolo").textContent = "Conto · " + (cli?.nome || "cliente");
+		document.getElementById("conto-nuovo-corpo").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico i lavori…</div>";
+		openModal("modal-conto-nuovo");
+		await caricaCavalliMiei().catch(() => {});
+		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(clienteId), ContoDB.aperti(clienteId)]);
+		contoApplicaPeriodo();
+	}
+	function contoApriEsistente(id) {
+		closeModal("modal-conto-nuovo");
+		apriInvioConto(id);
+	}
+	async function contoAnnullaERifai(id) {
+		const c = (contoCtx?.aperti || []).find((x) => x.id === id);
+		if (!c) return;
+		if (!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
+		const { error } = await ContoDB.annulla(id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		showToast("Conto " + contoCodice(c) + " annullato");
+		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(contoCtx.clienteId), ContoDB.aperti(contoCtx.clienteId)]);
+		contoApplicaPeriodo();
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+	}
+	function contoApplicaPeriodo() {
+		const c = contoCtx;
+		if (!c) return;
+		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale;
+		let da = "", a = "";
+		if (c.periodo === "mese") {
+			da = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 1));
+			a = iso(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0));
+		} else if (c.periodo === "scorso") {
+			da = iso(new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1));
+			a = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 0));
+		} else if (c.periodo === "date") {
+			da = c.da;
+			a = c.a;
+		}
+		c.pDa = da;
+		c.pA = a;
+		c.lavori = c.tutti.filter((i) => (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a));
+		c.sel = new Set(c.lavori.map((i) => i.id));
+		renderNuovoConto();
+	}
+	function contoSetPeriodo(p) {
+		contoCtx.periodo = p;
+		if (p !== "date") contoApplicaPeriodo();
+		else renderNuovoConto();
+	}
+	function contoSetDate() {
+		contoCtx.da = document.getElementById("conto-da").value;
+		contoCtx.a = document.getElementById("conto-a").value;
+		contoApplicaPeriodo();
+	}
+	function contoSetModo(m) {
+		contoCtx.modo = m;
+		renderNuovoConto();
+	}
+	function contoToggleGruppo(nome) {
+		const c = contoCtx;
+		if (!c) return;
+		const ids = c.lavori.filter((i) => contoNomeProprietario(i) === nome).map((i) => i.id);
+		const tutti = ids.every((id) => c.sel.has(id));
+		ids.forEach((id) => tutti ? c.sel.delete(id) : c.sel.add(id));
+		renderNuovoConto();
+	}
+	function contoToggle(id) {
+		contoCtx.sel.has(id) ? contoCtx.sel.delete(id) : contoCtx.sel.add(id);
+		renderNuovoConto();
+	}
+	function contoNomeProprietario(i) {
+		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
+	}
+	function contoNomeCavallo(i) {
+		return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo";
+	}
+	function renderNuovoConto() {
+		const c = contoCtx;
+		if (!c) return;
+		const chip = (k, t) => `<button type="button" class="btn ${c.periodo === k ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetPeriodo('${k}')">${t}</button>`;
+		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
+		const tot = scelti.reduce((s, i) => s + Number(i.importo), 0);
+		const gruppi = {};
+		c.lavori.forEach((i) => {
+			(gruppi[contoNomeProprietario(i)] = gruppi[contoNomeProprietario(i)] || []).push(i);
+		});
+		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
+		const nPag = new Set(scelti.map((i) => i.cliente_mascalcia_id)).size;
+		const modoHtml = c.scuderia ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CHI PAGA</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="btn ${c.modo === "unico" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('unico')">Paga la scuderia · conto unico</button>
+      <button type="button" class="btn ${c.modo === "per_proprietario" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('per_proprietario')">Un conto per proprietario</button>
+    </div>` : "";
+		document.getElementById("conto-nuovo-corpo").innerHTML = `
+    ${modoHtml}
+    <div class="clienti-sez-title" style="margin:14px 0 6px">PERIODO</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${chip("tutto", "Non ancora saldato")}${chip("mese", "Questo mese")}${chip("scorso", "Mese scorso")}${chip("date", "Scegli le date")}</div>
+    ${c.periodo === "date" ? `<div style="display:flex;gap:8px;margin-top:8px"><input class="input" type="date" id="conto-da" value="${c.da}" onchange="contoSetDate()"><input class="input" type="date" id="conto-a" value="${c.a}" onchange="contoSetDate()"></div>` : ""}
+    <div class="clienti-sez-title" style="margin:14px 0 6px">LAVORI INCLUSI (${scelti.length} di ${c.lavori.length})</div>
+    ${c.lavori.length ? nomi.map((n) => `
+      ${c.scuderia || nomi.length > 1 ? `<label style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:13px;font-weight:700;color:var(--accent)">
+        <input type="checkbox" data-gruppo="${escapeHtml(n)}" ${gruppi[n].every((i) => c.sel.has(i.id)) ? "checked" : ""} onchange="contoToggleGruppo(this.dataset.gruppo)">
+        <span style="flex:1">${escapeHtml(n)}</span><span class="muted" style="font-size:12px;font-weight:600">${gruppi[n].filter((i) => c.sel.has(i.id)).length}/${gruppi[n].length}</span></label>` : ""}
+      ${gruppi[n].map((i) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)">
+        <input type="checkbox" ${c.sel.has(i.id) ? "checked" : ""} onchange="contoToggle('${i.id}')">
+        <span style="flex:1;min-width:0"><b>${escapeHtml(contoNomeCavallo(i))}</b><span class="muted" style="font-size:12px;display:block">${contoData(i.data_intervento)} · ${escapeHtml(agDescrizioneTipo(i))}</span></span>
+        <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("") : (c.aperti || []).length ? `<div class="conto-gia">
+          <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
+          ${c.aperti.map((k) => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
+            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
+        </div>` : "<div class=\"muted\" style=\"font-size:13px;padding:8px 0\">Nessun lavoro da saldare in questo periodo.</div>"}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
+    ${c.scuderia && c.modo === "per_proprietario" && nPag > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Verranno creati ${nPag} conti, uno per ciascun proprietario.</div>` : ""}
+    <button class="btn btn-primary" id="conto-crea-btn" style="width:100%;margin-top:14px" ${scelti.length ? "" : "disabled"} onclick="creaContoDaScelte()">Crea il PDF</button>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. Non è una fattura.</div>`;
+		document.querySelectorAll("#conto-nuovo-corpo input[data-gruppo]").forEach((cb) => {
+			const l = gruppi[cb.dataset.gruppo] || [], n = l.filter((i) => c.sel.has(i.id)).length;
+			cb.indeterminate = n > 0 && n < l.length;
+		});
+	}
+	async function creaContoDaScelte() {
+		const c = contoCtx;
+		if (!c) return;
+		const btn = document.getElementById("conto-crea-btn");
+		btn.disabled = true;
+		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
+		const riga = (i) => ({
+			intervento_id: i.id,
+			cavallo_nome: contoNomeCavallo(i),
+			proprietario_nome: contoNomeProprietario(i),
+			descrizione: agDescrizioneTipo(i)
+		});
+		const per = c.scuderia && c.modo === "per_proprietario";
+		const mappa = /* @__PURE__ */ new Map();
+		scelti.forEach((i) => {
+			const k = per ? i.cliente_mascalcia_id : c.clienteId;
+			(mappa.get(k) || mappa.set(k, []).get(k)).push(i);
+		});
+		const creati = [];
+		for (const [clienteId, lav] of mappa) {
+			const { data, error } = await ContoDB.crea(clienteId, per ? "per_proprietario" : "unico", c.pDa || null, c.pA || null, lav.map(riga));
+			if (error) {
+				showToast("Conto non creato: " + (error.message || "riprova"));
+				btn.disabled = false;
+				break;
+			}
+			creati.push(data);
+		}
+		if (!creati.length) return;
+		closeModal("modal-conto-nuovo");
+		contoCtx = null;
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (creati.length === 1) return apriInvioConto(creati[0].id);
+		showToast(creati.length + " conti creati: li trovi nella scheda di ogni proprietario");
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/111-promemoria-personali.js
+	var PM_AZIONI = {
+		conto: "Fai il conto",
+		chat: "Scrivi al cliente",
+		naviga: "Naviga"
+	};
+	var pmCache = {};
+	var pmInModifica = null;
+	var pmOra = (q) => new Date(q).toLocaleTimeString("it-IT", {
+		hour: "2-digit",
+		minute: "2-digit"
+	});
+	var pmGiorno = (q) => isoLocale(new Date(q));
+	var pmNomeCliente = (p) => p?.clienti_mascalcia?.nome || clientiMascalcia?.find?.((c) => c.id === p?.cliente_mascalcia_id)?.nome || "";
+	var PmDB = {
+		async periodo(daIso, aIso) {
+			if (DEMO_MODE) return (demoState.promemoria || []).filter((p) => p.stato !== "annullato" && pmGiorno(p.quando) >= daIso && pmGiorno(p.quando) <= aIso);
+			const da = (/* @__PURE__ */ new Date(daIso + "T00:00:00")).toISOString(), a = (/* @__PURE__ */ new Date(aIso + "T23:59:59")).toISOString();
+			const { data, error } = await sb.from("promemoria_personali").select("*, clienti_mascalcia(nome)").eq("user_id", currentUser.id).neq("stato", "annullato").gte("quando", da).lte("quando", a).order("quando", { ascending: true }).limit(200);
+			if (error) {
+				if (!/does not exist|schema cache/i.test(error.message || "")) console.warn("promemoria:", error.message);
+				return [];
+			}
+			return data || [];
+		},
+		async daFareFinoAOggi() {
+			if (DEMO_MODE) return (demoState.promemoria || []).filter((p) => p.stato === "attivo" && pmGiorno(p.quando) <= isoLocale(/* @__PURE__ */ new Date()));
+			const fine = (/* @__PURE__ */ new Date(isoLocale(/* @__PURE__ */ new Date()) + "T23:59:59")).toISOString();
+			const { data, error } = await sb.from("promemoria_personali").select("*, clienti_mascalcia(nome)").eq("user_id", currentUser.id).eq("stato", "attivo").lte("quando", fine).order("quando", { ascending: true }).limit(30);
+			if (error) return [];
+			return data || [];
+		},
+		async uno(id) {
+			if (pmCache[id]) return pmCache[id];
+			if (DEMO_MODE) return (demoState.promemoria || []).find((p) => p.id === id) || null;
+			const { data } = await sb.from("promemoria_personali").select("*, clienti_mascalcia(nome)").eq("id", id).maybeSingle();
+			if (data) pmCache[id] = data;
+			return data || null;
+		},
+		async salva(id, campi) {
+			if (DEMO_MODE) {
+				demoState.promemoria = demoState.promemoria || [];
+				if (id) {
+					Object.assign(demoState.promemoria.find((p) => p.id === id) || {}, campi);
+					return { error: null };
+				}
+				demoState.promemoria.push({
+					id: "pm" + Date.now(),
+					stato: "attivo",
+					user_id: currentUser.id,
+					...campi
+				});
+				return { error: null };
+			}
+			const { error } = await (id ? sb.from("promemoria_personali").update(campi).eq("id", id) : sb.from("promemoria_personali").insert({
+				user_id: currentUser.id,
+				...campi
+			}));
+			if (id) delete pmCache[id];
+			return { error };
+		}
+	};
+	var pmTabellaMancante = (e) => /does not exist|schema cache|promemoria_personali/i.test(e?.message || "");
+	function pmApriNuovo(preset) {
+		pmInModifica = null;
+		pmRiempi(preset || {});
+	}
+	async function pmModifica(id) {
+		const p = await PmDB.uno(id);
+		if (!p) return;
+		pmInModifica = p;
+		pmRiempi({
+			testo: p.testo,
+			data: pmGiorno(p.quando),
+			ora: pmOra(p.quando),
+			cliente_mascalcia_id: p.cliente_mascalcia_id,
+			azione: p.azione
+		});
+	}
+	function pmRiempi(x) {
+		document.getElementById("pm-tit").textContent = pmInModifica ? "Modifica promemoria" : "Nuovo promemoria";
+		document.getElementById("pm-testo").value = x.testo || "";
+		document.getElementById("pm-data").value = x.data || aggiungiGiorniIso(isoLocale(/* @__PURE__ */ new Date()), 1);
+		document.getElementById("pm-data").min = isoLocale(/* @__PURE__ */ new Date());
+		document.getElementById("pm-ora").value = x.ora || "08:00";
+		const sel = document.getElementById("pm-cliente");
+		sel.innerHTML = "<option value=\"\">Nessun cliente</option>" + (clientiMascalcia || []).filter((c) => !c.archiviato_il).slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+		sel.value = x.cliente_mascalcia_id || "";
+		document.getElementById("pm-azione").value = x.azione || "";
+		pmAggiornaAzione();
+		pmAggiornaQuando();
+		document.getElementById("pm-errore").style.display = "none";
+		document.getElementById("pm-elimina").style.display = pmInModifica ? "" : "none";
+		openModal("modal-promemoria");
+		if (!pmInModifica) setTimeout(() => document.getElementById("pm-testo").focus(), 250);
+	}
+	function pmQuando(g) {
+		document.getElementById("pm-data").value = aggiungiGiorniIso(isoLocale(/* @__PURE__ */ new Date()), g);
+		pmAggiornaQuando();
+	}
+	function pmAggiornaQuando() {
+		const v = document.getElementById("pm-data").value, oggi = isoLocale(/* @__PURE__ */ new Date());
+		document.querySelectorAll("#pm-quando button").forEach((b) => b.classList.toggle("on", v === aggiungiGiorniIso(oggi, Number(b.dataset.q))));
+	}
+	function pmAggiornaAzione() {
+		const c = document.getElementById("pm-cliente").value;
+		document.getElementById("pm-azione-box").style.display = c ? "" : "none";
+		if (!c) document.getElementById("pm-azione").value = "";
+	}
+	async function pmSalva() {
+		const err = document.getElementById("pm-errore");
+		const testo = document.getElementById("pm-testo").value.replace(/\s+/g, " ").trim();
+		const data = document.getElementById("pm-data").value, ora = document.getElementById("pm-ora").value || "08:00";
+		const mostra = (t) => {
+			err.textContent = t;
+			err.style.display = "block";
+		};
+		if (!testo) return mostra("Scrivi cosa devo ricordarti.");
+		if (!data) return mostra("Scegli il giorno.");
+		const quando = /* @__PURE__ */ new Date(data + "T" + ora);
+		if (quando.getTime() < Date.now() - 6e4) return mostra("Scegli un'ora che non sia già passata.");
+		const cliente = document.getElementById("pm-cliente").value || null;
+		const campi = {
+			testo: testo.slice(0, 300),
+			quando: quando.toISOString(),
+			cliente_mascalcia_id: cliente,
+			azione: cliente ? document.getElementById("pm-azione").value || null : null,
+			stato: "attivo"
+		};
+		if (!pmInModifica) campi.creato_da = "utente";
+		const btn = document.getElementById("pm-salva");
+		btn.disabled = true;
+		const { error } = await PmDB.salva(pmInModifica?.id || null, campi);
+		btn.disabled = false;
+		if (error) return mostra(pmTabellaMancante(error) ? "I promemoria saranno disponibili dopo l'aggiornamento di Equo." : "Non salvato: " + error.message);
+		closeModal("modal-promemoria");
+		showToast(`Promemoria ${pmInModifica ? "aggiornato" : "salvato"}: ${formatDataBreve(data)} ore ${ora}`);
+		pmInModifica = null;
+		pmAggiornaViste();
+	}
+	async function pmElimina() {
+		if (!pmInModifica) return;
+		if (!confirm("Eliminare questo promemoria?")) return;
+		const { error } = await PmDB.salva(pmInModifica.id, { stato: "annullato" });
+		if (error) {
+			showToast("Errore: " + error.message);
+			return;
+		}
+		closeModal("modal-promemoria");
+		pmInModifica = null;
+		showToast("Promemoria eliminato");
+		pmAggiornaViste();
+	}
+	async function pmFatto(id, btn) {
+		if (btn) btn.disabled = true;
+		const fatto = (await PmDB.uno(id))?.stato === "fatto";
+		const { error } = await PmDB.salva(id, { stato: fatto ? "attivo" : "fatto" });
+		if (error) {
+			if (btn) btn.disabled = false;
+			showToast("Errore: " + error.message);
+			return;
+		}
+		showToast(fatto ? "Rimesso da fare" : "✓ Fatto");
+		pmSegnaInChat(id, fatto ? null : "✓ Fatto");
+		pmAggiornaViste();
+	}
+	async function pmDomani(id, btn) {
+		if (btn) btn.disabled = true;
+		const p = await PmDB.uno(id);
+		if (!p) {
+			if (btn) btn.disabled = false;
+			return;
+		}
+		const base = new Date(Math.max(Date.now(), new Date(p.quando).getTime()));
+		const d = new Date(base);
+		d.setDate(d.getDate() + 1);
+		if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+		const ora = pmOra(p.quando);
+		const quando = /* @__PURE__ */ new Date(isoLocale(d) + "T" + ora);
+		const { error } = await PmDB.salva(id, {
+			quando: quando.toISOString(),
+			stato: "attivo"
+		});
+		if (error) {
+			if (btn) btn.disabled = false;
+			showToast("Errore: " + error.message);
+			return;
+		}
+		showToast(`Rimandato a ${formatDataBreve(isoLocale(d))} ore ${ora}`);
+		pmSegnaInChat(id, `↻ Rimandato a ${formatDataBreve(isoLocale(d))} ore ${ora}`);
+		pmAggiornaViste();
+	}
+	async function pmEsegui(id) {
+		const p = await PmDB.uno(id);
+		if (!p) return;
+		const cid = p.cliente_mascalcia_id;
+		if (!cid || !p.azione) return pmModifica(id);
+		if (typeof closeAiSheet === "function" && document.body.classList.contains("ai-aperta")) closeAiSheet();
+		if (p.azione === "conto") return apriNuovoConto(cid);
+		if (p.azione === "chat") {
+			if (typeof showPage === "function") showPage("pro-inbox");
+			return typeof openChatThread === "function" ? openChatThread(cid) : null;
+		}
+		if (p.azione === "naviga") return typeof wgNaviga === "function" ? wgNaviga(cid) : null;
+	}
+	function pmSegnaInChat(id, esito) {
+		document.querySelectorAll(`.pm-tasti[data-pm="${id}"]`).forEach((el) => {
+			if (esito) el.innerHTML = `<span class="pm-esito">${escapeHtml(esito)}</span>`;
+		});
+	}
+	function pmTastiHtml(p, compatto) {
+		const az = p.azione && p.cliente_mascalcia_id ? `<button type="button" class="btn btn-primary btn-sm" onclick="pmEsegui('${p.id}')">${PM_AZIONI[p.azione]}</button>` : "";
+		if (p.stato === "fatto") return `<span class="pm-esito">✓ Fatto</span>`;
+		return `${az}<button type="button" class="btn btn-outline btn-sm" onclick="pmFatto('${p.id}', this)">Fatto</button>${compatto ? "" : `<button type="button" class="btn btn-outline btn-sm" onclick="pmDomani('${p.id}', this)">Domani</button>`}`;
+	}
+	function pmTastiChat(azione) {
+		if (!azione || azione.tipo !== "promemoria" || !azione.id) return "";
+		const p = {
+			id: azione.id,
+			azione: azione.azione,
+			cliente_mascalcia_id: azione.cliente_mascalcia_id,
+			stato: "attivo"
+		};
+		return `<div class="pm-tasti" data-pm="${azione.id}">${pmTastiHtml(p)}</div>`;
+	}
+	async function pmRenderHome$1() {
+		const box = document.getElementById("hm-promemoria");
+		if (!box || !currentUser) return;
+		const lista = await PmDB.daFareFinoAOggi();
+		lista.forEach((p) => {
+			pmCache[p.id] = p;
+		});
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		box.innerHTML = !lista.length ? "" : `<div class="pm-home">
+    <div class="pm-home-t"><b>🔔 Da ricordare</b><button type="button" onclick="pmApriNuovo()">+ Nuovo</button></div>
+    ${lista.map((p) => {
+			const g = pmGiorno(p.quando), cli = pmNomeCliente(p);
+			return `<div class="pm-riga"><div class="pm-riga-c" onclick="pmModifica('${p.id}')"><b>${escapeHtml(p.testo)}</b><small>${g < oggi ? `<span class="pm-ritardo">${formatDataBreve(g)}</span> · ` : ""}ore ${pmOra(p.quando)}${cli ? " · " + escapeHtml(cli) : ""}</small></div><div class="pm-tasti">${pmTastiHtml(p, true)}</div></div>`;
+		}).join("")}
+  </div>`;
+	}
+	async function pmCaricaSettimana(daIso, aIso) {
+		const lista = await PmDB.periodo(daIso, aIso);
+		lista.forEach((p) => {
+			pmCache[p.id] = p;
+		});
+		return lista;
+	}
+	function pmPannelloGiorno(lista) {
+		if (!lista || !lista.length) return "";
+		return `<div class="pm-giorno"><div class="pm-giorno-t">🔔 Promemoria</div>
+    ${lista.map((p) => {
+			const cli = pmNomeCliente(p);
+			return `<div class="pm-riga${p.stato === "fatto" ? " fatto" : ""}"><span class="pm-ora">${pmOra(p.quando)}</span><div class="pm-riga-c" onclick="pmModifica('${p.id}')"><b>${escapeHtml(p.testo)}</b>${cli ? `<small>${escapeHtml(cli)}</small>` : ""}</div><div class="pm-tasti">${pmTastiHtml(p, true)}</div></div>`;
+		}).join("")}
+  </div>`;
+	}
+	function pmAggiornaViste() {
+		pmCache = {};
+		pmRenderHome$1();
+		if (typeof renderAgendaSettimana === "function" && document.getElementById("page-pro-agenda")?.classList.contains("active")) renderAgendaSettimana();
+	}
+	async function pmSalvaDaHammer(x) {
+		const quando = /* @__PURE__ */ new Date(x.data + "T" + (x.ora || "08:00"));
+		if (quando.getTime() < Date.now() - 6e4) return { error: { message: "l'ora è già passata" } };
+		const r = await PmDB.salva(null, {
+			testo: x.testo,
+			quando: quando.toISOString(),
+			cliente_mascalcia_id: x.cliente_mascalcia_id || null,
+			azione: x.cliente_mascalcia_id ? x.azione || null : null,
+			creato_da: "hammer",
+			stato: "attivo"
+		});
+		if (r.error && pmTabellaMancante(r.error)) return { error: { message: "i promemoria saranno disponibili dopo l'aggiornamento di Equo" } };
+		if (!r.error) pmAggiornaViste();
+		return r;
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
 	async function azioneGruppoStruttura(gruppoId, azione) {
 		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
@@ -3152,7 +3919,7 @@
 			return;
 		}
 		showToast(azione === "conferma" ? "Confermato: la scuderia riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		await renderProDeadlines();
 		if (currentClienteId) await loadClienteInterventi(currentClienteId);
 	}
@@ -3215,7 +3982,7 @@
 		}
 		closeModal("modal-proponi-struttura");
 		showToast("Proposta inviata: la scuderia deve confermarla.");
-		if (document.getElementById("ag-week")) await renderAgendaSettimana();
+		if (document.getElementById("ag-week")) await renderAgendaSettimana$1();
 		if (currentClienteId) await loadClienteInterventi(currentClienteId);
 	}
 	function vaiAllaDataAgenda(iso) {
@@ -3225,7 +3992,7 @@
 		const diffGiorni = Math.round((target - lunCorrente) / 864e5);
 		agSettimanaOffset = Math.floor(diffGiorni / 7);
 		agGiorniAperti = /* @__PURE__ */ new Set([iso]);
-		renderAgendaSettimana();
+		renderAgendaSettimana$1();
 	}
 	function accettaRichiesta(id) {
 		const r = richiesteCache[id] || agEventiCache[id];
@@ -3252,7 +4019,7 @@
 			testo: testoRichiesta("❌ Non riesco per questa richiesta", r, agNomeCavallo(r)) + " Scrivimi qui per trovare un'altra data."
 		});
 		showToast("Richiesta rifiutata");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		await renderProDeadlines();
 		if (currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
 	}
@@ -3287,6 +4054,7 @@
       <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
       ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
+      ${(d.pm || []).some((p) => p.stato === "attivo") ? `<span class="ag-pm" title="Promemoria">🔔${(d.pm || []).filter((p) => p.stato === "attivo").length}</span>` : ""}
       ${riposo ? "<span class=\"ag-riposo\">Riposo</span>" : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
     </button>`;
 	}
@@ -3327,6 +4095,7 @@
 		return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
         <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+      ${pmPannelloGiorno(d.pm)}
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
       ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
       ${d.ev.length > 1 ? "<div class=\"ag-sugger\">Tieni premuto ⋮⋮ e trascina per cambiare l'ordine del giro.</div>" : ""}
@@ -3483,7 +4252,7 @@
 			}
 		}
 		if (!scambio) showToast("Ordine del giro salvato");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		try {
 			await renderProDeadlines();
 		} catch (_) {}
@@ -3503,13 +4272,13 @@
 	function cambiaSettimanaAgenda(delta) {
 		agSettimanaOffset += delta;
 		agGiorniAperti = /* @__PURE__ */ new Set();
-		renderAgendaSettimana(delta);
+		renderAgendaSettimana$1(delta);
 	}
 	function tornaSettimanaCorrente() {
 		const delta = -agSettimanaOffset;
 		agSettimanaOffset = 0;
 		agGiorniAperti = null;
-		renderAgendaSettimana(delta || null);
+		renderAgendaSettimana$1(delta || null);
 	}
 	function agAttivaSwipe(box) {
 		if (box.dataset.swipe) return;
@@ -3591,7 +4360,7 @@
 			return;
 		}
 		showToast("Segnato come fatto");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		await renderIncassi$1();
 		await renderProDeadlines();
 	}
@@ -3665,7 +4434,7 @@
 			}
 			closeModal("modal-azioni-evento");
 			showToast(nuovo === "fatto" ? "Segnato come fatto" : "Rimesso da fare");
-			await renderAgendaSettimana();
+			await renderAgendaSettimana$1();
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} else if (tipo === "elimina") {
@@ -3681,7 +4450,7 @@
 			});
 			closeModal("modal-azioni-evento");
 			showToast("Appuntamento eliminato");
-			await renderAgendaSettimana();
+			await renderAgendaSettimana$1();
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} else if (tipo === "pdf") {
@@ -3919,7 +4688,7 @@
 		}
 		return wgIndirizziStrutture.find((x) => (x.cliente_id || x.id) === c.id) || null;
 	}
-	async function wgNaviga(clienteId) {
+	async function wgNaviga$1(clienteId) {
 		const c = wgClienteDi(clienteId);
 		if (!c) {
 			showToast("Cliente non trovato");
@@ -4173,7 +4942,7 @@
 	function navigaLuogo(l) {
 		if (!l) return;
 		if (l.indirizzo) return wgMostraMappe({ nome: l.nome }, l.indirizzo);
-		if (l.clienteId) return wgNaviga(l.clienteId);
+		if (l.clienteId) return wgNaviga$1(l.clienteId);
 		wgMostraMappe({ nome: l.nome }, l.nome, "Indirizzo non indicato: ricerca per nome, controlla nelle mappe che sia il posto giusto.");
 	}
 	async function wgNavigaEvento(id) {
@@ -4397,7 +5166,7 @@
 			await caricaCavalliMiei();
 			if (typeof renderClientiList === "function") renderClientiList();
 			if (currentClienteId) await loadClienteInterventi(currentClienteId);
-			if (typeof renderAgendaSettimana === "function") renderAgendaSettimana();
+			if (typeof renderAgendaSettimana$1 === "function") renderAgendaSettimana$1();
 		} else {
 			await loadHorses();
 			if (currentHorseId) await openHorseDetail(currentHorseId);
@@ -4522,7 +5291,7 @@
 		const [y, m, d] = iso.split("-").map(Number);
 		return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
 	}
-	async function renderAgendaSettimana(direzione) {
+	async function renderAgendaSettimana$1(direzione) {
 		const box = document.getElementById("ag-week");
 		if (!box) return;
 		const token = ++agRenderToken;
@@ -4534,11 +5303,13 @@
 		document.getElementById("ag-oggi-btn").style.display = agSettimanaOffset === 0 ? "none" : "inline-block";
 		if (!agGiorniAperti) agGiorniAperti = /* @__PURE__ */ new Set([oggiIso]);
 		renderRichiestePendenti();
+		const pmAttesa = pmCaricaSettimana(isoGiorni[0], isoGiorni[6]).catch(() => []);
 		const [eventi, scadenze] = await Promise.all([
 			DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
 			DB.listScadenzePeriodo(aggiungiGiorniIso(isoGiorni[0], -1), isoGiorni[6]),
 			caricaUbicazioni()
 		]);
+		const promemoria2 = await pmAttesa;
 		if (token !== agRenderToken) return;
 		agEventiCache = {};
 		(typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach((e) => {
@@ -4559,7 +5330,8 @@
 				g,
 				oggi: iso === oggiIso,
 				ev: eventi.filter((e) => e.data_intervento === iso),
-				sc: scadenze.filter((sc) => sc.data_vista === iso)
+				sc: scadenze.filter((sc) => sc.data_vista === iso),
+				pm: promemoria2.filter((p) => isoLocale(new Date(p.quando)) === iso)
 			};
 		});
 		agDisegnaGriglia();
@@ -4683,7 +5455,7 @@
 		showToast(`Giro fissato: ${righe.length} cavalli ${formatDataBreve(data)}${ora ? " ore " + ora : ""}`);
 		giroCorrente = null;
 		await renderProDeadlines();
-		if (document.getElementById("ag-week")) renderAgendaSettimana();
+		if (document.getElementById("ag-week")) renderAgendaSettimana$1();
 		if (document.getElementById("giro-avvisa").checked) {
 			const nome = (righe[0].cliente_nome || "").split(" ")[0];
 			const elenco = righe.map((r) => `${r.cavallo_nome || "cavallo"} (${hpTipo(r).toLowerCase()})`).join(", ");
@@ -6777,7 +7549,7 @@
 			if (clienteCreatoOra) await loadClientiMascalcia();
 			await renderProDeadlines();
 			await renderIncassi$1();
-			if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 			if (currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
 		} finally {
 			saveBtn.disabled = false;
@@ -6865,7 +7637,7 @@
 		showToast("Appuntamento eliminato");
 		await renderProDeadlines();
 		await renderIncassi$1();
-		if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+		if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 		if (currentClienteId === clienteId) await loadClienteInterventi(clienteId);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/035-ferratura-del-cavallo-scheda-libretto-fe.js
@@ -8456,495 +9228,6 @@
 		showToast("Cliente ripristinato");
 		await loadClientiMascalcia();
 		await openClienteDetail(id);
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/061-pdf-del-conto-dai-dati-salvati-snapshot.js
-	async function creaPdfConto(c) {
-		const doc = new (await (caricaJsPdf()))({
-			unit: "mm",
-			format: "a4"
-		});
-		const W = 210, M = 18, verde = [
-			20,
-			49,
-			42
-		], oro = [
-			201,
-			143,
-			46
-		], grigio = [
-			95,
-			111,
-			103
-		];
-		const cli = clienteDiId(c.cliente_mascalcia_id);
-		const piede = () => {
-			doc.setDrawColor(227, 221, 204);
-			doc.line(M, 280, 192, 280);
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(8.5);
-			doc.setTextColor(...grigio);
-			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
-		};
-		doc.setFillColor(...verde);
-		doc.rect(0, 0, W, 32, "F");
-		doc.setTextColor(255, 255, 255);
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(22);
-		doc.text("Equo", M, 20);
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(10);
-		doc.text("Prenditi cura del tuo cavallo", M, 26);
-		doc.text(contoData(c.creato_il), 192, 20, { align: "right" });
-		doc.setFillColor(...oro);
-		doc.rect(0, 32, W, 1.5, "F");
-		let y = 48;
-		doc.setTextColor(...verde);
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(17);
-		doc.text("Resoconto lavori", M, y);
-		doc.setFontSize(12);
-		doc.setTextColor(...oro);
-		doc.text(contoCodice(c), 192, y, { align: "right" });
-		y += 9;
-		doc.setFontSize(15);
-		doc.setTextColor(...verde);
-		doc.text(cli?.nome || "", M, y);
-		const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(10.5);
-		doc.setTextColor(...grigio);
-		if (pro) {
-			y += 6;
-			doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
-		}
-		if (c.periodo_da || c.periodo_a) {
-			y += 5.5;
-			doc.text("Periodo: " + (c.periodo_da ? "dal " + contoData(c.periodo_da) + " " : "") + (c.periodo_a ? "al " + contoData(c.periodo_a) : ""), M, y);
-		}
-		y += 10;
-		const colData = 20, colCav = 44, colLav = 96, colImp = 190;
-		const testa = () => {
-			doc.setFillColor(...verde);
-			doc.rect(M, y - 5, 174, 8, "F");
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(9.5);
-			doc.setTextColor(255, 255, 255);
-			doc.text("DATA", colData, y);
-			doc.text("CAVALLO", colCav, y);
-			doc.text("LAVORO", colLav, y);
-			doc.text("IMPORTO", colImp, y, { align: "right" });
-			y += 8;
-		};
-		testa();
-		const nuovaPagina = () => {
-			piede();
-			doc.addPage();
-			y = 22;
-			testa();
-		};
-		const gruppi = {};
-		(c.righe || []).forEach((r) => {
-			(gruppi[r.proprietario_nome || "—"] = gruppi[r.proprietario_nome || "—"] || []).push(r);
-		});
-		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
-		const conGruppi = c.modo === "unico" && nomi.length > 1 || nomi.length > 1;
-		let k = 0;
-		nomi.forEach((n) => {
-			const lista = gruppi[n].slice().sort((a, b) => String(a.data_intervento).localeCompare(String(b.data_intervento)));
-			if (conGruppi) {
-				if (y > 262) nuovaPagina();
-				doc.setFont("helvetica", "bold");
-				doc.setFontSize(10.5);
-				doc.setTextColor(...oro);
-				doc.text(n, colData, y);
-				y += 6;
-			}
-			lista.forEach((r) => {
-				const lav = doc.splitTextToSize(String(r.descrizione || ""), 70);
-				const h = Math.max(7.5, lav.length * 4.8 + 2.6);
-				if (y + h > 268) nuovaPagina();
-				if (k++ % 2 === 0) {
-					doc.setFillColor(248, 246, 240);
-					doc.rect(M, y - 4.6, 174, h, "F");
-				}
-				doc.setFont("helvetica", "normal");
-				doc.setFontSize(10);
-				doc.setTextColor(...grigio);
-				doc.text(contoData(r.data_intervento), colData, y);
-				doc.setFont("helvetica", "bold");
-				doc.setTextColor(...verde);
-				doc.text(doc.splitTextToSize(String(r.cavallo_nome || ""), 49), colCav, y);
-				doc.setFont("helvetica", "normal");
-				doc.setTextColor(...grigio);
-				doc.text(lav, colLav, y);
-				doc.setFont("helvetica", "bold");
-				doc.setTextColor(...verde);
-				doc.text(contoEuro(r.importo), colImp, y, { align: "right" });
-				y += h;
-			});
-			if (conGruppi) {
-				const sub = gruppi[n].reduce((s, r) => s + Number(r.importo), 0);
-				doc.setFont("helvetica", "normal");
-				doc.setFontSize(9.5);
-				doc.setTextColor(...grigio);
-				doc.text("Subtotale " + n, 136, y, { align: "left" });
-				doc.setFont("helvetica", "bold");
-				doc.text(contoEuro(sub), colImp, y, { align: "right" });
-				y += 8;
-			}
-		});
-		if (y > 246) nuovaPagina();
-		y += 4;
-		doc.setDrawColor(...oro);
-		doc.setLineWidth(.6);
-		doc.line(M, y, 192, y);
-		y += 9;
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(12);
-		doc.setTextColor(...grigio);
-		doc.text(contoLavori(c.n_lavori), M, y);
-		doc.setFontSize(17);
-		doc.setTextColor(...verde);
-		doc.text("TOTALE  " + contoEuro(c.totale), 192, y, { align: "right" });
-		y += 12;
-		if (c.stato !== "pagato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
-			if (y > 250) nuovaPagina();
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(12);
-			doc.setTextColor(...verde);
-			doc.text("Dati per il pagamento", M, y);
-			y += 7;
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10.5);
-			doc.setTextColor(...grigio);
-			if (currentUser.datiPagamentoNome) {
-				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
-				y += 6;
-			}
-			if (currentUser.datiPagamentoIban) {
-				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
-				y += 6;
-			}
-			if (currentUser.datiPagamentoPaypal) {
-				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
-				y += 6;
-			}
-			doc.text("Causale: Conto " + contoCodice(c), M, y);
-		} else if (c.stato === "pagato") {
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(12);
-			doc.setTextColor(...verde);
-			doc.text("Conto saldato" + (c.pagato_il ? " il " + contoData(c.pagato_il) : ""), M, y);
-		}
-		y = riquadroInvitoPdf(doc, cli, y + 6, W, M, () => {
-			piede();
-			doc.addPage();
-			return 22;
-		});
-		piede();
-		return {
-			blob: doc.output("blob"),
-			nome: contoNomeFile(c)
-		};
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/060-foglio-di-invio-gestione-del-conto.js
-	async function apriInvioConto(id) {
-		const c = await ContoDB.completo(id);
-		if (!c) {
-			showToast("Conto non trovato");
-			return;
-		}
-		contoAperto = c;
-		const cli = clienteDiId(c.cliente_mascalcia_id);
-		const stato = c.stato === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : c.stato === "annullato" ? "<span class=\"badge\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
-		document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
-		document.getElementById("conto-invio-corpo").innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div></div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
-    <div class="ag-azioni" style="margin-top:14px">
-      ${c.stato !== "annullato" ? `
-      <button class="btn btn-primary" onclick="contoInviaChat()"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat Equo</button>
-      <button class="btn btn-outline" onclick="contoCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Email, WhatsApp, altro…</button>
-      <button class="btn btn-outline" onclick="contoScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>` : ""}
-      ${c.stato === "da_incassare" ? `
-      <button class="btn btn-outline" onclick="contoSegnaPagato()"><span class="fa-icon"><i class="fa-solid fa-check"></i></span> Segna pagato</button>
-      <button class="btn btn-outline" style="color:var(--red)" onclick="contoAnnulla()"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla il conto</button>` : ""}
-    </div>`;
-		openModal("modal-conto-invio");
-	}
-	async function contoInviaChat() {
-		const c = contoAperto;
-		if (!c) return;
-		closeModal("modal-conto-invio");
-		await openChatThread(c.cliente_mascalcia_id);
-		document.getElementById("mchat-input").value = `Conto ${contoCodice(c)}: ${c.n_lavori} lavori · totale ${contoEuro(c.totale)}`;
-		chatAllegatoEvento = { __conto: c };
-		document.getElementById("mchat-allegato-nome").textContent = contoNomeFile(c);
-		document.getElementById("mchat-allegato").classList.add("active");
-	}
-	function contoNomeFile(c) {
-		const n = String(clienteDiId(c.cliente_mascalcia_id)?.nome || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
-		return [
-			"Equo",
-			"Conto",
-			contoCodice(c),
-			n
-		].filter(Boolean).join("_") + ".pdf";
-	}
-	async function contoCondividi() {
-		const c = contoAperto;
-		if (!c) return;
-		showToast("Creo il PDF…");
-		try {
-			const { blob, nome } = await creaPdfConto(c);
-			const file = new File([blob], nome, { type: "application/pdf" });
-			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
-				await navigator.share({
-					files: [file],
-					title: nome,
-					text: `Conto ${contoCodice(c)} · totale ${contoEuro(c.totale)}`
-				});
-				return;
-			} catch (err) {
-				if (err?.name === "AbortError") return;
-			}
-			contoScaricaBlob(blob, nome);
-			showToast("Il PDF è stato scaricato: allegalo alla tua email o a WhatsApp.");
-		} catch (err) {
-			console.error("contoCondividi:", err);
-			showToast("Impossibile creare il PDF: " + (err?.message || err));
-		}
-	}
-	function contoScaricaBlob(blob, nome) {
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = nome;
-		document.body.appendChild(a);
-		a.click();
-		a.remove();
-		setTimeout(() => URL.revokeObjectURL(url), 3e4);
-	}
-	async function contoScarica() {
-		const c = contoAperto;
-		if (!c) return;
-		try {
-			const { blob, nome } = await creaPdfConto(c);
-			contoScaricaBlob(blob, nome);
-		} catch (err) {
-			console.error("contoScarica:", err);
-			showToast("Impossibile creare il PDF: " + (err?.message || err));
-		}
-	}
-	async function contoSegnaPagato() {
-		const c = contoAperto;
-		if (!c) return;
-		if (!await chiediSiNo("Conto pagato?", `${c.n_lavori === 1 ? "Il lavoro" : "Tutti i " + c.n_lavori + " lavori"} del conto ${contoCodice(c)} (${contoEuro(c.totale)}) ${c.n_lavori === 1 ? "risulterà saldato" : "risulteranno saldati"}.`)) return;
-		const { error } = await ContoDB.pagato(c.id);
-		if (error) {
-			showToast("Errore: " + (error.message || "riprova"));
-			return;
-		}
-		closeModal("modal-conto-invio");
-		showToast("Conto pagato: lavori saldati");
-		if (currentClienteId) {
-			caricaContiCliente(currentClienteId);
-			loadClienteInterventi(currentClienteId);
-		}
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
-	}
-	async function contoAnnulla() {
-		const c = contoAperto;
-		if (!c) return;
-		if (!await chiediSiNo("Annullare il conto?", `Il conto ${contoCodice(c)} resta nell'elenco come «annullato» e i suoi lavori tornano da saldare: potrai rifarlo.`)) return;
-		const { error } = await ContoDB.annulla(c.id);
-		if (error) {
-			showToast("Errore: " + (error.message || "riprova"));
-			return;
-		}
-		closeModal("modal-conto-invio");
-		showToast("Conto annullato");
-		if (currentClienteId) caricaContiCliente(currentClienteId);
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/059-foglio-fai-il-conto.js
-	async function apriNuovoConto(clienteId) {
-		if (incassiNascosti()) {
-			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il conto.");
-			return;
-		}
-		if (!clienteDiId(clienteId)) await loadClientiMascalcia().catch(() => {});
-		const cli = clienteDiId(clienteId);
-		contoCtx = {
-			clienteId,
-			scuderia: eLuogoScuderia(cli),
-			modo: "unico",
-			periodo: "tutto",
-			da: "",
-			a: "",
-			tutti: [],
-			lavori: [],
-			sel: /* @__PURE__ */ new Set()
-		};
-		document.getElementById("conto-nuovo-titolo").textContent = "Conto · " + (cli?.nome || "cliente");
-		document.getElementById("conto-nuovo-corpo").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico i lavori…</div>";
-		openModal("modal-conto-nuovo");
-		await caricaCavalliMiei().catch(() => {});
-		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(clienteId), ContoDB.aperti(clienteId)]);
-		contoApplicaPeriodo();
-	}
-	function contoApriEsistente(id) {
-		closeModal("modal-conto-nuovo");
-		apriInvioConto(id);
-	}
-	async function contoAnnullaERifai(id) {
-		const c = (contoCtx?.aperti || []).find((x) => x.id === id);
-		if (!c) return;
-		if (!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
-		const { error } = await ContoDB.annulla(id);
-		if (error) {
-			showToast("Errore: " + (error.message || "riprova"));
-			return;
-		}
-		showToast("Conto " + contoCodice(c) + " annullato");
-		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(contoCtx.clienteId), ContoDB.aperti(contoCtx.clienteId)]);
-		contoApplicaPeriodo();
-		if (currentClienteId) caricaContiCliente(currentClienteId);
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-	}
-	function contoApplicaPeriodo() {
-		const c = contoCtx;
-		if (!c) return;
-		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale;
-		let da = "", a = "";
-		if (c.periodo === "mese") {
-			da = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 1));
-			a = iso(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0));
-		} else if (c.periodo === "scorso") {
-			da = iso(new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1));
-			a = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 0));
-		} else if (c.periodo === "date") {
-			da = c.da;
-			a = c.a;
-		}
-		c.pDa = da;
-		c.pA = a;
-		c.lavori = c.tutti.filter((i) => (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a));
-		c.sel = new Set(c.lavori.map((i) => i.id));
-		renderNuovoConto();
-	}
-	function contoSetPeriodo(p) {
-		contoCtx.periodo = p;
-		if (p !== "date") contoApplicaPeriodo();
-		else renderNuovoConto();
-	}
-	function contoSetDate() {
-		contoCtx.da = document.getElementById("conto-da").value;
-		contoCtx.a = document.getElementById("conto-a").value;
-		contoApplicaPeriodo();
-	}
-	function contoSetModo(m) {
-		contoCtx.modo = m;
-		renderNuovoConto();
-	}
-	function contoToggleGruppo(nome) {
-		const c = contoCtx;
-		if (!c) return;
-		const ids = c.lavori.filter((i) => contoNomeProprietario(i) === nome).map((i) => i.id);
-		const tutti = ids.every((id) => c.sel.has(id));
-		ids.forEach((id) => tutti ? c.sel.delete(id) : c.sel.add(id));
-		renderNuovoConto();
-	}
-	function contoToggle(id) {
-		contoCtx.sel.has(id) ? contoCtx.sel.delete(id) : contoCtx.sel.add(id);
-		renderNuovoConto();
-	}
-	function contoNomeProprietario(i) {
-		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
-	}
-	function contoNomeCavallo(i) {
-		return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo";
-	}
-	function renderNuovoConto() {
-		const c = contoCtx;
-		if (!c) return;
-		const chip = (k, t) => `<button type="button" class="btn ${c.periodo === k ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetPeriodo('${k}')">${t}</button>`;
-		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
-		const tot = scelti.reduce((s, i) => s + Number(i.importo), 0);
-		const gruppi = {};
-		c.lavori.forEach((i) => {
-			(gruppi[contoNomeProprietario(i)] = gruppi[contoNomeProprietario(i)] || []).push(i);
-		});
-		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
-		const nPag = new Set(scelti.map((i) => i.cliente_mascalcia_id)).size;
-		const modoHtml = c.scuderia ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CHI PAGA</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button type="button" class="btn ${c.modo === "unico" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('unico')">Paga la scuderia · conto unico</button>
-      <button type="button" class="btn ${c.modo === "per_proprietario" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('per_proprietario')">Un conto per proprietario</button>
-    </div>` : "";
-		document.getElementById("conto-nuovo-corpo").innerHTML = `
-    ${modoHtml}
-    <div class="clienti-sez-title" style="margin:14px 0 6px">PERIODO</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">${chip("tutto", "Non ancora saldato")}${chip("mese", "Questo mese")}${chip("scorso", "Mese scorso")}${chip("date", "Scegli le date")}</div>
-    ${c.periodo === "date" ? `<div style="display:flex;gap:8px;margin-top:8px"><input class="input" type="date" id="conto-da" value="${c.da}" onchange="contoSetDate()"><input class="input" type="date" id="conto-a" value="${c.a}" onchange="contoSetDate()"></div>` : ""}
-    <div class="clienti-sez-title" style="margin:14px 0 6px">LAVORI INCLUSI (${scelti.length} di ${c.lavori.length})</div>
-    ${c.lavori.length ? nomi.map((n) => `
-      ${c.scuderia || nomi.length > 1 ? `<label style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:13px;font-weight:700;color:var(--accent)">
-        <input type="checkbox" data-gruppo="${escapeHtml(n)}" ${gruppi[n].every((i) => c.sel.has(i.id)) ? "checked" : ""} onchange="contoToggleGruppo(this.dataset.gruppo)">
-        <span style="flex:1">${escapeHtml(n)}</span><span class="muted" style="font-size:12px;font-weight:600">${gruppi[n].filter((i) => c.sel.has(i.id)).length}/${gruppi[n].length}</span></label>` : ""}
-      ${gruppi[n].map((i) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)">
-        <input type="checkbox" ${c.sel.has(i.id) ? "checked" : ""} onchange="contoToggle('${i.id}')">
-        <span style="flex:1;min-width:0"><b>${escapeHtml(contoNomeCavallo(i))}</b><span class="muted" style="font-size:12px;display:block">${contoData(i.data_intervento)} · ${escapeHtml(agDescrizioneTipo(i))}</span></span>
-        <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("") : (c.aperti || []).length ? `<div class="conto-gia">
-          <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
-          ${c.aperti.map((k) => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
-            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
-        </div>` : "<div class=\"muted\" style=\"font-size:13px;padding:8px 0\">Nessun lavoro da saldare in questo periodo.</div>"}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
-    ${c.scuderia && c.modo === "per_proprietario" && nPag > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Verranno creati ${nPag} conti, uno per ciascun proprietario.</div>` : ""}
-    <button class="btn btn-primary" id="conto-crea-btn" style="width:100%;margin-top:14px" ${scelti.length ? "" : "disabled"} onclick="creaContoDaScelte()">Crea il PDF</button>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. Non è una fattura.</div>`;
-		document.querySelectorAll("#conto-nuovo-corpo input[data-gruppo]").forEach((cb) => {
-			const l = gruppi[cb.dataset.gruppo] || [], n = l.filter((i) => c.sel.has(i.id)).length;
-			cb.indeterminate = n > 0 && n < l.length;
-		});
-	}
-	async function creaContoDaScelte() {
-		const c = contoCtx;
-		if (!c) return;
-		const btn = document.getElementById("conto-crea-btn");
-		btn.disabled = true;
-		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
-		const riga = (i) => ({
-			intervento_id: i.id,
-			cavallo_nome: contoNomeCavallo(i),
-			proprietario_nome: contoNomeProprietario(i),
-			descrizione: agDescrizioneTipo(i)
-		});
-		const per = c.scuderia && c.modo === "per_proprietario";
-		const mappa = /* @__PURE__ */ new Map();
-		scelti.forEach((i) => {
-			const k = per ? i.cliente_mascalcia_id : c.clienteId;
-			(mappa.get(k) || mappa.set(k, []).get(k)).push(i);
-		});
-		const creati = [];
-		for (const [clienteId, lav] of mappa) {
-			const { data, error } = await ContoDB.crea(clienteId, per ? "per_proprietario" : "unico", c.pDa || null, c.pA || null, lav.map(riga));
-			if (error) {
-				showToast("Conto non creato: " + (error.message || "riprova"));
-				btn.disabled = false;
-				break;
-			}
-			creati.push(data);
-		}
-		if (!creati.length) return;
-		closeModal("modal-conto-nuovo");
-		contoCtx = null;
-		if (currentClienteId) caricaContiCliente(currentClienteId);
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-		if (creati.length === 1) return apriInvioConto(creati[0].id);
-		showToast(creati.length + " conti creati: li trovi nella scheda di ogni proprietario");
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/074-abbinamento-cavalli-del-maniscalco-caval.js
 	var abbinaPendenti = [];
@@ -10830,7 +11113,7 @@
 		if (conScuderia.length && upd.stato === "annullato") for (const g of conScuderia) await azioneGruppoStruttura(g, "annulla");
 		else if (conScuderia.length) showToast("Gli appuntamenti con la scuderia si spostano dal tasto ⋯ (la scuderia deve riconfermare)");
 		if (libere.length) showToast(testo);
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 	}
 	async function agNfSposta(n) {
 		const g = agGruppiNonFatti()[n];
@@ -11649,7 +11932,7 @@
 		razzaImposta,
 		razzaSegnala,
 		razzaValore,
-		renderAgendaSettimana,
+		renderAgendaSettimana: renderAgendaSettimana$1,
 		renderBoxCavalliCliente,
 		renderCorpoCavalloPro,
 		renderDoveStaProprietario,
@@ -11720,7 +12003,7 @@
 		wgClienteDi,
 		wgLuogoAMano,
 		wgMostraMappe,
-		wgNaviga,
+		wgNaviga: wgNaviga$1,
 		wgNavigaEvento,
 		wgRidisegna,
 		wgScegli,
@@ -11768,7 +12051,20 @@
 		scegliSchedaAgenda,
 		scegliVistaAgenda,
 		contoAnnullaERifai,
-		contoApriEsistente
+		contoApriEsistente,
+		pmAggiornaAzione,
+		pmAggiornaQuando,
+		pmApriNuovo,
+		pmDomani,
+		pmElimina,
+		pmEsegui,
+		pmFatto,
+		pmModifica,
+		pmQuando,
+		pmRenderHome: pmRenderHome$1,
+		pmSalva,
+		pmSalvaDaHammer,
+		pmTastiChat
 	});
 })();
 

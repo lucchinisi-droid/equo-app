@@ -7,6 +7,7 @@ import { notaModificaMan, openInterventoModal } from "./052-ferro-standard-nella
 import { AG_GIORNI, AG_MESI, agDescrizioneTipoPro, agLunedi, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { richiesteCache, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agAttivaTrascina, agOrdinaGiro } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
+import { pmPannelloGiorno } from "./111-promemoria-personali.js";
 /* ---------- APPUNTAMENTI CON STRUTTURE EQUO SCUDERIA (doppia conferma, più cavalli) ---------- */
 async function azioneGruppoStruttura(gruppoId, azione){
   const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: gruppoId, p_azione: azione });
@@ -151,6 +152,7 @@ function agTile(d){
       <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? '<span class="ag-tile-oggi">oggi</span>' : ""}</span>
       ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
+      ${(d.pm || []).some(p => p.stato === "attivo") ? `<span class="ag-pm" title="Promemoria">🔔${(d.pm || []).filter(p => p.stato === "attivo").length}</span>` : ""}
       ${riposo ? '<span class="ag-riposo">Riposo</span>' : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
     </button>`;
 }
@@ -178,6 +180,7 @@ function agPannello(d){
   return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
         <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+      ${pmPannelloGiorno(d.pm)}
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
       ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
       ${d.ev.length > 1 ? '<div class="ag-sugger">Tieni premuto ⋮⋮ e trascina per cambiare l\'ordine del giro.</div>' : ""}

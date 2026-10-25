@@ -1,0 +1,38 @@
+<div class="modal-overlay" id="modal-promemoria" onclick="closeOut(event,'modal-promemoria')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span id="pm-tit">Nuovo promemoria</span></div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5;margin:-4px 0 12px">Solo per te. All'ora scelta Hammer te lo scrive in chat come messaggio importante e ti arriva la notifica (o un'email se le notifiche sono spente).</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label" for="pm-testo">Cosa devo ricordarti</label>
+        <input class="input" id="pm-testo" maxlength="300" placeholder="es. Prendere i rock and roll">
+      </div>
+      <div class="pm-quando" id="pm-quando">
+        <button type="button" data-q="0" onclick="pmQuando(0)">Oggi</button>
+        <button type="button" data-q="1" onclick="pmQuando(1)">Domani</button>
+        <button type="button" data-q="7" onclick="pmQuando(7)">Tra una settimana</button>
+      </div>
+      <div class="input-row-2">
+        <div class="input-group"><label class="input-label" for="pm-data">Giorno</label><input class="input" id="pm-data" type="date" onchange="pmAggiornaQuando()"></div>
+        <div class="input-group"><label class="input-label" for="pm-ora">Ora</label><input class="input" id="pm-ora" type="time" value="08:00"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="pm-cliente">Cliente (facoltativo)</label>
+        <select class="input" id="pm-cliente" onchange="pmAggiornaAzione()"></select>
+      </div>
+      <div class="input-group" id="pm-azione-box" style="display:none">
+        <label class="input-label" for="pm-azione">Tasto nel promemoria</label>
+        <select class="input" id="pm-azione">
+          <option value="">Nessuno</option>
+          <option value="conto">Fai il conto</option>
+          <option value="chat">Scrivi al cliente</option>
+          <option value="naviga">Naviga</option>
+        </select>
+      </div>
+      <div class="error-msg" id="pm-errore" style="display:none"></div>
+      <button class="btn btn-primary" id="pm-salva" style="width:100%;margin-top:4px" onclick="pmSalva()">Salva promemoria</button>
+      <button class="btn btn-ghost" id="pm-elimina" style="width:100%;margin-top:6px;color:var(--red);display:none" onclick="pmElimina()">Elimina promemoria</button>
+    </div>
+  </div>
+</div>

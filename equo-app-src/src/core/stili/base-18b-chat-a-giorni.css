@@ -1,0 +1,49 @@
+/* ---------- CHAT DEGLI AGENTI A GIORNI, STORICO, MESSAGGI IMPORTANTI (27/10/2026) ---------- */
+.ai-testa-t{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.ai-testa-t small{font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+.ai-testa-btn{all:unset;box-sizing:border-box;cursor:pointer;height:34px;min-width:34px;padding:0 8px;border-radius:17px;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text);-webkit-tap-highlight-color:transparent}
+.ai-testa-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ai-testa-btn b{font-size:12px;font-weight:800}
+.ai-testa-btn b:empty{display:none}
+.ai-ripresa{margin:4px 2px 10px;padding:9px 11px;border-radius:12px;background:var(--surface2);border:1px dashed var(--border);font-size:12.5px;line-height:1.45;color:var(--text)}
+.ai-ripresa button{all:unset;cursor:pointer;color:var(--accent);font-weight:800;margin-left:4px}
+/* messaggio importante */
+.chat-bubble.ai.importante{border:1.5px solid #c9973f;background:linear-gradient(180deg,rgba(201,151,63,.12),transparent 60%),var(--surface);box-shadow:0 4px 14px rgba(120,80,20,.12)}
+.ai-imp-testa{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a6a1f;background:rgba(201,151,63,.18);border-radius:8px;padding:3px 8px;margin-bottom:6px}
+.ai-imp-testa::before{content:"";width:7px;height:7px;border-radius:50%;background:#e5484d}
+.pm-tasti{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pm-tasti .btn{flex:1;min-width:0}
+.pm-esito{font-size:12.5px;font-weight:800;color:var(--green)}
+/* rettangolo «Messaggio importante» sopra l'icona dell'agente */
+.ai-imp-tag{position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:800;letter-spacing:.02em;color:#fff;background:#c0392b;border-radius:7px;padding:3px 7px;box-shadow:0 3px 10px rgba(120,20,10,.3);pointer-events:none;animation:aiImp 1.8s ease-in-out infinite;z-index:3}
+.ai-imp-tag::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#c0392b}
+#nav-hammer,#ai-fab{position:relative}
+#nav-hammer .ai-imp-tag{bottom:calc(100% + 14px)}
+@keyframes aiImp{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.ai-imp-tag{animation:none}}
+/* storico */
+.ai-sheet{position:relative}
+.ai-arch{position:absolute;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;border-radius:inherit;overflow:hidden}
+.ai-arch[hidden]{display:none}
+.ai-arch-testa{display:flex;align-items:center;gap:10px;padding:14px 14px 8px}
+.ai-arch-testa>div{flex:1;min-width:0}
+.ai-arch-testa b{display:block;font-family:Fraunces,serif;font-size:19px}
+.ai-arch-testa small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.ai-arch-x{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--surface2)}
+.ai-arch-cerca{margin:0 14px 8px;width:auto}
+.ai-arch-lista{flex:1;overflow-y:auto;padding:0 14px 20px}
+.ai-arch-g{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 2px 6px}
+.ai-arch-r{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:6px}
+.ai-arch-r.corrente{border-color:var(--accent)}
+.ai-arch-apri{all:unset;box-sizing:border-box;flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 4px 10px 12px;cursor:pointer}
+.ai-arch-ic{flex:none;font-size:16px}
+.ai-arch-c{flex:1;min-width:0}
+.ai-arch-c b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-arch-c small{display:block;font-size:12px;color:var(--muted)}
+.ai-arch-q{flex:none;font-size:12px;font-weight:700;color:var(--muted)}
+.ai-arch-piu{all:unset;cursor:pointer;padding:10px 12px;font-size:18px;color:var(--muted)}
+.ai-arch-menu{background:var(--surface2);border-radius:12px;padding:9px;margin:-2px 0 8px}
+.ai-arch-menu-a{display:flex;gap:6px;margin-top:7px}
+.ai-arch-menu-a .btn{flex:1}
+.btn.ai-rosso{color:var(--red);border-color:rgba(181,67,47,.4)}
+.ai-arch-vuoto{text-align:center;color:var(--muted);font-weight:700;padding:30px 10px}

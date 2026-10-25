@@ -44,6 +44,7 @@ const PLI = {
   scuderia: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M2 21h20"/><rect x="8" y="13" width="8" height="8"/><path d="m8 13 8 8M16 13l-8 8"/></svg>',
   scad: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg>',
   pin: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  campana: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
   partner: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
 };
 function plTile(ic, t, az, o, cls, sotto){
@@ -69,7 +70,8 @@ function plCostruisciMenuBase(){
       plTile(PLI.fatto, "Lavoro già fatto", "hmGiaFatto()", 1),
       plTile(HM_IC.ferro, "Cavallo", "hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)", 1),
       plTile(HM_IC.users, "Cliente", "apriNuovoCliente('proprietario')", 1),
-      plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1)
+      plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1),
+      plTile(PLI.campana, "Promemoria", "pmApriNuovo()", 1)
     ]);
     h += plSez("Vai a", [
       plTile(HM_IC.ferro, "Cavalli", "hmCartella('cavalli')"),

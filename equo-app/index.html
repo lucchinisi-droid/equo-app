@@ -1330,6 +1330,55 @@ body.ct-aperta{overflow:hidden}
 body.fab-via .ai-fab{opacity:0;transform:scale(.7);pointer-events:none}
 .ai-fab-dot{display:none;position:absolute;top:4px;right:4px;width:13px;height:13px;border-radius:50%;background:#e5484d;border:2px solid var(--bg,#fff)}
 .ai-fab.con-novita .ai-fab-dot{display:block}
+/* ---------- CHAT DEGLI AGENTI A GIORNI, STORICO, MESSAGGI IMPORTANTI (27/10/2026) ---------- */
+.ai-testa-t{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.ai-testa-t small{font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+.ai-testa-btn{all:unset;box-sizing:border-box;cursor:pointer;height:34px;min-width:34px;padding:0 8px;border-radius:17px;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text);-webkit-tap-highlight-color:transparent}
+.ai-testa-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ai-testa-btn b{font-size:12px;font-weight:800}
+.ai-testa-btn b:empty{display:none}
+.ai-ripresa{margin:4px 2px 10px;padding:9px 11px;border-radius:12px;background:var(--surface2);border:1px dashed var(--border);font-size:12.5px;line-height:1.45;color:var(--text)}
+.ai-ripresa button{all:unset;cursor:pointer;color:var(--accent);font-weight:800;margin-left:4px}
+/* messaggio importante */
+.chat-bubble.ai.importante{border:1.5px solid #c9973f;background:linear-gradient(180deg,rgba(201,151,63,.12),transparent 60%),var(--surface);box-shadow:0 4px 14px rgba(120,80,20,.12)}
+.ai-imp-testa{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a6a1f;background:rgba(201,151,63,.18);border-radius:8px;padding:3px 8px;margin-bottom:6px}
+.ai-imp-testa::before{content:"";width:7px;height:7px;border-radius:50%;background:#e5484d}
+.pm-tasti{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pm-tasti .btn{flex:1;min-width:0}
+.pm-esito{font-size:12.5px;font-weight:800;color:var(--green)}
+/* rettangolo «Messaggio importante» sopra l'icona dell'agente */
+.ai-imp-tag{position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:800;letter-spacing:.02em;color:#fff;background:#c0392b;border-radius:7px;padding:3px 7px;box-shadow:0 3px 10px rgba(120,20,10,.3);pointer-events:none;animation:aiImp 1.8s ease-in-out infinite;z-index:3}
+.ai-imp-tag::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#c0392b}
+#nav-hammer,#ai-fab{position:relative}
+#nav-hammer .ai-imp-tag{bottom:calc(100% + 14px)}
+@keyframes aiImp{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.ai-imp-tag{animation:none}}
+/* storico */
+.ai-sheet{position:relative}
+.ai-arch{position:absolute;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;border-radius:inherit;overflow:hidden}
+.ai-arch[hidden]{display:none}
+.ai-arch-testa{display:flex;align-items:center;gap:10px;padding:14px 14px 8px}
+.ai-arch-testa>div{flex:1;min-width:0}
+.ai-arch-testa b{display:block;font-family:Fraunces,serif;font-size:19px}
+.ai-arch-testa small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.ai-arch-x{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--surface2)}
+.ai-arch-cerca{margin:0 14px 8px;width:auto}
+.ai-arch-lista{flex:1;overflow-y:auto;padding:0 14px 20px}
+.ai-arch-g{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 2px 6px}
+.ai-arch-r{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:6px}
+.ai-arch-r.corrente{border-color:var(--accent)}
+.ai-arch-apri{all:unset;box-sizing:border-box;flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 4px 10px 12px;cursor:pointer}
+.ai-arch-ic{flex:none;font-size:16px}
+.ai-arch-c{flex:1;min-width:0}
+.ai-arch-c b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-arch-c small{display:block;font-size:12px;color:var(--muted)}
+.ai-arch-q{flex:none;font-size:12px;font-weight:700;color:var(--muted)}
+.ai-arch-piu{all:unset;cursor:pointer;padding:10px 12px;font-size:18px;color:var(--muted)}
+.ai-arch-menu{background:var(--surface2);border-radius:12px;padding:9px;margin:-2px 0 8px}
+.ai-arch-menu-a{display:flex;gap:6px;margin-top:7px}
+.ai-arch-menu-a .btn{flex:1}
+.btn.ai-rosso{color:var(--red);border-color:rgba(181,67,47,.4)}
+.ai-arch-vuoto{text-align:center;color:var(--muted);font-weight:700;padding:30px 10px}
 /* icona dell'agente (Pegasus = testa di cavallo, Hammer = martello) con piccola rotazione sx/dx + zoom */
 /* BARRA IN ALTO UNICA (26/10/2026): avatar con pallino notifiche · Cerca · meteo di oggi · Equo Card / Card */
 #screen-app .topbar.tb2{display:flex;align-items:center;gap:10px;padding:10px 16px 10px;border-bottom:0;justify-content:flex-start}
@@ -2748,6 +2797,27 @@ body.ecv-aperta{overflow:hidden}
 .conto-gia-r small{display:block;color:var(--red);font-weight:700;font-size:12px}
 .conto-gia-a{display:flex;gap:6px;margin-top:8px}
 .conto-gia-a .btn{flex:1}
+/* 27/10/2026: promemoria personali (Home, Agenda, finestra) */
+.pm-home{background:var(--surface);border:1.5px solid #c9973f;border-radius:18px;padding:11px 13px;margin:0 0 12px;box-shadow:0 4px 14px rgba(120,80,20,.08)}
+.pm-home-t{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.pm-home-t b{font-size:14.5px}
+.pm-home-t button{all:unset;cursor:pointer;font-size:12.5px;font-weight:800;color:var(--accent)}
+.pm-riga{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.pm-riga.fatto{opacity:.55}
+.pm-riga.fatto b{text-decoration:line-through}
+.pm-riga-c{flex:1;min-width:0;cursor:pointer}
+.pm-riga-c b{display:block;font-size:13.5px;line-height:1.3}
+.pm-riga-c small{display:block;font-size:12px;color:var(--muted)}
+.pm-riga .pm-tasti{margin-top:0;flex:none;flex-wrap:nowrap}
+.pm-riga .pm-tasti .btn{flex:none}
+.pm-ritardo{color:var(--red);font-weight:800}
+.pm-ora{flex:none;font-size:12px;font-weight:800;color:var(--accent);width:38px}
+.pm-giorno{background:rgba(201,151,63,.1);border-radius:12px;padding:6px 10px 2px;margin:0 0 8px}
+.pm-giorno-t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a6a1f;padding:2px 0 4px}
+:where(body:not(.pl-owner)) .ag-tile .ag-pm{flex:none;font-size:11.5px;font-weight:800}
+.pm-quando{display:flex;gap:6px;margin:0 0 10px}
+.pm-quando button{all:unset;cursor:pointer;flex:1;text-align:center;padding:8px 4px;border-radius:12px;background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:700}
+.pm-quando button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 /* ---------- Tablet e computer (da 768 px) ---------- */
 @media (min-width:768px){
   body{display:block;background:var(--bg)}
@@ -3596,6 +3666,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
         <div class="hm-meteo-pill" onclick="if(!event.target.closest('#hm-meteo')) document.getElementById('hm-meteo').click()"><div class="meteo-box hm-meteo" id="hm-meteo" aria-label="Meteo della settimana"></div><span class="hm-temp" id="hm-temp"></span></div>
       </div>
       <div id="hm-conferme"></div>
+      <div id="hm-promemoria"></div>
       <div class="hm-banner" id="hm-banner"><div class="hm-slides" id="hm-slides"></div><div class="hm-pall" id="hm-pall"></div></div>
       <div class="hm-cerchi">
         <button class="hm-cerchio" onclick="hmPortami()"><span class="c"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 22 2l-9 19-2-8z"/></svg></span>Portami da…</button>
@@ -4008,12 +4079,13 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
   <div class="ai-sheet-overlay" id="ai-sheet-overlay" onclick="if(event.target.id==='ai-sheet-overlay')closeAiSheet()">
     <div class="ai-sheet">
       <div class="ai-sheet-header">
-        <div style="display:flex;align-items:center;gap:8px;font-weight:700">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;min-width:0">
           <span class="icon" style="color:var(--accent)"><svg><use href="#i-sparkles"/></svg></span>
-          <span id="ai-sheet-titolo">Assistente AI</span>
+          <span class="ai-testa-t"><span id="ai-sheet-titolo">Assistente AI</span><small id="ai-chat-sotto"></small></span>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
-          <button class="btn btn-ghost btn-sm" onclick="nuovaConversazioneAi()" style="padding:6px 10px;font-size:12px">Nuova chat</button>
+          <button class="ai-testa-btn" onclick="aiApriArchivio()" aria-label="Storico delle chat" title="Storico delle chat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg><b id="ai-arch-n"></b></button>
+          <button class="ai-testa-btn" onclick="aiNuovaChat()" aria-label="Chat nuova" title="Chat nuova"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           <button class="back-btn" onclick="closeAiSheet()"><span class="icon"><svg><use href="#i-x"/></svg></span></button>
         </div>
       </div>
@@ -4026,6 +4098,14 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
           <button type="button" onclick="hpCaso()"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>Consulta un caso</button>
           <button type="button" id="hp-btn-storico" onclick="hpStorico()" hidden><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg>Riassumi lo storico</button>
         </div>
+      </div>
+      <!-- storico delle chat (27/10/2026) -->
+      <div class="ai-arch" id="ai-arch" hidden>
+        <div class="ai-arch-testa"><button type="button" class="ai-arch-x" onclick="aiChiudiArchivio()" aria-label="Torna alla chat">‹</button>
+          <div><b id="ai-arch-tit">Chat</b><small id="ai-arch-sotto"></small></div>
+          <button type="button" class="ai-testa-btn" onclick="aiChiudiArchivio();aiNuovaChat()" aria-label="Chat nuova"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+        <input class="input ai-arch-cerca" id="ai-arch-cerca" type="search" placeholder="Cerca: parola, cavallo, cliente…" oninput="aiCercaArchivio(this.value)">
+        <div class="ai-arch-lista" id="ai-arch-lista"></div>
       </div>
       <div class="chat-wrap">
         <div class="chat-messages" id="chat-messages">
@@ -5929,6 +6009,44 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     <div class="muted" style="font-size:12.5px;line-height:1.5;margin-bottom:10px">Cavalli in scadenza in questo giorno secondo l'intervallo della loro scheda. «Fissa» crea l'appuntamento: puoi cambiare la data.</div>
     <div id="df-lista"></div>
     <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeModal('modal-da-fissare')">Chiudi</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-promemoria" onclick="closeOut(event,'modal-promemoria')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span id="pm-tit">Nuovo promemoria</span></div>
+    <div class="muted" style="font-size:12.5px;line-height:1.5;margin:-4px 0 12px">Solo per te. All'ora scelta Hammer te lo scrive in chat come messaggio importante e ti arriva la notifica (o un'email se le notifiche sono spente).</div>
+    <div class="auth-form">
+      <div class="input-group">
+        <label class="input-label" for="pm-testo">Cosa devo ricordarti</label>
+        <input class="input" id="pm-testo" maxlength="300" placeholder="es. Prendere i rock and roll">
+      </div>
+      <div class="pm-quando" id="pm-quando">
+        <button type="button" data-q="0" onclick="pmQuando(0)">Oggi</button>
+        <button type="button" data-q="1" onclick="pmQuando(1)">Domani</button>
+        <button type="button" data-q="7" onclick="pmQuando(7)">Tra una settimana</button>
+      </div>
+      <div class="input-row-2">
+        <div class="input-group"><label class="input-label" for="pm-data">Giorno</label><input class="input" id="pm-data" type="date" onchange="pmAggiornaQuando()"></div>
+        <div class="input-group"><label class="input-label" for="pm-ora">Ora</label><input class="input" id="pm-ora" type="time" value="08:00"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="pm-cliente">Cliente (facoltativo)</label>
+        <select class="input" id="pm-cliente" onchange="pmAggiornaAzione()"></select>
+      </div>
+      <div class="input-group" id="pm-azione-box" style="display:none">
+        <label class="input-label" for="pm-azione">Tasto nel promemoria</label>
+        <select class="input" id="pm-azione">
+          <option value="">Nessuno</option>
+          <option value="conto">Fai il conto</option>
+          <option value="chat">Scrivi al cliente</option>
+          <option value="naviga">Naviga</option>
+        </select>
+      </div>
+      <div class="error-msg" id="pm-errore" style="display:none"></div>
+      <button class="btn btn-primary" id="pm-salva" style="width:100%;margin-top:4px" onclick="pmSalva()">Salva promemoria</button>
+      <button class="btn btn-ghost" id="pm-elimina" style="width:100%;margin-top:6px;color:var(--red);display:none" onclick="pmElimina()">Elimina promemoria</button>
+    </div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
@@ -8027,7 +8145,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		try {
 			await renderProDeadlines();
 			await renderIncassi$1();
-			if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 		} catch (e) {}
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/097-versione-semplice-completa-dell-app-mani.js
@@ -8408,6 +8526,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function renderHomeMan() {
 		if (!document.getElementById("hm")) return;
 		caricaConfermePro(false, "hm-conferme");
+		if (typeof pmRenderHome === "function") pmRenderHome();
 		document.getElementById("hm-saluto").textContent = testoSaluto();
 		document.getElementById("hm-data").textContent = (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", {
 			weekday: "long",
@@ -9178,6 +9297,772 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		} catch (e) {}
 		renderIncassiCompleta();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/061-pdf-del-conto-dai-dati-salvati-snapshot.js
+	async function creaPdfConto(c) {
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const W = 210, M = 18, verde = [
+			20,
+			49,
+			42
+		], oro = [
+			201,
+			143,
+			46
+		], grigio = [
+			95,
+			111,
+			103
+		];
+		const cli = clienteDiId(c.cliente_mascalcia_id);
+		const piede = () => {
+			doc.setDrawColor(227, 221, 204);
+			doc.line(M, 280, 192, 280);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.5);
+			doc.setTextColor(...grigio);
+			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
+		};
+		doc.setFillColor(...verde);
+		doc.rect(0, 0, W, 32, "F");
+		doc.setTextColor(255, 255, 255);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(22);
+		doc.text("Equo", M, 20);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.text("Prenditi cura del tuo cavallo", M, 26);
+		doc.text(contoData(c.creato_il), 192, 20, { align: "right" });
+		doc.setFillColor(...oro);
+		doc.rect(0, 32, W, 1.5, "F");
+		let y = 48;
+		doc.setTextColor(...verde);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(17);
+		doc.text("Resoconto lavori", M, y);
+		doc.setFontSize(12);
+		doc.setTextColor(...oro);
+		doc.text(contoCodice(c), 192, y, { align: "right" });
+		y += 9;
+		doc.setFontSize(15);
+		doc.setTextColor(...verde);
+		doc.text(cli?.nome || "", M, y);
+		const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10.5);
+		doc.setTextColor(...grigio);
+		if (pro) {
+			y += 6;
+			doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
+		}
+		if (c.periodo_da || c.periodo_a) {
+			y += 5.5;
+			doc.text("Periodo: " + (c.periodo_da ? "dal " + contoData(c.periodo_da) + " " : "") + (c.periodo_a ? "al " + contoData(c.periodo_a) : ""), M, y);
+		}
+		y += 10;
+		const colData = 20, colCav = 44, colLav = 96, colImp = 190;
+		const testa = () => {
+			doc.setFillColor(...verde);
+			doc.rect(M, y - 5, 174, 8, "F");
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(9.5);
+			doc.setTextColor(255, 255, 255);
+			doc.text("DATA", colData, y);
+			doc.text("CAVALLO", colCav, y);
+			doc.text("LAVORO", colLav, y);
+			doc.text("IMPORTO", colImp, y, { align: "right" });
+			y += 8;
+		};
+		testa();
+		const nuovaPagina = () => {
+			piede();
+			doc.addPage();
+			y = 22;
+			testa();
+		};
+		const gruppi = {};
+		(c.righe || []).forEach((r) => {
+			(gruppi[r.proprietario_nome || "—"] = gruppi[r.proprietario_nome || "—"] || []).push(r);
+		});
+		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
+		const conGruppi = c.modo === "unico" && nomi.length > 1 || nomi.length > 1;
+		let k = 0;
+		nomi.forEach((n) => {
+			const lista = gruppi[n].slice().sort((a, b) => String(a.data_intervento).localeCompare(String(b.data_intervento)));
+			if (conGruppi) {
+				if (y > 262) nuovaPagina();
+				doc.setFont("helvetica", "bold");
+				doc.setFontSize(10.5);
+				doc.setTextColor(...oro);
+				doc.text(n, colData, y);
+				y += 6;
+			}
+			lista.forEach((r) => {
+				const lav = doc.splitTextToSize(String(r.descrizione || ""), 70);
+				const h = Math.max(7.5, lav.length * 4.8 + 2.6);
+				if (y + h > 268) nuovaPagina();
+				if (k++ % 2 === 0) {
+					doc.setFillColor(248, 246, 240);
+					doc.rect(M, y - 4.6, 174, h, "F");
+				}
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(10);
+				doc.setTextColor(...grigio);
+				doc.text(contoData(r.data_intervento), colData, y);
+				doc.setFont("helvetica", "bold");
+				doc.setTextColor(...verde);
+				doc.text(doc.splitTextToSize(String(r.cavallo_nome || ""), 49), colCav, y);
+				doc.setFont("helvetica", "normal");
+				doc.setTextColor(...grigio);
+				doc.text(lav, colLav, y);
+				doc.setFont("helvetica", "bold");
+				doc.setTextColor(...verde);
+				doc.text(contoEuro(r.importo), colImp, y, { align: "right" });
+				y += h;
+			});
+			if (conGruppi) {
+				const sub = gruppi[n].reduce((s, r) => s + Number(r.importo), 0);
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(9.5);
+				doc.setTextColor(...grigio);
+				doc.text("Subtotale " + n, 136, y, { align: "left" });
+				doc.setFont("helvetica", "bold");
+				doc.text(contoEuro(sub), colImp, y, { align: "right" });
+				y += 8;
+			}
+		});
+		if (y > 246) nuovaPagina();
+		y += 4;
+		doc.setDrawColor(...oro);
+		doc.setLineWidth(.6);
+		doc.line(M, y, 192, y);
+		y += 9;
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(12);
+		doc.setTextColor(...grigio);
+		doc.text(contoLavori(c.n_lavori), M, y);
+		doc.setFontSize(17);
+		doc.setTextColor(...verde);
+		doc.text("TOTALE  " + contoEuro(c.totale), 192, y, { align: "right" });
+		y += 12;
+		if (c.stato !== "pagato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
+			if (y > 250) nuovaPagina();
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...verde);
+			doc.text("Dati per il pagamento", M, y);
+			y += 7;
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...grigio);
+			if (currentUser.datiPagamentoNome) {
+				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoIban) {
+				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoPaypal) {
+				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
+				y += 6;
+			}
+			doc.text("Causale: Conto " + contoCodice(c), M, y);
+		} else if (c.stato === "pagato") {
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...verde);
+			doc.text("Conto saldato" + (c.pagato_il ? " il " + contoData(c.pagato_il) : ""), M, y);
+		}
+		y = riquadroInvitoPdf(doc, cli, y + 6, W, M, () => {
+			piede();
+			doc.addPage();
+			return 22;
+		});
+		piede();
+		return {
+			blob: doc.output("blob"),
+			nome: contoNomeFile(c)
+		};
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/060-foglio-di-invio-gestione-del-conto.js
+	async function apriInvioConto(id) {
+		const c = await ContoDB.completo(id);
+		if (!c) {
+			showToast("Conto non trovato");
+			return;
+		}
+		contoAperto = c;
+		const cli = clienteDiId(c.cliente_mascalcia_id);
+		const stato = c.stato === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : c.stato === "annullato" ? "<span class=\"badge\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
+		document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
+		document.getElementById("conto-invio-corpo").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div></div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
+    <div class="ag-azioni" style="margin-top:14px">
+      ${c.stato !== "annullato" ? `
+      <button class="btn btn-primary" onclick="contoInviaChat()"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat Equo</button>
+      <button class="btn btn-outline" onclick="contoCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Email, WhatsApp, altro…</button>
+      <button class="btn btn-outline" onclick="contoScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>` : ""}
+      ${c.stato === "da_incassare" ? `
+      <button class="btn btn-outline" onclick="contoSegnaPagato()"><span class="fa-icon"><i class="fa-solid fa-check"></i></span> Segna pagato</button>
+      <button class="btn btn-outline" style="color:var(--red)" onclick="contoAnnulla()"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla il conto</button>` : ""}
+    </div>`;
+		openModal("modal-conto-invio");
+	}
+	async function contoInviaChat() {
+		const c = contoAperto;
+		if (!c) return;
+		closeModal("modal-conto-invio");
+		await openChatThread(c.cliente_mascalcia_id);
+		document.getElementById("mchat-input").value = `Conto ${contoCodice(c)}: ${c.n_lavori} lavori · totale ${contoEuro(c.totale)}`;
+		chatAllegatoEvento = { __conto: c };
+		document.getElementById("mchat-allegato-nome").textContent = contoNomeFile(c);
+		document.getElementById("mchat-allegato").classList.add("active");
+	}
+	function contoNomeFile(c) {
+		const n = String(clienteDiId(c.cliente_mascalcia_id)?.nome || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+		return [
+			"Equo",
+			"Conto",
+			contoCodice(c),
+			n
+		].filter(Boolean).join("_") + ".pdf";
+	}
+	async function contoCondividi() {
+		const c = contoAperto;
+		if (!c) return;
+		showToast("Creo il PDF…");
+		try {
+			const { blob, nome } = await creaPdfConto(c);
+			const file = new File([blob], nome, { type: "application/pdf" });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
+				await navigator.share({
+					files: [file],
+					title: nome,
+					text: `Conto ${contoCodice(c)} · totale ${contoEuro(c.totale)}`
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			contoScaricaBlob(blob, nome);
+			showToast("Il PDF è stato scaricato: allegalo alla tua email o a WhatsApp.");
+		} catch (err) {
+			console.error("contoCondividi:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	function contoScaricaBlob(blob, nome) {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = nome;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 3e4);
+	}
+	async function contoScarica() {
+		const c = contoAperto;
+		if (!c) return;
+		try {
+			const { blob, nome } = await creaPdfConto(c);
+			contoScaricaBlob(blob, nome);
+		} catch (err) {
+			console.error("contoScarica:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	async function contoSegnaPagato() {
+		const c = contoAperto;
+		if (!c) return;
+		if (!await chiediSiNo("Conto pagato?", `${c.n_lavori === 1 ? "Il lavoro" : "Tutti i " + c.n_lavori + " lavori"} del conto ${contoCodice(c)} (${contoEuro(c.totale)}) ${c.n_lavori === 1 ? "risulterà saldato" : "risulteranno saldati"}.`)) return;
+		const { error } = await ContoDB.pagato(c.id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		closeModal("modal-conto-invio");
+		showToast("Conto pagato: lavori saldati");
+		if (currentClienteId) {
+			caricaContiCliente(currentClienteId);
+			loadClienteInterventi(currentClienteId);
+		}
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	async function contoAnnulla() {
+		const c = contoAperto;
+		if (!c) return;
+		if (!await chiediSiNo("Annullare il conto?", `Il conto ${contoCodice(c)} resta nell'elenco come «annullato» e i suoi lavori tornano da saldare: potrai rifarlo.`)) return;
+		const { error } = await ContoDB.annulla(c.id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		closeModal("modal-conto-invio");
+		showToast("Conto annullato");
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/059-foglio-fai-il-conto.js
+	async function apriNuovoConto(clienteId) {
+		if (incassiNascosti()) {
+			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il conto.");
+			return;
+		}
+		if (!clienteDiId(clienteId)) await loadClientiMascalcia().catch(() => {});
+		const cli = clienteDiId(clienteId);
+		contoCtx = {
+			clienteId,
+			scuderia: eLuogoScuderia(cli),
+			modo: "unico",
+			periodo: "tutto",
+			da: "",
+			a: "",
+			tutti: [],
+			lavori: [],
+			sel: /* @__PURE__ */ new Set()
+		};
+		document.getElementById("conto-nuovo-titolo").textContent = "Conto · " + (cli?.nome || "cliente");
+		document.getElementById("conto-nuovo-corpo").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico i lavori…</div>";
+		openModal("modal-conto-nuovo");
+		await caricaCavalliMiei().catch(() => {});
+		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(clienteId), ContoDB.aperti(clienteId)]);
+		contoApplicaPeriodo();
+	}
+	function contoApriEsistente(id) {
+		closeModal("modal-conto-nuovo");
+		apriInvioConto(id);
+	}
+	async function contoAnnullaERifai(id) {
+		const c = (contoCtx?.aperti || []).find((x) => x.id === id);
+		if (!c) return;
+		if (!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
+		const { error } = await ContoDB.annulla(id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		showToast("Conto " + contoCodice(c) + " annullato");
+		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(contoCtx.clienteId), ContoDB.aperti(contoCtx.clienteId)]);
+		contoApplicaPeriodo();
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+	}
+	function contoApplicaPeriodo() {
+		const c = contoCtx;
+		if (!c) return;
+		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale;
+		let da = "", a = "";
+		if (c.periodo === "mese") {
+			da = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 1));
+			a = iso(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0));
+		} else if (c.periodo === "scorso") {
+			da = iso(new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1));
+			a = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 0));
+		} else if (c.periodo === "date") {
+			da = c.da;
+			a = c.a;
+		}
+		c.pDa = da;
+		c.pA = a;
+		c.lavori = c.tutti.filter((i) => (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a));
+		c.sel = new Set(c.lavori.map((i) => i.id));
+		renderNuovoConto();
+	}
+	function contoSetPeriodo(p) {
+		contoCtx.periodo = p;
+		if (p !== "date") contoApplicaPeriodo();
+		else renderNuovoConto();
+	}
+	function contoSetDate() {
+		contoCtx.da = document.getElementById("conto-da").value;
+		contoCtx.a = document.getElementById("conto-a").value;
+		contoApplicaPeriodo();
+	}
+	function contoSetModo(m) {
+		contoCtx.modo = m;
+		renderNuovoConto();
+	}
+	function contoToggleGruppo(nome) {
+		const c = contoCtx;
+		if (!c) return;
+		const ids = c.lavori.filter((i) => contoNomeProprietario(i) === nome).map((i) => i.id);
+		const tutti = ids.every((id) => c.sel.has(id));
+		ids.forEach((id) => tutti ? c.sel.delete(id) : c.sel.add(id));
+		renderNuovoConto();
+	}
+	function contoToggle(id) {
+		contoCtx.sel.has(id) ? contoCtx.sel.delete(id) : contoCtx.sel.add(id);
+		renderNuovoConto();
+	}
+	function contoNomeProprietario(i) {
+		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
+	}
+	function contoNomeCavallo(i) {
+		return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo";
+	}
+	function renderNuovoConto() {
+		const c = contoCtx;
+		if (!c) return;
+		const chip = (k, t) => `<button type="button" class="btn ${c.periodo === k ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetPeriodo('${k}')">${t}</button>`;
+		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
+		const tot = scelti.reduce((s, i) => s + Number(i.importo), 0);
+		const gruppi = {};
+		c.lavori.forEach((i) => {
+			(gruppi[contoNomeProprietario(i)] = gruppi[contoNomeProprietario(i)] || []).push(i);
+		});
+		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
+		const nPag = new Set(scelti.map((i) => i.cliente_mascalcia_id)).size;
+		const modoHtml = c.scuderia ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CHI PAGA</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="btn ${c.modo === "unico" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('unico')">Paga la scuderia · conto unico</button>
+      <button type="button" class="btn ${c.modo === "per_proprietario" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('per_proprietario')">Un conto per proprietario</button>
+    </div>` : "";
+		document.getElementById("conto-nuovo-corpo").innerHTML = `
+    ${modoHtml}
+    <div class="clienti-sez-title" style="margin:14px 0 6px">PERIODO</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${chip("tutto", "Non ancora saldato")}${chip("mese", "Questo mese")}${chip("scorso", "Mese scorso")}${chip("date", "Scegli le date")}</div>
+    ${c.periodo === "date" ? `<div style="display:flex;gap:8px;margin-top:8px"><input class="input" type="date" id="conto-da" value="${c.da}" onchange="contoSetDate()"><input class="input" type="date" id="conto-a" value="${c.a}" onchange="contoSetDate()"></div>` : ""}
+    <div class="clienti-sez-title" style="margin:14px 0 6px">LAVORI INCLUSI (${scelti.length} di ${c.lavori.length})</div>
+    ${c.lavori.length ? nomi.map((n) => `
+      ${c.scuderia || nomi.length > 1 ? `<label style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:13px;font-weight:700;color:var(--accent)">
+        <input type="checkbox" data-gruppo="${escapeHtml(n)}" ${gruppi[n].every((i) => c.sel.has(i.id)) ? "checked" : ""} onchange="contoToggleGruppo(this.dataset.gruppo)">
+        <span style="flex:1">${escapeHtml(n)}</span><span class="muted" style="font-size:12px;font-weight:600">${gruppi[n].filter((i) => c.sel.has(i.id)).length}/${gruppi[n].length}</span></label>` : ""}
+      ${gruppi[n].map((i) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)">
+        <input type="checkbox" ${c.sel.has(i.id) ? "checked" : ""} onchange="contoToggle('${i.id}')">
+        <span style="flex:1;min-width:0"><b>${escapeHtml(contoNomeCavallo(i))}</b><span class="muted" style="font-size:12px;display:block">${contoData(i.data_intervento)} · ${escapeHtml(agDescrizioneTipo(i))}</span></span>
+        <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("") : (c.aperti || []).length ? `<div class="conto-gia">
+          <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
+          ${c.aperti.map((k) => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
+            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
+        </div>` : "<div class=\"muted\" style=\"font-size:13px;padding:8px 0\">Nessun lavoro da saldare in questo periodo.</div>"}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
+    ${c.scuderia && c.modo === "per_proprietario" && nPag > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Verranno creati ${nPag} conti, uno per ciascun proprietario.</div>` : ""}
+    <button class="btn btn-primary" id="conto-crea-btn" style="width:100%;margin-top:14px" ${scelti.length ? "" : "disabled"} onclick="creaContoDaScelte()">Crea il PDF</button>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. Non è una fattura.</div>`;
+		document.querySelectorAll("#conto-nuovo-corpo input[data-gruppo]").forEach((cb) => {
+			const l = gruppi[cb.dataset.gruppo] || [], n = l.filter((i) => c.sel.has(i.id)).length;
+			cb.indeterminate = n > 0 && n < l.length;
+		});
+	}
+	async function creaContoDaScelte() {
+		const c = contoCtx;
+		if (!c) return;
+		const btn = document.getElementById("conto-crea-btn");
+		btn.disabled = true;
+		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
+		const riga = (i) => ({
+			intervento_id: i.id,
+			cavallo_nome: contoNomeCavallo(i),
+			proprietario_nome: contoNomeProprietario(i),
+			descrizione: agDescrizioneTipo(i)
+		});
+		const per = c.scuderia && c.modo === "per_proprietario";
+		const mappa = /* @__PURE__ */ new Map();
+		scelti.forEach((i) => {
+			const k = per ? i.cliente_mascalcia_id : c.clienteId;
+			(mappa.get(k) || mappa.set(k, []).get(k)).push(i);
+		});
+		const creati = [];
+		for (const [clienteId, lav] of mappa) {
+			const { data, error } = await ContoDB.crea(clienteId, per ? "per_proprietario" : "unico", c.pDa || null, c.pA || null, lav.map(riga));
+			if (error) {
+				showToast("Conto non creato: " + (error.message || "riprova"));
+				btn.disabled = false;
+				break;
+			}
+			creati.push(data);
+		}
+		if (!creati.length) return;
+		closeModal("modal-conto-nuovo");
+		contoCtx = null;
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (creati.length === 1) return apriInvioConto(creati[0].id);
+		showToast(creati.length + " conti creati: li trovi nella scheda di ogni proprietario");
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/111-promemoria-personali.js
+	var PM_AZIONI = {
+		conto: "Fai il conto",
+		chat: "Scrivi al cliente",
+		naviga: "Naviga"
+	};
+	var pmCache = {};
+	var pmInModifica = null;
+	var pmOra = (q) => new Date(q).toLocaleTimeString("it-IT", {
+		hour: "2-digit",
+		minute: "2-digit"
+	});
+	var pmGiorno = (q) => isoLocale(new Date(q));
+	var pmNomeCliente = (p) => p?.clienti_mascalcia?.nome || clientiMascalcia?.find?.((c) => c.id === p?.cliente_mascalcia_id)?.nome || "";
+	var PmDB = {
+		async periodo(daIso, aIso) {
+			if (DEMO_MODE) return (demoState.promemoria || []).filter((p) => p.stato !== "annullato" && pmGiorno(p.quando) >= daIso && pmGiorno(p.quando) <= aIso);
+			const da = (/* @__PURE__ */ new Date(daIso + "T00:00:00")).toISOString(), a = (/* @__PURE__ */ new Date(aIso + "T23:59:59")).toISOString();
+			const { data, error } = await sb.from("promemoria_personali").select("*, clienti_mascalcia(nome)").eq("user_id", currentUser.id).neq("stato", "annullato").gte("quando", da).lte("quando", a).order("quando", { ascending: true }).limit(200);
+			if (error) {
+				if (!/does not exist|schema cache/i.test(error.message || "")) console.warn("promemoria:", error.message);
+				return [];
+			}
+			return data || [];
+		},
+		async daFareFinoAOggi() {
+			if (DEMO_MODE) return (demoState.promemoria || []).filter((p) => p.stato === "attivo" && pmGiorno(p.quando) <= isoLocale(/* @__PURE__ */ new Date()));
+			const fine = (/* @__PURE__ */ new Date(isoLocale(/* @__PURE__ */ new Date()) + "T23:59:59")).toISOString();
+			const { data, error } = await sb.from("promemoria_personali").select("*, clienti_mascalcia(nome)").eq("user_id", currentUser.id).eq("stato", "attivo").lte("quando", fine).order("quando", { ascending: true }).limit(30);
+			if (error) return [];
+			return data || [];
+		},
+		async uno(id) {
+			if (pmCache[id]) return pmCache[id];
+			if (DEMO_MODE) return (demoState.promemoria || []).find((p) => p.id === id) || null;
+			const { data } = await sb.from("promemoria_personali").select("*, clienti_mascalcia(nome)").eq("id", id).maybeSingle();
+			if (data) pmCache[id] = data;
+			return data || null;
+		},
+		async salva(id, campi) {
+			if (DEMO_MODE) {
+				demoState.promemoria = demoState.promemoria || [];
+				if (id) {
+					Object.assign(demoState.promemoria.find((p) => p.id === id) || {}, campi);
+					return { error: null };
+				}
+				demoState.promemoria.push({
+					id: "pm" + Date.now(),
+					stato: "attivo",
+					user_id: currentUser.id,
+					...campi
+				});
+				return { error: null };
+			}
+			const { error } = await (id ? sb.from("promemoria_personali").update(campi).eq("id", id) : sb.from("promemoria_personali").insert({
+				user_id: currentUser.id,
+				...campi
+			}));
+			if (id) delete pmCache[id];
+			return { error };
+		}
+	};
+	var pmTabellaMancante = (e) => /does not exist|schema cache|promemoria_personali/i.test(e?.message || "");
+	function pmApriNuovo(preset) {
+		pmInModifica = null;
+		pmRiempi(preset || {});
+	}
+	async function pmModifica(id) {
+		const p = await PmDB.uno(id);
+		if (!p) return;
+		pmInModifica = p;
+		pmRiempi({
+			testo: p.testo,
+			data: pmGiorno(p.quando),
+			ora: pmOra(p.quando),
+			cliente_mascalcia_id: p.cliente_mascalcia_id,
+			azione: p.azione
+		});
+	}
+	function pmRiempi(x) {
+		document.getElementById("pm-tit").textContent = pmInModifica ? "Modifica promemoria" : "Nuovo promemoria";
+		document.getElementById("pm-testo").value = x.testo || "";
+		document.getElementById("pm-data").value = x.data || aggiungiGiorniIso(isoLocale(/* @__PURE__ */ new Date()), 1);
+		document.getElementById("pm-data").min = isoLocale(/* @__PURE__ */ new Date());
+		document.getElementById("pm-ora").value = x.ora || "08:00";
+		const sel = document.getElementById("pm-cliente");
+		sel.innerHTML = "<option value=\"\">Nessun cliente</option>" + (clientiMascalcia || []).filter((c) => !c.archiviato_il).slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+		sel.value = x.cliente_mascalcia_id || "";
+		document.getElementById("pm-azione").value = x.azione || "";
+		pmAggiornaAzione();
+		pmAggiornaQuando();
+		document.getElementById("pm-errore").style.display = "none";
+		document.getElementById("pm-elimina").style.display = pmInModifica ? "" : "none";
+		openModal("modal-promemoria");
+		if (!pmInModifica) setTimeout(() => document.getElementById("pm-testo").focus(), 250);
+	}
+	function pmQuando(g) {
+		document.getElementById("pm-data").value = aggiungiGiorniIso(isoLocale(/* @__PURE__ */ new Date()), g);
+		pmAggiornaQuando();
+	}
+	function pmAggiornaQuando() {
+		const v = document.getElementById("pm-data").value, oggi = isoLocale(/* @__PURE__ */ new Date());
+		document.querySelectorAll("#pm-quando button").forEach((b) => b.classList.toggle("on", v === aggiungiGiorniIso(oggi, Number(b.dataset.q))));
+	}
+	function pmAggiornaAzione() {
+		const c = document.getElementById("pm-cliente").value;
+		document.getElementById("pm-azione-box").style.display = c ? "" : "none";
+		if (!c) document.getElementById("pm-azione").value = "";
+	}
+	async function pmSalva() {
+		const err = document.getElementById("pm-errore");
+		const testo = document.getElementById("pm-testo").value.replace(/\s+/g, " ").trim();
+		const data = document.getElementById("pm-data").value, ora = document.getElementById("pm-ora").value || "08:00";
+		const mostra = (t) => {
+			err.textContent = t;
+			err.style.display = "block";
+		};
+		if (!testo) return mostra("Scrivi cosa devo ricordarti.");
+		if (!data) return mostra("Scegli il giorno.");
+		const quando = /* @__PURE__ */ new Date(data + "T" + ora);
+		if (quando.getTime() < Date.now() - 6e4) return mostra("Scegli un'ora che non sia già passata.");
+		const cliente = document.getElementById("pm-cliente").value || null;
+		const campi = {
+			testo: testo.slice(0, 300),
+			quando: quando.toISOString(),
+			cliente_mascalcia_id: cliente,
+			azione: cliente ? document.getElementById("pm-azione").value || null : null,
+			stato: "attivo"
+		};
+		if (!pmInModifica) campi.creato_da = "utente";
+		const btn = document.getElementById("pm-salva");
+		btn.disabled = true;
+		const { error } = await PmDB.salva(pmInModifica?.id || null, campi);
+		btn.disabled = false;
+		if (error) return mostra(pmTabellaMancante(error) ? "I promemoria saranno disponibili dopo l'aggiornamento di Equo." : "Non salvato: " + error.message);
+		closeModal("modal-promemoria");
+		showToast(`Promemoria ${pmInModifica ? "aggiornato" : "salvato"}: ${formatDataBreve(data)} ore ${ora}`);
+		pmInModifica = null;
+		pmAggiornaViste();
+	}
+	async function pmElimina() {
+		if (!pmInModifica) return;
+		if (!confirm("Eliminare questo promemoria?")) return;
+		const { error } = await PmDB.salva(pmInModifica.id, { stato: "annullato" });
+		if (error) {
+			showToast("Errore: " + error.message);
+			return;
+		}
+		closeModal("modal-promemoria");
+		pmInModifica = null;
+		showToast("Promemoria eliminato");
+		pmAggiornaViste();
+	}
+	async function pmFatto(id, btn) {
+		if (btn) btn.disabled = true;
+		const fatto = (await PmDB.uno(id))?.stato === "fatto";
+		const { error } = await PmDB.salva(id, { stato: fatto ? "attivo" : "fatto" });
+		if (error) {
+			if (btn) btn.disabled = false;
+			showToast("Errore: " + error.message);
+			return;
+		}
+		showToast(fatto ? "Rimesso da fare" : "✓ Fatto");
+		pmSegnaInChat(id, fatto ? null : "✓ Fatto");
+		pmAggiornaViste();
+	}
+	async function pmDomani(id, btn) {
+		if (btn) btn.disabled = true;
+		const p = await PmDB.uno(id);
+		if (!p) {
+			if (btn) btn.disabled = false;
+			return;
+		}
+		const base = new Date(Math.max(Date.now(), new Date(p.quando).getTime()));
+		const d = new Date(base);
+		d.setDate(d.getDate() + 1);
+		if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+		const ora = pmOra(p.quando);
+		const quando = /* @__PURE__ */ new Date(isoLocale(d) + "T" + ora);
+		const { error } = await PmDB.salva(id, {
+			quando: quando.toISOString(),
+			stato: "attivo"
+		});
+		if (error) {
+			if (btn) btn.disabled = false;
+			showToast("Errore: " + error.message);
+			return;
+		}
+		showToast(`Rimandato a ${formatDataBreve(isoLocale(d))} ore ${ora}`);
+		pmSegnaInChat(id, `↻ Rimandato a ${formatDataBreve(isoLocale(d))} ore ${ora}`);
+		pmAggiornaViste();
+	}
+	async function pmEsegui(id) {
+		const p = await PmDB.uno(id);
+		if (!p) return;
+		const cid = p.cliente_mascalcia_id;
+		if (!cid || !p.azione) return pmModifica(id);
+		if (typeof closeAiSheet === "function" && document.body.classList.contains("ai-aperta")) closeAiSheet();
+		if (p.azione === "conto") return apriNuovoConto(cid);
+		if (p.azione === "chat") {
+			if (typeof showPage === "function") showPage("pro-inbox");
+			return typeof openChatThread === "function" ? openChatThread(cid) : null;
+		}
+		if (p.azione === "naviga") return typeof wgNaviga === "function" ? wgNaviga(cid) : null;
+	}
+	function pmSegnaInChat(id, esito) {
+		document.querySelectorAll(`.pm-tasti[data-pm="${id}"]`).forEach((el) => {
+			if (esito) el.innerHTML = `<span class="pm-esito">${escapeHtml(esito)}</span>`;
+		});
+	}
+	function pmTastiHtml(p, compatto) {
+		const az = p.azione && p.cliente_mascalcia_id ? `<button type="button" class="btn btn-primary btn-sm" onclick="pmEsegui('${p.id}')">${PM_AZIONI[p.azione]}</button>` : "";
+		if (p.stato === "fatto") return `<span class="pm-esito">✓ Fatto</span>`;
+		return `${az}<button type="button" class="btn btn-outline btn-sm" onclick="pmFatto('${p.id}', this)">Fatto</button>${compatto ? "" : `<button type="button" class="btn btn-outline btn-sm" onclick="pmDomani('${p.id}', this)">Domani</button>`}`;
+	}
+	function pmTastiChat(azione) {
+		if (!azione || azione.tipo !== "promemoria" || !azione.id) return "";
+		const p = {
+			id: azione.id,
+			azione: azione.azione,
+			cliente_mascalcia_id: azione.cliente_mascalcia_id,
+			stato: "attivo"
+		};
+		return `<div class="pm-tasti" data-pm="${azione.id}">${pmTastiHtml(p)}</div>`;
+	}
+	async function pmRenderHome$1() {
+		const box = document.getElementById("hm-promemoria");
+		if (!box || !currentUser) return;
+		const lista = await PmDB.daFareFinoAOggi();
+		lista.forEach((p) => {
+			pmCache[p.id] = p;
+		});
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		box.innerHTML = !lista.length ? "" : `<div class="pm-home">
+    <div class="pm-home-t"><b>🔔 Da ricordare</b><button type="button" onclick="pmApriNuovo()">+ Nuovo</button></div>
+    ${lista.map((p) => {
+			const g = pmGiorno(p.quando), cli = pmNomeCliente(p);
+			return `<div class="pm-riga"><div class="pm-riga-c" onclick="pmModifica('${p.id}')"><b>${escapeHtml(p.testo)}</b><small>${g < oggi ? `<span class="pm-ritardo">${formatDataBreve(g)}</span> · ` : ""}ore ${pmOra(p.quando)}${cli ? " · " + escapeHtml(cli) : ""}</small></div><div class="pm-tasti">${pmTastiHtml(p, true)}</div></div>`;
+		}).join("")}
+  </div>`;
+	}
+	async function pmCaricaSettimana(daIso, aIso) {
+		const lista = await PmDB.periodo(daIso, aIso);
+		lista.forEach((p) => {
+			pmCache[p.id] = p;
+		});
+		return lista;
+	}
+	function pmPannelloGiorno(lista) {
+		if (!lista || !lista.length) return "";
+		return `<div class="pm-giorno"><div class="pm-giorno-t">🔔 Promemoria</div>
+    ${lista.map((p) => {
+			const cli = pmNomeCliente(p);
+			return `<div class="pm-riga${p.stato === "fatto" ? " fatto" : ""}"><span class="pm-ora">${pmOra(p.quando)}</span><div class="pm-riga-c" onclick="pmModifica('${p.id}')"><b>${escapeHtml(p.testo)}</b>${cli ? `<small>${escapeHtml(cli)}</small>` : ""}</div><div class="pm-tasti">${pmTastiHtml(p, true)}</div></div>`;
+		}).join("")}
+  </div>`;
+	}
+	function pmAggiornaViste() {
+		pmCache = {};
+		pmRenderHome$1();
+		if (typeof renderAgendaSettimana === "function" && document.getElementById("page-pro-agenda")?.classList.contains("active")) renderAgendaSettimana();
+	}
+	async function pmSalvaDaHammer(x) {
+		const quando = /* @__PURE__ */ new Date(x.data + "T" + (x.ora || "08:00"));
+		if (quando.getTime() < Date.now() - 6e4) return { error: { message: "l'ora è già passata" } };
+		const r = await PmDB.salva(null, {
+			testo: x.testo,
+			quando: quando.toISOString(),
+			cliente_mascalcia_id: x.cliente_mascalcia_id || null,
+			azione: x.cliente_mascalcia_id ? x.azione || null : null,
+			creato_da: "hammer",
+			stato: "attivo"
+		});
+		if (r.error && pmTabellaMancante(r.error)) return { error: { message: "i promemoria saranno disponibili dopo l'aggiornamento di Equo" } };
+		if (!r.error) pmAggiornaViste();
+		return r;
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
 	async function azioneGruppoStruttura(gruppoId, azione) {
 		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
@@ -9189,7 +10074,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			return;
 		}
 		showToast(azione === "conferma" ? "Confermato: la scuderia riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		await renderProDeadlines();
 		if (currentClienteId) await loadClienteInterventi(currentClienteId);
 	}
@@ -9252,7 +10137,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}
 		closeModal("modal-proponi-struttura");
 		showToast("Proposta inviata: la scuderia deve confermarla.");
-		if (document.getElementById("ag-week")) await renderAgendaSettimana();
+		if (document.getElementById("ag-week")) await renderAgendaSettimana$1();
 		if (currentClienteId) await loadClienteInterventi(currentClienteId);
 	}
 	function vaiAllaDataAgenda(iso) {
@@ -9262,7 +10147,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const diffGiorni = Math.round((target - lunCorrente) / 864e5);
 		agSettimanaOffset = Math.floor(diffGiorni / 7);
 		agGiorniAperti = /* @__PURE__ */ new Set([iso]);
-		renderAgendaSettimana();
+		renderAgendaSettimana$1();
 	}
 	function accettaRichiesta(id) {
 		const r = richiesteCache[id] || agEventiCache[id];
@@ -9289,7 +10174,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			testo: testoRichiesta("❌ Non riesco per questa richiesta", r, agNomeCavallo(r)) + " Scrivimi qui per trovare un'altra data."
 		});
 		showToast("Richiesta rifiutata");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		await renderProDeadlines();
 		if (currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
 	}
@@ -9324,6 +10209,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
       ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
+      ${(d.pm || []).some((p) => p.stato === "attivo") ? `<span class="ag-pm" title="Promemoria">🔔${(d.pm || []).filter((p) => p.stato === "attivo").length}</span>` : ""}
       ${riposo ? "<span class=\"ag-riposo\">Riposo</span>" : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
     </button>`;
 	}
@@ -9364,6 +10250,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
         <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+      ${pmPannelloGiorno(d.pm)}
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
       ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
       ${d.ev.length > 1 ? "<div class=\"ag-sugger\">Tieni premuto ⋮⋮ e trascina per cambiare l'ordine del giro.</div>" : ""}
@@ -9520,7 +10407,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			}
 		}
 		if (!scambio) showToast("Ordine del giro salvato");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		try {
 			await renderProDeadlines();
 		} catch (_) {}
@@ -9540,13 +10427,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function cambiaSettimanaAgenda(delta) {
 		agSettimanaOffset += delta;
 		agGiorniAperti = /* @__PURE__ */ new Set();
-		renderAgendaSettimana(delta);
+		renderAgendaSettimana$1(delta);
 	}
 	function tornaSettimanaCorrente() {
 		const delta = -agSettimanaOffset;
 		agSettimanaOffset = 0;
 		agGiorniAperti = null;
-		renderAgendaSettimana(delta || null);
+		renderAgendaSettimana$1(delta || null);
 	}
 	function agAttivaSwipe(box) {
 		if (box.dataset.swipe) return;
@@ -9628,7 +10515,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			return;
 		}
 		showToast("Segnato come fatto");
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 		await renderIncassi$1();
 		await renderProDeadlines();
 	}
@@ -9702,7 +10589,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			}
 			closeModal("modal-azioni-evento");
 			showToast(nuovo === "fatto" ? "Segnato come fatto" : "Rimesso da fare");
-			await renderAgendaSettimana();
+			await renderAgendaSettimana$1();
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} else if (tipo === "elimina") {
@@ -9718,7 +10605,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			});
 			closeModal("modal-azioni-evento");
 			showToast("Appuntamento eliminato");
-			await renderAgendaSettimana();
+			await renderAgendaSettimana$1();
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} else if (tipo === "pdf") {
@@ -9956,7 +10843,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}
 		return wgIndirizziStrutture.find((x) => (x.cliente_id || x.id) === c.id) || null;
 	}
-	async function wgNaviga(clienteId) {
+	async function wgNaviga$1(clienteId) {
 		const c = wgClienteDi(clienteId);
 		if (!c) {
 			showToast("Cliente non trovato");
@@ -10210,7 +11097,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function navigaLuogo(l) {
 		if (!l) return;
 		if (l.indirizzo) return wgMostraMappe({ nome: l.nome }, l.indirizzo);
-		if (l.clienteId) return wgNaviga(l.clienteId);
+		if (l.clienteId) return wgNaviga$1(l.clienteId);
 		wgMostraMappe({ nome: l.nome }, l.nome, "Indirizzo non indicato: ricerca per nome, controlla nelle mappe che sia il posto giusto.");
 	}
 	async function wgNavigaEvento(id) {
@@ -10434,7 +11321,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			await caricaCavalliMiei();
 			if (typeof renderClientiList === "function") renderClientiList();
 			if (currentClienteId) await loadClienteInterventi(currentClienteId);
-			if (typeof renderAgendaSettimana === "function") renderAgendaSettimana();
+			if (typeof renderAgendaSettimana$1 === "function") renderAgendaSettimana$1();
 		} else {
 			await loadHorses();
 			if (currentHorseId) await openHorseDetail(currentHorseId);
@@ -10559,7 +11446,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const [y, m, d] = iso.split("-").map(Number);
 		return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
 	}
-	async function renderAgendaSettimana(direzione) {
+	async function renderAgendaSettimana$1(direzione) {
 		const box = document.getElementById("ag-week");
 		if (!box) return;
 		const token = ++agRenderToken;
@@ -10571,11 +11458,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("ag-oggi-btn").style.display = agSettimanaOffset === 0 ? "none" : "inline-block";
 		if (!agGiorniAperti) agGiorniAperti = /* @__PURE__ */ new Set([oggiIso]);
 		renderRichiestePendenti();
+		const pmAttesa = pmCaricaSettimana(isoGiorni[0], isoGiorni[6]).catch(() => []);
 		const [eventi, scadenze] = await Promise.all([
 			DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
 			DB.listScadenzePeriodo(aggiungiGiorniIso(isoGiorni[0], -1), isoGiorni[6]),
 			caricaUbicazioni()
 		]);
+		const promemoria2 = await pmAttesa;
 		if (token !== agRenderToken) return;
 		agEventiCache = {};
 		(typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach((e) => {
@@ -10596,7 +11485,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				g,
 				oggi: iso === oggiIso,
 				ev: eventi.filter((e) => e.data_intervento === iso),
-				sc: scadenze.filter((sc) => sc.data_vista === iso)
+				sc: scadenze.filter((sc) => sc.data_vista === iso),
+				pm: promemoria2.filter((p) => isoLocale(new Date(p.quando)) === iso)
 			};
 		});
 		agDisegnaGriglia();
@@ -10720,7 +11610,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		showToast(`Giro fissato: ${righe.length} cavalli ${formatDataBreve(data)}${ora ? " ore " + ora : ""}`);
 		giroCorrente = null;
 		await renderProDeadlines();
-		if (document.getElementById("ag-week")) renderAgendaSettimana();
+		if (document.getElementById("ag-week")) renderAgendaSettimana$1();
 		if (document.getElementById("giro-avvisa").checked) {
 			const nome = (righe[0].cliente_nome || "").split(" ")[0];
 			const elenco = righe.map((r) => `${r.cavallo_nome || "cavallo"} (${hpTipo(r).toLowerCase()})`).join(", ");
@@ -12814,7 +13704,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			if (clienteCreatoOra) await loadClientiMascalcia();
 			await renderProDeadlines();
 			await renderIncassi$1();
-			if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 			if (currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
 		} finally {
 			saveBtn.disabled = false;
@@ -12902,7 +13792,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		showToast("Appuntamento eliminato");
 		await renderProDeadlines();
 		await renderIncassi$1();
-		if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+		if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 		if (currentClienteId === clienteId) await loadClienteInterventi(clienteId);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/035-ferratura-del-cavallo-scheda-libretto-fe.js
@@ -14493,495 +15383,6 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		showToast("Cliente ripristinato");
 		await loadClientiMascalcia();
 		await openClienteDetail(id);
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/061-pdf-del-conto-dai-dati-salvati-snapshot.js
-	async function creaPdfConto(c) {
-		const doc = new (await (caricaJsPdf()))({
-			unit: "mm",
-			format: "a4"
-		});
-		const W = 210, M = 18, verde = [
-			20,
-			49,
-			42
-		], oro = [
-			201,
-			143,
-			46
-		], grigio = [
-			95,
-			111,
-			103
-		];
-		const cli = clienteDiId(c.cliente_mascalcia_id);
-		const piede = () => {
-			doc.setDrawColor(227, 221, 204);
-			doc.line(M, 280, 192, 280);
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(8.5);
-			doc.setTextColor(...grigio);
-			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
-		};
-		doc.setFillColor(...verde);
-		doc.rect(0, 0, W, 32, "F");
-		doc.setTextColor(255, 255, 255);
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(22);
-		doc.text("Equo", M, 20);
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(10);
-		doc.text("Prenditi cura del tuo cavallo", M, 26);
-		doc.text(contoData(c.creato_il), 192, 20, { align: "right" });
-		doc.setFillColor(...oro);
-		doc.rect(0, 32, W, 1.5, "F");
-		let y = 48;
-		doc.setTextColor(...verde);
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(17);
-		doc.text("Resoconto lavori", M, y);
-		doc.setFontSize(12);
-		doc.setTextColor(...oro);
-		doc.text(contoCodice(c), 192, y, { align: "right" });
-		y += 9;
-		doc.setFontSize(15);
-		doc.setTextColor(...verde);
-		doc.text(cli?.nome || "", M, y);
-		const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(10.5);
-		doc.setTextColor(...grigio);
-		if (pro) {
-			y += 6;
-			doc.text(etichettaPro() + ": " + pro + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y);
-		}
-		if (c.periodo_da || c.periodo_a) {
-			y += 5.5;
-			doc.text("Periodo: " + (c.periodo_da ? "dal " + contoData(c.periodo_da) + " " : "") + (c.periodo_a ? "al " + contoData(c.periodo_a) : ""), M, y);
-		}
-		y += 10;
-		const colData = 20, colCav = 44, colLav = 96, colImp = 190;
-		const testa = () => {
-			doc.setFillColor(...verde);
-			doc.rect(M, y - 5, 174, 8, "F");
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(9.5);
-			doc.setTextColor(255, 255, 255);
-			doc.text("DATA", colData, y);
-			doc.text("CAVALLO", colCav, y);
-			doc.text("LAVORO", colLav, y);
-			doc.text("IMPORTO", colImp, y, { align: "right" });
-			y += 8;
-		};
-		testa();
-		const nuovaPagina = () => {
-			piede();
-			doc.addPage();
-			y = 22;
-			testa();
-		};
-		const gruppi = {};
-		(c.righe || []).forEach((r) => {
-			(gruppi[r.proprietario_nome || "—"] = gruppi[r.proprietario_nome || "—"] || []).push(r);
-		});
-		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
-		const conGruppi = c.modo === "unico" && nomi.length > 1 || nomi.length > 1;
-		let k = 0;
-		nomi.forEach((n) => {
-			const lista = gruppi[n].slice().sort((a, b) => String(a.data_intervento).localeCompare(String(b.data_intervento)));
-			if (conGruppi) {
-				if (y > 262) nuovaPagina();
-				doc.setFont("helvetica", "bold");
-				doc.setFontSize(10.5);
-				doc.setTextColor(...oro);
-				doc.text(n, colData, y);
-				y += 6;
-			}
-			lista.forEach((r) => {
-				const lav = doc.splitTextToSize(String(r.descrizione || ""), 70);
-				const h = Math.max(7.5, lav.length * 4.8 + 2.6);
-				if (y + h > 268) nuovaPagina();
-				if (k++ % 2 === 0) {
-					doc.setFillColor(248, 246, 240);
-					doc.rect(M, y - 4.6, 174, h, "F");
-				}
-				doc.setFont("helvetica", "normal");
-				doc.setFontSize(10);
-				doc.setTextColor(...grigio);
-				doc.text(contoData(r.data_intervento), colData, y);
-				doc.setFont("helvetica", "bold");
-				doc.setTextColor(...verde);
-				doc.text(doc.splitTextToSize(String(r.cavallo_nome || ""), 49), colCav, y);
-				doc.setFont("helvetica", "normal");
-				doc.setTextColor(...grigio);
-				doc.text(lav, colLav, y);
-				doc.setFont("helvetica", "bold");
-				doc.setTextColor(...verde);
-				doc.text(contoEuro(r.importo), colImp, y, { align: "right" });
-				y += h;
-			});
-			if (conGruppi) {
-				const sub = gruppi[n].reduce((s, r) => s + Number(r.importo), 0);
-				doc.setFont("helvetica", "normal");
-				doc.setFontSize(9.5);
-				doc.setTextColor(...grigio);
-				doc.text("Subtotale " + n, 136, y, { align: "left" });
-				doc.setFont("helvetica", "bold");
-				doc.text(contoEuro(sub), colImp, y, { align: "right" });
-				y += 8;
-			}
-		});
-		if (y > 246) nuovaPagina();
-		y += 4;
-		doc.setDrawColor(...oro);
-		doc.setLineWidth(.6);
-		doc.line(M, y, 192, y);
-		y += 9;
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(12);
-		doc.setTextColor(...grigio);
-		doc.text(contoLavori(c.n_lavori), M, y);
-		doc.setFontSize(17);
-		doc.setTextColor(...verde);
-		doc.text("TOTALE  " + contoEuro(c.totale), 192, y, { align: "right" });
-		y += 12;
-		if (c.stato !== "pagato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
-			if (y > 250) nuovaPagina();
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(12);
-			doc.setTextColor(...verde);
-			doc.text("Dati per il pagamento", M, y);
-			y += 7;
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10.5);
-			doc.setTextColor(...grigio);
-			if (currentUser.datiPagamentoNome) {
-				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
-				y += 6;
-			}
-			if (currentUser.datiPagamentoIban) {
-				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
-				y += 6;
-			}
-			if (currentUser.datiPagamentoPaypal) {
-				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
-				y += 6;
-			}
-			doc.text("Causale: Conto " + contoCodice(c), M, y);
-		} else if (c.stato === "pagato") {
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(12);
-			doc.setTextColor(...verde);
-			doc.text("Conto saldato" + (c.pagato_il ? " il " + contoData(c.pagato_il) : ""), M, y);
-		}
-		y = riquadroInvitoPdf(doc, cli, y + 6, W, M, () => {
-			piede();
-			doc.addPage();
-			return 22;
-		});
-		piede();
-		return {
-			blob: doc.output("blob"),
-			nome: contoNomeFile(c)
-		};
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/060-foglio-di-invio-gestione-del-conto.js
-	async function apriInvioConto(id) {
-		const c = await ContoDB.completo(id);
-		if (!c) {
-			showToast("Conto non trovato");
-			return;
-		}
-		contoAperto = c;
-		const cli = clienteDiId(c.cliente_mascalcia_id);
-		const stato = c.stato === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : c.stato === "annullato" ? "<span class=\"badge\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
-		document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
-		document.getElementById("conto-invio-corpo").innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div></div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
-    <div class="ag-azioni" style="margin-top:14px">
-      ${c.stato !== "annullato" ? `
-      <button class="btn btn-primary" onclick="contoInviaChat()"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat Equo</button>
-      <button class="btn btn-outline" onclick="contoCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Email, WhatsApp, altro…</button>
-      <button class="btn btn-outline" onclick="contoScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>` : ""}
-      ${c.stato === "da_incassare" ? `
-      <button class="btn btn-outline" onclick="contoSegnaPagato()"><span class="fa-icon"><i class="fa-solid fa-check"></i></span> Segna pagato</button>
-      <button class="btn btn-outline" style="color:var(--red)" onclick="contoAnnulla()"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla il conto</button>` : ""}
-    </div>`;
-		openModal("modal-conto-invio");
-	}
-	async function contoInviaChat() {
-		const c = contoAperto;
-		if (!c) return;
-		closeModal("modal-conto-invio");
-		await openChatThread(c.cliente_mascalcia_id);
-		document.getElementById("mchat-input").value = `Conto ${contoCodice(c)}: ${c.n_lavori} lavori · totale ${contoEuro(c.totale)}`;
-		chatAllegatoEvento = { __conto: c };
-		document.getElementById("mchat-allegato-nome").textContent = contoNomeFile(c);
-		document.getElementById("mchat-allegato").classList.add("active");
-	}
-	function contoNomeFile(c) {
-		const n = String(clienteDiId(c.cliente_mascalcia_id)?.nome || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
-		return [
-			"Equo",
-			"Conto",
-			contoCodice(c),
-			n
-		].filter(Boolean).join("_") + ".pdf";
-	}
-	async function contoCondividi() {
-		const c = contoAperto;
-		if (!c) return;
-		showToast("Creo il PDF…");
-		try {
-			const { blob, nome } = await creaPdfConto(c);
-			const file = new File([blob], nome, { type: "application/pdf" });
-			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
-				await navigator.share({
-					files: [file],
-					title: nome,
-					text: `Conto ${contoCodice(c)} · totale ${contoEuro(c.totale)}`
-				});
-				return;
-			} catch (err) {
-				if (err?.name === "AbortError") return;
-			}
-			contoScaricaBlob(blob, nome);
-			showToast("Il PDF è stato scaricato: allegalo alla tua email o a WhatsApp.");
-		} catch (err) {
-			console.error("contoCondividi:", err);
-			showToast("Impossibile creare il PDF: " + (err?.message || err));
-		}
-	}
-	function contoScaricaBlob(blob, nome) {
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = nome;
-		document.body.appendChild(a);
-		a.click();
-		a.remove();
-		setTimeout(() => URL.revokeObjectURL(url), 3e4);
-	}
-	async function contoScarica() {
-		const c = contoAperto;
-		if (!c) return;
-		try {
-			const { blob, nome } = await creaPdfConto(c);
-			contoScaricaBlob(blob, nome);
-		} catch (err) {
-			console.error("contoScarica:", err);
-			showToast("Impossibile creare il PDF: " + (err?.message || err));
-		}
-	}
-	async function contoSegnaPagato() {
-		const c = contoAperto;
-		if (!c) return;
-		if (!await chiediSiNo("Conto pagato?", `${c.n_lavori === 1 ? "Il lavoro" : "Tutti i " + c.n_lavori + " lavori"} del conto ${contoCodice(c)} (${contoEuro(c.totale)}) ${c.n_lavori === 1 ? "risulterà saldato" : "risulteranno saldati"}.`)) return;
-		const { error } = await ContoDB.pagato(c.id);
-		if (error) {
-			showToast("Errore: " + (error.message || "riprova"));
-			return;
-		}
-		closeModal("modal-conto-invio");
-		showToast("Conto pagato: lavori saldati");
-		if (currentClienteId) {
-			caricaContiCliente(currentClienteId);
-			loadClienteInterventi(currentClienteId);
-		}
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
-	}
-	async function contoAnnulla() {
-		const c = contoAperto;
-		if (!c) return;
-		if (!await chiediSiNo("Annullare il conto?", `Il conto ${contoCodice(c)} resta nell'elenco come «annullato» e i suoi lavori tornano da saldare: potrai rifarlo.`)) return;
-		const { error } = await ContoDB.annulla(c.id);
-		if (error) {
-			showToast("Errore: " + (error.message || "riprova"));
-			return;
-		}
-		closeModal("modal-conto-invio");
-		showToast("Conto annullato");
-		if (currentClienteId) caricaContiCliente(currentClienteId);
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/059-foglio-fai-il-conto.js
-	async function apriNuovoConto(clienteId) {
-		if (incassiNascosti()) {
-			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il conto.");
-			return;
-		}
-		if (!clienteDiId(clienteId)) await loadClientiMascalcia().catch(() => {});
-		const cli = clienteDiId(clienteId);
-		contoCtx = {
-			clienteId,
-			scuderia: eLuogoScuderia(cli),
-			modo: "unico",
-			periodo: "tutto",
-			da: "",
-			a: "",
-			tutti: [],
-			lavori: [],
-			sel: /* @__PURE__ */ new Set()
-		};
-		document.getElementById("conto-nuovo-titolo").textContent = "Conto · " + (cli?.nome || "cliente");
-		document.getElementById("conto-nuovo-corpo").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico i lavori…</div>";
-		openModal("modal-conto-nuovo");
-		await caricaCavalliMiei().catch(() => {});
-		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(clienteId), ContoDB.aperti(clienteId)]);
-		contoApplicaPeriodo();
-	}
-	function contoApriEsistente(id) {
-		closeModal("modal-conto-nuovo");
-		apriInvioConto(id);
-	}
-	async function contoAnnullaERifai(id) {
-		const c = (contoCtx?.aperti || []).find((x) => x.id === id);
-		if (!c) return;
-		if (!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
-		const { error } = await ContoDB.annulla(id);
-		if (error) {
-			showToast("Errore: " + (error.message || "riprova"));
-			return;
-		}
-		showToast("Conto " + contoCodice(c) + " annullato");
-		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(contoCtx.clienteId), ContoDB.aperti(contoCtx.clienteId)]);
-		contoApplicaPeriodo();
-		if (currentClienteId) caricaContiCliente(currentClienteId);
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-	}
-	function contoApplicaPeriodo() {
-		const c = contoCtx;
-		if (!c) return;
-		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale;
-		let da = "", a = "";
-		if (c.periodo === "mese") {
-			da = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 1));
-			a = iso(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0));
-		} else if (c.periodo === "scorso") {
-			da = iso(new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1));
-			a = iso(new Date(oggi.getFullYear(), oggi.getMonth(), 0));
-		} else if (c.periodo === "date") {
-			da = c.da;
-			a = c.a;
-		}
-		c.pDa = da;
-		c.pA = a;
-		c.lavori = c.tutti.filter((i) => (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a));
-		c.sel = new Set(c.lavori.map((i) => i.id));
-		renderNuovoConto();
-	}
-	function contoSetPeriodo(p) {
-		contoCtx.periodo = p;
-		if (p !== "date") contoApplicaPeriodo();
-		else renderNuovoConto();
-	}
-	function contoSetDate() {
-		contoCtx.da = document.getElementById("conto-da").value;
-		contoCtx.a = document.getElementById("conto-a").value;
-		contoApplicaPeriodo();
-	}
-	function contoSetModo(m) {
-		contoCtx.modo = m;
-		renderNuovoConto();
-	}
-	function contoToggleGruppo(nome) {
-		const c = contoCtx;
-		if (!c) return;
-		const ids = c.lavori.filter((i) => contoNomeProprietario(i) === nome).map((i) => i.id);
-		const tutti = ids.every((id) => c.sel.has(id));
-		ids.forEach((id) => tutti ? c.sel.delete(id) : c.sel.add(id));
-		renderNuovoConto();
-	}
-	function contoToggle(id) {
-		contoCtx.sel.has(id) ? contoCtx.sel.delete(id) : contoCtx.sel.add(id);
-		renderNuovoConto();
-	}
-	function contoNomeProprietario(i) {
-		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
-	}
-	function contoNomeCavallo(i) {
-		return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo";
-	}
-	function renderNuovoConto() {
-		const c = contoCtx;
-		if (!c) return;
-		const chip = (k, t) => `<button type="button" class="btn ${c.periodo === k ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetPeriodo('${k}')">${t}</button>`;
-		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
-		const tot = scelti.reduce((s, i) => s + Number(i.importo), 0);
-		const gruppi = {};
-		c.lavori.forEach((i) => {
-			(gruppi[contoNomeProprietario(i)] = gruppi[contoNomeProprietario(i)] || []).push(i);
-		});
-		const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
-		const nPag = new Set(scelti.map((i) => i.cliente_mascalcia_id)).size;
-		const modoHtml = c.scuderia ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CHI PAGA</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button type="button" class="btn ${c.modo === "unico" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('unico')">Paga la scuderia · conto unico</button>
-      <button type="button" class="btn ${c.modo === "per_proprietario" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('per_proprietario')">Un conto per proprietario</button>
-    </div>` : "";
-		document.getElementById("conto-nuovo-corpo").innerHTML = `
-    ${modoHtml}
-    <div class="clienti-sez-title" style="margin:14px 0 6px">PERIODO</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">${chip("tutto", "Non ancora saldato")}${chip("mese", "Questo mese")}${chip("scorso", "Mese scorso")}${chip("date", "Scegli le date")}</div>
-    ${c.periodo === "date" ? `<div style="display:flex;gap:8px;margin-top:8px"><input class="input" type="date" id="conto-da" value="${c.da}" onchange="contoSetDate()"><input class="input" type="date" id="conto-a" value="${c.a}" onchange="contoSetDate()"></div>` : ""}
-    <div class="clienti-sez-title" style="margin:14px 0 6px">LAVORI INCLUSI (${scelti.length} di ${c.lavori.length})</div>
-    ${c.lavori.length ? nomi.map((n) => `
-      ${c.scuderia || nomi.length > 1 ? `<label style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:13px;font-weight:700;color:var(--accent)">
-        <input type="checkbox" data-gruppo="${escapeHtml(n)}" ${gruppi[n].every((i) => c.sel.has(i.id)) ? "checked" : ""} onchange="contoToggleGruppo(this.dataset.gruppo)">
-        <span style="flex:1">${escapeHtml(n)}</span><span class="muted" style="font-size:12px;font-weight:600">${gruppi[n].filter((i) => c.sel.has(i.id)).length}/${gruppi[n].length}</span></label>` : ""}
-      ${gruppi[n].map((i) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)">
-        <input type="checkbox" ${c.sel.has(i.id) ? "checked" : ""} onchange="contoToggle('${i.id}')">
-        <span style="flex:1;min-width:0"><b>${escapeHtml(contoNomeCavallo(i))}</b><span class="muted" style="font-size:12px;display:block">${contoData(i.data_intervento)} · ${escapeHtml(agDescrizioneTipo(i))}</span></span>
-        <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("") : (c.aperti || []).length ? `<div class="conto-gia">
-          <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
-          ${c.aperti.map((k) => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
-            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
-        </div>` : "<div class=\"muted\" style=\"font-size:13px;padding:8px 0\">Nessun lavoro da saldare in questo periodo.</div>"}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
-    ${c.scuderia && c.modo === "per_proprietario" && nPag > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Verranno creati ${nPag} conti, uno per ciascun proprietario.</div>` : ""}
-    <button class="btn btn-primary" id="conto-crea-btn" style="width:100%;margin-top:14px" ${scelti.length ? "" : "disabled"} onclick="creaContoDaScelte()">Crea il PDF</button>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. Non è una fattura.</div>`;
-		document.querySelectorAll("#conto-nuovo-corpo input[data-gruppo]").forEach((cb) => {
-			const l = gruppi[cb.dataset.gruppo] || [], n = l.filter((i) => c.sel.has(i.id)).length;
-			cb.indeterminate = n > 0 && n < l.length;
-		});
-	}
-	async function creaContoDaScelte() {
-		const c = contoCtx;
-		if (!c) return;
-		const btn = document.getElementById("conto-crea-btn");
-		btn.disabled = true;
-		const scelti = c.lavori.filter((i) => c.sel.has(i.id));
-		const riga = (i) => ({
-			intervento_id: i.id,
-			cavallo_nome: contoNomeCavallo(i),
-			proprietario_nome: contoNomeProprietario(i),
-			descrizione: agDescrizioneTipo(i)
-		});
-		const per = c.scuderia && c.modo === "per_proprietario";
-		const mappa = /* @__PURE__ */ new Map();
-		scelti.forEach((i) => {
-			const k = per ? i.cliente_mascalcia_id : c.clienteId;
-			(mappa.get(k) || mappa.set(k, []).get(k)).push(i);
-		});
-		const creati = [];
-		for (const [clienteId, lav] of mappa) {
-			const { data, error } = await ContoDB.crea(clienteId, per ? "per_proprietario" : "unico", c.pDa || null, c.pA || null, lav.map(riga));
-			if (error) {
-				showToast("Conto non creato: " + (error.message || "riprova"));
-				btn.disabled = false;
-				break;
-			}
-			creati.push(data);
-		}
-		if (!creati.length) return;
-		closeModal("modal-conto-nuovo");
-		contoCtx = null;
-		if (currentClienteId) caricaContiCliente(currentClienteId);
-		if (typeof renderIncassi$1 === "function") renderIncassi$1();
-		if (creati.length === 1) return apriInvioConto(creati[0].id);
-		showToast(creati.length + " conti creati: li trovi nella scheda di ogni proprietario");
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/074-abbinamento-cavalli-del-maniscalco-caval.js
 	var abbinaPendenti = [];
@@ -16867,7 +17268,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (conScuderia.length && upd.stato === "annullato") for (const g of conScuderia) await azioneGruppoStruttura(g, "annulla");
 		else if (conScuderia.length) showToast("Gli appuntamenti con la scuderia si spostano dal tasto ⋯ (la scuderia deve riconfermare)");
 		if (libere.length) showToast(testo);
-		await renderAgendaSettimana();
+		await renderAgendaSettimana$1();
 	}
 	async function agNfSposta(n) {
 		const g = agGruppiNonFatti()[n];
@@ -17686,7 +18087,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		razzaImposta,
 		razzaSegnala,
 		razzaValore,
-		renderAgendaSettimana,
+		renderAgendaSettimana: renderAgendaSettimana$1,
 		renderBoxCavalliCliente,
 		renderCorpoCavalloPro,
 		renderDoveStaProprietario,
@@ -17757,7 +18158,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		wgClienteDi,
 		wgLuogoAMano,
 		wgMostraMappe,
-		wgNaviga,
+		wgNaviga: wgNaviga$1,
 		wgNavigaEvento,
 		wgRidisegna,
 		wgScegli,
@@ -17805,7 +18206,20 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		scegliSchedaAgenda,
 		scegliVistaAgenda,
 		contoAnnullaERifai,
-		contoApriEsistente
+		contoApriEsistente,
+		pmAggiornaAzione,
+		pmAggiornaQuando,
+		pmApriNuovo,
+		pmDomani,
+		pmElimina,
+		pmEsegui,
+		pmFatto,
+		pmModifica,
+		pmQuando,
+		pmRenderHome: pmRenderHome$1,
+		pmSalva,
+		pmSalvaDaHammer,
+		pmTastiChat
 	});
 })();
 
@@ -20696,6 +21110,8 @@ function aggiornaFabAi(){
 let novitaAi = { riepilogo: false, annunci: false };
 async function controllaNovitaAi(){
   if(DEMO_MODE || !currentUser) return;
+  if(typeof aiAvviaControlloImportanti === "function" && !window.__aiImpAvviato){ window.__aiImpAvviato = true; aiAvviaControlloImportanti(); }
+  else if(typeof aiControllaImportanti === "function") aiControllaImportanti();
   const vista = vistaAi();
   const [r, a] = await Promise.all([
     sb.from("ai_riepiloghi").select("settimana").eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null).limit(1),
@@ -20863,8 +21279,9 @@ async function openAiSheetBase(){
   const conNovita = document.getElementById("ai-fab")?.classList.contains("con-novita");
   segnaNovitaLette();
   // se ha cambiato vista (proprietario ↔ professionista) o sono arrivate novità, si ricarica la conversazione
-  if(aiStoriaCaricata && (aiStoriaVista !== vistaAi() || conNovita)){
-    document.querySelectorAll("#chat-messages .chat-bubble:not(#ai-benvenuto)").forEach(el => el.remove());
+  const ricarica = typeof aiServeRicarica === "function" && aiServeRicarica();
+  if(aiStoriaCaricata && (aiStoriaVista !== vistaAi() || conNovita || ricarica)){
+    document.querySelectorAll("#chat-messages .chat-bubble:not(#ai-benvenuto), #chat-messages .ai-ripresa, #chat-messages .hp-scelte").forEach(el => el.remove());
     aiStoriaCaricata = false;
   }
   if(!aiStoriaCaricata && !DEMO_MODE && currentUser){
@@ -20875,6 +21292,8 @@ async function openAiSheetBase(){
   }
 }
 async function caricaStoriaAi(){
+  // chat a giorni con storico (27/10/2026); se lo SQL non c'è ancora si carica la conversazione unica come prima
+  if(typeof caricaChatAiGiorni === "function" && await caricaChatAiGiorni().catch(e => { console.error("chat a giorni:", e); return false; })) return;
   const { data, error } = await sb.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", currentUser.id).eq("vista", vistaAi()).order("created_at", { ascending: false }).limit(20);
   if(error){ console.error("caricaStoriaAi:", error); return; }
   const box = document.getElementById("chat-messages");
@@ -22809,6 +23228,365 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			notes: null
 		};
 	}
+	// equo-app-src/src/comune/agenti/moduli/083-chat-a-giorni.js
+	var aiConvId = null;
+	var aiConvInfo = null;
+	var aiConvRiaperta = false;
+	var aiArchivio = [];
+	var aiArchCerca = "";
+	var aiArchTimer = null;
+	var aiArchTrovate = null;
+	var aiSqlPronto = true;
+	var MESI_IT = [
+		"gennaio",
+		"febbraio",
+		"marzo",
+		"aprile",
+		"maggio",
+		"giugno",
+		"luglio",
+		"agosto",
+		"settembre",
+		"ottobre",
+		"novembre",
+		"dicembre"
+	];
+	var oggiRoma = () => (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+	var giornoLungo = (iso) => {
+		const [y, m, d] = iso.split("-").map(Number);
+		return new Date(y, m - 1, d).toLocaleDateString("it-IT", {
+			weekday: "long",
+			day: "numeric",
+			month: "long"
+		});
+	};
+	var giornoBreve = (iso) => {
+		const [y, m, d] = iso.split("-").map(Number);
+		return `${d} ${MESI_IT[m - 1].slice(0, 3)}`;
+	};
+	var sqlMancante = (e) => /ai_conversazioni|conversazione_id|importante|does not exist|schema cache/i.test(e?.message || "");
+	async function aiConvDelGiorno() {
+		const { data, error } = await sb.from("ai_conversazioni").select("id, titolo, giorno, fissata, n_messaggi").eq("user_id", currentUser.id).eq("vista", vistaAi()).eq("chiave", "").eq("giorno", oggiRoma()).order("aggiornata_il", { ascending: false }).limit(1);
+		if (error) {
+			if (sqlMancante(error)) aiSqlPronto = false;
+			return null;
+		}
+		return data?.[0] || null;
+	}
+	function aiBollaHtml(m) {
+		if (m.ruolo === "user") return `<div class="chat-bubble user">${escapeHtml(m.contenuto)}</div>`;
+		const imp = m.importante;
+		const tasti = imp && m.azione && typeof pmTastiChat === "function" ? pmTastiChat(m.azione) : "";
+		return `<div class="chat-bubble ai${imp ? " importante" : ""}" data-msg="${m.id || ""}">${imp ? "<div class=\"ai-imp-testa\">Messaggio importante</div>" : ""}${formattaRispostaAi(m.contenuto)}${tasti}</div>`;
+	}
+	async function caricaChatAiGiorni() {
+		if (DEMO_MODE || !currentUser) return false;
+		const box = document.getElementById("chat-messages");
+		let conv = null;
+		if (aiConvId) {
+			const { data, error } = await sb.from("ai_conversazioni").select("id, titolo, giorno, fissata, n_messaggi").eq("id", aiConvId).maybeSingle();
+			if (error && sqlMancante(error)) {
+				aiSqlPronto = false;
+				return false;
+			}
+			conv = data || null;
+			if (!conv) aiConvId = null;
+		}
+		if (!conv) conv = await aiConvDelGiorno();
+		if (!aiSqlPronto) return false;
+		aiConvInfo = conv;
+		box.querySelectorAll(".chat-bubble:not(#ai-benvenuto), .hp-scelte, .ai-ripresa").forEach((el) => el.remove());
+		if (conv) {
+			const { data: msg, error } = await sb.from("ai_messaggi").select("id, ruolo, contenuto, importante, letto_at, azione, created_at").eq("conversazione_id", conv.id).order("created_at", { ascending: true }).limit(300);
+			if (error) {
+				console.error("chat agente:", error);
+				return true;
+			}
+			if (conv.giorno !== oggiRoma()) box.insertAdjacentHTML("beforeend", `<div class="ai-ripresa">Stai riprendendo la chat del <b>${giornoLungo(conv.giorno)}</b>: ${escapeHtml(nomeAgenteAi())} ricorda i suoi messaggi. Scrivendo qui la conversazione continua in questa chat. <button type="button" onclick="aiTornaAOggi()">Torna a oggi</button></div>`);
+			(msg || []).forEach((m) => box.insertAdjacentHTML("beforeend", aiBollaHtml(m)));
+			const daLeggere = (msg || []).filter((m) => m.importante && !m.letto_at).map((m) => m.id);
+			if (daLeggere.length) {
+				await sb.rpc("ai_segna_importanti_letti", { p_ids: daLeggere });
+				aiControllaImportanti();
+			}
+		}
+		aiAggiornaTestataChat();
+		box.scrollTop = box.scrollHeight;
+		aiContaArchivio();
+		return true;
+	}
+	function aiAggiornaTestataChat() {
+		const el = document.getElementById("ai-chat-sotto");
+		if (!el) return;
+		const c = aiConvInfo;
+		el.textContent = !c || c.giorno === oggiRoma() ? c?.titolo ? c.titolo + " · oggi" : "Oggi · " + giornoLungo(oggiRoma()) : (c.titolo || "Chat") + " · " + giornoBreve(c.giorno);
+	}
+	function aiConvDaRisposta(conv) {
+		if (!conv?.id) return;
+		const nuova = !aiConvInfo || aiConvInfo.id !== conv.id;
+		aiConvId = conv.id;
+		aiConvInfo = {
+			...aiConvInfo && !nuova ? aiConvInfo : {},
+			id: conv.id,
+			titolo: conv.titolo || aiConvInfo?.titolo || null,
+			giorno: conv.giorno || aiConvInfo?.giorno || oggiRoma()
+		};
+		aiAggiornaTestataChat();
+		if (nuova) aiContaArchivio();
+	}
+	function aiConvPerInvio() {
+		return aiSqlPronto ? aiConvId : null;
+	}
+	function aiServeRicarica() {
+		if (aiConvInfo && aiConvInfo.giorno !== oggiRoma() && !aiConvRiaperta) {
+			aiConvId = null;
+			return true;
+		}
+		return document.body.classList.contains("ai-con-importante");
+	}
+	async function aiNuovaChat() {
+		if (DEMO_MODE || !currentUser || !aiSqlPronto) return typeof nuovaConversazioneAi === "function" ? nuovaConversazioneAi() : null;
+		const box = document.getElementById("chat-messages");
+		if (!box.querySelector(".chat-bubble:not(#ai-benvenuto)") && (!aiConvInfo || aiConvInfo.giorno === oggiRoma())) {
+			showToast("Sei già in una chat nuova");
+			return;
+		}
+		const { data, error } = await sb.from("ai_conversazioni").insert({
+			user_id: currentUser.id,
+			vista: vistaAi(),
+			chiave: ""
+		}).select("id, titolo, giorno, fissata").single();
+		if (error) {
+			showToast("Non sono riuscito ad aprire una chat nuova, riprova.");
+			return;
+		}
+		aiConvId = data.id;
+		aiConvInfo = data;
+		aiConvRiaperta = false;
+		box.querySelectorAll(".chat-bubble:not(#ai-benvenuto), .hp-scelte, .ai-ripresa").forEach((el) => el.remove());
+		aiAggiornaTestataChat();
+		aiContaArchivio();
+		showToast("Chat nuova: la precedente è nello storico");
+		document.getElementById("chat-input")?.focus();
+	}
+	async function aiTornaAOggi() {
+		aiConvId = null;
+		aiConvRiaperta = false;
+		await caricaChatAiGiorni();
+	}
+	async function aiContaArchivio() {
+		const el = document.getElementById("ai-arch-n");
+		if (!el || DEMO_MODE || !currentUser || !aiSqlPronto) return;
+		const { count } = await sb.from("ai_conversazioni").select("id", {
+			count: "exact",
+			head: true
+		}).eq("user_id", currentUser.id).eq("vista", vistaAi()).eq("chiave", "").gt("n_messaggi", 0);
+		el.textContent = count ? String(count) : "";
+	}
+	async function aiApriArchivio() {
+		const arch = document.getElementById("ai-arch");
+		if (!arch) return;
+		if (!aiSqlPronto) {
+			showToast("Lo storico delle chat arriva con l'aggiornamento di Equo.");
+			return;
+		}
+		document.getElementById("ai-arch-tit").textContent = "Chat con " + nomeAgenteAi();
+		document.getElementById("ai-arch-cerca").value = aiArchCerca = "";
+		aiArchTrovate = null;
+		arch.hidden = false;
+		document.getElementById("ai-arch-lista").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico le chat…</div>";
+		const { data, error } = await sb.from("ai_conversazioni").select("id, titolo, giorno, fissata, n_messaggi, aggiornata_il").eq("user_id", currentUser.id).eq("vista", vistaAi()).eq("chiave", "").order("aggiornata_il", { ascending: false }).limit(300);
+		if (error) {
+			document.getElementById("ai-arch-lista").innerHTML = "<div class=\"muted\">Non riesco a leggere lo storico, riprova.</div>";
+			return;
+		}
+		aiArchivio = (data || []).filter((c) => c.n_messaggi > 0 || c.id === aiConvInfo?.id);
+		document.getElementById("ai-arch-sotto").textContent = `${aiArchivio.length} chat nello storico`;
+		aiDisegnaArchivio();
+	}
+	function aiChiudiArchivio() {
+		const a = document.getElementById("ai-arch");
+		if (a) a.hidden = true;
+	}
+	function aiCercaArchivio(v) {
+		aiArchCerca = String(v || "").trim();
+		clearTimeout(aiArchTimer);
+		aiArchTimer = setTimeout(async () => {
+			if (aiArchCerca.length < 2) {
+				aiArchTrovate = null;
+				return aiDisegnaArchivio();
+			}
+			const q = aiArchCerca.replace(/[%_,()]/g, " ");
+			const { data } = await sb.from("ai_messaggi").select("conversazione_id").eq("user_id", currentUser.id).eq("vista", vistaAi()).ilike("contenuto", `%${q}%`).limit(500);
+			aiArchTrovate = new Set((data || []).map((r) => r.conversazione_id));
+			aiDisegnaArchivio();
+		}, 250);
+	}
+	function aiDisegnaArchivio() {
+		const box = document.getElementById("ai-arch-lista");
+		if (!box) return;
+		const q = aiArchCerca.toLowerCase();
+		const lista = aiArchivio.filter((c) => !aiArchTrovate || aiArchTrovate.has(c.id) || (c.titolo || "").toLowerCase().includes(q));
+		const oggi = oggiRoma();
+		const lun = (() => {
+			const d = /* @__PURE__ */ new Date();
+			d.setDate(d.getDate() - (d.getDay() + 6) % 7);
+			return d.toLocaleDateString("sv-SE");
+		})();
+		const gruppi = [];
+		const metti = (t, c) => {
+			let g = gruppi.find((x) => x.t === t);
+			if (!g) gruppi.push(g = {
+				t,
+				l: []
+			});
+			g.l.push(c);
+		};
+		lista.forEach((c) => {
+			if (c.id === aiConvInfo?.id && c.giorno === oggi) metti("In corso", c);
+			else if (c.fissata) metti("Fissate", c);
+			else if (c.giorno === oggi) metti("Oggi", c);
+			else if (c.giorno >= lun) metti("Questa settimana", c);
+			else {
+				const [y, m] = c.giorno.split("-").map(Number);
+				metti(MESI_IT[m - 1][0].toUpperCase() + MESI_IT[m - 1].slice(1) + (y !== (/* @__PURE__ */ new Date()).getFullYear() ? " " + y : ""), c);
+			}
+		});
+		const ordine = [
+			"In corso",
+			"Fissate",
+			"Oggi",
+			"Questa settimana"
+		];
+		gruppi.sort((a, b) => (ordine.indexOf(a.t) + 1 || 99) - (ordine.indexOf(b.t) + 1 || 99));
+		const quando = (c) => c.giorno === oggi ? new Date(c.aggiornata_il).toLocaleTimeString("it-IT", {
+			hour: "2-digit",
+			minute: "2-digit"
+		}) : c.giorno >= lun ? (/* @__PURE__ */ new Date(c.giorno + "T12:00")).toLocaleDateString("it-IT", {
+			weekday: "short",
+			day: "numeric"
+		}) : giornoBreve(c.giorno);
+		box.innerHTML = !lista.length ? `<div class="ai-arch-vuoto">${aiArchCerca ? "Nessuna chat con «" + escapeHtml(aiArchCerca) + "»" : "Ancora nessuna chat nello storico"}</div>` : gruppi.map((g) => `<div class="ai-arch-g">${escapeHtml(g.t)}</div>` + g.l.map((c) => `
+      <div class="ai-arch-r${c.id === aiConvInfo?.id ? " corrente" : ""}" data-id="${c.id}">
+        <button type="button" class="ai-arch-apri" onclick="aiRiapriChat('${c.id}')">
+          <span class="ai-arch-ic">${c.fissata ? "📌" : "💬"}</span>
+          <span class="ai-arch-c"><b>${escapeHtml(c.titolo || "Chat del " + giornoBreve(c.giorno))}</b><small>${c.n_messaggi} ${c.n_messaggi === 1 ? "messaggio" : "messaggi"}</small></span>
+          <span class="ai-arch-q">${quando(c)}</span>
+        </button>
+        <button type="button" class="ai-arch-piu" onclick="aiMenuChat('${c.id}')" aria-label="Altre azioni">⋯</button>
+      </div>`).join("")).join("");
+	}
+	async function aiRiapriChat(id) {
+		const c = aiArchivio.find((x) => x.id === id);
+		aiConvId = id;
+		aiConvRiaperta = !!c && c.giorno !== oggiRoma();
+		aiChiudiArchivio();
+		await caricaChatAiGiorni();
+	}
+	function aiMenuChat(id) {
+		const r = document.querySelector(`.ai-arch-r[data-id="${id}"]`);
+		const c = aiArchivio.find((x) => x.id === id);
+		if (!r || !c) return;
+		const aperto = r.nextElementSibling?.classList.contains("ai-arch-menu");
+		document.querySelectorAll(".ai-arch-menu").forEach((m) => m.remove());
+		if (aperto) return;
+		r.insertAdjacentHTML("afterend", `<div class="ai-arch-menu">
+    <input class="input" id="ai-ren-${id}" maxlength="70" value="${escapeHtml(c.titolo || "")}" placeholder="Nome della chat">
+    <div class="ai-arch-menu-a">
+      <button type="button" class="btn btn-primary btn-sm" onclick="aiRinominaChat('${id}')">Rinomina</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="aiFissaChat('${id}')">${c.fissata ? "Togli dalle fissate" : "📌 Fissa"}</button>
+      <button type="button" class="btn btn-outline btn-sm ai-rosso" onclick="aiEliminaChat('${id}')">Elimina</button>
+    </div></div>`);
+	}
+	async function aiRinominaChat(id) {
+		const t = (document.getElementById("ai-ren-" + id)?.value || "").replace(/\s+/g, " ").trim().slice(0, 70);
+		if (!t) {
+			showToast("Scrivi un nome");
+			return;
+		}
+		const { error } = await sb.from("ai_conversazioni").update({
+			titolo: t,
+			titolo_manuale: true
+		}).eq("id", id);
+		if (error) {
+			showToast("Non salvato, riprova");
+			return;
+		}
+		const c = aiArchivio.find((x) => x.id === id);
+		if (c) c.titolo = t;
+		if (aiConvInfo?.id === id) {
+			aiConvInfo.titolo = t;
+			aiAggiornaTestataChat();
+		}
+		showToast("Chat rinominata");
+		aiDisegnaArchivio();
+	}
+	async function aiFissaChat(id) {
+		const c = aiArchivio.find((x) => x.id === id);
+		if (!c) return;
+		const { error } = await sb.from("ai_conversazioni").update({ fissata: !c.fissata }).eq("id", id);
+		if (error) {
+			showToast("Non salvato, riprova");
+			return;
+		}
+		c.fissata = !c.fissata;
+		showToast(c.fissata ? "Chat fissata in alto" : "Tolta dalle fissate");
+		aiDisegnaArchivio();
+	}
+	async function aiEliminaChat(id) {
+		const c = aiArchivio.find((x) => x.id === id);
+		if (!c) return;
+		if (!confirm(`Eliminare la chat «${c.titolo || "Chat del " + giornoBreve(c.giorno)}»? I messaggi si cancellano; le note che ${nomeAgenteAi()} ha memorizzato restano.`)) return;
+		const { error } = await sb.from("ai_conversazioni").delete().eq("id", id);
+		if (error) {
+			showToast("Non eliminata, riprova");
+			return;
+		}
+		aiArchivio = aiArchivio.filter((x) => x.id !== id);
+		if (aiConvInfo?.id === id) {
+			aiConvId = null;
+			aiConvRiaperta = false;
+			await caricaChatAiGiorni();
+		}
+		showToast("Chat eliminata");
+		aiDisegnaArchivio();
+		aiContaArchivio();
+	}
+	var aiImpTimer = null;
+	async function aiControllaImportanti() {
+		if (DEMO_MODE || !currentUser || !aiSqlPronto) return;
+		const { count, error } = await sb.from("ai_messaggi").select("id", {
+			count: "exact",
+			head: true
+		}).eq("user_id", currentUser.id).eq("vista", vistaAi()).eq("importante", true).is("letto_at", null);
+		if (error) {
+			if (sqlMancante(error)) aiSqlPronto = false;
+			return;
+		}
+		aiMostraImportante(count || 0);
+	}
+	function aiMostraImportante(n) {
+		document.body.classList.toggle("ai-con-importante", n > 0);
+		[document.getElementById("nav-hammer"), document.getElementById("ai-fab")].filter(Boolean).forEach((el) => {
+			let tag = el.querySelector(":scope > .ai-imp-tag");
+			if (n > 0 && !tag) {
+				tag = document.createElement("span");
+				tag.className = "ai-imp-tag";
+				el.appendChild(tag);
+			}
+			if (tag) {
+				if (n > 0) tag.textContent = n > 1 ? `${n} messaggi importanti` : "Messaggio importante";
+				else tag.remove();
+			}
+		});
+	}
+	function aiAvviaControlloImportanti() {
+		clearInterval(aiImpTimer);
+		aiControllaImportanti();
+		aiImpTimer = setInterval(() => {
+			if (document.visibilityState === "visible" && currentUser) aiControllaImportanti();
+		}, 6e4);
+	}
 	// equo-app-src/src/comune/agenti/moduli/082-analizza-una-foto-focus.js
 	var HP_SCATTI = [
 		{
@@ -22930,10 +23708,12 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 							media_type: "image/jpeg",
 							data: hpFoto.url.split(",")[1]
 						}],
-						contesto_app: hpContesto ? hpContesto.testo : null
+						contesto_app: hpContesto ? hpContesto.testo : null,
+						conversazione_id: aiConvPerInvio()
 					})
 				});
 				data = await res.json().catch(() => ({}));
+				if (data.conversazione) aiConvDaRisposta(data.conversazione);
 				if (res.status === 413) data = {
 					reply: null,
 					errore: "Foto troppo pesante: riprova con un'altra."
@@ -23181,7 +23961,13 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		accetta_richiesta: () => "Accetta",
 		rifiuta_richiesta: () => "Rifiuta",
 		promemoria: (x) => x.collegato ? "Invia in chat" : "Copia testo",
-		saldato: () => "Segna saldato"
+		saldato: () => "Segna saldato",
+		promemoria_personale: () => "Salva promemoria"
+	};
+	var AZIONE_PM = {
+		conto: "con il tasto «Fai il conto»",
+		chat: "con il tasto «Scrivi al cliente»",
+		naviga: "con il tasto «Naviga»"
 	};
 	async function aggiornaViteManiscalco(clienteId) {
 		try {
@@ -23211,8 +23997,30 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			box.scrollTop = box.scrollHeight;
 			return;
 		}
+		if (azione.tipo === "conto") {
+			const nuovo = x.n_liberi > 0;
+			box.insertAdjacentHTML("beforeend", `
+    <div class="chat-bubble ai event-proposal" id="${id}">
+      <div class="event-proposal-title">Conto · ${escapeHtml(x.nome_cliente || "")}</div>
+      <div class="event-proposal-row">${nuovo ? `${x.n_liberi} ${x.n_liberi === 1 ? "lavoro da mettere" : "lavori da mettere"} in conto · <b>€ ${Number(x.totale_liberi || 0).toFixed(2)}</b>${x.senza_importo ? ` <span class="muted">(${x.senza_importo} senza importo)</span>` : ""}` : "Nessun lavoro nuovo da mettere in conto."}</div>
+      ${(x.aperti || []).map((c) => `<div class="event-proposal-row">Già fatto: <b>${escapeHtml(c.codice)}</b> del ${formatDataBreve(c.creato_il)} · ${c.n_lavori} lavori · € ${Number(c.totale || 0).toFixed(2)} · da incassare</div>`).join("")}
+      <div class="event-proposal-actions">
+        ${(x.aperti || []).map((c) => `<button class="btn btn-outline btn-sm" onclick="closeAiSheet();apriInvioConto('${c.id}')">Apri ${escapeHtml(c.codice)}</button>`).join("")}
+        ${nuovo || !(x.aperti || []).length ? `<button class="btn btn-primary btn-sm btn-conferma" onclick="closeAiSheet();apriNuovoConto('${x.cliente_mascalcia_id}')">Fai il conto</button>` : ""}
+      </div>
+    </div>`);
+			box.scrollTop = box.scrollHeight;
+			return;
+		}
 		let titolo = "", righe = [];
-		if (azione.tipo === "spesa") {
+		if (azione.tipo === "promemoria_personale") {
+			titolo = `🔔 Promemoria · ${formatDataBreve(x.data)} ore ${escapeHtml(x.ora || "08:00")}`;
+			righe = [
+				`<b>${escapeHtml(x.testo || "")}</b>`,
+				x.nome_cliente ? `Cliente: ${escapeHtml(x.nome_cliente)}${x.azione && AZIONE_PM[x.azione] ? " · " + AZIONE_PM[x.azione] : ""}` : "",
+				`<span class="muted">All'ora giusta te lo scrivo qui e ti arriva la notifica.</span>`
+			];
+		} else if (azione.tipo === "spesa") {
 			titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
 			righe = [
 				`Importo: € ${Number(x.amount).toFixed(2)}`,
@@ -23423,6 +24231,10 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			} catch (e) {
 				error = { message: "copia non riuscita, tieni premuto sul testo per copiarlo" };
 			}
+		} else if (azione.tipo === "promemoria_personale") {
+			if (typeof pmSalvaDaHammer !== "function") error = { message: "promemoria non disponibili in questa vista" };
+			else ({error} = await pmSalvaDaHammer(x));
+			fatto = `✓ Promemoria salvato: ${formatDataBreve(x.data)} ore ${escapeHtml(x.ora || "08:00")}. Te lo ricordo io.`;
 		} else if (azione.tipo === "saldato") {
 			for (const idInt of x.ids || []) {
 				const r = await DB.updateInterventoMascalcia(idInt, { stato_pagamento: "saldato" });
@@ -23484,10 +24296,12 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 					})),
 					posizione: typeof meteoUltimaPos === "function" ? meteoUltimaPos() : null,
 					modalita,
-					contesto_app: agenteAiHammer() && hpContesto ? hpContesto.testo : null
+					contesto_app: agenteAiHammer() && hpContesto ? hpContesto.testo : null,
+					conversazione_id: aiConvPerInvio()
 				})
 			});
 			const data = await res.json().catch(() => ({}));
+			if (data.conversazione) aiConvDaRisposta(data.conversazione);
 			const bolla = document.getElementById(thinkingId);
 			if (res.status === 413) bolla.textContent = "Allegati troppo pesanti: prova con meno foto o un PDF più leggero.";
 			else if (res.status === 401) bolla.textContent = `Sessione scaduta: esci e rientra per usare ${nomeAgenteAi()}.`;
@@ -23762,7 +24576,21 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		renderAllegatiAi,
 		riduciImmagine,
 		rimuoviAllegatoAi,
-		sendChatMessage
+		sendChatMessage,
+		aiApriArchivio,
+		aiAvviaControlloImportanti,
+		aiCercaArchivio,
+		aiChiudiArchivio,
+		aiControllaImportanti,
+		aiEliminaChat,
+		aiFissaChat,
+		aiMenuChat,
+		aiNuovaChat,
+		aiRiapriChat,
+		aiRinominaChat,
+		aiServeRicarica,
+		aiTornaAOggi,
+		caricaChatAiGiorni
 	});
 })();
 
@@ -28367,6 +29195,7 @@ const PLI = {
   scuderia: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M2 21h20"/><rect x="8" y="13" width="8" height="8"/><path d="m8 13 8 8M16 13l-8 8"/></svg>',
   scad: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg>',
   pin: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  campana: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
   partner: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
 };
 function plTile(ic, t, az, o, cls, sotto){
@@ -28392,7 +29221,8 @@ function plCostruisciMenuBase(){
       plTile(PLI.fatto, "Lavoro già fatto", "hmGiaFatto()", 1),
       plTile(HM_IC.ferro, "Cavallo", "hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)", 1),
       plTile(HM_IC.users, "Cliente", "apriNuovoCliente('proprietario')", 1),
-      plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1)
+      plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1),
+      plTile(PLI.campana, "Promemoria", "pmApriNuovo()", 1)
     ]);
     h += plSez("Vai a", [
       plTile(HM_IC.ferro, "Cavalli", "hmCartella('cavalli')"),

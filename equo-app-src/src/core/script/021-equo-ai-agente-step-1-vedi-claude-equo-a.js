@@ -52,6 +52,8 @@ function aggiornaFabAi(){
 let novitaAi = { riepilogo: false, annunci: false };
 async function controllaNovitaAi(){
   if(DEMO_MODE || !currentUser) return;
+  if(typeof aiAvviaControlloImportanti === "function" && !window.__aiImpAvviato){ window.__aiImpAvviato = true; aiAvviaControlloImportanti(); }
+  else if(typeof aiControllaImportanti === "function") aiControllaImportanti();
   const vista = vistaAi();
   const [r, a] = await Promise.all([
     sb.from("ai_riepiloghi").select("settimana").eq("user_id", currentUser.id).eq("vista", vista).is("letto_il", null).limit(1),

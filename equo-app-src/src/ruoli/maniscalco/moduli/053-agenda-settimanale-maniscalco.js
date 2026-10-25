@@ -3,6 +3,7 @@ import { caricaUbicazioni } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas
 import { MISURA_SISTEMA_LABEL, aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { renderRichiestePendenti } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agDisegnaGriglia } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
+import { pmCaricaSettimana } from "./111-promemoria-personali.js";
 import { agAttivaSwipe } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 /* ---------- AGENDA SETTIMANALE (maniscalco) ---------- */
 const AG_GIORNI = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -67,11 +68,13 @@ async function renderAgendaSettimana(direzione){
   if(!agGiorniAperti) agGiorniAperti = new Set([oggiIso]);
 
   renderRichiestePendenti();
+  const pmAttesa = pmCaricaSettimana(isoGiorni[0], isoGiorni[6]).catch(() => []);   // promemoria personali, in parallelo
   const [eventi, scadenze] = await Promise.all([
     DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
     DB.listScadenzePeriodo(aggiungiGiorniIso(isoGiorni[0], -1), isoGiorni[6]),   // dalla domenica prima: la domenica è riposo, le sue scadenze vanno al lunedì
     caricaUbicazioni()
   ]);
+  const promemoria2 = await pmAttesa;
   if(token !== agRenderToken) return; // un render più recente è già partito
   agEventiCache = {};
   (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach(e => { agEventiCache[e.id] = e; });   // righe della Home pro
@@ -82,7 +85,8 @@ async function renderAgendaSettimana(direzione){
     const iso = isoGiorni[k];
     return { iso, k, g, oggi: iso === oggiIso,
       ev: eventi.filter(e => e.data_intervento === iso),
-      sc: scadenze.filter(sc => sc.data_vista === iso) };
+      sc: scadenze.filter(sc => sc.data_vista === iso),
+      pm: promemoria2.filter(p => isoLocale(new Date(p.quando)) === iso) };
   });
   agDisegnaGriglia();
   if(typeof agAggiornaSchede === "function") agAggiornaSchede();

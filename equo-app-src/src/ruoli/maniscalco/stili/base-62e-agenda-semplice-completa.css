@@ -97,3 +97,24 @@
 .conto-gia-r small{display:block;color:var(--red);font-weight:700;font-size:12px}
 .conto-gia-a{display:flex;gap:6px;margin-top:8px}
 .conto-gia-a .btn{flex:1}
+/* 27/10/2026: promemoria personali (Home, Agenda, finestra) */
+.pm-home{background:var(--surface);border:1.5px solid #c9973f;border-radius:18px;padding:11px 13px;margin:0 0 12px;box-shadow:0 4px 14px rgba(120,80,20,.08)}
+.pm-home-t{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.pm-home-t b{font-size:14.5px}
+.pm-home-t button{all:unset;cursor:pointer;font-size:12.5px;font-weight:800;color:var(--accent)}
+.pm-riga{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.pm-riga.fatto{opacity:.55}
+.pm-riga.fatto b{text-decoration:line-through}
+.pm-riga-c{flex:1;min-width:0;cursor:pointer}
+.pm-riga-c b{display:block;font-size:13.5px;line-height:1.3}
+.pm-riga-c small{display:block;font-size:12px;color:var(--muted)}
+.pm-riga .pm-tasti{margin-top:0;flex:none;flex-wrap:nowrap}
+.pm-riga .pm-tasti .btn{flex:none}
+.pm-ritardo{color:var(--red);font-weight:800}
+.pm-ora{flex:none;font-size:12px;font-weight:800;color:var(--accent);width:38px}
+.pm-giorno{background:rgba(201,151,63,.1);border-radius:12px;padding:6px 10px 2px;margin:0 0 8px}
+.pm-giorno-t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a6a1f;padding:2px 0 4px}
+:where(body:not(.pl-owner)) .ag-tile .ag-pm{flex:none;font-size:11.5px;font-weight:800}
+.pm-quando{display:flex;gap:6px;margin:0 0 10px}
+.pm-quando button{all:unset;cursor:pointer;flex:1;text-align:center;padding:8px 4px;border-radius:12px;background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:700}
+.pm-quando button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}

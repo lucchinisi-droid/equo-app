@@ -129,8 +129,9 @@ async function openAiSheetBase(){
   const conNovita = document.getElementById("ai-fab")?.classList.contains("con-novita");
   segnaNovitaLette();
   // se ha cambiato vista (proprietario ↔ professionista) o sono arrivate novità, si ricarica la conversazione
-  if(aiStoriaCaricata && (aiStoriaVista !== vistaAi() || conNovita)){
-    document.querySelectorAll("#chat-messages .chat-bubble:not(#ai-benvenuto)").forEach(el => el.remove());
+  const ricarica = typeof aiServeRicarica === "function" && aiServeRicarica();
+  if(aiStoriaCaricata && (aiStoriaVista !== vistaAi() || conNovita || ricarica)){
+    document.querySelectorAll("#chat-messages .chat-bubble:not(#ai-benvenuto), #chat-messages .ai-ripresa, #chat-messages .hp-scelte").forEach(el => el.remove());
     aiStoriaCaricata = false;
   }
   if(!aiStoriaCaricata && !DEMO_MODE && currentUser){
@@ -141,6 +142,8 @@ async function openAiSheetBase(){
   }
 }
 async function caricaStoriaAi(){
+  // chat a giorni con storico (27/10/2026); se lo SQL non c'è ancora si carica la conversazione unica come prima
+  if(typeof caricaChatAiGiorni === "function" && await caricaChatAiGiorni().catch(e => { console.error("chat a giorni:", e); return false; })) return;
   const { data, error } = await sb.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", currentUser.id).eq("vista", vistaAi()).order("created_at", { ascending: false }).limit(20);
   if(error){ console.error("caricaStoriaAi:", error); return; }
   const box = document.getElementById("chat-messages");

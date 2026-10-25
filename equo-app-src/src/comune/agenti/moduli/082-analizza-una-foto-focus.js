@@ -1,6 +1,7 @@
 // Equo App · agenti · modulo (moduli ES, costruiti con Vite in ruoli/agenti/costruito.js)
 import { detectDemoEvent } from "./080-ai-chat.js";
 import { hpEstraiScelte, hpFineCaso, hpLimiteHtml, renderAllegatiAi, riduciImmagine } from "./081-equo-ai-allegati-step-2-foto-ridotte-a-m.js";
+import { aiConvDaRisposta, aiConvPerInvio } from "./083-chat-a-giorni.js";
 /* ---------- Analizza una foto (Focus) ---------- */
 const HP_SCATTI = [
   { k: "laterale", t: "Laterale", g: "Zoccolo di lato, a terra, telefono all'altezza del piede" },
@@ -60,8 +61,9 @@ async function hpAnalizza(){
     } else {
       const res = await fetch("/.netlify/functions/agent", { method: "POST", headers: await authHeaders(),
         body: JSON.stringify({ message: testo, vista: vistaAi(), modalita: "foto", allegati: [{ media_type: "image/jpeg", data: hpFoto.url.split(",")[1] }],
-          contesto_app: hpContesto ? hpContesto.testo : null }) });
+          contesto_app: hpContesto ? hpContesto.testo : null, conversazione_id: aiConvPerInvio() }) });
       data = await res.json().catch(() => ({}));
+      if(data.conversazione) aiConvDaRisposta(data.conversazione);
       if(res.status === 413) data = { reply: null, errore: "Foto troppo pesante: riprova con un'altra." };
       else if(!res.ok && !data.reply) data = { reply: null, errore: "Non riesco ad analizzare la foto adesso, riprova tra poco." };
     }
@@ -192,7 +194,9 @@ const ETICHETTA_CONFERMA_AI = {
   rifiuta_richiesta: () => "Rifiuta",
   promemoria: x => x.collegato ? "Invia in chat" : "Copia testo",
   saldato: () => "Segna saldato",
+  promemoria_personale: () => "Salva promemoria",
 };
+const AZIONE_PM = { conto: "con il tasto «Fai il conto»", chat: "con il tasto «Scrivi al cliente»", naviga: "con il tasto «Naviga»" };
 // dopo un'azione di Hammer aggiorna le schermate del maniscalco già aperte
 async function aggiornaViteManiscalco(clienteId){
   try{
@@ -221,8 +225,28 @@ function renderAzioneAi(box, azione){
     box.scrollTop = box.scrollHeight;
     return;
   }
+  if(azione.tipo === "conto"){
+    // Hammer · conto di un cliente: apre «Fai il conto» già sul cliente, oppure un conto già fatto
+    const nuovo = x.n_liberi > 0;
+    box.insertAdjacentHTML("beforeend", `
+    <div class="chat-bubble ai event-proposal" id="${id}">
+      <div class="event-proposal-title">Conto · ${escapeHtml(x.nome_cliente || "")}</div>
+      <div class="event-proposal-row">${nuovo ? `${x.n_liberi} ${x.n_liberi === 1 ? "lavoro da mettere" : "lavori da mettere"} in conto · <b>€ ${Number(x.totale_liberi || 0).toFixed(2)}</b>${x.senza_importo ? ` <span class="muted">(${x.senza_importo} senza importo)</span>` : ""}` : "Nessun lavoro nuovo da mettere in conto."}</div>
+      ${(x.aperti || []).map(c => `<div class="event-proposal-row">Già fatto: <b>${escapeHtml(c.codice)}</b> del ${formatDataBreve(c.creato_il)} · ${c.n_lavori} lavori · € ${Number(c.totale || 0).toFixed(2)} · da incassare</div>`).join("")}
+      <div class="event-proposal-actions">
+        ${(x.aperti || []).map(c => `<button class="btn btn-outline btn-sm" onclick="closeAiSheet();apriInvioConto('${c.id}')">Apri ${escapeHtml(c.codice)}</button>`).join("")}
+        ${nuovo || !(x.aperti || []).length ? `<button class="btn btn-primary btn-sm btn-conferma" onclick="closeAiSheet();apriNuovoConto('${x.cliente_mascalcia_id}')">Fai il conto</button>` : ""}
+      </div>
+    </div>`);
+    box.scrollTop = box.scrollHeight;
+    return;
+  }
   let titolo = "", righe = [];
-  if(azione.tipo === "spesa"){
+  if(azione.tipo === "promemoria_personale"){
+    titolo = `🔔 Promemoria · ${formatDataBreve(x.data)} ore ${escapeHtml(x.ora || "08:00")}`;
+    righe = [`<b>${escapeHtml(x.testo || "")}</b>`, x.nome_cliente ? `Cliente: ${escapeHtml(x.nome_cliente)}${x.azione && AZIONE_PM[x.azione] ? " · " + AZIONE_PM[x.azione] : ""}` : "",
+      `<span class="muted">All'ora giusta te lo scrivo qui e ti arriva la notifica.</span>`];
+  } else if(azione.tipo === "spesa"){
     titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
     righe = [`Importo: € ${Number(x.amount).toFixed(2)}`, `Data: ${formatDate(x.date)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.notes ? escapeHtml(x.notes) : ""];
   } else if(azione.tipo === "lezione"){
@@ -347,6 +371,10 @@ async function confermaAzioneAi(id){
       try{ await navigator.clipboard.writeText(x.testo); fatto = `✓ Testo copiato: incollalo nel messaggio a ${escapeHtml(x.nome_cliente || "")}.`; }
       catch(e){ error = { message: "copia non riuscita, tieni premuto sul testo per copiarlo" }; }
     }
+  } else if(azione.tipo === "promemoria_personale"){
+    if(typeof pmSalvaDaHammer !== "function") error = { message: "promemoria non disponibili in questa vista" };
+    else ({ error } = await pmSalvaDaHammer(x));
+    fatto = `✓ Promemoria salvato: ${formatDataBreve(x.data)} ore ${escapeHtml(x.ora || "08:00")}. Te lo ricordo io.`;
   } else if(azione.tipo === "saldato"){
     for(const idInt of (x.ids || [])){
       const r = await DB.updateInterventoMascalcia(idInt, { stato_pagamento: "saldato" });
@@ -402,9 +430,10 @@ async function sendChatMessage(opz){
       method: "POST",
       headers: await authHeaders(),
       body: JSON.stringify({ message: text, vista: vistaAi(), allegati: allegati.map(a => ({ media_type: a.media_type, data: a.data })), posizione: (typeof meteoUltimaPos === "function" ? meteoUltimaPos() : null),
-        modalita, contesto_app: agenteAiHammer() && hpContesto ? hpContesto.testo : null })
+        modalita, contesto_app: agenteAiHammer() && hpContesto ? hpContesto.testo : null, conversazione_id: aiConvPerInvio() })
     });
     const data = await res.json().catch(() => ({}));
+    if(data.conversazione) aiConvDaRisposta(data.conversazione);
     const bolla = document.getElementById(thinkingId);
     if(res.status === 413){
       bolla.textContent = "Allegati troppo pesanti: prova con meno foto o un PDF più leggero.";

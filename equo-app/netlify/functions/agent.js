@@ -45,6 +45,30 @@ async function provaAgente(admin, centroId, agente) {
   return { usati: count || 0, fine };
 }
 
+// titolo della chat scelto dall'agente (dopo il primo scambio e di nuovo all'8° messaggio), se l'utente non l'ha rinominata
+const MODELLO_TITOLI = process.env.EQUO_RIEPILOGO_MODEL || "claude-haiku-4-5-20251001";
+async function titoloConversazione(admin, convId) {
+  const { data: c } = await admin.from("ai_conversazioni").select("id, titolo, titolo_manuale, n_messaggi, giorno").eq("id", convId).maybeSingle();
+  if (!c) return null;
+  if (!c.titolo_manuale && (!c.titolo || c.n_messaggi === 2 || c.n_messaggi === 8) && process.env.ANTHROPIC_API_KEY) {
+    const { data: ms } = await admin.from("ai_messaggi").select("ruolo, contenuto").eq("conversazione_id", convId).order("created_at", { ascending: true }).limit(10);
+    const testo = (ms || []).map((m) => (m.ruolo === "user" ? "Utente: " : "Agente: ") + String(m.contenuto || "").replace(/\s+/g, " ").slice(0, 300)).join("\n");
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({ model: MODELLO_TITOLI, max_tokens: 30,
+          system: "Dai un titolo breve (3-6 parole, italiano) a questa conversazione, citando cavallo o cliente se ci sono. Rispondi solo con il titolo, senza virgolette né punto finale.",
+          messages: [{ role: "user", content: testo || "(vuota)" }] }),
+      });
+      const j = await res.json();
+      const t = (j.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ").replace(/["«»*]/g, "").replace(/\s+/g, " ").trim().slice(0, 70);
+      if (res.ok && t) { await admin.from("ai_conversazioni").update({ titolo: t }).eq("id", convId).eq("titolo_manuale", false); c.titolo = t; }
+    } catch (_) { /* il titolo resta quello di prima */ }
+  }
+  return { id: c.id, titolo: c.titolo, giorno: c.giorno };
+}
+
 // ---------------------------------------------------------------- handler
 exports.handler = async (event) => {
   const origine = event.headers.origin || event.headers.Origin || "";
@@ -161,12 +185,28 @@ exports.handler = async (event) => {
     prenotato++;
   }
 
-  // contesto: cavalli, memoria, cronologia
+  // chat del giorno o chat dello storico riaperta dall'utente (27/10/2026). Se lo SQL non c'è ancora si prosegue come prima.
+  const chiaveConv = scud ? (merlino ? "merlino" : agScud || "athena") : "";
+  let convId = null;
+  const convRichiesta = /^[0-9a-f-]{36}$/i.test(String(body.conversazione_id || "")) ? String(body.conversazione_id) : null;
+  if (convRichiesta) {
+    const { data: cv } = await admin.from("ai_conversazioni").select("id").eq("id", convRichiesta).eq("user_id", user.id).eq("vista", vista).eq("chiave", chiaveConv).maybeSingle();
+    convId = cv?.id || null;
+  }
+  if (!convId) {
+    const { data: idc, error: ec } = await admin.rpc("ai_conversazione_corrente", { p_user: user.id, p_vista: vista, p_chiave: chiaveConv, p_centro: centro?.id || null });
+    if (!ec && idc) convId = idc;
+  }
+
+  // contesto: cavalli, memoria, cronologia (solo la chat in corso)
   const { data: cavalli } = scud ? { data: [] } : await db.from("horses").select("id, name, breed, birth_date, microchip, mantello, note, condiviso_ecosistema").eq("owner_id", user.id).order("created_at", { ascending: true });
   const { data: memoria } = scud ? { data: [] } : await db.from("ai_memoria").select("testo, horse_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
   let qStoria = db.from("ai_messaggi").select("ruolo, contenuto").eq("user_id", user.id).eq("vista", vista);
-  if (scud) qStoria = qStoria.eq("centro_id", centro.id);
-  if (merlino) qStoria = qStoria.eq("agente", "merlino"); else if (agScud) qStoria = qStoria.eq("agente", agScud); else if (athena) qStoria = qStoria.or("agente.is.null,agente.eq.athena");
+  if (convId) qStoria = qStoria.eq("conversazione_id", convId);
+  else {
+    if (scud) qStoria = qStoria.eq("centro_id", centro.id);
+    if (merlino) qStoria = qStoria.eq("agente", "merlino"); else if (agScud) qStoria = qStoria.eq("agente", agScud); else if (athena) qStoria = qStoria.or("agente.is.null,agente.eq.athena");
+  }
   const { data: storia } = await qStoria.order("created_at", { ascending: false }).limit(16);
 
   const listaCavalli = cavalli || [];
@@ -280,10 +320,12 @@ exports.handler = async (event) => {
   // salva conversazione e consumo (service role: la tabella ai_utilizzo non è scrivibile dall'app)
   const p = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
   const costoUsd = (costo.in * p.in + costo.out * p.out + costo.cacheRead * p.cacheRead + costo.cacheWrite * p.cacheWrite) / 1e6 + costo.ricerche * COSTO_RICERCA_USD;
+  const conChat = convId ? { conversazione_id: convId } : {};
   await admin.from("ai_messaggi").insert([
-    { user_id: user.id, vista, agente, ruolo: "user", contenuto: testoUtenteSalvato, centro_id: centro?.id || null },
-    { user_id: user.id, vista, agente, ruolo: "assistant", contenuto: testoFinale, centro_id: centro?.id || null },
+    { user_id: user.id, vista, agente, ruolo: "user", contenuto: testoUtenteSalvato, centro_id: centro?.id || null, ...conChat },
+    { user_id: user.id, vista, agente, ruolo: "assistant", contenuto: testoFinale, centro_id: centro?.id || null, ...conChat },
   ]);
+  const conversazione = convId ? await titoloConversazione(admin, convId).catch(() => null) : null;
   // domanda per i Boss fatta davvero: si segna per non ripeterla prima di 14 giorni
   if (chiediFeedback && /boss/i.test(testoFinale)) await admin.from("profiles").update({ ai_feedback_chiesto_at: new Date().toISOString() }).eq("id", user.id);
   await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + peso, costo_usd: Number(uso?.costo_usd || 0) + costoUsd, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
@@ -294,7 +336,7 @@ exports.handler = async (event) => {
       prova: !!prova, costo_usd: Math.round(costoUsd * 100000) / 100000 });
   } catch (_) {}
 
-  return risposta(200, { reply: testoFinale, agente, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, prova: prova ? { fine: new Date(prova.fine).toISOString() } : undefined, modalita });
+  return risposta(200, { reply: testoFinale, agente, conversazione, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, prova: prova ? { fine: new Date(prova.fine).toISOString() } : undefined, modalita });
 };
 
 // esportati solo per i test

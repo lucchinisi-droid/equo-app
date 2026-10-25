@@ -5,7 +5,7 @@ const { strumentoMeteo } = require("./meteo");
 const { STRUMENTI_GESTIONE, TIPI_INTERVENTO } = require("./strumenti");
 
 async function eseguiStrumento(nome, input, ctx) {
-  if (ctx.incassiNascosti && ["incassi", "proponi_segna_saldato"].includes(nome)) {
+  if (ctx.incassiNascosti && ["incassi", "proponi_segna_saldato", "proponi_conto"].includes(nome)) {
     return "L'utente ha nascosto gli incassi nell'app (interruttore con PIN): non parlare di importi, pagamenti o incassi. Se te li chiede, digli che può farli ricomparire dal menu profilo → Home → «Mostra gli incassi».";
   }
   const { db, userId, cavalli } = ctx;
@@ -407,6 +407,54 @@ async function eseguiStrumento(nome, input, ctx) {
       const totale = Math.round(righe.reduce((t, i) => t + Number(i.importo || 0), 0) * 100) / 100;
       ctx.azioni.push({ tipo: "saldato", dati: { ids: righe.map((i) => i.id), totale, righe: righe.map((i) => `${i.clienti_mascalcia?.nome || ""} · ${descrTipo(i)} del ${i.data_intervento}${i.importo != null ? " · € " + Number(i.importo).toFixed(2) : ""}`) } });
       return `Scheda "segna come saldato" (${righe.length} interventi, € ${totale.toFixed(2)}) mostrata, da confermare.`;
+    }
+
+    case "proponi_promemoria_personale": {
+      const testo = String(input.testo || "").replace(/\s+/g, " ").trim().slice(0, 300);
+      if (!testo) return "Manca cosa ricordare: chiedilo.";
+      if (!isoValida(input.data)) return "Data non valida: chiedila.";
+      const ora = /^\d{1,2}:\d{2}$/.test(input.ora || "") ? String(input.ora).padStart(5, "0") : "08:00";
+      const adesso = new Date().toLocaleString("sv-SE", { timeZone: "Europe/Rome" }).slice(0, 16).replace(" ", "T");
+      if (`${input.data}T${ora}` <= adesso) return `Il ${input.data} alle ${ora} è già passato (adesso è ${adesso.replace("T", " ")}): proponi un'ora futura.`;
+      let cliente = null;
+      if (input.cliente) { const r = await risolviCliente(ctx, input.cliente); if (r.errore) return r.errore; cliente = r.cliente; }
+      const azione = ["conto", "chat", "naviga"].includes(input.azione) && cliente ? input.azione : null;
+      if (ctx.azioni.filter((x) => x.tipo === "promemoria_personale").length >= 5) return "Già 5 promemoria in questa risposta: fermati qui.";
+      ctx.azioni.push({ tipo: "promemoria_personale", dati: { testo, data: input.data, ora, cliente_mascalcia_id: cliente?.id || null, nome_cliente: cliente?.nome || null, azione } });
+      return `Scheda promemoria (${input.data} ore ${ora}) mostrata, da confermare. Quando confermato, all'ora giusta scrivi tu qui in chat e arriva la notifica.`;
+    }
+
+    case "i_miei_promemoria": {
+      const da = new Date(Date.now() - 7 * 86400000).toISOString();
+      const { data, error } = await db.from("promemoria_personali").select("id, testo, quando, stato, azione, clienti_mascalcia(nome)")
+        .eq("user_id", userId).neq("stato", "annullato").or(`stato.eq.attivo,fatto_il.gte.${da}`).order("quando", { ascending: true }).limit(40);
+      if (error) return "Promemoria non disponibili (funzione appena aggiunta: riprova dopo l'aggiornamento).";
+      if (!(data || []).length) return "Nessun promemoria personale.";
+      return data.map((p) => ({ id: p.id, testo: p.testo, quando: new Date(p.quando).toLocaleString("it-IT", { timeZone: "Europe/Rome", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
+        stato: p.stato === "attivo" ? "da fare" : "fatto", cliente: p.clienti_mascalcia?.nome || null, azione: p.azione || null }));
+    }
+
+    case "proponi_conto": {
+      if (ctx.incassiNascosti) return "Incassi nascosti: non preparare conti.";
+      const { cliente, errore } = await risolviCliente(ctx, input.cliente);
+      if (errore) return errore;
+      const { data: lav, error } = await db.from("interventi_mascalcia").select("id, importo")
+        .eq("maniscalco_id", userId).eq("stato", "fatto").neq("stato_pagamento", "saldato")
+        .or(`cliente_mascalcia_id.eq.${cliente.id},luogo_cliente_id.eq.${cliente.id}`).limit(1000);
+      if (error) return "Errore nel leggere i lavori del cliente.";
+      const ids = (lav || []).map((i) => i.id);
+      let usati = new Set();
+      if (ids.length) {
+        const { data: righe } = await db.from("conti_mascalcia_righe").select("intervento_id, conti_mascalcia!inner(stato)").in("intervento_id", ids).neq("conti_mascalcia.stato", "annullato");
+        usati = new Set((righe || []).map((r) => r.intervento_id));
+      }
+      const liberi = (lav || []).filter((i) => !usati.has(i.id));
+      const totale = Math.round(liberi.reduce((t, i) => t + Number(i.importo || 0), 0) * 100) / 100;
+      const { data: aperti } = await db.from("conti_mascalcia").select("id, anno, numero, totale, n_lavori, creato_il").eq("maniscalco_id", userId).eq("cliente_mascalcia_id", cliente.id).eq("stato", "da_incassare").order("creato_il");
+      const conti = (aperti || []).map((c) => ({ id: c.id, codice: `C-${c.anno}-${String(c.numero).padStart(3, "0")}`, totale: Number(c.totale || 0), n_lavori: c.n_lavori, creato_il: String(c.creato_il).slice(0, 10) }));
+      ctx.azioni.push({ tipo: "conto", dati: { cliente_mascalcia_id: cliente.id, nome_cliente: cliente.nome, n_liberi: liberi.length, totale_liberi: totale, senza_importo: liberi.filter((i) => i.importo == null).length, aperti: conti } });
+      return { cliente: cliente.nome, lavori_da_mettere_in_conto: liberi.length, totale_euro: totale, conti_gia_fatti_da_incassare: conti,
+        nota: "Scheda mostrata: «Fai il conto» apre il foglio già sul cliente (lì può togliere i cavalli che non vuole), «Apri il conto» apre un conto già fatto per rimandarlo o segnarlo pagato." };
     }
 
     case "riferisci_ai_boss": {
