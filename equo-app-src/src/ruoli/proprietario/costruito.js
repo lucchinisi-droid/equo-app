@@ -1517,13 +1517,7 @@
 		if (typeof renderIncassi === "function") renderIncassi();
 	}
 	async function hmGiaFatto() {
-		await openInterventoModal(null);
-		const d = document.getElementById("intervento-data");
-		d.value = isoLocale(/* @__PURE__ */ new Date());
-		aggiornaGiaFatto();
-		aggiornaQuando();
-		const g = document.getElementById("intervento-gia-fatto");
-		if (g) g.checked = true;
+		await openInterventoModal(null, null, { modo_fatto: true });
 	}
 	function hmPiu() {
 		eseguiEstensioniSubito(estensioniPrima, "hmPiu");

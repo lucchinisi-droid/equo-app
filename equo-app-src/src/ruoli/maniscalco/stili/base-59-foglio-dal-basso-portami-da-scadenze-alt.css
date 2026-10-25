@@ -1,5 +1,5 @@
 /* foglio dal basso (Portami da…, Scadenze, Altro) */
-.hm-foglio{display:none;position:fixed;left:0;right:0;bottom:0;z-index:66;background:var(--surface);border-radius:26px 26px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(40,30,10,.2);max-height:82vh;overflow-y:auto;max-width:560px;margin:0 auto}
+.hm-foglio{display:none;position:fixed;left:0;right:0;bottom:0;z-index:66;background:var(--surface);border-radius:26px 26px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(40,30,10,.2);max-height:92vh;max-height:92dvh;overflow-y:auto;max-width:560px;margin:0 auto}
 .hm-foglio.on{display:block}
 .hm-foglio .man{width:44px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 12px}
 .hm-foglio h3{font-family:'Fraunces',serif;font-size:22px;margin:0 0 3px}

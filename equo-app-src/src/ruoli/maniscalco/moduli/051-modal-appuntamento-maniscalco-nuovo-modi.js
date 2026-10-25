@@ -64,6 +64,9 @@ function aggiornaGiaFatto(){
   const riga = document.getElementById("intervento-gia-fatto-row");
   if(!riga) return;
   const d = document.getElementById("intervento-data").value;
+  if(document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto")){   // «Lavoro già fatto»: sempre fatto
+    riga.style.display = "none"; document.getElementById("intervento-gia-fatto").checked = true; return;
+  }
   const vedi = !interventoInModifica && d === isoLocale(new Date());
   riga.style.display = vedi ? "flex" : "none";
   if(!vedi) document.getElementById("intervento-gia-fatto").checked = false;

@@ -347,10 +347,9 @@ function hmDaIncassare(){
   showPage("pro-incassi");
   if(typeof renderIncassi === "function") renderIncassi();
 }
+// «Lavoro già fatto» (27/10/2026): la finestra dell'appuntamento in modalità dedicata (data oggi o passata, niente ora, già fatto)
 async function hmGiaFatto(){
-  await openInterventoModal(null);
-  const d = document.getElementById("intervento-data"); d.value = isoLocale(new Date()); aggiornaGiaFatto(); aggiornaQuando();
-  const g = document.getElementById("intervento-gia-fatto"); if(g) g.checked = true;
+  await openInterventoModal(null, null, { modo_fatto: true });
 }
 // «+»: × verde quando è aperto
 function hmPiu(){ eseguiEstensioniSubito(estensioniPrima, "hmPiu"); return hmPiuBase.apply(this, arguments); }

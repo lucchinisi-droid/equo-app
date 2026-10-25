@@ -114,8 +114,11 @@ async function openInterventoModal(clienteId, intervento, preset){
   interventoPreset = intervento ? null : (preset || null);
   const inModifica = !!interventoInModifica;
   const daConfermare = inModifica && interventoInModifica.stato === "richiesto";
-  document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
-  document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : "Salva appuntamento";
+  const lavoroFatto = !inModifica && !!(preset && preset.modo_fatto);   // «Lavoro già fatto» dal tasto +
+  document.getElementById("modal-add-intervento").classList.toggle("int-lavoro-fatto", lavoroFatto);
+  document.getElementById("intervento-data").max = lavoroFatto ? isoLocale(new Date()) : "";
+  document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : lavoroFatto ? "Registra un lavoro fatto" : "Nuovo appuntamento";
+  document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : lavoroFatto ? "Salva il lavoro fatto" : "Salva appuntamento";
   document.getElementById("intervento-delete-btn").style.display = inModifica ? "block" : "none";
 
   const select = document.getElementById("intervento-cliente-select");
@@ -197,7 +200,8 @@ async function openInterventoModal(clienteId, intervento, preset){
   }
   document.getElementById("intervento-error").style.display = "none";
 
-  document.getElementById("intervento-gia-fatto").checked = false; aggiornaGiaFatto();
+  document.getElementById("intervento-gia-fatto").checked = lavoroFatto; aggiornaGiaFatto();
+  if(lavoroFatto) document.getElementById("intervento-ora").value = "";
   openModal("modal-add-intervento");
   await onInterventoClienteChange();
   toggleInterventoTipoFields();
@@ -205,7 +209,7 @@ async function openInterventoModal(clienteId, intervento, preset){
 
 async function onInterventoClienteChange(){
   const clienteId = document.getElementById("intervento-cliente-select").value;
-  if(!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId)){
+  if(!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId) && !lavoroFattoAttivo()){
     const preset = { ...(interventoPreset || {}),
       tipo_ferratura: document.getElementById("intervento-tipo").value,
       data_intervento: document.getElementById("intervento-data").value,
@@ -375,10 +379,13 @@ function quandoIntervento(q){
 }
 function aggiornaQuando(forzaScegli){
   const v = document.getElementById("intervento-data").value;
-  const oggi = isoLocale(new Date()), dom = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return isoLocale(d); })();
-  const q = forzaScegli && v !== oggi && v !== dom ? "x" : v === oggi ? "0" : v === dom ? "1" : "x";
+  const oggi = isoLocale(new Date()), dom = aggiungiGiorniIso(oggi, 1), ieri = aggiungiGiorniIso(oggi, -1);
+  const lf = lavoroFattoAttivo();
+  const q = forzaScegli && v !== oggi && v !== dom && v !== ieri ? "x" : v === oggi ? "0" : v === dom && !lf ? "1" : v === ieri && lf ? "-1" : "x";
   document.querySelectorAll("#intervento-quando button").forEach(b => b.classList.toggle("on", b.dataset.q === q));
 }
+
+function lavoroFattoAttivo(){ return !!document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto"); }
 
 /* Pop-up Sì / No (stile Equo) — restituisce true/false */
 let sinoResolve = null;
@@ -477,7 +484,8 @@ async function salvaInterventoMascalcia(){
     // stato: data/ora nel futuro = programmato; altrimenti fatto (in modifica non si "chiude" da solo un programmato)
     // nuovo appuntamento: passato = fatto, oggi = da fare (salvo «L'ho già fatto»), futuro = da fare
     const oggiIso = isoLocale(new Date());
-    const giaFatto = !!document.getElementById("intervento-gia-fatto")?.checked;
+    const giaFatto = lavoroFattoAttivo() || !!document.getElementById("intervento-gia-fatto")?.checked;
+    if(!interventoInModifica && lavoroFattoAttivo() && data_intervento > oggiIso) return errore("Un lavoro già fatto non può avere una data futura: per il futuro crea un appuntamento.");
     const futuro = interventoInModifica
       ? new Date(data_intervento + "T" + (ora || "00:00")).getTime() > Date.now()
       : (data_intervento > oggiIso || (data_intervento === oggiIso && !giaFatto));

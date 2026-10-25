@@ -34,7 +34,20 @@ const sostituzioniPerRuolo = {};
 function registraPerRuolo(nome, ruoli, fn){ for(const r of [].concat(ruoli)) (sostituzioniPerRuolo[nome] = sostituzioniPerRuolo[nome] || {})[r] = fn; }
 function versioneDelRuolo(nome){ const r = typeof plRuolo === "function" ? plRuolo() : null; return (sostituzioniPerRuolo[nome] || {})[r] || null; }
 
-function openModal(id){ document.getElementById(id).classList.add("active"); }
+function openModal(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  // 27/10/2026: ogni finestra ha la X in alto a destra (aggiunta qui se nel suo HTML manca)
+  const box = el.querySelector(":scope > .modal");
+  if(box && !box.querySelector(":scope > .modal-close-x")){
+    const x = document.createElement("button");
+    x.type = "button"; x.className = "modal-close-x"; x.setAttribute("aria-label", "Chiudi");
+    x.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    x.onclick = () => closeModal(id);
+    box.insertBefore(x, box.firstChild);
+  }
+  el.classList.add("active");
+}
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 

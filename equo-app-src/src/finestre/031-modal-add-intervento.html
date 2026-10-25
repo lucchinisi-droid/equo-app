@@ -3,6 +3,7 @@
     <button class="modal-close-x" onclick="closeModal('modal-add-intervento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="intervento-modal-title">Nuovo appuntamento</span></div>
+    <div class="int-lavoro-nota">Per registrare un lavoro che hai già fatto e non era in agenda. Dopo il salvataggio scegli il prossimo intervento e il pagamento.</div>
     <div class="int-richiesta-box" id="intervento-richiesta-box" style="display:none"></div>
     <div class="auth-form">
       <!-- 1. Cliente -->
@@ -117,7 +118,8 @@
       <!-- 8-9. Quando: Oggi / Domani / Scegli giorno + Data e Ora -->
       <div class="int-quando" id="intervento-quando">
         <button type="button" data-q="0" onclick="quandoIntervento(0)">Oggi</button>
-        <button type="button" data-q="1" onclick="quandoIntervento(1)">Domani</button>
+        <button type="button" data-q="-1" class="solo-lavoro-fatto" onclick="quandoIntervento(-1)">Ieri</button>
+        <button type="button" data-q="1" class="no-lavoro-fatto" onclick="quandoIntervento(1)">Domani</button>
         <button type="button" data-q="x" onclick="quandoIntervento('x')">Scegli giorno</button>
       </div>
       <div class="input-row-2">
@@ -125,7 +127,7 @@
           <label class="input-label">Data</label>
           <input class="input" id="intervento-data" type="date" onchange="aggiornaGiaFatto();aggiornaQuando()">
         </div>
-        <div class="input-group">
+        <div class="input-group no-lavoro-fatto">
           <label class="input-label">Ora</label>
           <input class="input" id="intervento-ora" type="time">
         </div>

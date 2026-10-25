@@ -66,18 +66,19 @@ function plCostruisciMenuBase(){
   } else if(r === "man"){
     h += plSez("Crea subito", [
       plTile(PLI.cal, "Appuntamento", "openInterventoModal(null)", 1),
-      plTile(PLI.fatto, "Intervento già fatto", "hmGiaFatto()", 1),
+      plTile(PLI.fatto, "Lavoro già fatto", "hmGiaFatto()", 1),
       plTile(HM_IC.ferro, "Cavallo", "hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)", 1),
       plTile(HM_IC.users, "Cliente", "apriNuovoCliente('proprietario')", 1),
       plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1)
     ]);
     h += plSez("Vai a", [
-      plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
       plTile(HM_IC.ferro, "Cavalli", "hmCartella('cavalli')"),
-      plTile(PLI.scuderia, "Scuderie e centri", "hmCartella('clienti')"),
+      plTile(HM_IC.users, "Clienti", "hmCartella('clienti')"),
+      plTile(PLI.scuderia, "Scuderie", "hmCartella('scuderie')"),
+      plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
       plTile(PLI.scad, "Scadenze", "hmScadenze()"),
-      plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
       plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
+      plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
       plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
     ]);
   } else return;

@@ -2356,7 +2356,7 @@ body.home-man[data-pagina="pro-home"] .hm-flot{display:flex}
 .hm-menu-piu button span svg{width:19px;height:19px}
 body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
 /* foglio dal basso (Portami da…, Scadenze, Altro) */
-.hm-foglio{display:none;position:fixed;left:0;right:0;bottom:0;z-index:66;background:var(--surface);border-radius:26px 26px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(40,30,10,.2);max-height:82vh;overflow-y:auto;max-width:560px;margin:0 auto}
+.hm-foglio{display:none;position:fixed;left:0;right:0;bottom:0;z-index:66;background:var(--surface);border-radius:26px 26px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(40,30,10,.2);max-height:92vh;max-height:92dvh;overflow-y:auto;max-width:560px;margin:0 auto}
 .hm-foglio.on{display:block}
 .hm-foglio .man{width:44px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 12px}
 .hm-foglio h3{font-family:'Fraunces',serif;font-size:22px;margin:0 0 3px}
@@ -2723,6 +2723,14 @@ body.ecv-aperta{overflow:hidden}
 .ag-dafissare{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:8px;margin-top:8px;padding:10px 12px;border-radius:12px;border:1.5px dashed var(--border);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer}
 .ag-dafissare b{margin-left:auto;color:var(--accent);font-weight:800}
 #modal-da-fissare .ag-gruppo{background:var(--bg)}
+
+/* 27/10/2026: «Lavoro già fatto» = finestra dell'appuntamento in modalità dedicata */
+.int-lavoro-nota{display:none;font-size:12.5px;line-height:1.45;color:var(--muted);background:var(--surface2);border-radius:12px;padding:9px 11px;margin:-4px 0 12px}
+#modal-add-intervento.int-lavoro-fatto .int-lavoro-nota{display:block}
+#modal-add-intervento .solo-lavoro-fatto{display:none}
+#modal-add-intervento.int-lavoro-fatto .solo-lavoro-fatto{display:revert}
+#modal-add-intervento.int-lavoro-fatto .no-lavoro-fatto{display:none}
+#modal-add-intervento.int-lavoro-fatto .input-row-2{display:block}
 /* ---------- Tablet e computer (da 768 px) ---------- */
 @media (min-width:768px){
   body{display:block;background:var(--bg)}
@@ -4294,7 +4302,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
 <div class="modal-overlay" id="modal-add-cliente" onclick="closeOut(event,'modal-add-cliente')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-users"></i></span>Nuovo cliente</div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-users"></i></span><span id="cliente-modal-titolo">Nuovo cliente</span></div>
     <div class="auth-form">
       <div class="input-group">
         <label class="input-label">Tipo di cliente</label>
@@ -4541,6 +4549,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     <button class="modal-close-x" onclick="closeModal('modal-add-intervento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="icon"><svg><use href="#i-clipboard"/></svg></span><span id="intervento-modal-title">Nuovo appuntamento</span></div>
+    <div class="int-lavoro-nota">Per registrare un lavoro che hai già fatto e non era in agenda. Dopo il salvataggio scegli il prossimo intervento e il pagamento.</div>
     <div class="int-richiesta-box" id="intervento-richiesta-box" style="display:none"></div>
     <div class="auth-form">
       <!-- 1. Cliente -->
@@ -4655,7 +4664,8 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
       <!-- 8-9. Quando: Oggi / Domani / Scegli giorno + Data e Ora -->
       <div class="int-quando" id="intervento-quando">
         <button type="button" data-q="0" onclick="quandoIntervento(0)">Oggi</button>
-        <button type="button" data-q="1" onclick="quandoIntervento(1)">Domani</button>
+        <button type="button" data-q="-1" class="solo-lavoro-fatto" onclick="quandoIntervento(-1)">Ieri</button>
+        <button type="button" data-q="1" class="no-lavoro-fatto" onclick="quandoIntervento(1)">Domani</button>
         <button type="button" data-q="x" onclick="quandoIntervento('x')">Scegli giorno</button>
       </div>
       <div class="input-row-2">
@@ -4663,7 +4673,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
           <label class="input-label">Data</label>
           <input class="input" id="intervento-data" type="date" onchange="aggiornaGiaFatto();aggiornaQuando()">
         </div>
-        <div class="input-group">
+        <div class="input-group no-lavoro-fatto">
           <label class="input-label">Ora</label>
           <input class="input" id="intervento-ora" type="time">
         </div>
@@ -7343,6 +7353,11 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const riga = document.getElementById("intervento-gia-fatto-row");
 		if (!riga) return;
 		const d = document.getElementById("intervento-data").value;
+		if (document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto")) {
+			riga.style.display = "none";
+			document.getElementById("intervento-gia-fatto").checked = true;
+			return;
+		}
 		const vedi = !interventoInModifica && d === isoLocale(/* @__PURE__ */ new Date());
 		riga.style.display = vedi ? "flex" : "none";
 		if (!vedi) document.getElementById("intervento-gia-fatto").checked = false;
@@ -12157,8 +12172,11 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		interventoPreset = intervento ? null : preset || null;
 		const inModifica = !!interventoInModifica;
 		const daConfermare = inModifica && interventoInModifica.stato === "richiesto";
-		document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
-		document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : "Salva appuntamento";
+		const lavoroFatto = !inModifica && !!(preset && preset.modo_fatto);
+		document.getElementById("modal-add-intervento").classList.toggle("int-lavoro-fatto", lavoroFatto);
+		document.getElementById("intervento-data").max = lavoroFatto ? isoLocale(/* @__PURE__ */ new Date()) : "";
+		document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : lavoroFatto ? "Registra un lavoro fatto" : "Nuovo appuntamento";
+		document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : lavoroFatto ? "Salva il lavoro fatto" : "Salva appuntamento";
 		document.getElementById("intervento-delete-btn").style.display = inModifica ? "block" : "none";
 		const select = document.getElementById("intervento-cliente-select");
 		const opzCli = (lista) => lista.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
@@ -12233,15 +12251,16 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			}
 		}
 		document.getElementById("intervento-error").style.display = "none";
-		document.getElementById("intervento-gia-fatto").checked = false;
+		document.getElementById("intervento-gia-fatto").checked = lavoroFatto;
 		aggiornaGiaFatto();
+		if (lavoroFatto) document.getElementById("intervento-ora").value = "";
 		openModal("modal-add-intervento");
 		await onInterventoClienteChange();
 		toggleInterventoTipoFields();
 	}
 	async function onInterventoClienteChange() {
 		const clienteId = document.getElementById("intervento-cliente-select").value;
-		if (!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId)) {
+		if (!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId) && !lavoroFattoAttivo()) {
 			const preset = {
 				...interventoPreset || {},
 				tipo_ferratura: document.getElementById("intervento-tipo").value,
@@ -12462,13 +12481,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	function aggiornaQuando(forzaScegli) {
 		const v = document.getElementById("intervento-data").value;
-		const oggi = isoLocale(/* @__PURE__ */ new Date()), dom = (() => {
-			const d = /* @__PURE__ */ new Date();
-			d.setDate(d.getDate() + 1);
-			return isoLocale(d);
-		})();
-		const q = forzaScegli && v !== oggi && v !== dom ? "x" : v === oggi ? "0" : v === dom ? "1" : "x";
+		const oggi = isoLocale(/* @__PURE__ */ new Date()), dom = aggiungiGiorniIso(oggi, 1), ieri = aggiungiGiorniIso(oggi, -1);
+		const lf = lavoroFattoAttivo();
+		const q = forzaScegli && v !== oggi && v !== dom && v !== ieri ? "x" : v === oggi ? "0" : v === dom && !lf ? "1" : v === ieri && lf ? "-1" : "x";
 		document.querySelectorAll("#intervento-quando button").forEach((b) => b.classList.toggle("on", b.dataset.q === q));
+	}
+	function lavoroFattoAttivo() {
+		return !!document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto");
 	}
 	var sinoResolve = null;
 	function chiediSiNo(titolo, testo) {
@@ -12581,7 +12600,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			}
 			const nomiCavalli = righe.map((r) => r.nome).filter(Boolean).join(", ");
 			const oggiIso = isoLocale(/* @__PURE__ */ new Date());
-			const giaFatto = !!document.getElementById("intervento-gia-fatto")?.checked;
+			const giaFatto = lavoroFattoAttivo() || !!document.getElementById("intervento-gia-fatto")?.checked;
+			if (!interventoInModifica && lavoroFattoAttivo() && data_intervento > oggiIso) return errore("Un lavoro già fatto non può avere una data futura: per il futuro crea un appuntamento.");
 			const futuro = interventoInModifica ? (/* @__PURE__ */ new Date(data_intervento + "T" + (ora || "00:00"))).getTime() > Date.now() : data_intervento > oggiIso || data_intervento === oggiIso && !giaFatto;
 			const statoPrec = interventoInModifica ? interventoInModifica.stato || "fatto" : null;
 			const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id);
@@ -13403,6 +13423,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const struttura = document.getElementById("cliente-tipo").value === "struttura";
 		document.getElementById("cliente-nome-label").textContent = struttura ? "Nome scuderia o centro ippico" : "Nome cliente";
 		document.getElementById("cliente-nome").placeholder = struttura ? "es. Scuderia Le Querce" : "es. Marco Bianchi";
+		const tit = document.getElementById("cliente-modal-titolo");
+		if (tit) tit.textContent = struttura ? "Nuova scuderia" : "Nuovo cliente";
+		const btn = document.getElementById("cliente-save-btn");
+		if (btn) btn.textContent = struttura ? "Salva scuderia" : "Salva cliente";
 	}
 	function nomiCavalliDaTesto(testo) {
 		const visti = /* @__PURE__ */ new Set();
@@ -20522,7 +20546,20 @@ const sostituzioniPerRuolo = {};
 function registraPerRuolo(nome, ruoli, fn){ for(const r of [].concat(ruoli)) (sostituzioniPerRuolo[nome] = sostituzioniPerRuolo[nome] || {})[r] = fn; }
 function versioneDelRuolo(nome){ const r = typeof plRuolo === "function" ? plRuolo() : null; return (sostituzioniPerRuolo[nome] || {})[r] || null; }
 
-function openModal(id){ document.getElementById(id).classList.add("active"); }
+function openModal(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  // 27/10/2026: ogni finestra ha la X in alto a destra (aggiunta qui se nel suo HTML manca)
+  const box = el.querySelector(":scope > .modal");
+  if(box && !box.querySelector(":scope > .modal-close-x")){
+    const x = document.createElement("button");
+    x.type = "button"; x.className = "modal-close-x"; x.setAttribute("aria-label", "Chiudi");
+    x.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    x.onclick = () => closeModal(id);
+    box.insertBefore(x, box.firstChild);
+  }
+  el.classList.add("active");
+}
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 function closeOut(e, id){ if(e.target.id === id) closeModal(id); }
 
@@ -25260,13 +25297,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		if (typeof renderIncassi === "function") renderIncassi();
 	}
 	async function hmGiaFatto() {
-		await openInterventoModal(null);
-		const d = document.getElementById("intervento-data");
-		d.value = isoLocale(/* @__PURE__ */ new Date());
-		aggiornaGiaFatto();
-		aggiornaQuando();
-		const g = document.getElementById("intervento-gia-fatto");
-		if (g) g.checked = true;
+		await openInterventoModal(null, null, { modo_fatto: true });
 	}
 	function hmPiu() {
 		eseguiEstensioniSubito(estensioniPrima, "hmPiu");
@@ -28279,18 +28310,19 @@ function plCostruisciMenuBase(){
   } else if(r === "man"){
     h += plSez("Crea subito", [
       plTile(PLI.cal, "Appuntamento", "openInterventoModal(null)", 1),
-      plTile(PLI.fatto, "Intervento già fatto", "hmGiaFatto()", 1),
+      plTile(PLI.fatto, "Lavoro già fatto", "hmGiaFatto()", 1),
       plTile(HM_IC.ferro, "Cavallo", "hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)", 1),
       plTile(HM_IC.users, "Cliente", "apriNuovoCliente('proprietario')", 1),
       plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1)
     ]);
     h += plSez("Vai a", [
-      plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
       plTile(HM_IC.ferro, "Cavalli", "hmCartella('cavalli')"),
-      plTile(PLI.scuderia, "Scuderie e centri", "hmCartella('clienti')"),
+      plTile(HM_IC.users, "Clienti", "hmCartella('clienti')"),
+      plTile(PLI.scuderia, "Scuderie", "hmCartella('scuderie')"),
+      plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
       plTile(PLI.scad, "Scadenze", "hmScadenze()"),
-      plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
       plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
+      plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
       plTile(HM_IC.aiuto, "Serve aiuto?", "apriTicketAssistenza()")
     ]);
   } else return;

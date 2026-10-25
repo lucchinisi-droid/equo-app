@@ -125,6 +125,8 @@ function aggiornaEtichetteNuovoCliente(){
   const struttura = document.getElementById("cliente-tipo").value === "struttura";
   document.getElementById("cliente-nome-label").textContent = struttura ? "Nome scuderia o centro ippico" : "Nome cliente";
   document.getElementById("cliente-nome").placeholder = struttura ? "es. Scuderia Le Querce" : "es. Marco Bianchi";
+  const tit = document.getElementById("cliente-modal-titolo"); if(tit) tit.textContent = struttura ? "Nuova scuderia" : "Nuovo cliente";
+  const btn = document.getElementById("cliente-save-btn"); if(btn) btn.textContent = struttura ? "Salva scuderia" : "Salva cliente";
 }
 
 // "Aurora, Baia" -> una scheda cavallo per nome (senza doppioni)

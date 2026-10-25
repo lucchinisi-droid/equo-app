@@ -1334,6 +1334,11 @@
 		const riga = document.getElementById("intervento-gia-fatto-row");
 		if (!riga) return;
 		const d = document.getElementById("intervento-data").value;
+		if (document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto")) {
+			riga.style.display = "none";
+			document.getElementById("intervento-gia-fatto").checked = true;
+			return;
+		}
 		const vedi = !interventoInModifica && d === isoLocale(/* @__PURE__ */ new Date());
 		riga.style.display = vedi ? "flex" : "none";
 		if (!vedi) document.getElementById("intervento-gia-fatto").checked = false;
@@ -6148,8 +6153,11 @@
 		interventoPreset = intervento ? null : preset || null;
 		const inModifica = !!interventoInModifica;
 		const daConfermare = inModifica && interventoInModifica.stato === "richiesto";
-		document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : "Nuovo appuntamento";
-		document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : "Salva appuntamento";
+		const lavoroFatto = !inModifica && !!(preset && preset.modo_fatto);
+		document.getElementById("modal-add-intervento").classList.toggle("int-lavoro-fatto", lavoroFatto);
+		document.getElementById("intervento-data").max = lavoroFatto ? isoLocale(/* @__PURE__ */ new Date()) : "";
+		document.getElementById("intervento-modal-title").textContent = daConfermare ? "Conferma richiesta" : inModifica ? "Modifica appuntamento" : lavoroFatto ? "Registra un lavoro fatto" : "Nuovo appuntamento";
+		document.getElementById("intervento-save-btn").textContent = daConfermare ? "Conferma appuntamento" : inModifica ? "Salva modifiche" : lavoroFatto ? "Salva il lavoro fatto" : "Salva appuntamento";
 		document.getElementById("intervento-delete-btn").style.display = inModifica ? "block" : "none";
 		const select = document.getElementById("intervento-cliente-select");
 		const opzCli = (lista) => lista.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
@@ -6224,15 +6232,16 @@
 			}
 		}
 		document.getElementById("intervento-error").style.display = "none";
-		document.getElementById("intervento-gia-fatto").checked = false;
+		document.getElementById("intervento-gia-fatto").checked = lavoroFatto;
 		aggiornaGiaFatto();
+		if (lavoroFatto) document.getElementById("intervento-ora").value = "";
 		openModal("modal-add-intervento");
 		await onInterventoClienteChange();
 		toggleInterventoTipoFields();
 	}
 	async function onInterventoClienteChange() {
 		const clienteId = document.getElementById("intervento-cliente-select").value;
-		if (!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId)) {
+		if (!interventoInModifica && clienteId !== "__nuovo__" && isStrutturaCollegata(clienteId) && !lavoroFattoAttivo()) {
 			const preset = {
 				...interventoPreset || {},
 				tipo_ferratura: document.getElementById("intervento-tipo").value,
@@ -6453,13 +6462,13 @@
 	}
 	function aggiornaQuando(forzaScegli) {
 		const v = document.getElementById("intervento-data").value;
-		const oggi = isoLocale(/* @__PURE__ */ new Date()), dom = (() => {
-			const d = /* @__PURE__ */ new Date();
-			d.setDate(d.getDate() + 1);
-			return isoLocale(d);
-		})();
-		const q = forzaScegli && v !== oggi && v !== dom ? "x" : v === oggi ? "0" : v === dom ? "1" : "x";
+		const oggi = isoLocale(/* @__PURE__ */ new Date()), dom = aggiungiGiorniIso(oggi, 1), ieri = aggiungiGiorniIso(oggi, -1);
+		const lf = lavoroFattoAttivo();
+		const q = forzaScegli && v !== oggi && v !== dom && v !== ieri ? "x" : v === oggi ? "0" : v === dom && !lf ? "1" : v === ieri && lf ? "-1" : "x";
 		document.querySelectorAll("#intervento-quando button").forEach((b) => b.classList.toggle("on", b.dataset.q === q));
+	}
+	function lavoroFattoAttivo() {
+		return !!document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto");
 	}
 	var sinoResolve = null;
 	function chiediSiNo(titolo, testo) {
@@ -6572,7 +6581,8 @@
 			}
 			const nomiCavalli = righe.map((r) => r.nome).filter(Boolean).join(", ");
 			const oggiIso = isoLocale(/* @__PURE__ */ new Date());
-			const giaFatto = !!document.getElementById("intervento-gia-fatto")?.checked;
+			const giaFatto = lavoroFattoAttivo() || !!document.getElementById("intervento-gia-fatto")?.checked;
+			if (!interventoInModifica && lavoroFattoAttivo() && data_intervento > oggiIso) return errore("Un lavoro già fatto non può avere una data futura: per il futuro crea un appuntamento.");
 			const futuro = interventoInModifica ? (/* @__PURE__ */ new Date(data_intervento + "T" + (ora || "00:00"))).getTime() > Date.now() : data_intervento > oggiIso || data_intervento === oggiIso && !giaFatto;
 			const statoPrec = interventoInModifica ? interventoInModifica.stato || "fatto" : null;
 			const diGruppo = !!(interventoInModifica && interventoInModifica.gruppo_id);
@@ -7394,6 +7404,10 @@
 		const struttura = document.getElementById("cliente-tipo").value === "struttura";
 		document.getElementById("cliente-nome-label").textContent = struttura ? "Nome scuderia o centro ippico" : "Nome cliente";
 		document.getElementById("cliente-nome").placeholder = struttura ? "es. Scuderia Le Querce" : "es. Marco Bianchi";
+		const tit = document.getElementById("cliente-modal-titolo");
+		if (tit) tit.textContent = struttura ? "Nuova scuderia" : "Nuovo cliente";
+		const btn = document.getElementById("cliente-save-btn");
+		if (btn) btn.textContent = struttura ? "Salva scuderia" : "Salva cliente";
 	}
 	function nomiCavalliDaTesto(testo) {
 		const visti = /* @__PURE__ */ new Set();
