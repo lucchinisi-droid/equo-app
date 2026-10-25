@@ -201,6 +201,7 @@ async function openInterventoModal(clienteId, intervento, preset){
   document.getElementById("intervento-error").style.display = "none";
 
   document.getElementById("intervento-gia-fatto").checked = lavoroFatto; aggiornaGiaFatto();
+  if(typeof ofPreparaAiutanteAppuntamento === "function") ofPreparaAiutanteAppuntamento(interventoInModifica).catch(() => {});
   if(lavoroFatto) document.getElementById("intervento-ora").value = "";
   openModal("modal-add-intervento");
   await onInterventoClienteChange();
@@ -560,7 +561,8 @@ async function salvaInterventoMascalcia(){
       const ferri_nuovi = !fr ? null : ferriScelti ? ferriScelti.nuovi : (interventoInModifica ? interventoInModifica.ferri_nuovi ?? null : null);
       const payload = { cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, tipo_ferratura: tipoRiga, tipo_altro: tipoRiga === "altro" ? tipo_altro : null,
         misura_sistema: fr ? r.misura_sistema : null, numero_ferro: fr ? r.numero_ferro : null, quantita_ferri: quantitaRiga, ferri_nuovi,
-        data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento: statoPagamento, note };
+        data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento: statoPagamento, note,
+        ...(typeof ofCampiAiutanteIntervento === "function" ? ofCampiAiutanteIntervento(interventoInModifica) : {}) };
       const { error } = interventoInModifica
         ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
         : await DB.insertInterventoMascalcia({ cliente_mascalcia_id, ...payload });

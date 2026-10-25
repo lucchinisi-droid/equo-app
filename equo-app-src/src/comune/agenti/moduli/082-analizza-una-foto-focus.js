@@ -195,6 +195,7 @@ const ETICHETTA_CONFERMA_AI = {
   promemoria: x => x.collegato ? "Invia in chat" : "Copia testo",
   saldato: () => "Segna saldato",
   promemoria_personale: () => "Salva promemoria",
+  spesa_officina: () => "Registra spesa",
 };
 const AZIONE_PM = { conto: "con il tasto «Fai il conto»", chat: "con il tasto «Scrivi al cliente»", naviga: "con il tasto «Naviga»" };
 // dopo un'azione di Hammer aggiorna le schermate del maniscalco già aperte
@@ -246,6 +247,9 @@ function renderAzioneAi(box, azione){
     titolo = `🔔 Promemoria · ${formatDataBreve(x.data)} ore ${escapeHtml(x.ora || "08:00")}`;
     righe = [`<b>${escapeHtml(x.testo || "")}</b>`, x.nome_cliente ? `Cliente: ${escapeHtml(x.nome_cliente)}${x.azione && AZIONE_PM[x.azione] ? " · " + AZIONE_PM[x.azione] : ""}` : "",
       `<span class="muted">All'ora giusta te lo scrivo qui e ti arriva la notifica.</span>`];
+  } else if(azione.tipo === "spesa_officina"){
+    titolo = `🚐 Spesa · ${escapeHtml({ aiutanti: "Aiutanti", carburante: "Carburante", materiali: "Materiali", mezzo: "Mezzo", altro: "Altro" }[x.categoria] || x.categoria)}`;
+    righe = [`<b>${escapeHtml(x.descrizione)}</b>`, `€ ${Number(x.importo).toFixed(2)} · ${formatDataBreve(x.data)}`, '<span class="muted">Va nelle spese dell\'Officina mobile e nel guadagno netto.</span>'];
   } else if(azione.tipo === "spesa"){
     titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
     righe = [`Importo: € ${Number(x.amount).toFixed(2)}`, `Data: ${formatDate(x.date)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.notes ? escapeHtml(x.notes) : ""];
@@ -371,6 +375,10 @@ async function confermaAzioneAi(id){
       try{ await navigator.clipboard.writeText(x.testo); fatto = `✓ Testo copiato: incollalo nel messaggio a ${escapeHtml(x.nome_cliente || "")}.`; }
       catch(e){ error = { message: "copia non riuscita, tieni premuto sul testo per copiarlo" }; }
     }
+  } else if(azione.tipo === "spesa_officina"){
+    if(typeof ofSalvaSpesaDaHammer !== "function") error = { message: "Officina mobile non disponibile in questa vista" };
+    else ({ error } = await ofSalvaSpesaDaHammer(x));
+    fatto = `✓ Spesa registrata nell'Officina mobile: ${escapeHtml(x.descrizione)} · € ${Number(x.importo).toFixed(2)}.`;
   } else if(azione.tipo === "promemoria_personale"){
     if(typeof pmSalvaDaHammer !== "function") error = { message: "promemoria non disponibili in questa vista" };
     else ({ error } = await pmSalvaDaHammer(x));

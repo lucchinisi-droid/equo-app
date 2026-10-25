@@ -91,9 +91,22 @@ function hmBannerAvanti(){
   box.scrollTo({ left: i * box.clientWidth, behavior: ridotto ? "auto" : "smooth" });
 }
 
+// «Da confermare» (27/10/2026): non più riquadro in Home ma cerchio giallo con il numero; al tocco il foglio con i cavalli
+function hmContaConferme(){
+  const n = document.querySelectorAll("#hm-conferme button").length, el = document.getElementById("hm-n-conf");
+  if(el){ el.textContent = n; el.hidden = !n; }
+}
+async function hmConferme(){
+  hmFoglio("Da confermare", "Conferma che nome, razza e data di nascita sono giusti: con quella del proprietario arriva il codice definitivo.", '<div id="hm-conferme-foglio"><div class="loading"><div class="spinner"></div></div></div>');
+  await caricaConfermePro(true, "hm-conferme-foglio");
+  const box = document.getElementById("hm-conferme-foglio");
+  if(box && !box.querySelector("button")) box.innerHTML = '<div class="muted" style="font-size:13.5px;padding:8px 0 4px">✓ Tutto confermato: nessun cavallo in attesa.</div>';
+  else if(box){ const t = box.querySelector(".section-title"); if(t) t.remove(); const d = box.querySelector(".card > .muted"); if(d) d.remove(); }
+  // dopo una conferma si aggiorna la lista del foglio; il numero in Home al prossimo ritorno in Home
+}
 function renderHomeMan(){
   if(!document.getElementById("hm")) return;
-  caricaConfermePro(false, "hm-conferme");
+  Promise.resolve(caricaConfermePro(false, "hm-conferme")).then(hmContaConferme).catch(() => {});
   if(typeof pmRenderHome === "function") pmRenderHome();
   document.getElementById("hm-saluto").textContent = testoSaluto();
   document.getElementById("hm-data").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
@@ -137,4 +150,4 @@ async function hmTemperatura(){
 }
 
 
-export { hmToccaBanner, renderHomeMan };
+export { hmToccaBanner, renderHomeMan, hmConferme, hmContaConferme };

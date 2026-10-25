@@ -33,6 +33,7 @@ function testoRiepilogoEvento(e){
     (cav ? cav + " — " : "") + agDescrizioneTipo(e)
   ];
   if(e.importo != null) parti.push("€ " + Number(e.importo).toFixed(2).replace(".", ",") + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
+  if(e.aiutante_nome) parti.push(e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `con l'aiutante ${e.aiutante_nome}`);
   return parti.join(" · ");
 }
 
@@ -90,6 +91,7 @@ async function creaPdfEvento(e){
     ["Importo", e.importo != null ? "€ " + Number(e.importo).toFixed(2).replace(".", ",") : "—"],
     ["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
     ["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
+    e.aiutante_nome ? ["Aiutante", e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `Con l'aiutante ${e.aiutante_nome}`] : null,
     e.prossima_scadenza && e.stato === "fatto" ? ["Prossimo intervento consigliato", new Date(e.prossima_scadenza + "T00:00").toLocaleDateString("it-IT")] : null,
     e.note ? ["Note", e.note] : null
   ].filter(Boolean);

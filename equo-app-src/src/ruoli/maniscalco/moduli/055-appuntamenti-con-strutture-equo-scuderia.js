@@ -113,7 +113,7 @@ function agRigaEvento(e, di){
         <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
         <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
           <div class="ag-ev-title">${cav ? escapeHtml(cav) : '<span style="color:var(--muted);font-weight:500">Cavallo non indicato</span>'}</div>
-          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.aiutante_nome ? " · con " + escapeHtml(e.aiutante_nome) : ""}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
           ${notaModificaMan(e)}
         </div>
         ${e.stato === "fatto"

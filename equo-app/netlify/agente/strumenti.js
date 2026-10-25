@@ -115,6 +115,11 @@ const STRUMENTI_GESTIONE = [
       azione: { type: "string", enum: ["nessuna", "conto", "chat", "naviga"], description: "Tasto da mettere nel promemoria: conto = «Fai il conto» del cliente, chat = «Scrivi al cliente», naviga = «Naviga» verso il cliente." } },
     required: ["testo", "data"] } },
   { name: "i_miei_promemoria", description: "Promemoria personali del maniscalco ancora da fare (con id, testo, data e ora, cliente) e quelli fatti negli ultimi 7 giorni.", input_schema: { type: "object", properties: {} } },
+  { name: "officina", description: "Officina mobile del maniscalco: mezzi (marca, modello, targa, km, scadenze di revisione, tagliando ogni N km o mesi con ultimo tagliando, assicurazione, bollo, bombole), aiutanti (compenso, predefinito), materiali con scorte basse, giornata di oggi, spese del mese per categoria.", input_schema: { type: "object", properties: {
+      mese: { type: "string", description: "YYYY-MM per le spese (default mese corrente)." } } } },
+  { name: "proponi_spesa_officina", description: "Propone di registrare una spesa dell'Officina mobile (aiutanti, carburante, materiali, mezzo, altro), es. «segna 2 scatole di chiodi da 34 euro», «ho pagato 210 euro di gomme». L'app mostra una scheda da confermare.", input_schema: { type: "object", properties: {
+      categoria: { type: "string", enum: ["aiutanti", "carburante", "materiali", "mezzo", "altro"] }, descrizione: { type: "string", description: "Breve, max 120 caratteri." },
+      importo: { type: "number", description: "Euro totali." }, data: { type: "string", description: "YYYY-MM-DD (default oggi)." } }, required: ["categoria", "descrizione", "importo"] } },
   { name: "proponi_conto", description: "Prepara il conto di un cliente o di una scuderia: dice quanti lavori fatti e non pagati sono ancora fuori da un conto (con totale) e quali conti sono già stati fatti e non ancora pagati. L'app mostra una scheda con i tasti «Fai il conto» (si apre già sul cliente, dove si possono togliere i cavalli) e «Apri il conto» per quelli già fatti.", input_schema: { type: "object", properties: {
       cliente: { type: "string", description: "Nome del cliente o della scuderia." } }, required: ["cliente"] } },
 ];

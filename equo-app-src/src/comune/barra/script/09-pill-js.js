@@ -45,6 +45,8 @@ const PLI = {
   scad: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg>',
   pin: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   campana: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  spesa: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16v18l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+  furgone: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 16V7a1 1 0 0 1 1-1h11l4 4h3a1 1 0 0 1 1 1v5"/><path d="M14 6v4h6"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/><path d="M8.5 17.5h7M2 16h2.5M19.5 17.5H22"/></svg>',
   partner: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
 };
 function plTile(ic, t, az, o, cls, sotto){
@@ -71,13 +73,15 @@ function plCostruisciMenuBase(){
       plTile(HM_IC.ferro, "Cavallo", "hmCartella('cavalli');setTimeout(()=>{try{apriNuovoCavalloCartella()}catch(e){}},150)", 1),
       plTile(HM_IC.users, "Cliente", "apriNuovoCliente('proprietario')", 1),
       plTile(PLI.scuderia, "Scuderia", "apriNuovoCliente('struttura')", 1),
-      plTile(PLI.campana, "Promemoria", "pmApriNuovo()", 1)
+      plTile(PLI.campana, "Promemoria", "pmApriNuovo()", 1),
+      plTile(PLI.spesa, "Spesa", "ofFormSpesa()", 1)
     ]);
     h += plSez("Vai a", [
       plTile(HM_IC.ferro, "Cavalli", "hmCartella('cavalli')"),
       plTile(HM_IC.users, "Clienti", "hmCartella('clienti')"),
       plTile(PLI.scuderia, "Scuderie", "hmCartella('scuderie')"),
       plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
+      plTile(PLI.furgone, "Officina mobile", "showPage('pro-officina')"),
       plTile(PLI.scad, "Scadenze", "hmScadenze()"),
       plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
       plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),

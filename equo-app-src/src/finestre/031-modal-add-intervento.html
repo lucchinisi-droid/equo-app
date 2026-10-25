@@ -125,12 +125,17 @@
       <div class="input-row-2">
         <div class="input-group">
           <label class="input-label">Data</label>
-          <input class="input" id="intervento-data" type="date" onchange="aggiornaGiaFatto();aggiornaQuando()">
+          <input class="input" id="intervento-data" type="date" onchange="aggiornaGiaFatto();aggiornaQuando();ofAggiornaAiutanteData()">
         </div>
         <div class="input-group no-lavoro-fatto">
           <label class="input-label">Ora</label>
           <input class="input" id="intervento-ora" type="time">
         </div>
+      </div>
+      <!-- aiutante (Officina mobile): proposto quello del giorno, il cliente vede «con …» -->
+      <div class="input-group" id="intervento-aiutante-box" style="display:none">
+        <label class="input-label" for="intervento-aiutante">Aiutante</label>
+        <select class="input" id="intervento-aiutante" onchange="this.dataset.toccato='1'"></select>
       </div>
       <label class="gia-fatto-row" id="intervento-gia-fatto-row" style="display:none">
         <input type="checkbox" id="intervento-gia-fatto">

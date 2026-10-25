@@ -5,7 +5,7 @@ const { strumentoMeteo } = require("./meteo");
 const { STRUMENTI_GESTIONE, TIPI_INTERVENTO } = require("./strumenti");
 
 async function eseguiStrumento(nome, input, ctx) {
-  if (ctx.incassiNascosti && ["incassi", "proponi_segna_saldato", "proponi_conto"].includes(nome)) {
+  if (ctx.incassiNascosti && ["incassi", "proponi_segna_saldato", "proponi_conto", "proponi_spesa_officina"].includes(nome)) {
     return "L'utente ha nascosto gli incassi nell'app (interruttore con PIN): non parlare di importi, pagamenti o incassi. Se te li chiede, digli che può farli ricomparire dal menu profilo → Home → «Mostra gli incassi».";
   }
   const { db, userId, cavalli } = ctx;
@@ -455,6 +455,36 @@ async function eseguiStrumento(nome, input, ctx) {
       ctx.azioni.push({ tipo: "conto", dati: { cliente_mascalcia_id: cliente.id, nome_cliente: cliente.nome, n_liberi: liberi.length, totale_liberi: totale, senza_importo: liberi.filter((i) => i.importo == null).length, aperti: conti } });
       return { cliente: cliente.nome, lavori_da_mettere_in_conto: liberi.length, totale_euro: totale, conti_gia_fatti_da_incassare: conti,
         nota: "Scheda mostrata: «Fai il conto» apre il foglio già sul cliente (lì può togliere i cavalli che non vuole), «Apri il conto» apre un conto già fatto per rimandarlo o segnarlo pagato." };
+    }
+
+    case "officina": {
+      const ym = /^\d{4}-\d{2}$/.test(input.mese || "") ? input.mese : oggiISO().slice(0, 7);
+      const [imp, mezzi, aiut, mat, spese, gio] = await Promise.all([
+        db.from("officina_impostazioni").select("base_indirizzo, prezzo_carburante, mezzo_predefinito, aiutante_predefinito, configurata_il").eq("user_id", userId).maybeSingle(),
+        db.from("officina_mezzi").select("id, tipo, marca, modello, targa, alimentazione, immatricolazione, km_attuali, consumo_l100, tagliando_km, tagliando_mesi, ultimo_tagliando_data, ultimo_tagliando_km, revisione_data, assicurazione_data, bollo_data, bombole_data, mostra_clienti").eq("user_id", userId).eq("archiviato", false),
+        db.from("officina_aiutanti").select("id, nome, compenso_tipo, compenso").eq("user_id", userId).eq("attivo", true),
+        db.from("officina_materiali").select("nome, misura, unita, costo, scorta, scorta_minima").eq("user_id", userId).eq("attivo", true),
+        db.from("officina_spese").select("categoria, descrizione, importo, data, automatica").eq("user_id", userId).gte("data", ym + "-01").lte("data", ym + "-31").order("data", { ascending: false }).limit(300),
+        db.from("officina_giornate").select("giorno, mezzo_id, aiutante_id, km").eq("user_id", userId).eq("giorno", oggiISO()).maybeSingle(),
+      ]);
+      if (mezzi.error) return "Officina mobile non ancora disponibile (arriva con l'aggiornamento).";
+      if (!imp.data && !(mezzi.data || []).length) return "Officina mobile non ancora configurata: dì al maniscalco di aprirla dalla Home (riga «Officina mobile») per inserire furgone, aiutanti e materiali in 4 passi.";
+      const perCat = {}; (spese.data || []).forEach((x) => { perCat[x.categoria] = Math.round(((perCat[x.categoria] || 0) + Number(x.importo)) * 100) / 100; });
+      return { oggi: oggiISO(), impostazioni: imp.data, mezzi: mezzi.data, aiutanti: aiut.data, predefinito_aiutante: imp.data?.aiutante_predefinito || null,
+        materiali_in_esaurimento: (mat.data || []).filter((m) => m.scorta_minima != null && Number(m.scorta) <= Number(m.scorta_minima)), materiali: (mat.data || []).length,
+        giornata_oggi: gio.data || "non ancora salvata (si usano mezzo e aiutante predefiniti)", spese_mese: { mese: ym, totale: Math.round(Object.values(perCat).reduce((t, v) => t + v, 0) * 100) / 100, per_categoria: perCat, ultime: (spese.data || []).slice(0, 15) },
+        note: "Revisione: se manca la data vale immatricolazione + 4 anni, poi ogni 2. Tagliando: vale quello che arriva prima tra ogni tagliando_km dall'ultimo e ogni tagliando_mesi dall'ultima data. I km sono in Beta (calcoli approssimativi). Mezzo e aiutante del giorno si cambiano in Agenda o in Officina mobile → Oggi." };
+    }
+
+    case "proponi_spesa_officina": {
+      if (ctx.incassiNascosti) return "Incassi nascosti: non registrare spese.";
+      const cat = ["aiutanti", "carburante", "materiali", "mezzo", "altro"].includes(input.categoria) ? input.categoria : "altro";
+      const desc = String(input.descrizione || "").replace(/\s+/g, " ").trim().slice(0, 120);
+      const imp = Math.round(Number(input.importo) * 100) / 100;
+      if (!desc || !(imp >= 0)) return "Servono descrizione e importo: chiedili.";
+      const data = isoValida(input.data) ? input.data : oggiISO();
+      ctx.azioni.push({ tipo: "spesa_officina", dati: { categoria: cat, descrizione: desc, importo: imp, data } });
+      return `Scheda spesa (${cat}, € ${imp.toFixed(2)}) mostrata, da confermare.`;
     }
 
     case "riferisci_ai_boss": {
