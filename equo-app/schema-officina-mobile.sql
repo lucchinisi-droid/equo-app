@@ -50,7 +50,7 @@ create table if not exists public.officina_interventi (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   mezzo_id uuid not null references public.officina_mezzi(id) on delete cascade,
-  tipo text not null default 'altro' check (tipo in ('tagliando', 'revisione', 'pneumatici', 'riparazione', 'bombole', 'altro')),
+  tipo text not null default 'altro',
   titolo text not null check (length(trim(titolo)) between 1 and 80),
   data date not null,
   km integer,
@@ -188,6 +188,20 @@ begin
 end $fn$;
 revoke all on function public.equo_pro_pubblico(text) from public, anon, authenticated;
 grant execute on function public.equo_pro_pubblico(text) to service_role;
+
+-- aggiunte del 26/10 (tipi di intervento e cinghia): stesse righe di schema-officina-cinghia.sql
+
+alter table public.officina_interventi drop constraint if exists officina_interventi_tipo_check;
+alter table public.officina_interventi add constraint officina_interventi_tipo_check check (tipo in
+  ('tagliando', 'revisione', 'pneumatici', 'pasticche', 'cinghia', 'manutenzione_ordinaria', 'manutenzione_straordinaria', 'riparazione', 'bombole', 'altro'));
+
+alter table public.officina_mezzi add column if not exists cinghia_km integer;
+alter table public.officina_mezzi add column if not exists cinghia_anni smallint;
+alter table public.officina_mezzi add column if not exists ultima_cinghia_data date;
+alter table public.officina_mezzi add column if not exists ultima_cinghia_km integer;
+alter table public.officina_mezzi drop constraint if exists officina_mezzi_cinghia_check;
+alter table public.officina_mezzi add constraint officina_mezzi_cinghia_check check (
+  (cinghia_km is null or cinghia_km between 10000 and 400000) and (cinghia_anni is null or cinghia_anni between 1 and 15));
 
 -- controllo: atteso 8 | 2 | 1
 select (select count(*) from information_schema.tables where table_schema = 'public' and table_name in

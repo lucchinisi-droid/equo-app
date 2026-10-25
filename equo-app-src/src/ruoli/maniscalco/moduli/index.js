@@ -45,7 +45,7 @@ import { usaPosizioneQui } from "./106-posizione-attuale.js";
 import { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
 import { condividiInvitoCliente } from "./108-invito-qr.js";
 import { apriCardPro, chiudiCardPro, ecvAggiungiEsperienza, ecvAggiungiFormazione, ecvAggiungiVoce, ecvCampo, ecvChiediReferenza, ecvCopiaLink, ecvGiraPass, ecvHammer, ecvIndietro, ecvInterruttore, ecvLingua, ecvModello, ecvMostra, ecvPdfCv, ecvPdfPass, ecvPubblica, ecvReferenza, ecvSlug, ecvSpec, ecvTogliElemento, ecvTogliVoce } from "./109-equo-cv-pass.js";
-import { ofSalvaSpesaDaHammer, ofAggiornaAiutanteData, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa, ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante, ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo, ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi } from "./112-officina-mobile.js";
+import { ofMatRapido, ofTitoloDaTipo, ofSalvaSpesaDaHammer, ofAggiornaAiutanteData, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa, ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante, ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo, ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi } from "./112-officina-mobile.js";
 import { pmAggiornaAzione, pmAggiornaQuando, pmApriNuovo, pmDomani, pmElimina, pmEsegui, pmFatto, pmModifica, pmQuando, pmRenderHome, pmSalva, pmSalvaDaHammer, pmTastiChat } from "./111-promemoria-personali.js";
 import { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda } from "./110-agenda-semplice-completa.js";
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
@@ -380,6 +380,8 @@ Object.assign(window, {
   pmTastiChat,
   ofAggiornaAiutanteData,
   ofSalvaSpesaDaHammer,
+  ofMatRapido,
+  ofTitoloDaTipo,
   ofAggiornaRiepiloghi,
   ofAggiungiMatGiorno,
   ofApri,

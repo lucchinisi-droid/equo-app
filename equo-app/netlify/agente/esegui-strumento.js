@@ -461,7 +461,7 @@ async function eseguiStrumento(nome, input, ctx) {
       const ym = /^\d{4}-\d{2}$/.test(input.mese || "") ? input.mese : oggiISO().slice(0, 7);
       const [imp, mezzi, aiut, mat, spese, gio] = await Promise.all([
         db.from("officina_impostazioni").select("base_indirizzo, prezzo_carburante, mezzo_predefinito, aiutante_predefinito, configurata_il").eq("user_id", userId).maybeSingle(),
-        db.from("officina_mezzi").select("id, tipo, marca, modello, targa, alimentazione, immatricolazione, km_attuali, consumo_l100, tagliando_km, tagliando_mesi, ultimo_tagliando_data, ultimo_tagliando_km, revisione_data, assicurazione_data, bollo_data, bombole_data, mostra_clienti").eq("user_id", userId).eq("archiviato", false),
+        db.from("officina_mezzi").select("*").eq("user_id", userId).eq("archiviato", false),
         db.from("officina_aiutanti").select("id, nome, compenso_tipo, compenso").eq("user_id", userId).eq("attivo", true),
         db.from("officina_materiali").select("nome, misura, unita, costo, scorta, scorta_minima").eq("user_id", userId).eq("attivo", true),
         db.from("officina_spese").select("categoria, descrizione, importo, data, automatica").eq("user_id", userId).gte("data", ym + "-01").lte("data", ym + "-31").order("data", { ascending: false }).limit(300),
@@ -473,7 +473,7 @@ async function eseguiStrumento(nome, input, ctx) {
       return { oggi: oggiISO(), impostazioni: imp.data, mezzi: mezzi.data, aiutanti: aiut.data, predefinito_aiutante: imp.data?.aiutante_predefinito || null,
         materiali_in_esaurimento: (mat.data || []).filter((m) => m.scorta_minima != null && Number(m.scorta) <= Number(m.scorta_minima)), materiali: (mat.data || []).length,
         giornata_oggi: gio.data || "non ancora salvata (si usano mezzo e aiutante predefiniti)", spese_mese: { mese: ym, totale: Math.round(Object.values(perCat).reduce((t, v) => t + v, 0) * 100) / 100, per_categoria: perCat, ultime: (spese.data || []).slice(0, 15) },
-        note: "Revisione: se manca la data vale immatricolazione + 4 anni, poi ogni 2. Tagliando: vale quello che arriva prima tra ogni tagliando_km dall'ultimo e ogni tagliando_mesi dall'ultima data. I km sono in Beta (calcoli approssimativi). Mezzo e aiutante del giorno si cambiano in Agenda o in Officina mobile → Oggi." };
+        note: "Revisione: se manca la data vale immatricolazione + 4 anni, poi ogni 2. Tagliando: vale quello che arriva prima tra ogni tagliando_km dall'ultimo e ogni tagliando_mesi dall'ultima data. Cinghia distribuzione: ogni cinghia_km o cinghia_anni dall'ultima sostituzione (ultima_cinghia_data/km); se mai cambiata si conta dall'immatricolazione a 0 km; senza intervallo = catena o non impostata. Interventi possibili: tagliando, revisione, gomme, pasticche, cinghia, manutenzione ordinaria/straordinaria, riparazione, collaudo bombole. I km sono in Beta (calcoli approssimativi). Mezzo e aiutante del giorno si cambiano in Agenda o in Officina mobile → Oggi." };
     }
 
     case "proponi_spesa_officina": {
