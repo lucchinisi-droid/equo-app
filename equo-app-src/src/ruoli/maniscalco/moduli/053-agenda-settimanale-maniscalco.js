@@ -1,6 +1,6 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { caricaUbicazioni } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
-import { MISURA_SISTEMA_LABEL, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { MISURA_SISTEMA_LABEL, aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { renderRichiestePendenti } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agDisegnaGriglia } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { agAttivaSwipe } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
@@ -47,6 +47,13 @@ function agDescrizioneTipo(i){
   return [t, ...extra].join(" · ");
 }
 
+// La domenica è RIPOSO (26/10/2026): una scadenza che cade di domenica si mostra e si propone il lunedì
+function agGiornoLavoro(iso){
+  if(!iso) return iso;
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
+}
+
 async function renderAgendaSettimana(direzione){
   const box = document.getElementById("ag-week");
   if(!box) return;
@@ -62,7 +69,7 @@ async function renderAgendaSettimana(direzione){
   renderRichiestePendenti();
   const [eventi, scadenze] = await Promise.all([
     DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
-    DB.listScadenzePeriodo(isoGiorni[0], isoGiorni[6]),
+    DB.listScadenzePeriodo(aggiungiGiorniIso(isoGiorni[0], -1), isoGiorni[6]),   // dalla domenica prima: la domenica è riposo, le sue scadenze vanno al lunedì
     caricaUbicazioni()
   ]);
   if(token !== agRenderToken) return; // un render più recente è già partito
@@ -70,18 +77,19 @@ async function renderAgendaSettimana(direzione){
   (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach(e => { agEventiCache[e.id] = e; });   // righe della Home pro
   eventi.forEach(e => { agEventiCache[e.id] = e; });
 
-  scadenze.forEach(sc => { agEventiCache["sc:" + sc.id] = sc; });
+  scadenze.forEach(sc => { sc.data_vista = agGiornoLavoro(sc.prossima_scadenza); agEventiCache["sc:" + sc.id] = sc; });
   agGiorniDati = giorni.map((g, k) => {
     const iso = isoGiorni[k];
     return { iso, k, g, oggi: iso === oggiIso,
       ev: eventi.filter(e => e.data_intervento === iso),
-      sc: scadenze.filter(sc => sc.prossima_scadenza === iso) };
+      sc: scadenze.filter(sc => sc.data_vista === iso) };
   });
   agDisegnaGriglia();
+  if(typeof agAggiornaSchede === "function") agAggiornaSchede();
   box.classList.remove("slide-l", "slide-r");
   if(direzione){ void box.offsetWidth; box.classList.add(direzione > 0 ? "slide-l" : "slide-r"); }
   agAttivaSwipe(box);
 }
 
 
-export { AG_GIORNI, AG_MESI, AG_MESI_LUNGHI, agDescrizioneTipo, agDescrizioneTipoPro, agLunedi, agNomeCavallo, renderAgendaSettimana };
+export { AG_GIORNI, AG_MESI, AG_MESI_LUNGHI, agDescrizioneTipo, agDescrizioneTipoPro, agGiornoLavoro, agLunedi, agNomeCavallo, renderAgendaSettimana };

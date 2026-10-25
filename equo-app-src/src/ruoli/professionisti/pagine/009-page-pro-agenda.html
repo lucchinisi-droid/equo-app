@@ -1,25 +1,36 @@
   <div class="page-content" id="page-pro-agenda">
-    <div class="card" style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="role-card-icon"><span class="icon"><svg><use href="#i-link"/></svg></span></div>
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:14px">Invita i tuoi clienti su Equo</div>
-          <div class="muted" style="font-size:12.5px;margin-top:2px">Condividi il link per collegarli al tuo profilo</div>
-        </div>
+    <!-- Agenda semplice | Agenda completa (26/10/2026) -->
+    <div class="ag-vista" id="ag-vista" role="tablist" aria-label="Tipo di agenda">
+      <button type="button" role="tab" data-v="semplice" onclick="scegliVistaAgenda('semplice')">Agenda semplice</button>
+      <button type="button" role="tab" data-v="completa" onclick="scegliVistaAgenda('completa')">Agenda completa</button>
+    </div>
+    <div class="ag-schede" id="ag-schede" hidden>
+      <button type="button" data-s="app" onclick="scegliSchedaAgenda('app')"><span>Appuntamenti</span><b id="ag-n-app">·</b></button>
+      <button type="button" data-s="prog" onclick="scegliSchedaAgenda('prog')"><span>Da programmare</span><b class="o" id="ag-n-prog">·</b></button>
+      <button type="button" data-s="nonfatti" onclick="scegliSchedaAgenda('nonfatti')"><span>Non fatti</span><b class="r" id="ag-n-nonfatti">·</b></button>
+      <button type="button" data-s="saldare" onclick="scegliSchedaAgenda('saldare')"><span>Da saldare</span><b id="ag-n-saldare">·</b></button>
+    </div>
+
+    <div id="ag-sez-app">
+      <div class="card" id="ag-richieste" style="display:none;margin-bottom:14px;border:1.5px solid var(--accent)"></div>
+
+      <div class="ag-head"><div class="section-title" id="pro-agenda-title">Agenda della settimana</div></div>
+      <div class="ag-nav">
+        <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(-1)" aria-label="Settimana precedente">‹</button>
+        <div class="ag-week-label"><div id="ag-week-label">—</div><button class="ag-oggi-btn" id="ag-oggi-btn" style="display:none" onclick="tornaSettimanaCorrente()">Torna a oggi</button></div>
+        <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(1)" aria-label="Settimana successiva">›</button>
       </div>
-      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:12px" onclick="copyInviteLink()">Copia link invito</button>
+      <div class="card ag-week" id="ag-week" style="margin-bottom:14px"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
+      <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">+ Nuovo appuntamento</button>
     </div>
+    <div id="ag-sez-prog" class="ag-sez" hidden></div>
+    <div id="ag-sez-nonfatti" class="ag-sez" hidden></div>
+    <div id="ag-sez-saldare" class="ag-sez" hidden></div>
 
-    <div class="card" id="ag-richieste" style="display:none;margin-bottom:14px;border:1.5px solid var(--accent)"></div>
-
-    <div class="ag-head"><div class="section-title" id="pro-agenda-title">Agenda della settimana</div></div>
-    <div class="ag-nav">
-      <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(-1)" aria-label="Settimana precedente">‹</button>
-      <div class="ag-week-label"><div id="ag-week-label">—</div><button class="ag-oggi-btn" id="ag-oggi-btn" style="display:none" onclick="tornaSettimanaCorrente()">Torna a oggi</button></div>
-      <button class="ag-nav-btn" onclick="cambiaSettimanaAgenda(1)" aria-label="Settimana successiva">›</button>
+    <!-- invito clienti: in fondo, compatto -->
+    <div class="ag-invito">
+      <button type="button" class="ag-invito-qr" onclick="openCodicePersonaleModal()" aria-label="Mostra il QR"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM5 5v3h3V5zM16 5v3h3V5zM5 16v3h3v-3zM14 14h3v3h-3zM18 18h3v3h-3zM14 19h2v2h-2zM19 14h2v2h-2z" fill="currentColor"/></svg></button>
+      <div class="ag-invito-t"><b>Colleghiamoci su Equo</b><span>Invita i tuoi clienti con il tuo codice</span></div>
+      <button type="button" class="btn btn-outline btn-sm" onclick="condividiInvitoAgenda()">Condividi l'invito</button>
     </div>
-    <div class="card ag-week" id="ag-week" style="margin-bottom:14px"><div class="loading"><div class="spinner"></div> Caricamento...</div></div>
-    <button class="btn btn-primary" style="width:100%" id="pro-action-btn" onclick="openInterventoModal(null)">+ Nuovo appuntamento</button>
   </div>
-
-  <!-- PROFESSIONISTA: INCASSI (vista Semplice = cassa; vista Completa = statistiche, Premium) -->

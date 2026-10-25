@@ -143,7 +143,7 @@ function fissaDaScadenza(id){
   openInterventoModal(sc.cliente_mascalcia_id, null, {
     tipo_ferratura: sc.tipo_ferratura, tipo_altro: sc.tipo_altro,
     misura_sistema: sc.misura_sistema, numero_ferro: sc.numero_ferro, quantita_ferri: sc.quantita_ferri,
-    data_intervento: sc.prossima_scadenza, cavallo_cliente_id: sc.cavallo_cliente_id, horse_id: sc.horse_id
+    data_intervento: sc.data_vista || sc.prossima_scadenza, cavallo_cliente_id: sc.cavallo_cliente_id, horse_id: sc.horse_id
   });
 }
 

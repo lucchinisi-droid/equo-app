@@ -1,0 +1,68 @@
+/* ---------- AGENDA SEMPLICE | COMPLETA (26/10/2026) ---------- */
+.ag-vista{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 12px;border-radius:16px;background:var(--surface2);border:1px solid var(--border)}
+.ag-vista button{all:unset;box-sizing:border-box;text-align:center;padding:10px 6px;border-radius:12px;font-weight:800;font-size:14px;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ag-vista button.on{background:var(--accent);color:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.ag-vista button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ag-schede{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 14px}
+.ag-schede[hidden]{display:none}
+.ag-schede button{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px 10px 10px 12px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);font-weight:700;font-size:13px;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent}
+.ag-schede button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-schede button b{flex:none;min-width:24px;height:22px;padding:0 7px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;background:var(--surface2)}
+.ag-schede button b.o{background:rgba(201,151,63,.2);color:#9a6a1f}
+.ag-schede button b.r{background:rgba(181,67,47,.14);color:var(--red)}
+.ag-schede button b.zero{background:var(--surface2);color:var(--muted);opacity:.7}
+.ag-schede button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.ag-schede button.on b{background:rgba(255,255,255,.22);color:inherit;opacity:1}
+/* casella del giorno: piccolo «N ⚠», «✓ N», domenica riposo */
+:where(body:not(.pl-owner)) .ag-tile .ag-scad{flex:none;display:inline-flex;align-items:center;gap:2px;height:22px;padding:0 6px;border-radius:7px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text)}
+:where(body:not(.pl-owner)) .ag-tile .ag-scad span{font-size:11px}
+:where(body:not(.pl-owner)) .ag-tile .ag-fatti{flex:none;font-size:11.5px;font-weight:800;color:var(--green)}
+.ag-tile.aperto .ag-fatti{color:inherit;opacity:.85}
+.ag-tile.aperto .ag-scad{color:var(--text)}
+:where(body:not(.pl-owner)) .ag-tile .ag-riposo{flex:none;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:3px 9px;border-radius:9px;background:var(--surface2)}
+.ag-tile.aperto .ag-riposo{background:rgba(255,255,255,.22);color:inherit}
+:where(body:not(.pl-owner)) .ag-tile.riposo:not(.aperto){background:var(--surface2);border-style:dashed}
+/* schede della versione completa */
+.ag-sez[hidden]{display:none}
+.ag-nota{font-size:12.5px;color:var(--muted);line-height:1.45;margin:0 2px 10px}
+.ag-filtri{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:2px;scrollbar-width:none}
+.ag-filtri button{all:unset;flex:none;cursor:pointer;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:14px;background:var(--surface);border:1px solid var(--border)}
+.ag-filtri button b{font-weight:800;color:var(--muted);margin-left:2px}
+.ag-filtri button.on{background:var(--text);color:var(--surface);border-color:var(--text)}
+.ag-filtri button.on b{color:inherit;opacity:.75}
+.ag-gruppo,.agc-cli{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:10px 12px;margin-bottom:9px}
+.ag-gruppo-t{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.ag-gruppo-t b{display:block;font-size:14px}
+.ag-gruppo-t small{font-size:12px;color:var(--muted)}
+.ag-riga{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.ag-riga-c{flex:1;min-width:0;cursor:pointer}
+.ag-riga-c b{display:block;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag-riga-c small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.ag-pill{flex:none;font-size:11px;font-weight:800;padding:3px 8px;border-radius:9px;white-space:nowrap}
+.ag-pill.r{background:rgba(181,67,47,.14);color:var(--red)}
+.ag-pill.o{background:rgba(201,151,63,.2);color:#9a6a1f}
+.ag-pill.v{background:rgba(61,122,79,.14);color:var(--green)}
+.ag-piu{all:unset;cursor:pointer;padding:4px 6px;font-size:18px;color:var(--muted);line-height:1}
+.agc-azioni{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-top:9px;border-top:1px solid var(--border)}
+.agc-azioni .btn{flex:1}
+.ag-sposta{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted);flex:1 1 100%}
+.ag-sposta input{flex:1;min-width:0;padding:7px 9px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font:inherit;color:var(--text)}
+.btn.ag-rosso{color:var(--red);border-color:rgba(181,67,47,.4)}
+.ag-vuoto{text-align:center;color:var(--muted);font-weight:700;padding:26px 10px;background:var(--surface);border:1.5px dashed var(--border);border-radius:16px}
+.ag-totale{display:flex;justify-content:space-between;align-items:center;background:var(--accent);color:var(--surface);border-radius:16px;padding:13px 14px;margin-bottom:10px}
+.ag-totale small{display:block;font-size:12px;opacity:.85}
+.ag-totale b{font-family:Fraunces,serif;font-size:26px}
+.agc-cli{padding:0;overflow:hidden}
+.agc-cli-t{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.ag-ini{flex:none;width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--accent)}
+.ag-eu{flex:none;font-weight:800;font-size:14px;text-align:right}
+.ag-eu small{display:block;font-size:11px;font-weight:700;color:var(--red)}
+.agc-cli-d{padding:0 12px 10px}
+.agc-cli.aperto{border-color:var(--accent)}
+/* invito clienti in fondo */
+.ag-invito{display:flex;align-items:center;gap:10px;margin-top:18px;padding:10px 12px;border-radius:16px;border:1.5px dashed var(--border);background:var(--surface)}
+.ag-invito-qr{all:unset;flex:none;cursor:pointer;width:40px;height:40px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text)}
+.ag-invito-qr svg{width:24px;height:24px}
+.ag-invito-t{flex:1;min-width:0}
+.ag-invito-t b{display:block;font-size:13.5px}
+.ag-invito-t span{display:block;font-size:12px;color:var(--muted)}

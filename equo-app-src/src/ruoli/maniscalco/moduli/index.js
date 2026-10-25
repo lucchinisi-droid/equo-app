@@ -45,6 +45,7 @@ import { usaPosizioneQui } from "./106-posizione-attuale.js";
 import { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
 import { condividiInvitoCliente } from "./108-invito-qr.js";
 import { apriCardPro, chiudiCardPro, ecvAggiungiEsperienza, ecvAggiungiFormazione, ecvAggiungiVoce, ecvCampo, ecvChiediReferenza, ecvCopiaLink, ecvGiraPass, ecvHammer, ecvIndietro, ecvInterruttore, ecvLingua, ecvModello, ecvMostra, ecvPdfCv, ecvPdfPass, ecvPubblica, ecvReferenza, ecvSlug, ecvSpec, ecvTogliElemento, ecvTogliVoce } from "./109-equo-cv-pass.js";
+import { agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda } from "./110-agenda-semplice-completa.js";
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
@@ -346,5 +347,17 @@ Object.assign(window, {
   ecvSlug,
   ecvSpec,
   ecvTogliElemento,
-  ecvTogliVoce
+  ecvTogliVoce,
+  agAggiornaSchede,
+  agApplicaVistaAgenda,
+  agDsApri,
+  agDsSaldato,
+  agFiltroProg,
+  agFissaScadenza,
+  agFissaTutti,
+  agNfAnnulla,
+  agNfSposta,
+  condividiInvitoAgenda,
+  scegliSchedaAgenda,
+  scegliVistaAgenda
 });

@@ -137,11 +137,21 @@ function agRigaScadenza(sc, di){
         <button class="btn btn-outline btn-sm" onclick="fissaDaScadenza('${sc.id}')">Fissa</button>
       </div>`;
 }
+/* AGENDA SEMPLICE / COMPLETA (26/10/2026): scelta salvata sul telefono, si parte da Semplice.
+   Semplice: numero grande = appuntamenti ancora da fare, piccolo «N ⚠» = scadenze del giorno (righe «scad.» nel giorno aperto).
+   Completa: niente scadenze nell'agenda (stanno in «Da programmare»), i fatti si vedono come «✓ N».
+   In entrambe la domenica è RIPOSO e i lavori già fatti non entrano nel numero. */
+function agendaCompleta(){ try { return localStorage.getItem("equo-agenda-vista") === "completa"; } catch(e){ return false; } }
+const agScadGiorno = d => agendaCompleta() ? [] : d.sc;
+const agDaFare = d => d.ev.filter(e => e.stato !== "fatto");
 function agTile(d){
-  const tot = d.ev.length + d.sc.length, aperto = agGiorniAperti.has(d.iso);
-  return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
+  const daFare = agDaFare(d).length, sc = agScadGiorno(d).length, fatti = d.ev.length - daFare, aperto = agGiorniAperti.has(d.iso);
+  const riposo = d.k === 6 && !d.ev.length;
+  return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
       <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? '<span class="ag-tile-oggi">oggi</span>' : ""}</span>
-      <span class="ag-count${tot ? "" : " zero"}">${tot}</span><span class="ag-chev">▾</span>
+      ${sc ? `<span class="ag-scad" title="${sc} ${sc === 1 ? "scadenza" : "scadenze"}">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
+      ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
+      ${riposo ? '<span class="ag-riposo">Riposo</span>' : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
     </button>`;
 }
 function agPannello(d){
@@ -155,8 +165,9 @@ function agPannello(d){
     gruppi.get(l.key).righe.push(riga(x, di));
   };
   agOrdinaGiro(d.ev).forEach(e => metti(e, false, agRigaEvento));
-  d.sc.forEach(sc => metti(sc, true, agRigaScadenza));
-  const cavalli = new Set([...d.ev, ...d.sc].map(x => x.cavallo_cliente_id || x.horse_id || ("r:" + x.id))).size;
+  const scad = agScadGiorno(d);
+  scad.forEach(sc => metti(sc, true, agRigaScadenza));
+  const cavalli = new Set([...d.ev, ...scad].map(x => x.cavallo_cliente_id || x.horse_id || ("r:" + x.id))).size;
   const nCli = gruppi.size;
   const nomeEsteso = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"][d.k];
   const corpo = [...gruppi.entries()].map(([k, gr]) => `
@@ -168,7 +179,7 @@ function agPannello(d){
   return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
         <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
-      <div class="ag-gruppi">${corpo || '<div class="ag-empty">Nessun appuntamento</div>'}</div>
+      <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
       ${d.ev.length > 1 ? '<div class="ag-sugger">Tieni premuto ⋮⋮ e trascina per cambiare l\'ordine del giro.</div>' : ""}
       <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${d.iso}')">+ Aggiungi in questo giorno</button>
     </div>`;
@@ -188,4 +199,4 @@ function agDisegnaGriglia(){
 }
 
 
-export { accettaRichiesta, agDisegnaGriglia, apriPropostaStruttura, azioneGruppoStruttura, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda };
+export { accettaRichiesta, agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda };
