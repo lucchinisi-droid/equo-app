@@ -10983,7 +10983,7 @@
 			"pezzo"
 		],
 		[
-			"Scarpe antinfortunistiche",
+			"Scarpe antinfortunistica",
 			"altro",
 			"paio"
 		],
