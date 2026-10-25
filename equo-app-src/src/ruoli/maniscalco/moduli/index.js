@@ -23,7 +23,7 @@ import { accettaRichiesta, apriPropostaStruttura, inviaPropostaStruttura, rifiut
 import { agOrdinaGiro, apriAzioniEvento, azioneEvento, cambiaSettimanaAgenda, fissaDaScadenza, nuovoAppuntamentoGiorno, segnaFattoAgenda, toggleGiornoAgenda, tornaSettimanaCorrente } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 import { caricaJsPdf, creaPdfEvento, generaPdfEvento, inviaEventoInChat, rimuoviAllegatoChat } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
-import { apriNuovoConto, contoSetDate, contoSetModo, contoSetPeriodo, contoToggle, contoToggleGruppo, creaContoDaScelte } from "./059-foglio-fai-il-conto.js";
+import { contoAnnullaERifai, contoApriEsistente, apriNuovoConto, contoSetDate, contoSetModo, contoSetPeriodo, contoToggle, contoToggleGruppo, creaContoDaScelte } from "./059-foglio-fai-il-conto.js";
 import { apriInvioConto, contoAnnulla, contoCondividi, contoInviaChat, contoScarica, contoSegnaPagato } from "./060-foglio-di-invio-gestione-del-conto.js";
 import { creaPdfConto } from "./061-pdf-del-conto-dai-dati-salvati-snapshot.js";
 import { apriAbbinamentoDaChat, closeFarrierChatThread, confermaAbbinamentoCavalli, openFarrierChatThread, proponiAbbinamentoCavalli, renderFarrierChatThread, saltaAbbinamentoCavalli, sendFarrierChatMessage } from "./074-abbinamento-cavalli-del-maniscalco-caval.js";
@@ -360,5 +360,7 @@ Object.assign(window, {
   agNfSposta,
   condividiInvitoAgenda,
   scegliSchedaAgenda,
-  scegliVistaAgenda
+  scegliVistaAgenda,
+  contoAnnullaERifai,
+  contoApriEsistente
 });

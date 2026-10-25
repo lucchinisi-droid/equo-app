@@ -7,6 +7,7 @@ import { openInterventoModal } from "./052-ferro-standard-nella-scheda-del-caval
 import { agGiornoLavoro, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
+import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
 /* ---------- AGENDA SEMPLICE | AGENDA COMPLETA (26/10/2026) ----------
    Interruttore in alto nella pagina Agenda (scelta salvata sul telefono, si parte da Semplice).
    Completa = 4 schede: Appuntamenti (la settimana, senza scadenze) · Da programmare (scadenze scadute e dei prossimi 30 giorni,
@@ -215,6 +216,7 @@ function agDisegnaSaldare(){
     .sort((a, b) => (a.vecchio || "").localeCompare(b.vecchio || ""));
   const tot = gruppi.reduce((t, g) => t + g.tot, 0);
   box.innerHTML = `<div class="ag-totale"><div><small>Da incassare · ${gruppi.length} ${gruppi.length === 1 ? "cliente" : "clienti"} · ${agDati.saldare.length} ${agDati.saldare.length === 1 ? "lavoro" : "lavori"}</small><b>${euroTondo(tot)}</b></div></div>
+    <div id="ag-conti-aperti"></div>
     <p class="ag-nota">Dal debito più vecchio. Tocca un cliente per vedere i lavori e segnarli saldati.</p>
     ${gruppi.length ? gruppi.map(g => { const gg = g.vecchio ? giorniTra(g.vecchio, oggi) : 0, aperto = agDsAperto === g.id;
       return `<div class="agc-cli${aperto ? " aperto" : ""}">
@@ -224,6 +226,7 @@ function agDisegnaSaldare(){
         ${aperto ? `<div class="agc-cli-d">${g.righe.map(i => `<div class="ag-riga"><div class="ag-riga-c"><b>${escapeHtml(nomeCav(i))}</b><small>${escapeHtml(tipoLav(i))} · ${formatDataBreve(i.data_intervento)}</small></div><span class="ag-eu">${i.importo != null ? euroTondo(i.importo) : "—"}</span><button type="button" class="btn btn-primary btn-sm" onclick="agDsSaldato('${i.id}', this)">Saldato</button></div>`).join("")}
           ${g.id !== "?" ? `<div class="agc-azioni"><button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="apriResoconto('${g.id}')">Resoconto PDF</button></div>` : ""}</div>` : ""}
       </div>`; }).join("") : '<div class="ag-vuoto">✓ Tutto incassato</div>'}`;
+  caricaContiAperti("ag-conti-aperti");
 }
 function agDsApri(id){ agDsAperto = agDsAperto === id ? null : id; agDisegnaSaldare(); }
 async function agDsSaldato(id, btn){

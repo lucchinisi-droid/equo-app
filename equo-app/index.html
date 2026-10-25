@@ -2731,6 +2731,23 @@ body.ecv-aperta{overflow:hidden}
 #modal-add-intervento.int-lavoro-fatto .solo-lavoro-fatto{display:revert}
 #modal-add-intervento.int-lavoro-fatto .no-lavoro-fatto{display:none}
 #modal-add-intervento.int-lavoro-fatto .input-row-2{display:block}
+
+/* 27/10/2026: conti mandati e non pagati (Incassi, Agenda completa) e «Fai il conto» quando i lavori sono già in un conto */
+.conti-aperti{background:var(--surface);border:1.5px solid var(--accent);border-radius:16px;padding:10px 12px;margin:0 0 10px}
+.conti-aperti-t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.conti-aperti-t b{font-size:14px}
+.conti-aperti-t span{font-size:12.5px;font-weight:700;color:var(--muted)}
+.conti-aperti-r{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);cursor:pointer}
+.conti-aperti-r .c{flex:1;min-width:0}
+.conti-aperti-r .c b{display:block;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conti-aperti-r .c small{display:block;font-size:12px;color:var(--muted)}
+.conti-aperti-r .e{text-align:right;font-weight:800;font-size:14px}
+.conti-aperti-r .e small{display:block;font-size:11.5px;color:var(--accent);font-weight:800}
+.conto-gia{background:var(--surface2);border-radius:14px;padding:11px 12px;margin:6px 0;font-size:13px;line-height:1.45}
+.conto-gia-r{padding-top:9px;margin-top:9px;border-top:1px solid var(--border)}
+.conto-gia-r small{display:block;color:var(--red);font-weight:700;font-size:12px}
+.conto-gia-a{display:flex;gap:6px;margin-top:8px}
+.conto-gia-a .btn{flex:1}
 /* ---------- Tablet e computer (da 768 px) ---------- */
 @media (min-width:768px){
   body{display:block;background:var(--bg)}
@@ -3698,6 +3715,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
       </div>
       <button type="button" class="inc-cassa rosso" id="inc-cassa-dasaldare" onclick="incApri('dasaldare')"></button>
       <div id="inc-det-dasaldare" class="inc-det" hidden>
+        <div id="inc-conti-aperti"></div>
         <div class="card inc-card"><div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div></div>
       </div>
       <div class="muted" style="font-size:11.5px;line-height:1.5;margin:2px 2px 14px">«Da incassare» non dipende dal periodo: è tutto quello che devi ancora riscuotere per lavori già fatti.</div>
@@ -8489,483 +8507,6 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const sm = document.getElementById("misura-pref-select");
 		if (sm) sm.value = currentUser?.ferroSistema || "";
 	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/047-incassi-saldati-per-periodo-da-saldare-p.js
-	var incMesi = (() => {
-		try {
-			return Number(localStorage.getItem("equo-inc-mesi")) || 6;
-		} catch (e) {
-			return 6;
-		}
-	})();
-	var INC_PERIODI = [
-		[
-			"oggi",
-			"Oggi",
-			false
-		],
-		[
-			"settimana",
-			"Settimana",
-			true
-		],
-		[
-			"mese",
-			"Mese",
-			false
-		],
-		[
-			"anno",
-			"Anno",
-			true
-		],
-		[
-			"date",
-			"Scegli date…",
-			true
-		]
-	];
-	function euroTondo(n) {
-		return (Number(n) || 0).toLocaleString("it-IT", {
-			style: "currency",
-			currency: "EUR",
-			maximumFractionDigits: Number(n) % 1 ? 2 : 0
-		});
-	}
-	function giornoPagamento(i) {
-		return i.saldato_il ? isoLocale(new Date(i.saldato_il)) : i.data_intervento || "";
-	}
-	function incIntervallo(per) {
-		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale(oggi);
-		if (per === "oggi") return {
-			da: iso,
-			a: iso,
-			prevDa: aggiungiGiorniIso(iso, -1),
-			prevA: aggiungiGiorniIso(iso, -1),
-			nome: "oggi",
-			prevNome: "ieri"
-		};
-		if (per === "settimana") {
-			const lun = isoLocale(agLunedi(0));
-			return {
-				da: lun,
-				a: aggiungiGiorniIso(lun, 6),
-				prevDa: aggiungiGiorniIso(lun, -7),
-				prevA: aggiungiGiorniIso(lun, -1),
-				nome: "questa settimana",
-				prevNome: "la settimana scorsa"
-			};
-		}
-		if (per === "anno") {
-			const y = oggi.getFullYear();
-			return {
-				da: y + "-01-01",
-				a: y + "-12-31",
-				prevDa: y - 1 + "-01-01",
-				prevA: y - 1 + "-12-31",
-				nome: String(y),
-				prevNome: String(y - 1)
-			};
-		}
-		if (per === "date") {
-			const da = document.getElementById("inc-dal").value || aggiungiGiorniIso(iso, -29), a = document.getElementById("inc-al").value || iso;
-			const n = giorniTra(da, a) + 1;
-			return {
-				da,
-				a,
-				prevDa: aggiungiGiorniIso(da, -n),
-				prevA: aggiungiGiorniIso(da, -1),
-				nome: formatDataBreve(da) + " – " + formatDataBreve(a),
-				prevNome: `i ${n} giorni prima`
-			};
-		}
-		const y = oggi.getFullYear(), m = oggi.getMonth();
-		return {
-			da: isoLocale(new Date(y, m, 1)),
-			a: isoLocale(new Date(y, m + 1, 0)),
-			prevDa: isoLocale(new Date(y, m - 1, 1)),
-			prevA: isoLocale(new Date(y, m, 0)),
-			nome: new Date(y, m, 1).toLocaleDateString("it-IT", { month: "long" }),
-			prevNome: new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long" })
-		};
-	}
-	function incSaldatiTra(da, a) {
-		return incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => {
-			const g = giornoPagamento(i);
-			return g >= da && g <= a;
-		})());
-	}
-	var incSomma = (l) => l.reduce((t, i) => t + (Number(i.importo) || 0), 0);
-	async function renderIncassi$1() {
-		const box = document.getElementById("incassi-mese-incassato");
-		if (!box) return;
-		incTutti = await DB.listInterventiMascalciaTutti();
-		const iso = isoLocale(/* @__PURE__ */ new Date()), mese = iso.slice(0, 7);
-		const incassatoMese = incSomma(incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && giornoPagamento(i).startsWith(mese)));
-		const fattiNonSaldati = incTutti.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato");
-		const daIncassare = incSomma(fattiNonSaldati);
-		const previstoTot = incSomma(incTutti.filter((i) => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0).sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || ""))));
-		box.textContent = formatEuro(incassatoMese);
-		if (typeof wgPro !== "undefined") {
-			wgPro.incassatoMese = incassatoMese;
-			wgPro.daIncassareMese = daIncassare;
-			wgPro.previsto = previstoTot;
-			if (typeof wgRidisegna === "function") wgRidisegna();
-		}
-		const homeTeaser = document.getElementById("home-pro-incassi-mese");
-		if (homeTeaser) homeTeaser.textContent = formatEuro(incassatoMese) + " incassati";
-		const totalUnread = proUnreadTotal;
-		const homeUnread = document.getElementById("home-pro-unread");
-		if (homeUnread) homeUnread.textContent = totalUnread > 0 ? `${totalUnread} messagg${totalUnread === 1 ? "io" : "i"} non lett${totalUnread === 1 ? "o" : "i"}` : "Nessun messaggio non letto";
-		if (!vistaCompleta() && incVista === "completa") incVista = "semplice";
-		document.getElementById("inc-vista").style.display = vistaCompleta() ? "" : "none";
-		const prem = isPremium();
-		document.getElementById("inc-vista").innerHTML = [["semplice", "Semplice"], ["completa", "Completa"]].map(([k, t]) => `<button role="tab" aria-selected="${incVista === k}" class="${incVista === k ? "on" : ""}" onclick="sceltaVistaIncassi('${k}')">${t}${k === "completa" && !prem ? "<span class=\"stella\" aria-label=\"Premium\">★</span>" : ""}</button>`).join("");
-		document.getElementById("inc-titolo").textContent = incVista === "completa" ? "Statistiche" : "Incassi";
-		document.getElementById("inc-semplice").hidden = incVista !== "semplice";
-		document.getElementById("inc-completa").hidden = incVista !== "completa";
-		const oggiIso = iso;
-		const perCli = /* @__PURE__ */ new Map();
-		fattiNonSaldati.forEach((i) => {
-			const k = i.cliente_mascalcia_id || "?";
-			if (!perCli.has(k)) perCli.set(k, {
-				id: k,
-				nome: i.clienti_mascalcia?.nome || "Cliente",
-				righe: []
-			});
-			perCli.get(k).righe.push(i);
-		});
-		const gruppiDs = [...perCli.values()].map((g) => ({
-			...g,
-			tot: incSomma(g.righe),
-			righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))
-		})).sort((a, b) => b.tot - a.tot);
-		const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
-		const cDs = document.getElementById("inc-cassa-dasaldare");
-		cDs.classList.toggle("aperta", incAperta === "dasaldare");
-		cDs.setAttribute("aria-expanded", String(incAperta === "dasaldare"));
-		cDs.innerHTML = `<span class="l"><span>Da incassare</span><span>${incAperta === "dasaldare" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(daIncassare)}</span>
-    <span class="d">${fattiNonSaldati.length ? `${fattiNonSaldati.length} ${fattiNonSaldati.length === 1 ? "lavoro già fatto" : "lavori già fatti"} · ${gruppiDs.length} ${gruppiDs.length === 1 ? "cliente" : "clienti"} · il più vecchio da ${piuVecchio} ${piuVecchio === 1 ? "giorno" : "giorni"}` : "Tutto incassato 👍"}</span>`;
-		document.getElementById("inc-det-dasaldare").hidden = incAperta !== "dasaldare";
-		document.getElementById("incassi-da-saldare-list").innerHTML = !gruppiDs.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun pagamento in sospeso.</div>" : gruppiDs.map((g) => `<div class="inc-gruppo"><span>${escapeHtml(g.nome)}</span><span style="display:flex;align-items:center;gap:10px">${euroTondo(g.tot)}${g.id && g.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button>` : ""}</span></div>` + g.righe.map((i) => {
-			const gg = giorniTra(i.data_intervento, oggiIso);
-			return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
-          <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
-            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span></div>
-          <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span>
-          <button class="btn btn-primary btn-sm inc-saldato" onclick="segnaSaldatoIncassi('${i.id}', this)">Saldato</button></div>`;
-		}).join("")).join("");
-		if (incVista === "completa") await renderIncassiCompleta();
-		renderIncassiSaldati();
-	}
-	function renderIncassiSaldati() {
-		const prem = isPremium();
-		if (!prem && INC_PERIODI.find((p) => p[0] === incPeriodo)?.[2]) incPeriodo = "mese";
-		document.getElementById("inc-periodi").innerHTML = INC_PERIODI.map(([k, t, p]) => `<button class="${incPeriodo === k ? "on" : ""}" onclick="sceltaPeriodoIncassi('${k}')">${t}${p && !prem ? " <span class=\"inc-lucchetto\" aria-label=\"Premium\">🔒</span>" : ""}</button>`).join("");
-		document.getElementById("inc-date").hidden = incPeriodo !== "date";
-		const r = incIntervallo(incPeriodo);
-		const lista = incSaldatiTra(r.da, r.a).sort((a, b) => giornoPagamento(b).localeCompare(giornoPagamento(a)));
-		const prev = incSaldatiTra(r.prevDa, r.prevA);
-		const tot = incSomma(lista), totPrev = incSomma(prev);
-		const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
-		const conImporto = lista.filter((i) => Number(i.importo) > 0);
-		const cIn = document.getElementById("inc-cassa-incassati");
-		cIn.classList.toggle("aperta", incAperta === "incassati");
-		cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
-		cIn.innerHTML = `<span class="l"><span>Incassati · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
-    <span class="d">${lista.length} ${lista.length === 1 ? "lavoro pagato" : "lavori pagati"}${diff === null ? "" : ` · <span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(r.prevNome)}`}</span>`;
-		document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
-		document.getElementById("inc-kpis").innerHTML = `
-    <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>
-    <div class="inc-kpi"><div class="l">Media a lavoro</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
-		const barre = [];
-		if (incPeriodo === "settimana" || incPeriodo === "date" && giorniTra(r.da, r.a) <= 31) for (let g = r.da; g <= r.a; g = aggiungiGiorniIso(g, 1)) {
-			const d = /* @__PURE__ */ new Date(g + "T12:00");
-			barre.push([incPeriodo === "settimana" ? AG_GIORNI[(d.getDay() + 6) % 7].charAt(0) : String(d.getDate()), incSomma(lista.filter((i) => giornoPagamento(i) === g))]);
-		}
-		else if (incPeriodo === "mese") {
-			const fine = Number(r.a.slice(8));
-			for (let s0 = 1; s0 <= fine; s0 += 7) {
-				const s1 = Math.min(s0 + 6, fine);
-				r.da.slice(0, 8);
-				barre.push([s0 + "-" + s1, incSomma(lista.filter((i) => {
-					const g = Number(giornoPagamento(i).slice(8));
-					return g >= s0 && g <= s1;
-				}))]);
-			}
-		} else if (incPeriodo === "anno" || incPeriodo === "date") {
-			const mesi = [];
-			for (let d = /* @__PURE__ */ new Date(r.da.slice(0, 7) + "-01T12:00"); isoLocale(d).slice(0, 7) <= r.a.slice(0, 7); d.setMonth(d.getMonth() + 1)) mesi.push(isoLocale(d).slice(0, 7));
-			mesi.forEach((m) => barre.push([(/* @__PURE__ */ new Date(m + "-01T12:00")).toLocaleDateString("it-IT", { month: "narrow" }), incSomma(lista.filter((i) => giornoPagamento(i).startsWith(m)))]));
-		}
-		const gc = document.getElementById("inc-grafico-card");
-		gc.style.display = barre.length > 1 ? "" : "none";
-		const max = Math.max(1, ...barre.map((b) => b[1]));
-		const fmtK = (v) => v >= 1e3 ? (v / 1e3).toFixed(1).replace(".", ",").replace(",0", "") + "k" : String(Math.round(v));
-		document.getElementById("inc-grafico").innerHTML = barre.map(([l, v]) => `<div class="c" title="${escapeHtml(l)}: ${euroTondo(v)}"><small>${v ? fmtK(v) : ""}</small><div class="b${v ? "" : " zero"}" style="height:${Math.max(2, Math.round(v / max * 78))}px"></div><small>${escapeHtml(l)}</small></div>`).join("");
-		const barra = (t, v, maxV) => `<div class="inc-riga"><div class="t"><i style="transform:scaleX(${maxV ? (v / maxV).toFixed(3) : 0})"></i><span>${escapeHtml(t)}</span></div><b>${euroTondo(v)}</b></div>`;
-		const perTipo = Object.keys(TIPO_FERRATURA_LABELS).map((k) => [TIPO_FERRATURA_LABELS[k], incSomma(lista.filter((i) => i.tipo_ferratura === k))]).filter((x) => x[1] > 0);
-		const mt = Math.max(0, ...perTipo.map((x) => x[1]));
-		document.getElementById("inc-per-tipo").innerHTML = perTipo.length ? perTipo.map(([t, v]) => barra(t, v, mt)).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun incasso nel periodo.</div>";
-		const cli = /* @__PURE__ */ new Map();
-		lista.forEach((i) => {
-			const n = i.clienti_mascalcia?.nome || "Cliente";
-			cli.set(n, (cli.get(n) || 0) + (Number(i.importo) || 0));
-		});
-		const cliOrd = [...cli.entries()].sort((a, b) => b[1] - a[1]);
-		const top = cliOrd.slice(0, 5), altri = cliOrd.slice(5);
-		if (altri.length) top.push([`Altri ${altri.length} ${altri.length === 1 ? "cliente" : "clienti"}`, altri.reduce((t, x) => t + x[1], 0)]);
-		const mc = Math.max(0, ...top.map((x) => x[1]));
-		document.getElementById("inc-per-cliente").innerHTML = top.length ? top.map(([t, v]) => barra(t, v, mc)).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun incasso nel periodo.</div>";
-		document.getElementById("inc-elenco-n").textContent = lista.length ? String(lista.length) : "";
-		const vis = incElencoTutto ? lista : lista.slice(0, 30);
-		document.getElementById("inc-elenco").innerHTML = !lista.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun lavoro saldato nel periodo.</div>" : vis.map((i) => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i.saldato_il ? " · pagato " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
-        <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("") + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
-	}
-	function sceltaPeriodoIncassi(k) {
-		const p = INC_PERIODI.find((x) => x[0] === k);
-		if (p && p[2] && !isPremium()) {
-			showToast("Settimana, Anno e date a scelta sono con Premium");
-			setTimeout(() => togglePiano(), 400);
-			return;
-		}
-		incPeriodo = k;
-		incElencoTutto = false;
-		if (k === "date" && !document.getElementById("inc-dal").value) {
-			const iso = isoLocale(/* @__PURE__ */ new Date());
-			document.getElementById("inc-dal").value = aggiungiGiorniIso(iso, -29);
-			document.getElementById("inc-al").value = iso;
-		}
-		renderIncassi$1();
-	}
-	function incApri(k) {
-		incAperta = incAperta === k ? null : k;
-		renderIncassi$1();
-	}
-	function sceltaVistaIncassi(k) {
-		incVista = k;
-		try {
-			localStorage.setItem("equo-inc-vista", k);
-		} catch (e) {}
-		renderIncassi$1();
-	}
-	function sceltaMesiIncassi(n) {
-		incMesi = n;
-		try {
-			localStorage.setItem("equo-inc-mesi", String(n));
-		} catch (e) {}
-		renderIncassiCompleta();
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
-	async function azioneGruppoStruttura(gruppoId, azione) {
-		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
-			p_gruppo_id: gruppoId,
-			p_azione: azione
-		});
-		if (error || !data?.ok) {
-			showToast(data && data.errore || "Operazione non riuscita: " + (error?.message || "riprova"));
-			return;
-		}
-		showToast(azione === "conferma" ? "Confermato: la scuderia riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
-		await renderAgendaSettimana();
-		await renderProDeadlines();
-		if (currentClienteId) await loadClienteInterventi(currentClienteId);
-	}
-	var propStrutturaClienteId = null;
-	async function apriPropostaStruttura(clienteId, preset) {
-		propStrutturaClienteId = clienteId;
-		const c = clientiMascalcia.find((x) => x.id === clienteId);
-		document.getElementById("prop-str-nome").textContent = c?.nome || "Scuderia";
-		const p = preset || {};
-		document.getElementById("prop-str-tipo").value = p.tipo_ferratura || "ferratura";
-		document.getElementById("prop-str-tipo-altro").value = p.tipo_altro || "";
-		document.getElementById("prop-str-tipo-altro-group").style.display = p.tipo_ferratura === "altro" ? "flex" : "none";
-		document.getElementById("prop-str-data").value = p.data_intervento || "";
-		document.getElementById("prop-str-data").min = isoLocale(/* @__PURE__ */ new Date());
-		document.getElementById("prop-str-ora").value = p.ora ? String(p.ora).slice(0, 5) : "";
-		document.getElementById("prop-str-importo").value = "";
-		document.getElementById("prop-str-note").value = "";
-		document.getElementById("prop-str-error").style.display = "none";
-		const box = document.getElementById("prop-str-cavalli");
-		box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Caricamento…</div>";
-		openModal("modal-proponi-struttura");
-		const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
-		const cav = data || [];
-		box.innerHTML = cav.length ? cav.map((x) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? " <span class=\"muted\" style=\"font-size:11.5px\">(inserito da te, non nella scheda della scuderia)</span>" : ""}</label>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">La scuderia non ha ancora cavalli in scheda: l'appuntamento sarà generico.</div>";
-	}
-	async function inviaPropostaStruttura() {
-		const err = document.getElementById("prop-str-error");
-		err.style.display = "none";
-		const tipo = document.getElementById("prop-str-tipo").value;
-		const tipoAltro = document.getElementById("prop-str-tipo-altro").value.trim();
-		const data = document.getElementById("prop-str-data").value;
-		const ora = document.getElementById("prop-str-ora").value;
-		const importo = document.getElementById("prop-str-importo").value;
-		const note = document.getElementById("prop-str-note").value.trim();
-		const cavalli = Array.from(document.querySelectorAll(".prop-str-cav:checked")).map((el) => el.value);
-		if (!data) {
-			err.textContent = "Scegli la data.";
-			err.style.display = "block";
-			return;
-		}
-		if (tipo === "altro" && !tipoAltro) {
-			err.textContent = "Specifica il tipo di intervento.";
-			err.style.display = "block";
-			return;
-		}
-		const { data: res, error } = await sb.rpc("pro_proponi_appuntamento_struttura", {
-			p_cliente_id: propStrutturaClienteId,
-			p_tipo: tipo,
-			p_tipo_altro: tipoAltro || null,
-			p_data: data,
-			p_ora: ora || null,
-			p_cavalli: cavalli,
-			p_note: note || null,
-			p_importo: importo ? Number(importo) : null
-		});
-		if (error || !res?.ok) {
-			err.textContent = res && res.errore || "Invio non riuscito: " + (error?.message || "riprova");
-			err.style.display = "block";
-			return;
-		}
-		closeModal("modal-proponi-struttura");
-		showToast("Proposta inviata: la scuderia deve confermarla.");
-		if (document.getElementById("ag-week")) await renderAgendaSettimana();
-		if (currentClienteId) await loadClienteInterventi(currentClienteId);
-	}
-	function vaiAllaDataAgenda(iso) {
-		const lunCorrente = agLunedi(0);
-		const [y, m, d] = iso.split("-").map(Number);
-		const target = new Date(y, m - 1, d);
-		const diffGiorni = Math.round((target - lunCorrente) / 864e5);
-		agSettimanaOffset = Math.floor(diffGiorni / 7);
-		agGiorniAperti = /* @__PURE__ */ new Set([iso]);
-		renderAgendaSettimana();
-	}
-	function accettaRichiesta(id) {
-		const r = richiesteCache[id] || agEventiCache[id];
-		if (!r) return;
-		if (r.gruppo_id) return azioneGruppoStruttura(r.gruppo_id, "conferma");
-		openInterventoModal(null, r);
-	}
-	async function rifiutaRichiesta(id) {
-		const r = richiesteCache[id] || agEventiCache[id];
-		if (!r) return;
-		if (r.gruppo_id) {
-			if (!confirm("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
-			return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
-		}
-		if (!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
-		const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
-		if (error) {
-			showToast("Errore: " + error.message);
-			return;
-		}
-		await DB.insertMessaggioMascalcia({
-			cliente_mascalcia_id: r.cliente_mascalcia_id,
-			tipo: "testo",
-			testo: testoRichiesta("❌ Non riesco per questa richiesta", r, agNomeCavallo(r)) + " Scrivimi qui per trovare un'altra data."
-		});
-		showToast("Richiesta rifiutata");
-		await renderAgendaSettimana();
-		await renderProDeadlines();
-		if (currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
-	}
-	function agRigaEvento(e, di) {
-		const cav = agNomeCavallo(e);
-		return `
-      <div class="ag-ev${e.stato === "fatto" ? " fatto" : e.stato === "richiesto" || e.stato === "proposto" ? " richiesta" : ""}" data-ev="${e.id}">
-        <span class="ag-mani" data-drag="ev" aria-label="Trascina per cambiare l'ordine" title="Trascina per cambiare l'ordine">⋮⋮</span>
-        <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
-        <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
-          <div class="ag-ev-title">${cav ? escapeHtml(cav) : "<span style=\"color:var(--muted);font-weight:500\">Cavallo non indicato</span>"}</div>
-          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
-          ${notaModificaMan(e)}
-        </div>
-        ${e.stato === "fatto" ? "<span class=\"ag-ev-done\">✓ Fatto</span>" : e.stato === "proposto" ? "<span class=\"ag-ev-done\" style=\"color:var(--accent)\">attesa</span>" : e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>` : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
-        <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
-      </div>`;
-	}
-	function agendaCompleta() {
-		try {
-			return localStorage.getItem("equo-agenda-vista") === "completa";
-		} catch (e) {
-			return false;
-		}
-	}
-	var agScadGiorno = (d) => agendaCompleta() ? [] : d.sc;
-	var agDaFare = (d) => d.ev.filter((e) => e.stato !== "fatto");
-	function agTile(d) {
-		const daFare = agDaFare(d).length, sc = agScadGiorno(d).length, fatti = d.ev.length - daFare, aperto = agGiorniAperti.has(d.iso);
-		const riposo = d.k === 6 && !d.ev.length;
-		return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
-      <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
-      ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
-      ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
-      ${riposo ? "<span class=\"ag-riposo\">Riposo</span>" : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
-    </button>`;
-	}
-	function agPannello(d) {
-		const gruppi = /* @__PURE__ */ new Map();
-		const metti = (x, attuale, riga) => {
-			const l = luogoEvento(x, attuale);
-			if (!gruppi.has(l.key)) {
-				gruppi.set(l.key, {
-					nome: l.nome,
-					l,
-					righe: []
-				});
-				agLuoghi[l.key] = l;
-			}
-			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "" : "";
-			gruppi.get(l.key).righe.push(riga(x, di));
-		};
-		agOrdinaGiro(d.ev).forEach((e) => metti(e, false, agRigaEvento));
-		const scad = agScadGiorno(d);
-		const cavalli = new Set([...d.ev].map((x) => x.cavallo_cliente_id || x.horse_id || "r:" + x.id)).size;
-		const nCli = gruppi.size;
-		const nomeEsteso = [
-			"Lunedì",
-			"Martedì",
-			"Mercoledì",
-			"Giovedì",
-			"Venerdì",
-			"Sabato",
-			"Domenica"
-		][d.k];
-		const corpo = [...gruppi.entries()].map(([k, gr]) => `
-      <div class="ag-gblock" data-cli="${escapeHtml(k)}">
-        <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span>
-          <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some((e) => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
-        <div class="ag-gr">${gr.righe.join("")}</div>
-      </div>`).join("");
-		return `<div class="ag-pannello" data-iso="${d.iso}">
-      <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
-        <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
-      <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
-      ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
-      ${d.ev.length > 1 ? "<div class=\"ag-sugger\">Tieni premuto ⋮⋮ e trascina per cambiare l'ordine del giro.</div>" : ""}
-      <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${d.iso}')">+ Aggiungi in questo giorno</button>
-    </div>`;
-	}
-	function agDisegnaGriglia() {
-		const box = document.getElementById("ag-week");
-		if (!box || !agGiorniDati.length) return;
-		let html = "";
-		for (const coppia of [
-			[0, 1],
-			[2, 3],
-			[4, 5],
-			[6]
-		]) {
-			const gg = coppia.map((k) => agGiorniDati[k]);
-			html += gg.map(agTile).join("");
-			const ap = gg.find((d) => agGiorniAperti.has(d.iso));
-			if (ap) html += agPannello(ap);
-		}
-		box.innerHTML = `<div class="ag-griglia">${html}</div>`;
-		agAttivaTrascina(box);
-	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/057-pdf-appuntamento-invio-in-chat-maniscalc.js
 	var jsPdfPromise = null;
 	function caricaJsPdf() {
@@ -9279,6 +8820,17 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			}
 			return data || [];
 		},
+		async aperti(clienteId) {
+			if (DEMO_MODE) return (demoState.conti || []).filter((c) => c.stato === "da_incassare" && (!clienteId || c.cliente_mascalcia_id === clienteId)).sort((a, b) => a.creato_il.localeCompare(b.creato_il));
+			let q = sb.from("conti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).eq("stato", "da_incassare");
+			if (clienteId) q = q.eq("cliente_mascalcia_id", clienteId);
+			const { data, error } = await q.order("creato_il", { ascending: true }).limit(100);
+			if (error) {
+				console.error("conti aperti:", error);
+				return [];
+			}
+			return data || [];
+		},
 		async completo(id) {
 			if (DEMO_MODE) return (demoState.conti || []).find((c) => c.id === id) || null;
 			const [c, r] = await Promise.all([sb.from("conti_mascalcia").select("*").eq("id", id).single(), sb.from("conti_mascalcia_righe").select("*").eq("conto_id", id).order("proprietario_nome").order("data_intervento")]);
@@ -9318,6 +8870,524 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			return { error };
 		}
 	};
+	// equo-app-src/src/ruoli/maniscalco/moduli/058-scheda-cliente-pulsante-elenco-dei-conti.js
+	async function caricaContiCliente(clienteId) {
+		const box = document.getElementById("cliente-conti-box");
+		if (!box) return;
+		if (incassiNascosti()) {
+			box.innerHTML = "";
+			return;
+		}
+		const lista = await ContoDB.lista(clienteId);
+		if (currentClienteId !== clienteId) return;
+		const badge = (s) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
+		box.innerHTML = `<div class="card" style="margin:14px 0">
+    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
+      <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
+    ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map((c) => `
+      <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
+        <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
+        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato)}</div></div>
+      </div>`).join("") : ""}
+  </div>`;
+	}
+	function htmlContiAperti(lista, conCliente) {
+		if (!lista || !lista.length) return "";
+		const tot = lista.reduce((t, c) => t + (Number(c.totale) || 0), 0);
+		return `<div class="conti-aperti">
+    <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
+    ${lista.map((c) => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
+      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small></span>
+      <span class="e">${contoEuro(c.totale)}<small>Apri</small></span></button>`).join("")}
+  </div>`;
+	}
+	async function caricaContiAperti(boxId) {
+		const box = document.getElementById(boxId);
+		if (!box) return;
+		if (incassiNascosti()) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = htmlContiAperti(await ContoDB.aperti(), true);
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/047-incassi-saldati-per-periodo-da-saldare-p.js
+	var incMesi = (() => {
+		try {
+			return Number(localStorage.getItem("equo-inc-mesi")) || 6;
+		} catch (e) {
+			return 6;
+		}
+	})();
+	var INC_PERIODI = [
+		[
+			"oggi",
+			"Oggi",
+			false
+		],
+		[
+			"settimana",
+			"Settimana",
+			true
+		],
+		[
+			"mese",
+			"Mese",
+			false
+		],
+		[
+			"anno",
+			"Anno",
+			true
+		],
+		[
+			"date",
+			"Scegli date…",
+			true
+		]
+	];
+	function euroTondo(n) {
+		return (Number(n) || 0).toLocaleString("it-IT", {
+			style: "currency",
+			currency: "EUR",
+			maximumFractionDigits: Number(n) % 1 ? 2 : 0
+		});
+	}
+	function giornoPagamento(i) {
+		return i.saldato_il ? isoLocale(new Date(i.saldato_il)) : i.data_intervento || "";
+	}
+	function incIntervallo(per) {
+		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale(oggi);
+		if (per === "oggi") return {
+			da: iso,
+			a: iso,
+			prevDa: aggiungiGiorniIso(iso, -1),
+			prevA: aggiungiGiorniIso(iso, -1),
+			nome: "oggi",
+			prevNome: "ieri"
+		};
+		if (per === "settimana") {
+			const lun = isoLocale(agLunedi(0));
+			return {
+				da: lun,
+				a: aggiungiGiorniIso(lun, 6),
+				prevDa: aggiungiGiorniIso(lun, -7),
+				prevA: aggiungiGiorniIso(lun, -1),
+				nome: "questa settimana",
+				prevNome: "la settimana scorsa"
+			};
+		}
+		if (per === "anno") {
+			const y = oggi.getFullYear();
+			return {
+				da: y + "-01-01",
+				a: y + "-12-31",
+				prevDa: y - 1 + "-01-01",
+				prevA: y - 1 + "-12-31",
+				nome: String(y),
+				prevNome: String(y - 1)
+			};
+		}
+		if (per === "date") {
+			const da = document.getElementById("inc-dal").value || aggiungiGiorniIso(iso, -29), a = document.getElementById("inc-al").value || iso;
+			const n = giorniTra(da, a) + 1;
+			return {
+				da,
+				a,
+				prevDa: aggiungiGiorniIso(da, -n),
+				prevA: aggiungiGiorniIso(da, -1),
+				nome: formatDataBreve(da) + " – " + formatDataBreve(a),
+				prevNome: `i ${n} giorni prima`
+			};
+		}
+		const y = oggi.getFullYear(), m = oggi.getMonth();
+		return {
+			da: isoLocale(new Date(y, m, 1)),
+			a: isoLocale(new Date(y, m + 1, 0)),
+			prevDa: isoLocale(new Date(y, m - 1, 1)),
+			prevA: isoLocale(new Date(y, m, 0)),
+			nome: new Date(y, m, 1).toLocaleDateString("it-IT", { month: "long" }),
+			prevNome: new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long" })
+		};
+	}
+	function incSaldatiTra(da, a) {
+		return incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => {
+			const g = giornoPagamento(i);
+			return g >= da && g <= a;
+		})());
+	}
+	var incSomma = (l) => l.reduce((t, i) => t + (Number(i.importo) || 0), 0);
+	async function renderIncassi$1() {
+		const box = document.getElementById("incassi-mese-incassato");
+		if (!box) return;
+		incTutti = await DB.listInterventiMascalciaTutti();
+		const iso = isoLocale(/* @__PURE__ */ new Date()), mese = iso.slice(0, 7);
+		const incassatoMese = incSomma(incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && giornoPagamento(i).startsWith(mese)));
+		const fattiNonSaldati = incTutti.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato");
+		const daIncassare = incSomma(fattiNonSaldati);
+		const previstoTot = incSomma(incTutti.filter((i) => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0).sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || ""))));
+		box.textContent = formatEuro(incassatoMese);
+		if (typeof wgPro !== "undefined") {
+			wgPro.incassatoMese = incassatoMese;
+			wgPro.daIncassareMese = daIncassare;
+			wgPro.previsto = previstoTot;
+			if (typeof wgRidisegna === "function") wgRidisegna();
+		}
+		const homeTeaser = document.getElementById("home-pro-incassi-mese");
+		if (homeTeaser) homeTeaser.textContent = formatEuro(incassatoMese) + " incassati";
+		const totalUnread = proUnreadTotal;
+		const homeUnread = document.getElementById("home-pro-unread");
+		if (homeUnread) homeUnread.textContent = totalUnread > 0 ? `${totalUnread} messagg${totalUnread === 1 ? "io" : "i"} non lett${totalUnread === 1 ? "o" : "i"}` : "Nessun messaggio non letto";
+		if (!vistaCompleta() && incVista === "completa") incVista = "semplice";
+		document.getElementById("inc-vista").style.display = vistaCompleta() ? "" : "none";
+		const prem = isPremium();
+		document.getElementById("inc-vista").innerHTML = [["semplice", "Semplice"], ["completa", "Completa"]].map(([k, t]) => `<button role="tab" aria-selected="${incVista === k}" class="${incVista === k ? "on" : ""}" onclick="sceltaVistaIncassi('${k}')">${t}${k === "completa" && !prem ? "<span class=\"stella\" aria-label=\"Premium\">★</span>" : ""}</button>`).join("");
+		document.getElementById("inc-titolo").textContent = incVista === "completa" ? "Statistiche" : "Incassi";
+		document.getElementById("inc-semplice").hidden = incVista !== "semplice";
+		document.getElementById("inc-completa").hidden = incVista !== "completa";
+		const oggiIso = iso;
+		const perCli = /* @__PURE__ */ new Map();
+		fattiNonSaldati.forEach((i) => {
+			const k = i.cliente_mascalcia_id || "?";
+			if (!perCli.has(k)) perCli.set(k, {
+				id: k,
+				nome: i.clienti_mascalcia?.nome || "Cliente",
+				righe: []
+			});
+			perCli.get(k).righe.push(i);
+		});
+		const gruppiDs = [...perCli.values()].map((g) => ({
+			...g,
+			tot: incSomma(g.righe),
+			righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))
+		})).sort((a, b) => b.tot - a.tot);
+		const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
+		const cDs = document.getElementById("inc-cassa-dasaldare");
+		cDs.classList.toggle("aperta", incAperta === "dasaldare");
+		cDs.setAttribute("aria-expanded", String(incAperta === "dasaldare"));
+		cDs.innerHTML = `<span class="l"><span>Da incassare</span><span>${incAperta === "dasaldare" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(daIncassare)}</span>
+    <span class="d">${fattiNonSaldati.length ? `${fattiNonSaldati.length} ${fattiNonSaldati.length === 1 ? "lavoro già fatto" : "lavori già fatti"} · ${gruppiDs.length} ${gruppiDs.length === 1 ? "cliente" : "clienti"} · il più vecchio da ${piuVecchio} ${piuVecchio === 1 ? "giorno" : "giorni"}` : "Tutto incassato 👍"}</span>`;
+		document.getElementById("inc-det-dasaldare").hidden = incAperta !== "dasaldare";
+		document.getElementById("incassi-da-saldare-list").innerHTML = !gruppiDs.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun pagamento in sospeso.</div>" : gruppiDs.map((g) => `<div class="inc-gruppo"><span>${escapeHtml(g.nome)}</span><span style="display:flex;align-items:center;gap:10px">${euroTondo(g.tot)}${g.id && g.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button>` : ""}</span></div>` + g.righe.map((i) => {
+			const gg = giorniTra(i.data_intervento, oggiIso);
+			return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
+          <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
+            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span></div>
+          <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span>
+          <button class="btn btn-primary btn-sm inc-saldato" onclick="segnaSaldatoIncassi('${i.id}', this)">Saldato</button></div>`;
+		}).join("")).join("");
+		caricaContiAperti("inc-conti-aperti");
+		if (incVista === "completa") await renderIncassiCompleta();
+		renderIncassiSaldati();
+	}
+	function renderIncassiSaldati() {
+		const prem = isPremium();
+		if (!prem && INC_PERIODI.find((p) => p[0] === incPeriodo)?.[2]) incPeriodo = "mese";
+		document.getElementById("inc-periodi").innerHTML = INC_PERIODI.map(([k, t, p]) => `<button class="${incPeriodo === k ? "on" : ""}" onclick="sceltaPeriodoIncassi('${k}')">${t}${p && !prem ? " <span class=\"inc-lucchetto\" aria-label=\"Premium\">🔒</span>" : ""}</button>`).join("");
+		document.getElementById("inc-date").hidden = incPeriodo !== "date";
+		const r = incIntervallo(incPeriodo);
+		const lista = incSaldatiTra(r.da, r.a).sort((a, b) => giornoPagamento(b).localeCompare(giornoPagamento(a)));
+		const prev = incSaldatiTra(r.prevDa, r.prevA);
+		const tot = incSomma(lista), totPrev = incSomma(prev);
+		const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
+		const conImporto = lista.filter((i) => Number(i.importo) > 0);
+		const cIn = document.getElementById("inc-cassa-incassati");
+		cIn.classList.toggle("aperta", incAperta === "incassati");
+		cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
+		cIn.innerHTML = `<span class="l"><span>Incassati · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
+    <span class="d">${lista.length} ${lista.length === 1 ? "lavoro pagato" : "lavori pagati"}${diff === null ? "" : ` · <span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(r.prevNome)}`}</span>`;
+		document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
+		document.getElementById("inc-kpis").innerHTML = `
+    <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>
+    <div class="inc-kpi"><div class="l">Media a lavoro</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
+		const barre = [];
+		if (incPeriodo === "settimana" || incPeriodo === "date" && giorniTra(r.da, r.a) <= 31) for (let g = r.da; g <= r.a; g = aggiungiGiorniIso(g, 1)) {
+			const d = /* @__PURE__ */ new Date(g + "T12:00");
+			barre.push([incPeriodo === "settimana" ? AG_GIORNI[(d.getDay() + 6) % 7].charAt(0) : String(d.getDate()), incSomma(lista.filter((i) => giornoPagamento(i) === g))]);
+		}
+		else if (incPeriodo === "mese") {
+			const fine = Number(r.a.slice(8));
+			for (let s0 = 1; s0 <= fine; s0 += 7) {
+				const s1 = Math.min(s0 + 6, fine);
+				r.da.slice(0, 8);
+				barre.push([s0 + "-" + s1, incSomma(lista.filter((i) => {
+					const g = Number(giornoPagamento(i).slice(8));
+					return g >= s0 && g <= s1;
+				}))]);
+			}
+		} else if (incPeriodo === "anno" || incPeriodo === "date") {
+			const mesi = [];
+			for (let d = /* @__PURE__ */ new Date(r.da.slice(0, 7) + "-01T12:00"); isoLocale(d).slice(0, 7) <= r.a.slice(0, 7); d.setMonth(d.getMonth() + 1)) mesi.push(isoLocale(d).slice(0, 7));
+			mesi.forEach((m) => barre.push([(/* @__PURE__ */ new Date(m + "-01T12:00")).toLocaleDateString("it-IT", { month: "narrow" }), incSomma(lista.filter((i) => giornoPagamento(i).startsWith(m)))]));
+		}
+		const gc = document.getElementById("inc-grafico-card");
+		gc.style.display = barre.length > 1 ? "" : "none";
+		const max = Math.max(1, ...barre.map((b) => b[1]));
+		const fmtK = (v) => v >= 1e3 ? (v / 1e3).toFixed(1).replace(".", ",").replace(",0", "") + "k" : String(Math.round(v));
+		document.getElementById("inc-grafico").innerHTML = barre.map(([l, v]) => `<div class="c" title="${escapeHtml(l)}: ${euroTondo(v)}"><small>${v ? fmtK(v) : ""}</small><div class="b${v ? "" : " zero"}" style="height:${Math.max(2, Math.round(v / max * 78))}px"></div><small>${escapeHtml(l)}</small></div>`).join("");
+		const barra = (t, v, maxV) => `<div class="inc-riga"><div class="t"><i style="transform:scaleX(${maxV ? (v / maxV).toFixed(3) : 0})"></i><span>${escapeHtml(t)}</span></div><b>${euroTondo(v)}</b></div>`;
+		const perTipo = Object.keys(TIPO_FERRATURA_LABELS).map((k) => [TIPO_FERRATURA_LABELS[k], incSomma(lista.filter((i) => i.tipo_ferratura === k))]).filter((x) => x[1] > 0);
+		const mt = Math.max(0, ...perTipo.map((x) => x[1]));
+		document.getElementById("inc-per-tipo").innerHTML = perTipo.length ? perTipo.map(([t, v]) => barra(t, v, mt)).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun incasso nel periodo.</div>";
+		const cli = /* @__PURE__ */ new Map();
+		lista.forEach((i) => {
+			const n = i.clienti_mascalcia?.nome || "Cliente";
+			cli.set(n, (cli.get(n) || 0) + (Number(i.importo) || 0));
+		});
+		const cliOrd = [...cli.entries()].sort((a, b) => b[1] - a[1]);
+		const top = cliOrd.slice(0, 5), altri = cliOrd.slice(5);
+		if (altri.length) top.push([`Altri ${altri.length} ${altri.length === 1 ? "cliente" : "clienti"}`, altri.reduce((t, x) => t + x[1], 0)]);
+		const mc = Math.max(0, ...top.map((x) => x[1]));
+		document.getElementById("inc-per-cliente").innerHTML = top.length ? top.map(([t, v]) => barra(t, v, mc)).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun incasso nel periodo.</div>";
+		document.getElementById("inc-elenco-n").textContent = lista.length ? String(lista.length) : "";
+		const vis = incElencoTutto ? lista : lista.slice(0, 30);
+		document.getElementById("inc-elenco").innerHTML = !lista.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun lavoro saldato nel periodo.</div>" : vis.map((i) => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i.saldato_il ? " · pagato " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
+        <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("") + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
+	}
+	function sceltaPeriodoIncassi(k) {
+		const p = INC_PERIODI.find((x) => x[0] === k);
+		if (p && p[2] && !isPremium()) {
+			showToast("Settimana, Anno e date a scelta sono con Premium");
+			setTimeout(() => togglePiano(), 400);
+			return;
+		}
+		incPeriodo = k;
+		incElencoTutto = false;
+		if (k === "date" && !document.getElementById("inc-dal").value) {
+			const iso = isoLocale(/* @__PURE__ */ new Date());
+			document.getElementById("inc-dal").value = aggiungiGiorniIso(iso, -29);
+			document.getElementById("inc-al").value = iso;
+		}
+		renderIncassi$1();
+	}
+	function incApri(k) {
+		incAperta = incAperta === k ? null : k;
+		renderIncassi$1();
+	}
+	function sceltaVistaIncassi(k) {
+		incVista = k;
+		try {
+			localStorage.setItem("equo-inc-vista", k);
+		} catch (e) {}
+		renderIncassi$1();
+	}
+	function sceltaMesiIncassi(n) {
+		incMesi = n;
+		try {
+			localStorage.setItem("equo-inc-mesi", String(n));
+		} catch (e) {}
+		renderIncassiCompleta();
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
+	async function azioneGruppoStruttura(gruppoId, azione) {
+		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
+			p_gruppo_id: gruppoId,
+			p_azione: azione
+		});
+		if (error || !data?.ok) {
+			showToast(data && data.errore || "Operazione non riuscita: " + (error?.message || "riprova"));
+			return;
+		}
+		showToast(azione === "conferma" ? "Confermato: la scuderia riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
+		await renderAgendaSettimana();
+		await renderProDeadlines();
+		if (currentClienteId) await loadClienteInterventi(currentClienteId);
+	}
+	var propStrutturaClienteId = null;
+	async function apriPropostaStruttura(clienteId, preset) {
+		propStrutturaClienteId = clienteId;
+		const c = clientiMascalcia.find((x) => x.id === clienteId);
+		document.getElementById("prop-str-nome").textContent = c?.nome || "Scuderia";
+		const p = preset || {};
+		document.getElementById("prop-str-tipo").value = p.tipo_ferratura || "ferratura";
+		document.getElementById("prop-str-tipo-altro").value = p.tipo_altro || "";
+		document.getElementById("prop-str-tipo-altro-group").style.display = p.tipo_ferratura === "altro" ? "flex" : "none";
+		document.getElementById("prop-str-data").value = p.data_intervento || "";
+		document.getElementById("prop-str-data").min = isoLocale(/* @__PURE__ */ new Date());
+		document.getElementById("prop-str-ora").value = p.ora ? String(p.ora).slice(0, 5) : "";
+		document.getElementById("prop-str-importo").value = "";
+		document.getElementById("prop-str-note").value = "";
+		document.getElementById("prop-str-error").style.display = "none";
+		const box = document.getElementById("prop-str-cavalli");
+		box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Caricamento…</div>";
+		openModal("modal-proponi-struttura");
+		const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
+		const cav = data || [];
+		box.innerHTML = cav.length ? cav.map((x) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? " <span class=\"muted\" style=\"font-size:11.5px\">(inserito da te, non nella scheda della scuderia)</span>" : ""}</label>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">La scuderia non ha ancora cavalli in scheda: l'appuntamento sarà generico.</div>";
+	}
+	async function inviaPropostaStruttura() {
+		const err = document.getElementById("prop-str-error");
+		err.style.display = "none";
+		const tipo = document.getElementById("prop-str-tipo").value;
+		const tipoAltro = document.getElementById("prop-str-tipo-altro").value.trim();
+		const data = document.getElementById("prop-str-data").value;
+		const ora = document.getElementById("prop-str-ora").value;
+		const importo = document.getElementById("prop-str-importo").value;
+		const note = document.getElementById("prop-str-note").value.trim();
+		const cavalli = Array.from(document.querySelectorAll(".prop-str-cav:checked")).map((el) => el.value);
+		if (!data) {
+			err.textContent = "Scegli la data.";
+			err.style.display = "block";
+			return;
+		}
+		if (tipo === "altro" && !tipoAltro) {
+			err.textContent = "Specifica il tipo di intervento.";
+			err.style.display = "block";
+			return;
+		}
+		const { data: res, error } = await sb.rpc("pro_proponi_appuntamento_struttura", {
+			p_cliente_id: propStrutturaClienteId,
+			p_tipo: tipo,
+			p_tipo_altro: tipoAltro || null,
+			p_data: data,
+			p_ora: ora || null,
+			p_cavalli: cavalli,
+			p_note: note || null,
+			p_importo: importo ? Number(importo) : null
+		});
+		if (error || !res?.ok) {
+			err.textContent = res && res.errore || "Invio non riuscito: " + (error?.message || "riprova");
+			err.style.display = "block";
+			return;
+		}
+		closeModal("modal-proponi-struttura");
+		showToast("Proposta inviata: la scuderia deve confermarla.");
+		if (document.getElementById("ag-week")) await renderAgendaSettimana();
+		if (currentClienteId) await loadClienteInterventi(currentClienteId);
+	}
+	function vaiAllaDataAgenda(iso) {
+		const lunCorrente = agLunedi(0);
+		const [y, m, d] = iso.split("-").map(Number);
+		const target = new Date(y, m - 1, d);
+		const diffGiorni = Math.round((target - lunCorrente) / 864e5);
+		agSettimanaOffset = Math.floor(diffGiorni / 7);
+		agGiorniAperti = /* @__PURE__ */ new Set([iso]);
+		renderAgendaSettimana();
+	}
+	function accettaRichiesta(id) {
+		const r = richiesteCache[id] || agEventiCache[id];
+		if (!r) return;
+		if (r.gruppo_id) return azioneGruppoStruttura(r.gruppo_id, "conferma");
+		openInterventoModal(null, r);
+	}
+	async function rifiutaRichiesta(id) {
+		const r = richiesteCache[id] || agEventiCache[id];
+		if (!r) return;
+		if (r.gruppo_id) {
+			if (!confirm("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
+			return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
+		}
+		if (!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
+		const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
+		if (error) {
+			showToast("Errore: " + error.message);
+			return;
+		}
+		await DB.insertMessaggioMascalcia({
+			cliente_mascalcia_id: r.cliente_mascalcia_id,
+			tipo: "testo",
+			testo: testoRichiesta("❌ Non riesco per questa richiesta", r, agNomeCavallo(r)) + " Scrivimi qui per trovare un'altra data."
+		});
+		showToast("Richiesta rifiutata");
+		await renderAgendaSettimana();
+		await renderProDeadlines();
+		if (currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
+	}
+	function agRigaEvento(e, di) {
+		const cav = agNomeCavallo(e);
+		return `
+      <div class="ag-ev${e.stato === "fatto" ? " fatto" : e.stato === "richiesto" || e.stato === "proposto" ? " richiesta" : ""}" data-ev="${e.id}">
+        <span class="ag-mani" data-drag="ev" aria-label="Trascina per cambiare l'ordine" title="Trascina per cambiare l'ordine">⋮⋮</span>
+        <div class="ag-ev-time">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
+        <div class="ag-ev-main" onclick="apriAzioniEvento('${e.id}')">
+          <div class="ag-ev-title">${cav ? escapeHtml(cav) : "<span style=\"color:var(--muted);font-weight:500\">Cavallo non indicato</span>"}</div>
+          <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
+          ${notaModificaMan(e)}
+        </div>
+        ${e.stato === "fatto" ? "<span class=\"ag-ev-done\">✓ Fatto</span>" : e.stato === "proposto" ? "<span class=\"ag-ev-done\" style=\"color:var(--accent)\">attesa</span>" : e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>` : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
+        <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
+      </div>`;
+	}
+	function agendaCompleta() {
+		try {
+			return localStorage.getItem("equo-agenda-vista") === "completa";
+		} catch (e) {
+			return false;
+		}
+	}
+	var agScadGiorno = (d) => agendaCompleta() ? [] : d.sc;
+	var agDaFare = (d) => d.ev.filter((e) => e.stato !== "fatto");
+	function agTile(d) {
+		const daFare = agDaFare(d).length, sc = agScadGiorno(d).length, fatti = d.ev.length - daFare, aperto = agGiorniAperti.has(d.iso);
+		const riposo = d.k === 6 && !d.ev.length;
+		return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
+      <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
+      ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
+      ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
+      ${riposo ? "<span class=\"ag-riposo\">Riposo</span>" : `<span class="ag-count${daFare ? "" : " zero"}" aria-label="${daFare} da fare">${daFare}</span>`}<span class="ag-chev">▾</span>
+    </button>`;
+	}
+	function agPannello(d) {
+		const gruppi = /* @__PURE__ */ new Map();
+		const metti = (x, attuale, riga) => {
+			const l = luogoEvento(x, attuale);
+			if (!gruppi.has(l.key)) {
+				gruppi.set(l.key, {
+					nome: l.nome,
+					l,
+					righe: []
+				});
+				agLuoghi[l.key] = l;
+			}
+			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "" : "";
+			gruppi.get(l.key).righe.push(riga(x, di));
+		};
+		agOrdinaGiro(d.ev).forEach((e) => metti(e, false, agRigaEvento));
+		const scad = agScadGiorno(d);
+		const cavalli = new Set([...d.ev].map((x) => x.cavallo_cliente_id || x.horse_id || "r:" + x.id)).size;
+		const nCli = gruppi.size;
+		const nomeEsteso = [
+			"Lunedì",
+			"Martedì",
+			"Mercoledì",
+			"Giovedì",
+			"Venerdì",
+			"Sabato",
+			"Domenica"
+		][d.k];
+		const corpo = [...gruppi.entries()].map(([k, gr]) => `
+      <div class="ag-gblock" data-cli="${escapeHtml(k)}">
+        <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span>
+          <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some((e) => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
+        <div class="ag-gr">${gr.righe.join("")}</div>
+      </div>`).join("");
+		return `<div class="ag-pannello" data-iso="${d.iso}">
+      <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
+        <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+      <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
+      ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
+      ${d.ev.length > 1 ? "<div class=\"ag-sugger\">Tieni premuto ⋮⋮ e trascina per cambiare l'ordine del giro.</div>" : ""}
+      <button class="btn btn-outline btn-sm ag-add-day" onclick="nuovoAppuntamentoGiorno('${d.iso}')">+ Aggiungi in questo giorno</button>
+    </div>`;
+	}
+	function agDisegnaGriglia() {
+		const box = document.getElementById("ag-week");
+		if (!box || !agGiorniDati.length) return;
+		let html = "";
+		for (const coppia of [
+			[0, 1],
+			[2, 3],
+			[4, 5],
+			[6]
+		]) {
+			const gg = coppia.map((k) => agGiorniDati[k]);
+			html += gg.map(agTile).join("");
+			const ap = gg.find((d) => agGiorniAperti.has(d.iso));
+			if (ap) html += agPannello(ap);
+		}
+		box.innerHTML = `<div class="ag-griglia">${html}</div>`;
+		agAttivaTrascina(box);
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/056-ordine-del-giro-trascina-un-cavallo-nel.js
 	function agOrdinaGiro(l) {
 		return (l || []).slice().sort((a, b) => (a.data_intervento || "").localeCompare(b.data_intervento || "") || (a.ordine_giro ?? 1e9) - (b.ordine_giro ?? 1e9) || String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
@@ -11802,27 +11872,6 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
     </div>
   `;
 		}).join("");
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/058-scheda-cliente-pulsante-elenco-dei-conti.js
-	async function caricaContiCliente(clienteId) {
-		const box = document.getElementById("cliente-conti-box");
-		if (!box) return;
-		if (incassiNascosti()) {
-			box.innerHTML = "";
-			return;
-		}
-		const lista = await ContoDB.lista(clienteId);
-		if (currentClienteId !== clienteId) return;
-		const badge = (s) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
-		box.innerHTML = `<div class="card" style="margin:14px 0">
-    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
-      <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
-    ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map((c) => `
-      <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
-        <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
-        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato)}</div></div>
-      </div>`).join("") : ""}
-  </div>`;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/037-scheda-cliente-a-box-scheda-del-cavallo.js
 	async function loadClienteInterventi(clienteId) {
@@ -14739,6 +14788,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			loadClienteInterventi(currentClienteId);
 		}
 		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
 	}
 	async function contoAnnulla() {
 		const c = contoAperto;
@@ -14752,6 +14802,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		closeModal("modal-conto-invio");
 		showToast("Conto annullato");
 		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/059-foglio-fai-il-conto.js
 	async function apriNuovoConto(clienteId) {
@@ -14776,8 +14828,27 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("conto-nuovo-corpo").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Carico i lavori…</div>";
 		openModal("modal-conto-nuovo");
 		await caricaCavalliMiei().catch(() => {});
-		contoCtx.tutti = await ContoDB.lavoriLiberi(clienteId);
+		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(clienteId), ContoDB.aperti(clienteId)]);
 		contoApplicaPeriodo();
+	}
+	function contoApriEsistente(id) {
+		closeModal("modal-conto-nuovo");
+		apriInvioConto(id);
+	}
+	async function contoAnnullaERifai(id) {
+		const c = (contoCtx?.aperti || []).find((x) => x.id === id);
+		if (!c) return;
+		if (!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
+		const { error } = await ContoDB.annulla(id);
+		if (error) {
+			showToast("Errore: " + (error.message || "riprova"));
+			return;
+		}
+		showToast("Conto " + contoCodice(c) + " annullato");
+		[contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(contoCtx.clienteId), ContoDB.aperti(contoCtx.clienteId)]);
+		contoApplicaPeriodo();
+		if (currentClienteId) caricaContiCliente(currentClienteId);
+		if (typeof renderIncassi$1 === "function") renderIncassi$1();
 	}
 	function contoApplicaPeriodo() {
 		const c = contoCtx;
@@ -14862,11 +14933,15 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       ${gruppi[n].map((i) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)">
         <input type="checkbox" ${c.sel.has(i.id) ? "checked" : ""} onchange="contoToggle('${i.id}')">
         <span style="flex:1;min-width:0"><b>${escapeHtml(contoNomeCavallo(i))}</b><span class="muted" style="font-size:12px;display:block">${contoData(i.data_intervento)} · ${escapeHtml(agDescrizioneTipo(i))}</span></span>
-        <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("") : "<div class=\"muted\" style=\"font-size:13px;padding:8px 0\">Nessun lavoro da saldare in questo periodo.</div>"}
+        <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("") : (c.aperti || []).length ? `<div class="conto-gia">
+          <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
+          ${c.aperti.map((k) => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
+            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
+        </div>` : "<div class=\"muted\" style=\"font-size:13px;padding:8px 0\">Nessun lavoro da saldare in questo periodo.</div>"}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
     ${c.scuderia && c.modo === "per_proprietario" && nPag > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Verranno creati ${nPag} conti, uno per ciascun proprietario.</div>` : ""}
     <button class="btn btn-primary" id="conto-crea-btn" style="width:100%;margin-top:14px" ${scelti.length ? "" : "disabled"} onclick="creaContoDaScelte()">Crea il PDF</button>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. È un resoconto, non una fattura.</div>`;
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. Non è una fattura.</div>`;
 		document.querySelectorAll("#conto-nuovo-corpo input[data-gruppo]").forEach((cb) => {
 			const l = gruppi[cb.dataset.gruppo] || [], n = l.filter((i) => c.sel.has(i.id)).length;
 			cb.indeterminate = n > 0 && n < l.length;
@@ -16825,6 +16900,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		})).sort((a, b) => (a.vecchio || "").localeCompare(b.vecchio || ""));
 		const tot = gruppi.reduce((t, g) => t + g.tot, 0);
 		box.innerHTML = `<div class="ag-totale"><div><small>Da incassare · ${gruppi.length} ${gruppi.length === 1 ? "cliente" : "clienti"} · ${agDati.saldare.length} ${agDati.saldare.length === 1 ? "lavoro" : "lavori"}</small><b>${euroTondo(tot)}</b></div></div>
+    <div id="ag-conti-aperti"></div>
     <p class="ag-nota">Dal debito più vecchio. Tocca un cliente per vedere i lavori e segnarli saldati.</p>
     ${gruppi.length ? gruppi.map((g) => {
 			const gg = g.vecchio ? giorniTra(g.vecchio, oggi) : 0, aperto = agDsAperto === g.id;
@@ -16836,6 +16912,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
           ${g.id !== "?" ? `<div class="agc-azioni"><button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="apriResoconto('${g.id}')">Resoconto PDF</button></div>` : ""}</div>` : ""}
       </div>`;
 		}).join("") : "<div class=\"ag-vuoto\">✓ Tutto incassato</div>"}`;
+		caricaContiAperti("ag-conti-aperti");
 	}
 	function agDsApri(id) {
 		agDsAperto = agDsAperto === id ? null : id;
@@ -17726,7 +17803,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		agNfSposta,
 		condividiInvitoAgenda,
 		scegliSchedaAgenda,
-		scegliVistaAgenda
+		scegliVistaAgenda,
+		contoAnnullaERifai,
+		contoApriEsistente
 	});
 })();
 

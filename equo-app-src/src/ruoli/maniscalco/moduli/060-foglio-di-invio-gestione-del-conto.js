@@ -73,6 +73,7 @@ async function contoSegnaPagato(){
   showToast("Conto pagato: lavori saldati");
   if(currentClienteId){ caricaContiCliente(currentClienteId); loadClienteInterventi(currentClienteId); }
   if(typeof renderIncassi === "function") renderIncassi();
+  if(typeof agAggiornaSchede === "function") agAggiornaSchede();
 }
 async function contoAnnulla(){
   const c = contoAperto; if(!c) return;
@@ -82,6 +83,8 @@ async function contoAnnulla(){
   closeModal("modal-conto-invio");
   showToast("Conto annullato");
   if(currentClienteId) caricaContiCliente(currentClienteId);
+  if(typeof renderIncassi === "function") renderIncassi();
+  if(typeof agAggiornaSchede === "function") agAggiornaSchede();
 }
 
 

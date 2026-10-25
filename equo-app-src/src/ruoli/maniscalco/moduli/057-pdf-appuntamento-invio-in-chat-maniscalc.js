@@ -220,6 +220,15 @@ const ContoDB = {
     if(error){ console.error("lista conti:", error); return []; }
     return data || [];
   },
+  // conti ancora da incassare (di un cliente o di tutti), per «Fai il conto», Incassi e Agenda completa
+  async aperti(clienteId){
+    if(DEMO_MODE) return (demoState.conti || []).filter(c => c.stato === "da_incassare" && (!clienteId || c.cliente_mascalcia_id === clienteId)).sort((a, b) => a.creato_il.localeCompare(b.creato_il));
+    let q = sb.from("conti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).eq("stato", "da_incassare");
+    if(clienteId) q = q.eq("cliente_mascalcia_id", clienteId);
+    const { data, error } = await q.order("creato_il", { ascending: true }).limit(100);
+    if(error){ console.error("conti aperti:", error); return []; }
+    return data || [];
+  },
   async completo(id){
     if(DEMO_MODE) return (demoState.conti || []).find(c => c.id === id) || null;
     const [c, r] = await Promise.all([

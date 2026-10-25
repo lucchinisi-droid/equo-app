@@ -7,6 +7,7 @@ import { AG_GIORNI, agLunedi } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { wgRidisegna } from "./096-vista-applica-cambia-salva.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
+import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
 /* ---------- INCASSI: Saldati (per periodo), Da saldare, Previsti ----------
    Saldati: conta il giorno del pagamento (saldato_il); per i saldati di prima del 9/10/2026 il giorno del lavoro.
    Piano Free: Oggi e Mese corrente; Settimana, Anno e date a scelta sono Premium. */
@@ -92,6 +93,7 @@ async function renderIncassi(){
           <button class="btn btn-primary btn-sm inc-saldato" onclick="segnaSaldatoIncassi('${i.id}', this)">Saldato</button></div>`;
       }).join("")).join("");
 
+  caricaContiAperti("inc-conti-aperti");   // conti mandati e non ancora pagati, sopra i lavori da incassare
   if(incVista === "completa") await renderIncassiCompleta();
   renderIncassiSaldati();
 }

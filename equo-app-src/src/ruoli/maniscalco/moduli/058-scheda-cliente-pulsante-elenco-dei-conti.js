@@ -1,5 +1,6 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { ContoDB, contoCodice, contoData, contoEuro, contoLavori } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
+import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 /* ---- scheda cliente: pulsante + elenco dei conti ---- */
 async function caricaContiCliente(clienteId){
   const box = document.getElementById("cliente-conti-box");
@@ -20,4 +21,23 @@ async function caricaContiCliente(clienteId){
 }
 
 
-export { caricaContiCliente };
+// 27/10/2026: elenco dei conti ancora da incassare, riusato in Incassi → Da incassare e in Agenda completa → Da saldare
+function htmlContiAperti(lista, conCliente){
+  if(!lista || !lista.length) return "";
+  const tot = lista.reduce((t, c) => t + (Number(c.totale) || 0), 0);
+  return `<div class="conti-aperti">
+    <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
+    ${lista.map(c => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
+      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small></span>
+      <span class="e">${contoEuro(c.totale)}<small>Apri</small></span></button>`).join("")}
+  </div>`;
+}
+async function caricaContiAperti(boxId){
+  const box = document.getElementById(boxId);
+  if(!box) return;
+  if(incassiNascosti()){ box.innerHTML = ""; return; }
+  const lista = await ContoDB.aperti();
+  box.innerHTML = htmlContiAperti(lista, true);
+}
+
+export { caricaContiAperti, caricaContiCliente, htmlContiAperti };

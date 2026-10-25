@@ -4,7 +4,8 @@ import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js
 import { clienteDiId, eLuogoScuderia } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { agDescrizioneTipo, agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
-import { ContoDB, contoData, contoEuro } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
+import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { ContoDB, contoCodice, contoData, contoEuro, contoLavori } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { caricaContiCliente } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
 import { apriInvioConto } from "./060-foglio-di-invio-gestione-del-conto.js";
 import { caricaCavalliMiei } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
@@ -18,8 +19,21 @@ async function apriNuovoConto(clienteId){
   document.getElementById("conto-nuovo-corpo").innerHTML = '<div class="loading"><div class="spinner"></div> Carico i lavori…</div>';
   openModal("modal-conto-nuovo");
   await caricaCavalliMiei().catch(() => {});
-  contoCtx.tutti = await ContoDB.lavoriLiberi(clienteId);
+  [contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(clienteId), ContoDB.aperti(clienteId)]);
   contoApplicaPeriodo();
+}
+// i lavori da saldare sono già in un conto aperto: si apre quello, oppure si annulla e si rifà
+function contoApriEsistente(id){ closeModal("modal-conto-nuovo"); apriInvioConto(id); }
+async function contoAnnullaERifai(id){
+  const c = (contoCtx?.aperti || []).find(x => x.id === id); if(!c) return;
+  if(!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
+  const { error } = await ContoDB.annulla(id);
+  if(error){ showToast("Errore: " + (error.message || "riprova")); return; }
+  showToast("Conto " + contoCodice(c) + " annullato");
+  [contoCtx.tutti, contoCtx.aperti] = await Promise.all([ContoDB.lavoriLiberi(contoCtx.clienteId), ContoDB.aperti(contoCtx.clienteId)]);
+  contoApplicaPeriodo();
+  if(currentClienteId) caricaContiCliente(currentClienteId);
+  if(typeof renderIncassi === "function") renderIncassi();
 }
 function contoApplicaPeriodo(){
   const c = contoCtx; if(!c) return;
@@ -77,11 +91,16 @@ function renderNuovoConto(){
         <input type="checkbox" ${c.sel.has(i.id) ? "checked" : ""} onchange="contoToggle('${i.id}')">
         <span style="flex:1;min-width:0"><b>${escapeHtml(contoNomeCavallo(i))}</b><span class="muted" style="font-size:12px;display:block">${contoData(i.data_intervento)} · ${escapeHtml(agDescrizioneTipo(i))}</span></span>
         <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("")
+      : (c.aperti || []).length ? `<div class="conto-gia">
+          <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
+          ${c.aperti.map(k => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
+            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
+        </div>`
       : '<div class="muted" style="font-size:13px;padding:8px 0">Nessun lavoro da saldare in questo periodo.</div>'}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
     ${c.scuderia && c.modo === "per_proprietario" && nPag > 1 ? `<div class="muted" style="font-size:12px;margin-top:6px">Verranno creati ${nPag} conti, uno per ciascun proprietario.</div>` : ""}
     <button class="btn btn-primary" id="conto-crea-btn" style="width:100%;margin-top:14px" ${scelti.length ? "" : "disabled"} onclick="creaContoDaScelte()">Crea il PDF</button>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. È un resoconto, non una fattura.</div>`;
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Il conto prende un numero e resta salvato. Non è una fattura.</div>`;
   document.querySelectorAll("#conto-nuovo-corpo input[data-gruppo]").forEach(cb => {
     const l = gruppi[cb.dataset.gruppo] || [], n = l.filter(i => c.sel.has(i.id)).length;
     cb.indeterminate = n > 0 && n < l.length;
@@ -111,4 +130,4 @@ async function creaContoDaScelte(){
 }
 
 
-export { apriNuovoConto, contoSetDate, contoSetModo, contoSetPeriodo, contoToggle, contoToggleGruppo, creaContoDaScelte };
+export { contoAnnullaERifai, contoApriEsistente, apriNuovoConto, contoSetDate, contoSetModo, contoSetPeriodo, contoToggle, contoToggleGruppo, creaContoDaScelte };
