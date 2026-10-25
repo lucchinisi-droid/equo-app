@@ -28,7 +28,7 @@ const INT_TIPI = { tagliando: "Tagliando", revisione: "Revisione", pneumatici: "
 const INT_ICO = { tagliando: "⚙️", revisione: "📋", pneumatici: "🛞", pasticche: "🛑", cinghia: "⛓️", manutenzione_ordinaria: "🧰", manutenzione_straordinaria: "🔩", riparazione: "🔧", bombole: "🧯", altro: "•" };
 // scelte rapide nel modulo «Nuovo materiale»: nome, categoria, unità
 const MAT_RAPIDI = [["Ferri", "ferri", "paio"], ["Chiodi", "chiodi", "scatola"], ["Raspe", "attrezzi", "pezzo"], ["Nastro smerigliatrice", "attrezzi", "pezzo"],
-  ["Scarpe antinfortunistica", "altro", "paio"], ["Bombola gas", "altro", "pezzo"]];
+  ["Scarpe antinfortunistiche", "altro", "paio"], ["Bombola gas", "altro", "pezzo"]];
 const mesiTra = (a, b) => (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
 const giorniA = iso => iso ? Math.round((new Date(iso + "T12:00") - new Date(OGGI() + "T12:00")) / 86400000) : null;
 const num = v => { const n = Number(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : null; };
