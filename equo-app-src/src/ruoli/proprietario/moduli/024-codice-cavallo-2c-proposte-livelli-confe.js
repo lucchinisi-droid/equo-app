@@ -18,6 +18,32 @@ async function caricaProposteCavalli(){
   } catch(e){ proposteCav = []; }
   renderProposteCavalli();
   caricaRichiesteLasciati();
+  caricaReferenzeDaScrivere();
+}
+/* Referenze per l'Equo CV (26/10/2026): il tuo professionista ti chiede due righe; lui decide se pubblicarle */
+let referenzeDaScrivere = [];
+async function caricaReferenzeDaScrivere(){
+  const box = document.getElementById("home-referenze");
+  if(!box) return;
+  if(DEMO_MODE){ box.innerHTML = ""; return; }
+  try{ const { data, error } = await sb.rpc("equo_referenze_da_scrivere"); referenzeDaScrivere = (!error && Array.isArray(data)) ? data : []; }catch(e){ referenzeDaScrivere = []; }
+  if(!referenzeDaScrivere.length){ box.innerHTML = ""; return; }
+  box.innerHTML = referenzeDaScrivere.map(r => `<div class="card" style="margin-bottom:14px">
+    <div class="section-title" style="margin-bottom:4px">⭐ ${escapeHtml(r.pro || "Il tuo professionista")} ti chiede una referenza</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:8px">Due righe sul suo lavoro per il suo Equo CV. Compare con il tuo nome solo se lui decide di pubblicarla.</div>
+    <textarea class="input" id="ref-${r.id}" maxlength="400" rows="3" placeholder="Es. Preciso e puntuale, segue i miei cavalli con grande attenzione."></textarea>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="inviaReferenza('${r.id}', this)">Invia la referenza</button>
+  </div>`).join("");
+}
+async function inviaReferenza(id, btn){
+  const t = (document.getElementById("ref-" + id)?.value || "").trim();
+  if(t.length < 5){ showToast("Scrivi almeno qualche parola."); return; }
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("equo_scrivi_referenza", { p_id: id, p_testo: t });
+  btn.disabled = false;
+  if(error || !data?.ok){ showToast("Non inviata, riprova."); return; }
+  showToast("Grazie! Referenza inviata.");
+  caricaReferenzeDaScrivere();
 }
 /* «Non lo seguo più» (24/10/2026, caso Rio): il maniscalco chiede di non seguire più un tuo cavallo; tu confermi o rifiuti */
 let richiesteLasciati = [];
@@ -231,4 +257,4 @@ async function proponiCavalliCliente(clienteId){
 
 
 
-export { caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };
+export { caricaReferenzeDaScrivere, inviaReferenza, caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };

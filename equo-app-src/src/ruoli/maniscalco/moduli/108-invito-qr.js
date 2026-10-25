@@ -28,6 +28,16 @@ function moduliQr(testo){
     return n > 0 && punti.length ? { n, punti } : null;
   }catch(e){ return null; }
 }
+// QR disegnato nel PDF a quadratini (nitido in stampa): Equo Pass ed Equo CV
+function disegnaQrPdf(doc, testo, x, y, lato){
+  const q = moduliQr(testo);
+  if(!q) return false;
+  doc.setFillColor(255, 255, 255); doc.rect(x - 1.5, y - 1.5, lato + 3, lato + 3, "F");
+  doc.setFillColor(0, 0, 0);
+  const m = lato / q.n;
+  q.punti.forEach(([cx, cy]) => doc.rect(x + cx * m, y + cy * m, m + 0.02, m + 0.02, "F"));
+  return true;
+}
 // riquadro in fondo al PDF; nuovaPagina() deve aggiungere la pagina e ritornare la nuova y
 function riquadroInvitoPdf(doc, cli, y, W, M, nuovaPagina){
   const c = clienteDaInvitare(cli);
@@ -63,4 +73,4 @@ function condividiInvitoCliente(){
   window.open("https://wa.me/?text=" + encodeURIComponent(testo), "_blank");
 }
 
-export { clienteDaInvitare, condividiInvitoCliente, etichettaPro, linkInvito, riquadroInvitoPdf };
+export { disegnaQrPdf, clienteDaInvitare, condividiInvitoCliente, etichettaPro, linkInvito, riquadroInvitoPdf };

@@ -1,0 +1,121 @@
+/* CARD DEI PROFESSIONISTI: Equo Pass ed Equo CV (26/10/2026) */
+.ecv-pagina{--ecv-ok:#3fd18a;--ecv-oro:#e8b04b;--ecv-prem:#c58cff;position:fixed;inset:0;z-index:120;background:radial-gradient(120% 70% at 50% 0%,#5a4316 0%,#140e05 62%);color:#f7f0e2;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.25,1);overflow-y:auto;padding-bottom:calc(36px + env(safe-area-inset-bottom));visibility:hidden}
+.ecv-pagina.on{transform:none;visibility:visible}
+:root[data-theme="light"] .ecv-pagina{background:radial-gradient(120% 70% at 50% 0%,#fffaf0 0%,#ecdcbc 70%);color:#2a2110;--ecv-ok:#1d9a5d;--ecv-oro:#a8701a;--ecv-prem:#8a4fd1}
+body.ecv-aperta{overflow:hidden}
+.ecv-testa{display:flex;align-items:center;gap:10px;padding:calc(18px + env(safe-area-inset-top)) 18px 6px}
+.ecv-testa b{font-size:22px;flex:1}
+.ecv-tondo{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:inherit;font-size:20px;cursor:pointer;flex-shrink:0}
+:root[data-theme="light"] .ecv-tondo{background:rgba(0,0,0,.07)}
+.ecv-sotto{padding:0 18px 8px;opacity:.75;font-size:13px;line-height:1.45}
+.ecv-attesa{display:grid;place-items:center;height:200px}
+.ecv-tessere{display:grid;gap:12px;padding:12px 18px}
+.ecv-tessera{border-radius:22px;padding:18px;cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);display:flex;gap:14px;align-items:center;color:inherit;font:inherit;text-align:left;width:100%}
+:root[data-theme="light"] .ecv-tessera{background:rgba(255,255,255,.65);border-color:rgba(60,40,10,.12)}
+.ecv-ico{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:27px;flex-shrink:0;background:linear-gradient(135deg,#e8b04b,#a8701a)}
+.ecv-ico-p{background:linear-gradient(135deg,#c58cff,#7a2bd0)}
+.ecv-tessera b{font-size:16.5px;display:block}
+.ecv-tessera small{opacity:.75;font-size:12.5px;line-height:1.4;display:block;margin-top:3px}
+.ecv-fr{margin-left:auto;font-size:22px;opacity:.6}
+.ecv-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.4px;padding:2px 7px;border-radius:999px;margin-top:4px;vertical-align:middle}
+.ecv-badge.v{background:rgba(63,209,138,.2);color:var(--ecv-ok);border:1px solid var(--ecv-ok)}
+.ecv-badge.a{background:rgba(232,176,75,.15);color:var(--ecv-oro);border:1px solid var(--ecv-oro)}
+.ecv-badge.g{background:rgba(127,127,127,.12);opacity:.85;border:1px solid rgba(127,127,127,.4)}
+.ecv-badge.p{background:rgba(197,140,255,.18);color:var(--ecv-prem);border:1px solid var(--ecv-prem)}
+/* Pass */
+.ecv-pass-zona{display:flex;justify-content:center;padding:6px 0 4px;perspective:1400px}
+.ecv-pass{position:relative;width:286px;height:452px;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,1.3,.4,1);cursor:pointer}
+.ecv-pass.girato{transform:rotateY(180deg)}
+.ecv-lato{position:absolute;inset:0;border-radius:22px;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden;background:#fbf6ea;color:#1f1708;box-shadow:0 24px 50px rgba(0,0,0,.45)}
+.ecv-retro{transform:rotateY(180deg)}
+.ecv-foro{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:54px;height:9px;border-radius:5px;background:rgba(0,0,0,.25);box-shadow:inset 0 1px 2px rgba(0,0,0,.5);z-index:3}
+.ecv-band{position:relative;height:118px;background:linear-gradient(135deg,#2b1f08 0%,#6b4f18 55%,#c98f2e 120%);padding:26px 18px 0;color:#fff}
+.ecv-band:after{content:"";position:absolute;left:0;right:0;bottom:-22px;height:44px;background:inherit;clip-path:polygon(0 0,100% 0,50% 100%)}
+.ecv-logo{display:flex;align-items:center;gap:8px}
+.ecv-logo img{width:34px;height:34px}
+.ecv-logo b{font-size:18px;letter-spacing:.5px}
+.ecv-logo span{font-size:10px;letter-spacing:2.5px;opacity:.85;display:block;margin-top:1px}
+.ecv-anno{position:absolute;right:16px;top:28px;font-size:10px;letter-spacing:1px;padding:4px 8px;border:1px solid rgba(255,255,255,.5);border-radius:6px}
+.ecv-pcorpo{position:relative;padding:34px 18px 0;display:flex;gap:12px}
+.ecv-foto{width:96px;height:118px;border-radius:12px;flex-shrink:0;background:linear-gradient(160deg,#cfc2a5,#8d7a55) center/cover no-repeat;display:grid;place-items:center;color:#fff;font-size:34px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.ecv-pdati{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.ecv-ruolo{background:#c98f2e;color:#1f1708;font-weight:800;font-size:11px;letter-spacing:1.5px;padding:4px 8px;border-radius:4px}
+.ecv-nome{background:#2b1f08;color:#fff;font-weight:800;font-size:15px;line-height:1.15;padding:6px 8px;border-radius:4px;text-transform:uppercase;word-break:break-word}
+.ecv-zona{background:#efe4cc;font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px}
+.ecv-cert{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;color:#1d7a4c;letter-spacing:.4px}
+.ecv-cert i{width:16px;height:16px;border-radius:50%;background:#1d9a5d;color:#fff;display:grid;place-items:center;font-style:normal;font-size:10px}
+.ecv-spec{padding:12px 18px 0;display:flex;flex-wrap:wrap;gap:5px}
+.ecv-spec span{font-size:10px;font-weight:700;padding:4px 7px;border-radius:5px;background:#2b1f08;color:#f2d9a6}
+.ecv-piede{position:absolute;left:18px;right:18px;bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.ecv-cod{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:1.2px;font-weight:700;font-variant-numeric:slashed-zero;min-width:0;word-break:break-all}
+.ecv-cod small{display:block;font-family:-apple-system,sans-serif;font-size:9.5px;letter-spacing:.3px;color:#7a6a4a;font-weight:500;margin-top:3px;word-break:normal}
+.ecv-qr{width:92px;height:92px;background:#fff;border-radius:8px;padding:5px;box-shadow:0 0 0 1px #e3d7bb;flex-shrink:0}
+.ecv-qr svg{width:100%;height:100%;display:block}
+.ecv-qr canvas{display:none}
+.ecv-rtit{padding:30px 18px 6px;font-size:11px;letter-spacing:2px;font-weight:800;color:#7a6a4a}
+.ecv-numeri{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px}
+.ecv-numeri div{background:#efe4cc;border-radius:10px;padding:8px 10px}
+.ecv-numeri b{display:block;font-size:20px;color:#2b1f08}
+.ecv-numeri small{font-size:10px;color:#7a6a4a;line-height:1.2;display:block}
+.ecv-rlista{padding:0 18px;font-size:11.5px;line-height:1.5}
+.ecv-rlista div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #eadfc6;padding:4px 0}
+.ecv-rlista span{color:#7a6a4a;text-align:right}
+.ecv-verifica{position:absolute;left:18px;right:18px;bottom:14px;font-size:10px;color:#7a6a4a;text-align:center;line-height:1.4}
+.ecv-azioni{display:flex;gap:8px;padding:12px 18px 4px;flex-wrap:wrap}
+.ecv-azioni button{flex:1;min-width:96px;height:44px;border-radius:14px;border:1px solid rgba(127,127,127,.3);background:rgba(255,255,255,.08);color:inherit;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+:root[data-theme="light"] .ecv-azioni button{background:rgba(255,255,255,.65)}
+.ecv-azioni button.princ{background:var(--ecv-oro);color:#2a2110;border-color:var(--ecv-oro)}
+.ecv-azioni button.ecv-prem{background:var(--ecv-prem);border-color:var(--ecv-prem);color:#fff}
+.ecv-azioni button[disabled]{opacity:.5}
+.ecv-nota{text-align:center;font-size:12px;opacity:.7;margin-top:8px;padding:0 18px}
+/* CV */
+.ecv-compl{margin:6px 18px 10px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(127,127,127,.25);display:flex;align-items:center;gap:12px}
+:root[data-theme="light"] .ecv-compl,:root[data-theme="light"] .ecv-sez{background:rgba(255,255,255,.65)}
+.ecv-compl small{font-size:11.5px;opacity:.75;white-space:nowrap}
+.ecv-barra{flex:1;height:8px;border-radius:4px;background:rgba(127,127,127,.3);overflow:hidden}
+.ecv-barra i{display:block;height:100%;background:linear-gradient(90deg,var(--ecv-oro),var(--ecv-ok));transition:width .4s}
+.ecv-sez{margin:0 18px 10px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(127,127,127,.25);overflow:hidden}
+.ecv-sez>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.ecv-sez>summary::-webkit-details-marker{display:none}
+.ecv-sez>summary:after{content:"›";margin-left:auto;font-size:20px;opacity:.6;transition:transform .2s}
+.ecv-sez[open]>summary:after{transform:rotate(90deg)}
+.ecv-dentro{padding:0 16px 14px}
+.ecv-campo{margin-bottom:10px}
+.ecv-campo label{display:block;font-size:11.5px;opacity:.75;margin-bottom:4px}
+.ecv-pagina input,.ecv-pagina textarea,.ecv-pagina select{width:100%;border-radius:12px;border:1px solid rgba(127,127,127,.35);background:rgba(0,0,0,.18);color:inherit;padding:10px 12px;font:inherit;font-size:14px}
+:root[data-theme="light"] .ecv-pagina input,:root[data-theme="light"] .ecv-pagina textarea,:root[data-theme="light"] .ecv-pagina select{background:#fff}
+.ecv-pagina select option{color:#222}
+.ecv-pagina textarea{min-height:96px;resize:vertical;line-height:1.45}
+.ecv-hammer{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ecv-oro);color:var(--ecv-oro);background:transparent;border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;margin:0 6px 6px 0}
+.ecv-riga{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid rgba(127,127,127,.2);font-size:14px}
+.ecv-riga small{display:block;opacity:.7;font-size:11.5px}
+.ecv-int{position:relative;width:46px;height:28px;border-radius:14px;background:rgba(127,127,127,.35);flex-shrink:0;cursor:pointer;border:0;transition:background .2s;padding:0}
+.ecv-int:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.ecv-int.on{background:var(--ecv-ok)}
+.ecv-int.on:after{transform:translateX(18px)}
+.ecv-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ecv-chips button{padding:7px 11px;border-radius:999px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;font:inherit;font-size:12.5px;cursor:pointer}
+.ecv-chips button.on{background:var(--ecv-oro);color:#2a2110;border-color:var(--ecv-oro);font-weight:700}
+.ecv-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.ecv-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 6px 5px 11px;border-radius:999px;background:var(--ecv-oro);color:#2a2110;font-size:12.5px;font-weight:700}
+.ecv-tag button{border:0;background:rgba(0,0,0,.15);color:inherit;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:13px;line-height:1}
+.ecv-piccolo{border:1px solid var(--ecv-oro);background:transparent;color:var(--ecv-oro);border-radius:12px;padding:9px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ecv-muted{opacity:.7;font-size:12px;line-height:1.4}
+.ecv-voce{padding:10px 0;border-top:1px solid rgba(127,127,127,.2);display:flex;gap:10px;align-items:flex-start}
+.ecv-voce:first-child{border-top:0}
+.ecv-mini{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#7a2bd0,#3b1a7a);flex-shrink:0;display:grid;place-items:center;font-size:20px;overflow:hidden}
+.ecv-mini.v{background:linear-gradient(135deg,#1d9a5d,#0e5a36)}
+.ecv-mini img{width:100%;height:100%;object-fit:cover}
+.ecv-vtxt{flex:1;min-width:0}
+.ecv-vtxt b{font-size:14px;display:block}
+.ecv-vtxt small{opacity:.75;font-size:12px;display:block;line-height:1.35}
+.ecv-x{border:0;background:transparent;color:inherit;opacity:.6;font-size:20px;cursor:pointer;padding:0 4px}
+.ecv-nuovo{display:grid;gap:8px;margin-top:8px;padding-top:10px;border-top:1px dashed rgba(127,127,127,.35)}
+.ecv-due{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ecv-file{font-size:12px;opacity:.85;display:grid;gap:4px}
+.ecv-file input{padding:8px;font-size:12.5px}
+.ecv-agg{height:42px;border-radius:12px;border:1px dashed var(--ecv-oro);background:transparent;color:var(--ecv-oro);font:inherit;font-weight:700;cursor:pointer}
+.ecv-modelli{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ecv-modelli button{border-radius:12px;border:2px solid rgba(127,127,127,.3);padding:6px;cursor:pointer;text-align:center;font:inherit;font-size:11.5px;background:transparent;color:inherit}
+.ecv-modelli button.on{border-color:var(--ecv-oro)}
+.ecv-modelli i{display:block;height:56px;border-radius:6px;margin-bottom:5px}

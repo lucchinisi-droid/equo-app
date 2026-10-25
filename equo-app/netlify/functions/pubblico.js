@@ -74,6 +74,46 @@ async function cavallo(sb, codice) {
     body: pagina({ titolo: data.nome + " · Equo Card", descr: "Scheda Equo del cavallo " + data.nome, corpo, immagine: foto }) };
 }
 
+// pagina pubblica del professionista (Equo CV, solo Premium e con «pagina pubblica» accesa)
+exports.pro = async (sb, slug) => {
+  const { data, error } = await sb.rpc("equo_pro_pubblico", { p_slug: String(slug).toLowerCase() });
+  if (error || !data) return nonTrovato("Profilo");
+  const foto = [];
+  (data.esperienze || []).forEach((e) => (e.foto || []).slice(0, 3).forEach((p) => foto.push(p)));
+  const firmati = {};
+  if (foto.length) {
+    const r = await sb.storage.from("pro-cv").createSignedUrls(foto.slice(0, 24), 3600);
+    (r.data || []).forEach((x) => { if (x.signedUrl) firmati[x.path] = x.signedUrl; });
+  }
+  const n = data.numeri || {}, mn = data.mostra_numeri || {};
+  const numeri = [
+    mn.cavalli !== false && n.cavalli ? [n.cavalli, "cavalli seguiti"] : null,
+    mn.interventi !== false && n.interventi ? [n.interventi, "interventi"] : null,
+    mn.clienti !== false && n.clienti ? [n.clienti, "clienti"] : null,
+  ].filter(Boolean);
+  const iniziali = String(data.nome || "").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join("");
+  const zone = (data.zone || []).join(" · ");
+  const link = data.codice ? APP + "/?invito=" + encodeURIComponent(data.codice) : APP;
+  const social = data.social || {};
+  const sito = social.sito ? (/^https?:\/\//.test(social.sito) ? social.sito : "https://" + social.sito) : null;
+  const ig = social.instagram ? "https://instagram.com/" + String(social.instagram).replace(/^@/, "") : null;
+  const corpo = `<div class="hero pro"><div class="foto"${data.avatar ? ` style="background-image:url('${esc(data.avatar)}')"` : ""}>${data.avatar ? "" : esc(iniziali)}</div>
+  <h1>${esc(data.nome)}</h1><p class="sotto">${esc(data.titolo || data.ruolo)}</p>${zone || data.trasferte ? `<p class="sotto">${esc([zone, data.trasferte ? "trasferte ed eventi" : ""].filter(Boolean).join(" · "))}</p>` : ""}
+  ${data.certificato ? '<span class="bollino">✓ Equo Certified</span>' : `<span class="bollino grigio">${esc(data.ruolo)} su Equo</span>`}</div>
+  <div class="wrap"><a class="btn" href="${esc(link)}">Collegati su Equo</a>
+  ${sito || ig ? `<div style="display:flex;gap:8px">${ig ? `<a class="btn sec" style="flex:1" href="${esc(ig)}" rel="noopener">Instagram</a>` : ""}${sito ? `<a class="btn sec" style="flex:1" href="${esc(sito)}" rel="noopener">Sito web</a>` : ""}</div>` : ""}
+  ${numeri.length ? `<h2>Numeri Equo</h2><div class="num">${numeri.map(([v, t]) => `<div><b>${esc(Number(v).toLocaleString("it-IT"))}</b><small>${esc(t)}</small></div>`).join("")}</div>` : ""}
+  ${data.presentazione ? `<h2>Chi sono</h2><div class="card">${esc(data.presentazione)}${data.presentazione_en ? `<details style="margin-top:8px"><summary style="cursor:pointer;color:#7a6a4a">English</summary><p style="margin-top:6px">${esc(data.presentazione_en)}</p></details>` : ""}</div>` : ""}
+  ${(data.spec || []).length ? `<h2>Specializzazioni</h2><div class="chips">${data.spec.map((x) => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+  ${(data.esperienze || []).length ? `<h2>Eventi ed esperienze</h2>${data.esperienze.map((e) => `<div class="card"><b>${esc(e.titolo)}</b><span>${esc([e.ruolo, e.luogo, e.anno].filter(Boolean).join(" · "))}</span>${(e.foto || []).filter((p) => firmati[p]).length ? `<div style="display:flex;gap:6px;margin-top:8px;overflow-x:auto">${e.foto.filter((p) => firmati[p]).map((p) => `<img src="${esc(firmati[p])}" alt="" style="height:96px;border-radius:10px">`).join("")}</div>` : ""}</div>`).join("")}` : ""}
+  ${(data.formazione || []).length ? `<h2>Formazione e certificazioni</h2>${data.formazione.map((f) => `<div class="card"><b>${esc(f.titolo)}${f.verificato ? ' <span style="color:#1d9a5d;font-size:12px;font-weight:800">✓ verificato da Equo</span>' : ""}</b><span>${esc([f.ente, f.anno].filter(Boolean).join(" · "))}</span></div>`).join("")}` : ""}
+  ${(data.lingue || []).length ? `<h2>Lingue</h2><div class="card">${esc(data.lingue.join(" · "))}</div>` : ""}
+  ${(data.referenze || []).length ? `<h2>Referenze</h2>${data.referenze.map((r) => `<div class="card">«${esc(r.testo)}»<br><span>${esc(r.autore || "")} · cliente verificato</span></div>`).join("")}` : ""}
+  <p class="piede">Profilo su Equo${data.aggiornato_il ? " · aggiornato il " + esc(new Date(data.aggiornato_il).toLocaleDateString("it-IT")) : ""}<br>Telefono ed email li vede chi si collega su Equo.</p></div>`;
+  return { statusCode: 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" },
+    body: pagina({ titolo: data.nome + " · " + data.ruolo, descr: (data.titolo || data.ruolo) + (zone ? " · " + zone : ""), corpo, immagine: data.avatar }) };
+};
+
 exports.handler = async (event) => {
   const q = event.queryStringParameters || {};
   let tipo = q.tipo, chiave = q.c;
@@ -83,7 +123,7 @@ exports.handler = async (event) => {
   const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   try {
     if (tipo === "cavallo") return await cavallo(sb, chiave);
-    if (tipo === "pro" && exports.pro) return await exports.pro(sb, chiave, { pagina, esc, nonTrovato, APP });
+    if (tipo === "pro") return await exports.pro(sb, chiave);
   } catch (e) { console.error("pubblico:", e); }
   return nonTrovato("Pagina");
 };

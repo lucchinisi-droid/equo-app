@@ -1,6 +1,6 @@
 // Ingresso dei moduli proprietario: l'ordine e quello originale dei file.
 import { loadHorses } from "./023-horses.js";
-import { caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaConfermePro, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderProposteCliente, rifiutaProposta } from "./024-codice-cavallo-2c-proposte-livelli-confe.js";
+import { caricaReferenzeDaScrivere, inviaReferenza, caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaConfermePro, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderProposteCliente, rifiutaProposta } from "./024-codice-cavallo-2c-proposte-livelli-confe.js";
 import { renderHome, rispondiStessoCavallo } from "./025-scheda-unica-stesso-nome-in-scuderia-dec.js";
 import { askDeleteHorse, askDeleteHorseStep2, closeHorseDetail, confermaSalvaSenzaMicrochip, confirmDeleteHorse, eseguiSalvataggioHorse, goToLastMessage, openHorseDetail, openHorseForm, renderHorseInfoBox, saveHorse, tornaAInserireMicrochip } from "./026-ultimo-messaggio-home.js";
 import { deleteHorseEventFromModal, loadDeadlines, loadHorseEvents, openAddEventModal, openEditEventModal, saveHorseEvent } from "./027-health-events.js";
@@ -109,6 +109,8 @@ Object.assign(window, {
   renderWidgetOwner,
   rifiutaProposta,
   rispondiLasciato,
+  inviaReferenza,
+  caricaReferenzeDaScrivere,
   caricaRichiesteLasciati,
   rispondiStessoCavallo,
   saveExpense,
