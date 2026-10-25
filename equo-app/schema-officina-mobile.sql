@@ -203,6 +203,23 @@ alter table public.officina_mezzi drop constraint if exists officina_mezzi_cingh
 alter table public.officina_mezzi add constraint officina_mezzi_cinghia_check check (
   (cinghia_km is null or cinghia_km between 10000 and 400000) and (cinghia_anni is null or cinghia_anni between 1 and 15));
 
+-- aggiunte del 26/10 (tipo di cambio e tagliando del cambio): stesse righe di schema-officina-cambio.sql
+
+alter table public.officina_mezzi add column if not exists cambio text not null default 'manuale';
+alter table public.officina_mezzi drop constraint if exists officina_mezzi_cambio_check;
+alter table public.officina_mezzi add constraint officina_mezzi_cambio_check check (cambio in ('manuale', 'automatico'));
+alter table public.officina_mezzi add column if not exists cambio_aut_km integer;
+alter table public.officina_mezzi add column if not exists cambio_aut_anni smallint;
+alter table public.officina_mezzi add column if not exists ultimo_cambio_aut_data date;
+alter table public.officina_mezzi add column if not exists ultimo_cambio_aut_km integer;
+alter table public.officina_mezzi drop constraint if exists officina_mezzi_cambio_aut_check;
+alter table public.officina_mezzi add constraint officina_mezzi_cambio_aut_check check (
+  (cambio_aut_km is null or cambio_aut_km between 10000 and 300000) and (cambio_aut_anni is null or cambio_aut_anni between 1 and 15));
+
+alter table public.officina_interventi drop constraint if exists officina_interventi_tipo_check;
+alter table public.officina_interventi add constraint officina_interventi_tipo_check check (tipo in
+  ('tagliando', 'revisione', 'pneumatici', 'pasticche', 'cinghia', 'tagliando_cambio', 'manutenzione_ordinaria', 'manutenzione_straordinaria', 'riparazione', 'bombole', 'altro'));
+
 -- controllo: atteso 8 | 2 | 1
 select (select count(*) from information_schema.tables where table_schema = 'public' and table_name in
           ('officina_impostazioni', 'officina_mezzi', 'officina_interventi', 'officina_aiutanti', 'officina_materiali', 'officina_giornate', 'officina_spese', 'geo_cache')) tabelle,

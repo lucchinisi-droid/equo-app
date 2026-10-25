@@ -23,12 +23,14 @@ const COMPENSO = { giornata: "a giornata", cavallo: "a cavallo", ora: "all'ora" 
 const CAT_MAT = { ferri: "Ferri", chiodi: "Chiodi", prodotti: "Prodotti", attrezzi: "Attrezzi", altro: "Altro" };
 const UNITA = { pezzo: "pezzo", paio: "paio", scatola: "scatola", barattolo: "barattolo", confezione: "confezione", kg: "kg", litro: "litro" };
 const CAT_SPESA = { aiutanti: ["Aiutanti", "#2f5a3f"], carburante: ["Carburante", "#d76b3a"], materiali: ["Materiali", "#c9973f"], mezzo: ["Mezzo", "#8a7d66"], altro: ["Altro", "#5c7a8a"] };
-const INT_TIPI = { tagliando: "Tagliando", revisione: "Revisione", pneumatici: "Gomme", pasticche: "Pasticche", cinghia: "Cinghia distribuzione",
+const INT_TIPI = { tagliando: "Tagliando", revisione: "Revisione", pneumatici: "Gomme", pasticche: "Pasticche", cinghia: "Cinghia distribuzione", tagliando_cambio: "Tagliando cambio automatico",
   manutenzione_ordinaria: "Manutenzione ordinaria", manutenzione_straordinaria: "Manutenzione straordinaria", riparazione: "Riparazione", bombole: "Collaudo bombole", altro: "Altro" };
-const INT_ICO = { tagliando: "⚙️", revisione: "📋", pneumatici: "🛞", pasticche: "🛑", cinghia: "⛓️", manutenzione_ordinaria: "🧰", manutenzione_straordinaria: "🔩", riparazione: "🔧", bombole: "🧯", altro: "•" };
+const INT_ICO = { tagliando: "⚙️", revisione: "📋", pneumatici: "🛞", pasticche: "🛑", cinghia: "⛓️", tagliando_cambio: "🕹️", manutenzione_ordinaria: "🧰", manutenzione_straordinaria: "🔩", riparazione: "🔧", bombole: "🧯", altro: "•" };
 // scelte rapide nel modulo «Nuovo materiale»: nome, categoria, unità
 const MAT_RAPIDI = [["Ferri", "ferri", "paio"], ["Chiodi", "chiodi", "scatola"], ["Raspe", "attrezzi", "pezzo"], ["Nastro smerigliatrice", "attrezzi", "pezzo"],
-  ["Scarpe antinfortunistiche", "altro", "paio"], ["Bombola gas", "altro", "pezzo"]];
+  ["Scarpe antinfortunistiche", "altro", "paio"], ["Bombola gas", "altro", "pezzo"], ["Grembiule", "altro", "pezzo"]];
+const CAMBIO = { manuale: "Cambio manuale", automatico: "Cambio automatico" };
+const KM_AVVISO = { tagliando: 1000, cinghia: 3000, cambio_aut: 2000 };
 const mesiTra = (a, b) => (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
 const giorniA = iso => iso ? Math.round((new Date(iso + "T12:00") - new Date(OGGI() + "T12:00")) / 86400000) : null;
 const num = v => { const n = Number(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : null; };
@@ -140,6 +142,12 @@ function ciclo(m, ogniKm, ogniMesi, ultData, ultKm){
 }
 const tagliando = m => ciclo(m, m.tagliando_km, m.tagliando_mesi, m.ultimo_tagliando_data, m.ultimo_tagliando_km);
 // cinghia: se non è mai stata cambiata si conta dall'immatricolazione (0 km)
+// tagliando del cambio automatico: come la cinghia, solo se il cambio è automatico
+function cambioAut(m){
+  if(m.cambio !== "automatico" || (!m.cambio_aut_km && !m.cambio_aut_anni)) return { conDati: false };
+  const daImm = !m.ultimo_cambio_aut_data && m.ultimo_cambio_aut_km == null;
+  return { ...ciclo(m, m.cambio_aut_km, m.cambio_aut_anni ? m.cambio_aut_anni * 12 : null, daImm ? m.immatricolazione : m.ultimo_cambio_aut_data, daImm ? (m.immatricolazione ? 0 : null) : m.ultimo_cambio_aut_km), daImm };
+}
 function cinghia(m){
   if(!m.cinghia_km && !m.cinghia_anni) return { conDati: false };
   const daImm = !m.ultima_cinghia_data && m.ultima_cinghia_km == null;
@@ -152,6 +160,8 @@ function scadenzeMezzo(m){
   const t = tagliando(m);
   if(t.conDati) out.push({ k: "tagliando", titolo: "Tagliando", data: t.data, giorni: t.data ? giorniA(t.data) : null, km: t.kmMancano, perc: t.perc, mezzo: m });
   const c = cinghia(m);
+  const ca = cambioAut(m);
+  if(ca.conDati) out.push({ k: "cambio_aut", titolo: "Tagliando cambio automatico", data: ca.data, giorni: ca.data ? giorniA(ca.data) : null, km: ca.kmMancano, perc: ca.perc, mezzo: m });
   if(c.conDati) out.push({ k: "cinghia", titolo: "Cinghia distribuzione", data: c.data, giorni: c.data ? giorniA(c.data) : null, km: c.kmMancano, perc: c.perc, mezzo: m });
   add("assicurazione", "Assicurazione", m.assicurazione_data);
   add("bollo", "Bollo", m.bollo_data);
@@ -161,8 +171,8 @@ function scadenzeMezzo(m){
 }
 // colore e riempimento dell'anello: più vicino = più pieno e più caldo
 function statoScadenza(s){
-  if(s.k === "tagliando" || s.k === "cinghia"){
-    const urg = (s.km != null && s.km <= (s.k === "cinghia" ? 3000 : 1000)) || (s.giorni != null && s.giorni <= 15);
+  if(KM_AVVISO[s.k]){
+    const urg = (s.km != null && s.km <= KM_AVVISO[s.k]) || (s.giorni != null && s.giorni <= 15);
     return { perc: s.perc ?? 0, colore: (s.km != null && s.km <= 0) || (s.giorni != null && s.giorni < 0) ? "#b5432f" : urg ? "#d76b3a" : "#c9973f" };
   }
   const g = s.giorni;
@@ -171,11 +181,11 @@ function statoScadenza(s){
 }
 const dataScad = iso => iso && iso.slice(0, 4) !== OGGI().slice(0, 4) ? new Date(iso + "T12:00").toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" }) : formatDataBreve(iso);
 function testoScadenza(s){
-  if(s.k === "tagliando" || s.k === "cinghia"){
+  if(KM_AVVISO[s.k]){
     const parti = [];
     if(s.km != null) parti.push(s.km <= 0 ? `superato di ${fmtKm(-s.km)} km` : `tra ${fmtKm(s.km)} km`);
     if(s.giorni != null) parti.push(s.giorni < 0 ? `scaduto da ${-s.giorni} gg` : `entro ${dataScad(s.data)}`);
-    return parti.join(" · ") || (s.k === "cinghia" ? "imposta l'ultima sostituzione" : "imposta l'ultimo tagliando");
+    return parti.join(" · ") || (s.k === "tagliando" ? "imposta l'ultimo tagliando" : "imposta l'ultima sostituzione");
   }
   const g = s.giorni;
   return g < 0 ? `scaduta da ${-g} ${-g === 1 ? "giorno" : "giorni"}` : g === 0 ? "oggi" : g <= 60 ? `tra ${g} ${g === 1 ? "giorno" : "giorni"}` : dataScad(s.data);
@@ -207,6 +217,11 @@ async function ofControllaTagliandoKm(m){
   if(c.kmMancano != null && c.kmMancano <= 3000)
     await sb.from("promemoria_personali").upsert({ user_id: currentUser.id, fonte: `mezzo:${m.id}:cinghia_km:${m.ultima_cinghia_km ?? 0}`,
       testo: `Cinghia distribuzione ${nomeMezzo(m)}: ${c.kmMancano <= 0 ? "hai superato i km" : "mancano circa " + fmtKm(c.kmMancano) + " km"} (ogni ${fmtKm(c.ogniKm)} km · km in Beta)`,
+      quando: new Date(Date.now() + 60000).toISOString(), stato: "attivo", creato_da: "utente" }, { onConflict: "user_id,fonte", ignoreDuplicates: true });
+  const ca = cambioAut(m);
+  if(ca.kmMancano != null && ca.kmMancano <= KM_AVVISO.cambio_aut)
+    await sb.from("promemoria_personali").upsert({ user_id: currentUser.id, fonte: `mezzo:${m.id}:cambio_km:${m.ultimo_cambio_aut_km ?? 0}`,
+      testo: `Tagliando cambio automatico ${nomeMezzo(m)}: ${ca.kmMancano <= 0 ? "hai superato i km" : "mancano circa " + fmtKm(ca.kmMancano) + " km"} (ogni ${fmtKm(ca.ogniKm)} km · km in Beta)`,
       quando: new Date(Date.now() + 60000).toISOString(), stato: "attivo", creato_da: "utente" }, { onConflict: "user_id,fonte", ignoreDuplicates: true });
   const t = tagliando(m);
   if(t.kmMancano == null || t.kmMancano > 1000) return;
@@ -485,7 +500,7 @@ function ofDisegnaMezzo(){
   const storia = OF.interventi.filter(i => i.mezzo_id === m.id).sort((a, b) => (a.stato === "da_fare" ? 0 : 1) - (b.stato === "da_fare" ? 0 : 1) || (a.stato === "da_fare" ? a.data.localeCompare(b.data) : b.data.localeCompare(a.data)));
   const scad = scadenzeMezzo(m).filter(s => !s.k.startsWith("int:"));
   document.getElementById("of-root").innerHTML = `
-    <div class="of-testa-m"><button type="button" class="of-tondo" onclick="ofTornaOfficina()" aria-label="Indietro">‹</button><div><b>${esc(nomeMezzo(m))}</b><small>${[TIPI_MEZZO[m.tipo], ALIM[m.alimentazione], m.targa].filter(Boolean).map(esc).join(" · ")}</small></div><button type="button" class="of-tondo" onclick="ofFormMezzo('${m.id}')" aria-label="Modifica">✎</button></div>
+    <div class="of-testa-m"><button type="button" class="of-tondo" onclick="ofTornaOfficina()" aria-label="Indietro">‹</button><div><b>${esc(nomeMezzo(m))}</b><small>${[TIPI_MEZZO[m.tipo], ALIM[m.alimentazione], m.cambio === "automatico" ? "automatico" : null, m.targa].filter(Boolean).map(esc).join(" · ")}</small></div><button type="button" class="of-tondo" onclick="ofFormMezzo('${m.id}')" aria-label="Modifica">✎</button></div>
     <div class="of-netto">
       <div class="of-lab2">TAGLIANDO · ${[t.ogniKm ? "OGNI " + fmtKm(t.ogniKm) + " KM" : null, t.ogniMesi ? t.ogniMesi + " MESI" : null].filter(Boolean).join(" O ") || "INTERVALLO NON IMPOSTATO"}</div>
       ${t.conDati ? `<div class="of-tg-r"><b>${t.kmFatti != null && t.ogniKm ? fmtKm(Math.max(0, t.kmFatti)) + " / " + fmtKm(t.ogniKm) + " km" : Math.round(t.perc * 100) + "%"}</b>${t.ogniKm ? '<span class="of-beta">KM BETA</span>' : ""}</div>
@@ -522,7 +537,7 @@ function ofModale(titolo, corpo, tasti){
 function ofErrore(t){ const e = document.getElementById("of-modal-err"); e.textContent = t; e.style.display = "block"; }
 const val = id => (document.getElementById(id)?.value ?? "").trim();
 const seg = (nome, opz, scelto) => `<div class="of-seg" data-seg="${nome}">${Object.entries(opz).map(([k, t]) => `<button type="button" data-v="${k}" class="${k === scelto ? "on" : ""}" onclick="ofSeg(this)">${t}</button>`).join("")}</div>`;
-function ofSeg(b){ b.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); const s = b.parentElement.dataset.seg; if(s === "alim") ofMostraBombole(); if(s === "tkm") document.getElementById("of-tkm-altro").style.display = b.dataset.v === "altro" ? "" : "none"; if(s === "ckm") document.getElementById("of-ckm-altro").style.display = b.dataset.v === "altro" ? "" : "none"; if(s === "itipo") ofTitoloDaTipo(b.dataset.v); if(s === "ctipo") ofAggiornaCompenso(); if(s === "mcat") ofAggiornaMisura(); }
+function ofSeg(b){ b.parentElement.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); const s = b.parentElement.dataset.seg; if(s === "alim") ofMostraBombole(); if(s === "tkm") document.getElementById("of-tkm-altro").style.display = b.dataset.v === "altro" ? "" : "none"; if(s === "ckm") document.getElementById("of-ckm-altro").style.display = b.dataset.v === "altro" ? "" : "none"; if(s === "cakm") document.getElementById("of-cakm-altro").style.display = b.dataset.v === "altro" ? "" : "none"; if(s === "cambio") document.getElementById("of-box-cambio").style.display = b.dataset.v === "automatico" ? "" : "none"; if(s === "itipo") ofTitoloDaTipo(b.dataset.v); if(s === "ctipo") ofAggiornaCompenso(); if(s === "mcat") ofAggiornaMisura(); }
 const segVal = nome => document.querySelector(`.of-seg[data-seg="${nome}"] .on`)?.dataset.v || null;
 const campo = (id, et, v, extra) => `<div class="of-campo"><label for="${id}">${et}</label><input class="input" id="${id}" value="${esc(v ?? "")}" ${extra || ""}></div>`;
 const toggle = (id, et, sotto, on) => `<div class="of-rr"><span><b>${et}</b>${sotto ? `<small>${sotto}</small>` : ""}</span><button type="button" class="of-tg${on ? " on" : ""}" id="${id}" onclick="this.classList.toggle('on')" aria-label="${et}"></button></div>`;
@@ -533,11 +548,13 @@ function ofCampiMezzo(m){
   m = m || { tipo: "furgone", alimentazione: "diesel", tagliando_km: 15000, tagliando_mesi: 12 };
   const tkm = [10000, 15000, 20000, 30000].includes(Number(m.tagliando_km)) ? String(m.tagliando_km) : m.tagliando_km ? "altro" : "";
   const ckm = [120000, 150000, 180000, 240000].includes(Number(m.cinghia_km)) ? String(m.cinghia_km) : m.cinghia_km ? "altro" : "no";
+  const cakm = [40000, 60000, 80000, 100000].includes(Number(m.cambio_aut_km)) ? String(m.cambio_aut_km) : m.cambio_aut_km ? "altro" : "no";
   return `
     <div class="of-campo"><label>TIPO</label>${seg("tipo", TIPI_MEZZO, m.tipo)}</div>
     <div class="of-due">${campo("of-marca", "MARCA", m.marca, 'placeholder="es. Fiat" maxlength="40"')}${campo("of-modello", "MODELLO", m.modello, 'placeholder="es. Ducato" maxlength="60"')}</div>
     <div class="of-due">${campo("of-targa", "TARGA", m.targa, 'placeholder="AA 123 BB" maxlength="15" style="text-transform:uppercase"')}${campo("of-imm", "IMMATRICOLATO", m.immatricolazione ? m.immatricolazione.slice(0, 7) : "", 'type="month"')}</div>
     <div class="of-campo"><label>ALIMENTAZIONE</label>${seg("alim", ALIM, m.alimentazione)}</div>
+    <div class="of-campo"><label>CAMBIO</label>${seg("cambio", { manuale: "Manuale", automatico: "Automatico" }, m.cambio || "manuale")}</div>
     <div class="of-due">${campo("of-km", "KM ATTUALI", m.km_attuali, 'inputmode="numeric" placeholder="es. 128400"')}${campo("of-cons", "CONSUMO L/100 KM", m.consumo_l100 != null ? String(m.consumo_l100).replace(".", ",") : "", 'inputmode="decimal" placeholder="es. 9,5"')}</div>
     <div class="of-box" id="of-box-tagliando">
       <div class="of-rr"><span><b>Tagliando ogni</b><small>vale quello che arriva prima, km o mesi</small></span></div>
@@ -545,6 +562,13 @@ function ofCampiMezzo(m){
       <div class="of-campo" id="of-tkm-altro" style="${tkm === "altro" ? "" : "display:none"};margin-top:6px">${campo("of-tkm-n", "KM (es. 12000)", tkm === "altro" ? m.tagliando_km : "", 'inputmode="numeric"').replace('<div class="of-campo">', "").replace(/<\/div>$/, "")}</div>
       <div style="margin-top:6px">${seg("tmesi", { 6: "6 mesi", 12: "12 mesi", 24: "24 mesi", 0: "solo km" }, String(m.tagliando_mesi ?? 0))}</div>
       <div class="of-due" style="margin-top:8px">${campo("of-ult-data", "ULTIMO TAGLIANDO", m.ultimo_tagliando_data, 'type="date"')}${campo("of-ult-km", "A QUANTI KM", m.ultimo_tagliando_km, 'inputmode="numeric"')}</div>
+    </div>
+    <div class="of-box" id="of-box-cambio" style="${m.cambio === "automatico" ? "" : "display:none"}">
+      <div class="of-rr"><span><b>Tagliando cambio automatico ogni</b><small>vale quello che arriva prima, km o anni · se non l'hai mai fatto si conta dall'immatricolazione</small></span></div>
+      ${seg("cakm", { 40000: "40.000", 60000: "60.000", 80000: "80.000", 100000: "100.000", altro: "Altro…", no: "Non so" }, cakm)}
+      <div class="of-campo" id="of-cakm-altro" style="${cakm === "altro" ? "" : "display:none"};margin-top:6px">${campo("of-cakm-n", "KM (es. 70000)", cakm === "altro" ? m.cambio_aut_km : "", 'inputmode="numeric"').replace('<div class="of-campo">', "").replace(/<\/div>$/, "")}</div>
+      <div style="margin-top:6px">${seg("caanni", { 4: "4 anni", 5: "5 anni", 6: "6 anni", 0: "solo km" }, String(m.cambio_aut_anni ?? 0))}</div>
+      <div class="of-due" style="margin-top:8px">${campo("of-ca-data", "ULTIMO TAGLIANDO CAMBIO", m.ultimo_cambio_aut_data, 'type="date"')}${campo("of-ca-km", "A QUANTI KM", m.ultimo_cambio_aut_km, 'inputmode="numeric"')}</div>
     </div>
     <div class="of-box" id="of-box-cinghia">
       <div class="of-rr"><span><b>Cinghia distribuzione ogni</b><small>vale quello che arriva prima, km o anni · se non l'hai mai cambiata si conta dall'immatricolazione</small></span></div>
@@ -566,6 +590,7 @@ function ofLeggiMezzo(){
   const tkm = segVal("tkm");
   const imm = val("of-imm");
   const kmAltro = num(val("of-tkm-n")), ckm = segVal("ckm"), ckmAltro = num(val("of-ckm-n"));
+  const cambio = segVal("cambio") || "manuale", aut = cambio === "automatico", cakm = segVal("cakm"), cakmAltro = num(val("of-cakm-n"));
   const riga = {
     tipo: segVal("tipo") || "furgone", marca: val("of-marca") || null, modello: val("of-modello") || null, targa: val("of-targa").toUpperCase() || null,
     immatricolazione: imm ? imm + "-01" : null, alimentazione: segVal("alim"),
@@ -575,12 +600,16 @@ function ofLeggiMezzo(){
     ultimo_tagliando_data: val("of-ult-data") || null, ultimo_tagliando_km: num(val("of-ult-km")) != null ? Math.round(num(val("of-ult-km"))) : null,
     cinghia_km: ckm === "altro" ? (ckmAltro ? Math.round(ckmAltro) : null) : ckm && ckm !== "no" ? Number(ckm) : null,
     cinghia_anni: Number(segVal("canni")) || null,
+    cambio, cambio_aut_km: !aut ? null : cakm === "altro" ? (cakmAltro ? Math.round(cakmAltro) : null) : cakm && cakm !== "no" ? Number(cakm) : null,
+    cambio_aut_anni: aut ? (Number(segVal("caanni")) || null) : null,
+    ultimo_cambio_aut_data: aut ? (val("of-ca-data") || null) : null, ultimo_cambio_aut_km: aut && num(val("of-ca-km")) != null ? Math.round(num(val("of-ca-km"))) : null,
     ultima_cinghia_data: val("of-cin-data") || null, ultima_cinghia_km: num(val("of-cin-km")) != null ? Math.round(num(val("of-cin-km"))) : null,
     revisione_data: val("of-rev") || null, assicurazione_data: val("of-ass") || null, bollo_data: val("of-bollo") || null,
     bombole_data: ["gpl", "metano"].includes(segVal("alim")) ? (val("of-bomb") || null) : null, mostra_clienti: tgOn("of-mostra")
   };
   if(!riga.marca && !riga.modello) return { errore: "Scrivi almeno marca o modello." };
   if(riga.tagliando_km != null && (riga.tagliando_km < 1000 || riga.tagliando_km > 100000)) return { errore: "Tagliando: scegli tra 1.000 e 100.000 km." };
+  if(riga.cambio_aut_km != null && (riga.cambio_aut_km < 10000 || riga.cambio_aut_km > 300000)) return { errore: "Tagliando del cambio: scegli tra 10.000 e 300.000 km." };
   if(riga.cinghia_km != null && (riga.cinghia_km < 10000 || riga.cinghia_km > 400000)) return { errore: "Cinghia: scegli tra 10.000 e 400.000 km." };
   if(riga.km_attuali != null) riga.km_aggiornati_il = OGGI();
   return { riga, predefinito: document.getElementById("of-pred-m") ? tgOn("of-pred-m") : !OF.mezzi.length };
@@ -616,13 +645,13 @@ function ofFormIntervento(mezzoId, id, tipo){
   const i = id ? OF.interventi.find(x => x.id === id) : null, m = ofMezzo(mezzoId);
   ofForm = { tipo: "intervento", id, mezzoId };
   const t = i?.tipo || tipo || "altro";
-  ofModale(i ? "Modifica intervento" : t === "tagliando" ? "Tagliando fatto" : t === "cinghia" ? "Cinghia cambiata" : "Nuovo intervento", `
-    <div class="of-campo"><label>TIPO</label>${seg("itipo", INT_TIPI, t)}</div>
+  ofModale(i ? "Modifica intervento" : t === "tagliando" ? "Tagliando fatto" : t === "tagliando_cambio" ? "Tagliando del cambio fatto" : t === "cinghia" ? "Cinghia cambiata" : "Nuovo intervento", `
+    <div class="of-campo"><label>TIPO</label>${seg("itipo", Object.fromEntries(Object.entries(INT_TIPI).filter(([k]) => k !== "tagliando_cambio" || m?.cambio === "automatico" || t === k)), t)}</div>
     ${campo("of-i-tit", "DESCRIZIONE", i?.titolo || (t !== "altro" ? INT_TIPI[t] : ""), 'maxlength="80" placeholder="es. Cambio gomme invernali"')}
     <div class="of-campo"><label>STATO</label>${seg("istato", { fatto: "Fatto", da_fare: "Da fare" }, i?.stato || "fatto")}</div>
     <div class="of-due">${campo("of-i-data", "DATA", i?.data || OGGI(), 'type="date"')}${campo("of-i-km", "KM DEL MEZZO", i?.km ?? m?.km_attuali ?? "", 'inputmode="numeric"')}</div>
     <div class="of-due">${campo("of-i-eur", "COSTO €", i?.importo != null ? String(i.importo).replace(".", ",") : "", 'inputmode="decimal" placeholder="es. 380"')}${campo("of-i-note", "OFFICINA / NOTE", i?.note, 'maxlength="300"')}</div>
-    <div class="of-nota">Con il costo diventa una spesa «Mezzo». Tagliando, revisione e cinghia fatti aggiornano da soli le scadenze.</div>`,
+    <div class="of-nota">Con il costo diventa una spesa «Mezzo». Tagliando, revisione, cinghia e tagliando del cambio fatti aggiornano da soli le scadenze.</div>`,
     `${i ? `<button type="button" class="btn btn-ghost" style="color:var(--red)" onclick="ofEliminaIntervento('${i.id}')">Elimina</button>` : ""}<button type="button" class="btn btn-primary" onclick="ofSalvaIntervento()">Salva</button>`);
 }
 // cambiando tipo si aggiorna la descrizione, se era ancora quella proposta
@@ -642,6 +671,7 @@ async function ofSalvaIntervento(){
   if(m && riga.stato === "fatto"){
     const agg = {};
     if(riga.tipo === "tagliando"){ agg.ultimo_tagliando_data = riga.data; if(riga.km != null) agg.ultimo_tagliando_km = riga.km; }
+    if(riga.tipo === "tagliando_cambio"){ agg.ultimo_cambio_aut_data = riga.data; if(riga.km != null) agg.ultimo_cambio_aut_km = riga.km; }
     if(riga.tipo === "cinghia"){ agg.ultima_cinghia_data = riga.data; if(riga.km != null) agg.ultima_cinghia_km = riga.km; }
     if(riga.tipo === "revisione"){ const d = new Date(riga.data + "T12:00"); d.setFullYear(d.getFullYear() + 2); agg.revisione_data = isoLocale(d); }
     if(riga.tipo === "bombole"){ const d = new Date(riga.data + "T12:00"); d.setFullYear(d.getFullYear() + 4); agg.bombole_data = isoLocale(d); }
