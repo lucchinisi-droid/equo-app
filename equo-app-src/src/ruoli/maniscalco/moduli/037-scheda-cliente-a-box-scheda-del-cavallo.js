@@ -39,9 +39,25 @@ function cavalliQuiStanno(luogoId){
     .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 }
 // 26/10: i cavalli che stanno qui si vedono nel riquadro «Cavalli» (con «di …»), non più in fondo alla scheda
-function renderCavalliQui(clienteId){
+// lavori dei cavalli che stanno qui ma sono di altri proprietari (intestati a chi paga): servono a «Ultimo / Prossimo» nei loro box
+let quiInterventiCache = [];
+async function renderCavalliQui(clienteId){
   const box = document.getElementById("cliente-qui-box");
   if(box) box.innerHTML = "";
+  quiInterventiCache = [];
+  if(typeof renderBoxCavalliCliente === "function") renderBoxCavalliCliente();
+  const ids = cavalliQuiStanno(clienteId).map(c => c.id).filter(Boolean);
+  if(!ids.length) return;
+  let lista = [];
+  if(DEMO_MODE) lista = (demoState.interventiMascalcia || []).filter(i => ids.includes(i.cavallo_cliente_id) && i.stato !== "rifiutato");
+  else {
+    const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("maniscalco_id", currentUser.id).in("cavallo_cliente_id", ids)
+      .not("stato", "in", "(rifiutato,annullato)").order("data_intervento", { ascending: false }).limit(500);
+    if(error) console.warn("lavori dei cavalli che stanno qui:", error.message);
+    lista = data || [];
+  }
+  if(currentClienteId !== clienteId) return;
+  quiInterventiCache = lista;
   if(typeof renderBoxCavalliCliente === "function") renderBoxCavalliCliente();
 }
 function renderCavalliQuiInFondo(clienteId){
@@ -88,4 +104,4 @@ function descrFerroBreve(cv){
   return p.join(" · ");
 }
 
-export { cavalliQuiStanno, descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro };
+export { quiInterventiCache, cavalliQuiStanno, descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro };

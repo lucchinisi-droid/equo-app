@@ -2,7 +2,7 @@
 import { renderClientiList } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { closeClienteDetail, descrFerraturaCavallo, lavoroCav, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
-import { cavalliQuiStanno, descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { quiInterventiCache, cavalliQuiStanno, descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { luogoDi, renderDoveCavalloPro, spostamentoHtml } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
@@ -91,12 +91,14 @@ function renderBoxCavalliCliente(){
     .filter(c => !q || (c.nome || "").toLowerCase().includes(q) || (c.codice_equo || "").toLowerCase().includes(q));
   const boxQui = c => {
     const foto = fotoCavalloPro(c), ferro = descrFerroBreve(c), prop = (clientiMascalcia || []).find(x => x.id === c.quiDi);
+    const st = statoCavalloPro(c, quiInterventiCache);
     return `<button type="button" class="cav-box" onclick="apriCavalloDaCartella('${c.quiDi}', '${c.id || ""}', '${c.horse_id || ""}')">
-      <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}</span>
+      <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}${st.sem ? `<i class="cav-sem ${st.sem}"></i>` : ""}</span>
       <span class="cav-box-nome">${escapeHtml(c.nome)}</span>
       <span class="cav-box-cod">${escapeHtml([c.codice_equo, ferro ? "ferro " + ferro : ""].filter(Boolean).join(" · ") || "—")}</span>
-      <span class="cav-box-riga">👤 di <b>${escapeHtml(prop ? prop.nome : "un altro cliente")}</b></span>
-      <span class="cav-box-riga">paga il proprietario</span>
+      <span class="cav-box-riga">👤 di <b>${escapeHtml(prop ? prop.nome : "un altro cliente")}</b> · paga lui</span>
+      <span class="cav-box-riga">Ultimo: <b>${st.ultimo ? escapeHtml((TIPO_FERRATURA_LABELS[st.ultimo.tipo_ferratura] || st.ultimo.tipo_ferratura) + " · " + formatDataBreve(st.ultimo.data_intervento)) : "—"}</b></span>
+      <span class="cav-box-riga">Prossimo: <b>${st.prossimo ? escapeHtml((st.prossimo.fissato ? st.prossimo.testo + " · " : "") + formatDataBreve(st.prossimo.data)) : "—"}</b></span>
     </button>`;
   };
   const box = c => {

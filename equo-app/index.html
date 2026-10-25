@@ -12601,12 +12601,14 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}))).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).filter((c) => !q || (c.nome || "").toLowerCase().includes(q) || (c.codice_equo || "").toLowerCase().includes(q));
 		const boxQui = (c) => {
 			const foto = fotoCavalloPro(c), ferro = descrFerroBreve(c), prop = (clientiMascalcia || []).find((x) => x.id === c.quiDi);
+			const st = statoCavalloPro(c, quiInterventiCache);
 			return `<button type="button" class="cav-box" onclick="apriCavalloDaCartella('${c.quiDi}', '${c.id || ""}', '${c.horse_id || ""}')">
-      <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}</span>
+      <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}${st.sem ? `<i class="cav-sem ${st.sem}"></i>` : ""}</span>
       <span class="cav-box-nome">${escapeHtml(c.nome)}</span>
       <span class="cav-box-cod">${escapeHtml([c.codice_equo, ferro ? "ferro " + ferro : ""].filter(Boolean).join(" · ") || "—")}</span>
-      <span class="cav-box-riga">👤 di <b>${escapeHtml(prop ? prop.nome : "un altro cliente")}</b></span>
-      <span class="cav-box-riga">paga il proprietario</span>
+      <span class="cav-box-riga">👤 di <b>${escapeHtml(prop ? prop.nome : "un altro cliente")}</b> · paga lui</span>
+      <span class="cav-box-riga">Ultimo: <b>${st.ultimo ? escapeHtml((TIPO_FERRATURA_LABELS[st.ultimo.tipo_ferratura] || st.ultimo.tipo_ferratura) + " · " + formatDataBreve(st.ultimo.data_intervento)) : "—"}</b></span>
+      <span class="cav-box-riga">Prossimo: <b>${st.prossimo ? escapeHtml((st.prossimo.fissato ? st.prossimo.testo + " · " : "") + formatDataBreve(st.prossimo.data)) : "—"}</b></span>
     </button>`;
 		};
 		const box = (c) => {
@@ -13008,9 +13010,23 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function cavalliQuiStanno(luogoId) {
 		return (cavalliMieiLista || []).filter((c) => c.ubicazione_tipo === "scuderia" && c.ubicazione_cliente_id === luogoId && c.cliente_mascalcia_id !== luogoId).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 	}
-	function renderCavalliQui(clienteId) {
+	var quiInterventiCache = [];
+	async function renderCavalliQui(clienteId) {
 		const box = document.getElementById("cliente-qui-box");
 		if (box) box.innerHTML = "";
+		quiInterventiCache = [];
+		if (typeof renderBoxCavalliCliente === "function") renderBoxCavalliCliente();
+		const ids = cavalliQuiStanno(clienteId).map((c) => c.id).filter(Boolean);
+		if (!ids.length) return;
+		let lista = [];
+		if (DEMO_MODE) lista = (demoState.interventiMascalcia || []).filter((i) => ids.includes(i.cavallo_cliente_id) && i.stato !== "rifiutato");
+		else {
+			const { data, error } = await sb.from("interventi_mascalcia").select("*").eq("maniscalco_id", currentUser.id).in("cavallo_cliente_id", ids).not("stato", "in", "(rifiutato,annullato)").order("data_intervento", { ascending: false }).limit(500);
+			if (error) console.warn("lavori dei cavalli che stanno qui:", error.message);
+			lista = data || [];
+		}
+		if (currentClienteId !== clienteId) return;
+		quiInterventiCache = lista;
 		if (typeof renderBoxCavalliCliente === "function") renderBoxCavalliCliente();
 	}
 	function interventiDelCavallo(cv, lista) {
