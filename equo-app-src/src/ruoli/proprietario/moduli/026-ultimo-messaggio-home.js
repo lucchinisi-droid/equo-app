@@ -96,6 +96,7 @@ function openHorseForm(id){
     document.getElementById("horse-tipo-proprieta").value = h?.tipo_proprieta || "proprieta";
     razzaImposta("horse-breed", h?.breed || "");
     document.getElementById("horse-mantello").value = h?.mantello || "";
+    attivitaImposta(h?.attivita || "");
     document.getElementById("horse-birthdate").value = h?.birth_date || "";
     document.getElementById("horse-microchip").value = h?.microchip || "";
     document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
@@ -103,6 +104,7 @@ function openHorseForm(id){
     document.getElementById("horse-condiviso").checked = h?.condiviso_ecosistema !== false;
   } else {
     ["horse-name","horse-mantello","horse-birthdate","horse-microchip","horse-gruppo-sanguigno","horse-note"].forEach(id => document.getElementById(id).value = "");
+    attivitaImposta("");
     razzaImposta("horse-breed", "");
     document.getElementById("horse-tipo-proprieta").value = "proprieta";
     document.getElementById("horse-condiviso").checked = true;
@@ -110,8 +112,25 @@ function openHorseForm(id){
   openModal("modal-add-horse");
 }
 
+// Attività del cavallo (26/10/2026, Equo Card): elenco + «Altro»; vuoto = nessuna
+function attivitaImposta(v){
+  const sel = document.getElementById("horse-attivita"), alt = document.getElementById("horse-attivita-altro");
+  if(!sel) return;
+  const inElenco = [...sel.options].some(o => o.value && o.value !== "__altro" && o.value === v);
+  sel.value = !v ? "" : inElenco ? v : "__altro";
+  alt.value = v && !inElenco ? v : "";
+  alt.style.display = sel.value === "__altro" ? "" : "none";
+}
+function attivitaValore(){
+  const sel = document.getElementById("horse-attivita");
+  if(!sel) return null;
+  if(sel.value === "__altro") return document.getElementById("horse-attivita-altro").value.trim().slice(0, 60) || null;
+  return sel.value || null;
+}
 function raccogliDatiHorseForm(){
+  const att = attivitaValore(), prima = editingHorseId ? (horses.find(x => x.id === editingHorseId)?.attivita || null) : null;
   return {
+    ...(att || prima ? { attivita: att } : {}),
     name: document.getElementById("horse-name").value.trim(),
     tipo_proprieta: document.getElementById("horse-tipo-proprieta").value,
     breed: document.getElementById("horse-breed").value.trim() || null,

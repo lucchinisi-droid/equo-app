@@ -1,0 +1,15 @@
+<!-- EQUO CARD del proprietario (26/10/2026): si apre dalla barra in alto -->
+<div class="ec-pagina" id="equo-card" aria-label="Equo Card">
+  <div class="ec-testa"><b>Equo Card</b><button type="button" class="ec-chiudi" onclick="chiudiEquoCard()" aria-label="Chiudi">×</button></div>
+  <div class="ec-sotto">La card di ogni tuo cavallo. Tocca per girarla.</div>
+  <div class="ec-giostra" id="ec-giostra"></div>
+  <div class="ec-punti" id="ec-punti"></div>
+  <div class="ec-azioni"><button type="button" onclick="ecMostraQr()">Mostra QR</button><button type="button" onclick="ecCondividi()">Condividi card</button></div>
+  <div class="ec-salute" id="ec-salute">
+    <div class="ec-anelli-box"><svg viewBox="0 0 132 132" id="ec-anelli" aria-hidden="true"></svg></div>
+    <div class="ec-s-testo"><div class="ec-s-tit" id="ec-s-tit">Salute</div><div id="ec-voci"></div></div>
+    <div class="ec-coriandoli" id="ec-coriandoli"></div>
+  </div>
+  <div class="ec-esito" id="ec-esito"></div>
+  <div class="ec-qrgrande" id="ec-qrgrande" onclick="this.classList.remove('on')"><div class="ec-qr ec-qr-g" id="ec-qr-g"></div><div id="ec-qr-t" class="ec-qr-t"></div><div class="ec-qr-n">Inquadra per vedere la scheda del cavallo · tocca per chiudere</div></div>
+</div>

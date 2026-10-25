@@ -13,6 +13,7 @@ import { bollaAllegato, collegaManiscalco, loadFarrierChatSection, openCollegaMa
 import { annullaRichiestaAppuntamento, apriAppuntamentiManiscalco, inviaRichiestaAppuntamento, toggleRichiestaCampi, vistoModificaAppuntamento } from "./075-appuntamenti-col-maniscalco-lato-proprie.js";
 import { deleteExpenseFromModal, loadExpenses, loadExpensesSummary, openAddExpenseModal, openEditExpenseModal, saveExpense } from "./079-expenses.js";
 import { filterServices, focusServiceOnMap, loadServicesData, openServicesMap } from "./083-services-map.js";
+import { apriEquoCard, chiudiEquoCard, ecAzione, ecCondividi, ecGira, ecMostraQr } from "./102-equo-card.js";
 import { invitoControlla, applicaHomeMan, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
 import { cambiaIncassi, renderWidgetOwner, wgApriAppMan, wgChattaAppuntamento, wgControllaResetPin, wgFissaManiscalco, wgNuovoEvento } from "./101-proprietario.js";
 
@@ -123,5 +124,11 @@ Object.assign(window, {
   wgChattaAppuntamento,
   wgControllaResetPin,
   wgFissaManiscalco,
-  wgNuovoEvento
+  wgNuovoEvento,
+  apriEquoCard,
+  chiudiEquoCard,
+  ecAzione,
+  ecCondividi,
+  ecGira,
+  ecMostraQr
 });

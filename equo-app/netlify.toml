@@ -56,3 +56,14 @@
   for = "/OneSignalSDKUpdaterWorker.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+# Pagine pubbliche (26/10/2026): scheda del cavallo dal QR della Equo Card e pagina del professionista (Equo CV, Premium)
+[[redirects]]
+  from = "/cavallo/*"
+  to = "/.netlify/functions/pubblico?tipo=cavallo&c=:splat"
+  status = 200
+
+[[redirects]]
+  from = "/pro/*"
+  to = "/.netlify/functions/pubblico?tipo=pro&c=:splat"
+  status = 200

@@ -24,6 +24,16 @@
         <input class="input" id="horse-mantello" placeholder="es. Baio">
       </div>
       <div class="input-group">
+        <label class="input-label">Attività (opzionale)</label>
+        <select class="input" id="horse-attivita" onchange="document.getElementById('horse-attivita-altro').style.display = this.value === '__altro' ? '' : 'none'">
+          <option value="">Nessuna / non indicata</option>
+          <option>Salto ostacoli</option><option>Dressage</option><option>Completo</option><option>Endurance</option>
+          <option>Monta western</option><option>Trotto</option><option>Galoppo</option><option>Volteggio</option>
+          <option>Attacchi</option><option>Passeggiata / diporto</option><option value="__altro">Altro…</option>
+        </select>
+        <input class="input" id="horse-attivita-altro" placeholder="Scrivi l'attività" maxlength="60" style="display:none;margin-top:6px">
+      </div>
+      <div class="input-group">
         <label class="input-label">Data di nascita (opzionale)</label>
         <input class="input" id="horse-birthdate" type="date">
       </div>
