@@ -97,6 +97,7 @@ async function enterApp(ruolo){
   document.getElementById("screen-app").classList.add("active");
   collegaOneSignal();
   currentUser.vistaAttiva = ruolo;
+  setTimeout(() => { try{ barraAggiornaVista(); }catch(e){} }, 0);
   if(Registro.sid){ Registro.vista = ruolo; Registro.azione("vista:" + ruolo); } else Registro.avvia(ruolo);
   applicaPaletteVista(ruolo);
   avviaSpunte();

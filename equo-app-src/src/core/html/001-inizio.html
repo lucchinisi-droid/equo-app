@@ -135,11 +135,13 @@
 
 <!-- ═══ APP ═══ -->
 <div class="screen" id="screen-app">
-  <div class="topbar">
-    <img src="assets/icona-equo.png" alt="Equo" class="topbar-logo-img" onclick="goHome()">
-    <div class="topbar-context" id="topbar-context">Nessun cavallo</div>
-    <button type="button" class="topbar-cerca ct-apri" onclick="apriCercaTutto()" aria-label="Cerca in Equo">{{lente}}</button>
-    <div class="topbar-avatar" id="topbar-avatar" onclick="openMenu()">?</div>
+  <!-- barra in alto unica (26/10/2026): profilo · Cerca · meteo di oggi · Equo Card (proprietario) / Card (professionisti) -->
+  <div class="topbar tb2">
+    <div class="tb-av"><div class="topbar-avatar" id="topbar-avatar" onclick="openMenu()" role="button" aria-label="Menu profilo">?</div><span class="tb-pallino" id="tb-pallino" hidden></span></div>
+    <button type="button" class="topbar-cerca tb-cerca ct-apri" onclick="apriCercaTutto()" aria-label="Cerca in Equo">{{lente}}<span>Cerca</span></button>
+    <button type="button" class="tb-tondo tb-meteo" id="topbar-meteo" aria-label="Meteo di oggi"><i class="fa-solid fa-cloud-sun"></i></button>
+    <button type="button" class="tb-tondo tb-card" id="topbar-card" onclick="apriCardTopbar()" aria-label="Equo Card"></button>
+    <div class="topbar-context" id="topbar-context" hidden>Nessun cavallo</div>
   </div>
 
   <!-- HOME -->

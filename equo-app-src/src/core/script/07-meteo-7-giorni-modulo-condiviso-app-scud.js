@@ -46,7 +46,7 @@
   const stati = new WeakMap();
   async function carica(el, forza){
     const cfg = stati.get(el); if(!cfg) return;
-    el.innerHTML = cfg.dati ? el.innerHTML : Array.from({ length: 7 }, () => '<span class="meteo-scheletro"></span>').join("");
+    el.innerHTML = cfg.dati ? el.innerHTML : cfg.soloIcona ? '<span class="meteo-scheletro"></span>' : Array.from({ length: 7 }, () => '<span class="meteo-scheletro"></span>').join("");
     let pos = null;
     try{ pos = await cfg.posizione(); }catch(e){ pos = null; }
     if(!pos || pos.messaggio){ cfg.dati = null; mostraMsg(el, (pos && pos.messaggio) || cfg.senzaPosizione); return; }
@@ -65,6 +65,13 @@
   }
   function mostraMsg(el, m){
     m = m || { testo: "Meteo non disponibile" };
+    if(stati.get(el).soloIcona){   // barra in alto: solo un'icona, il testo nel suggerimento
+      el.innerHTML = `<i class="fa-solid ${m.icona || "fa-location-dot"}"></i>`;
+      el.title = m.testo + (m.link ? " " + m.link : "");
+      el.setAttribute("aria-label", el.title);
+      stati.get(el).azioneMsg = m.azione || null;
+      return;
+    }
     el.innerHTML = `<span class="meteo-msg"><i class="fa-solid ${m.icona || "fa-location-dot"}"></i><span>${esc(m.testo)}${m.link ? ` <u>${esc(m.link)}</u>` : ""}</span></span>`;
     el.dataset.azione = m.azione ? "1" : "";
     stati.get(el).azioneMsg = m.azione || null;
@@ -72,6 +79,14 @@
   function disegna(el){
     const cfg = stati.get(el), d = cfg.dati;
     const oggi = oggiIso();
+    if(cfg.soloIcona){   // barra in alto: il tempo di adesso (ora più vicina), al tocco il dettaglio
+      const adesso = window.EquoMeteo.alle(d, oggi, new Date().toLocaleTimeString("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" })) || d.giorni[0] || {};
+      el.innerHTML = icona(adesso.sim, adesso.notte);
+      el.title = "Meteo" + (d.luogo ? " · " + d.luogo : "") + ": " + (NOMI[adesso.sim] || "") + " · tocca per i dettagli";
+      el.setAttribute("aria-label", el.title);
+      stati.get(el).azioneMsg = null;
+      return;
+    }
     el.innerHTML = d.giorni.slice(0, 7).map((g, i) => `<span class="meteo-g${g.data === oggi ? " oggi" : ""}"><b>${esc(etichettaGiorno(g.data, i))}</b>${icona(g.sim, false)}</span>`).join("");
     el.setAttribute("aria-label", "Meteo dei prossimi 7 giorni" + (d.luogo ? " a " + d.luogo : "") + ": tocca per il dettaglio ora per ora");
     stati.get(el).azioneMsg = null;

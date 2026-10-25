@@ -1,0 +1,21 @@
+/* BARRA IN ALTO UNICA (26/10/2026): avatar con pallino notifiche · Cerca · meteo di oggi · Equo Card / Card */
+#screen-app .topbar.tb2{display:flex;align-items:center;gap:10px;padding:10px 16px 10px;border-bottom:0;justify-content:flex-start}
+.tb2 .tb-av{position:relative;flex-shrink:0}
+.tb2 .topbar-avatar{width:44px;height:44px;font-size:15px;letter-spacing:.3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.14)}
+.tb2 .tb-pallino{position:absolute;top:-1px;right:-1px;width:12px;height:12px;border-radius:50%;background:#ff8a5c;border:2px solid var(--bg);pointer-events:none}
+.tb2 .tb-pallino[hidden]{display:none}
+.tb2 .tb-cerca{flex:1;width:auto;height:44px;border-radius:22px;margin:0;padding:0 16px;justify-content:flex-start;gap:10px;font:inherit;font-size:15.5px;color:var(--text)}
+.tb2 .tb-cerca svg{width:20px;height:20px;flex-shrink:0}
+.tb2 .tb-cerca span{opacity:.85}
+.tb2 .tb-tondo{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;cursor:pointer;padding:0;color:var(--text)}
+.tb2 .tb-cerca,.tb2 .tb-tondo{background:var(--surface);border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 14px rgba(0,0,0,.12);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);transition:transform .15s}
+.tb2 .tb-cerca:active,.tb2 .tb-tondo:active,.tb2 .topbar-avatar:active{transform:scale(.94)}
+.tb2 .tb-tondo svg{width:24px;height:24px}
+.tb2 .tb-tondo i{font-size:18px;color:var(--muted)}
+.tb2 .tb-meteo .mi{width:30px;height:30px}
+.tb2 .tb-meteo .meteo-msg{display:contents}
+.tb2 .tb-meteo .meteo-scheletro{width:22px;height:22px;border-radius:50%}
+:root[data-vista] .topbar.tb2 .tb-cerca,:root[data-vista] .topbar.tb2 .tb-tondo{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.2)}
+:root[data-theme="light"][data-vista] .topbar.tb2 .tb-cerca,:root[data-theme="light"][data-vista] .topbar.tb2 .tb-tondo{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.08)}
+/* il meteo è nella barra: niente riquadri meteo nelle Home */
+#meteo-owner,#meteo-pro,.hm-meteo-pill{display:none!important}

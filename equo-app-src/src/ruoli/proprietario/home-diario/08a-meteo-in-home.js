@@ -21,6 +21,7 @@ async function meteoPosizioneTelefono(){
 }
 function meteoHome(forza){
   if(typeof EquoMeteo === "undefined" || !currentUser) return;
+  if(typeof barraMeteo === "function") barraMeteo(forza);   // 26/10: il meteo si vede nella barra in alto
   const pro = document.getElementById("page-pro-home")?.classList.contains("active");
   const el = document.getElementById(pro ? (document.body.classList.contains("home-man") ? "hm-meteo" : "meteo-pro") : "meteo-owner");
   if(!el) return;
