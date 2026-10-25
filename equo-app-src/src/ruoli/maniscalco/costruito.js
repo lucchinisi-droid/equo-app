@@ -6258,11 +6258,26 @@
 		const grid = document.getElementById("cliente-cavalli-grid");
 		if (!grid) return;
 		const cerca = document.getElementById("cliente-cavalli-cerca");
-		cerca.style.display = schedaCavalli.length > 4 ? "block" : "none";
+		const qui = currentClienteId ? cavalliQuiStanno(currentClienteId) : [];
+		cerca.style.display = schedaCavalli.length + qui.length > 4 ? "block" : "none";
 		const q = cerca.value.trim().toLowerCase();
-		document.getElementById("cliente-cavalli-titolo").textContent = `CAVALLI (${schedaCavalli.length})`;
-		const ordinati = schedaCavalli.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).filter((c) => !q || (c.nome || "").toLowerCase().includes(q) || (c.codice_equo || "").toLowerCase().includes(q));
+		document.getElementById("cliente-cavalli-titolo").textContent = `CAVALLI (${schedaCavalli.length + qui.length})`;
+		const ordinati = schedaCavalli.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).concat(qui.map((c) => ({
+			...c,
+			quiDi: c.cliente_mascalcia_id
+		}))).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" })).filter((c) => !q || (c.nome || "").toLowerCase().includes(q) || (c.codice_equo || "").toLowerCase().includes(q));
+		const boxQui = (c) => {
+			const foto = fotoCavalloPro(c), ferro = descrFerroBreve(c), prop = (clientiMascalcia || []).find((x) => x.id === c.quiDi);
+			return `<button type="button" class="cav-box" onclick="apriCavalloDaCartella('${c.quiDi}', '${c.id || ""}', '${c.horse_id || ""}')">
+      <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}</span>
+      <span class="cav-box-nome">${escapeHtml(c.nome)}</span>
+      <span class="cav-box-cod">${escapeHtml([c.codice_equo, ferro ? "ferro " + ferro : ""].filter(Boolean).join(" · ") || "—")}</span>
+      <span class="cav-box-riga">👤 di <b>${escapeHtml(prop ? prop.nome : "un altro cliente")}</b></span>
+      <span class="cav-box-riga">paga il proprietario</span>
+    </button>`;
+		};
 		const box = (c) => {
+			if (c.quiDi) return boxQui(c);
 			const st = statoCavalloPro(c, clienteInterventiCache), foto = fotoCavalloPro(c), ferro = descrFerroBreve(c);
 			return `<button type="button" class="cav-box" onclick="apriSchedaCavalloPro('${c.key}')">
       <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}${st.sem ? `<i class="cav-sem ${st.sem}"></i>` : ""}</span>
@@ -6662,21 +6677,8 @@
 	}
 	function renderCavalliQui(clienteId) {
 		const box = document.getElementById("cliente-qui-box");
-		if (!box) return;
-		const lista = cavalliQuiStanno(clienteId);
-		if (!lista.length) {
-			box.innerHTML = "";
-			return;
-		}
-		box.innerHTML = `<div class="clienti-sez-head" style="margin-top:14px"><div class="clienti-sez-title">QUI STANNO (${lista.length})</div></div>
-    <div class="muted" style="font-size:12.5px;line-height:1.5;margin:0 0 8px">Cavalli di altri clienti che hai spostato qui. Restano intestati al loro proprietario, che paga il lavoro.</div>
-    <div class="cli-lista">${lista.map((c) => {
-			const prop = clienteDiId(c.cliente_mascalcia_id);
-			return `<div class="cli-riga" onclick="apriCavalloDaCartella('${c.cliente_mascalcia_id}', '${c.id || ""}', '${c.horse_id || ""}')">
-        <span class="cli-av">${iniziale(c.nome)}</span>
-        <span class="cli-c"><b>${escapeHtml(c.nome || "")}</b><span>di ${escapeHtml(prop ? prop.nome : "un cliente")}${c.ubicazione_dal ? " · dal " + escapeHtml(formatDataBreve(c.ubicazione_dal)) : ""}</span></span>
-        <span class="cli-dx">›</span></div>`;
-		}).join("")}</div>`;
+		if (box) box.innerHTML = "";
+		if (typeof renderBoxCavalliCliente === "function") renderBoxCavalliCliente();
 	}
 	function interventiDelCavallo(cv, lista) {
 		return (lista || []).filter((i) => cv.id && i.cavallo_cliente_id === cv.id || cv.horse_id && i.horse_id === cv.horse_id);
@@ -7096,7 +7098,28 @@
 		sel.innerHTML = "<option value=\"\">Caricamento…</option>";
 		multi.innerHTML = "<div class=\"muted\" style=\"font-size:13px;padding:9px 0\">Caricamento…</div>";
 		cavalliClienteCorrente = isNuovo ? [] : await DB.listCavalliCliente(clienteId);
-		const opzioni = cavalliClienteCorrente.map((c) => `<option value="${c.key}">${escapeHtml(c.nome)}${c.tipo === "equo" ? " · su Equo" : ""}</option>`).join("");
+		const cliSc = !isNuovo && !inMod ? (clientiMascalcia || []).find((c) => c.id === clienteId) : null;
+		if (cliSc && isStruttura(cliSc)) {
+			await caricaCavalliMiei().catch(() => {});
+			if (document.getElementById("intervento-cliente-select").value !== clienteId) return;
+			cavalliQuiStanno(clienteId).forEach((r) => {
+				if (cavalliClienteCorrente.some((c) => c.id === r.id)) return;
+				const prop = (clientiMascalcia || []).find((c) => c.id === r.cliente_mascalcia_id);
+				cavalliClienteCorrente.push({
+					...r,
+					key: "q:" + r.id,
+					tipo: r.horse_id ? "equo" : "manuale",
+					id: r.id,
+					proprietarioId: r.cliente_mascalcia_id,
+					proprietarioNome: prop?.nome || "altro cliente",
+					ferratura_tipo: r.ferratura_tipo || "completa",
+					ferro_tipo: r.ferro_tipo || "standard"
+				});
+			});
+			cavalliClienteCorrente.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		}
+		const diChi = (c) => c.proprietarioId ? " · di " + c.proprietarioNome : "";
+		const opzioni = cavalliClienteCorrente.map((c) => `<option value="${c.key}">${escapeHtml(c.nome)}${c.tipo === "equo" ? " · su Equo" : ""}${escapeHtml(diChi(c))}</option>`).join("");
 		sel.innerHTML = (cavalliClienteCorrente.length ? "" : "<option value=\"\">— nessun cavallo —</option>") + opzioni + "<option value=\"__nuovo_cavallo__\">+ Aggiungi cavallo</option>";
 		let valore = "";
 		const rif = interventoInModifica || interventoPreset;
@@ -7107,7 +7130,7 @@
 		else if (cavalliClienteCorrente.length === 1) valore = cavalliClienteCorrente[0].key;
 		sel.value = valore;
 		const presetCavalli = new Set([valore].concat(interventoPreset?.cavalli || []).filter(Boolean));
-		multi.innerHTML = cavalliClienteCorrente.map((c) => `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}</span></label>`).join("") + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
+		multi.innerHTML = cavalliClienteCorrente.map((c) => `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}${c.proprietarioId ? " <small>· 👤 di " + escapeHtml(c.proprietarioNome) + "</small>" : ""}</span></label>`).join("") + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
 		if (inMod && mRif && interventoInModifica.numero_ferro) {
 			const usato = {
 				s: interventoInModifica.misura_sistema || "italiana",
@@ -7377,7 +7400,7 @@
 			}
 			const righe = [];
 			for (const k of scelti) {
-				let cavallo_cliente_id = null, horse_id = null, nome = "";
+				let cavallo_cliente_id = null, horse_id = null, nome = "", cliente = cliente_mascalcia_id;
 				if (k === "__nuovo_cavallo__") {
 					const { error: cvErr, data: cv } = await DB.insertCavalloCliente({
 						cliente_mascalcia_id,
@@ -7392,10 +7415,12 @@
 					const scelto = cavalliClienteCorrente.find((c) => c.key === k);
 					({cavallo_cliente_id, horse_id} = await DB.risolviCavalloPerIntervento(cliente_mascalcia_id, scelto));
 					nome = scelto?.nome || "";
+					if (scelto?.proprietarioId) cliente = scelto.proprietarioId;
 				}
 				const f = ferri[k];
 				righe.push({
 					key: k,
+					cliente,
 					cavallo_cliente_id,
 					horse_id,
 					nome,
@@ -7461,13 +7486,13 @@
 				importi = await chiediPrezzi(righe.map((r) => ({
 					nome: r.nome || nomeCli,
 					tipo: r.tipo,
-					clienteId: cliente_mascalcia_id,
+					clienteId: r.cliente || cliente_mascalcia_id,
 					cavalloId: r.cavallo_cliente_id
 				})));
 			}
 			if (!interventoInModifica) {
 				const stessoGiorno = await DB.listInterventiPeriodo(data_intervento, data_intervento).catch(() => []);
-				const doppi = righe.map((r) => (stessoGiorno || []).find((i) => i.cliente_mascalcia_id === cliente_mascalcia_id && i.tipo_ferratura === tipo_ferratura && (r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id || r.horse_id && i.horse_id === r.horse_id || !r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id))).filter(Boolean);
+				const doppi = righe.map((r) => (stessoGiorno || []).find((i) => i.cliente_mascalcia_id === (r.cliente || cliente_mascalcia_id) && i.tipo_ferratura === tipo_ferratura && (r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id || r.horse_id && i.horse_id === r.horse_id || !r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id))).filter(Boolean);
 				if (doppi.length) {
 					const cv = doppi.map((d) => d.cavalli_clienti_mascalcia?.nome || agNomeCavallo(d) || "questo cavallo").join(", ");
 					if (!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`)) return errore("Non salvato: c'era già lo stesso appuntamento.");
@@ -7481,7 +7506,7 @@
 					else if (diventaFatto) prossima_scadenza = scadenzaComune;
 					else if (stato === "fatto") prossima_scadenza = interventoInModifica?.prossima_scadenza || null;
 					else {
-						const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id, cliente_mascalcia_id);
+						const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id, r.cliente || cliente_mascalcia_id);
 						prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
 					}
 				}
@@ -7510,7 +7535,7 @@
 					...typeof ofCampiAiutanteIntervento === "function" ? ofCampiAiutanteIntervento(interventoInModifica) : {}
 				};
 				const { error } = interventoInModifica ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload) : await DB.insertInterventoMascalcia({
-					cliente_mascalcia_id,
+					cliente_mascalcia_id: r.cliente || cliente_mascalcia_id,
 					...payload
 				});
 				if (error) return errore("Errore: " + error.message + (salvati ? ` (salvati ${salvati} su ${righe.length})` : ""));
@@ -7557,14 +7582,14 @@
 					cavallo: nomeCv
 				}, precInfo);
 				showToast(clienteCollegatoEquo(cliente_mascalcia_id) ? "Appuntamento modificato: il cliente riceve l'avviso e lo conferma con «Ok, ho visto»" : "Appuntamento modificato: avviso salvato nella chat del cliente");
-			} else if (!interventoInModifica && stato === "programmato" && clienteCollegatoEquo(cliente_mascalcia_id)) {
-				await avvisaClienteAppuntamento("nuovo", {
-					cliente_mascalcia_id,
+			} else if (!interventoInModifica && stato === "programmato" && [...new Set(righe.map((r) => r.cliente || cliente_mascalcia_id))].some(clienteCollegatoEquo)) {
+				for (const cid of [...new Set(righe.map((r) => r.cliente || cliente_mascalcia_id))].filter(clienteCollegatoEquo)) await avvisaClienteAppuntamento("nuovo", {
+					cliente_mascalcia_id: cid,
 					tipo_ferratura,
 					tipo_altro,
 					data_intervento,
 					ora,
-					cavallo: nomeCv
+					cavallo: righe.filter((r) => (r.cliente || cliente_mascalcia_id) === cid).map((r) => r.nome).filter(Boolean).join(", ")
 				});
 				showToast(righe.length > 1 ? `${righe.length} appuntamenti salvati: il cliente riceve l'avviso in chat` : "Appuntamento salvato: il cliente riceve l'avviso in chat");
 			} else showToast(interventoInModifica ? "Appuntamento aggiornato" : righe.length > 1 ? `${righe.length} ${stato === "programmato" ? "appuntamenti salvati" : "interventi registrati"} (uno per cavallo)` : stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato");

@@ -38,7 +38,13 @@ function cavalliQuiStanno(luogoId){
   return (cavalliMieiLista || []).filter(c => c.ubicazione_tipo === "scuderia" && c.ubicazione_cliente_id === luogoId && c.cliente_mascalcia_id !== luogoId)
     .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 }
+// 26/10: i cavalli che stanno qui si vedono nel riquadro «Cavalli» (con «di …»), non più in fondo alla scheda
 function renderCavalliQui(clienteId){
+  const box = document.getElementById("cliente-qui-box");
+  if(box) box.innerHTML = "";
+  if(typeof renderBoxCavalliCliente === "function") renderBoxCavalliCliente();
+}
+function renderCavalliQuiInFondo(clienteId){
   const box = document.getElementById("cliente-qui-box");
   if(!box) return;
   const lista = cavalliQuiStanno(clienteId);

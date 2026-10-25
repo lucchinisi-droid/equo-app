@@ -2,7 +2,8 @@
 import { agNomeCavalloSicuro, giorniRichiamoSuggeriti, giorniTra, loadClientiMascalcia, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, richiamoPerFatto } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStruttura, isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { LAVORO_CAV, apriSchedaFerratura, descrFerraturaCavallo, tipoDaScheda } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
-import { iniziale, loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { cavalliQuiStanno, iniziale, loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { caricaCavalliMiei } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { chiediPrezzi, promemoriaPrezzoAttivo } from "./049-prezzo-mancante-promemoria-salvando-un-a.js";
@@ -238,8 +239,22 @@ async function onInterventoClienteChange(){
   sel.innerHTML = '<option value="">Caricamento…</option>';
   multi.innerHTML = '<div class="muted" style="font-size:13px;padding:9px 0">Caricamento…</div>';
   cavalliClienteCorrente = isNuovo ? [] : await DB.listCavalliCliente(clienteId);
+  // scuderia: anche i cavalli di altri proprietari che stanno qui (ogni lavoro va a chi paga, il luogo resta la scuderia)
+  const cliSc = !isNuovo && !inMod ? (clientiMascalcia || []).find(c => c.id === clienteId) : null;
+  if(cliSc && isStruttura(cliSc)){
+    await caricaCavalliMiei().catch(() => {});
+    if(document.getElementById("intervento-cliente-select").value !== clienteId) return;
+    cavalliQuiStanno(clienteId).forEach(r => {
+      if(cavalliClienteCorrente.some(c => c.id === r.id)) return;
+      const prop = (clientiMascalcia || []).find(c => c.id === r.cliente_mascalcia_id);
+      cavalliClienteCorrente.push({ ...r, key: "q:" + r.id, tipo: r.horse_id ? "equo" : "manuale", id: r.id, proprietarioId: r.cliente_mascalcia_id, proprietarioNome: prop?.nome || "altro cliente",
+        ferratura_tipo: r.ferratura_tipo || "completa", ferro_tipo: r.ferro_tipo || "standard" });
+    });
+    cavalliClienteCorrente.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+  }
+  const diChi = c => c.proprietarioId ? " · di " + c.proprietarioNome : "";
   const opzioni = cavalliClienteCorrente.map(c =>
-    `<option value="${c.key}">${escapeHtml(c.nome)}${c.tipo === "equo" ? " · su Equo" : ""}</option>`).join("");
+    `<option value="${c.key}">${escapeHtml(c.nome)}${c.tipo === "equo" ? " · su Equo" : ""}${escapeHtml(diChi(c))}</option>`).join("");
   sel.innerHTML = (cavalliClienteCorrente.length ? "" : '<option value="">— nessun cavallo —</option>') + opzioni + '<option value="__nuovo_cavallo__">+ Aggiungi cavallo</option>';
   // preselezione: cavallo dell'intervento in modifica / del preset, altrimenti il primo (se c'è), altrimenti "aggiungi" per un cliente nuovo
   let valore = "";
@@ -257,7 +272,7 @@ async function onInterventoClienteChange(){
   sel.value = valore;
   const presetCavalli = new Set([valore].concat(interventoPreset?.cavalli || []).filter(Boolean));
   multi.innerHTML = cavalliClienteCorrente.map(c =>
-    `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}</span></label>`).join("")
+    `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}${c.proprietarioId ? " <small>· 👤 di " + escapeHtml(c.proprietarioNome) + "</small>" : ""}</span></label>`).join("")
     + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
   // in modifica: il ferro salvato nell'appuntamento, se diverso dallo standard, resta «usato in questo appuntamento»
   if(inMod && mRif && interventoInModifica.numero_ferro){
@@ -467,7 +482,7 @@ async function salvaInterventoMascalcia(){
     // cavalli: nuovo / esistenti (manuali o "su Equo")
     const righe = [];
     for(const k of scelti){
-      let cavallo_cliente_id = null, horse_id = null, nome = "";
+      let cavallo_cliente_id = null, horse_id = null, nome = "", cliente = cliente_mascalcia_id;
       if(k === "__nuovo_cavallo__"){
         const { error: cvErr, data: cv } = await DB.insertCavalloCliente({ cliente_mascalcia_id, nome: nuovoCavalloNome, microchip: nuovoCavalloChip || null, ferratura_tipo: nuovoCavLavoro });
         if(cvErr || !cv) return errore("Errore nel salvare il cavallo: " + (cvErr?.message || ""));
@@ -476,9 +491,10 @@ async function salvaInterventoMascalcia(){
         const scelto = cavalliClienteCorrente.find(c => c.key === k);
         ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(cliente_mascalcia_id, scelto));
         nome = scelto?.nome || "";
+        if(scelto?.proprietarioId) cliente = scelto.proprietarioId;   // cavallo di un altro proprietario che sta in scuderia: paga lui
       }
       const f = ferri[k];
-      righe.push({ key: k, cavallo_cliente_id, horse_id, nome, tipo: tipoPerCavallo(null, k), misura_sistema: f ? f.s : null, numero_ferro: f ? f.n : null });
+      righe.push({ key: k, cliente, cavallo_cliente_id, horse_id, nome, tipo: tipoPerCavallo(null, k), misura_sistema: f ? f.s : null, numero_ferro: f ? f.n : null });
     }
     const nomiCavalli = righe.map(r => r.nome).filter(Boolean).join(", ");
 
@@ -522,13 +538,13 @@ async function salvaInterventoMascalcia(){
     if(!interventoInModifica && stato === "programmato" && importoForm == null && !importi && tipo_ferratura !== "altro" && promemoriaPrezzoAttivo()){
       if(!incTutti.length) { try { incTutti = await DB.listInterventiMascalciaTutti(); } catch(e){} }
       const nomeCli = clientiMascalcia.find(c => c.id === cliente_mascalcia_id)?.nome || "";
-      importi = await chiediPrezzi(righe.map(r => ({ nome: r.nome || nomeCli, tipo: r.tipo, clienteId: cliente_mascalcia_id, cavalloId: r.cavallo_cliente_id })));
+      importi = await chiediPrezzi(righe.map(r => ({ nome: r.nome || nomeCli, tipo: r.tipo, clienteId: r.cliente || cliente_mascalcia_id, cavalloId: r.cavallo_cliente_id })));
     }
 
     // stesso cliente, stesso cavallo, stesso giorno e stesso tipo: probabilmente salvato due volte
     if(!interventoInModifica){
       const stessoGiorno = await DB.listInterventiPeriodo(data_intervento, data_intervento).catch(() => []);
-      const doppi = righe.map(r => (stessoGiorno || []).find(i => i.cliente_mascalcia_id === cliente_mascalcia_id && i.tipo_ferratura === tipo_ferratura
+      const doppi = righe.map(r => (stessoGiorno || []).find(i => i.cliente_mascalcia_id === (r.cliente || cliente_mascalcia_id) && i.tipo_ferratura === tipo_ferratura
         && ((r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id) || (r.horse_id && i.horse_id === r.horse_id) || (!r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id)))).filter(Boolean);
       if(doppi.length){
         const cv = doppi.map(d => d.cavalli_clienti_mascalcia?.nome || agNomeCavallo(d) || "questo cavallo").join(", ");
@@ -547,7 +563,7 @@ async function salvaInterventoMascalcia(){
         else if(diventaFatto) prossima_scadenza = scadenzaComune;
         else if(stato === "fatto") prossima_scadenza = interventoInModifica?.prossima_scadenza || null;
         else {
-          const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id, cliente_mascalcia_id);
+          const sg = await giorniRichiamoSuggeriti(r.tipo, r.cavallo_cliente_id, r.horse_id, interventoInModifica?.id, r.cliente || cliente_mascalcia_id);
           prossima_scadenza = sg.giorni ? aggiungiGiorniIso(data_intervento, sg.giorni) : null;
         }
       }
@@ -565,7 +581,7 @@ async function salvaInterventoMascalcia(){
         ...(typeof ofCampiAiutanteIntervento === "function" ? ofCampiAiutanteIntervento(interventoInModifica) : {}) };
       const { error } = interventoInModifica
         ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
-        : await DB.insertInterventoMascalcia({ cliente_mascalcia_id, ...payload });
+        : await DB.insertInterventoMascalcia({ cliente_mascalcia_id: r.cliente || cliente_mascalcia_id, ...payload });
       if(error) return errore("Errore: " + error.message + (salvati ? ` (salvati ${salvati} su ${righe.length})` : ""));
       salvati++;
     }
@@ -587,9 +603,12 @@ async function salvaInterventoMascalcia(){
       // 1. appuntamento già confermato cambiato (data, ora o servizio): il cliente lo deve sapere
       await avvisaClienteAppuntamento("modificato", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv }, precInfo);
       showToast(clienteCollegatoEquo(cliente_mascalcia_id) ? "Appuntamento modificato: il cliente riceve l'avviso e lo conferma con «Ok, ho visto»" : "Appuntamento modificato: avviso salvato nella chat del cliente");
-    } else if(!interventoInModifica && stato === "programmato" && clienteCollegatoEquo(cliente_mascalcia_id)){
-      // nuovo appuntamento fissato dal maniscalco: il cliente su Equo riceve un solo messaggio in chat (anche con più cavalli)
-      await avvisaClienteAppuntamento("nuovo", { cliente_mascalcia_id, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: nomeCv });
+    } else if(!interventoInModifica && stato === "programmato" && [...new Set(righe.map(r => r.cliente || cliente_mascalcia_id))].some(clienteCollegatoEquo)){
+      // nuovo appuntamento fissato dal maniscalco: ogni cliente su Equo riceve un solo messaggio in chat con i SUOI cavalli
+      for(const cid of [...new Set(righe.map(r => r.cliente || cliente_mascalcia_id))].filter(clienteCollegatoEquo)){
+        const suoi = righe.filter(r => (r.cliente || cliente_mascalcia_id) === cid).map(r => r.nome).filter(Boolean).join(", ");
+        await avvisaClienteAppuntamento("nuovo", { cliente_mascalcia_id: cid, tipo_ferratura, tipo_altro, data_intervento, ora, cavallo: suoi });
+      }
       showToast(righe.length > 1 ? `${righe.length} appuntamenti salvati: il cliente riceve l'avviso in chat` : "Appuntamento salvato: il cliente riceve l'avviso in chat");
     } else {
       showToast(interventoInModifica ? "Appuntamento aggiornato"

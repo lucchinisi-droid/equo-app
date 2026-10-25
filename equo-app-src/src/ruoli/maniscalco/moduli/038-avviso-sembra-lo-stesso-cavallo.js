@@ -2,7 +2,7 @@
 import { renderClientiList } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { closeClienteDetail, descrFerraturaCavallo, lavoroCav, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
-import { descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { cavalliQuiStanno, descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { luogoDi, renderDoveCavalloPro, spostamentoHtml } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
@@ -80,12 +80,27 @@ function renderBoxCavalliCliente(){
   const grid = document.getElementById("cliente-cavalli-grid");
   if(!grid) return;
   const cerca = document.getElementById("cliente-cavalli-cerca");
-  cerca.style.display = schedaCavalli.length > 4 ? "block" : "none";
+  // cavalli di altri proprietari che stanno in questa scuderia: nel riquadro, con «di …» (si aprono nella scheda del proprietario)
+  const qui = currentClienteId ? cavalliQuiStanno(currentClienteId) : [];
+  cerca.style.display = schedaCavalli.length + qui.length > 4 ? "block" : "none";
   const q = cerca.value.trim().toLowerCase();
-  document.getElementById("cliente-cavalli-titolo").textContent = `CAVALLI (${schedaCavalli.length})`;
+  document.getElementById("cliente-cavalli-titolo").textContent = `CAVALLI (${schedaCavalli.length + qui.length})`;
   const ordinati = schedaCavalli.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }))
+    .concat(qui.map(c => ({ ...c, quiDi: c.cliente_mascalcia_id })))
+    .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }))
     .filter(c => !q || (c.nome || "").toLowerCase().includes(q) || (c.codice_equo || "").toLowerCase().includes(q));
+  const boxQui = c => {
+    const foto = fotoCavalloPro(c), ferro = descrFerroBreve(c), prop = (clientiMascalcia || []).find(x => x.id === c.quiDi);
+    return `<button type="button" class="cav-box" onclick="apriCavalloDaCartella('${c.quiDi}', '${c.id || ""}', '${c.horse_id || ""}')">
+      <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}</span>
+      <span class="cav-box-nome">${escapeHtml(c.nome)}</span>
+      <span class="cav-box-cod">${escapeHtml([c.codice_equo, ferro ? "ferro " + ferro : ""].filter(Boolean).join(" · ") || "—")}</span>
+      <span class="cav-box-riga">👤 di <b>${escapeHtml(prop ? prop.nome : "un altro cliente")}</b></span>
+      <span class="cav-box-riga">paga il proprietario</span>
+    </button>`;
+  };
   const box = c => {
+    if(c.quiDi) return boxQui(c);
     const st = statoCavalloPro(c, clienteInterventiCache), foto = fotoCavalloPro(c), ferro = descrFerroBreve(c);
     return `<button type="button" class="cav-box" onclick="apriSchedaCavalloPro('${c.key}')">
       <span class="cav-box-foto"${foto ? ` style="background-image:${cssUrlApp(foto)}"` : ""}>${foto ? "" : iniziale(c.nome)}${st.sem ? `<i class="cav-sem ${st.sem}"></i>` : ""}</span>
