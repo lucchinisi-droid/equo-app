@@ -1054,6 +1054,28 @@
 			"PNY",
 			0,
 			["pony"]
+		],
+		[
+			"Asino",
+			"ASN",
+			0,
+			[
+				"asina",
+				"somaro",
+				"ciuco"
+			]
+		],
+		[
+			"Bardotto",
+			"BDT",
+			0,
+			["bardotta"]
+		],
+		[
+			"Mulo",
+			"MUL",
+			0,
+			["mula"]
 		]
 	].map(([nome, sigla, italiana, alias]) => ({
 		nome,
@@ -6180,7 +6202,7 @@
 		if (cv.mantello) r.push(["Mantello", cv.mantello]);
 		if (cv.altezza_cm) r.push(["Altezza", cv.altezza_cm + " cm"]);
 		if (cv.peso_kg) r.push(["Peso stimato", "≈ " + cv.peso_kg + " kg"]);
-		if (cv.disciplina) r.push(["Disciplina", cv.disciplina]);
+		if (cv.disciplina) r.push(["Attività", cv.disciplina]);
 		if (cv.segni_particolari) r.push(["Segni particolari", cv.segni_particolari]);
 		return r;
 	}

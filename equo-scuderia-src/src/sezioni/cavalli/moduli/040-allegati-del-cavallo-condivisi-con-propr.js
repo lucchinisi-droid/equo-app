@@ -70,13 +70,14 @@ function renderCavalloDetail(){
   if(!c){ closeCavalloDetail(); return; }
 
   document.getElementById("detail-cavallo-nome").innerHTML = escapeHtml(c.nome) + " " + pallinoHtml(c.id);
-  const sub = [c.razza, c.mantello, TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null, c.proprietario ? "proprietario: " + c.proprietario : null].filter(Boolean).join(" · ");
+  const sub = [c.razza, c.mantello, { femmina: "Femmina", castrone: "Castrone", stallone: "Stallone" }[c.sesso] || null, TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null, c.proprietario ? "proprietario: " + c.proprietario : null].filter(Boolean).join(" · ");
   document.getElementById("detail-cavallo-sub").textContent = sub || "Nessun dettaglio aggiuntivo";
   const info = [
     c.codice_equo ? "Codice Equo: " + c.codice_equo : null,
     c.data_nascita ? "Nato il " + formatDate(c.data_nascita) : null,
     c.microchip ? "Microchip: " + c.microchip : null,
     c.gruppo_sanguigno ? "Gruppo sanguigno: " + c.gruppo_sanguigno : null,
+    c.attivita ? "Attività: " + c.attivita : null,
   ].filter(Boolean).join(" · ");
   document.getElementById("detail-cavallo-info").textContent = info;
   const fotoEl = document.getElementById("detail-cavallo-foto");

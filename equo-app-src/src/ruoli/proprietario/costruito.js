@@ -424,6 +424,7 @@
 			razzaImposta("horse-breed", h?.breed || "");
 			document.getElementById("horse-mantello").value = h?.mantello || "";
 			attivitaImposta(h?.attivita || "");
+			document.getElementById("horse-sesso").value = h?.sesso || "";
 			document.getElementById("horse-birthdate").value = h?.birth_date || "";
 			document.getElementById("horse-microchip").value = h?.microchip || "";
 			document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
@@ -439,13 +440,20 @@
 				"horse-note"
 			].forEach((id) => document.getElementById(id).value = "");
 			attivitaImposta("");
+			document.getElementById("horse-sesso").value = "";
 			razzaImposta("horse-breed", "");
 			document.getElementById("horse-tipo-proprieta").value = "proprieta";
 			document.getElementById("horse-condiviso").checked = true;
 		}
 		openModal("modal-add-horse");
 	}
+	var ATTIVITA_VECCHIE = {
+		"Passeggiata / diporto": "Passeggiata / trekking",
+		"Trekking / passeggiata": "Passeggiata / trekking",
+		"Western / Reining": "Monta western"
+	};
 	function attivitaImposta(v) {
+		v = ATTIVITA_VECCHIE[v] || v;
 		const sel = document.getElementById("horse-attivita"), alt = document.getElementById("horse-attivita-altro");
 		if (!sel) return;
 		const inElenco = [...sel.options].some((o) => o.value && o.value !== "__altro" && o.value === v);
@@ -461,8 +469,10 @@
 	}
 	function raccogliDatiHorseForm() {
 		const att = attivitaValore(), prima = editingHorseId ? horses.find((x) => x.id === editingHorseId)?.attivita || null : null;
+		const sesso = document.getElementById("horse-sesso")?.value || "", sessoPrima = editingHorseId ? horses.find((x) => x.id === editingHorseId)?.sesso || null : null;
 		return {
 			...att || prima ? { attivita: att } : {},
+			...sesso || sessoPrima ? { sesso: sesso || null } : {},
 			name: document.getElementById("horse-name").value.trim(),
 			tipo_proprieta: document.getElementById("horse-tipo-proprieta").value,
 			breed: document.getElementById("horse-breed").value.trim() || null,
@@ -540,6 +550,12 @@
 			["Codice Equo", h.codice_equo || "in assegnazione"],
 			["Razza", h.breed || "—"],
 			["Mantello", h.mantello || "—"],
+			["Sesso", {
+				femmina: "Femmina",
+				castrone: "Castrone",
+				stallone: "Stallone"
+			}[h.sesso] || "—"],
+			["Attività", h.attivita || "—"],
 			["Data di nascita", h.birth_date ? formatDate(h.birth_date) : "—"],
 			["Microchip", h.microchip || "Non inserito"],
 			["Gruppo sanguigno", h.gruppo_sanguigno || "—"],

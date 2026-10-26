@@ -2990,6 +2990,11 @@ textarea.input{resize:vertical}
       <div class="field"><label>Mantello</label><input class="input" id="cav-mantello" placeholder="Es. Baio"></div>
     </div>
     <div class="grid grid-2">
+      <div class="field"><label>Sesso</label><select class="input" id="cav-sesso"><option value="">Non indicato</option><option value="femmina">Femmina</option><option value="castrone">Castrone</option><option value="stallone">Stallone</option></select></div>
+      <div class="field"><label>Attività</label><input class="input" id="cav-attivita" list="cav-attivita-elenco" maxlength="60" placeholder="Scegli o scrivi"></div>
+    </div>
+    <datalist id="cav-attivita-elenco"><option value="Salto ostacoli"><option value="Dressage"><option value="Completo"><option value="Endurance"><option value="Monta western"><option value="Monta da lavoro"><option value="Trotto"><option value="Galoppo"><option value="Volteggio"><option value="Attacchi"><option value="Polo"><option value="Scuola"><option value="Passeggiata / trekking"><option value="Riproduzione"><option value="A riposo"></datalist>
+    <div class="grid grid-2">
       <div class="field"><label>Data di nascita</label><input class="input" id="cav-nascita" type="date"></div>
       <div class="field"><label>Microchip</label><input class="input" id="cav-microchip" placeholder="15 cifre"></div>
     </div>
@@ -10253,6 +10258,28 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			"PNY",
 			0,
 			["pony"]
+		],
+		[
+			"Asino",
+			"ASN",
+			0,
+			[
+				"asina",
+				"somaro",
+				"ciuco"
+			]
+		],
+		[
+			"Bardotto",
+			"BDT",
+			0,
+			["bardotta"]
+		],
+		[
+			"Mulo",
+			"MUL",
+			0,
+			["mula"]
 		]
 	].map(([nome, sigla, italiana, alias]) => ({
 		nome,
@@ -10459,6 +10486,10 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			proprietario: document.getElementById("cav-proprietario").value.trim() || null,
 			note: document.getElementById("cav-note").value.trim() || null
 		};
+		const vecchio = editingCavalloId ? cavalliList.find((x) => x.id === editingCavalloId) : null;
+		const sesso = document.getElementById("cav-sesso").value || null, attivita = document.getElementById("cav-attivita").value.trim().slice(0, 60) || null;
+		if (sesso || vecchio?.sesso) payload.sesso = sesso;
+		if (attivita || vecchio?.attivita) payload.attivita = attivita;
 		const fotoFile = document.getElementById("cav-foto-file").files[0] || null;
 		const codiceProprietario = document.getElementById("cav-codice-proprietario").value.trim().toUpperCase();
 		const saveBtn = document.getElementById("cavallo-save-btn");
@@ -11026,7 +11057,13 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			["Data di nascita", c.data_nascita ? formatDate(c.data_nascita) : "—"],
 			["Microchip", c.microchip || "—"],
 			["Gruppo sanguigno", c.gruppo_sanguigno || "—"],
-			["Proprietario", c.proprietario || "—"]
+			["Proprietario", c.proprietario || "—"],
+			["Sesso", {
+				femmina: "Femmina",
+				castrone: "Castrone",
+				stallone: "Stallone"
+			}[c.sesso] || "—"],
+			["Attività", c.attivita || "—"]
 		].forEach(([k, v], i) => {
 			const cx = L + i % 2 * 60, cy = y + Math.floor(i / 2) * 13;
 			doc.setFont("helvetica", "bold");
@@ -11216,6 +11253,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			document.getElementById("cav-tipo-proprieta").value = c?.tipo_proprieta || "proprieta";
 			razzaImposta("cav-razza", c?.razza || "");
 			document.getElementById("cav-mantello").value = c?.mantello || "";
+			document.getElementById("cav-sesso").value = c?.sesso || "";
+			document.getElementById("cav-attivita").value = c?.attivita || "";
 			document.getElementById("cav-nascita").value = c?.data_nascita || "";
 			document.getElementById("cav-microchip").value = c?.microchip || "";
 			document.getElementById("cav-gruppo-sanguigno").value = c?.gruppo_sanguigno || "";
@@ -11230,6 +11269,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			[
 				"cav-nome",
 				"cav-mantello",
+				"cav-sesso",
+				"cav-attivita",
 				"cav-nascita",
 				"cav-microchip",
 				"cav-gruppo-sanguigno",
@@ -11366,6 +11407,11 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		const sub = [
 			c.razza,
 			c.mantello,
+			{
+				femmina: "Femmina",
+				castrone: "Castrone",
+				stallone: "Stallone"
+			}[c.sesso] || null,
 			TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null,
 			c.proprietario ? "proprietario: " + c.proprietario : null
 		].filter(Boolean).join(" · ");
@@ -11374,7 +11420,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			c.codice_equo ? "Codice Equo: " + c.codice_equo : null,
 			c.data_nascita ? "Nato il " + formatDate(c.data_nascita) : null,
 			c.microchip ? "Microchip: " + c.microchip : null,
-			c.gruppo_sanguigno ? "Gruppo sanguigno: " + c.gruppo_sanguigno : null
+			c.gruppo_sanguigno ? "Gruppo sanguigno: " + c.gruppo_sanguigno : null,
+			c.attivita ? "Attività: " + c.attivita : null
 		].filter(Boolean).join(" · ");
 		document.getElementById("detail-cavallo-info").textContent = info;
 		const fotoEl = document.getElementById("detail-cavallo-foto");
@@ -11447,7 +11494,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			cavalliArrivi = demoState.arrivi || [];
 			return;
 		}
-		const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo";
+		const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita";
 		const [att, usc, arr] = await Promise.all([
 			sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).is("uscito_il", null).order("nome", { ascending: true }),
 			sb.from("scuderia_cavalli").select("id, nome, razza, proprietario, codice_equo, uscito_il, uscito_verso").eq("centro_id", currentCentro.id).not("uscito_il", "is", null).order("uscito_il", { ascending: false }).limit(50),

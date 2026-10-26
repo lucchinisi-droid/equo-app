@@ -241,6 +241,7 @@ async function generateSchedaPdf(c){
   const dati = [
     ["Data di nascita", c.data_nascita ? formatDate(c.data_nascita) : "—"], ["Microchip", c.microchip || "—"],
     ["Gruppo sanguigno", c.gruppo_sanguigno || "—"], ["Proprietario", c.proprietario || "—"],
+    ["Sesso", { femmina: "Femmina", castrone: "Castrone", stallone: "Stallone" }[c.sesso] || "—"], ["Attività", c.attivita || "—"],
   ];
   dati.forEach(([k, v], i) => {
     const cx = L + (i % 2) * 60, cy = y + Math.floor(i / 2) * 13;
@@ -339,6 +340,8 @@ function openCavalloForm(id){
     document.getElementById("cav-tipo-proprieta").value = c?.tipo_proprieta || "proprieta";
     razzaImposta("cav-razza", c?.razza || "");
     document.getElementById("cav-mantello").value = c?.mantello || "";
+    document.getElementById("cav-sesso").value = c?.sesso || "";
+    document.getElementById("cav-attivita").value = c?.attivita || "";
     document.getElementById("cav-nascita").value = c?.data_nascita || "";
     document.getElementById("cav-microchip").value = c?.microchip || "";
     document.getElementById("cav-gruppo-sanguigno").value = c?.gruppo_sanguigno || "";
@@ -350,7 +353,7 @@ function openCavalloForm(id){
     document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
     document.getElementById("cav-tipo-proprieta").value = "proprieta";
     razzaImposta("cav-razza", "");
-    ["cav-nome","cav-mantello","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
+    ["cav-nome","cav-mantello","cav-sesso","cav-attivita","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
     preview.innerHTML = "";
   }
   openModal("modal-cavallo");

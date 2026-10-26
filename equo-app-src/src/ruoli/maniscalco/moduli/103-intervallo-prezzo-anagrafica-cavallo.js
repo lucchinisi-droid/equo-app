@@ -176,7 +176,7 @@ function anagraficaRighe(cv){
   if(cv.mantello) r.push(["Mantello", cv.mantello]);
   if(cv.altezza_cm) r.push(["Altezza", cv.altezza_cm + " cm"]);
   if(cv.peso_kg) r.push(["Peso stimato", "≈ " + cv.peso_kg + " kg"]);
-  if(cv.disciplina) r.push(["Disciplina", cv.disciplina]);
+  if(cv.disciplina) r.push(["Attività", cv.disciplina]);
   if(cv.segni_particolari) r.push(["Segni particolari", cv.segni_particolari]);
   return r;
 }

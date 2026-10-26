@@ -4482,12 +4482,16 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
         <input class="input" id="horse-mantello" placeholder="es. Baio">
       </div>
       <div class="input-group">
+        <label class="input-label">Sesso (opzionale)</label>
+        <select class="input" id="horse-sesso">
+          <option value="">Non indicato</option><option value="femmina">Femmina</option><option value="castrone">Castrone</option><option value="stallone">Stallone</option>
+        </select>
+      </div>
+      <div class="input-group">
         <label class="input-label">Attività (opzionale)</label>
         <select class="input" id="horse-attivita" onchange="document.getElementById('horse-attivita-altro').style.display = this.value === '__altro' ? '' : 'none'">
           <option value="">Nessuna / non indicata</option>
-          <option>Salto ostacoli</option><option>Dressage</option><option>Completo</option><option>Endurance</option>
-          <option>Monta western</option><option>Trotto</option><option>Galoppo</option><option>Volteggio</option>
-          <option>Attacchi</option><option>Passeggiata / diporto</option><option value="__altro">Altro…</option>
+          <option>Salto ostacoli</option><option>Dressage</option><option>Completo</option><option>Endurance</option><option>Monta western</option><option>Monta da lavoro</option><option>Trotto</option><option>Galoppo</option><option>Volteggio</option><option>Attacchi</option><option>Polo</option><option>Scuola</option><option>Passeggiata / trekking</option><option>Riproduzione</option><option>A riposo</option><option value="__altro">Altro…</option>
         </select>
         <input class="input" id="horse-attivita-altro" placeholder="Scrivi l'attività" maxlength="60" style="display:none;margin-top:6px">
       </div>
@@ -6124,10 +6128,10 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     </div>
     <div class="input-group"><label class="input-label">Sesso</label>
       <div class="acav-sesso" id="acav-sesso"><button type="button" data-v="femmina" onclick="acavSesso('femmina')">Femmina</button><button type="button" data-v="castrone" onclick="acavSesso('castrone')">Castrone</button><button type="button" data-v="stallone" onclick="acavSesso('stallone')">Stallone</button></div></div>
-    <div class="input-group"><label class="input-label" for="acav-disciplina">Disciplina</label><input class="input" id="acav-disciplina" list="acav-discipline" maxlength="60" placeholder="Scegli o scrivi"></div>
+    <div class="input-group"><label class="input-label" for="acav-disciplina">Attività</label><input class="input" id="acav-disciplina" list="acav-discipline" maxlength="60" placeholder="Scegli o scrivi"></div>
     <div class="input-group"><label class="input-label" for="acav-segni">Segni particolari</label><textarea class="input" id="acav-segni" rows="2" maxlength="300" placeholder="es. stella in fronte, balzana posteriore sinistra"></textarea></div>
     <datalist id="acav-mantelli"><option value="Baio"><option value="Baio scuro"><option value="Sauro"><option value="Sauro bruciato"><option value="Grigio"><option value="Grigio pomellato"><option value="Grigio trotinato"><option value="Bianco"><option value="Morello"><option value="Roano"><option value="Pezzato"><option value="Palomino"><option value="Isabella"><option value="Cremello"><option value="Leardo"><option value="Falbo"><option value="Appaloosa"></datalist>
-    <datalist id="acav-discipline"><option value="Salto ostacoli"><option value="Dressage"><option value="Completo"><option value="Endurance"><option value="Western / Reining"><option value="Monta da lavoro"><option value="Trekking / passeggiata"><option value="Scuola"><option value="Attacchi"><option value="Trotto"><option value="Galoppo"><option value="Volteggio"><option value="Polo"><option value="A riposo"></datalist>
+    <datalist id="acav-discipline"><option value="Salto ostacoli"><option value="Dressage"><option value="Completo"><option value="Endurance"><option value="Monta western"><option value="Monta da lavoro"><option value="Trotto"><option value="Galoppo"><option value="Volteggio"><option value="Attacchi"><option value="Polo"><option value="Scuola"><option value="Passeggiata / trekking"><option value="Riproduzione"><option value="A riposo"></datalist>
     <div class="auth-error" id="acav-errore" style="display:none"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaAnagraficaCavallo(this)">Salva</button>
   </div>
@@ -7409,6 +7413,28 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			"PNY",
 			0,
 			["pony"]
+		],
+		[
+			"Asino",
+			"ASN",
+			0,
+			[
+				"asina",
+				"somaro",
+				"ciuco"
+			]
+		],
+		[
+			"Bardotto",
+			"BDT",
+			0,
+			["bardotta"]
+		],
+		[
+			"Mulo",
+			"MUL",
+			0,
+			["mula"]
 		]
 	].map(([nome, sigla, italiana, alias]) => ({
 		nome,
@@ -12535,7 +12561,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (cv.mantello) r.push(["Mantello", cv.mantello]);
 		if (cv.altezza_cm) r.push(["Altezza", cv.altezza_cm + " cm"]);
 		if (cv.peso_kg) r.push(["Peso stimato", "≈ " + cv.peso_kg + " kg"]);
-		if (cv.disciplina) r.push(["Disciplina", cv.disciplina]);
+		if (cv.disciplina) r.push(["Attività", cv.disciplina]);
 		if (cv.segni_particolari) r.push(["Segni particolari", cv.segni_particolari]);
 		return r;
 	}
@@ -27308,6 +27334,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 			razzaImposta("horse-breed", h?.breed || "");
 			document.getElementById("horse-mantello").value = h?.mantello || "";
 			attivitaImposta(h?.attivita || "");
+			document.getElementById("horse-sesso").value = h?.sesso || "";
 			document.getElementById("horse-birthdate").value = h?.birth_date || "";
 			document.getElementById("horse-microchip").value = h?.microchip || "";
 			document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
@@ -27323,13 +27350,20 @@ const mlSigla = k => String(k || "").toUpperCase();
 				"horse-note"
 			].forEach((id) => document.getElementById(id).value = "");
 			attivitaImposta("");
+			document.getElementById("horse-sesso").value = "";
 			razzaImposta("horse-breed", "");
 			document.getElementById("horse-tipo-proprieta").value = "proprieta";
 			document.getElementById("horse-condiviso").checked = true;
 		}
 		openModal("modal-add-horse");
 	}
+	var ATTIVITA_VECCHIE = {
+		"Passeggiata / diporto": "Passeggiata / trekking",
+		"Trekking / passeggiata": "Passeggiata / trekking",
+		"Western / Reining": "Monta western"
+	};
 	function attivitaImposta(v) {
+		v = ATTIVITA_VECCHIE[v] || v;
 		const sel = document.getElementById("horse-attivita"), alt = document.getElementById("horse-attivita-altro");
 		if (!sel) return;
 		const inElenco = [...sel.options].some((o) => o.value && o.value !== "__altro" && o.value === v);
@@ -27345,8 +27379,10 @@ const mlSigla = k => String(k || "").toUpperCase();
 	}
 	function raccogliDatiHorseForm() {
 		const att = attivitaValore(), prima = editingHorseId ? horses.find((x) => x.id === editingHorseId)?.attivita || null : null;
+		const sesso = document.getElementById("horse-sesso")?.value || "", sessoPrima = editingHorseId ? horses.find((x) => x.id === editingHorseId)?.sesso || null : null;
 		return {
 			...att || prima ? { attivita: att } : {},
+			...sesso || sessoPrima ? { sesso: sesso || null } : {},
 			name: document.getElementById("horse-name").value.trim(),
 			tipo_proprieta: document.getElementById("horse-tipo-proprieta").value,
 			breed: document.getElementById("horse-breed").value.trim() || null,
@@ -27424,6 +27460,12 @@ const mlSigla = k => String(k || "").toUpperCase();
 			["Codice Equo", h.codice_equo || "in assegnazione"],
 			["Razza", h.breed || "—"],
 			["Mantello", h.mantello || "—"],
+			["Sesso", {
+				femmina: "Femmina",
+				castrone: "Castrone",
+				stallone: "Stallone"
+			}[h.sesso] || "—"],
+			["Attività", h.attivita || "—"],
 			["Data di nascita", h.birth_date ? formatDate(h.birth_date) : "—"],
 			["Microchip", h.microchip || "Non inserito"],
 			["Gruppo sanguigno", h.gruppo_sanguigno || "—"],
