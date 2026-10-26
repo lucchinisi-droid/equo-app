@@ -1924,6 +1924,20 @@ body.ml-on .bottom-nav,body.ml-on .hm-flot,body.ml-on #ai-fab{visibility:hidden}
 .inc-cassa.verde .v{color:var(--green)} .inc-cassa.rosso .v{color:var(--red)}
 .inc-cassa .d{font-size:13px;color:var(--muted)}
 .inc-cassa .d.su{color:var(--green)} .inc-cassa .d.giu{color:var(--red)}
+.inc-cassa.oro .v{color:var(--accent)}
+:where(body:not(.pl-owner)) .inc-coppia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.inc-coppia .inc-cassa{margin-bottom:0;min-width:0;padding:13px 13px}
+.inc-coppia .inc-cassa.aperta{padding:12px 12px}
+.inc-coppia .inc-cassa .l{font-size:11px;letter-spacing:.05em}
+.inc-coppia .inc-cassa .v{font-size:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inc-coppia .inc-cassa .d{font-size:12px;line-height:1.35}
+.inc-nota-coppia{font-size:12px;color:var(--muted);margin:-2px 2px 10px;line-height:1.4}
+.inc-nota-coppia[hidden]{display:none}
+.inc-nota-coppia b{color:var(--red)}
+.inc-separa{display:flex;align-items:center;gap:8px;margin:16px 2px 8px;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.inc-separa::after{content:"";flex:1;border-top:1px solid var(--border)}
+.inc-voce .tag{font-size:11px;font-weight:800;white-space:nowrap}
+.inc-voce .tag.ok{color:var(--green)} .inc-voce .tag.no{color:var(--red)}
 .inc-det[hidden],#inc-semplice[hidden],#inc-completa[hidden]{display:none}
 :where(body:not(.pl-owner)) .inc-det{margin-bottom:6px}
 :where(body:not(.pl-owner)) .inc-stat-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -3934,7 +3948,15 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
         <label>Dal <input type="date" class="input" id="inc-dal" onchange="renderIncassiSaldati()"></label>
         <label>Al <input type="date" class="input" id="inc-al" onchange="renderIncassiSaldati()"></label>
       </div>
-      <button type="button" class="inc-cassa verde" id="inc-cassa-incassati" onclick="incApri('incassati')"></button>
+      <div class="inc-coppia">
+        <button type="button" class="inc-cassa oro" id="inc-cassa-guadagnato" onclick="incApri('guadagnato')"></button>
+        <button type="button" class="inc-cassa verde" id="inc-cassa-incassati" onclick="incApri('incassati')"></button>
+      </div>
+      <div class="inc-nota-coppia" id="inc-nota-coppia" hidden></div>
+      <div id="inc-det-guadagnato" class="inc-det" hidden>
+        <div class="card inc-card"><div class="inc-tit"><span>Lavori fatti nel periodo</span><span id="inc-fatti-n"></span></div><div id="inc-fatti"></div></div>
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin:0 2px 14px">«Guadagnato» conta il giorno del lavoro, pagato o no; «Incassato» conta il giorno in cui il cliente ha pagato.</div>
+      </div>
       <div id="inc-det-incassati" class="inc-det" hidden>
         <div class="inc-kpis" id="inc-kpis"></div>
         <div class="card inc-card" id="inc-grafico-card"><div class="inc-tit">Andamento</div><div class="inc-grafico" id="inc-grafico"></div></div>
@@ -3943,12 +3965,12 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
         <div class="card inc-card"><div class="inc-tit"><span>Pagati nel periodo</span><span id="inc-elenco-n"></span></div><div id="inc-elenco"></div></div>
         <div class="muted" style="font-size:11.5px;line-height:1.5;margin:0 2px 14px">Conta il giorno in cui il cliente ha pagato (registrato quando segni «Saldato»); per i lavori saldati prima del 9 ottobre 2026 vale il giorno del lavoro.</div>
       </div>
+      <div class="inc-separa"><span>In totale – Storico</span></div>
       <button type="button" class="inc-cassa rosso" id="inc-cassa-dasaldare" onclick="incApri('dasaldare')"></button>
       <div id="inc-det-dasaldare" class="inc-det" hidden>
         <div id="inc-conti-aperti"></div>
         <div class="card inc-card"><div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div></div>
       </div>
-      <div class="muted" style="font-size:11.5px;line-height:1.5;margin:2px 2px 14px">«Da incassare» non dipende dal periodo: è tutto quello che devi ancora riscuotere per lavori già fatti.</div>
     </div>
 
     <div id="inc-completa" hidden>
@@ -9327,6 +9349,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			prevNome: new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long" })
 		};
 	}
+	function incFattiTra(da, a) {
+		return incTutti.filter((i) => i.stato === "fatto" && i.data_intervento && i.data_intervento >= da && i.data_intervento <= a);
+	}
+	function incDiff(tot, totPrev, prevNome) {
+		const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
+		return diff === null ? "" : `<span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(prevNome)}`;
+	}
 	function incSaldatiTra(da, a) {
 		return incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => {
 			const g = giornoPagamento(i);
@@ -9406,13 +9435,31 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const lista = incSaldatiTra(r.da, r.a).sort((a, b) => giornoPagamento(b).localeCompare(giornoPagamento(a)));
 		const prev = incSaldatiTra(r.prevDa, r.prevA);
 		const tot = incSomma(lista), totPrev = incSomma(prev);
-		const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
 		const conImporto = lista.filter((i) => Number(i.importo) > 0);
+		const fatti = incFattiTra(r.da, r.a).sort((a, b) => (b.data_intervento + (b.ora || "")).localeCompare(a.data_intervento + (a.ora || "")));
+		const totFatti = incSomma(fatti), totFattiPrev = incSomma(incFattiTra(r.prevDa, r.prevA));
+		const fattiAperti = incSomma(fatti.filter((i) => i.stato_pagamento !== "saldato"));
+		const piu = (n, uno, tanti) => `${n} ${n === 1 ? uno : tanti}`;
+		const cGu = document.getElementById("inc-cassa-guadagnato");
+		cGu.classList.toggle("aperta", incAperta === "guadagnato");
+		cGu.setAttribute("aria-expanded", String(incAperta === "guadagnato"));
+		const dGu = incDiff(totFatti, totFattiPrev, r.prevNome);
+		cGu.innerHTML = `<span class="l"><span>Guadagnato · ${escapeHtml(r.nome)}</span><span>${incAperta === "guadagnato" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(totFatti)}</span>
+    <span class="d">${piu(fatti.length, "lavoro fatto", "lavori fatti")}${dGu ? "<br>" + dGu : ""}</span>`;
 		const cIn = document.getElementById("inc-cassa-incassati");
 		cIn.classList.toggle("aperta", incAperta === "incassati");
 		cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
-		cIn.innerHTML = `<span class="l"><span>Incassati · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
-    <span class="d">${lista.length} ${lista.length === 1 ? "lavoro pagato" : "lavori pagati"}${diff === null ? "" : ` · <span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(r.prevNome)}`}</span>`;
+		const dIn = incDiff(tot, totPrev, r.prevNome);
+		cIn.innerHTML = `<span class="l"><span>Incassato · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
+    <span class="d">${piu(lista.length, "lavoro pagato", "lavori pagati")}${dIn ? "<br>" + dIn : ""}</span>`;
+		const nota = document.getElementById("inc-nota-coppia");
+		nota.hidden = !(fattiAperti > 0);
+		nota.innerHTML = fattiAperti > 0 ? `Dei lavori del periodo, <b>${euroTondo(fattiAperti)}</b> ${fattiAperti === 1 ? "è" : "sono"} ancora da incassare.` : "";
+		document.getElementById("inc-det-guadagnato").hidden = incAperta !== "guadagnato";
+		document.getElementById("inc-fatti-n").textContent = fatti.length ? String(fatti.length) : "";
+		document.getElementById("inc-fatti").innerHTML = !fatti.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun lavoro fatto nel periodo.</div>" : fatti.map((i) => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "")} · ${formatDataBreve(i.data_intervento)} · ${i.stato_pagamento === "saldato" ? "<span class=\"tag ok\">pagato</span>" : "<span class=\"tag no\">da incassare</span>"}</span></div>
+        <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("");
 		document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
 		document.getElementById("inc-kpis").innerHTML = `
     <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>

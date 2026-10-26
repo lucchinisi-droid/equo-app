@@ -39,6 +39,12 @@ function incIntervallo(per){
   const pPrimo = isoLocale(new Date(y, m - 1, 1)), pUltimo = isoLocale(new Date(y, m, 0));
   return { da: primo, a: ultimo, prevDa: pPrimo, prevA: pUltimo, nome: new Date(y, m, 1).toLocaleDateString("it-IT", { month: "long" }), prevNome: new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long" }) };
 }
+// 26/10/2026: Guadagnato = lavori fatti nel periodo (giorno del lavoro), pagati o no
+function incFattiTra(da, a){ return incTutti.filter(i => i.stato === "fatto" && i.data_intervento && i.data_intervento >= da && i.data_intervento <= a); }
+function incDiff(tot, totPrev, prevNome){
+  const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
+  return diff === null ? "" : `<span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(prevNome)}`;
+}
 function incSaldatiTra(da, a){ return incTutti.filter(i => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => { const g = giornoPagamento(i); return g >= da && g <= a; })()); }
 const incSomma = l => l.reduce((t, i) => t + (Number(i.importo) || 0), 0);
 
@@ -108,13 +114,32 @@ function renderIncassiSaldati(){
   const lista = incSaldatiTra(r.da, r.a).sort((a, b) => giornoPagamento(b).localeCompare(giornoPagamento(a)));
   const prev = incSaldatiTra(r.prevDa, r.prevA);
   const tot = incSomma(lista), totPrev = incSomma(prev);
-  const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
   const conImporto = lista.filter(i => Number(i.importo) > 0);
+  const fatti = incFattiTra(r.da, r.a).sort((a, b) => (b.data_intervento + (b.ora || "")).localeCompare(a.data_intervento + (a.ora || "")));
+  const totFatti = incSomma(fatti), totFattiPrev = incSomma(incFattiTra(r.prevDa, r.prevA));
+  const fattiAperti = incSomma(fatti.filter(i => i.stato_pagamento !== "saldato"));
+  const piu = (n, uno, tanti) => `${n} ${n === 1 ? uno : tanti}`;
+  const cGu = document.getElementById("inc-cassa-guadagnato");
+  cGu.classList.toggle("aperta", incAperta === "guadagnato");
+  cGu.setAttribute("aria-expanded", String(incAperta === "guadagnato"));
+  const dGu = incDiff(totFatti, totFattiPrev, r.prevNome);
+  cGu.innerHTML = `<span class="l"><span>Guadagnato · ${escapeHtml(r.nome)}</span><span>${incAperta === "guadagnato" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(totFatti)}</span>
+    <span class="d">${piu(fatti.length, "lavoro fatto", "lavori fatti")}${dGu ? "<br>" + dGu : ""}</span>`;
   const cIn = document.getElementById("inc-cassa-incassati");
   cIn.classList.toggle("aperta", incAperta === "incassati");
   cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
-  cIn.innerHTML = `<span class="l"><span>Incassati · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
-    <span class="d">${lista.length} ${lista.length === 1 ? "lavoro pagato" : "lavori pagati"}${diff === null ? "" : ` · <span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(r.prevNome)}`}</span>`;
+  const dIn = incDiff(tot, totPrev, r.prevNome);
+  cIn.innerHTML = `<span class="l"><span>Incassato · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
+    <span class="d">${piu(lista.length, "lavoro pagato", "lavori pagati")}${dIn ? "<br>" + dIn : ""}</span>`;
+  const nota = document.getElementById("inc-nota-coppia");
+  nota.hidden = !(fattiAperti > 0);
+  nota.innerHTML = fattiAperti > 0 ? `Dei lavori del periodo, <b>${euroTondo(fattiAperti)}</b> ${fattiAperti === 1 ? "è" : "sono"} ancora da incassare.` : "";
+  document.getElementById("inc-det-guadagnato").hidden = incAperta !== "guadagnato";
+  document.getElementById("inc-fatti-n").textContent = fatti.length ? String(fatti.length) : "";
+  document.getElementById("inc-fatti").innerHTML = !fatti.length ? '<div class="muted" style="font-size:13px">Nessun lavoro fatto nel periodo.</div>'
+    : fatti.map(i => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "")} · ${formatDataBreve(i.data_intervento)} · ${i.stato_pagamento === "saldato" ? '<span class="tag ok">pagato</span>' : '<span class="tag no">da incassare</span>'}</span></div>
+        <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("");
   document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
   document.getElementById("inc-kpis").innerHTML = `
     <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>

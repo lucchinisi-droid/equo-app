@@ -11,6 +11,20 @@
 .inc-cassa.verde .v{color:var(--green)} .inc-cassa.rosso .v{color:var(--red)}
 .inc-cassa .d{font-size:13px;color:var(--muted)}
 .inc-cassa .d.su{color:var(--green)} .inc-cassa .d.giu{color:var(--red)}
+.inc-cassa.oro .v{color:var(--accent)}
+:where(body:not(.pl-owner)) .inc-coppia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.inc-coppia .inc-cassa{margin-bottom:0;min-width:0;padding:13px 13px}
+.inc-coppia .inc-cassa.aperta{padding:12px 12px}
+.inc-coppia .inc-cassa .l{font-size:11px;letter-spacing:.05em}
+.inc-coppia .inc-cassa .v{font-size:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inc-coppia .inc-cassa .d{font-size:12px;line-height:1.35}
+.inc-nota-coppia{font-size:12px;color:var(--muted);margin:-2px 2px 10px;line-height:1.4}
+.inc-nota-coppia[hidden]{display:none}
+.inc-nota-coppia b{color:var(--red)}
+.inc-separa{display:flex;align-items:center;gap:8px;margin:16px 2px 8px;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.inc-separa::after{content:"";flex:1;border-top:1px solid var(--border)}
+.inc-voce .tag{font-size:11px;font-weight:800;white-space:nowrap}
+.inc-voce .tag.ok{color:var(--green)} .inc-voce .tag.no{color:var(--red)}
 .inc-det[hidden],#inc-semplice[hidden],#inc-completa[hidden]{display:none}
 :where(body:not(.pl-owner)) .inc-det{margin-bottom:6px}
 :where(body:not(.pl-owner)) .inc-stat-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}

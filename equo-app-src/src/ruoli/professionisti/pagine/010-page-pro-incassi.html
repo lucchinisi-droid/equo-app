@@ -11,7 +11,15 @@
         <label>Dal <input type="date" class="input" id="inc-dal" onchange="renderIncassiSaldati()"></label>
         <label>Al <input type="date" class="input" id="inc-al" onchange="renderIncassiSaldati()"></label>
       </div>
-      <button type="button" class="inc-cassa verde" id="inc-cassa-incassati" onclick="incApri('incassati')"></button>
+      <div class="inc-coppia">
+        <button type="button" class="inc-cassa oro" id="inc-cassa-guadagnato" onclick="incApri('guadagnato')"></button>
+        <button type="button" class="inc-cassa verde" id="inc-cassa-incassati" onclick="incApri('incassati')"></button>
+      </div>
+      <div class="inc-nota-coppia" id="inc-nota-coppia" hidden></div>
+      <div id="inc-det-guadagnato" class="inc-det" hidden>
+        <div class="card inc-card"><div class="inc-tit"><span>Lavori fatti nel periodo</span><span id="inc-fatti-n"></span></div><div id="inc-fatti"></div></div>
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin:0 2px 14px">«Guadagnato» conta il giorno del lavoro, pagato o no; «Incassato» conta il giorno in cui il cliente ha pagato.</div>
+      </div>
       <div id="inc-det-incassati" class="inc-det" hidden>
         <div class="inc-kpis" id="inc-kpis"></div>
         <div class="card inc-card" id="inc-grafico-card"><div class="inc-tit">Andamento</div><div class="inc-grafico" id="inc-grafico"></div></div>
@@ -20,12 +28,12 @@
         <div class="card inc-card"><div class="inc-tit"><span>Pagati nel periodo</span><span id="inc-elenco-n"></span></div><div id="inc-elenco"></div></div>
         <div class="muted" style="font-size:11.5px;line-height:1.5;margin:0 2px 14px">Conta il giorno in cui il cliente ha pagato (registrato quando segni «Saldato»); per i lavori saldati prima del 9 ottobre 2026 vale il giorno del lavoro.</div>
       </div>
+      <div class="inc-separa"><span>In totale – Storico</span></div>
       <button type="button" class="inc-cassa rosso" id="inc-cassa-dasaldare" onclick="incApri('dasaldare')"></button>
       <div id="inc-det-dasaldare" class="inc-det" hidden>
         <div id="inc-conti-aperti"></div>
         <div class="card inc-card"><div id="incassi-da-saldare-list"><div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div></div></div>
       </div>
-      <div class="muted" style="font-size:11.5px;line-height:1.5;margin:2px 2px 14px">«Da incassare» non dipende dal periodo: è tutto quello che devi ancora riscuotere per lavori già fatti.</div>
     </div>
 
     <div id="inc-completa" hidden>
