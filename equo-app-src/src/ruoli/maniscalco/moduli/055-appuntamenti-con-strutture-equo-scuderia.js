@@ -8,6 +8,7 @@ import { AG_GIORNI, AG_MESI, agDescrizioneTipoPro, agLunedi, agNomeCavallo, rend
 import { richiesteCache, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agAttivaTrascina, agOrdinaGiro } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 import { pmPannelloGiorno } from "./111-promemoria-personali.js";
+import { cscRender } from "./115-cavalli-per-scadenza.js";
 /* ---------- APPUNTAMENTI CON STRUTTURE EQUO SCUDERIA (doppia conferma, più cavalli) ---------- */
 async function azioneGruppoStruttura(gruppoId, azione){
   const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: gruppoId, p_azione: azione });
@@ -34,6 +35,7 @@ async function apriPropostaStruttura(clienteId, preset){
   document.getElementById("prop-str-note").value = "";
   document.getElementById("prop-str-error").style.display = "none";
   const box = document.getElementById("prop-str-cavalli");
+  box.classList.remove("csc-on"); box._csc = null;
   box.innerHTML = '<div class="muted" style="font-size:13px">Caricamento…</div>';
   openModal("modal-proponi-struttura");
   const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
@@ -41,6 +43,10 @@ async function apriPropostaStruttura(clienteId, preset){
   box.innerHTML = cav.length
     ? cav.map(x => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? ' <span class="muted" style="font-size:11.5px">(inserito da te, non nella scheda della scuderia)</span>' : ""}</label>`).join("")
     : '<div class="muted" style="font-size:13px">La scuderia non ha ancora cavalli in scheda: l\'appuntamento sarà generico.</div>';
+  // 27/10/2026: con 4 o più cavalli, linea del tempo per scadenza (115-cavalli-per-scadenza.js)
+  if(cav.length >= 4) cscRender(box, cav.map(x => ({ key: x.id, id: x.id, nome: x.nome, sotto: x.in_scuderia === false ? "inserito da te" : "" })),
+    { chk: "prop-str-cav", preset: new Set([p.cavallo_cliente_id].concat(p.cavalli || []).filter(Boolean)), dataId: "prop-str-data", ancora: () => propStrutturaClienteId === clienteId })
+    .catch(e => console.warn("cavalli per scadenza:", e));
 }
 
 async function inviaPropostaStruttura(){

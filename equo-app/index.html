@@ -1692,6 +1692,51 @@ body.ai-aperta{overflow:hidden}
 :where(body.pl-owner) .ds-segm i.p{background:var(--green)}
 :where(body.pl-owner) .ds-piano small{font-size:12px;color:var(--muted)}
 :where(body.pl-owner) .ds-piano small.scad{color:var(--red);font-weight:700}
+
+/* 27/10/2026: scelta dei cavalli per scadenza (linea del tempo) — 115-cavalli-per-scadenza.js */
+:where(body:not(.pl-owner)) .int-cav-multi.csc-on{max-height:none;padding:10px;display:flex;flex-direction:column;gap:10px}
+:where(body:not(.pl-owner)) #prop-str-cavalli.csc-on{display:flex;flex-direction:column;gap:10px}
+.csc-on .csc-cont{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:var(--green);border-radius:14px;padding:8px}
+.csc-on .csc-cont span{display:flex;flex-direction:column;align-items:center;font-size:11px;color:#f5e8c9;line-height:1.2;text-align:center}
+.csc-on .csc-cont b{font-size:19px}
+.csc-on .csc-cont b.r{color:#f2a08f} .csc-on .csc-cont b.a{color:#f3c37a} .csc-on .csc-cont b.v{color:#a9d8b4}
+.csc-on .csc-rapidi{display:flex;flex-wrap:wrap;gap:6px}
+.csc-on .csc-rapidi:empty{display:none}
+.csc-on .csc-rapidi button{border:1.5px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:7px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.csc-on .csc-linea{display:flex;flex-direction:column}
+.csc-on .csc-segno{display:flex;align-items:center;gap:8px;padding:5px 0}
+.csc-on .csc-segno i{width:22px;display:grid;place-items:center}
+.csc-on .csc-segno i::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--c)}
+.csc-on .csc-segno span{flex:1;height:2px;background:var(--c);opacity:.45}
+.csc-on .csc-segno b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+.csc-on .csc-segno.oggi{--c:var(--green)} .csc-on .csc-segno.app{--c:var(--accent)}
+.csc-on .csc-gr{display:flex;gap:8px}
+.csc-on .csc-rail{width:22px;flex:none;display:flex;flex-direction:column;align-items:center;background:linear-gradient(var(--border),var(--border)) center/3px 100% no-repeat}
+.csc-on .csc-rail .csc-p{width:12px;height:12px;margin-top:16px;box-shadow:0 0 0 3px var(--surface)}
+.csc-on .csc-card{flex:1;min-width:0;margin:4px 0;border:1.5px solid var(--border);border-radius:16px;background:var(--card);padding:9px 10px;display:flex;flex-direction:column;gap:8px}
+.csc-on .csc-card:has(.csc-tutti.on){border-color:var(--green)}
+.csc-on .csc-t{display:flex;align-items:center;gap:8px}
+.csc-on .csc-t>span{flex:1;min-width:0;display:flex;flex-direction:column}
+.csc-on .csc-t b{font-size:13.5px}
+.csc-on .csc-t small{font-size:11.5px;font-weight:700}
+.csc-on small.r{color:#a33a26} .csc-on small.a{color:#8a520f} .csc-on small.v{color:#2a6b40}
+.csc-on .csc-tutti{border:none;background:var(--green);color:#fff;border-radius:11px;padding:7px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;flex:none}
+.csc-on .csc-tutti.on{background:color-mix(in srgb,var(--green) 12%,transparent);color:var(--green)}
+.csc-on .csc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.csc-on .csc-chip{position:relative;display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:5px 10px 5px 6px;font-size:13px;font-weight:700;cursor:pointer;max-width:100%}
+.csc-on .csc-chip small{font-weight:500;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csc-on .csc-chip input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.csc-on .csc-chip:has(input:focus-visible){outline:3px solid #e2ab45;outline-offset:2px}
+.csc-on .csc-chip:has(input:checked){background:var(--green);border-color:var(--green);color:#fff}
+.csc-on .csc-chip:has(input:checked) small{color:#e9f2ec}
+.csc-on .csc-chip.spento{opacity:.6}
+.csc-on .csc-chip.spento:has(input:checked){opacity:1}
+.csc-on .csc-p{width:16px;height:16px;border-radius:50%;flex:none;display:grid;place-items:center}
+.csc-on .csc-p.r{background:#b5432f} .csc-on .csc-p.a{background:#d07a1f} .csc-on .csc-p.v{background:#2f7a4a} .csc-on .csc-p.g{background:#9a8a66}
+.csc-on .csc-chip:has(input:checked) .csc-p::after{content:"";width:5px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.csc-on .csc-fuori{border:1px dashed var(--border);border-radius:14px;padding:9px 10px;display:flex;flex-direction:column;gap:6px}
+.csc-on .csc-fuori>b{font-size:13px} .csc-on .csc-fuori>span{font-size:11.5px;color:var(--muted);margin-top:-4px}
+.csc-on .int-cav.nuovo{border-bottom:0;padding:4px 2px}
 /* versione Semplice / Completa */
 body.vm-semplice .solo-completa{display:none!important}
 .vm-opz{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:16px;padding:12px;margin:0 0 10px;font:inherit;cursor:pointer}
@@ -13337,6 +13382,188 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (!r.error) pmAggiornaViste();
 		return r;
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/115-cavalli-per-scadenza.js
+	var CSC_SOGLIA = 10;
+	var CSC_FINESTRA = 7;
+	var CSC_MINIMO = 4;
+	var cscCache = {
+		t: 0,
+		richiami: [],
+		agenda: []
+	};
+	var cscOggi = () => isoLocale(/* @__PURE__ */ new Date());
+	var cscGiorni = (da, a) => Math.round((/* @__PURE__ */ new Date(a + "T12:00") - /* @__PURE__ */ new Date(da + "T12:00")) / 864e5);
+	var cscData = (iso) => {
+		const d = /* @__PURE__ */ new Date(iso + "T12:00");
+		return d.getDate() + " " + d.toLocaleDateString("it-IT", { month: "short" }).replace(".", "");
+	};
+	async function cscCarica() {
+		if (Date.now() - cscCache.t < 6e4) return cscCache;
+		const oggi = cscOggi();
+		let richiami = [], agenda = [];
+		try {
+			richiami = await DB.listRichiami(400);
+		} catch (e) {
+			richiami = [];
+		}
+		if (DEMO_MODE) agenda = (demoState.interventiMascalcia || []).filter((i) => [
+			"programmato",
+			"proposto",
+			"richiesto"
+		].includes(i.stato) && i.data_intervento >= oggi);
+		else {
+			const { data } = await sb.from("interventi_mascalcia").select("cavallo_cliente_id, horse_id, data_intervento, stato").eq("maniscalco_id", currentUser.id).in("stato", [
+				"programmato",
+				"proposto",
+				"richiesto"
+			]).gte("data_intervento", oggi).order("data_intervento", { ascending: true }).limit(1e3);
+			agenda = data || [];
+		}
+		cscCache = {
+			t: Date.now(),
+			richiami,
+			agenda
+		};
+		return cscCache;
+	}
+	function cscStessoCavallo(c, r) {
+		return r.cavallo_cliente_id && (r.cavallo_cliente_id === c.id || r.cavallo_cliente_id === c.cavalloClienteId) || r.horse_id && (r.horse_id === c.horse_id || c.tipo === "equo" && r.horse_id === c.id);
+	}
+	var cscSem = (g) => g == null ? "g" : g < 0 ? "r" : g <= CSC_SOGLIA ? "a" : "v";
+	function cscQuando(g, data) {
+		return g < 0 ? -g + (g === -1 ? " giorno fa" : " gg fa") : g === 0 ? "oggi" : g <= CSC_SOGLIA ? "tra " + g + " gg" : cscData(data);
+	}
+	async function cscRender(box, cavalli, opz) {
+		if (!box || !cavalli || cavalli.length < CSC_MINIMO) return false;
+		const { richiami, agenda } = await cscCarica();
+		if (!box.isConnected) return false;
+		const oggi = cscOggi();
+		const righe = cavalli.map((c) => {
+			const ag = agenda.filter((a) => cscStessoCavallo(c, a)).sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))[0];
+			const r = richiami.find((x) => cscStessoCavallo(c, x));
+			const scad = r ? r.scadenza || r.prossima_scadenza : null;
+			return {
+				...c,
+				agenda: ag ? ag.data_intervento : null,
+				scad,
+				g: scad ? cscGiorni(oggi, scad) : null
+			};
+		});
+		const conData = righe.filter((c) => !c.agenda && c.g != null).sort((a, b) => a.g - b.g || a.nome.localeCompare(b.nome, "it"));
+		const fuori = righe.filter((c) => c.agenda || c.g == null);
+		const gruppi = [];
+		conData.forEach((c) => {
+			const u = gruppi[gruppi.length - 1];
+			if (u && c.g - u[0].g <= CSC_FINESTRA) u.push(c);
+			else gruppi.push([c]);
+		});
+		const dataApp = document.getElementById(opz.dataId)?.value || "";
+		const gApp = dataApp && cscGiorni(oggi, dataApp) > 0 ? cscGiorni(oggi, dataApp) : null;
+		const nR = conData.filter((c) => c.g < 0).length, nA = conData.filter((c) => c.g >= 0 && c.g <= CSC_SOGLIA).length, nV = conData.length - nR - nA;
+		const chk = (c) => `<label class="csc-chip${c.agenda ? " spento" : ""}" data-g="${!c.agenda && c.g != null ? c.g : "x"}" title="${escapeHtml(c.nome)}${c.sotto ? " · " + escapeHtml(c.sotto) : ""}"><input type="checkbox" class="${opz.chk}" value="${escapeHtml(c.key)}"${opz.preset?.has(c.key) ? " checked" : ""} onchange="cscCambio(this)"><i class="csc-p ${c.agenda ? "g" : cscSem(c.g)}"></i>${escapeHtml(c.nome)}<small>${c.agenda ? "in agenda " + cscData(c.agenda) : c.g == null ? "senza scadenza" : cscQuando(c.g, c.scad)}${c.sotto ? " · " + escapeHtml(c.sotto) : ""}</small></label>`;
+		const segno = (testo, cls) => `<div class="csc-segno ${cls}"><i></i><span></span><b>${testo}</b></div>`;
+		let h = `<div class="csc-cont"><span><b class="r">${nR}</b>scaduti</span><span><b class="a">${nA}</b>entro ${CSC_SOGLIA} giorni</span><span><b class="v">${nV}</b>con tempo</span></div>
+    <div class="csc-rapidi">
+      ${nR ? `<button type="button" onclick="cscRapido(this,-1)">Scaduti · ${nR}</button>` : ""}
+      ${nA ? `<button type="button" onclick="cscRapido(this,${CSC_SOGLIA})">Scaduti + entro ${CSC_SOGLIA} giorni · ${nR + nA}</button>` : ""}
+      ${gApp != null && gApp >= 0 ? `<button type="button" onclick="cscRapido(this,${gApp + 3})">Entro il ${cscData(dataApp)} · ${conData.filter((c) => c.g <= gApp + 3).length}</button>` : ""}
+    </div><div class="csc-linea">`;
+		let oggiMesso = false, appMesso = gApp == null;
+		gruppi.forEach((l) => {
+			if (!oggiMesso && l[0].g >= 0) {
+				h += segno("Oggi · " + cscData(oggi), "oggi");
+				oggiMesso = true;
+			}
+			if (!appMesso && l[0].g > gApp) {
+				h += segno("Appuntamento · " + cscData(dataApp), "app");
+				appMesso = true;
+			}
+			const r = l.filter((c) => c.g < 0).length, a = l.filter((c) => c.g >= 0 && c.g <= CSC_SOGLIA).length, v = l.length - r - a;
+			const da = cscData(l[0].scad), a2 = cscData(l[l.length - 1].scad);
+			h += `<div class="csc-gr"><div class="csc-rail"><i class="csc-p ${cscSem(l[0].g)}"></i></div><div class="csc-card">
+      <div class="csc-t"><span><b>${da === a2 ? da : da + " – " + a2}</b><small class="${cscSem(l[0].g)}">${[
+				r ? r + (r === 1 ? " scaduto" : " scaduti") : "",
+				a ? a + " in scadenza" : "",
+				v ? v + " con tempo" : ""
+			].filter(Boolean).join(" · ")}</small></span>
+        <button type="button" class="csc-tutti" onclick="cscGruppo(this)">Prendi tutti ${l.length}</button></div>
+      <div class="csc-chips">${l.map(chk).join("")}</div></div></div>`;
+		});
+		if (!oggiMesso) h += segno("Oggi · " + cscData(oggi), "oggi");
+		if (!appMesso) h += segno("Appuntamento · " + cscData(dataApp), "app");
+		h += `</div>`;
+		if (fuori.length) h += `<div class="csc-fuori"><b>Fuori dalla linea</b><span>già in agenda o senza scadenza</span><div class="csc-chips">${fuori.sort((a, b) => (a.agenda ? 1 : 0) - (b.agenda ? 1 : 0) || a.nome.localeCompare(b.nome, "it")).map(chk).join("")}</div></div>`;
+		box.classList.add("csc-on");
+		box._csc = {
+			cavalli,
+			opz
+		};
+		box.dataset.cscCambio = opz.cambio || "";
+		box.dataset.cscChk = opz.chk;
+		box.innerHTML = h + (opz.coda || "");
+		cscAggiorna(box);
+		return true;
+	}
+	function cscBox(el) {
+		return el.closest(".csc-on");
+	}
+	function cscAggiorna(box) {
+		box.querySelectorAll(".csc-gr").forEach((g) => {
+			const cb = [...g.querySelectorAll("input[type=checkbox]")], tutti = cb.length && cb.every((x) => x.checked);
+			const b = g.querySelector(".csc-tutti");
+			if (b) {
+				b.textContent = tutti ? "Togli" : "Prendi tutti " + cb.length;
+				b.classList.toggle("on", tutti);
+			}
+		});
+	}
+	function cscAvvisa(box) {
+		cscAggiorna(box);
+		const fn = box.dataset.cscCambio;
+		if (fn && typeof window[fn] === "function") window[fn]();
+	}
+	function cscCambio(el) {
+		const box = cscBox(el);
+		if (box) cscAvvisa(box);
+	}
+	function cscGruppo(btn) {
+		const box = cscBox(btn), cb = [...btn.closest(".csc-gr").querySelectorAll("input[type=checkbox]")];
+		const tutti = cb.every((x) => x.checked);
+		cb.forEach((x) => {
+			x.checked = !tutti;
+		});
+		cscAvvisa(box);
+	}
+	function cscRapido(btn, lim) {
+		const box = cscBox(btn);
+		const cb = [...box.querySelectorAll(".csc-gr input[type=checkbox]")].filter((x) => {
+			const g = Number(x.closest(".csc-chip").dataset.g);
+			return Number.isFinite(g) && g <= lim;
+		});
+		const tutti = cb.length && cb.every((x) => x.checked);
+		cb.forEach((x) => {
+			x.checked = !tutti;
+		});
+		cscAvvisa(box);
+	}
+	function cscRidisegna(box) {
+		if (!box?._csc) return;
+		const sel = new Set([...box.querySelectorAll("input[type=checkbox]:checked")].map((x) => x.value));
+		cscRender(box, box._csc.cavalli, {
+			...box._csc.opz,
+			preset: sel
+		}).then((ok) => {
+			if (ok) {
+				const fn = box.dataset.cscCambio;
+				if (fn && typeof window[fn] === "function") window[fn]();
+			}
+		});
+	}
+	document.addEventListener("change", (e) => {
+		const id = e.target?.id;
+		if (id === "intervento-data") cscRidisegna(document.getElementById("intervento-cavalli-multi"));
+		else if (id === "prop-str-data") cscRidisegna(document.getElementById("prop-str-cavalli"));
+	});
 	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
 	async function azioneGruppoStruttura(gruppoId, azione) {
 		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
@@ -13368,11 +13595,24 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("prop-str-note").value = "";
 		document.getElementById("prop-str-error").style.display = "none";
 		const box = document.getElementById("prop-str-cavalli");
+		box.classList.remove("csc-on");
+		box._csc = null;
 		box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Caricamento…</div>";
 		openModal("modal-proponi-struttura");
 		const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
 		const cav = data || [];
 		box.innerHTML = cav.length ? cav.map((x) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? " <span class=\"muted\" style=\"font-size:11.5px\">(inserito da te, non nella scheda della scuderia)</span>" : ""}</label>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">La scuderia non ha ancora cavalli in scheda: l'appuntamento sarà generico.</div>";
+		if (cav.length >= 4) cscRender(box, cav.map((x) => ({
+			key: x.id,
+			id: x.id,
+			nome: x.nome,
+			sotto: x.in_scuderia === false ? "inserito da te" : ""
+		})), {
+			chk: "prop-str-cav",
+			preset: new Set([p.cavallo_cliente_id].concat(p.cavalli || []).filter(Boolean)),
+			dataId: "prop-str-data",
+			ancora: () => propStrutturaClienteId === clienteId
+		}).catch((e) => console.warn("cavalli per scadenza:", e));
 	}
 	async function inviaPropostaStruttura() {
 		const err = document.getElementById("prop-str-error");
@@ -16493,7 +16733,29 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		else if (cavalliClienteCorrente.length === 1) valore = cavalliClienteCorrente[0].key;
 		sel.value = valore;
 		const presetCavalli = new Set([valore].concat(interventoPreset?.cavalli || []).filter(Boolean));
+		multi.classList.remove("csc-on");
+		multi._csc = null;
 		multi.innerHTML = cavalliClienteCorrente.map((c) => `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}${c.proprietarioId ? " <small>· 👤 di " + escapeHtml(c.proprietarioNome) + "</small>" : ""}</span></label>`).join("") + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
+		if (!inMod && !isNuovo && cavalliClienteCorrente.length >= 4) {
+			const coda = multi.querySelector(".int-cav.nuovo")?.outerHTML || "";
+			cscRender(multi, cavalliClienteCorrente.map((c) => ({
+				key: c.key,
+				id: c.id,
+				horse_id: c.horse_id,
+				tipo: c.tipo,
+				nome: c.nome,
+				sotto: c.proprietarioId ? "di " + c.proprietarioNome : ""
+			})), {
+				chk: "int-cav-chk",
+				preset: presetCavalli,
+				dataId: "intervento-data",
+				cambio: "onCavalliMultiChange",
+				coda,
+				ancora: () => document.getElementById("intervento-cliente-select").value === clienteId
+			}).then((ok) => {
+				if (ok) toggleInterventoNuovoCavallo();
+			}).catch((e) => console.warn("cavalli per scadenza:", e));
+		}
 		if (inMod && mRif && interventoInModifica.numero_ferro) {
 			const usato = {
 				s: interventoInModifica.misura_sistema || "italiana",
@@ -21155,6 +21417,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		cscCambio,
+		cscGruppo,
+		cscRapido,
 		tcChiudi,
 		tcImpostaLettura,
 		tcLettura,

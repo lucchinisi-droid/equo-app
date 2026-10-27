@@ -13,6 +13,7 @@ import { formatDataBreve, testoRichiesta } from "./054-richieste-di-appuntamento
 import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { cercaClienteIntervento } from "./087-2-scelta-del-cliente-nell-appuntamento.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
+import { cscRender } from "./115-cavalli-per-scadenza.js";
 /* ---------- FERRO (standard nella scheda del cavallo) E QUANTITÀ (rotella 1-4) ---------- */
 let ferroOverride = {};      // chiave cavallo → { s, n, origine } ferro diverso solo per questo appuntamento
 let ferroEditKey = null;
@@ -271,9 +272,17 @@ async function onInterventoClienteChange(){
   }
   sel.value = valore;
   const presetCavalli = new Set([valore].concat(interventoPreset?.cavalli || []).filter(Boolean));
+  multi.classList.remove("csc-on"); multi._csc = null;
   multi.innerHTML = cavalliClienteCorrente.map(c =>
     `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}${c.proprietarioId ? " <small>· 👤 di " + escapeHtml(c.proprietarioNome) + "</small>" : ""}</span></label>`).join("")
     + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
+  // 27/10/2026: con 4 o più cavalli la lista diventa una linea del tempo per scadenza (115-cavalli-per-scadenza.js)
+  if(!inMod && !isNuovo && cavalliClienteCorrente.length >= 4){
+    const coda = multi.querySelector(".int-cav.nuovo")?.outerHTML || "";
+    cscRender(multi, cavalliClienteCorrente.map(c => ({ key: c.key, id: c.id, horse_id: c.horse_id, tipo: c.tipo, nome: c.nome, sotto: c.proprietarioId ? "di " + c.proprietarioNome : "" })),
+      { chk: "int-cav-chk", preset: presetCavalli, dataId: "intervento-data", cambio: "onCavalliMultiChange", coda, ancora: () => document.getElementById("intervento-cliente-select").value === clienteId })
+      .then(ok => { if(ok) toggleInterventoNuovoCavallo(); }).catch(e => console.warn("cavalli per scadenza:", e));
+  }
   // in modifica: il ferro salvato nell'appuntamento, se diverso dallo standard, resta «usato in questo appuntamento»
   if(inMod && mRif && interventoInModifica.numero_ferro){
     const usato = { s: interventoInModifica.misura_sistema || "italiana", n: String(interventoInModifica.numero_ferro), origine: "intervento" };
