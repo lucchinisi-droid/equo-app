@@ -27,7 +27,7 @@ let storicoClienteId = null;
 // da 040-home-pro-prossimi-appuntamenti-da-richia.js
 let hpAppuntamenti = [], hpRichiami = {}, hpRichiamiLista = [], hpRichiamoId = null, hpListaTipo = null, hpListaFiltro = "tutti";
 // da 047-incassi-saldati-per-periodo-da-saldare-p.js
-let incPeriodo = "mese", incTutti = [], incElencoTutto = false, incCavalli = [];
+let incPeriodo = "oggi", incTutti = [], incElencoTutto = false, incCavalli = [];
 // da 047-incassi-saldati-per-periodo-da-saldare-p.js
 let incVista = (() => { try { return localStorage.getItem("equo-inc-vista") || "semplice"; } catch(e){ return "semplice"; } })();
 // da 047-incassi-saldati-per-periodo-da-saldare-p.js

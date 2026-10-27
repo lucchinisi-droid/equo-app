@@ -106,7 +106,7 @@ async function renderIncassi(){
 
 function renderIncassiSaldati(){
   const prem = isPremium();
-  if(!prem && INC_PERIODI.find(p => p[0] === incPeriodo)?.[2]) incPeriodo = "mese";
+  if(!prem && INC_PERIODI.find(p => p[0] === incPeriodo)?.[2]) incPeriodo = "oggi";
   document.getElementById("inc-periodi").innerHTML = INC_PERIODI.map(([k, t, p]) =>
     `<button class="${incPeriodo === k ? "on" : ""}" onclick="sceltaPeriodoIncassi('${k}')">${t}${p && !prem ? ' <span class="inc-lucchetto" aria-label="Premium">🔒</span>' : ""}</button>`).join("");
   document.getElementById("inc-date").hidden = incPeriodo !== "date";

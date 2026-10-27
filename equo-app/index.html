@@ -6312,7 +6312,7 @@ let storicoClienteId = null;
 // da 040-home-pro-prossimi-appuntamenti-da-richia.js
 let hpAppuntamenti = [], hpRichiami = {}, hpRichiamiLista = [], hpRichiamoId = null, hpListaTipo = null, hpListaFiltro = "tutti";
 // da 047-incassi-saldati-per-periodo-da-saldare-p.js
-let incPeriodo = "mese", incTutti = [], incElencoTutto = false, incCavalli = [];
+let incPeriodo = "oggi", incTutti = [], incElencoTutto = false, incCavalli = [];
 // da 047-incassi-saldati-per-periodo-da-saldare-p.js
 let incVista = (() => { try { return localStorage.getItem("equo-inc-vista") || "semplice"; } catch(e){ return "semplice"; } })();
 // da 047-incassi-saldati-per-periodo-da-saldare-p.js
@@ -9454,7 +9454,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	function renderIncassiSaldati() {
 		const prem = isPremium();
-		if (!prem && INC_PERIODI.find((p) => p[0] === incPeriodo)?.[2]) incPeriodo = "mese";
+		if (!prem && INC_PERIODI.find((p) => p[0] === incPeriodo)?.[2]) incPeriodo = "oggi";
 		document.getElementById("inc-periodi").innerHTML = INC_PERIODI.map(([k, t, p]) => `<button class="${incPeriodo === k ? "on" : ""}" onclick="sceltaPeriodoIncassi('${k}')">${t}${p && !prem ? " <span class=\"inc-lucchetto\" aria-label=\"Premium\">🔒</span>" : ""}</button>`).join("");
 		document.getElementById("inc-date").hidden = incPeriodo !== "date";
 		const r = incIntervallo(incPeriodo);
