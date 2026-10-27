@@ -43,3 +43,13 @@
 .ric-imp-riga label{display:flex;align-items:center;gap:4px;flex-shrink:0;color:var(--muted)}
 .ric-imp-riga input{width:92px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;font:inherit;font-size:15px;text-align:right;background:var(--surface);color:var(--text)}
 .ric-imp-tot{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:6px;font-weight:800;font-size:14px}
+
+/* 27/10/2026: proprietario · «Da saldare» con acconti e rate */
+:where(body.pl-owner) .ds-acc{display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+:where(body.pl-owner) .ds-piano{margin:4px 0 8px;padding:9px 10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 9%,transparent);display:flex;flex-direction:column;gap:6px}
+:where(body.pl-owner) .ds-piano b{font-size:14px}
+:where(body.pl-owner) .ds-segm{display:flex;gap:4px}
+:where(body.pl-owner) .ds-segm i{flex:1;height:7px;border-radius:4px;background:color-mix(in srgb,var(--border) 80%,transparent)}
+:where(body.pl-owner) .ds-segm i.p{background:var(--green)}
+:where(body.pl-owner) .ds-piano small{font-size:12px;color:var(--muted)}
+:where(body.pl-owner) .ds-piano small.scad{color:var(--red);font-weight:700}

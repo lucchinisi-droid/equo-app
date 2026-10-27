@@ -1,21 +1,22 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { ContoDB, contoCodice, contoData, contoEuro, contoLavori } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
+import { pagCarica, pagHtmlConto, pagPagatoConto } from "./113-pagamenti-a-rate.js";
 /* ---- scheda cliente: pulsante + elenco dei conti ---- */
 async function caricaContiCliente(clienteId){
   const box = document.getElementById("cliente-conti-box");
   if(!box) return;
   if(incassiNascosti()){ box.innerHTML = ""; return; }
-  const lista = await ContoDB.lista(clienteId);
+  const [lista] = await Promise.all([ContoDB.lista(clienteId), pagCarica()]);
   if(currentClienteId !== clienteId) return;
-  const badge = s => s === "pagato" ? '<span class="badge badge-green">Pagato</span>' : s === "annullato" ? '<span class="badge" style="opacity:.7">Annullato</span>' : '<span class="badge badge-red">Da incassare</span>';
+  const badge = (s, id) => s === "pagato" ? '<span class="badge badge-green">Pagato</span>' : s === "annullato" ? '<span class="badge" style="opacity:.7">Annullato</span>' : pagPagatoConto(id) > 0 ? '<span class="badge" style="color:var(--accent)">Acconto</span>' : '<span class="badge badge-red">Da incassare</span>';
   box.innerHTML = `<div class="card" style="margin:14px 0">
     <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
       <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
     ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map(c => `
       <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
         <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
-        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato)}</div></div>
+        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato, c.id)}</div></div>
       </div>`).join("") : ""}
   </div>`;
 }
@@ -24,12 +25,12 @@ async function caricaContiCliente(clienteId){
 // 27/10/2026: elenco dei conti ancora da incassare, riusato in Incassi → Da incassare e in Agenda completa → Da saldare
 function htmlContiAperti(lista, conCliente){
   if(!lista || !lista.length) return "";
-  const tot = lista.reduce((t, c) => t + (Number(c.totale) || 0), 0);
+  const tot = lista.reduce((t, c) => t + Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)), 0);
   return `<div class="conti-aperti">
     <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
     ${lista.map(c => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
-      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small></span>
-      <span class="e">${contoEuro(c.totale)}<small>Apri</small></span></button>`).join("")}
+      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small>${pagHtmlConto(c)}</span>
+      <span class="e">${contoEuro(Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)))}<small>Apri</small></span></button>`).join("")}
   </div>`;
 }
 async function caricaContiAperti(boxId){

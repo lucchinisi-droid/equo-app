@@ -1682,6 +1682,16 @@ body.ai-aperta{overflow:hidden}
 .ric-imp-riga label{display:flex;align-items:center;gap:4px;flex-shrink:0;color:var(--muted)}
 .ric-imp-riga input{width:92px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;font:inherit;font-size:15px;text-align:right;background:var(--surface);color:var(--text)}
 .ric-imp-tot{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:6px;font-weight:800;font-size:14px}
+
+/* 27/10/2026: proprietario · «Da saldare» con acconti e rate */
+:where(body.pl-owner) .ds-acc{display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+:where(body.pl-owner) .ds-piano{margin:4px 0 8px;padding:9px 10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 9%,transparent);display:flex;flex-direction:column;gap:6px}
+:where(body.pl-owner) .ds-piano b{font-size:14px}
+:where(body.pl-owner) .ds-segm{display:flex;gap:4px}
+:where(body.pl-owner) .ds-segm i{flex:1;height:7px;border-radius:4px;background:color-mix(in srgb,var(--border) 80%,transparent)}
+:where(body.pl-owner) .ds-segm i.p{background:var(--green)}
+:where(body.pl-owner) .ds-piano small{font-size:12px;color:var(--muted)}
+:where(body.pl-owner) .ds-piano small.scad{color:var(--red);font-weight:700}
 /* versione Semplice / Completa */
 body.vm-semplice .solo-completa{display:none!important}
 .vm-opz{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:16px;padding:12px;margin:0 0 10px;font:inherit;cursor:pointer}
@@ -2022,6 +2032,41 @@ body.ml-on .bottom-nav,body.ml-on .hm-flot,body.ml-on #ai-fab{visibility:hidden}
 .inc-voce .imp{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 :where(body:not(.pl-owner)) .inc-vecchio{color:var(--red);font-weight:700}
 :where(body:not(.pl-owner)) .inc-saldato{flex:none}
+
+/* 27/10/2026: pagamenti in più volte (acconti e rate) — Incassi, conti e finestra «Registra pagamento» */
+:where(body:not(.pl-owner)) .pag-link{border:0;background:none;padding:2px 0;font:inherit;font-size:12px;font-weight:800;color:var(--accent);cursor:pointer;text-align:left}
+:where(body:not(.pl-owner)) .inc-voce .c .pag-link{display:block;margin-top:3px}
+.pag-barra{display:block;height:6px;border-radius:4px;background:color-mix(in srgb,var(--border) 70%,transparent);overflow:hidden;margin:5px 0 3px}
+.pag-barra i{display:block;height:100%;background:var(--green);border-radius:4px}
+:where(body:not(.pl-owner)) .pag-nota{display:block;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-scaduta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;padding:5px 8px;border-radius:9px;background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);font-size:11.5px;font-weight:700}
+:where(body:not(.pl-owner)) .pag-scaduta button{border:1.5px solid var(--red);background:none;color:var(--red);border-radius:8px;padding:3px 8px;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;flex:none}
+:where(body:not(.pl-owner)) .pag-conto{display:block;font-size:11.5px;color:var(--green);font-weight:700}
+:where(body:not(.pl-owner)) .pag-testa{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:4px;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-testa span{color:var(--muted);min-width:0}
+:where(body:not(.pl-owner)) .pag-imp{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+:where(body:not(.pl-owner)) .pag-chip{border:1.5px solid var(--border);background:var(--card);color:var(--text);border-radius:18px;padding:5px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+:where(body:not(.pl-owner)) .pag-chip.on{background:var(--green);border-color:var(--green);color:#fff}
+:where(body:not(.pl-owner)) .pag-blocco{margin-top:10px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);display:flex;flex-direction:column;gap:8px}
+:where(body:not(.pl-owner)) .pag-blocco-t{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+:where(body:not(.pl-owner)) .pag-blocco-t span{font-size:11.5px;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-p{margin:0;font-size:12.5px;line-height:1.45;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-rate{display:flex;flex-direction:column;gap:5px}
+:where(body:not(.pl-owner)) .pag-rate div{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:6px 9px;border-radius:9px;background:var(--card);font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-rate div.ok{color:var(--green)}
+:where(body:not(.pl-owner)) .pag-azioni-l{display:flex;gap:16px;flex-wrap:wrap}
+:where(body:not(.pl-owner)) .pag-righe{display:flex;flex-direction:column;gap:6px}
+:where(body:not(.pl-owner)) .pag-riga{display:grid;grid-template-columns:26px 1fr 1.3fr;gap:6px;align-items:center}
+:where(body:not(.pl-owner)) .pag-riga span{font-size:12px;font-weight:800;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-riga .input{padding:8px;font-size:14px;min-width:0}
+:where(body:not(.pl-owner)) .pag-somma{font-size:12.5px;font-weight:800}
+:where(body:not(.pl-owner)) .pag-somma.ok{color:var(--green)} :where(body:not(.pl-owner)) .pag-somma.no{color:var(--red)}
+:where(body:not(.pl-owner)) .pag-sez{margin:14px 0 4px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-storico div{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border);font-size:13px;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-storico span{flex:1;min-width:0;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-storico button{border:0;background:none;color:var(--muted);font-size:14px;padding:2px 4px;cursor:pointer}
+.inc-voce .tag.acc{color:var(--accent)}
 /* clienti a cartelle */
 :where(body:not(.pl-owner)) .cli-cartelle{display:flex;gap:2px;border-bottom:1.5px solid var(--border);overflow-x:auto;margin-bottom:6px}
 :where(body:not(.pl-owner)) .cli-cartelle button{font:inherit;font-size:14px;font-weight:800;border:none;background:none;color:var(--muted);padding:9px 10px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
@@ -6253,6 +6298,14 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     <div class="of-modal-tasti" id="of-modal-tasti"></div>
   </div>
 </div>
+<div class="modal-overlay" id="modal-pagamento" onclick="closeOut(event,'modal-pagamento')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-pagamento')" aria-label="Chiudi"><span class="fa-icon"><i class="fa-solid fa-xmark"></i></span></button>
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span id="pag-titolo">Registra pagamento</span></div>
+    <div id="pag-corpo"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -9236,6 +9289,554 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			return { error };
 		}
 	};
+	// equo-app-src/src/ruoli/maniscalco/moduli/113-pagamenti-a-rate.js
+	var PAG_MODI = [
+		["contanti", "Contanti"],
+		["bonifico", "Bonifico"],
+		["pos", "POS"],
+		["assegno", "Assegno"],
+		["altro", "Altro"]
+	];
+	var pagTranche = [];
+	var pagRate = [];
+	var pag = null;
+	var r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+	var pagEuro = (n) => (Number(n) || 0).toLocaleString("it-IT", {
+		style: "currency",
+		currency: "EUR",
+		maximumFractionDigits: r2(n) % 1 ? 2 : 0
+	});
+	var oggiIso$1 = () => isoLocale(/* @__PURE__ */ new Date());
+	var nomeModo = (k) => (PAG_MODI.find((m) => m[0] === k) || [k, k])[1];
+	async function pagCarica() {
+		if (DEMO_MODE) {
+			demoState.tranche = demoState.tranche || [];
+			demoState.rate = demoState.rate || [];
+			pagTranche = demoState.tranche;
+			pagRate = demoState.rate;
+			return;
+		}
+		if (!currentUser) return;
+		const [t, r] = await Promise.all([sb.from("incassi_tranche").select("*").eq("professionista_id", currentUser.id).order("pagato_il", { ascending: true }).limit(5e3), sb.from("incassi_rate").select("*").eq("professionista_id", currentUser.id).order("n", { ascending: true }).limit(2e3)]);
+		if (t.error && !/does not exist|schema cache/i.test(t.error.message || "")) console.warn("incassi_tranche:", t.error.message);
+		pagTranche = t.error ? [] : t.data || [];
+		pagRate = r.error ? [] : r.data || [];
+	}
+	function pagTrancheDi(interventoId) {
+		return pagTranche.filter((t) => t.intervento_id === interventoId);
+	}
+	function pagPagato(interventoId) {
+		return r2(pagTrancheDi(interventoId).reduce((s, t) => s + Number(t.importo), 0));
+	}
+	function pagResiduo(i) {
+		return Math.max(0, r2((Number(i?.importo) || 0) - pagPagato(i?.id)));
+	}
+	function pagPagatoConto(contoId) {
+		return r2(pagTranche.filter((t) => t.conto_id === contoId).reduce((s, t) => s + Number(t.importo), 0));
+	}
+	function pagRateDi(interventoId, contoId) {
+		return pagRate.filter((r) => interventoId ? r.intervento_id === interventoId : r.conto_id === contoId).sort((a, b) => a.n - b.n);
+	}
+	function pagPiano(rate, pagato) {
+		if (!rate || !rate.length) return null;
+		let cum = 0, pagate = 0, prossima = null;
+		for (const r of rate) {
+			cum = r2(cum + Number(r.importo));
+			if (cum <= pagato + .005) pagate++;
+			else if (!prossima) prossima = {
+				n: r.n,
+				importo: r2(cum - pagato),
+				scadenza: r.scadenza
+			};
+		}
+		return {
+			rate: rate.length,
+			pagate,
+			prossima
+		};
+	}
+	function pagPianoIntervento(i) {
+		return pagPiano(pagRateDi(i.id), pagPagato(i.id));
+	}
+	function pagPianoConto(c) {
+		return pagPiano(pagRateDi(null, c.id), pagPagatoConto(c.id));
+	}
+	function pagVociIncasso(lista) {
+		const perInt = /* @__PURE__ */ new Map();
+		pagTranche.forEach((t) => {
+			if (!perInt.has(t.intervento_id)) perInt.set(t.intervento_id, []);
+			perInt.get(t.intervento_id).push(t);
+		});
+		const out = [];
+		(lista || []).forEach((i) => {
+			const tr = perInt.get(i.id) || [];
+			tr.forEach((t) => out.push({
+				...i,
+				importo: Number(t.importo),
+				_giorno: t.pagato_il,
+				_tranche: t
+			}));
+			if (i.stato === "fatto" && i.stato_pagamento === "saldato") {
+				if (!tr.length) out.push(i);
+				else {
+					const resto = r2((Number(i.importo) || 0) - tr.reduce((s, t) => s + Number(t.importo), 0));
+					if (resto > .005) out.push({
+						...i,
+						importo: resto,
+						_resto: true
+					});
+				}
+			}
+		});
+		return out;
+	}
+	function pagHtmlLavoro(i) {
+		const pagato = pagPagato(i.id), tot = Number(i.importo) || 0, piano = pagPianoIntervento(i);
+		let h = `<button type="button" class="pag-link" onclick="pagApri('${i.id}')">${pagato > 0 || piano ? "Pagamenti e rate" : "Acconto o rate"} ›</button>`;
+		if (pagato > 0 && tot > 0) h += `<span class="pag-barra" role="progressbar" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${pagato}"><i style="width:${Math.min(100, pagato / tot * 100).toFixed(1)}%"></i></span>
+    <span class="pag-nota">Acconto: pagati ${pagEuro(pagato)} di ${pagEuro(tot)}${piano ? ` · ${piano.pagate} ${piano.pagate === 1 ? "rata" : "rate"} su ${piano.rate}` : ""}</span>`;
+		else if (piano) h += `<span class="pag-nota">${piano.rate} rate · nessuna ancora pagata</span>`;
+		if (piano?.prossima) h += pagHtmlProssima(piano.prossima, `'${i.id}', null`);
+		return h;
+	}
+	function pagHtmlProssima(p, args) {
+		const oggi = oggiIso$1();
+		if (p.scadenza < oggi) {
+			const gg = Math.round((/* @__PURE__ */ new Date(oggi + "T12:00") - /* @__PURE__ */ new Date(p.scadenza + "T12:00")) / 864e5);
+			return `<span class="pag-scaduta"><span>Rata ${p.n} scaduta da ${gg} ${gg === 1 ? "giorno" : "giorni"} · ${pagEuro(p.importo)}</span><button type="button" onclick="pagSollecita(${args}, this)">Promemoria</button></span>`;
+		}
+		return `<span class="pag-nota">Prossima rata: ${pagEuro(p.importo)} entro il ${formatDataBreve(p.scadenza)}</span>`;
+	}
+	function pagHtmlConto(c) {
+		const pagato = pagPagatoConto(c.id), piano = pagPianoConto(c);
+		if (!(pagato > 0) && !piano) return "";
+		const tot = Number(c.totale) || 0;
+		return `<small class="pag-conto">${pagato > 0 ? `Pagati ${pagEuro(pagato)} di ${pagEuro(tot)}` : ""}${pagato > 0 && piano ? " · " : ""}${piano ? `${piano.pagate} rate su ${piano.rate}${piano.prossima ? " · prossima " + formatDataBreve(piano.prossima.scadenza) : ""}` : ""}</small>`;
+	}
+	async function pagApri(interventoId, contoId) {
+		await pagCarica();
+		let t;
+		if (contoId) {
+			const c = await ContoDB.completo(contoId);
+			if (!c) {
+				showToast("Conto non trovato");
+				return;
+			}
+			const pagato = pagPagatoConto(c.id);
+			t = {
+				tipo: "conto",
+				id: c.id,
+				titolo: "Conto " + contoCodice(c),
+				sotto: (clientiMascalcia.find((x) => x.id === c.cliente_mascalcia_id)?.nome || "") + " · " + c.n_lavori + (c.n_lavori === 1 ? " lavoro" : " lavori"),
+				totale: Number(c.totale) || 0,
+				pagato,
+				residuo: Math.max(0, r2((Number(c.totale) || 0) - pagato)),
+				aperto: c.stato === "da_incassare",
+				storico: pagStorico(pagTranche.filter((x) => x.conto_id === c.id)),
+				rate: pagRateDi(null, c.id)
+			};
+		} else {
+			const i = (incTutti || []).find((x) => x.id === interventoId) || await pagLeggiIntervento(interventoId);
+			if (!i) {
+				showToast("Lavoro non trovato");
+				return;
+			}
+			if (!(Number(i.importo) > 0)) {
+				showToast("Scrivi prima l'importo del lavoro");
+				return;
+			}
+			const pagato = pagPagato(i.id);
+			t = {
+				tipo: "lavoro",
+				id: i.id,
+				titolo: [i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · ") || "Lavoro",
+				sotto: (i.clienti_mascalcia?.nome || clientiMascalcia.find((x) => x.id === i.cliente_mascalcia_id)?.nome || "") + " · " + formatDataBreve(i.data_intervento),
+				totale: Number(i.importo),
+				pagato,
+				residuo: pagResiduo(i),
+				aperto: i.stato_pagamento !== "saldato",
+				storico: pagStorico(pagTrancheDi(i.id)),
+				rate: pagRateDi(i.id)
+			};
+		}
+		const piano = pagPiano(t.rate, t.pagato);
+		pag = {
+			t,
+			importo: piano?.prossima ? Math.min(piano.prossima.importo, t.residuo) : t.residuo,
+			data: oggiIso$1(),
+			modo: "contanti",
+			nota: "",
+			rateAperte: false,
+			nRate: 2,
+			righe: null
+		};
+		pagRender();
+		openModal("modal-pagamento");
+	}
+	async function pagLeggiIntervento(id) {
+		if (DEMO_MODE) return (demoState.interventiMascalcia || []).find((x) => x.id === id) || null;
+		const { data } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)").eq("id", id).maybeSingle();
+		return data || null;
+	}
+	function pagStorico(lista) {
+		const g = /* @__PURE__ */ new Map();
+		lista.forEach((x) => {
+			const k = x.gruppo || x.id;
+			if (!g.has(k)) g.set(k, {
+				gruppo: k,
+				importo: 0,
+				pagato_il: x.pagato_il,
+				modo: x.modo,
+				nota: x.nota
+			});
+			g.get(k).importo = r2(g.get(k).importo + Number(x.importo));
+		});
+		return [...g.values()].sort((a, b) => a.pagato_il.localeCompare(b.pagato_il));
+	}
+	function pagDividi(totale, n, primaData) {
+		const base = Math.floor(totale / n * 100) / 100, righe = [];
+		for (let k = 0; k < n; k++) righe.push({
+			importo: k === n - 1 ? r2(totale - base * (n - 1)) : base,
+			scadenza: pagMesiDopo(primaData, k)
+		});
+		return righe;
+	}
+	function pagMesiDopo(iso, n) {
+		const d = /* @__PURE__ */ new Date(iso + "T12:00");
+		const g = d.getDate();
+		d.setDate(1);
+		d.setMonth(d.getMonth() + n);
+		d.setDate(Math.min(g, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+		return isoLocale(d);
+	}
+	function pagRestoDopo() {
+		return Math.max(0, r2(pag.t.residuo - (Number(pag.importo) || 0)));
+	}
+	function pagRender() {
+		const t = pag.t, el = document.getElementById("pag-corpo");
+		document.getElementById("pag-titolo").textContent = t.titolo;
+		const piano = pagPiano(t.rate, t.pagato);
+		const chip = (on, onclick, testo) => `<button type="button" class="pag-chip${on ? " on" : ""}" onclick="${onclick}">${testo}</button>`;
+		let h = `<div class="pag-testa"><span>${escapeHtml(t.sotto)}</span><b>Totale ${pagEuro(t.totale)}</b></div>`;
+		if (t.pagato > 0) h += `<div class="pag-testa"><span>Già pagati ${pagEuro(t.pagato)}</span><b>Restano ${pagEuro(t.residuo)}</b></div>
+    <span class="pag-barra"><i style="width:${Math.min(100, t.pagato / (t.totale || 1) * 100).toFixed(1)}%"></i></span>`;
+		if (t.aperto && t.residuo > 0) {
+			h += `<div class="input-group"><label class="input-label" for="pag-importo">Importo ricevuto</label>
+        <input class="input pag-imp" id="pag-importo" type="number" inputmode="decimal" min="0" step="0.01" value="${pag.importo}" oninput="pagImporto(this.value)">
+        <div class="pag-chips">${chip(false, `pagImporto(${t.residuo}, true)`, "Tutto · " + pagEuro(t.residuo))}${piano?.prossima && piano.prossima.importo < t.residuo ? chip(false, `pagImporto(${piano.prossima.importo}, true)`, `Rata ${piano.prossima.n} · ${pagEuro(piano.prossima.importo)}`) : ""}${chip(false, `pagImporto(${r2(t.residuo / 2)}, true)`, "Metà")}</div></div>
+      <div class="input-row-2">
+        <div class="input-group"><label class="input-label" for="pag-data">Giorno del pagamento</label><input class="input" id="pag-data" type="date" value="${pag.data}" max="${oggiIso$1()}" onchange="pagSet('data',this.value)"></div>
+        <div class="input-group"><label class="input-label" for="pag-nota">Nota</label><input class="input" id="pag-nota" maxlength="200" placeholder="facoltativa" value="${escapeHtml(pag.nota)}" oninput="pagSet('nota',this.value)"></div>
+      </div>
+      <div class="input-group"><span class="input-label">Modalità</span><div class="pag-chips">${PAG_MODI.map(([k, n]) => chip(pag.modo === k, `pagSet('modo','${k}',true)`, n)).join("")}</div></div>`;
+			h += `<div class="pag-blocco"><div class="pag-blocco-t"><b>Rate</b><span>facoltative, non vincolanti</span></div>`;
+			if (!pag.rateAperte) h += piano ? `<div class="pag-rate">${t.rate.map((r, k) => `<div class="${k < piano.pagate ? "ok" : ""}"><span>${k < piano.pagate ? "✓ " : ""}Rata ${r.n} · ${formatDataBreve(r.scadenza)}</span><b>${pagEuro(r.importo)}</b></div>`).join("")}</div>
+          <div class="pag-azioni-l"><button type="button" class="pag-link" onclick="pagApriRate()">Cambia le rate</button><button type="button" class="pag-link" onclick="pagTogliRate()">Togli le rate</button></div>` : `<p class="pag-p">Puoi dividere quello che resta in più rate con le loro scadenze: le vedi in Incassi e ricevi l'avviso se una scade.</p>
+          <button type="button" class="btn btn-outline btn-sm" onclick="pagApriRate()">Dividi in rate</button>`;
+			else {
+				const resto = pagRestoDopo(), somma = r2(pag.righe.reduce((s, r) => s + (Number(r.importo) || 0), 0));
+				const giaDopo = r2(t.pagato + (Number(pag.importo) || 0));
+				h += `<p class="pag-p">${giaDopo > 0 ? `Quello già pagato (${pagEuro(giaDopo)}${Number(pag.importo) > 0 ? ", compreso questo pagamento" : ""}) conta come prima rata. ` : ""}Dividi i <b>${pagEuro(resto)}</b> che restano:</p>
+        <div class="input-group"><label class="input-label" for="pag-n">Numero di rate</label><select class="input" id="pag-n" onchange="pagNumeroRate(this.value)">${[
+					1,
+					2,
+					3,
+					4,
+					5,
+					6
+				].map((n) => `<option value="${n}"${n === pag.nRate ? " selected" : ""}>${n}</option>`).join("")}</select></div>
+        <div class="pag-righe">${pag.righe.map((r, k) => `<div class="pag-riga"><span>${k + 1}ª</span>
+          <input class="input" aria-label="Importo rata ${k + 1}" type="number" step="0.01" min="0" value="${r.importo}" oninput="pagRiga(${k},'importo',this.value)">
+          <input class="input" aria-label="Scadenza rata ${k + 1}" type="date" value="${r.scadenza}" onchange="pagRiga(${k},'scadenza',this.value)"></div>`).join("")}</div>
+        <div class="pag-somma ${Math.abs(somma - resto) < .01 ? "ok" : "no"}" id="pag-somma">${pagTestoSomma(somma, resto)}</div>
+        <div class="pag-azioni-l"><button type="button" class="pag-link" onclick="pagNumeroRate()">Ricalcola</button><button type="button" class="pag-link" onclick="pagSet('rateAperte',false,true)">Lascia stare le rate</button></div>`;
+			}
+			h += `</div>
+      <button type="button" class="btn btn-primary" id="pag-registra" style="width:100%;margin-top:12px" onclick="pagRegistra()">${pagTestoRegistra()}</button>
+      ${pag.rateAperte ? `<button type="button" class="btn btn-outline" style="width:100%;margin-top:8px" onclick="pagSalvaSoloRate()">Salva solo le rate, senza pagamento</button>` : ""}`;
+		} else h += `<p class="pag-p" style="margin-top:10px">${t.aperto ? "Niente da incassare." : "Già saldato."}</p>`;
+		if (t.storico.length) h += `<div class="pag-sez">Pagamenti ricevuti</div><div class="pag-storico">${t.storico.map((s) => `<div><span>${formatDataBreve(s.pagato_il)} · ${escapeHtml(nomeModo(s.modo))}${s.nota ? " · " + escapeHtml(s.nota) : ""}</span><b>${pagEuro(s.importo)}</b>
+      <button type="button" aria-label="Elimina questo pagamento" title="Elimina questo pagamento" onclick="pagElimina('${s.gruppo}')">✕</button></div>`).join("")}</div>`;
+		el.innerHTML = h;
+	}
+	function pagTestoSomma(somma, resto) {
+		return Math.abs(somma - resto) < .01 ? `Somma delle rate: ${pagEuro(somma)} ✓` : `Somma delle rate ${pagEuro(somma)} su ${pagEuro(resto)} che restano`;
+	}
+	function pagTestoRegistra() {
+		const v = Number(pag.importo) || 0;
+		if (v <= 0) return pag.rateAperte ? "Salva le rate" : "Scrivi l'importo ricevuto";
+		return v >= pag.t.residuo - .005 ? `Registra ${pagEuro(v)} · saldato` : `Registra ${pagEuro(v)}`;
+	}
+	function pagSet(campo, v, ridisegna) {
+		pag[campo] = v;
+		if (ridisegna) pagRender();
+	}
+	function pagImporto(v, ridisegna) {
+		pag.importo = r2(Math.max(0, Number(String(v).replace(",", ".")) || 0));
+		if (ridisegna || pag.rateAperte) {
+			if (pag.rateAperte) pag.righe = pagDividi(pagRestoDopo(), pag.nRate, pagMesiDopo(pag.data, 1));
+			pagRender();
+			return;
+		}
+		const b = document.getElementById("pag-registra");
+		if (b) b.textContent = pagTestoRegistra();
+	}
+	function pagApriRate() {
+		const resto = pagRestoDopo();
+		if (resto <= 0) {
+			showToast("Con questo pagamento il lavoro è saldato: non restano rate da fare");
+			return;
+		}
+		pag.rateAperte = true;
+		pag.nRate = pag.nRate || 2;
+		pag.righe = pagDividi(resto, pag.nRate, pagMesiDopo(pag.data, 1));
+		pagRender();
+	}
+	function pagNumeroRate(n) {
+		pag.nRate = Math.max(1, Math.min(6, Number(n ?? pag.nRate) || 2));
+		pag.righe = pagDividi(pagRestoDopo(), pag.nRate, pag.righe?.[0]?.scadenza || pagMesiDopo(pag.data, 1));
+		pagRender();
+	}
+	function pagRiga(k, campo, v) {
+		pag.righe[k][campo] = campo === "importo" ? r2(Number(String(v).replace(",", ".")) || 0) : v;
+		if (campo === "scadenza") return;
+		const resto = pagRestoDopo(), somma = r2(pag.righe.reduce((s, r) => s + (Number(r.importo) || 0), 0)), el = document.getElementById("pag-somma");
+		if (el) {
+			el.textContent = pagTestoSomma(somma, resto);
+			el.className = "pag-somma " + (Math.abs(somma - resto) < .01 ? "ok" : "no");
+		}
+	}
+	function pagPianoDaSalvare(conPagamento) {
+		const gia = r2(pag.t.pagato + (conPagamento ? Number(pag.importo) || 0 : 0));
+		const righe = pag.righe.filter((r) => Number(r.importo) > 0 && r.scadenza).map((r) => ({
+			importo: r2(r.importo),
+			scadenza: r.scadenza
+		}));
+		return (gia > 0 ? [{
+			importo: gia,
+			scadenza: conPagamento && Number(pag.importo) > 0 ? pag.data : pag.t.storico[pag.t.storico.length - 1]?.pagato_il || oggiIso$1()
+		}] : []).concat(righe);
+	}
+	async function pagRegistra() {
+		const v = r2(pag.importo);
+		if (v <= 0 && !pag.rateAperte) {
+			showToast("Scrivi l'importo ricevuto");
+			return;
+		}
+		if (v > pag.t.residuo + .005) {
+			showToast(`L'importo supera quanto resta (${pagEuro(pag.t.residuo)})`);
+			return;
+		}
+		if (pag.data > oggiIso$1()) {
+			showToast("Il giorno del pagamento è nel futuro");
+			return;
+		}
+		const b = document.getElementById("pag-registra");
+		if (b) b.disabled = true;
+		try {
+			if (pag.rateAperte) {
+				const e = await PagDB.salvaRate(pag.t, pagPianoDaSalvare(v > 0));
+				if (e) throw e;
+			}
+			let saldato = false;
+			if (v > 0) {
+				const { data, error } = await PagDB.registra(pag.t, v, pag.data, pag.modo, pag.nota);
+				if (error) throw error;
+				saldato = !!data?.saldato;
+			}
+			closeModal("modal-pagamento");
+			showToast(v <= 0 ? "Rate salvate" : saldato ? "Pagamento registrato: saldato" : `Registrati ${pagEuro(v)} · restano ${pagEuro(r2(pag.t.residuo - v))}`);
+			await pagDopo();
+		} catch (e) {
+			if (b) b.disabled = false;
+			showToast(pagErrore(e));
+		}
+	}
+	async function pagSalvaSoloRate() {
+		const e = await PagDB.salvaRate(pag.t, pagPianoDaSalvare(false));
+		if (e) {
+			showToast(pagErrore(e));
+			return;
+		}
+		closeModal("modal-pagamento");
+		showToast("Rate salvate");
+		await pagDopo();
+	}
+	async function pagTogliRate() {
+		if (!await chiediSiNo("Togliere le rate?", "I pagamenti già registrati restano; spariscono solo le scadenze.")) return;
+		const e = await PagDB.salvaRate(pag.t, []);
+		if (e) {
+			showToast(pagErrore(e));
+			return;
+		}
+		showToast("Rate tolte");
+		await pagCarica();
+		pag.t.rate = [];
+		pagRender();
+		pagDopo();
+	}
+	async function pagElimina(gruppo) {
+		if (!await chiediSiNo("Eliminare questo pagamento?", "Usalo solo se l'hai registrato per sbaglio: l'importo torna da incassare.")) return;
+		const e = await PagDB.elimina(gruppo);
+		if (e) {
+			showToast(pagErrore(e));
+			return;
+		}
+		closeModal("modal-pagamento");
+		showToast("Pagamento eliminato");
+		await pagDopo();
+	}
+	async function pagSollecita(interventoId, contoId, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await PagDB.sollecita(interventoId, contoId);
+		if (error) {
+			if (btn) btn.disabled = false;
+			showToast(pagErrore(error));
+			return;
+		}
+		showToast(data?.ok ? "Promemoria mandato in chat al cliente" : "Il cliente non è su Equo: ricordaglielo tu (WhatsApp o telefono)");
+	}
+	function pagErrore(e) {
+		const m = String(e?.message || e || "");
+		if (/equo_registra_pagamento|equo_salva_rate|incassi_tranche|could not find the function/i.test(m)) return "Manca un aggiornamento del database: avvisa l'assistenza Equo.";
+		return m ? m.replace(/^.*?ERROR:\s*/, "") : "Non riuscito, riprova.";
+	}
+	async function pagDopo() {
+		await pagCarica();
+		if (typeof renderIncassi$1 === "function") await renderIncassi$1();
+		if (currentClienteId) {
+			caricaContiCliente(currentClienteId);
+			loadClienteInterventi(currentClienteId);
+		}
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	var PagDB = {
+		async registra(t, importo, data, modo, nota) {
+			if (DEMO_MODE) return pagDemoRegistra(t, importo, data, modo, nota);
+			const { data: d, error } = await sb.rpc("equo_registra_pagamento", {
+				p_intervento: t.tipo === "lavoro" ? t.id : null,
+				p_conto: t.tipo === "conto" ? t.id : null,
+				p_importo: importo,
+				p_data: data,
+				p_modo: modo,
+				p_nota: nota || null
+			});
+			if (error) console.error("equo_registra_pagamento:", error);
+			return {
+				data: d,
+				error
+			};
+		},
+		async salvaRate(t, rate) {
+			if (DEMO_MODE) {
+				demoState.rate = (demoState.rate || []).filter((r) => t.tipo === "lavoro" ? r.intervento_id !== t.id : r.conto_id !== t.id);
+				rate.forEach((r, k) => demoState.rate.push({
+					id: "dr-" + Date.now().toString(36) + k,
+					intervento_id: t.tipo === "lavoro" ? t.id : null,
+					conto_id: t.tipo === "conto" ? t.id : null,
+					n: k + 1,
+					importo: r.importo,
+					scadenza: r.scadenza
+				}));
+				return null;
+			}
+			const { error } = await sb.rpc("equo_salva_rate", {
+				p_intervento: t.tipo === "lavoro" ? t.id : null,
+				p_conto: t.tipo === "conto" ? t.id : null,
+				p_rate: rate
+			});
+			if (error) console.error("equo_salva_rate:", error);
+			return error || null;
+		},
+		async elimina(gruppo) {
+			if (DEMO_MODE) {
+				const via = demoState.tranche.filter((x) => x.gruppo === gruppo);
+				demoState.tranche = demoState.tranche.filter((x) => x.gruppo !== gruppo);
+				via.forEach((x) => {
+					const i = demoState.interventiMascalcia.find((y) => y.id === x.intervento_id);
+					if (i && i.stato_pagamento === "saldato") {
+						i.stato_pagamento = "da_saldare";
+						i.saldato_il = null;
+					}
+				});
+				return null;
+			}
+			const { error } = await sb.rpc("equo_elimina_pagamento", { p_gruppo: gruppo });
+			if (error) console.error("equo_elimina_pagamento:", error);
+			return error || null;
+		},
+		async sollecita(interventoId, contoId) {
+			if (DEMO_MODE) return {
+				data: { ok: true },
+				error: null
+			};
+			return await sb.rpc("equo_sollecita_rata", {
+				p_intervento: interventoId || null,
+				p_conto: contoId || null
+			});
+		}
+	};
+	function pagDemoRegistra(t, importo, data, modo, nota) {
+		const gruppo = "dg-" + Date.now().toString(36);
+		const salda = (i) => {
+			i.stato_pagamento = "saldato";
+			i.saldato_il = (/* @__PURE__ */ new Date(data + "T12:00")).toISOString();
+		};
+		if (t.tipo === "lavoro") {
+			const i = demoState.interventiMascalcia.find((x) => x.id === t.id);
+			demoState.tranche.push({
+				id: gruppo,
+				gruppo,
+				intervento_id: t.id,
+				conto_id: null,
+				importo,
+				pagato_il: data,
+				modo,
+				nota
+			});
+			const ok = pagPagato(t.id) + importo >= Number(i.importo) - .005;
+			if (ok) salda(i);
+			return {
+				data: {
+					ok: true,
+					saldato: ok
+				},
+				error: null
+			};
+		}
+		const c = (demoState.conti || []).find((x) => x.id === t.id);
+		let resto = importo;
+		(c?.righe || []).slice().sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)).forEach((r) => {
+			const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
+			if (!i || i.stato_pagamento === "saldato" || resto <= .005) return;
+			const manca = r2(Number(r.importo) - pagPagato(i.id)), q = Math.min(manca, resto);
+			if (q <= 0) return;
+			demoState.tranche.push({
+				id: gruppo + r.intervento_id,
+				gruppo,
+				intervento_id: i.id,
+				conto_id: c.id,
+				importo: q,
+				pagato_il: data,
+				modo,
+				nota
+			});
+			resto = r2(resto - q);
+			if (q >= manca - .005) salda(i);
+		});
+		const tutto = (c?.righe || []).every((r) => demoState.interventiMascalcia.find((x) => x.id === r.intervento_id)?.stato_pagamento === "saldato");
+		if (tutto && c) {
+			c.stato = "pagato";
+			c.pagato_il = (/* @__PURE__ */ new Date(data + "T12:00")).toISOString();
+		}
+		return {
+			data: {
+				ok: true,
+				saldato: tutto
+			},
+			error: null
+		};
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/058-scheda-cliente-pulsante-elenco-dei-conti.js
 	async function caricaContiCliente(clienteId) {
 		const box = document.getElementById("cliente-conti-box");
@@ -9244,27 +9845,27 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			box.innerHTML = "";
 			return;
 		}
-		const lista = await ContoDB.lista(clienteId);
+		const [lista] = await Promise.all([ContoDB.lista(clienteId), pagCarica()]);
 		if (currentClienteId !== clienteId) return;
-		const badge = (s) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
+		const badge = (s, id) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : pagPagatoConto(id) > 0 ? "<span class=\"badge\" style=\"color:var(--accent)\">Acconto</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
 		box.innerHTML = `<div class="card" style="margin:14px 0">
     <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
       <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
     ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map((c) => `
       <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
         <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
-        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato)}</div></div>
+        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato, c.id)}</div></div>
       </div>`).join("") : ""}
   </div>`;
 	}
 	function htmlContiAperti(lista, conCliente) {
 		if (!lista || !lista.length) return "";
-		const tot = lista.reduce((t, c) => t + (Number(c.totale) || 0), 0);
+		const tot = lista.reduce((t, c) => t + Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)), 0);
 		return `<div class="conti-aperti">
     <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
     ${lista.map((c) => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
-      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small></span>
-      <span class="e">${contoEuro(c.totale)}<small>Apri</small></span></button>`).join("")}
+      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small>${pagHtmlConto(c)}</span>
+      <span class="e">${contoEuro(Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)))}<small>Apri</small></span></button>`).join("")}
   </div>`;
 	}
 	async function caricaContiAperti(boxId) {
@@ -9319,7 +9920,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		});
 	}
 	function giornoPagamento(i) {
-		return i.saldato_il ? isoLocale(new Date(i.saldato_il)) : i.data_intervento || "";
+		return i._giorno ? i._giorno : i.saldato_il ? isoLocale(new Date(i.saldato_il)) : i.data_intervento || "";
 	}
 	function incIntervallo(per) {
 		const oggi = /* @__PURE__ */ new Date(), iso = isoLocale(oggi);
@@ -9383,20 +9984,22 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return diff === null ? "" : `<span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(prevNome)}`;
 	}
 	function incSaldatiTra(da, a) {
-		return incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => {
+		return pagVociIncasso(incTutti).filter((i) => {
 			const g = giornoPagamento(i);
 			return g >= da && g <= a;
-		})());
+		});
 	}
+	var incSommaResidui = (l) => l.reduce((t, i) => t + pagResiduo(i), 0);
 	var incSomma = (l) => l.reduce((t, i) => t + (Number(i.importo) || 0), 0);
 	async function renderIncassi$1() {
 		const box = document.getElementById("incassi-mese-incassato");
 		if (!box) return;
 		incTutti = await DB.listInterventiMascalciaTutti();
+		await pagCarica();
 		const iso = isoLocale(/* @__PURE__ */ new Date()), mese = iso.slice(0, 7);
-		const incassatoMese = incSomma(incTutti.filter((i) => i.stato_pagamento === "saldato" && i.stato === "fatto" && giornoPagamento(i).startsWith(mese)));
+		const incassatoMese = incSomma(pagVociIncasso(incTutti).filter((i) => giornoPagamento(i).startsWith(mese)));
 		const fattiNonSaldati = incTutti.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato");
-		const daIncassare = incSomma(fattiNonSaldati);
+		const daIncassare = incSommaResidui(fattiNonSaldati);
 		const previstoTot = incSomma(incTutti.filter((i) => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0).sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || ""))));
 		box.textContent = formatEuro(incassatoMese);
 		if (typeof wgPro !== "undefined") {
@@ -9430,7 +10033,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		});
 		const gruppiDs = [...perCli.values()].map((g) => ({
 			...g,
-			tot: incSomma(g.righe),
+			tot: incSommaResidui(g.righe),
 			righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))
 		})).sort((a, b) => b.tot - a.tot);
 		const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
@@ -9444,8 +10047,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			const gg = giorniTra(i.data_intervento, oggiIso);
 			return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
           <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
-            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span></div>
-          <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span>
+            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span>${Number(i.importo) > 0 ? pagHtmlLavoro(i) : ""}</div>
+          <span class="imp">${i.importo != null ? euroTondo(pagResiduo(i)) : "—"}</span>
           <button class="btn btn-primary btn-sm inc-saldato" onclick="segnaSaldatoIncassi('${i.id}', this)">Saldato</button></div>`;
 		}).join("")).join("");
 		caricaContiAperti("inc-conti-aperti");
@@ -9464,7 +10067,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const conImporto = lista.filter((i) => Number(i.importo) > 0);
 		const fatti = incFattiTra(r.da, r.a).sort((a, b) => (b.data_intervento + (b.ora || "")).localeCompare(a.data_intervento + (a.ora || "")));
 		const totFatti = incSomma(fatti), totFattiPrev = incSomma(incFattiTra(r.prevDa, r.prevA));
-		const fattiAperti = incSomma(fatti.filter((i) => i.stato_pagamento !== "saldato"));
+		const fattiAperti = incSommaResidui(fatti.filter((i) => i.stato_pagamento !== "saldato"));
 		const piu = (n, uno, tanti) => `${n} ${n === 1 ? uno : tanti}`;
 		const cGu = document.getElementById("inc-cassa-guadagnato");
 		cGu.classList.toggle("aperta", incAperta === "guadagnato");
@@ -9477,19 +10080,19 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
 		const dIn = incDiff(tot, totPrev, r.prevNome);
 		cIn.innerHTML = `<span class="l"><span>Incassato · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
-    <span class="d">${piu(lista.length, "lavoro pagato", "lavori pagati")}${dIn ? "<br>" + dIn : ""}</span>`;
+    <span class="d">${piu(lista.length, "pagamento", "pagamenti")}${dIn ? "<br>" + dIn : ""}</span>`;
 		const nota = document.getElementById("inc-nota-coppia");
 		nota.hidden = !(fattiAperti > 0);
 		nota.innerHTML = fattiAperti > 0 ? `Dei lavori del periodo, <b>${euroTondo(fattiAperti)}</b> ${fattiAperti === 1 ? "è" : "sono"} ancora da incassare.` : "";
 		document.getElementById("inc-det-guadagnato").hidden = incAperta !== "guadagnato";
 		document.getElementById("inc-fatti-n").textContent = fatti.length ? String(fatti.length) : "";
 		document.getElementById("inc-fatti").innerHTML = !fatti.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun lavoro fatto nel periodo.</div>" : fatti.map((i) => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "")} · ${formatDataBreve(i.data_intervento)} · ${i.stato_pagamento === "saldato" ? "<span class=\"tag ok\">pagato</span>" : "<span class=\"tag no\">da incassare</span>"}</span></div>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "")} · ${formatDataBreve(i.data_intervento)} · ${i.stato_pagamento === "saldato" ? "<span class=\"tag ok\">pagato</span>" : pagPagato(i.id) > 0 ? "<span class=\"tag acc\">acconto</span>" : "<span class=\"tag no\">da incassare</span>"}</span></div>
         <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("");
 		document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
 		document.getElementById("inc-kpis").innerHTML = `
     <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>
-    <div class="inc-kpi"><div class="l">Media a lavoro</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
+    <div class="inc-kpi"><div class="l">Media a pagamento</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
 		const barre = [];
 		if (incPeriodo === "settimana" || incPeriodo === "date" && giorniTra(r.da, r.a) <= 31) for (let g = r.da; g <= r.a; g = aggiungiGiorniIso(g, 1)) {
 			const d = /* @__PURE__ */ new Date(g + "T12:00");
@@ -9532,7 +10135,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("inc-elenco-n").textContent = lista.length ? String(lista.length) : "";
 		const vis = incElencoTutto ? lista : lista.slice(0, 30);
 		document.getElementById("inc-elenco").innerHTML = !lista.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun lavoro saldato nel periodo.</div>" : vis.map((i) => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i.saldato_il ? " · pagato " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i._giorno || i.saldato_il ? " · " + (i._tranche ? "pagamento" : i._resto ? "saldo" : "pagato") + " " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
         <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("") + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
 	}
 	function sceltaPeriodoIncassi(k) {
@@ -9761,7 +10364,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/060-foglio-di-invio-gestione-del-conto.js
 	async function apriInvioConto(id) {
-		const c = await ContoDB.completo(id);
+		const [c] = await Promise.all([ContoDB.completo(id), pagCarica()]);
 		if (!c) {
 			showToast("Conto non trovato");
 			return;
@@ -9771,13 +10374,14 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const stato = c.stato === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : c.stato === "annullato" ? "<span class=\"badge\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
 		document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
 		document.getElementById("conto-invio-corpo").innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div></div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div>${c.stato === "da_incassare" ? pagHtmlConto(c) : ""}</div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
     <div class="ag-azioni" style="margin-top:14px">
       ${c.stato !== "annullato" ? `
       <button class="btn btn-primary" onclick="contoInviaChat()"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat Equo</button>
       <button class="btn btn-outline" onclick="contoCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Email, WhatsApp, altro…</button>
       <button class="btn btn-outline" onclick="contoScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>` : ""}
       ${c.stato === "da_incassare" ? `
+      <button class="btn btn-outline" onclick="closeModal('modal-conto-invio');pagApri(null,'${c.id}')"><span class="fa-icon"><i class="fa-solid fa-coins"></i></span> Acconto o rate</button>
       <button class="btn btn-outline" onclick="contoSegnaPagato()"><span class="fa-icon"><i class="fa-solid fa-check"></i></span> Segna pagato</button>
       <button class="btn btn-outline" style="color:var(--red)" onclick="contoAnnulla()"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla il conto</button>` : ""}
     </div>`;
@@ -20059,6 +20663,17 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		pagApri,
+		pagApriRate,
+		pagElimina,
+		pagImporto,
+		pagNumeroRate,
+		pagRegistra,
+		pagRiga,
+		pagSalvaSoloRate,
+		pagSet,
+		pagSollecita,
+		pagTogliRate,
 		cavPrezzoModifica,
 		cavPrezzoSalva,
 		apriScadenzaCavallo,
@@ -27876,6 +28491,18 @@ const mlSigla = k => String(k || "").toUpperCase();
 	function euroIt(v) {
 		return "€ " + Number(v || 0).toFixed(2).replace(".", ",");
 	}
+	var dsResto = (r) => Math.max(0, Number(r.importo || 0) - Number(r.pagato || 0));
+	function dsOggi() {
+		const d = /* @__PURE__ */ new Date();
+		return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+	}
+	function dsPianoHtml(p, titolo) {
+		if (!p || !p.rate) return "";
+		const scad = p.prossima_scadenza && p.prossima_scadenza < dsOggi();
+		return `<div class="ds-piano">${titolo ? `<small>${escapeHtml(titolo)}</small>` : ""}<b>${p.pagate ? `Pagato ${p.pagate} ${p.pagate === 1 ? "rata" : "rate"} su ${p.rate}` : `${p.rate} rate, nessuna ancora pagata`}</b>
+    <div class="ds-segm" aria-hidden="true">${Array.from({ length: p.rate }, (_, k) => `<i class="${k < p.pagate ? "p" : ""}"></i>`).join("")}</div>
+    ${p.prossima_importo != null ? `<small class="${scad ? "scad" : ""}">${scad ? "Rata scaduta" : "Prossima rata"}: ${euroIt(p.prossima_importo)} entro il ${formatDataBreve(p.prossima_scadenza)}</small>` : ""}</div>`;
+	}
 	function renderDaSaldare() {
 		const box = document.getElementById("home-da-saldare");
 		const righe = daSaldareStato.righe;
@@ -27885,7 +28512,8 @@ const mlSigla = k => String(k || "").toUpperCase();
 			return;
 		}
 		box.style.display = "block";
-		const tot = righe.filter((r) => !r.segnalato).reduce((t, r) => t + Number(r.importo || 0), 0);
+		const tot = righe.filter((r) => !r.segnalato).reduce((t, r) => t + dsResto(r), 0);
+		const contiVisti = /* @__PURE__ */ new Set();
 		if (!(daSaldareStato.daRicordare || daSaldareStato.aperto)) {
 			box.innerHTML = `<button type="button" class="ds-riga-corta" onclick="daSaldareStato.aperto=true;renderDaSaldare()"><span>💶 Da saldare${tot ? " · " + euroIt(tot) : ""}</span><span class="muted">Vedi ›</span></button>`;
 			return;
@@ -27904,10 +28532,10 @@ const mlSigla = k => String(k || "").toUpperCase();
     <div class="ds-testa"><span>${daSaldareStato.daRicordare ? "<i class=\"ds-dot\"></i>" : ""}💶 Da saldare</span><b>${euroIt(tot)}</b></div>
     ${Object.entries(perMan).map(([mid, m]) => `
       <div class="ds-man">${escapeHtml(m.nome || "Il tuo maniscalco")}</div>
-      ${m.righe.map((r) => `<div class="ds-voce">
-        <div><div>${escapeHtml([r.tipo, r.cavallo].filter(Boolean).join(" · "))}</div><small class="muted">${formatDataBreve(r.data)}${r.segnalato ? " · segnalato come pagato, in attesa del maniscalco" : ""}</small></div>
-        <div class="ds-dx"><b>${euroIt(r.importo)}</b>${r.segnalato ? "" : `<button type="button" onclick="segnalaGiaPagato('${r.id}', this)">Ho già pagato</button>`}</div>
-      </div>`).join("")}
+      ${m.righe.map((r) => `${r.piano_di === "conto" && r.conto && !contiVisti.has(r.conto) && contiVisti.add(r.conto) ? dsPianoHtml(r.piano, "Conto " + r.conto) : ""}<div class="ds-voce">
+        <div><div>${escapeHtml([r.tipo, r.cavallo].filter(Boolean).join(" · "))}</div><small class="muted">${formatDataBreve(r.data)}${r.segnalato ? " · segnalato come pagato, in attesa del maniscalco" : ""}</small>${Number(r.pagato) > 0 ? `<small class="ds-acc">Pagati ${euroIt(r.pagato)} di ${euroIt(r.importo)}</small>` : ""}</div>
+        <div class="ds-dx"><b>${euroIt(dsResto(r))}</b>${r.segnalato ? "" : `<button type="button" onclick="segnalaGiaPagato('${r.id}', this)">Ho già pagato</button>`}</div>
+      </div>${r.piano_di === "lavoro" ? dsPianoHtml(r.piano) : ""}`).join("")}
       ${m.iban || m.paypal ? `<button type="button" class="ds-link" onclick="daSaldareStato.pagaAperto = daSaldareStato.pagaAperto === '${mid}' ? null : '${mid}'; renderDaSaldare()">Come pagare ${daSaldareStato.pagaAperto === mid ? "▴" : "▾"}</button>
         ${daSaldareStato.pagaAperto === mid ? `<div class="ds-paga">${m.pag_nome ? `<div><small class="muted">Intestatario</small><br>${escapeHtml(m.pag_nome)}</div>` : ""}${m.iban ? `<div><small class="muted">IBAN</small><br><span class="ds-copia" onclick="copiaTestoDs('${escapeHtml(m.iban)}')">${escapeHtml(m.iban)} <i class="fa-regular fa-copy"></i></span></div>` : ""}${m.paypal ? `<div><small class="muted">PayPal</small><br><span class="ds-copia" onclick="copiaTestoDs('${escapeHtml(m.paypal)}')">${escapeHtml(m.paypal)} <i class="fa-regular fa-copy"></i></span></div>` : ""}</div>` : ""}` : ""}
     `).join("")}

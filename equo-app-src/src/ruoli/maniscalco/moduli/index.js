@@ -50,6 +50,7 @@ import { pmAggiornaAzione, pmAggiornaQuando, pmApriNuovo, pmDomani, pmElimina, p
 import { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda } from "./110-agenda-semplice-completa.js";
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
+import { pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 import { allineaRender, apriAllineaScadenze, cicloCambia, cicloTogli, confermaAllineaScadenze } from "./102-scadenze-della-struttura.js";
 import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } from "./101-importazione-vecchia-app.js";
@@ -57,6 +58,17 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  pagApri,
+  pagApriRate,
+  pagElimina,
+  pagImporto,
+  pagNumeroRate,
+  pagRegistra,
+  pagRiga,
+  pagSalvaSoloRate,
+  pagSet,
+  pagSollecita,
+  pagTogliRate,
   cavPrezzoModifica,
   cavPrezzoSalva,
   apriScadenzaCavallo,

@@ -6,22 +6,24 @@ import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { ContoDB, contoCodice, contoData, contoEuro, contoLavori } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { caricaContiCliente } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
 import { creaPdfConto } from "./061-pdf-del-conto-dai-dati-salvati-snapshot.js";
+import { pagCarica, pagHtmlConto } from "./113-pagamenti-a-rate.js";
 /* ---- foglio di invio / gestione del conto ---- */
 async function apriInvioConto(id){
-  const c = await ContoDB.completo(id);
+  const [c] = await Promise.all([ContoDB.completo(id), pagCarica()]);
   if(!c){ showToast("Conto non trovato"); return; }
   contoAperto = c;
   const cli = clienteDiId(c.cliente_mascalcia_id);
   const stato = c.stato === "pagato" ? '<span class="badge badge-green">Pagato</span>' : c.stato === "annullato" ? '<span class="badge">Annullato</span>' : '<span class="badge badge-red">Da incassare</span>';
   document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
   document.getElementById("conto-invio-corpo").innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div></div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${escapeHtml(cli?.nome || "")}</b><div class="muted" style="font-size:12px">${contoLavori(c.n_lavori)} · ${contoData(c.creato_il)}</div>${c.stato === "da_incassare" ? pagHtmlConto(c) : ""}</div><div style="text-align:right"><b style="font-size:20px">${contoEuro(c.totale)}</b><div>${stato}</div></div></div>
     <div class="ag-azioni" style="margin-top:14px">
       ${c.stato !== "annullato" ? `
       <button class="btn btn-primary" onclick="contoInviaChat()"><span class="fa-icon"><i class="fa-solid fa-comment"></i></span> Invia in chat Equo</button>
       <button class="btn btn-outline" onclick="contoCondividi()"><span class="fa-icon"><i class="fa-solid fa-share-nodes"></i></span> Email, WhatsApp, altro…</button>
       <button class="btn btn-outline" onclick="contoScarica()"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Scarica il PDF</button>` : ""}
       ${c.stato === "da_incassare" ? `
+      <button class="btn btn-outline" onclick="closeModal('modal-conto-invio');pagApri(null,'${c.id}')"><span class="fa-icon"><i class="fa-solid fa-coins"></i></span> Acconto o rate</button>
       <button class="btn btn-outline" onclick="contoSegnaPagato()"><span class="fa-icon"><i class="fa-solid fa-check"></i></span> Segna pagato</button>
       <button class="btn btn-outline" style="color:var(--red)" onclick="contoAnnulla()"><span class="fa-icon"><i class="fa-solid fa-ban"></i></span> Annulla il conto</button>` : ""}
     </div>`;

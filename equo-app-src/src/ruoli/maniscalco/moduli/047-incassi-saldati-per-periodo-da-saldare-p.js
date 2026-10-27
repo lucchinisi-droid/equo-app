@@ -8,6 +8,7 @@ import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { wgRidisegna } from "./096-vista-applica-cambia-salva.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
+import { pagCarica, pagHtmlLavoro, pagPagato, pagResiduo, pagVociIncasso } from "./113-pagamenti-a-rate.js";
 /* ---------- INCASSI: Saldati (per periodo), Da saldare, Previsti ----------
    Saldati: conta il giorno del pagamento (saldato_il); per i saldati di prima del 9/10/2026 il giorno del lavoro.
    Piano Free: Oggi e Mese corrente; Settimana, Anno e date a scelta sono Premium. */
@@ -17,7 +18,7 @@ let incMesi = (() => { try { return Number(localStorage.getItem("equo-inc-mesi")
 /* -> stato-condiviso.js */
 const INC_PERIODI = [["oggi", "Oggi", false], ["settimana", "Settimana", true], ["mese", "Mese", false], ["anno", "Anno", true], ["date", "Scegli date…", true]];
 function euroTondo(n){ return (Number(n) || 0).toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: Number(n) % 1 ? 2 : 0 }); }
-function giornoPagamento(i){ return i.saldato_il ? isoLocale(new Date(i.saldato_il)) : (i.data_intervento || ""); }
+function giornoPagamento(i){ return i._giorno ? i._giorno : i.saldato_il ? isoLocale(new Date(i.saldato_il)) : (i.data_intervento || ""); }
 function incIntervallo(per){
   const oggi = new Date(), iso = isoLocale(oggi);
   if(per === "oggi") return { da: iso, a: iso, prevDa: aggiungiGiorniIso(iso, -1), prevA: aggiungiGiorniIso(iso, -1), nome: "oggi", prevNome: "ieri" };
@@ -45,17 +46,20 @@ function incDiff(tot, totPrev, prevNome){
   const diff = totPrev > 0 ? Math.round((tot - totPrev) / totPrev * 100) : null;
   return diff === null ? "" : `<span class="${diff >= 0 ? "su" : "giu"}" style="color:var(--${diff >= 0 ? "green" : "red"})">${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%</span> rispetto a ${escapeHtml(prevNome)}`;
 }
-function incSaldatiTra(da, a){ return incTutti.filter(i => i.stato_pagamento === "saldato" && i.stato === "fatto" && (() => { const g = giornoPagamento(i); return g >= da && g <= a; })()); }
+// 27/10/2026: ogni pagamento (anche un acconto o una rata) conta nel giorno in cui arriva; vedi 113-pagamenti-a-rate.js
+function incSaldatiTra(da, a){ return pagVociIncasso(incTutti).filter(i => { const g = giornoPagamento(i); return g >= da && g <= a; }); }
+const incSommaResidui = l => l.reduce((t, i) => t + pagResiduo(i), 0);
 const incSomma = l => l.reduce((t, i) => t + (Number(i.importo) || 0), 0);
 
 async function renderIncassi(){
   const box = document.getElementById("incassi-mese-incassato");
   if(!box) return;
   incTutti = await DB.listInterventiMascalciaTutti();
+  await pagCarica();
   const iso = isoLocale(new Date()), mese = iso.slice(0, 7);
-  const incassatoMese = incSomma(incTutti.filter(i => i.stato_pagamento === "saldato" && i.stato === "fatto" && giornoPagamento(i).startsWith(mese)));
+  const incassatoMese = incSomma(pagVociIncasso(incTutti).filter(i => giornoPagamento(i).startsWith(mese)));
   const fattiNonSaldati = incTutti.filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato");
-  const daIncassare = incSomma(fattiNonSaldati);
+  const daIncassare = incSommaResidui(fattiNonSaldati);
   const previsti = incTutti.filter(i => i.stato === "programmato" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0)
     .sort((a, b) => (a.data_intervento + (a.ora || "")).localeCompare(b.data_intervento + (b.ora || "")));
   const previstoTot = incSomma(previsti);
@@ -81,7 +85,7 @@ async function renderIncassi(){
   const oggiIso = iso;
   const perCli = new Map();
   fattiNonSaldati.forEach(i => { const k = i.cliente_mascalcia_id || "?"; if(!perCli.has(k)) perCli.set(k, { id: k, nome: i.clienti_mascalcia?.nome || "Cliente", righe: [] }); perCli.get(k).righe.push(i); });
-  const gruppiDs = [...perCli.values()].map(g => ({ ...g, tot: incSomma(g.righe), righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)) })).sort((a, b) => b.tot - a.tot);
+  const gruppiDs = [...perCli.values()].map(g => ({ ...g, tot: incSommaResidui(g.righe), righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)) })).sort((a, b) => b.tot - a.tot);
   const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
   const cDs = document.getElementById("inc-cassa-dasaldare");
   cDs.classList.toggle("aperta", incAperta === "dasaldare");
@@ -94,8 +98,8 @@ async function renderIncassi(){
         const gg = giorniTra(i.data_intervento, oggiIso);
         return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
           <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
-            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span></div>
-          <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span>
+            <span>${formatDataBreve(i.data_intervento)} · <span class="${gg > 30 ? "inc-vecchio" : ""}">${gg <= 0 ? "oggi" : "da " + gg + (gg === 1 ? " giorno" : " giorni")}</span></span>${Number(i.importo) > 0 ? pagHtmlLavoro(i) : ""}</div>
+          <span class="imp">${i.importo != null ? euroTondo(pagResiduo(i)) : "—"}</span>
           <button class="btn btn-primary btn-sm inc-saldato" onclick="segnaSaldatoIncassi('${i.id}', this)">Saldato</button></div>`;
       }).join("")).join("");
 
@@ -117,7 +121,7 @@ function renderIncassiSaldati(){
   const conImporto = lista.filter(i => Number(i.importo) > 0);
   const fatti = incFattiTra(r.da, r.a).sort((a, b) => (b.data_intervento + (b.ora || "")).localeCompare(a.data_intervento + (a.ora || "")));
   const totFatti = incSomma(fatti), totFattiPrev = incSomma(incFattiTra(r.prevDa, r.prevA));
-  const fattiAperti = incSomma(fatti.filter(i => i.stato_pagamento !== "saldato"));
+  const fattiAperti = incSommaResidui(fatti.filter(i => i.stato_pagamento !== "saldato"));
   const piu = (n, uno, tanti) => `${n} ${n === 1 ? uno : tanti}`;
   const cGu = document.getElementById("inc-cassa-guadagnato");
   cGu.classList.toggle("aperta", incAperta === "guadagnato");
@@ -130,7 +134,7 @@ function renderIncassiSaldati(){
   cIn.setAttribute("aria-expanded", String(incAperta === "incassati"));
   const dIn = incDiff(tot, totPrev, r.prevNome);
   cIn.innerHTML = `<span class="l"><span>Incassato · ${escapeHtml(r.nome)}</span><span>${incAperta === "incassati" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(tot)}</span>
-    <span class="d">${piu(lista.length, "lavoro pagato", "lavori pagati")}${dIn ? "<br>" + dIn : ""}</span>`;
+    <span class="d">${piu(lista.length, "pagamento", "pagamenti")}${dIn ? "<br>" + dIn : ""}</span>`;
   const nota = document.getElementById("inc-nota-coppia");
   nota.hidden = !(fattiAperti > 0);
   nota.innerHTML = fattiAperti > 0 ? `Dei lavori del periodo, <b>${euroTondo(fattiAperti)}</b> ${fattiAperti === 1 ? "è" : "sono"} ancora da incassare.` : "";
@@ -138,12 +142,12 @@ function renderIncassiSaldati(){
   document.getElementById("inc-fatti-n").textContent = fatti.length ? String(fatti.length) : "";
   document.getElementById("inc-fatti").innerHTML = !fatti.length ? '<div class="muted" style="font-size:13px">Nessun lavoro fatto nel periodo.</div>'
     : fatti.map(i => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "")} · ${formatDataBreve(i.data_intervento)} · ${i.stato_pagamento === "saldato" ? '<span class="tag ok">pagato</span>' : '<span class="tag no">da incassare</span>'}</span></div>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "")} · ${formatDataBreve(i.data_intervento)} · ${i.stato_pagamento === "saldato" ? '<span class="tag ok">pagato</span>' : pagPagato(i.id) > 0 ? '<span class="tag acc">acconto</span>' : '<span class="tag no">da incassare</span>'}</span></div>
         <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("");
   document.getElementById("inc-det-incassati").hidden = incAperta !== "incassati";
   document.getElementById("inc-kpis").innerHTML = `
     <div class="inc-kpi"><div class="l">${escapeHtml(r.prevNome.charAt(0).toUpperCase() + r.prevNome.slice(1))}</div><div class="v">${euroTondo(totPrev)}</div></div>
-    <div class="inc-kpi"><div class="l">Media a lavoro</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
+    <div class="inc-kpi"><div class="l">Media a pagamento</div><div class="v">${conImporto.length ? euroTondo(Math.round(tot / conImporto.length)) : "—"}</div></div>`;
 
   // grafico: settimana = giorni, mese = settimane, anno = mesi, date = giorni (≤31) o mesi
   const barre = [];
@@ -187,7 +191,7 @@ function renderIncassiSaldati(){
   const vis = incElencoTutto ? lista : lista.slice(0, 30);
   document.getElementById("inc-elenco").innerHTML = !lista.length ? '<div class="muted" style="font-size:13px">Nessun lavoro saldato nel periodo.</div>'
     : vis.map(i => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i.saldato_il ? " · pagato " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i._giorno || i.saldato_il ? " · " + (i._tranche ? "pagamento" : i._resto ? "saldo" : "pagato") + " " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
         <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("")
       + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
 }

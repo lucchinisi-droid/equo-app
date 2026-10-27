@@ -39,3 +39,38 @@
 .inc-voce .imp{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 :where(body:not(.pl-owner)) .inc-vecchio{color:var(--red);font-weight:700}
 :where(body:not(.pl-owner)) .inc-saldato{flex:none}
+
+/* 27/10/2026: pagamenti in più volte (acconti e rate) — Incassi, conti e finestra «Registra pagamento» */
+:where(body:not(.pl-owner)) .pag-link{border:0;background:none;padding:2px 0;font:inherit;font-size:12px;font-weight:800;color:var(--accent);cursor:pointer;text-align:left}
+:where(body:not(.pl-owner)) .inc-voce .c .pag-link{display:block;margin-top:3px}
+.pag-barra{display:block;height:6px;border-radius:4px;background:color-mix(in srgb,var(--border) 70%,transparent);overflow:hidden;margin:5px 0 3px}
+.pag-barra i{display:block;height:100%;background:var(--green);border-radius:4px}
+:where(body:not(.pl-owner)) .pag-nota{display:block;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-scaduta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;padding:5px 8px;border-radius:9px;background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);font-size:11.5px;font-weight:700}
+:where(body:not(.pl-owner)) .pag-scaduta button{border:1.5px solid var(--red);background:none;color:var(--red);border-radius:8px;padding:3px 8px;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;flex:none}
+:where(body:not(.pl-owner)) .pag-conto{display:block;font-size:11.5px;color:var(--green);font-weight:700}
+:where(body:not(.pl-owner)) .pag-testa{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:4px;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-testa span{color:var(--muted);min-width:0}
+:where(body:not(.pl-owner)) .pag-imp{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+:where(body:not(.pl-owner)) .pag-chip{border:1.5px solid var(--border);background:var(--card);color:var(--text);border-radius:18px;padding:5px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+:where(body:not(.pl-owner)) .pag-chip.on{background:var(--green);border-color:var(--green);color:#fff}
+:where(body:not(.pl-owner)) .pag-blocco{margin-top:10px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);display:flex;flex-direction:column;gap:8px}
+:where(body:not(.pl-owner)) .pag-blocco-t{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+:where(body:not(.pl-owner)) .pag-blocco-t span{font-size:11.5px;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-p{margin:0;font-size:12.5px;line-height:1.45;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-rate{display:flex;flex-direction:column;gap:5px}
+:where(body:not(.pl-owner)) .pag-rate div{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:6px 9px;border-radius:9px;background:var(--card);font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-rate div.ok{color:var(--green)}
+:where(body:not(.pl-owner)) .pag-azioni-l{display:flex;gap:16px;flex-wrap:wrap}
+:where(body:not(.pl-owner)) .pag-righe{display:flex;flex-direction:column;gap:6px}
+:where(body:not(.pl-owner)) .pag-riga{display:grid;grid-template-columns:26px 1fr 1.3fr;gap:6px;align-items:center}
+:where(body:not(.pl-owner)) .pag-riga span{font-size:12px;font-weight:800;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-riga .input{padding:8px;font-size:14px;min-width:0}
+:where(body:not(.pl-owner)) .pag-somma{font-size:12.5px;font-weight:800}
+:where(body:not(.pl-owner)) .pag-somma.ok{color:var(--green)} :where(body:not(.pl-owner)) .pag-somma.no{color:var(--red)}
+:where(body:not(.pl-owner)) .pag-sez{margin:14px 0 4px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-storico div{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border);font-size:13px;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .pag-storico span{flex:1;min-width:0;color:var(--muted)}
+:where(body:not(.pl-owner)) .pag-storico button{border:0;background:none;color:var(--muted);font-size:14px;padding:2px 4px;cursor:pointer}
+.inc-voce .tag.acc{color:var(--accent)}
