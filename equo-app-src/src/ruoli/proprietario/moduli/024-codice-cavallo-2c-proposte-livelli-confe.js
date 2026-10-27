@@ -94,7 +94,8 @@ function renderProposteCavalli(){
     <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
     <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free è completo un solo cavallo: gli altri si aggiungono ma restano bloccati finché non passi a Premium."}</div>
     ${righe}
-    ${proposteCav.length > 1 ? `<button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti</button>` : ""}
+    ${proposteCav.length > 1 ? `<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti (${proposteCav.length})</button>` : ""}
+    <div class="muted" style="font-size:12px;margin-top:6px">I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.</div>
   </div>`;
 }
 async function accettaPropostaSilenzioso(id){
@@ -110,12 +111,22 @@ function messaggioProposta(res){
 async function accettaProposta(id){
   const res = await accettaPropostaSilenzioso(id);
   if(!res.ok){ showToast(messaggioProposta(res)); return; }
-  showToast("Cavallo aggiunto. Controlla i dati e confermali.");
+  showToast(res.lavori > 0 ? `Cavallo aggiunto con ${res.lavori} ${res.lavori === 1 ? "lavoro" : "lavori"} del maniscalco nel libretto. Controlla i dati e confermali.` : "Cavallo aggiunto. Controlla i dati e confermali.");
   await loadHorses();
   await caricaCavalliBloccati();
   if(res.horse_id && horses.some(h => h.id === res.horse_id)) openHorseDetail(res.horse_id);
 }
+// 27/10/2026: «Accetta tutti» in un colpo solo (equo_accetta_tutti_proposti): i lavori già fatti entrano nel libretto
+// e in chat col maniscalco arriva un solo riepilogo. Senza l'aggiornamento del database si accetta uno per uno.
 async function accettaTuttiProposte(){
+  const { data, error } = await sb.rpc("equo_accetta_tutti_proposti");
+  if(!error && data?.ok){
+    const n = data.accettati || 0, l = data.lavori || 0;
+    if(n) showToast(`${n === 1 ? "1 cavallo aggiunto" : n + " cavalli aggiunti"}${l ? ` con ${l} ${l === 1 ? "lavoro" : "lavori"} nel libretto` : ""}.`);
+    if(data.limite){ showToast(messaggioProposta({ motivo: "limite_cavalli_free" })); openModal("modal-limite-cavalli"); }
+    await loadHorses(); await caricaCavalliBloccati(); caricaProposteCavalli();
+    return;
+  }
   let n = 0, stop = null;
   for(const p of [...proposteCav]){
     const res = await accettaPropostaSilenzioso(p.proposta);
