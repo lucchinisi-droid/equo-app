@@ -8,8 +8,11 @@
       <div style="flex:1;min-width:0"><input class="input" id="ncav-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
     </div>
     <div class="input-group" style="margin-top:10px"><label class="input-label" for="ncav-cliente">Di chi è / dove sta?</label><select class="input" id="ncav-cliente" onchange="ncavClienteCambiato(this)"></select></div>
+    <div class="input-group" id="ncav-dichi-box" style="display:none"><label class="input-label" for="ncav-dichi">Di chi è?</label><select class="input" id="ncav-dichi"></select>
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Se è di un tuo cliente privato la scheda va a lui (lavori e conti a chi paga) e il cavallo risulta in questa scuderia.</div></div>
     <div class="muted" style="font-size:12px;text-align:center;margin:4px 0 6px">oppure, se ha già un codice Equo</div>
-    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. PRV-000005" autocapitalize="characters" style="text-transform:uppercase"></div>
+    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. PRV-000005" autocapitalize="characters" style="text-transform:uppercase">
+      <button type="button" class="pos-link" onclick="onbScansionaCavallo()">📷 Inquadra la Equo Card del cavallo</button></div>
     <div class="auth-error" id="ncav-errore" style="display:none"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaNuovoCavalloCartella(this)">Salva cavallo</button>
   </div>

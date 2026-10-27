@@ -7,6 +7,7 @@ import { siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { intervalloCavallo, intervalloEffettivo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
+import { onbControllaDoppione, onbEmail } from "./116-onboarding.js";
 /* ---------- FERRATURA DEL CAVALLO (scheda = libretto): Ferrato / Mezza / Pareggio, misura, tipo di ferro, note ----------
    Si imposta una volta e vale per tutti gli appuntamenti; ogni cambio resta nello storico del cavallo (trigger nel database).
    Completa: tipo di ferro separato davanti / dietro (ferro_tipo = davanti, ferro_tipo_post = dietro). */
@@ -238,6 +239,8 @@ async function aggiungiCavalloEditCliente(){
   if(!nome){ showToast("Inserisci il nome del cavallo"); return; }
   const razza = razzaValore("edit-cliente-nuovo-razza");
   if(razza === false) return;
+  // 27/10/2026: stesso nome o microchip già presente? prima si chiede (niente doppioni)
+  if(!(await onbControllaDoppione(nome, chip || null))){ closeModal("modal-edit-cliente"); return; }
   const { error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: currentClienteId, nome, microchip: chip || null, razza });
   if(error){ showToast("Errore: " + error.message); return; }
   document.getElementById("edit-cliente-nuovo-cavallo").value = "";
@@ -265,6 +268,13 @@ async function salvaEditCliente(){
   const tipo_cliente = document.getElementById("edit-cliente-tipo").value;
   const codiceEquo = document.getElementById("edit-cliente-codice-equo").value.trim().toUpperCase();
   const campiCli = { telefono, note };
+  { const g = document.getElementById("edit-cliente-email-group");
+    if(g && g.style.display !== "none"){
+      const email = onbEmail("edit-cliente-email");
+      if(email === null){ errBox.textContent = "L'email non sembra giusta: controllala o lasciala vuota."; errBox.style.display = "block"; return; }
+      const prima = clientiMascalcia.find(x => x.id === currentClienteId)?.email || "";
+      if(email !== prima) campiCli.email = email || null;
+    } }
   if(!document.getElementById("edit-cliente-nome").disabled) campiCli.nome = nome;   // collegato a Equo: il nome viene dal profilo
   if(!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;   // collegato a Equo: il tipo non si cambia
   const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);

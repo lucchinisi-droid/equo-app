@@ -1,4 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { onbCodiceScansionato } from "./116-onboarding.js";
 /* ---------- SCANNER QR (ripristinato 27/09) ---------- */
 let qrScanStream = null;
 let qrScanRAF = null;
@@ -72,6 +73,7 @@ async function scanQrLoop(){
 // Instrada il codice letto dal QR o scritto: OWN = chat tra proprietari, TRA = istruttore, PRO o invito = collega il maniscalco
 // (accetta anche i link app.equohub.com/?invito=..., maiuscole/minuscole, con o senza trattini)
 function gestisciCodiceScansionato(testo){
+  if(onbCodiceScansionato(testo)) return;   // 27/10/2026: Equo Card del cavallo inquadrata da «Aggiungi cavallo»
   const codice = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
   const tipo = tipoCodiceEquo(codice);
   if(tipo === "own"){

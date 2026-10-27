@@ -8,6 +8,7 @@ import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { cavalliMieiLista, nomiCavalliCliente, paroleCercaCliente } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
+import { onbControllaDoppione, onbDiChiAggiorna, onbDiChiScelto, onbUbicaInScuderia } from "./116-onboarding.js";
 /* ---------- CLIENTI A CARTELLE (stile Telegram): Cavalli · Clienti · Scuderie ----------
    Il primo spazio di ogni cartella è l'aggiunta rapida. La ricerca (cercaFiltro «clienti») cerca nella cartella aperta. */
 /* -> stato-condiviso.js */
@@ -124,6 +125,7 @@ function apriNuovoCavalloCartella(){
     + (sc.length ? `<optgroup label="Scuderie">${sc.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "")
     + '<option value="__nuovo_p">+ Nuovo cliente</option><option value="__nuovo_s">+ Nuova scuderia</option>';
   document.getElementById("ncav-errore").style.display = "none";
+  onbDiChiAggiorna("");
   openModal("modal-nuovo-cavallo");
 }
 function ncavClienteCambiato(sel){
@@ -138,7 +140,9 @@ function ncavClienteCambiato(sel){
 async function salvaNuovoCavalloCartella(btn){
   const err = document.getElementById("ncav-errore"); err.style.display = "none";
   const errore = t => { err.textContent = t; err.style.display = "block"; };
-  const clienteId = document.getElementById("ncav-cliente").value;
+  const dove = document.getElementById("ncav-cliente").value;
+  // 27/10/2026 «Di chi è?»: cavallo in una scuderia ma di un cliente privato → scheda al proprietario, ubicazione la scuderia
+  const diChi = onbDiChiScelto(), clienteId = diChi || dove;
   const codice = document.getElementById("ncav-codice").value.trim();
   const nome = document.getElementById("ncav-nome").value.trim();
   if(!clienteId) return errore("Scegli di chi è o dove sta il cavallo.");
@@ -156,12 +160,20 @@ async function salvaNuovoCavalloCartella(btn){
         if(error) return errore("Errore: " + error.message);
       }
       if(!data?.ok) return errore(data?.errore || "Non riuscito, riprova.");
+      if(diChi && data.codice){
+        const r = (await DB.listCavalliCliente(clienteId)).find(x => x.id && x.codice_equo === data.codice);
+        if(r) await onbUbicaInScuderia(r.id, dove);
+      }
       showToast(data.azione === "gia" ? `${data.nome} è già tra i cavalli di questo cliente.` : `${data.nome} aggiunto (codice ${data.codice}).`);
     } else {
       const razza = razzaValore("ncav-razza");
       if(razza === false) return;
-      const { error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome, microchip: document.getElementById("ncav-chip").value.trim() || null, razza });
+      const chip = document.getElementById("ncav-chip").value.trim() || null;
+      // 27/10/2026: stesso nome o microchip già presente? prima si chiede (niente doppioni)
+      if(!(await onbControllaDoppione(nome, chip))){ closeModal("modal-nuovo-cavallo"); return; }
+      const { error, data: riga } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome, microchip: chip, razza });
       if(error) return errore("Errore: " + error.message);
+      if(diChi && riga?.id) await onbUbicaInScuderia(riga.id, dove);
       showToast(`${nome} aggiunto`);
     }
     // tiene allineato il testo dei cavalli del cliente

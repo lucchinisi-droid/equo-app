@@ -1,4 +1,5 @@
 // Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
+import { onbAvvisoNuovoCavallo } from "./103-onboarding-proprietario.js";
 import { loadHorses } from "./023-horses.js";
 import { cavalliBloccati, renderHorseBloccato, renderLivelloCavallo } from "./024-codice-cavallo-2c-proposte-livelli-confe.js";
 import { loadHorseEvents } from "./027-health-events.js";
@@ -111,6 +112,7 @@ function openHorseForm(id){
     document.getElementById("horse-tipo-proprieta").value = "proprieta";
     document.getElementById("horse-condiviso").checked = true;
   }
+  onbAvvisoNuovoCavallo(!editingHorseId);   // 27/10/2026: cavalli già preparati dal maniscalco → accettali
   openModal("modal-add-horse");
 }
 

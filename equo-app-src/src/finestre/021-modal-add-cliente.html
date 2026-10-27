@@ -9,6 +9,7 @@
           <option value="proprietario">Proprietario</option>
           <option value="struttura">Scuderia o centro ippico</option>
         </select>
+        <div class="muted" id="cliente-tipo-auto" style="display:none;font-size:11.5px;margin-top:4px">Dal nome sembra una scuderia: se è una persona cambia qui sopra.</div>
       </div>
       <div class="input-group">
         <label class="input-label" id="cliente-nome-label">Nome cliente</label>
@@ -21,6 +22,11 @@
       <div class="input-group">
         <label class="input-label">Telefono (opzionale)</label>
         <input class="input" id="cliente-telefono" placeholder="es. 333 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email (opzionale, consigliata)</label>
+        <input class="input" id="cliente-email" type="email" inputmode="email" autocapitalize="off" autocomplete="off" placeholder="es. marco.bianchi@gmail.com">
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Quando si iscrive a Equo con questa email ti trova già, con i suoi cavalli: si collega con un tocco.</div>
       </div>
       <div class="input-group">
         <label class="input-label">Indirizzo (opzionale, per «Naviga»)</label>

@@ -51,6 +51,7 @@ import { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSa
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
 import { cscCambio, cscGruppo, cscRapido } from "./115-cavalli-per-scadenza.js";
+import { onbScansionaCavallo, onbSollecita } from "./116-onboarding.js";
 import { tcChiudi, tcImpostaLettura, tcLettura, tcNaviga, tcRiepilogo, tcSalvaCasaQui, tcSalvaMattina, tcScegliKm, tcTornaACasa } from "./114-torna-a-casa.js";
 import { pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
@@ -60,6 +61,8 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  onbScansionaCavallo,
+  onbSollecita,
   cscCambio,
   cscGruppo,
   cscRapido,

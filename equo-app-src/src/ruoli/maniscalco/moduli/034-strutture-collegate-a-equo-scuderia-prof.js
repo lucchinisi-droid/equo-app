@@ -8,6 +8,7 @@ import { renderCorpoCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js"
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { isPremium } from "./042-incassi-pro.js";
 import { renderCicloStruttura } from "./102-scadenze-della-struttura.js";
+import { onbEmail, onbNomiGiaPresenti, onbRenderStato, onbResetTipo } from "./116-onboarding.js";
 import { MISURE_FERRO, misuraNorm, misuraPredefinita, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { ferroStd, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 /* ---------- STRUTTURE COLLEGATE A EQUO SCUDERIA (Professionisti, opzione A) ----------
@@ -113,7 +114,8 @@ function messaggioErroreCollegaCliente(res){
 function mostraLimiteClienti(){ openModal("modal-limite-clienti"); }
 function apriNuovoCliente(tipo){
   if(!isPremium() && clientiAttivi().length >= LIMITE_CLIENTI_FREE){ mostraLimiteClienti(); return; }
-  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+  ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-email", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  onbResetTipo();
   { const n = document.getElementById("cliente-indirizzo-pos-nota"); if(n){ n.textContent = ""; n.className = "pos-nota"; } }
   document.getElementById("cliente-error").style.display = "none";
   document.getElementById("cliente-tipo").value = tipo === "struttura" ? "struttura" : "proprietario";
@@ -134,9 +136,10 @@ function nomiCavalliDaTesto(testo){
   const visti = new Set();
   return String(testo || "").split(/[,;\n]+/).map(x => x.trim()).filter(x => x && !visti.has(x.toLowerCase()) && visti.add(x.toLowerCase())).slice(0, 30);
 }
-async function creaCavalliDaTesto(clienteId, testo){
-  const creati = [];
+async function creaCavalliDaTesto(clienteId, testo, salta){
+  const creati = [], via = new Set((salta || []).map(x => x.toLowerCase()));
   for(const nome of nomiCavalliDaTesto(testo)){
+    if(via.has(nome.toLowerCase())) continue;
     const { data, error } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome });
     if(!error && data) creati.push(data);
   }
@@ -153,12 +156,18 @@ async function createClienteMascalcia(){
   const codiceEquo = document.getElementById("cliente-codice-equo").value.trim().toUpperCase();
   const errBox = document.getElementById("cliente-error");
   errBox.style.display = "none";
+  const email = onbEmail("cliente-email");
+  if(email === null){ errBox.textContent = "L'email non sembra giusta: controllala o lasciala vuota."; errBox.style.display = "block"; return; }
   const btn = document.getElementById("cliente-save-btn");
   btn.disabled = true;
   try {
+    // 27/10/2026: cavalli con lo stesso nome già presenti (in un altro cliente o già su Equo)? si chiede prima
+    const salta = await onbNomiGiaPresenti(nomiCavalliDaTesto(nome_cavallo));
     const { error, data: nuovo } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
     if(error || !nuovo){ errBox.textContent = "Errore: " + (error?.message || "salvataggio non riuscito"); errBox.style.display = "block"; return; }
-    await creaCavalliDaTesto(nuovo.id, nome_cavallo);
+    await creaCavalliDaTesto(nuovo.id, nome_cavallo, salta);
+    if(salta.length){ const restano = nomiCavalliDaTesto(nome_cavallo).filter(n => !salta.some(x => x.toLowerCase() === n.toLowerCase())); await DB.updateClienteMascalcia(nuovo.id, { nome_cavallo: restano.join(", ") }); }
+    if(email) await DB.updateClienteMascalcia(nuovo.id, { email });
     const indirizzoNuovo = document.getElementById("cliente-indirizzo")?.value.trim();
     if(indirizzoNuovo) await DB.updateClienteMascalcia(nuovo.id, { indirizzo: indirizzoNuovo });
     let msgCollegamento = "";
@@ -166,7 +175,7 @@ async function createClienteMascalcia(){
       const res = await DB.collegaClienteDaCodice(nuovo.id, codiceEquo);
       msgCollegamento = res.ok ? " e collegato a Equo: gli è arrivato il tuo primo messaggio" : " — codice non collegato: " + messaggioErroreCollegaCliente(res);
     }
-    ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => document.getElementById(id).value = "");
+    ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-email", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
     closeModal("modal-add-cliente");
     showToast("Cliente salvato" + msgCollegamento);
     await loadClientiMascalcia();
@@ -195,9 +204,11 @@ async function openClienteDetail(id){
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
       ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> Proprietari dei cavalli</button>` : ""}
     </div>
-    <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>`;
+    <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>
+    <div class="onb-stato" id="cli-onb" style="display:none"></div>`;
   renderCicloStruttura(c);
   renderProposteCliente(c);
+  onbRenderStato(c);
   const chipQr = document.getElementById("cli-chip-qr");
   if(chipQr) chipQr.style.display = isStruttura(c) && c.centro_id ? "none" : "";
   qrClienteAperto = false;
@@ -279,6 +290,8 @@ async function openEditCliente(){
   document.getElementById("edit-cliente-promemoria").checked = c.promemoria_pagamenti !== false;
   document.getElementById("edit-cliente-nome").value = c.nome || "";
   document.getElementById("edit-cliente-telefono").value = c.telefono || "";
+  { const em = document.getElementById("edit-cliente-email"); if(em) em.value = c.email || "";
+    const g = document.getElementById("edit-cliente-email-group"); if(g) g.style.display = c.cliente_user_id || c.centro_id ? "none" : ""; }
   document.getElementById("edit-cliente-indirizzo").value = c.indirizzo || "";
   { const n = document.getElementById("edit-cliente-indirizzo-pos-nota"); if(n){ n.textContent = ""; n.className = "pos-nota"; } }
   document.getElementById("edit-cliente-note").value = c.note || "";

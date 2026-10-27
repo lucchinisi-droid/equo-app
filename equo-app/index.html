@@ -2681,6 +2681,17 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
 :where(body:not(.pl-owner)) .cav-prezzo-riga span{color:var(--accent);font-weight:800;margin-left:4px}
 :where(body:not(.pl-owner)) .cav-prezzo-edit{display:flex;gap:6px;align-items:center}
 :where(body:not(.pl-owner)) .cav-prezzo-edit .prezzi-campo{flex:1;min-width:0}
+/* 27/10/2026 onboarding: stato del collegamento a Equo nella scheda cliente */
+:where(body:not(.pl-owner)) .onb-stato{margin-top:12px;border:1.5px solid var(--border);border-radius:14px;padding:12px;background:var(--surface)}
+:where(body:not(.pl-owner)) .onb-tit{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+:where(body:not(.pl-owner)) .onb-passi{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+:where(body:not(.pl-owner)) .onb-passi span{display:flex;align-items:center;gap:8px;color:var(--muted)}
+:where(body:not(.pl-owner)) .onb-passi span.ok{color:var(--text)}
+:where(body:not(.pl-owner)) .onb-passi i{width:18px;height:18px;flex-shrink:0;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700;color:#fff}
+:where(body:not(.pl-owner)) .onb-passi span.ok i{background:var(--primary);border-color:var(--primary)}
+:where(body:not(.pl-owner)) .onb-nota{font-size:13px;line-height:1.5;margin-top:10px}
+:where(body:not(.pl-owner)) .onb-tasti{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+:where(body:not(.pl-owner)) .onb-ok{font-size:13px;font-weight:600;color:var(--primary)}
 /* CARD DEI PROFESSIONISTI: Equo Pass ed Equo CV (26/10/2026) */
 .ecv-pagina{--ecv-ok:#3fd18a;--ecv-oro:#e8b04b;--ecv-prem:#c58cff;position:fixed;inset:0;z-index:120;background:radial-gradient(120% 70% at 50% 0%,#5a4316 0%,#140e05 62%);color:#f7f0e2;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.25,1);overflow-y:auto;padding-bottom:calc(36px + env(safe-area-inset-bottom));visibility:hidden}
 .ecv-pagina.on{transform:none;visibility:visible}
@@ -3717,6 +3728,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
     <div id="home-oggi"></div>
     <div id="home-da-saldare" style="display:none"></div>
     <div class="wh" id="wh-owner"></div>
+    <div id="home-ti-seguono"></div>
     <div id="home-proposte"></div>
     <div id="home-lasciati"></div>
     <div id="home-referenze"></div>
@@ -4721,6 +4733,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
           <option value="proprietario">Proprietario</option>
           <option value="struttura">Scuderia o centro ippico</option>
         </select>
+        <div class="muted" id="cliente-tipo-auto" style="display:none;font-size:11.5px;margin-top:4px">Dal nome sembra una scuderia: se è una persona cambia qui sopra.</div>
       </div>
       <div class="input-group">
         <label class="input-label" id="cliente-nome-label">Nome cliente</label>
@@ -4733,6 +4746,11 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
       <div class="input-group">
         <label class="input-label">Telefono (opzionale)</label>
         <input class="input" id="cliente-telefono" placeholder="es. 333 1234567">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email (opzionale, consigliata)</label>
+        <input class="input" id="cliente-email" type="email" inputmode="email" autocapitalize="off" autocomplete="off" placeholder="es. marco.bianchi@gmail.com">
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Quando si iscrive a Equo con questa email ti trova già, con i suoi cavalli: si collega con un tocco.</div>
       </div>
       <div class="input-group">
         <label class="input-label">Indirizzo (opzionale, per «Naviga»)</label>
@@ -4865,6 +4883,11 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
         <label class="input-label">Telefono</label>
         <input class="input" id="edit-cliente-telefono" type="tel" inputmode="tel" placeholder="es. 333 1234567">
       </div>
+      <div class="input-group" id="edit-cliente-email-group">
+        <label class="input-label">Email</label>
+        <input class="input" id="edit-cliente-email" type="email" inputmode="email" autocapitalize="off" autocomplete="off" placeholder="es. marco.bianchi@gmail.com">
+        <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Se si iscrive a Equo con questa email ti trova già e si collega con un tocco.</div>
+      </div>
       <div class="input-group">
         <label class="input-label">Indirizzo (per «Naviga»)</label>
         <input class="input" id="edit-cliente-indirizzo" autocomplete="street-address" placeholder="es. Via Casilina km 51, Colleferro">
@@ -4924,8 +4947,11 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
       <div style="flex:1;min-width:0"><input class="input" id="ncav-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
     </div>
     <div class="input-group" style="margin-top:10px"><label class="input-label" for="ncav-cliente">Di chi è / dove sta?</label><select class="input" id="ncav-cliente" onchange="ncavClienteCambiato(this)"></select></div>
+    <div class="input-group" id="ncav-dichi-box" style="display:none"><label class="input-label" for="ncav-dichi">Di chi è?</label><select class="input" id="ncav-dichi"></select>
+      <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:4px">Se è di un tuo cliente privato la scheda va a lui (lavori e conti a chi paga) e il cavallo risulta in questa scuderia.</div></div>
     <div class="muted" style="font-size:12px;text-align:center;margin:4px 0 6px">oppure, se ha già un codice Equo</div>
-    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. PRV-000005" autocapitalize="characters" style="text-transform:uppercase"></div>
+    <div class="input-group"><label class="input-label" for="ncav-codice">Codice Equo del cavallo</label><input class="input" id="ncav-codice" placeholder="es. PRV-000005" autocapitalize="characters" style="text-transform:uppercase">
+      <button type="button" class="pos-link" onclick="onbScansionaCavallo()">📷 Inquadra la Equo Card del cavallo</button></div>
     <div class="auth-error" id="ncav-errore" style="display:none"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaNuovoCavalloCartella(this)">Salva cavallo</button>
   </div>
@@ -17313,6 +17339,244 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 		if (currentClienteId === clienteId) await loadClienteInterventi(clienteId);
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/116-onboarding.js
+	var ONB_STRUTTURA = /^(scuderia|scuderie|centro|circolo|maneggio|asd|a\.s\.d\.?|ssd|s\.s\.d\.?|allevamento|club|tenuta|azienda agricola|agriturismo|ranch|associazione|equitazione|horse|team|pony club)\b|\b(asd|a\.s\.d\.?|ssd|srl|s\.r\.l\.|ranch|club|equestre|ippico|ippica)$/i;
+	function onbTipoDaNome(nome) {
+		return ONB_STRUTTURA.test(String(nome || "").trim()) ? "struttura" : "proprietario";
+	}
+	var onbTipoAuto = false;
+	var onbTipoToccato = false;
+	function onbResetTipo() {
+		onbTipoAuto = false;
+		onbTipoToccato = false;
+		const n = document.getElementById("cliente-tipo-auto");
+		if (n) n.style.display = "none";
+	}
+	document.addEventListener("input", (e) => {
+		if (e.target?.id !== "cliente-nome" || onbTipoToccato) return;
+		const sel = document.getElementById("cliente-tipo");
+		if (!sel) return;
+		const t = onbTipoDaNome(e.target.value);
+		if (t === "struttura" && sel.value !== "struttura") {
+			sel.value = "struttura";
+			onbTipoAuto = true;
+		} else if (t === "proprietario" && onbTipoAuto && sel.value === "struttura") {
+			sel.value = "proprietario";
+			onbTipoAuto = false;
+		} else return;
+		if (typeof window.aggiornaEtichetteNuovoCliente === "function") window.aggiornaEtichetteNuovoCliente();
+		const n = document.getElementById("cliente-tipo-auto");
+		if (n) n.style.display = onbTipoAuto ? "block" : "none";
+	});
+	document.addEventListener("change", (e) => {
+		if (e.target?.id === "cliente-tipo") {
+			onbTipoToccato = true;
+			const n = document.getElementById("cliente-tipo-auto");
+			if (n) n.style.display = "none";
+		}
+	});
+	function onbEmail(id) {
+		const v = String(document.getElementById(id)?.value || "").trim().toLowerCase();
+		if (!v) return "";
+		return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) && v.length <= 200 ? v : null;
+	}
+	var onbNorm = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+	async function onbSimili(nome, chip) {
+		if (!nome && !chip) return [];
+		if (DEMO_MODE) {
+			const cli = demoState.clientiMascalcia || [];
+			return (demoState.cavalliClientiMascalcia || []).filter((x) => nome && onbNorm(x.nome) === onbNorm(nome) || chip && x.microchip && onbNorm(x.microchip) === onbNorm(chip)).map((x) => {
+				const c = cli.find((k) => k.id === x.cliente_mascalcia_id) || {};
+				return {
+					id: x.id,
+					nome: x.nome,
+					cliente: c.nome || "",
+					cliente_id: c.id,
+					codice: x.codice_equo || "",
+					archiviato: !!(x.archiviato_il || c.archiviato_il),
+					motivo: chip && onbNorm(x.microchip) === onbNorm(chip) ? "microchip" : "nome",
+					tipo: "mio"
+				};
+			});
+		}
+		try {
+			const { data, error } = await sb.rpc("equo_cavalli_simili", {
+				p_nome: nome || null,
+				p_microchip: chip || null
+			});
+			return !error && Array.isArray(data) ? data : [];
+		} catch (e) {
+			return [];
+		}
+	}
+	function onbDove(x) {
+		return x.tipo === "proprietario" ? `è già su Equo, nell'account di ${x.cliente}` : x.archiviato ? `c'è già tra gli archiviati di «${x.cliente}»` : `c'è già sotto «${x.cliente}»`;
+	}
+	async function onbControllaDoppione(nome, chip) {
+		const lista = await onbSimili(nome, chip);
+		if (!lista.length) return true;
+		const x = lista[0], altri = lista.length - 1;
+		if (await chiediSiNo(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È un altro cavallo? «Sì» crea una scheda nuova; «No» apre quello che c'è già, così non nascono doppioni.`)) return true;
+		if (x.cliente_id) {
+			if (typeof window.showClientiPage === "function") try {
+				window.showClientiPage();
+			} catch (e) {}
+			await openClienteDetail(x.cliente_id);
+			if (x.archiviato) showToast(`${x.nome} è archiviato: ripristinalo da «Modifica» → Cavalli archiviati.`);
+		}
+		return false;
+	}
+	async function onbNomiGiaPresenti(nomi) {
+		const trovati = [];
+		for (const n of nomi.slice(0, 12)) {
+			const l = (await onbSimili(n, null)).filter((x) => !x.archiviato);
+			if (l.length) trovati.push(`${n} (${l[0].tipo === "proprietario" ? "su Equo con " : "sotto "}${l[0].cliente})`);
+		}
+		if (!trovati.length) return [];
+		return await chiediSiNo(trovati.length === 1 ? "Questo cavallo c'è già" : "Questi cavalli ci sono già", trovati.join(", ") + ". Sono altri cavalli? «Sì» crea lo stesso le schede; «No» salva il cliente senza questi cavalli (li colleghi poi dalla scheda giusta).") ? [] : trovati.map((t) => t.replace(/ \(.*$/, ""));
+	}
+	function onbDiChiAggiorna(clienteId) {
+		const box = document.getElementById("ncav-dichi-box"), sel = document.getElementById("ncav-dichi");
+		if (!box || !sel) return;
+		const c = (clientiMascalcia || []).find((x) => x.id === clienteId);
+		if (!c || !isStruttura(c)) {
+			box.style.display = "none";
+			sel.value = "";
+			return;
+		}
+		const pr = clientiAttivi().filter((k) => !isStruttura(k)).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		sel.innerHTML = `<option value="">Della scuderia (paga la scuderia)</option>` + (pr.length ? `<optgroup label="Di un mio cliente, sta in ${escapeHtml(c.nome)}">${pr.map((k) => `<option value="${k.id}">${escapeHtml(k.nome)}</option>`).join("")}</optgroup>` : "");
+		box.style.display = "block";
+	}
+	document.addEventListener("change", (e) => {
+		if (e.target?.id === "ncav-cliente") onbDiChiAggiorna(e.target.value);
+	});
+	function onbDiChiScelto() {
+		const box = document.getElementById("ncav-dichi-box");
+		return box && box.style.display !== "none" ? document.getElementById("ncav-dichi")?.value || "" : "";
+	}
+	async function onbUbicaInScuderia(rigaId, strutturaId) {
+		const s = (clientiMascalcia || []).find((x) => x.id === strutturaId);
+		if (!rigaId || !s) return;
+		const campi = {
+			ubicazione_tipo: "scuderia",
+			ubicazione_cliente_id: s.id,
+			ubicazione_nome: s.nome,
+			ubicazione_indirizzo: s.indirizzo || null,
+			ubicazione_dal: isoLocale(/* @__PURE__ */ new Date())
+		};
+		if (DEMO_MODE) {
+			const r = (demoState.cavalliClientiMascalcia || []).find((x) => x.id === rigaId);
+			if (r) Object.assign(r, campi);
+			return;
+		}
+		const { error } = await sb.from("cavalli_clienti_mascalcia").update(campi).eq("id", rigaId);
+		if (error) console.error("onbUbicaInScuderia:", error);
+	}
+	var onbScanFino = 0;
+	function onbScansionaCavallo() {
+		onbScanFino = Date.now() + 12e4;
+		if (typeof window.openQrScanner === "function") window.openQrScanner();
+	}
+	function onbCodiceDaTesto(testo) {
+		const t = String(testo || "").trim();
+		const m = t.match(/\/cavallo\/([^/?#\s]+)/i);
+		if (m) try {
+			return decodeURIComponent(m[1]).toUpperCase();
+		} catch (e) {
+			return m[1].toUpperCase();
+		}
+		const k = t.toUpperCase().match(/\b[A-Z]{2,4}[\s-]?\d{4,8}\b/);
+		return k ? k[0].replace(/\s/, "-") : "";
+	}
+	function onbCodiceScansionato(testo) {
+		if (Date.now() > onbScanFino) return false;
+		onbScanFino = 0;
+		const cod = onbCodiceDaTesto(testo);
+		const campo = document.getElementById("ncav-codice");
+		if (!cod || !campo) {
+			showToast("Questo QR non è la Equo Card di un cavallo.");
+			return true;
+		}
+		campo.value = cod;
+		showToast(`Codice ${cod} letto: scegli il cliente e salva.`);
+		return true;
+	}
+	async function onbStato(c) {
+		if (DEMO_MODE) {
+			const cav = (demoState.cavalliClientiMascalcia || []).filter((x) => x.cliente_mascalcia_id === c.id && !x.archiviato_il);
+			return {
+				ok: true,
+				collegato: !!c.cliente_user_id,
+				email: c.email || null,
+				proposte_attesa: [],
+				cavalli: cav.length,
+				collegati: cav.filter((x) => x.horse_id).length,
+				definitivi: 0,
+				da_confermare_io: 0
+			};
+		}
+		try {
+			const { data, error } = await sb.rpc("equo_stato_onboarding_cliente", { p_cliente: c.id });
+			return !error && data?.ok ? data : null;
+		} catch (e) {
+			return null;
+		}
+	}
+	async function onbRenderStato(c) {
+		const box = document.getElementById("cli-onb");
+		if (!box) return;
+		box.style.display = "none";
+		if (!c || c.archiviato_il || c.centro_id) return;
+		const s = await onbStato(c);
+		if (!s || currentClienteId !== c.id || !box.isConnected) return;
+		const attesa = s.proposte_attesa || [];
+		const passi = [
+			{
+				fatto: s.collegato,
+				t: s.collegato ? "Collegato a Equo" : "Invito da accettare"
+			},
+			{
+				fatto: s.collegato && !attesa.length && s.collegati >= s.cavalli && s.cavalli > 0,
+				t: s.cavalli ? `Cavalli nel suo account ${s.collegati}/${s.cavalli}` : "Nessun cavallo"
+			},
+			{
+				fatto: s.collegati > 0 && s.definitivi >= s.collegati,
+				t: `Codici definitivi ${s.definitivi}/${s.collegati || s.cavalli}`
+			}
+		];
+		let azione = "";
+		if (!s.collegato) azione = `<div class="onb-nota">${s.email ? `Quando si iscrive con <b>${escapeHtml(s.email)}</b> ti trova già: «ti segue già», un tocco e siete collegati.` : "Aggiungi la sua email: quando si iscrive a Equo ti trova da solo, anche senza QR."}</div>
+      <div class="onb-tasti"><button class="btn btn-primary btn-sm" onclick="condividiInvitoCliente()">Condividi l'invito</button>${s.email ? "" : `<button class="btn btn-outline btn-sm" onclick="openEditCliente()">Aggiungi email</button>`}</div>`;
+		else if (attesa.length) azione = `<div class="onb-nota">Deve ancora accettare ${escapeHtml(attesa.join(", "))}: con «Accetta tutti» entrano nel suo account con i lavori già fatti.</div>
+      <div class="onb-tasti"><button class="btn btn-primary btn-sm" onclick="onbSollecita('${c.id}', this)">Ricordaglielo</button></div>`;
+		else if (s.da_confermare_io > 0) azione = `<div class="onb-nota">${s.da_confermare_io === 1 ? "Un cavallo aspetta" : s.da_confermare_io + " cavalli aspettano"} la tua conferma dei dati per il codice definitivo.</div>
+      <div class="onb-tasti"><button class="btn btn-primary btn-sm" onclick="hmConferme()">Conferma i dati</button></div>`;
+		else if (s.collegati > s.definitivi) azione = `<div class="onb-nota">Il codice diventa definitivo quando tu e il proprietario confermate nome, razza e data di nascita.</div>`;
+		if (passi.every((p) => p.fatto) && !azione) box.innerHTML = `<div class="onb-ok">✓ Tutto collegato: cavalli nel suo account e codici definitivi</div>`;
+		else box.innerHTML = `<div class="onb-tit">Collegamento a Equo</div>
+      <div class="onb-passi">${passi.map((p) => `<span class="${p.fatto ? "ok" : ""}"><i>${p.fatto ? "✓" : ""}</i>${escapeHtml(p.t)}</span>`).join("")}</div>${azione}`;
+		box.style.display = "block";
+	}
+	async function onbSollecita(clienteId, btn) {
+		if (DEMO_MODE) {
+			showToast("In demo il promemoria non parte.");
+			return;
+		}
+		if (btn) btn.disabled = true;
+		try {
+			const { data, error } = await sb.rpc("equo_sollecita_onboarding", { p_cliente: clienteId });
+			if (error || !data?.ok) {
+				showToast(data?.motivo === "non_collegato" ? "Il cliente non è ancora collegato: condividi l'invito." : "Non inviato, riprova.");
+				return;
+			}
+			showToast(data.niente ? "Ha già accettato tutti i cavalli." : "Promemoria inviato in chat.");
+			const c = (clientiMascalcia || []).find((x) => x.id === clienteId);
+			if (c) onbRenderStato(c);
+		} finally {
+			if (btn) btn.disabled = false;
+		}
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/035-ferratura-del-cavallo-scheda-libretto-fe.js
 	var LAVORO_CAV = {
 		completa: {
@@ -17653,6 +17917,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}
 		const razza = razzaValore("edit-cliente-nuovo-razza");
 		if (razza === false) return;
+		if (!await onbControllaDoppione(nome, chip || null)) {
+			closeModal("modal-edit-cliente");
+			return;
+		}
 		const { error } = await DB.insertCavalloCliente({
 			cliente_mascalcia_id: currentClienteId,
 			nome,
@@ -17696,6 +17964,18 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			telefono,
 			note
 		};
+		{
+			const g = document.getElementById("edit-cliente-email-group");
+			if (g && g.style.display !== "none") {
+				const email = onbEmail("edit-cliente-email");
+				if (email === null) {
+					errBox.textContent = "L'email non sembra giusta: controllala o lasciala vuota.";
+					errBox.style.display = "block";
+					return;
+				}
+				if (email !== (clientiMascalcia.find((x) => x.id === currentClienteId)?.email || "")) campiCli.email = email || null;
+			}
+		}
 		if (!document.getElementById("edit-cliente-nome").disabled) campiCli.nome = nome;
 		if (!document.getElementById("edit-cliente-tipo").disabled) campiCli.tipo_cliente = tipo_cliente;
 		const { error } = await DB.updateClienteMascalcia(currentClienteId, campiCli);
@@ -17860,10 +18140,15 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			"cliente-nome",
 			"cliente-cavallo",
 			"cliente-telefono",
+			"cliente-email",
 			"cliente-indirizzo",
 			"cliente-note",
 			"cliente-codice-equo"
-		].forEach((id) => document.getElementById(id).value = "");
+		].forEach((id) => {
+			const el = document.getElementById(id);
+			if (el) el.value = "";
+		});
+		onbResetTipo();
 		{
 			const n = document.getElementById("cliente-indirizzo-pos-nota");
 			if (n) {
@@ -17889,9 +18174,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const visti = /* @__PURE__ */ new Set();
 		return String(testo || "").split(/[,;\n]+/).map((x) => x.trim()).filter((x) => x && !visti.has(x.toLowerCase()) && visti.add(x.toLowerCase())).slice(0, 30);
 	}
-	async function creaCavalliDaTesto(clienteId, testo) {
-		const creati = [];
+	async function creaCavalliDaTesto(clienteId, testo, salta) {
+		const creati = [], via = new Set((salta || []).map((x) => x.toLowerCase()));
 		for (const nome of nomiCavalliDaTesto(testo)) {
+			if (via.has(nome.toLowerCase())) continue;
 			const { data, error } = await DB.insertCavalloCliente({
 				cliente_mascalcia_id: clienteId,
 				nome
@@ -17910,9 +18196,16 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const codiceEquo = document.getElementById("cliente-codice-equo").value.trim().toUpperCase();
 		const errBox = document.getElementById("cliente-error");
 		errBox.style.display = "none";
+		const email = onbEmail("cliente-email");
+		if (email === null) {
+			errBox.textContent = "L'email non sembra giusta: controllala o lasciala vuota.";
+			errBox.style.display = "block";
+			return;
+		}
 		const btn = document.getElementById("cliente-save-btn");
 		btn.disabled = true;
 		try {
+			const salta = await onbNomiGiaPresenti(nomiCavalliDaTesto(nome_cavallo));
 			const { error, data: nuovo } = await DB.insertClienteMascalcia({
 				nome,
 				nome_cavallo,
@@ -17925,7 +18218,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				errBox.style.display = "block";
 				return;
 			}
-			await creaCavalliDaTesto(nuovo.id, nome_cavallo);
+			await creaCavalliDaTesto(nuovo.id, nome_cavallo, salta);
+			if (salta.length) {
+				const restano = nomiCavalliDaTesto(nome_cavallo).filter((n) => !salta.some((x) => x.toLowerCase() === n.toLowerCase()));
+				await DB.updateClienteMascalcia(nuovo.id, { nome_cavallo: restano.join(", ") });
+			}
+			if (email) await DB.updateClienteMascalcia(nuovo.id, { email });
 			const indirizzoNuovo = document.getElementById("cliente-indirizzo")?.value.trim();
 			if (indirizzoNuovo) await DB.updateClienteMascalcia(nuovo.id, { indirizzo: indirizzoNuovo });
 			let msgCollegamento = "";
@@ -17937,10 +18235,14 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				"cliente-nome",
 				"cliente-cavallo",
 				"cliente-telefono",
+				"cliente-email",
 				"cliente-indirizzo",
 				"cliente-note",
 				"cliente-codice-equo"
-			].forEach((id) => document.getElementById(id).value = "");
+			].forEach((id) => {
+				const el = document.getElementById(id);
+				if (el) el.value = "";
+			});
 			closeModal("modal-add-cliente");
 			showToast("Cliente salvato" + msgCollegamento);
 			await loadClientiMascalcia();
@@ -17968,9 +18270,11 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
       ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> Proprietari dei cavalli</button>` : ""}
     </div>
-    <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>`;
+    <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>
+    <div class="onb-stato" id="cli-onb" style="display:none"></div>`;
 		renderCicloStruttura(c);
 		renderProposteCliente(c);
+		onbRenderStato(c);
 		const chipQr = document.getElementById("cli-chip-qr");
 		if (chipQr) chipQr.style.display = isStruttura(c) && c.centro_id ? "none" : "";
 		qrClienteAperto = false;
@@ -18048,6 +18352,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("edit-cliente-promemoria").checked = c.promemoria_pagamenti !== false;
 		document.getElementById("edit-cliente-nome").value = c.nome || "";
 		document.getElementById("edit-cliente-telefono").value = c.telefono || "";
+		{
+			const em = document.getElementById("edit-cliente-email");
+			if (em) em.value = c.email || "";
+			const g = document.getElementById("edit-cliente-email-group");
+			if (g) g.style.display = c.cliente_user_id || c.centro_id ? "none" : "";
+		}
 		document.getElementById("edit-cliente-indirizzo").value = c.indirizzo || "";
 		{
 			const n = document.getElementById("edit-cliente-indirizzo-pos-nota");
@@ -18334,6 +18644,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const pr = clientiAttivi().filter((c) => !isStruttura(c)).sort(alf), sc = clientiAttivi().filter(isStruttura).sort(alf);
 		document.getElementById("ncav-cliente").innerHTML = "<option value=\"\">Scegli il cliente o la scuderia…</option>" + (pr.length ? `<optgroup label="Clienti">${pr.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + (sc.length ? `<optgroup label="Scuderie">${sc.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + "<option value=\"__nuovo_p\">+ Nuovo cliente</option><option value=\"__nuovo_s\">+ Nuova scuderia</option>";
 		document.getElementById("ncav-errore").style.display = "none";
+		onbDiChiAggiorna("");
 		openModal("modal-nuovo-cavallo");
 	}
 	function ncavClienteCambiato(sel) {
@@ -18352,7 +18663,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			err.textContent = t;
 			err.style.display = "block";
 		};
-		const clienteId = document.getElementById("ncav-cliente").value;
+		const dove = document.getElementById("ncav-cliente").value;
+		const diChi = onbDiChiScelto(), clienteId = diChi || dove;
 		const codice = document.getElementById("ncav-codice").value.trim();
 		const nome = document.getElementById("ncav-nome").value.trim();
 		if (!clienteId) return errore("Scegli di chi è o dove sta il cavallo.");
@@ -18377,17 +18689,27 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 					if (error) return errore("Errore: " + error.message);
 				}
 				if (!data?.ok) return errore(data?.errore || "Non riuscito, riprova.");
+				if (diChi && data.codice) {
+					const r = (await DB.listCavalliCliente(clienteId)).find((x) => x.id && x.codice_equo === data.codice);
+					if (r) await onbUbicaInScuderia(r.id, dove);
+				}
 				showToast(data.azione === "gia" ? `${data.nome} è già tra i cavalli di questo cliente.` : `${data.nome} aggiunto (codice ${data.codice}).`);
 			} else {
 				const razza = razzaValore("ncav-razza");
 				if (razza === false) return;
-				const { error } = await DB.insertCavalloCliente({
+				const chip = document.getElementById("ncav-chip").value.trim() || null;
+				if (!await onbControllaDoppione(nome, chip)) {
+					closeModal("modal-nuovo-cavallo");
+					return;
+				}
+				const { error, data: riga } = await DB.insertCavalloCliente({
 					cliente_mascalcia_id: clienteId,
 					nome,
-					microchip: document.getElementById("ncav-chip").value.trim() || null,
+					microchip: chip,
 					razza
 				});
 				if (error) return errore("Errore: " + error.message);
+				if (diChi && riga?.id) await onbUbicaInScuderia(riga.id, dove);
 				showToast(`${nome} aggiunto`);
 			}
 			const cav = await DB.listCavalliCliente(clienteId);
@@ -19147,6 +19469,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (qrScanStream) qrScanRAF = requestAnimationFrame(scanQrLoop);
 	}
 	function gestisciCodiceScansionato(testo) {
+		if (onbCodiceScansionato(testo)) return;
 		const codice = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
 		const tipo = tipoCodiceEquo(codice);
 		if (tipo === "own") {
@@ -21417,6 +21740,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		onbScansionaCavallo,
+		onbSollecita,
 		cscCambio,
 		cscGruppo,
 		cscRapido,
@@ -28292,6 +28617,137 @@ const mlSigla = k => String(k || "").toUpperCase();
 
 // === GENERATO da equo-app-src/strumenti/costruisci-moduli.mjs: NON modificare qui, modificare ruoli/proprietario/moduli/ ===
 (function() {
+	// equo-app-src/src/ruoli/proprietario/moduli/103-onboarding-proprietario.js
+	var ONB_NO = "equo_ti_seguono_no";
+	var tiSeguono = [];
+	var onbAgganciato = false;
+	function onbNascosti() {
+		try {
+			return JSON.parse(localStorage.getItem(ONB_NO) || "[]");
+		} catch (e) {
+			return [];
+		}
+	}
+	function onbVisibili() {
+		const no = onbNascosti();
+		return tiSeguono.filter((x) => !no.includes(x.cliente_mascalcia_id));
+	}
+	function onbNascondiSetup() {
+		if (!(typeof horses !== "undefined" && horses.length === 0)) return;
+		if (!onbVisibili().length && !proposteInAttesa().length) return;
+		const s = document.getElementById("home-setup");
+		if (s) s.style.display = "none";
+	}
+	function onbAggancia() {
+		if (onbAgganciato || typeof estendiDopo !== "function") return;
+		onbAgganciato = true;
+		estendiDopo("renderHome", onbNascondiSetup);
+		estendiPrima("eseguiSalvataggioHorse", async (payload) => {
+			const oggi = /* @__PURE__ */ new Date(), iso = oggi.getFullYear() + "-" + String(oggi.getMonth() + 1).padStart(2, "0") + "-" + String(oggi.getDate()).padStart(2, "0");
+			if (!payload?.birth_date || payload.birth_date < iso) return true;
+			const d = (/* @__PURE__ */ new Date(payload.birth_date + "T12:00")).toLocaleDateString("it-IT", {
+				day: "numeric",
+				month: "long",
+				year: "numeric"
+			});
+			const ok = await chiediSiNo("Nato il " + d + "?", "La data di nascita è oggi o nel futuro: spesso è quella che propone il telefono. Nome, razza e data di nascita servono per il codice definitivo. «Sì» salva così, «No» torna a correggerla.");
+			if (!ok) setTimeout(() => document.getElementById("horse-birthdate")?.focus(), 150);
+			return ok;
+		});
+	}
+	async function onbCaricaTiSeguono() {
+		onbAggancia();
+		const box = document.getElementById("home-ti-seguono");
+		if (!box) return;
+		if (DEMO_MODE) {
+			box.innerHTML = "";
+			return;
+		}
+		try {
+			const { data, error } = await sb.rpc("equo_professionisti_che_mi_seguono");
+			tiSeguono = !error && Array.isArray(data) ? data : [];
+		} catch (e) {
+			tiSeguono = [];
+		}
+		const l = onbVisibili();
+		if (!l.length) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = l.map((x) => {
+			const cav = Array.isArray(x.cavalli) ? x.cavalli : [];
+			const elenco = cav.length ? "con " + (cav.length > 3 ? cav.slice(0, 3).join(", ") + " e altri " + (cav.length - 3) : cav.join(cav.length === 2 ? " e " : ", ")) : "";
+			return `<div class="card" style="margin-bottom:14px">
+      <div class="section-title" style="margin-bottom:4px">🔗 ${escapeHtml(x.maniscalco || "Il tuo maniscalco")} ti segue già${elenco ? " " + escapeHtml(elenco) : ""}</div>
+      <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:10px">${x.lavori ? `Ha già registrato ${x.lavori} ${x.lavori === 1 ? "lavoro" : "lavori"}. ` : ""}Collegati: niente codice da scrivere, e i cavalli arrivano nel tuo account con i lavori già nel libretto.</div>
+      <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="onbCollegati('${x.cliente_mascalcia_id}', this)">Collegati</button>
+        <button class="btn btn-ghost" onclick="onbNonSonoIo('${x.cliente_mascalcia_id}')">Non sono io</button></div>
+    </div>`;
+		}).join("");
+		onbNascondiSetup();
+	}
+	async function onbCollegati(id, btn) {
+		if (btn) btn.disabled = true;
+		try {
+			const { data, error } = await sb.rpc("equo_collegati_da_contatto", { p_cliente: id });
+			if (error || !data?.ok) {
+				showToast(data?.errore === "codice_gia_usato" ? "Questo profilo è già collegato a un altro account." : "Collegamento non riuscito, riprova o chiedi il QR al maniscalco.");
+				return;
+			}
+			showToast(`Collegato a ${data.nome_maniscalco}. Ora accetta i cavalli che ti ha preparato.`);
+			await onbCaricaTiSeguono();
+			await caricaProposteCavalli();
+			try {
+				if (typeof caricaManiscalcoCliente === "function") caricaManiscalcoCliente();
+			} catch (e) {}
+			document.getElementById("home-proposte")?.scrollIntoView({
+				behavior: "smooth",
+				block: "start"
+			});
+		} finally {
+			if (btn) btn.disabled = false;
+		}
+	}
+	function onbNonSonoIo(id) {
+		const no = onbNascosti();
+		no.push(id);
+		try {
+			localStorage.setItem(ONB_NO, JSON.stringify(no.slice(-20)));
+		} catch (e) {}
+		tiSeguono = tiSeguono.filter((x) => x.cliente_mascalcia_id !== id);
+		onbCaricaTiSeguono();
+	}
+	function onbAvvisoNuovoCavallo(nuovo) {
+		const form = document.querySelector("#modal-add-horse .auth-form");
+		if (!form) return;
+		let box = document.getElementById("horse-onb-avviso");
+		const p = nuovo ? proposteInAttesa() : [];
+		if (!p.length) {
+			if (box) box.remove();
+			return;
+		}
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "horse-onb-avviso";
+			box.className = "card";
+			box.style.cssText = "margin-bottom:12px;padding:12px;border:1.5px solid var(--accent)";
+			form.insertBefore(box, form.firstChild);
+		}
+		const man = p[0].maniscalco || "Il tuo maniscalco", nomi = p.map((x) => x.nome).filter(Boolean);
+		box.innerHTML = `<div style="font-size:13.5px;line-height:1.5"><b>${escapeHtml(man)}</b> ti ha già preparato ${escapeHtml(nomi.join(", "))}, con i lavori già fatti. Accettali invece di crearli da zero: niente schede doppie.</div>
+    <button type="button" class="btn btn-primary btn-sm" style="width:100%;margin-top:8px" onclick="onbVaiAiProposti()">Vai ai cavalli preparati</button>
+    <div class="muted" style="font-size:11.5px;margin-top:6px">Se è un altro cavallo continua qui sotto. Con lo stesso nome si collega da solo alla scheda del maniscalco.</div>`;
+	}
+	function onbVaiAiProposti() {
+		closeModal("modal-add-horse");
+		try {
+			showPage("home");
+		} catch (e) {}
+		setTimeout(() => document.getElementById("home-proposte")?.scrollIntoView({
+			behavior: "smooth",
+			block: "start"
+		}), 200);
+	}
 	// equo-app-src/src/ruoli/proprietario/moduli/027-health-events.js
 	async function loadHorseEvents(horseId) {
 		const box = document.getElementById("horse-events-list");
@@ -28736,6 +29192,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 			document.getElementById("horse-tipo-proprieta").value = "proprieta";
 			document.getElementById("horse-condiviso").checked = true;
 		}
+		onbAvvisoNuovoCavallo(!editingHorseId);
 		openModal("modal-add-horse");
 	}
 	var ATTIVITA_VECCHIE = {
@@ -28924,9 +29381,11 @@ const mlSigla = k => String(k || "").toUpperCase();
 		return `<span style="font-size:11px;font-weight:700;color:${x[1]};background:${x[2]};border-radius:999px;padding:3px 9px">${x[0]}</span>`;
 	}
 	var proposteCav = [];
+	var proposteInAttesa = () => proposteCav;
 	async function caricaProposteCavalli() {
 		const box = document.getElementById("home-proposte");
 		if (!box) return;
+		onbCaricaTiSeguono();
 		if (DEMO_MODE) {
 			box.innerHTML = "";
 			return;
@@ -29035,6 +29494,10 @@ const mlSigla = k => String(k || "").toUpperCase();
 		if (!proposteCav.length) {
 			box.innerHTML = "";
 			return;
+		}
+		{
+			const s = document.getElementById("home-setup");
+			if (s) s.style.display = "none";
 		}
 		const man = proposteCav[0].maniscalco || "Il tuo maniscalco";
 		const righe = proposteCav.map((p) => `
@@ -31491,6 +31954,9 @@ const mlSigla = k => String(k || "").toUpperCase();
 	}
 	// equo-app-src/src/ruoli/proprietario/moduli/index.js
 	Object.assign(window, {
+		onbCollegati,
+		onbNonSonoIo,
+		onbVaiAiProposti,
 		accettaLezioneScuderia,
 		accettaProposta,
 		accettaTuttiProposte,

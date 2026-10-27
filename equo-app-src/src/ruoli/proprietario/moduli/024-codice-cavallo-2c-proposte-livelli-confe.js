@@ -1,6 +1,7 @@
 // Equo App · proprietario · modulo (moduli ES, costruiti con Vite in ruoli/proprietario/costruito.js)
 import { loadHorses } from "./023-horses.js";
 import { openHorseDetail, renderHorsesList } from "./026-ultimo-messaggio-home.js";
+import { onbCaricaTiSeguono } from "./103-onboarding-proprietario.js";
 /* ---------- CODICE CAVALLO 2C: proposte, livelli, conferme ---------- */
 const LIVELLI_CODICE = { provvisorio: ["Provvisorio", "#5B6B62", "#E9EEEB"], validato: ["Validato", "#14573A", "#E3F1E9"], certificato: ["Certificato", "#7A5A00", "#F8EDD2"] };
 function badgeLivelloCodice(l){
@@ -8,9 +9,11 @@ function badgeLivelloCodice(l){
   return `<span style="font-size:11px;font-weight:700;color:${x[1]};background:${x[2]};border-radius:999px;padding:3px 9px">${x[0]}</span>`;
 }
 let proposteCav = [];
+const proposteInAttesa = () => proposteCav;
 async function caricaProposteCavalli(){
   const box = document.getElementById("home-proposte");
   if(!box) return;
+  onbCaricaTiSeguono();   // 27/10/2026: «<maniscalco> ti segue già» (email registrata dal maniscalco)
   if(DEMO_MODE){ box.innerHTML = ""; return; }
   try{
     const { data, error } = await sb.rpc("equo_proposte_cavalli_proprietario");
@@ -80,6 +83,7 @@ function renderProposteCavalli(){
   const box = document.getElementById("home-proposte");
   if(!box) return;
   if(!proposteCav.length){ box.innerHTML = ""; return; }
+  { const s = document.getElementById("home-setup"); if(s) s.style.display = "none"; }   // niente «Aggiungi il tuo primo cavallo»: ci sono già
   const man = proposteCav[0].maniscalco || "Il tuo maniscalco";
   const righe = proposteCav.map(p => `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
@@ -268,4 +272,4 @@ async function proponiCavalliCliente(clienteId){
 
 
 
-export { caricaReferenzeDaScrivere, inviaReferenza, caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };
+export { proposteInAttesa, caricaReferenzeDaScrivere, inviaReferenza, caricaRichiesteLasciati, rispondiLasciato, accettaProposta, accettaTuttiProposte, caricaCavalliBloccati, caricaConfermePro, caricaProposteCavalli, cavalliBloccati, cavalliUsabili, confermaCavalloPro, confermaDatiCavallo, proponiCavalliCliente, renderHorseBloccato, renderLivelloCavallo, renderProposteCliente, rifiutaProposta };
