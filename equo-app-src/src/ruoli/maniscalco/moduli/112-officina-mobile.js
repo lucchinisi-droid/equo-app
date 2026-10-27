@@ -268,12 +268,14 @@ function ofMaterialiDaLavori(lavori){
   return Object.entries(out).map(([materiale_id, quantita]) => ({ materiale_id, quantita, auto: true }));
 }
 // proposta della giornata: quella salvata, altrimenti i predefiniti
+// 27/10/2026: una giornata con la sola lettura del contachilometri della mattina (114-torna-a-casa.js) vale come non salvata
+const ofSoloLettura = g => !!g && g.km_cruscotto != null && g.km == null && g.km_stimati == null && !!g.automatica && !g.rientro_il && !g.chiusa_il;
 async function ofGiornataProposta(giorno){
   const salvata = OF.giornate[giorno];
   const lavori = await ofLavoriGiorno(giorno);
-  if(salvata) return { ...salvata, materiali: salvata.materiali || [], lavori, salvata: true };
+  if(salvata && !ofSoloLettura(salvata)) return { ...salvata, materiali: salvata.materiali || [], lavori, salvata: true };
   const km = await ofStimaKm(giorno, lavori);
-  return { giorno, mezzo_id: ofMezzoPred()?.id || null, aiutante_id: ofAiutantePred()?.id || null, ore: 8, km: km.km, km_stimati: km.km, km_corretti: false,
+  return { giorno, mezzo_id: salvata?.mezzo_id || ofMezzoPred()?.id || null, aiutante_id: salvata ? salvata.aiutante_id || null : ofAiutantePred()?.id || null, ore: 8, km: km.km, km_stimati: km.km, km_corretti: false,
     materiali: ofMaterialiDaLavori(lavori), lavori, salvata: false };
 }
 const cavalliFatti = lavori => (lavori || []).filter(e => e.stato === "fatto").length || (lavori || []).length;
@@ -330,7 +332,7 @@ async function ofChiudiGiorniPassati(){
     const inizio = [isoLocale(new Date(OF.imp.configurata_il)), aggiungiGiorniIso(OGGI(), -14)].sort().pop();
     let fatti = 0;
     for(let d = inizio; d < OGGI() && fatti < 5; d = aggiungiGiorniIso(d, 1)){
-      if(OF.giornate[d]) continue;
+      if(OF.giornate[d] && !ofSoloLettura(OF.giornate[d])) continue;
       const g = await ofGiornataProposta(d);
       if(!g.lavori.some(e => e.stato === "fatto")) continue;
       await ofSalvaGiornata(g, true); fatti++;
@@ -865,6 +867,8 @@ async function ofOnboarding(p){
       ${campo("of-b-ind", "INDIRIZZO", OF.imp?.base_indirizzo, 'maxlength="300" placeholder="es. Via Roma 10, Colleferro"')}
       <div id="of-b-ind-pos-nota" class="pos-nota"></div>
       <button type="button" class="of-link" onclick="usaPosizioneQui('of-b-ind', this)">📍 Usa la mia posizione attuale</button>
+      <div class="input-group"><label class="input-label" for="of-b-lett">CONTACHILOMETRI (FACOLTATIVO)</label><select class="input" id="of-b-lett">${[["", "Non lo leggo"], ["sera", "Lo leggo la sera al rientro"], ["mattina", "Lo leggo la mattina alla partenza"]].map(([k, t]) => `<option value="${k}"${(OF.imp?.lettura_km || "") === k ? " selected" : ""}>${t}</option>`).join("")}</select></div>
+      <div class="of-nota">Una lettura al giorno: con due letture vicine Equo usa i km veri al posto della stima.</div>
       ${campo("of-b-carb", "PREZZO DEL CARBURANTE €/L (FACOLTATIVO)", OF.imp?.prezzo_carburante != null ? String(OF.imp.prezzo_carburante).replace(".", ",") : "", 'inputmode="decimal" placeholder="es. 1,72"')}
       <div class="of-nota">Serve per stimare il costo dei km (Beta). Lo cambi quando vuoi.</div>`, avanti("Avanti · Mezzi →", "ofSalvaBase()"));
   } else if(ofPasso === 2){
@@ -890,7 +894,11 @@ async function ofOnboarding(p){
 async function ofSalvaBase(){
   const ind = val("of-b-ind");
   const xy = coordDaIndirizzo(ind);
-  const r = await OfDB.impostazioni({ base_indirizzo: ind || null, base_lat: xy?.lat ?? null, base_lon: xy?.lon ?? null, prezzo_carburante: num(val("of-b-carb")) });
+  const lett = document.getElementById("of-b-lett")?.value || "";
+  // se l'indirizzo non cambia si tengono le coordinate salvate (anche quelle prese a casa dal riepilogo della sera)
+  const stessa = ind && ind === OF.imp?.base_indirizzo && !xy;
+  const r = await OfDB.impostazioni({ base_indirizzo: ind || null, base_lat: xy?.lat ?? (stessa ? OF.imp.base_lat : null), base_lon: xy?.lon ?? (stessa ? OF.imp.base_lon : null), prezzo_carburante: num(val("of-b-carb")),
+    ...(lett !== (OF.imp?.lettura_km || "") ? { lettura_km: lett || null } : {}) });
   if(r.error){ ofErrore("Non salvato: " + r.error.message); return; }
   OF.imp = r.data; OF.kmStime = {};
   ofOnboarding(2);
@@ -986,7 +994,7 @@ setTimeout(() => quandoApriPagina(p => {
   if(p === "pro-home") ofAggiornaRiepiloghi();
 }), 0);
 
-export { OF, ofMatRapido, ofTitoloDaTipo, ofAggiornaAiutanteData, ofSalvaSpesaDaHammer, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa,
+export { CARBURANTE, OfDB, costoCarburante, ofCarica, ofGiornataProposta, ofLavoriGiorno, ofMezzo, ofSalvaGiornata, OF, ofMatRapido, ofTitoloDaTipo, ofAggiornaAiutanteData, ofSalvaSpesaDaHammer, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa,
   ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante,
   ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo,
   ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi };

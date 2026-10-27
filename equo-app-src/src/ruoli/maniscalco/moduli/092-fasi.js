@@ -6,6 +6,7 @@ import { aggiungiGiorniIso } from "./051-modal-appuntamento-maniscalco-nuovo-mod
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { mlRender } from "./090-disegno.js";
+import { tcDopoTappa } from "./114-torna-a-casa.js";
 /* ---------- fasi ---------- */
 async function mlPausaNotifiche(on){
   if(DEMO_MODE || !currentUser) return;
@@ -52,6 +53,7 @@ async function mlChiudi(){
   ml = null; mlProb = null; mlSalva(); mlRender();
   showToast(errori ? `Tappa chiusa, ma ${errori} lavori non salvati: controlla in agenda` : `Tappa chiusa: ${n} ${n === 1 ? "lavoro fatto" : "lavori fatti"}`);
   try{ await renderProDeadlines(); await renderIncassi(); if(typeof renderAgendaSettimana === "function") await renderAgendaSettimana(); }catch(e){}
+  tcDopoTappa().catch(e => console.warn("torna a casa:", e));   // ultima tappa di oggi: «Giornata finita · Torna a casa»
 }
 
 

@@ -6,6 +6,7 @@ import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
 import { agOrdinaGiro } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 import { mlControllaArrivo, mlRiprendi } from "./094-arrivo-sul-posto-se-apri-l-app-vicino-a.js";
+import { tcRenderHome } from "./114-torna-a-casa.js";
 /* ---------- banner: riquadri dalla tabella home_banner (gestita da noi); se manca, i 3 di partenza ---------- */
 const HM_BANNER_BASE = [
   { id: null, tipo: "foto", immagine: "assets/banner/cavallo.webp", titolo: "La cura del cavallo inizia dai dettagli." },
@@ -108,6 +109,7 @@ function renderHomeMan(){
   if(!document.getElementById("hm")) return;
   Promise.resolve(caricaConfermePro(false, "hm-conferme")).then(hmContaConferme).catch(() => {});
   if(typeof pmRenderHome === "function") pmRenderHome();
+  tcRenderHome().catch(e => console.warn("torna a casa:", e));
   document.getElementById("hm-saluto").textContent = testoSaluto();
   document.getElementById("hm-data").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   // scadenze: in ritardo + entro 7 giorni

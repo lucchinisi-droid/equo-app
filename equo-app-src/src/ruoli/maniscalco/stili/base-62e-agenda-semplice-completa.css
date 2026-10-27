@@ -118,3 +118,35 @@
 .pm-quando{display:flex;gap:6px;margin:0 0 10px}
 .pm-quando button{all:unset;cursor:pointer;flex:1;text-align:center;padding:8px 4px;border-radius:12px;background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:700}
 .pm-quando button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+
+/* 27/10/2026: Torna a casa e riepilogo della giornata */
+:where(body:not(.pl-owner)) .tc-card{background:var(--surface);border:1.5px solid var(--green);border-radius:18px;padding:12px 13px;margin:0 0 12px;display:flex;flex-direction:column;gap:9px;box-shadow:0 4px 14px rgba(20,72,44,.10)}
+:where(body:not(.pl-owner)) .tc-card.tc-km{border-color:#c9973f}
+:where(body:not(.pl-owner)) .tc-t{display:flex;flex-direction:column;gap:2px}
+:where(body:not(.pl-owner)) .tc-t b{font-size:14.5px}
+:where(body:not(.pl-owner)) .tc-t small{font-size:12.5px;color:var(--muted)}
+:where(body:not(.pl-owner)) .tc-riga{display:flex;gap:8px;align-items:center}
+:where(body:not(.pl-owner)) .tc-riga .input{flex:1;min-width:0}
+:where(body:not(.pl-owner)) .tc-riga .btn{flex:none}
+:where(body:not(.pl-owner)) .tc-casa{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px;border-radius:14px;background:var(--green);color:#fff;font-weight:800;font-size:15.5px}
+:where(body:not(.pl-owner)) .tc-casa:focus-visible{outline:3px solid #e2ab45;outline-offset:2px}
+:where(body:not(.pl-owner)) .tc-km-big{display:flex;align-items:baseline;gap:8px;margin:2px 0 10px}
+:where(body:not(.pl-owner)) .tc-km-big b{font-size:34px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .tc-km-big span{font-size:13px;color:var(--muted)}
+:where(body:not(.pl-owner)) .tc-lett{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+:where(body:not(.pl-owner)) .tc-lett label{font-size:12px;font-weight:800;color:var(--muted)}
+:where(body:not(.pl-owner)) .tc-lett small{font-size:12px;color:var(--muted)}
+:where(body:not(.pl-owner)) .tc-scelta,:where(body:not(.pl-owner)) .tc-opz{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+:where(body:not(.pl-owner)) .tc-opz{margin:12px 0 0;font-size:12px;color:var(--muted)}
+:where(body:not(.pl-owner)) .tc-opz span{font-weight:800;margin-right:2px}
+:where(body:not(.pl-owner)) .tc-scelta button,:where(body:not(.pl-owner)) .tc-opz button{border:1.5px solid var(--border);background:var(--card);color:var(--text);border-radius:18px;padding:5px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+:where(body:not(.pl-owner)) .tc-scelta button.on,:where(body:not(.pl-owner)) .tc-opz button.on{background:var(--green);border-color:var(--green);color:#fff}
+:where(body:not(.pl-owner)) .tc-righe{display:flex;flex-direction:column;border-top:1px solid var(--border)}
+:where(body:not(.pl-owner)) .tc-righe>div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13.5px;font-variant-numeric:tabular-nums}
+:where(body:not(.pl-owner)) .tc-righe>div.tc-nota{font-size:12px;color:var(--muted);display:block}
+:where(body:not(.pl-owner)) .tc-nota button,:where(body:not(.pl-owner)) .tc-link{border:0;background:none;padding:0;font:inherit;font-weight:800;color:var(--accent);cursor:pointer;text-align:left}
+:where(body:not(.pl-owner)) .tc-link{display:block;margin-top:10px;font-size:12.5px}
+:where(body:not(.pl-owner)) .tc-righe .verde{color:var(--green)} :where(body:not(.pl-owner)) .tc-righe .rosso{color:var(--red)}
+:where(body:not(.pl-owner)) .tc-righe>div.tc-sep{margin-top:6px}
+:where(body:not(.pl-owner)) .tc-righe>div.tc-netto{border-bottom:0;font-size:15px}
+:where(body:not(.pl-owner)) .tc-netto b{font-size:20px;color:var(--green)}
