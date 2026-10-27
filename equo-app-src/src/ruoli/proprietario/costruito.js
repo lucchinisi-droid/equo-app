@@ -757,7 +757,7 @@
     </div>`).join("");
 		box.innerHTML = `<div class="card" style="margin-bottom:14px">
     <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
-    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free è completo un solo cavallo: gli altri si aggiungono ma restano bloccati finché non passi a Premium."}</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free sono completi 3 cavalli: dal quarto in poi si aggiungono ma restano bloccati finché non passi a Premium."}</div>
     ${righe}
     ${proposteCav.length > 1 ? `<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti (${proposteCav.length})</button>` : ""}
     <div class="muted" style="font-size:12px;margin-top:6px">I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.</div>
@@ -772,7 +772,7 @@
 		return data;
 	}
 	function messaggioProposta(res) {
-		if (res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere un solo cavallo: passa a Premium per accettare anche gli altri.";
+		if (res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere 3 cavalli: passa a Premium per accettare anche gli altri.";
 		if (res.motivo === "proposta_non_trovata") return "Questa proposta non è più disponibile.";
 		return "Operazione non riuscita. Riprova.";
 	}
@@ -850,7 +850,7 @@
 		v.classList.add("bloccato");
 		box.innerHTML = `<div class="card" style="margin-bottom:14px;text-align:center;padding:18px">
     <div style="font-weight:700;margin-bottom:6px">Scheda e interventi di ${escapeHtml(h.name)} sono bloccati</div>
-    <div class="muted" style="font-size:13px;line-height:1.55;margin-bottom:12px">Il tuo maniscalco continua a registrare gli interventi, che restano al sicuro. Con il piano Free è completo un solo cavallo: passa a Premium per sbloccare questa scheda, con tutto il suo storico.</div>
+    <div class="muted" style="font-size:13px;line-height:1.55;margin-bottom:12px">Il tuo maniscalco continua a registrare gli interventi, che restano al sicuro. Con il piano Free sono completi 3 cavalli: passa a Premium per sbloccare questa scheda, con tutto il suo storico.</div>
     <button class="btn btn-primary" style="width:100%" onclick="openModal('modal-limite-cavalli')">Sblocca con Premium</button></div>`;
 	}
 	async function renderLivelloCavallo(h) {

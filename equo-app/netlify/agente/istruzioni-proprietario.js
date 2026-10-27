@@ -61,7 +61,7 @@ const CORPO_PROPRIETARIO = `## Come lavori
 - Calendario: lezioni, allenamenti e gare.
 - Chat: sezione "Il tuo maniscalco" → "+ Collega" con il codice che dà il maniscalco; poi "Prenota" per chiedere un appuntamento e l'icona del cavallo per abbinare i cavalli. Chat tra proprietari con il codice personale (menu profilo → "Il tuo codice per la chat") o scansionando il QR.
 - Home → "Servizi vicino a te": veterinari, centri ippici e negozi vicini, con chiamata e indicazioni.
-- Piano: Free (1 cavallo, 5 messaggi AI al giorno, il contatore riparte a mezzanotte) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
+- Piano: Free (fino a 3 cavalli, 5 messaggi AI al giorno, il contatore riparte a mezzanotte) e Premium (cavalli illimitati, promemoria automatici, 500 messaggi AI al mese): menu profilo → "Passa a Premium" (mensile 2,99 €, annuale 19 €, lifetime 49 € a posti limitati).
 - Assistenza: Home → "Serve aiuto?" → "Apri un ticket" (risposta via email), oppure gestione.equo@gmail.com.
 
 ${REGOLE_COMUNI}`;

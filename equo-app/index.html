@@ -6208,7 +6208,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
   </div>
 </div>
 
-<!-- Piano Free proprietario: 1 cavallo -->
+<!-- Piano Free proprietario: 3 cavalli -->
 <div class="modal-overlay" id="modal-import-vecchia">
   <div class="modal imp-modal">
     <div class="modal-handle"></div>
@@ -6387,9 +6387,9 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
 <div class="modal-overlay" id="modal-limite-cavalli" onclick="closeOut(event,'modal-limite-cavalli')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Il piano Free comprende 1 cavallo</div>
+    <div class="modal-title">Il piano Free comprende 3 cavalli</div>
     <p class="muted" style="font-size:13.5px;line-height:1.6;margin-bottom:10px">
-      Il tuo cavallo e tutti i suoi dati restano al loro posto. Per aggiungere altri cavalli passa a <strong>Equo Premium</strong>:
+      I tuoi cavalli e tutti i loro dati restano al loro posto. Per aggiungerne altri passa a <strong>Equo Premium</strong>:
     </p>
     <ul style="font-size:13.5px;line-height:1.7;margin:0 0 18px;padding-left:18px">
       <li>cavalli illimitati</li>
@@ -22138,15 +22138,15 @@ Object.assign(DB, {
     return error ? [] : (data || []);
   },
   async insertHorse(payload){
-    // piano Free del proprietario: 1 cavallo (il controllo vero è anche nel database)
-    if(!isPremium() && (horses || []).length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavallo." }, data: null }; }
+    // piano Free del proprietario: 3 cavalli (LIMITE_CAVALLI_FREE) (il controllo vero è anche nel database)
+    if(!isPremium() && (horses || []).length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavalli." }, data: null }; }
     if(DEMO_MODE){
       const id = "demo-" + (++demoIdCounter);
       demoState.horses.push({ id, stable_id: null, ...payload });
       return { error: null, data: { id } };
     }
     const { data, error } = await sb.from("horses").insert({ owner_id: currentUser.id, ...payload }).select().single();
-    if(error && /LIMITE_CAVALLI_FREE/.test(error.message || "")){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavallo." }, data: null }; }
+    if(error && /LIMITE_CAVALLI_FREE/.test(error.message || "")){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavalli." }, data: null }; }
     return { error, data };
   },
   async updateHorse(id, payload){
@@ -28205,7 +28205,7 @@ let homeLastMessageTarget = null;
 // da 026-ultimo-messaggio-home.js
 let editingHorseId = null;
 // da 026-ultimo-messaggio-home.js
-const LIMITE_CAVALLI_FREE = 1;
+const LIMITE_CAVALLI_FREE = 3;   // 27/10/2026: da 1 a 3 cavalli
 // da 027-health-events.js
 const EVENT_LABELS = { vaccino: "Vaccino", coggins: "Test Coggins", ferratura: "Ferratura", sverminazione: "Sverminazione" };
 // da 029-lezioni-manuali-calendario-proprietario.js
@@ -29048,7 +29048,7 @@ const mlSigla = k => String(k || "").toUpperCase();
     </div>`).join("");
 		box.innerHTML = `<div class="card" style="margin-bottom:14px">
     <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
-    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free è completo un solo cavallo: gli altri si aggiungono ma restano bloccati finché non passi a Premium."}</div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free sono completi 3 cavalli: dal quarto in poi si aggiungono ma restano bloccati finché non passi a Premium."}</div>
     ${righe}
     ${proposteCav.length > 1 ? `<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti (${proposteCav.length})</button>` : ""}
     <div class="muted" style="font-size:12px;margin-top:6px">I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.</div>
@@ -29063,7 +29063,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		return data;
 	}
 	function messaggioProposta(res) {
-		if (res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere un solo cavallo: passa a Premium per accettare anche gli altri.";
+		if (res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere 3 cavalli: passa a Premium per accettare anche gli altri.";
 		if (res.motivo === "proposta_non_trovata") return "Questa proposta non è più disponibile.";
 		return "Operazione non riuscita. Riprova.";
 	}
@@ -29141,7 +29141,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		v.classList.add("bloccato");
 		box.innerHTML = `<div class="card" style="margin-bottom:14px;text-align:center;padding:18px">
     <div style="font-weight:700;margin-bottom:6px">Scheda e interventi di ${escapeHtml(h.name)} sono bloccati</div>
-    <div class="muted" style="font-size:13px;line-height:1.55;margin-bottom:12px">Il tuo maniscalco continua a registrare gli interventi, che restano al sicuro. Con il piano Free è completo un solo cavallo: passa a Premium per sbloccare questa scheda, con tutto il suo storico.</div>
+    <div class="muted" style="font-size:13px;line-height:1.55;margin-bottom:12px">Il tuo maniscalco continua a registrare gli interventi, che restano al sicuro. Con il piano Free sono completi 3 cavalli: passa a Premium per sbloccare questa scheda, con tutto il suo storico.</div>
     <button class="btn btn-primary" style="width:100%" onclick="openModal('modal-limite-cavalli')">Sblocca con Premium</button></div>`;
 	}
 	async function renderLivelloCavallo(h) {

@@ -5,7 +5,7 @@ let homeLastMessageTarget = null;
 // da 026-ultimo-messaggio-home.js
 let editingHorseId = null;
 // da 026-ultimo-messaggio-home.js
-const LIMITE_CAVALLI_FREE = 1;
+const LIMITE_CAVALLI_FREE = 3;   // 27/10/2026: da 1 a 3 cavalli
 // da 027-health-events.js
 const EVENT_LABELS = { vaccino: "Vaccino", coggins: "Test Coggins", ferratura: "Ferratura", sverminazione: "Sverminazione" };
 // da 029-lezioni-manuali-calendario-proprietario.js

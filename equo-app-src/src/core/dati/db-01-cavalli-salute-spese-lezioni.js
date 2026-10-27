@@ -6,15 +6,15 @@ Object.assign(DB, {
     return error ? [] : (data || []);
   },
   async insertHorse(payload){
-    // piano Free del proprietario: 1 cavallo (il controllo vero è anche nel database)
-    if(!isPremium() && (horses || []).length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavallo." }, data: null }; }
+    // piano Free del proprietario: 3 cavalli (LIMITE_CAVALLI_FREE) (il controllo vero è anche nel database)
+    if(!isPremium() && (horses || []).length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavalli." }, data: null }; }
     if(DEMO_MODE){
       const id = "demo-" + (++demoIdCounter);
       demoState.horses.push({ id, stable_id: null, ...payload });
       return { error: null, data: { id } };
     }
     const { data, error } = await sb.from("horses").insert({ owner_id: currentUser.id, ...payload }).select().single();
-    if(error && /LIMITE_CAVALLI_FREE/.test(error.message || "")){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavallo." }, data: null }; }
+    if(error && /LIMITE_CAVALLI_FREE/.test(error.message || "")){ openModal("modal-limite-cavalli"); return { error: { message: "Il piano Free comprende " + LIMITE_CAVALLI_FREE + " cavalli." }, data: null }; }
     return { error, data };
   },
   async updateHorse(id, payload){
