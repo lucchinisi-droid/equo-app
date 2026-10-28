@@ -8,7 +8,7 @@ import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { cavalliMieiLista, nomiCavalliCliente, paroleCercaCliente } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
-import { onbControllaDoppione, onbDiChiAggiorna, onbDiChiScelto, onbUbicaInScuderia } from "./116-onboarding.js";
+import { creaCavalloUnico, onbDiChiAggiorna, onbDiChiScelto, onbUbicaInScuderia } from "./116-onboarding.js";
 /* ---------- CLIENTI A CARTELLE (stile Telegram): Cavalli · Clienti · Scuderie ----------
    Il primo spazio di ogni cartella è l'aggiunta rapida. La ricerca (cercaFiltro «clienti») cerca nella cartella aperta. */
 /* -> stato-condiviso.js */
@@ -169,11 +169,10 @@ async function salvaNuovoCavalloCartella(btn){
       const razza = razzaValore("ncav-razza");
       if(razza === false) return;
       const chip = document.getElementById("ncav-chip").value.trim() || null;
-      // 27/10/2026: stesso nome o microchip già presente? prima si chiede (niente doppioni)
-      if(!(await onbControllaDoppione(nome, chip))){ closeModal("modal-nuovo-cavallo"); return; }
-      const { error, data: riga } = await DB.insertCavalloCliente({ cliente_mascalcia_id: clienteId, nome, microchip: chip, razza });
-      if(error) return errore("Errore: " + error.message);
-      if(diChi && riga?.id) await onbUbicaInScuderia(riga.id, dove);
+      // 28/10/2026: strada unica (controllo doppioni, «Di chi è?») · 116-onboarding.js
+      const r = await creaCavalloUnico({ cliente_mascalcia_id: clienteId, nome, microchip: chip, razza }, { ubicazioneDa: diChi ? dove : null });
+      if(r.annullato){ closeModal("modal-nuovo-cavallo"); return; }
+      if(r.error) return errore("Errore: " + r.error.message);
       showToast(`${nome} aggiunto`);
     }
     // tiene allineato il testo dei cavalli del cliente

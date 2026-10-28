@@ -951,11 +951,14 @@
 		} else if (azione.tipo === "appuntamento") {
 			let cavallo_cliente_id = null, horse_id = null;
 			if (x.nuovo_cavallo_nome) {
-				const r = await DB.insertCavalloCliente({
+				const r = typeof window.creaCavalloUnico === "function" ? await window.creaCavalloUnico({
+					cliente_mascalcia_id: x.cliente_mascalcia_id,
+					nome: x.nuovo_cavallo_nome
+				}, { usaEsistente: true }) : await DB.insertCavalloCliente({
 					cliente_mascalcia_id: x.cliente_mascalcia_id,
 					nome: x.nuovo_cavallo_nome
 				});
-				error = r.error;
+				error = r.annullato ? { message: r.messaggio || "il cavallo c'è già" } : r.error;
 				cavallo_cliente_id = r.data?.id || null;
 			} else if (x.cavallo) ({cavallo_cliente_id, horse_id} = await DB.risolviCavalloPerIntervento(x.cliente_mascalcia_id, x.cavallo));
 			if (!error) {

@@ -8,7 +8,7 @@ import { renderCorpoCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js"
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { isPremium } from "./042-incassi-pro.js";
 import { renderCicloStruttura } from "./102-scadenze-della-struttura.js";
-import { onbEmail, onbNomiGiaPresenti, onbRenderStato, onbResetTipo } from "./116-onboarding.js";
+import { creaClienteUnico, onbEmail, onbRenderStato, onbResetTipo } from "./116-onboarding.js";
 import { MISURE_FERRO, misuraNorm, misuraPredefinita, renderMisuraWheel } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { ferroStd, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 /* ---------- STRUTTURE COLLEGATE A EQUO SCUDERIA (Professionisti, opzione A) ----------
@@ -161,15 +161,9 @@ async function createClienteMascalcia(){
   const btn = document.getElementById("cliente-save-btn");
   btn.disabled = true;
   try {
-    // 27/10/2026: cavalli con lo stesso nome già presenti (in un altro cliente o già su Equo)? si chiede prima
-    const salta = await onbNomiGiaPresenti(nomiCavalliDaTesto(nome_cavallo));
-    const { error, data: nuovo } = await DB.insertClienteMascalcia({ nome, nome_cavallo, telefono, note, tipo_cliente });
+    // 28/10/2026: strada unica per i clienti nuovi (cavalli già presenti, email, indirizzo) · 116-onboarding.js
+    const { error, data: nuovo } = await creaClienteUnico({ nome, tipo_cliente, telefono, note, email, indirizzo: document.getElementById("cliente-indirizzo")?.value.trim(), cavalli: nome_cavallo });
     if(error || !nuovo){ errBox.textContent = "Errore: " + (error?.message || "salvataggio non riuscito"); errBox.style.display = "block"; return; }
-    await creaCavalliDaTesto(nuovo.id, nome_cavallo, salta);
-    if(salta.length){ const restano = nomiCavalliDaTesto(nome_cavallo).filter(n => !salta.some(x => x.toLowerCase() === n.toLowerCase())); await DB.updateClienteMascalcia(nuovo.id, { nome_cavallo: restano.join(", ") }); }
-    if(email) await DB.updateClienteMascalcia(nuovo.id, { email });
-    const indirizzoNuovo = document.getElementById("cliente-indirizzo")?.value.trim();
-    if(indirizzoNuovo) await DB.updateClienteMascalcia(nuovo.id, { indirizzo: indirizzoNuovo });
     let msgCollegamento = "";
     if(codiceEquo){
       const res = await DB.collegaClienteDaCodice(nuovo.id, codiceEquo);

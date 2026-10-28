@@ -14,6 +14,7 @@ import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scu
 import { cercaClienteIntervento } from "./087-2-scelta-del-cliente-nell-appuntamento.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { cscRender } from "./115-cavalli-per-scadenza.js";
+import { creaCavalloUnico, creaClienteUnico, onbEmail, onbResetTipoAppuntamento, verificaNuovoCavallo, testoGiaPresente } from "./116-onboarding.js";
 /* ---------- FERRO (standard nella scheda del cavallo) E QUANTITÀ (rotella 1-4) ---------- */
 let ferroOverride = {};      // chiave cavallo → { s, n, origine } ferro diverso solo per questo appuntamento
 let ferroEditKey = null;
@@ -146,6 +147,8 @@ async function openInterventoModal(clienteId, intervento, preset){
   const i = interventoInModifica || preset || {};
   document.getElementById("intervento-nuovo-cliente-nome").value = "";
   document.getElementById("intervento-nuovo-cliente-tipo").value = "proprietario";
+  { const em = document.getElementById("intervento-nuovo-cliente-email"); if(em) em.value = ""; }
+  onbResetTipoAppuntamento();
   document.getElementById("intervento-nuovo-cavallo-nome").value = "";
   document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
   // «Mezza ferratura» non è più una scelta dell'appuntamento: la decide la scheda del cavallo
@@ -460,6 +463,16 @@ async function salvaInterventoMascalcia(){
   const nuovoCavalloNome = document.getElementById("intervento-nuovo-cavallo-nome").value.trim();
   const nuovoCavalloChip = document.getElementById("intervento-nuovo-cavallo-microchip").value.trim();
   if(scelti.includes("__nuovo_cavallo__") && !nuovoCavalloNome) return errore("Inserisci il nome del cavallo.");
+  // 28/10/2026: cliente e cavallo nuovi passano dalla strada unica: email, cavallo già presente (anche sotto un altro cliente)
+  const emailNuovo = cliente_mascalcia_id === "__nuovo__" ? onbEmail("intervento-nuovo-cliente-email") : "";
+  if(emailNuovo === null) return errore("L'email del cliente non sembra giusta: controllala o lasciala vuota.");
+  let verificaCav = null;
+  if(scelti.includes("__nuovo_cavallo__") && !interventoInModifica){
+    verificaCav = await verificaNuovoCavallo(nuovoCavalloNome, nuovoCavalloChip || null, cliente_mascalcia_id === "__nuovo__" ? null : cliente_mascalcia_id, true);
+    if(verificaCav.stop) return errore(testoGiaPresente(verificaCav.stop));
+    // il cavallo che c'era già è anche spuntato nell'elenco: un appuntamento solo
+    if(verificaCav.usa && scelti.includes("m:" + verificaCav.usa.id)) scelti = scelti.filter(k => k !== "__nuovo_cavallo__");
+  }
 
   // ferro di ogni cavallo: quello della scheda (un lavoro già fatto conserva il ferro di quel giorno)
   const ferri = {};
@@ -482,7 +495,7 @@ async function salvaInterventoMascalcia(){
       const nome = document.getElementById("intervento-nuovo-cliente-nome").value.trim();
       if(!nome) return errore("Inserisci il nome del cliente.");
       const tipo_cliente = document.getElementById("intervento-nuovo-cliente-tipo").value;
-      const { error: clienteError, data: nuovoCliente } = await DB.insertClienteMascalcia({ nome, nome_cavallo: nuovoCavalloNome, telefono: "", note: "", tipo_cliente });
+      const { error: clienteError, data: nuovoCliente } = await creaClienteUnico({ nome, tipo_cliente, email: emailNuovo, nome_cavallo: nuovoCavalloNome });
       if(clienteError || !nuovoCliente) return errore("Errore nel creare il cliente: " + (clienteError?.message || ""));
       cliente_mascalcia_id = nuovoCliente.id;
       clienteCreatoOra = true;
@@ -493,7 +506,8 @@ async function salvaInterventoMascalcia(){
     for(const k of scelti){
       let cavallo_cliente_id = null, horse_id = null, nome = "", cliente = cliente_mascalcia_id;
       if(k === "__nuovo_cavallo__"){
-        const { error: cvErr, data: cv } = await DB.insertCavalloCliente({ cliente_mascalcia_id, nome: nuovoCavalloNome, microchip: nuovoCavalloChip || null, ferratura_tipo: nuovoCavLavoro });
+        const { error: cvErr, data: cv } = verificaCav?.usa ? { data: verificaCav.usa }
+          : await creaCavalloUnico({ cliente_mascalcia_id, nome: nuovoCavalloNome, microchip: nuovoCavalloChip || null, ferratura_tipo: nuovoCavLavoro }, { chiedi: !verificaCav });
         if(cvErr || !cv) return errore("Errore nel salvare il cavallo: " + (cvErr?.message || ""));
         cavallo_cliente_id = cv.id; nome = nuovoCavalloNome;
       } else if(k){

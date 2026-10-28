@@ -1,7 +1,7 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { clientiAttivi } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
-import { openClienteDetail, openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
+import { creaCavalliDaTesto, nomiCavalliDaTesto, openClienteDetail, openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { condividiInvitoCliente } from "./108-invito-qr.js";
@@ -18,18 +18,28 @@ const ONB_STRUTTURA = /^(scuderia|scuderie|centro|circolo|maneggio|asd|a\.s\.d\.
 function onbTipoDaNome(nome){ return ONB_STRUTTURA.test(String(nome || "").trim()) ? "struttura" : "proprietario"; }
 let onbTipoAuto = false, onbTipoToccato = false;
 function onbResetTipo(){ onbTipoAuto = false; onbTipoToccato = false; const n = document.getElementById("cliente-tipo-auto"); if(n) n.style.display = "none"; }
+// 28/10/2026: vale per «Nuovo cliente» e per «+ Nuovo cliente» dentro l'appuntamento (stessa regola ovunque)
+const ONB_CAMPI_TIPO = { "cliente-nome": ["cliente-tipo", "cliente-tipo-auto"], "intervento-nuovo-cliente-nome": ["intervento-nuovo-cliente-tipo", "intervento-nuovo-cliente-tipo-auto"] };
+const onbTipoStato = {};
 document.addEventListener("input", e => {
-  if(e.target?.id !== "cliente-nome" || onbTipoToccato) return;
-  const sel = document.getElementById("cliente-tipo"); if(!sel) return;
+  const campi = ONB_CAMPI_TIPO[e.target?.id]; if(!campi) return;
+  const st = e.target.id === "cliente-nome" ? { get auto(){ return onbTipoAuto; }, set auto(v){ onbTipoAuto = v; }, get toccato(){ return onbTipoToccato; } }
+    : (onbTipoStato[e.target.id] = onbTipoStato[e.target.id] || { auto: false, toccato: false });
+  if(st.toccato) return;
+  const sel = document.getElementById(campi[0]); if(!sel) return;
   const t = onbTipoDaNome(e.target.value);
-  if(t === "struttura" && sel.value !== "struttura"){ sel.value = "struttura"; onbTipoAuto = true; }
-  else if(t === "proprietario" && onbTipoAuto && sel.value === "struttura"){ sel.value = "proprietario"; onbTipoAuto = false; }
+  if(t === "struttura" && sel.value !== "struttura"){ sel.value = "struttura"; st.auto = true; }
+  else if(t === "proprietario" && st.auto && sel.value === "struttura"){ sel.value = "proprietario"; st.auto = false; }
   else return;
-  if(typeof window.aggiornaEtichetteNuovoCliente === "function") window.aggiornaEtichetteNuovoCliente();
-  const n = document.getElementById("cliente-tipo-auto");
-  if(n){ n.style.display = onbTipoAuto ? "block" : "none"; }
+  if(campi[0] === "cliente-tipo" && typeof window.aggiornaEtichetteNuovoCliente === "function") window.aggiornaEtichetteNuovoCliente();
+  const n = document.getElementById(campi[1]);
+  if(n){ n.style.display = st.auto ? "block" : "none"; }
 });
-document.addEventListener("change", e => { if(e.target?.id === "cliente-tipo"){ onbTipoToccato = true; const n = document.getElementById("cliente-tipo-auto"); if(n) n.style.display = "none"; } });
+document.addEventListener("change", e => {
+  if(e.target?.id === "cliente-tipo"){ onbTipoToccato = true; const n = document.getElementById("cliente-tipo-auto"); if(n) n.style.display = "none"; }
+  if(e.target?.id === "intervento-nuovo-cliente-tipo"){ (onbTipoStato["intervento-nuovo-cliente-nome"] = onbTipoStato["intervento-nuovo-cliente-nome"] || {}).toccato = true; const n = document.getElementById("intervento-nuovo-cliente-tipo-auto"); if(n) n.style.display = "none"; }
+});
+function onbResetTipoAppuntamento(){ delete onbTipoStato["intervento-nuovo-cliente-nome"]; const n = document.getElementById("intervento-nuovo-cliente-tipo-auto"); if(n) n.style.display = "none"; }
 
 // ---- 2. email del cliente: «» = vuota, null = non valida
 function onbEmail(id){
@@ -57,19 +67,67 @@ function onbDove(x){
     : x.archiviato ? `c'è già tra gli archiviati di «${x.cliente}»` : `c'è già sotto «${x.cliente}»`;
 }
 // true = crea il cavallo nuovo; false = il maniscalco ha scelto di aprire quello che c'è già
-async function onbControllaDoppione(nome, chip){
+async function onbApriEsistente(x){
+  if(!x?.cliente_id) return;
+  try{ showPage("pro-clienti"); }catch(e){}
+  await openClienteDetail(x.cliente_id);
+  if(x.archiviato) showToast(`${x.nome} è archiviato: ripristinalo da «Modifica» → Cavalli archiviati.`);
+}
+// stesso nome o microchip già presente? → { crea: true } · { usa: {id, nome} } (stesso cliente, si usa quello) · { stop: x }
+async function verificaNuovoCavallo(nome, chip, clienteId, usaEsistente){
   const lista = await onbSimili(nome, chip);
-  if(!lista.length) return true;
+  if(!lista.length) return { crea: true };
   const x = lista[0], altri = lista.length - 1;
+  const stesso = usaEsistente && x.tipo === "mio" && !x.archiviato && x.id && clienteId && x.cliente_id === clienteId;
   const ok = await chiediSiNo(`${x.nome} ${onbDove(x)}`,
-    `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È un altro cavallo? «Sì» crea una scheda nuova; «No» apre quello che c'è già, così non nascono doppioni.`);
-  if(ok) return true;
-  if(x.cliente_id){
-    if(typeof window.showClientiPage === "function") try{ window.showClientiPage(); }catch(e){}
-    await openClienteDetail(x.cliente_id);
-    if(x.archiviato) showToast(`${x.nome} è archiviato: ripristinalo da «Modifica» → Cavalli archiviati.`);
+    `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È un altro cavallo? «Sì» crea una scheda nuova; «No» ${stesso ? "usa quello che c'è già" : usaEsistente ? "si ferma, così scegli quello che c'è già" : "apre quello che c'è già"}: niente doppioni.`);
+  if(ok) return { crea: true };
+  if(stesso) return { usa: { id: x.id, nome: x.nome } };
+  return { stop: x };
+}
+// testo per chi si ferma: dove sta il cavallo che c'è già
+function testoGiaPresente(x){
+  return x.tipo === "proprietario" ? `${x.nome} è già su Equo con ${x.cliente}: sceglilo dall'elenco dei cavalli di quel cliente.`
+    : x.archiviato ? `${x.nome} è tra gli archiviati di «${x.cliente}»: ripristinalo da «Modifica».`
+    : `${x.nome} c'è già sotto «${x.cliente}»: usa quel cliente (oppure rispondi «Sì» se è un altro cavallo).`;
+}
+async function onbControllaDoppione(nome, chip){
+  const v = await verificaNuovoCavallo(nome, chip, null, false);
+  if(v.stop){ await onbApriEsistente(v.stop); return false; }
+  return true;
+}
+/* ---- UNA SOLA STRADA per creare cavalli e clienti (28/10/2026) ----
+   La usano: cartella Cavalli, Modifica cliente, Nuovo cliente, nuovo appuntamento, Hammer, Cambia proprietario.
+   creaCavalloUnico(campi, { chiedi, usaEsistente, ubicazioneDa }) → { data } · { data, riusato } · { annullato, esistente } · { error } */
+async function creaCavalloUnico(campi, opz = {}){
+  const nome = String(campi?.nome || "").trim(), chip = campi?.microchip ? String(campi.microchip).trim() : null;
+  if(!nome) return { error: { message: "Scrivi il nome del cavallo." } };
+  if(opz.chiedi !== false){
+    const v = await verificaNuovoCavallo(nome, chip, campi.cliente_mascalcia_id, !!opz.usaEsistente);
+    if(v.usa) return { data: v.usa, riusato: true };
+    if(v.stop){ if(!opz.usaEsistente) await onbApriEsistente(v.stop); return { annullato: true, esistente: v.stop, messaggio: testoGiaPresente(v.stop) }; }
   }
-  return false;
+  const r = await DB.insertCavalloCliente({ cliente_mascalcia_id: campi.cliente_mascalcia_id, nome, microchip: chip, horse_id: campi.horse_id || null, razza: campi.razza || null, ferratura_tipo: campi.ferratura_tipo || null });
+  if(!r.error && r.data?.id && opz.ubicazioneDa) await onbUbicaInScuderia(r.data.id, opz.ubicazioneDa);
+  return r;
+}
+// creaClienteUnico({ nome, tipo_cliente, telefono, email, indirizzo, note, cavalli (testo «Aurora, Baia»), nome_cavallo, chiediCavalli })
+async function creaClienteUnico(c){
+  const nome = String(c?.nome || "").trim();
+  if(!nome) return { error: { message: "Scrivi il nome del cliente." } };
+  const email = c.email ? String(c.email).trim().toLowerCase() : "";
+  const tipo_cliente = c.tipo_cliente || onbTipoDaNome(nome);
+  const nomi = nomiCavalliDaTesto(c.cavalli || "");
+  const salta = nomi.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomi) : [];
+  const restano = nomi.filter(n => !salta.some(x => x.toLowerCase() === n.toLowerCase()));
+  const { error, data } = await DB.insertClienteMascalcia({ nome, nome_cavallo: c.nome_cavallo != null ? c.nome_cavallo : restano.join(", "), telefono: c.telefono || "", note: c.note || "", tipo_cliente });
+  if(error || !data) return { error: error || { message: "salvataggio non riuscito" } };
+  const extra = {};
+  if(email) extra.email = email;
+  if(c.indirizzo) extra.indirizzo = String(c.indirizzo).trim();
+  if(Object.keys(extra).length) await DB.updateClienteMascalcia(data.id, extra);
+  const cavalli = restano.length ? await creaCavalliDaTesto(data.id, restano.join(", ")) : [];
+  return { data, cavalli, saltati: salta };
 }
 // nuovo cliente con «Aurora, Baia»: i nomi che esistono già, tutti insieme in una domanda
 async function onbNomiGiaPresenti(nomi){
@@ -188,4 +246,4 @@ async function onbSollecita(clienteId, btn){
   } finally { if(btn) btn.disabled = false; }
 }
 
-export { onbCodiceScansionato, onbControllaDoppione, onbDiChiAggiorna, onbDiChiScelto, onbEmail, onbNomiGiaPresenti, onbRenderStato, onbResetTipo, onbScansionaCavallo, onbSollecita, onbTipoDaNome, onbUbicaInScuderia };
+export { creaCavalloUnico, creaClienteUnico, onbResetTipoAppuntamento, testoGiaPresente, verificaNuovoCavallo, onbCodiceScansionato, onbControllaDoppione, onbDiChiAggiorna, onbDiChiScelto, onbEmail, onbNomiGiaPresenti, onbRenderStato, onbResetTipo, onbScansionaCavallo, onbSollecita, onbTipoDaNome, onbUbicaInScuderia };

@@ -2,6 +2,7 @@
 import { clientiAttivi, loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { openClienteDetail } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
+import { creaClienteUnico } from "./116-onboarding.js";
 import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { contoEuro } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { caricaCavalliMiei, cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
@@ -96,7 +97,7 @@ async function confermaCambiaProprietario(btn){
     if(dest === "__nuovo"){
       const nome = document.getElementById("cp-nuovo-nome").value.trim();
       if(!nome) return errore("Scrivi il nome del nuovo proprietario.");
-      const { data, error } = await DB.insertClienteMascalcia({ nome, telefono: document.getElementById("cp-nuovo-tel").value.trim() || null, tipo_cliente: "proprietario" });
+      const { data, error } = await creaClienteUnico({ nome, telefono: document.getElementById("cp-nuovo-tel").value.trim() || null, tipo_cliente: "proprietario" });   // 28/10/2026: strada unica
       if(error || !data) return errore(error?.message || "Proprietario non creato, riprova.");
       dest = data.id;
     }
