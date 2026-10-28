@@ -43,6 +43,7 @@ await pg.click("#intervento-cavalli-multi .lc-urgenti");await pg.waitForTimeout(
 const s1=await scelti();console.log("urgenti:",s1);
 ok(s1.split(",").length===10&&!s1.includes("cs11")&&!s1.includes("cs9"),"seleziona scaduti e in scadenza (9 scuderia + Zeus)");
 ok(/Togli scaduti e in scadenza \(10\)/.test(await multi()),"testo diventa Togli");
+ok(await pg.evaluate(()=>document.querySelector("#intervento-cavallo-label .lc-conta")?.textContent)==="10 scelti","contatore 10 scelti");
 await pg.click("#intervento-cavalli-multi .lc-ord >> text=Scadenza");await pg.waitForTimeout(200);
 ok((await nomi()).startsWith("Aurora,Brezza,Cometa,Diablo,Elettra,Furia")&&(await nomi()).endsWith("Rubino,Quarzo")||(await nomi()).endsWith("Quarzo,Rubino"),"ordine Scadenza: "+await nomi());
 ok((await scelti()).split(",").length===10,"spunte tenute cambiando ordine");

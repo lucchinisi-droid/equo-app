@@ -120,6 +120,16 @@ function lcDisegna(box, sel){
     <div class="lc-legenda"><span><i class="r"></i>scaduta</span><span><i class="a"></i>entro ${LC_SOGLIA} giorni</span><span><i class="v"></i>più in là</span><span><i class="ag"></i>già in agenda</span></div>`;
   // la coda («+ Aggiungi cavallo») tiene la sua spunta
   box.querySelectorAll(".lc-lista input[type=checkbox]").forEach(x => { x.checked = sel.has(x.value); });
+  lcConta(box);
+}
+// «N scelti» accanto all'etichetta «Cavalli» della finestra
+function lcEtichetta(box){ return box.parentElement?.querySelector(":scope > .input-label"); }
+function lcConta(box){
+  const lab = lcEtichetta(box); if(!lab) return;
+  let s = lab.querySelector(".lc-conta");
+  if(!s){ s = document.createElement("span"); s.className = "lc-conta"; lab.appendChild(s); }
+  const n = box.querySelectorAll(".lc-riga input[type=checkbox]:checked").length;
+  s.textContent = n ? n + (n === 1 ? " scelto" : " scelti") : "";
 }
 function lcBox(el){ return el.closest(".lc-on"); }
 function lcAvvisa(box){ const fn = box._lc?.opz?.cambio; if(fn && typeof window[fn] === "function") window[fn](); }
@@ -127,6 +137,7 @@ function lcCambio(el){
   const box = lcBox(el); if(!box) return;
   const b = box.querySelector(".lc-urgenti");
   if(b){ const sel = lcScelti(box), urg = box._lc.cavalli.filter(lcUrgente); b.textContent = (urg.every(c => sel.has(c.key)) ? "Togli" : "Seleziona") + ` scaduti e in scadenza (${urg.length})`; }
+  lcConta(box);
   lcAvvisa(box);
 }
 function lcOrdina(btn, k){
@@ -142,7 +153,7 @@ function lcUrgenti(btn){
   lcDisegna(box, sel);
   lcAvvisa(box);
 }
-function lcTogli(box){ if(box){ box.classList.remove("lc-on"); box._lc = null; } }
+function lcTogli(box){ if(box){ box.classList.remove("lc-on"); box._lc = null; lcEtichetta(box)?.querySelector(".lc-conta")?.remove(); } }
 // «Fissa il prossimo giro» (102): scadenze aperte dei cavalli di una struttura, già in agenda esclusi
 async function lcScadenzeStruttura(clienteId, idCavalliQui){
   const d = await lcCarica();

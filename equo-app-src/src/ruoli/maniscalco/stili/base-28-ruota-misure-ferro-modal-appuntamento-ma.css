@@ -80,3 +80,4 @@
 .lc-on .lc-legenda span{display:flex;align-items:center;gap:5px}
 .lc-on .lc-legenda i{width:10px;height:10px;border-radius:50%}
 .lc-on .lc-legenda i.r{background:#c0473a} .lc-on .lc-legenda i.a{background:#d9822b} .lc-on .lc-legenda i.v{background:#3d8a58} .lc-on .lc-legenda i.ag{background:#a99b7a}
+.input-label .lc-conta{float:right;font-weight:500;font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}

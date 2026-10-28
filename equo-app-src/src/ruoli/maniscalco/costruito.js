@@ -7128,6 +7128,22 @@
 		box.querySelectorAll(".lc-lista input[type=checkbox]").forEach((x) => {
 			x.checked = sel.has(x.value);
 		});
+		lcConta(box);
+	}
+	function lcEtichetta(box) {
+		return box.parentElement?.querySelector(":scope > .input-label");
+	}
+	function lcConta(box) {
+		const lab = lcEtichetta(box);
+		if (!lab) return;
+		let s = lab.querySelector(".lc-conta");
+		if (!s) {
+			s = document.createElement("span");
+			s.className = "lc-conta";
+			lab.appendChild(s);
+		}
+		const n = box.querySelectorAll(".lc-riga input[type=checkbox]:checked").length;
+		s.textContent = n ? n + (n === 1 ? " scelto" : " scelti") : "";
 	}
 	function lcBox(el) {
 		return el.closest(".lc-on");
@@ -7144,6 +7160,7 @@
 			const sel = lcScelti(box), urg = box._lc.cavalli.filter(lcUrgente);
 			b.textContent = (urg.every((c) => sel.has(c.key)) ? "Togli" : "Seleziona") + ` scaduti e in scadenza (${urg.length})`;
 		}
+		lcConta(box);
 		lcAvvisa(box);
 	}
 	function lcOrdina(btn, k) {
@@ -7167,6 +7184,7 @@
 		if (box) {
 			box.classList.remove("lc-on");
 			box._lc = null;
+			lcEtichetta(box)?.querySelector(".lc-conta")?.remove();
 		}
 	}
 	async function lcScadenzeStruttura(clienteId, idCavalliQui) {

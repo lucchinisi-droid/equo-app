@@ -1719,6 +1719,7 @@ body.ai-aperta{overflow:hidden}
 .lc-on .lc-legenda span{display:flex;align-items:center;gap:5px}
 .lc-on .lc-legenda i{width:10px;height:10px;border-radius:50%}
 .lc-on .lc-legenda i.r{background:#c0473a} .lc-on .lc-legenda i.a{background:#d9822b} .lc-on .lc-legenda i.v{background:#3d8a58} .lc-on .lc-legenda i.ag{background:#a99b7a}
+.input-label .lc-conta{float:right;font-weight:500;font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
 /* versione Semplice / Completa */
 body.vm-semplice .solo-completa{display:none!important}
 .vm-opz{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:16px;padding:12px;margin:0 0 10px;font:inherit;cursor:pointer}
@@ -5838,7 +5839,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
           <option value="ferratura">Ferratura</option><option value="pareggio">Pareggio</option><option value="altro">Altro</option>
         </select></div>
       <div class="input-group" id="prop-str-tipo-altro-group" style="display:none"><label class="input-label">Specifica</label><input class="input" id="prop-str-tipo-altro" maxlength="60"></div>
-      <div class="input-group"><label class="input-label">Cavalli della scuderia</label><div id="prop-str-cavalli" style="max-height:210px;overflow-y:auto"></div></div>
+      <div class="input-group"><label class="input-label">Cavalli della scuderia</label><div id="prop-str-cavalli"></div></div>
       <div style="display:flex;gap:10px">
         <div class="input-group" style="flex:1"><label class="input-label">Data</label><input class="input" type="date" id="prop-str-data"></div>
         <div class="input-group" style="flex:1"><label class="input-label">Ora</label><input class="input" type="time" id="prop-str-ora"></div>
@@ -13622,6 +13623,22 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		box.querySelectorAll(".lc-lista input[type=checkbox]").forEach((x) => {
 			x.checked = sel.has(x.value);
 		});
+		lcConta(box);
+	}
+	function lcEtichetta(box) {
+		return box.parentElement?.querySelector(":scope > .input-label");
+	}
+	function lcConta(box) {
+		const lab = lcEtichetta(box);
+		if (!lab) return;
+		let s = lab.querySelector(".lc-conta");
+		if (!s) {
+			s = document.createElement("span");
+			s.className = "lc-conta";
+			lab.appendChild(s);
+		}
+		const n = box.querySelectorAll(".lc-riga input[type=checkbox]:checked").length;
+		s.textContent = n ? n + (n === 1 ? " scelto" : " scelti") : "";
 	}
 	function lcBox(el) {
 		return el.closest(".lc-on");
@@ -13638,6 +13655,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			const sel = lcScelti(box), urg = box._lc.cavalli.filter(lcUrgente);
 			b.textContent = (urg.every((c) => sel.has(c.key)) ? "Togli" : "Seleziona") + ` scaduti e in scadenza (${urg.length})`;
 		}
+		lcConta(box);
 		lcAvvisa(box);
 	}
 	function lcOrdina(btn, k) {
@@ -13661,6 +13679,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (box) {
 			box.classList.remove("lc-on");
 			box._lc = null;
+			lcEtichetta(box)?.querySelector(".lc-conta")?.remove();
 		}
 	}
 	async function lcScadenzeStruttura(clienteId, idCavalliQui) {
