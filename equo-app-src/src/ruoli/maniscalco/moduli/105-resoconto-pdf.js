@@ -119,7 +119,8 @@ async function creaPdfResoconto(){
   const conGruppi = nomi.length > 1;
   let k = 0;
   nomi.forEach(n => {
-    const lista = gruppi.get(n).slice().sort((a, b) => (agNomeCavallo(a) || "").localeCompare(agNomeCavallo(b) || "", "it") || String(a.data_intervento).localeCompare(String(b.data_intervento)));
+    // 28/10/2026: in ordine di data (dalla più vecchia), a parità di data per nome del cavallo
+    const lista = gruppi.get(n).slice().sort((a, b) => String(a.data_intervento).localeCompare(String(b.data_intervento)) || (agNomeCavallo(a) || "").localeCompare(agNomeCavallo(b) || "", "it"));
     if(conGruppi){ if(y > 262) nuovaPagina(); doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...oro); doc.text(n, colData, y); y += 6; }
     lista.forEach(i => {
       const lav = doc.splitTextToSize(String(agDescrizioneTipo(i) || ""), colStato - colLav - 3);

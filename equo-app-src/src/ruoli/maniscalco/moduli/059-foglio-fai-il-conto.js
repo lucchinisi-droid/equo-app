@@ -72,6 +72,15 @@ function renderNuovoConto(){
   c.lavori.forEach(i => { (gruppi[contoNomeProprietario(i)] = gruppi[contoNomeProprietario(i)] || []).push(i); });
   const nomi = Object.keys(gruppi).sort((a, b) => a.localeCompare(b, "it"));
   const nPag = new Set(scelti.map(i => i.cliente_mascalcia_id)).size;
+  // 28/10/2026 (caso Francesco, Centro Ippico Levante): i conti ancora aperti si vedono sempre, anche quando ci sono lavori nuovi,
+  // così è chiaro dove sono gli altri lavori e si può «Annulla e rifai» per metterli tutti in un conto solo
+  const righeAperti = (c.aperti || []).map(k => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
+            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("");
+  const nGia = (c.aperti || []).reduce((s, k) => s + Number(k.n_lavori || 0), 0);
+  const giaSopra = c.lavori.length && righeAperti ? `<div class="conto-gia" style="margin-top:14px">
+      <b>${nGia === 1 ? "Un altro lavoro è" : "Altri " + nGia + " lavori sono"} già in un conto da incassare: qui sotto ci sono solo quelli nuovi.</b>
+      <div class="muted" style="font-size:12px;margin:2px 0 4px">Per un conto unico con tutto tocca «Annulla e rifai»: il vecchio conto si annulla e i suoi lavori tornano qui.</div>
+      ${righeAperti}</div>` : "";
   const modoHtml = c.scuderia ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CHI PAGA</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button type="button" class="btn ${c.modo === "unico" ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetModo('unico')">Paga la scuderia · conto unico</button>
@@ -82,6 +91,7 @@ function renderNuovoConto(){
     <div class="clienti-sez-title" style="margin:14px 0 6px">PERIODO</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">${chip("tutto", "Non ancora saldato")}${chip("mese", "Questo mese")}${chip("scorso", "Mese scorso")}${chip("date", "Scegli le date")}</div>
     ${c.periodo === "date" ? `<div style="display:flex;gap:8px;margin-top:8px"><input class="input" type="date" id="conto-da" value="${c.da}" onchange="contoSetDate()"><input class="input" type="date" id="conto-a" value="${c.a}" onchange="contoSetDate()"></div>` : ""}
+    ${giaSopra}
     <div class="clienti-sez-title" style="margin:14px 0 6px">LAVORI INCLUSI (${scelti.length} di ${c.lavori.length})</div>
     ${c.lavori.length ? nomi.map(n => `
       ${(c.scuderia || nomi.length > 1) ? `<label style="display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:13px;font-weight:700;color:var(--accent)">
@@ -93,8 +103,7 @@ function renderNuovoConto(){
         <b>${contoEuro(i.importo)}</b></label>`).join("")}`).join("")
       : (c.aperti || []).length ? `<div class="conto-gia">
           <b>${c.tutti.length ? "In questo periodo non ci sono altri lavori da mettere nel conto." : "Tutti i lavori da saldare sono già in un conto."}</b>
-          ${c.aperti.map(k => `<div class="conto-gia-r"><span><b>${contoCodice(k)}</b> del ${contoData(k.creato_il)} · ${contoLavori(k.n_lavori)} · ${contoEuro(k.totale)}<small>Da incassare</small></span>
-            <span class="conto-gia-a"><button type="button" class="btn btn-primary btn-sm" onclick="contoApriEsistente('${k.id}')">Apri il conto</button><button type="button" class="btn btn-outline btn-sm" onclick="contoAnnullaERifai('${k.id}')">Annulla e rifai</button></span></div>`).join("")}
+          ${righeAperti}
         </div>`
       : '<div class="muted" style="font-size:13px;padding:8px 0">Nessun lavoro da saldare in questo periodo.</div>'}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--border)"><span style="font-weight:700">Totale</span><b style="font-size:20px">${contoEuro(tot)}</b></div>
