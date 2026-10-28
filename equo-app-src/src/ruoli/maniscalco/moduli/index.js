@@ -52,6 +52,7 @@ import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, riprist
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
 import { cscCambio, cscGruppo, cscRapido } from "./115-cavalli-per-scadenza.js";
 import { creaCavalloUnico, creaClienteUnico, onbScansionaCavallo, onbSollecita } from "./116-onboarding.js";
+import { prossimaAutomatica, segnaFatto } from "./117-segna-fatto.js";
 import { tcChiudi, tcImpostaLettura, tcLettura, tcNaviga, tcRiepilogo, tcSalvaCasaQui, tcSalvaMattina, tcScegliKm, tcTornaACasa } from "./114-torna-a-casa.js";
 import { pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
@@ -63,6 +64,8 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 Object.assign(window, {
   creaCavalloUnico,
   creaClienteUnico,
+  prossimaAutomatica,
+  segnaFatto,
   onbScansionaCavallo,
   onbSollecita,
   cscCambio,

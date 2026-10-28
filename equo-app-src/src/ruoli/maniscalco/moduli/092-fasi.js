@@ -1,12 +1,11 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { giorniRichiamoSuggeriti } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
-import { aggiungiGiorniIso } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { mlRender } from "./090-disegno.js";
 import { tcDopoTappa } from "./114-torna-a-casa.js";
+import { prossimaAutomatica } from "./117-segna-fatto.js";
 /* ---------- fasi ---------- */
 async function mlPausaNotifiche(on){
   if(DEMO_MODE || !currentUser) return;
@@ -31,11 +30,9 @@ async function mlChiudi(){
       upd.importo = v === "" || v == null || isNaN(Number(v)) ? null : Math.round(Number(v) * 100) / 100;
       upd.stato_pagamento = ml.pag;
     }
-    if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]){
-      const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
-      // con 0 € la prossima data resta quella di prima («come prima»)
-      upd.prossima_scadenza = upd.importo === 0 && s.prima ? s.prima : (s.giorni ? aggiungiGiorniIso(oggi, s.giorni) : null);
-    }
+    // 28/10/2026: stessa regola di Hammer (117-segna-fatto.js): con 0 € la prossima data resta quella di prima
+    const ps = await prossimaAutomatica(e, oggi, upd.importo);
+    if(ps !== undefined) upd.prossima_scadenza = ps;
     const { error } = await DB.updateInterventoMascalcia(e.id, upd);
     if(error){ errori++; console.error("chiudi tappa:", error); }
   }

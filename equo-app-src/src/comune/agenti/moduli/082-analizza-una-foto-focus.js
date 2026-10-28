@@ -335,10 +335,13 @@ async function confermaAzioneAi(id){
     if(!error){
       const futuro = new Date(x.data + "T" + (x.ora || "00:00")).getTime() > Date.now();
       const giorni = (await giorniRichiamoSuggeriti(x.tipo, cavallo_cliente_id, horse_id)).giorni;
+      // 28/10/2026: lavoro già fatto → stessa regola della Modalità Lavoro (con 0 € la prossima resta come prima)
+      const psFatto = !futuro && typeof window.prossimaAutomatica === "function"
+        ? await window.prossimaAutomatica({ tipo_ferratura: x.tipo, cavallo_cliente_id, horse_id, cliente_mascalcia_id: x.cliente_mascalcia_id, data_intervento: x.data }, x.data, x.importo) : undefined;
       ({ error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, cavallo_cliente_id, horse_id,
         tipo_ferratura: x.tipo, tipo_altro: x.tipo_altro, misura_sistema: null, numero_ferro: null, quantita_ferri: null,
         data_intervento: x.data, ora: x.ora, stato: futuro ? "programmato" : "fatto",
-        prossima_scadenza: giorni ? aggiungiGiorniIso(x.data, giorni) : null, importo: x.importo, stato_pagamento: x.stato_pagamento || "da_saldare", note: x.note }));
+        prossima_scadenza: psFatto !== undefined ? psFatto : (giorni ? aggiungiGiorniIso(x.data, giorni) : null), importo: x.importo, stato_pagamento: x.stato_pagamento || "da_saldare", note: x.note }));
     }
     fatto = "✓ Salvato in agenda. Misura e numero di ferri li aggiungi aprendo l'appuntamento.";
     if(!error) await aggiornaViteManiscalco(x.cliente_mascalcia_id);
@@ -349,7 +352,10 @@ async function confermaAzioneAi(id){
     if(!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la scuderia riceve l'avviso in chat." : "✓ Richiesta rifiutata: la scuderia riceve un messaggio in chat.";
   } else if(azione.tipo === "accetta_richiesta"){
     const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura] ? (await giorniRichiamoSuggeriti(x.tipo_ferratura, x.cavallo_cliente_id, x.horse_id, x.id)).giorni : null;
-    const payload = { stato: x.data_intervento >= isoLocale(new Date()) ? "programmato" : "fatto", prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null };
+    const passato = x.data_intervento < isoLocale(new Date());
+    const psFatto = passato && typeof window.prossimaAutomatica === "function"
+      ? await window.prossimaAutomatica({ ...x }, x.data_intervento, x.importo) : undefined;   // 28/10/2026: stessa regola del «Fatto» senza riquadro
+    const payload = { stato: passato ? "fatto" : "programmato", prossima_scadenza: psFatto !== undefined ? psFatto : (giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null) };
     if(x.importo != null) payload.importo = x.importo;
     ({ error } = await DB.updateInterventoMascalcia(x.id, payload));
     if(!error){

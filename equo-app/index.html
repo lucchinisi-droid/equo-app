@@ -10828,6 +10828,66 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		showToast(msg);
 		tcRenderHome();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/117-segna-fatto.js
+	async function fattoInAnticipo(e) {
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		if (!e || !e.data_intervento || e.data_intervento <= oggi) return {};
+		if (e.gruppo_id) {
+			showToast("È un appuntamento con la scuderia: segnalo fatto il giorno dell'intervento.");
+			return null;
+		}
+		return await chiediSiNo(`Già fatto oggi?`, `L'appuntamento è per ${formatDataBreve(e.data_intervento)}. «Sì» lo segna fatto con la data di oggi.`) ? { data_intervento: oggi } : null;
+	}
+	async function datiDalRiquadro(e, anticipo) {
+		const upd = {
+			stato: "fatto",
+			...anticipo
+		};
+		const ps = await richiamoPerFatto({
+			...e,
+			...anticipo
+		});
+		if (TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
+		const pag = prendiPagamentoScelto();
+		if (pag) upd.stato_pagamento = pag;
+		const imp = prendiImportiScelti();
+		if (imp) upd.importo = imp[0];
+		const fs = prendiFerriScelti();
+		if (fs) {
+			upd.ferri_nuovi = fs.nuovi;
+			if (fs.nuovi) upd.quantita_ferri = fs.n;
+		}
+		return upd;
+	}
+	async function segnaFatto(e, opz = {}) {
+		if (!e) return { ok: false };
+		const anticipo = await fattoInAnticipo(e);
+		if (anticipo === null) return { ok: false };
+		if (opz.prima) opz.prima();
+		const upd = await datiDalRiquadro(e, anticipo);
+		const { error } = await DB.updateInterventoMascalcia(e.id, upd);
+		if (error) {
+			showToast("Errore: " + error.message);
+			return {
+				ok: false,
+				error
+			};
+		}
+		showToast("Segnato come fatto");
+		await renderAgendaSettimana$1();
+		await renderIncassi$1();
+		await renderProDeadlines();
+		return {
+			ok: true,
+			upd
+		};
+	}
+	async function prossimaAutomatica(e, dataFatto, importo) {
+		if (!TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) return void 0;
+		const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
+		if (Number(importo) === 0 && importo !== null && importo !== "" && s.prima) return s.prima;
+		return s.giorni ? aggiungiGiorniIso(dataFatto || e.data_intervento, s.giorni) : null;
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/092-fasi.js
 	async function mlPausaNotifiche(on) {
 		if (DEMO_MODE || !currentUser) return;
@@ -10865,10 +10925,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				upd.importo = v === "" || v == null || isNaN(Number(v)) ? null : Math.round(Number(v) * 100) / 100;
 				upd.stato_pagamento = ml.pag;
 			}
-			if (TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) {
-				const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
-				upd.prossima_scadenza = upd.importo === 0 && s.prima ? s.prima : s.giorni ? aggiungiGiorniIso(oggi, s.giorni) : null;
-			}
+			const ps = await prossimaAutomatica(e, oggi, upd.importo);
+			if (ps !== void 0) upd.prossima_scadenza = ps;
 			const { error } = await DB.updateInterventoMascalcia(e.id, upd);
 			if (error) {
 				errori++;
@@ -14023,50 +14081,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			horse_id: sc.horse_id
 		});
 	}
-	function fattoInAnticipo(e) {
-		const oggi = isoLocale(/* @__PURE__ */ new Date());
-		if (!e || !e.data_intervento || e.data_intervento <= oggi) return {};
-		if (e.gruppo_id) {
-			showToast("È un appuntamento con la scuderia: segnalo fatto il giorno dell'intervento.");
-			return null;
-		}
-		const quando = formatDataBreve(e.data_intervento);
-		if (!confirm(`Questo appuntamento è per ${quando}. L'hai già fatto oggi?\n\nSe confermi lo segno fatto con la data di oggi.`)) return null;
-		return { data_intervento: oggi };
-	}
 	async function segnaFattoAgenda(id) {
-		const e = agEventiCache[id];
-		const anticipo = fattoInAnticipo(e);
-		if (anticipo === null) return;
-		const upd = {
-			stato: "fatto",
-			...anticipo
-		};
-		if (e) {
-			const ps = await richiamoPerFatto({
-				...e,
-				...anticipo
-			});
-			if (TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
-			const pag = prendiPagamentoScelto();
-			if (pag) upd.stato_pagamento = pag;
-			const imp = prendiImportiScelti();
-			if (imp) upd.importo = imp[0];
-			const fs = prendiFerriScelti();
-			if (fs) {
-				upd.ferri_nuovi = fs.nuovi;
-				if (fs.nuovi) upd.quantita_ferri = fs.n;
-			}
-		}
-		const { error } = await DB.updateInterventoMascalcia(id, upd);
-		if (error) {
-			showToast("Errore: " + error.message);
-			return;
-		}
-		showToast("Segnato come fatto");
-		await renderAgendaSettimana$1();
-		await renderIncassi$1();
-		await renderProDeadlines();
+		await segnaFatto(agEventiCache[id]);
 	}
 	function apriAzioniEvento(id) {
 		const e = agEventiCache[id];
@@ -14106,38 +14122,17 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		} else if (tipo === "fatto" && e.stato === "richiesto") {
 			closeModal("modal-azioni-evento");
 			accettaRichiesta(e.id);
+		} else if (tipo === "fatto" && e.stato !== "fatto") {
+			await segnaFatto(e, { prima: () => closeModal("modal-azioni-evento") });
+			closeModal("modal-azioni-evento");
 		} else if (tipo === "fatto") {
-			const nuovo = e.stato === "fatto" ? "programmato" : "fatto";
-			const anticipo = nuovo === "fatto" ? fattoInAnticipo(e) : {};
-			if (anticipo === null) return;
-			const upd = {
-				stato: nuovo,
-				...anticipo
-			};
-			if (nuovo === "fatto") {
-				closeModal("modal-azioni-evento");
-				const ps = await richiamoPerFatto({
-					...e,
-					...anticipo
-				});
-				if (TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
-				const pag = prendiPagamentoScelto();
-				if (pag) upd.stato_pagamento = pag;
-				const imp = prendiImportiScelti();
-				if (imp) upd.importo = imp[0];
-				const fs = prendiFerriScelti();
-				if (fs) {
-					upd.ferri_nuovi = fs.nuovi;
-					if (fs.nuovi) upd.quantita_ferri = fs.n;
-				}
-			}
-			const { error } = await DB.updateInterventoMascalcia(e.id, upd);
+			const { error } = await DB.updateInterventoMascalcia(e.id, { stato: "programmato" });
 			if (error) {
 				showToast("Errore: " + error.message);
 				return;
 			}
 			closeModal("modal-azioni-evento");
-			showToast(nuovo === "fatto" ? "Segnato come fatto" : "Rimesso da fare");
+			showToast("Rimesso da fare");
 			await renderAgendaSettimana$1();
 			await renderIncassi$1();
 			await renderProDeadlines();
@@ -21849,6 +21844,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	Object.assign(window, {
 		creaCavalloUnico,
 		creaClienteUnico,
+		prossimaAutomatica,
+		segnaFatto,
 		onbScansionaCavallo,
 		onbSollecita,
 		cscCambio,
@@ -28181,6 +28178,13 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			if (!error) {
 				const futuro = (/* @__PURE__ */ new Date(x.data + "T" + (x.ora || "00:00"))).getTime() > Date.now();
 				const giorni = (await giorniRichiamoSuggeriti(x.tipo, cavallo_cliente_id, horse_id)).giorni;
+				const psFatto = !futuro && typeof window.prossimaAutomatica === "function" ? await window.prossimaAutomatica({
+					tipo_ferratura: x.tipo,
+					cavallo_cliente_id,
+					horse_id,
+					cliente_mascalcia_id: x.cliente_mascalcia_id,
+					data_intervento: x.data
+				}, x.data, x.importo) : void 0;
 				({error} = await DB.insertInterventoMascalcia({
 					cliente_mascalcia_id: x.cliente_mascalcia_id,
 					cavallo_cliente_id,
@@ -28193,7 +28197,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 					data_intervento: x.data,
 					ora: x.ora,
 					stato: futuro ? "programmato" : "fatto",
-					prossima_scadenza: giorni ? aggiungiGiorniIso(x.data, giorni) : null,
+					prossima_scadenza: psFatto !== void 0 ? psFatto : giorni ? aggiungiGiorniIso(x.data, giorni) : null,
 					importo: x.importo,
 					stato_pagamento: x.stato_pagamento || "da_saldare",
 					note: x.note
@@ -28210,9 +28214,11 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			if (!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la scuderia riceve l'avviso in chat." : "✓ Richiesta rifiutata: la scuderia riceve un messaggio in chat.";
 		} else if (azione.tipo === "accetta_richiesta") {
 			const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura] ? (await giorniRichiamoSuggeriti(x.tipo_ferratura, x.cavallo_cliente_id, x.horse_id, x.id)).giorni : null;
+			const passato = x.data_intervento < isoLocale(/* @__PURE__ */ new Date());
+			const psFatto = passato && typeof window.prossimaAutomatica === "function" ? await window.prossimaAutomatica({ ...x }, x.data_intervento, x.importo) : void 0;
 			const payload = {
-				stato: x.data_intervento >= isoLocale(/* @__PURE__ */ new Date()) ? "programmato" : "fatto",
-				prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null
+				stato: passato ? "fatto" : "programmato",
+				prossima_scadenza: psFatto !== void 0 ? psFatto : giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null
 			};
 			if (x.importo != null) payload.importo = x.importo;
 			({error} = await DB.updateInterventoMascalcia(x.id, payload));

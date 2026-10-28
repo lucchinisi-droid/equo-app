@@ -1,11 +1,9 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, richiamoPerFatto } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
-import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { avvisaClienteAppuntamento, chiediSiNo, deveAvvisareAnnullo, notaModificaMan, openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipoPro, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
-import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
+import { segnaFatto } from "./117-segna-fatto.js";
 import { accettaRichiesta, agDisegnaGriglia, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { generaPdfEvento, inviaEventoInChat } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 /* ---------- ORDINE DEL GIRO: trascina un cavallo nel suo cliente o un cliente intero ---------- */
@@ -149,33 +147,9 @@ function fissaDaScadenza(id){
 
 // «Fatto» su un appuntamento di un giorno futuro: si chiede conferma e la data diventa oggi
 // (null = annullato dall'utente; {} = nessun cambio; { data_intervento } = anticipato a oggi)
-function fattoInAnticipo(e){
-  const oggi = isoLocale(new Date());
-  if(!e || !e.data_intervento || e.data_intervento <= oggi) return {};
-  if(e.gruppo_id){ showToast("È un appuntamento con la scuderia: segnalo fatto il giorno dell'intervento."); return null; }
-  const quando = formatDataBreve(e.data_intervento);
-  if(!confirm(`Questo appuntamento è per ${quando}. L'hai già fatto oggi?\n\nSe confermi lo segno fatto con la data di oggi.`)) return null;
-  return { data_intervento: oggi };
-}
+// 28/10/2026: il «Fatto» passa da una funzione sola (117-segna-fatto.js), uguale da ogni punto
 async function segnaFattoAgenda(id){
-  const e = agEventiCache[id];
-  const anticipo = fattoInAnticipo(e);
-  if(anticipo === null) return;
-  const upd = { stato: "fatto", ...anticipo };
-  if(e){
-    // riquadro del «Fatto»: richiamo (se previsto), importo proposto e pagamento
-    const ps = await richiamoPerFatto({ ...e, ...anticipo });
-    if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
-    const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
-    const imp = prendiImportiScelti(); if(imp) upd.importo = imp[0];
-    const fs = prendiFerriScelti(); if(fs){ upd.ferri_nuovi = fs.nuovi; if(fs.nuovi) upd.quantita_ferri = fs.n; }
-  }
-  const { error } = await DB.updateInterventoMascalcia(id, upd);
-  if(error){ showToast("Errore: " + error.message); return; }
-  showToast("Segnato come fatto");
-  await renderAgendaSettimana();
-  await renderIncassi();
-  await renderProDeadlines();
+  await segnaFatto(agEventiCache[id]);
 }
 
 function apriAzioniEvento(id){
@@ -218,23 +192,15 @@ async function azioneEvento(tipo){
   } else if(tipo === "fatto" && e.stato === "richiesto"){
     closeModal("modal-azioni-evento");
     accettaRichiesta(e.id);
+  } else if(tipo === "fatto" && e.stato !== "fatto"){
+    await segnaFatto(e, { prima: () => closeModal("modal-azioni-evento") });
+    closeModal("modal-azioni-evento");
   } else if(tipo === "fatto"){
-    const nuovo = e.stato === "fatto" ? "programmato" : "fatto";
-    const anticipo = nuovo === "fatto" ? fattoInAnticipo(e) : {};
-    if(anticipo === null) return;
-    const upd = { stato: nuovo, ...anticipo };
-    if(nuovo === "fatto"){
-      closeModal("modal-azioni-evento");
-      const ps = await richiamoPerFatto({ ...e, ...anticipo });
-      if(TIPO_FERRATURA_INTERVALLI[e.tipo_ferratura]) upd.prossima_scadenza = ps;
-      const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
-      const imp = prendiImportiScelti(); if(imp) upd.importo = imp[0];
-      const fs = prendiFerriScelti(); if(fs){ upd.ferri_nuovi = fs.nuovi; if(fs.nuovi) upd.quantita_ferri = fs.n; }
-    }
-    const { error } = await DB.updateInterventoMascalcia(e.id, upd);
+    // già fatto: si rimette da fare
+    const { error } = await DB.updateInterventoMascalcia(e.id, { stato: "programmato" });
     if(error){ showToast("Errore: " + error.message); return; }
     closeModal("modal-azioni-evento");
-    showToast(nuovo === "fatto" ? "Segnato come fatto" : "Rimesso da fare");
+    showToast("Rimesso da fare");
     await renderAgendaSettimana();
     await renderIncassi();
     await renderProDeadlines();

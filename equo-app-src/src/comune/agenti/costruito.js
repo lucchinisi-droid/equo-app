@@ -964,6 +964,13 @@
 			if (!error) {
 				const futuro = (/* @__PURE__ */ new Date(x.data + "T" + (x.ora || "00:00"))).getTime() > Date.now();
 				const giorni = (await giorniRichiamoSuggeriti(x.tipo, cavallo_cliente_id, horse_id)).giorni;
+				const psFatto = !futuro && typeof window.prossimaAutomatica === "function" ? await window.prossimaAutomatica({
+					tipo_ferratura: x.tipo,
+					cavallo_cliente_id,
+					horse_id,
+					cliente_mascalcia_id: x.cliente_mascalcia_id,
+					data_intervento: x.data
+				}, x.data, x.importo) : void 0;
 				({error} = await DB.insertInterventoMascalcia({
 					cliente_mascalcia_id: x.cliente_mascalcia_id,
 					cavallo_cliente_id,
@@ -976,7 +983,7 @@
 					data_intervento: x.data,
 					ora: x.ora,
 					stato: futuro ? "programmato" : "fatto",
-					prossima_scadenza: giorni ? aggiungiGiorniIso(x.data, giorni) : null,
+					prossima_scadenza: psFatto !== void 0 ? psFatto : giorni ? aggiungiGiorniIso(x.data, giorni) : null,
 					importo: x.importo,
 					stato_pagamento: x.stato_pagamento || "da_saldare",
 					note: x.note
@@ -993,9 +1000,11 @@
 			if (!error) fatto = azione.tipo === "accetta_richiesta" ? "✓ Confermato: la scuderia riceve l'avviso in chat." : "✓ Richiesta rifiutata: la scuderia riceve un messaggio in chat.";
 		} else if (azione.tipo === "accetta_richiesta") {
 			const giorni = TIPO_FERRATURA_INTERVALLI[x.tipo_ferratura] ? (await giorniRichiamoSuggeriti(x.tipo_ferratura, x.cavallo_cliente_id, x.horse_id, x.id)).giorni : null;
+			const passato = x.data_intervento < isoLocale(/* @__PURE__ */ new Date());
+			const psFatto = passato && typeof window.prossimaAutomatica === "function" ? await window.prossimaAutomatica({ ...x }, x.data_intervento, x.importo) : void 0;
 			const payload = {
-				stato: x.data_intervento >= isoLocale(/* @__PURE__ */ new Date()) ? "programmato" : "fatto",
-				prossima_scadenza: giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null
+				stato: passato ? "fatto" : "programmato",
+				prossima_scadenza: psFatto !== void 0 ? psFatto : giorni ? aggiungiGiorniIso(x.data_intervento, giorni) : null
 			};
 			if (x.importo != null) payload.importo = x.importo;
 			({error} = await DB.updateInterventoMascalcia(x.id, payload));
