@@ -50,21 +50,8 @@
       <div class="input-group">
         <label class="input-label">Cavalli</label>
         <div id="edit-cliente-cavalli"></div>
-        <div class="cod-cav-box">
-          <div style="font-size:12.5px;font-weight:700;margin-bottom:2px">Codice Equo del cavallo</div>
-          <div class="muted" style="font-size:12px;margin-bottom:6px">Il cavallo ha già un codice Equo (es. PRV-000005)? Aggiungilo qui: arriva con tutto il suo storico, anche se ora è tra i cavalli di un altro cliente.</div>
-          <div style="display:flex;gap:8px">
-            <input class="input" id="edit-cliente-codice-cavallo" placeholder="es. PRV-000005" autocapitalize="characters" style="flex:1;text-transform:uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiCavalloCodice()}">
-            <button class="btn btn-primary btn-sm" style="flex:none" onclick="aggiungiCavalloCodice(this)">Aggiungi</button>
-          </div>
-        </div>
-        <div class="muted" style="font-size:12px;margin:10px 0 0">Oppure un cavallo nuovo:</div>
-        <div class="input-row-2" style="margin-top:6px">
-          <input class="input" id="edit-cliente-nuovo-cavallo" placeholder="Nome nuovo cavallo" style="flex:1.4">
-          <input class="input" id="edit-cliente-nuovo-chip" placeholder="Microchip (opz.)" autocapitalize="characters" style="flex:1">
-        </div>
-        <div style="margin-top:8px"><input class="input" id="edit-cliente-nuovo-razza" placeholder="Razza (opz.) · scrivi per cercare"></div>
-        <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="aggiungiCavalloEditCliente()">+ Aggiungi cavallo</button>
+        <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="apriNuovoCavalloCartella(currentClienteId)">+ Aggiungi cavallo</button>
+        <div class="muted" style="font-size:12px;margin-top:6px">Nuovo o con codice Equo; per una scuderia puoi dire di chi è.</div>
       </div>
       <div class="auth-error" id="edit-cliente-error" style="display:none"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="salvaEditCliente()">Salva modifiche</button>

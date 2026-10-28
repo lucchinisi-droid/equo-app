@@ -1,6 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { renderClientiList } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
-import { openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
+import { apriNuovoCavalloCartella, renderClientiList } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { closeClienteDetail, descrFerraturaCavallo, lavoroCav, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 import { quiInterventiCache, cavalliQuiStanno, descrFerroBreve, fotoCavalloPro, iniziale, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
@@ -116,10 +115,9 @@ function renderBoxCavalliCliente(){
     + (ordinati.length ? ordinati.map(box).join("") : (q ? '<div class="muted" style="font-size:13px;padding:10px 4px;grid-column:1/-1">Nessun cavallo con questo nome.</div>' : ""));
 }
 function cssUrlApp(u){ return "url('" + String(u).replace(/['\\()]/g, c => "\\" + c) + "')"; }
-// aggiunta: si usa la sezione Cavalli di «Modifica cliente» (nuovo cavallo o con codice Equo)
-async function aggiungiCavalloDaScheda(){
-  await openEditCliente();
-  setTimeout(() => { const el = document.getElementById("edit-cliente-nuovo-cavallo"); if(el){ el.scrollIntoView({ block: "center" }); el.focus(); } }, 250);
+// aggiunta: 28/10/2026 la finestra «Nuovo cavallo» (una sola strada), con questo cliente già scelto
+function aggiungiCavalloDaScheda(){
+  apriNuovoCavalloCartella(currentClienteId);
 }
 
 // interventi vecchi senza cavallo: Assegna a un cavallo o Elimina

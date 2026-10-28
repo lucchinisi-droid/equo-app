@@ -1,6 +1,6 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { clientiAttivi, loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
-import { apriNuovoCliente, badgeCollegamentoCliente, isManiscalcoUtente, openClienteDetail } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
+import { apriNuovoCliente, badgeCollegamentoCliente, isManiscalcoUtente, openClienteDetail, renderCavalliEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { cavalliQuiStanno, descrFerroBreve, iniziale, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
 import { apriSchedaCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
@@ -115,7 +115,8 @@ async function apriCavalloDaCartella(clienteId, cvId, horseId){
 }
 
 // «Aggiungi cavallo» dalla cartella Cavalli: nome, microchip, razza, di chi è (o codice Equo)
-function apriNuovoCavalloCartella(){
+// 28/10/2026: unica finestra per aggiungere un cavallo; da scheda cliente e «Modifica» arriva con il cliente già scelto
+function apriNuovoCavalloCartella(clienteId){
   ["ncav-nome", "ncav-chip", "ncav-codice"].forEach(id => { document.getElementById(id).value = ""; });
   razzaImposta("ncav-razza", "");
   const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
@@ -125,7 +126,10 @@ function apriNuovoCavalloCartella(){
     + (sc.length ? `<optgroup label="Scuderie">${sc.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "")
     + '<option value="__nuovo_p">+ Nuovo cliente</option><option value="__nuovo_s">+ Nuova scuderia</option>';
   document.getElementById("ncav-errore").style.display = "none";
-  onbDiChiAggiorna("");
+  const sel = document.getElementById("ncav-cliente");
+  const pre = typeof clienteId === "string" && clientiAttivi().some(c => c.id === clienteId) ? clienteId : "";
+  sel.value = pre;
+  onbDiChiAggiorna(pre);
   openModal("modal-nuovo-cavallo");
 }
 function ncavClienteCambiato(sel){
@@ -180,6 +184,9 @@ async function salvaNuovoCavalloCartella(btn){
     await DB.updateClienteMascalcia(clienteId, { nome_cavallo: cav.map(x => x.nome).join(", ") });
     closeModal("modal-nuovo-cavallo");
     await loadClientiMascalcia();
+    // aperta da «Modifica» o dalla scheda del cliente: si aggiornano l'elenco e la scheda
+    if(document.getElementById("modal-edit-cliente")?.classList.contains("active")) await renderCavalliEditCliente();
+    if(currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") await openClienteDetail(currentClienteId);
   } finally { btn.disabled = false; }
 }
 // clienti archiviati: in fondo, chiusi; cavalli e storico restano e si possono ripristinare

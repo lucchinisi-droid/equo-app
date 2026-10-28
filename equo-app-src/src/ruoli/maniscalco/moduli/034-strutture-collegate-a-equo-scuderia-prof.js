@@ -277,7 +277,6 @@ async function openEditCliente(){
     document.getElementById("edit-cliente-tipo").disabled = bloccato;
     document.getElementById("edit-cliente-nome").disabled = bloccato;   // profilo certificato: il nome viene dal profilo
     const n = document.getElementById("edit-cliente-tipo-nota"); if(n) n.style.display = bloccato ? "block" : "none"; }
-  razzaImposta("edit-cliente-nuovo-razza", "");
   document.getElementById("edit-cliente-codice-equo").value = "";
   document.getElementById("edit-cliente-codice-group").style.display = c.cliente_user_id ? "none" : "flex";
   document.getElementById("edit-cliente-collegato").style.display = c.cliente_user_id ? "flex" : "none";
@@ -289,8 +288,6 @@ async function openEditCliente(){
   document.getElementById("edit-cliente-indirizzo").value = c.indirizzo || "";
   { const n = document.getElementById("edit-cliente-indirizzo-pos-nota"); if(n){ n.textContent = ""; n.className = "pos-nota"; } }
   document.getElementById("edit-cliente-note").value = c.note || "";
-  document.getElementById("edit-cliente-nuovo-cavallo").value = "";
-  document.getElementById("edit-cliente-nuovo-chip").value = "";
   document.getElementById("edit-cliente-error").style.display = "none";
   openModal("modal-edit-cliente");
   await renderCavalliEditCliente();

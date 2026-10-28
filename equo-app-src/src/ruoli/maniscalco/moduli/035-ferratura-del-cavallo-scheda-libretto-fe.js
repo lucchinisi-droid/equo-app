@@ -1,13 +1,12 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { cavalliEditCache, messaggioErroreCollegaCliente, openClienteDetail, renderCavalliEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
-import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraNorm, misuraPredefinita } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { siglaFerro, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { intervalloCavallo, intervalloEffettivo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
-import { creaCavalloUnico, onbEmail } from "./116-onboarding.js";
+import { onbEmail } from "./116-onboarding.js";
 /* ---------- FERRATURA DEL CAVALLO (scheda = libretto): Ferrato / Mezza / Pareggio, misura, tipo di ferro, note ----------
    Si imposta una volta e vale per tutti gli appuntamenti; ogni cambio resta nello storico del cavallo (trigger nel database).
    Completa: tipo di ferro separato davanti / dietro (ferro_tipo = davanti, ferro_tipo_post = dietro). */
@@ -207,48 +206,7 @@ async function syncNomeCavalloCliente(){
   await DB.updateClienteMascalcia(currentClienteId, { nome_cavallo });
 }
 
-// aggiunge (o sposta qui) un cavallo con il suo codice Equo: una sola scheda per cavallo, storico a vita
-async function aggiungiCavalloCodice(btn){
-  const inp = document.getElementById("edit-cliente-codice-cavallo");
-  const codice = inp.value.trim();
-  if(!codice){ showToast("Scrivi il codice Equo del cavallo"); inp.focus(); return; }
-  if(DEMO_MODE){ showToast("In demo l'aggiunta con codice non è disponibile."); return; }
-  if(btn) btn.disabled = true;
-  try{
-    let { data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: false });
-    if(error){ showToast("Errore: " + error.message); return; }
-    if(data && data.chiedi){
-      if(!await chiediConferma(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
-      ({ data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: true }));
-      if(error){ showToast("Errore: " + error.message); return; }
-    }
-    if(!data?.ok){ showToast(data?.errore || "Non riuscito, riprova."); return; }
-    inp.value = "";
-    showToast(data.azione === "gia" ? `${data.nome} è già tra i cavalli di questo cliente.`
-      : data.azione === "spostato" ? `${data.nome} spostato qui da ${data.da} (codice ${data.codice}).`
-      : `${data.nome} aggiunto (codice ${data.codice}).`);
-    await renderCavalliEditCliente();
-    await syncNomeCavalloCliente();
-    try{ await loadClientiMascalcia(); }catch(e){}
-  } finally { if(btn) btn.disabled = false; }
-}
-
-async function aggiungiCavalloEditCliente(){
-  const nome = document.getElementById("edit-cliente-nuovo-cavallo").value.trim();
-  const chip = document.getElementById("edit-cliente-nuovo-chip").value.trim();
-  if(!nome){ showToast("Inserisci il nome del cavallo"); return; }
-  const razza = razzaValore("edit-cliente-nuovo-razza");
-  if(razza === false) return;
-  // 28/10/2026: strada unica (controllo doppioni) · 116-onboarding.js
-  const r = await creaCavalloUnico({ cliente_mascalcia_id: currentClienteId, nome, microchip: chip || null, razza });
-  if(r.annullato){ closeModal("modal-edit-cliente"); return; }
-  if(r.error){ showToast("Errore: " + r.error.message); return; }
-  document.getElementById("edit-cliente-nuovo-cavallo").value = "";
-  document.getElementById("edit-cliente-nuovo-chip").value = "";
-  razzaImposta("edit-cliente-nuovo-razza", "");
-  await renderCavalliEditCliente();
-  await syncNomeCavalloCliente();
-}
+// 28/10/2026: i cavalli si aggiungono solo da «Nuovo cavallo» (033 apriNuovoCavalloCartella), anche da «Modifica» cliente
 
 async function eliminaCavalloEditCliente(id){
   if(!await chiediConferma("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
@@ -315,4 +273,4 @@ function closeClienteDetail(){
 }
 
 
-export { syncNomeCavalloCliente, DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, aggiungiCavalloCodice, aggiungiCavalloEditCliente, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };
+export { syncNomeCavalloCliente, DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };
