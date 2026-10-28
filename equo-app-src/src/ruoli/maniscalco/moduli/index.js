@@ -50,13 +50,13 @@ import { pmAggiornaAzione, pmAggiornaQuando, pmApriNuovo, pmDomani, pmElimina, p
 import { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda } from "./110-agenda-semplice-completa.js";
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
-import { cscCambio, cscGruppo, cscRapido } from "./115-cavalli-per-scadenza.js";
+import { lcCambio, lcOrdina, lcUrgenti } from "./118-lista-cavalli-scadenze.js";
 import { creaCavalloUnico, creaClienteUnico, onbScansionaCavallo, onbSollecita } from "./116-onboarding.js";
 import { avvisaNuovoSeCollegato, clientePaganteCavallo, prossimaAutomatica, segnaFatto } from "./117-segna-fatto.js";
 import { tcChiudi, tcImpostaLettura, tcLettura, tcNaviga, tcRiepilogo, tcSalvaCasaQui, tcSalvaMattina, tcScegliKm, tcTornaACasa } from "./114-torna-a-casa.js";
 import { pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
-import { allineaRender, apriAllineaScadenze, cicloCambia, cicloTogli, confermaAllineaScadenze } from "./102-scadenze-della-struttura.js";
+import { cicloCambia, cicloTogli, fissaProssimoGiro } from "./102-scadenze-della-struttura.js";
 import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } from "./101-importazione-vecchia-app.js";
 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
@@ -70,9 +70,9 @@ Object.assign(window, {
   segnaFatto,
   onbScansionaCavallo,
   onbSollecita,
-  cscCambio,
-  cscGruppo,
-  cscRapido,
+  lcCambio,
+  lcOrdina,
+  lcUrgenti,
   tcChiudi,
   tcImpostaLettura,
   tcLettura,
@@ -117,11 +117,9 @@ Object.assign(window, {
   apriAnagraficaCavallo,
   cavIntervalloCambia,
   salvaAnagraficaCavallo,
-  allineaRender,
-  apriAllineaScadenze,
+  fissaProssimoGiro,
   cicloCambia,
   cicloTogli,
-  confermaAllineaScadenze,
   ferDettaglio,
   ferStatoSistema,
   impostaMisuraPredefinita,

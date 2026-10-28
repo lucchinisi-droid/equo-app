@@ -6966,188 +6966,223 @@
 		if (!r.error) pmAggiornaViste();
 		return r;
 	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/115-cavalli-per-scadenza.js
-	var CSC_SOGLIA = 10;
-	var CSC_FINESTRA = 7;
-	var CSC_MINIMO = 4;
-	var cscCache = {
+	// equo-app-src/src/ruoli/maniscalco/moduli/118-lista-cavalli-scadenze.js
+	var LC_SOGLIA = 10;
+	var LC_ORD = "equo_lc_ordine";
+	var LC_NOMI = {
+		az: "A–Z",
+		scad: "Scadenza",
+		data: "Data",
+		prop: "Proprietari"
+	};
+	var LC_SPIEGA = {
+		az: "In ordine alfabetico.",
+		scad: "Prima le scadute, poi le più vicine; in agenda e senza scadenza in fondo.",
+		data: "Dal lavoro più vecchio al più recente.",
+		prop: "Divisi per chi paga: la scuderia e i proprietari privati."
+	};
+	var lcCache = {
 		t: 0,
 		richiami: [],
-		agenda: []
+		agenda: [],
+		fatti: []
 	};
-	var cscOggi = () => isoLocale(/* @__PURE__ */ new Date());
-	var cscGiorni = (da, a) => Math.round((/* @__PURE__ */ new Date(a + "T12:00") - /* @__PURE__ */ new Date(da + "T12:00")) / 864e5);
-	var cscData = (iso) => {
+	var lcOggi = () => isoLocale(/* @__PURE__ */ new Date());
+	var lcGiorni = (da, a) => Math.round((/* @__PURE__ */ new Date(a + "T12:00") - /* @__PURE__ */ new Date(da + "T12:00")) / 864e5);
+	var lcData = (iso) => {
 		const d = /* @__PURE__ */ new Date(iso + "T12:00");
 		return d.getDate() + " " + d.toLocaleDateString("it-IT", { month: "short" }).replace(".", "");
 	};
-	async function cscCarica() {
-		if (Date.now() - cscCache.t < 6e4) return cscCache;
-		const oggi = cscOggi();
-		let richiami = [], agenda = [];
+	function lcOrdine() {
+		try {
+			const v = localStorage.getItem(LC_ORD);
+			return LC_NOMI[v] ? v : "az";
+		} catch (e) {
+			return "az";
+		}
+	}
+	async function lcCarica() {
+		if (Date.now() - lcCache.t < 5e3) return lcCache;
+		const oggi = lcOggi();
+		let richiami = [], agenda = [], fatti = [];
 		try {
 			richiami = await DB.listRichiami(400);
 		} catch (e) {
 			richiami = [];
 		}
-		if (DEMO_MODE) agenda = (demoState.interventiMascalcia || []).filter((i) => [
-			"programmato",
-			"proposto",
-			"richiesto"
-		].includes(i.stato) && i.data_intervento >= oggi);
-		else {
-			const { data } = await sb.from("interventi_mascalcia").select("cavallo_cliente_id, horse_id, data_intervento, stato").eq("maniscalco_id", currentUser.id).in("stato", [
+		if (DEMO_MODE) {
+			const tutti = demoState.interventiMascalcia || [];
+			agenda = tutti.filter((i) => [
 				"programmato",
 				"proposto",
 				"richiesto"
-			]).gte("data_intervento", oggi).order("data_intervento", { ascending: true }).limit(1e3);
-			agenda = data || [];
+			].includes(i.stato) && i.data_intervento >= oggi);
+			fatti = tutti.filter((i) => i.stato === "fatto");
+		} else {
+			const [a, f] = await Promise.all([sb.from("interventi_mascalcia").select("cavallo_cliente_id, horse_id, data_intervento, stato").eq("maniscalco_id", currentUser.id).in("stato", [
+				"programmato",
+				"proposto",
+				"richiesto"
+			]).gte("data_intervento", oggi).order("data_intervento", { ascending: true }).limit(1e3), sb.from("interventi_mascalcia").select("cavallo_cliente_id, horse_id, data_intervento").eq("maniscalco_id", currentUser.id).eq("stato", "fatto").order("data_intervento", { ascending: false }).limit(3e3)]);
+			agenda = a.data || [];
+			fatti = f.data || [];
 		}
-		cscCache = {
+		lcCache = {
 			t: Date.now(),
 			richiami,
-			agenda
+			agenda,
+			fatti
 		};
-		return cscCache;
+		return lcCache;
 	}
-	function cscStessoCavallo(c, r) {
+	function lcStessoCavallo(c, r) {
 		return r.cavallo_cliente_id && (r.cavallo_cliente_id === c.id || r.cavallo_cliente_id === c.cavalloClienteId) || r.horse_id && (r.horse_id === c.horse_id || c.tipo === "equo" && r.horse_id === c.id);
 	}
-	var cscSem = (g) => g == null ? "g" : g < 0 ? "r" : g <= CSC_SOGLIA ? "a" : "v";
-	function cscQuando(g, data) {
-		return g < 0 ? -g + (g === -1 ? " giorno fa" : " gg fa") : g === 0 ? "oggi" : g <= CSC_SOGLIA ? "tra " + g + " gg" : cscData(data);
-	}
-	async function cscRender(box, cavalli, opz) {
-		if (!box || !cavalli || cavalli.length < CSC_MINIMO) return false;
-		const { richiami, agenda } = await cscCarica();
-		if (!box.isConnected) return false;
-		const oggi = cscOggi();
-		const righe = cavalli.map((c) => {
-			const ag = agenda.filter((a) => cscStessoCavallo(c, a)).sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))[0];
-			const r = richiami.find((x) => cscStessoCavallo(c, x));
+	function lcArricchisci(cavalli, d) {
+		const oggi = lcOggi();
+		return cavalli.map((c) => {
+			const ag = d ? d.agenda.filter((a) => lcStessoCavallo(c, a)).sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))[0] : null;
+			const r = d ? d.richiami.find((x) => lcStessoCavallo(c, x)) : null;
+			const f = d ? d.fatti.filter((x) => lcStessoCavallo(c, x)).reduce((m, x) => !m || x.data_intervento > m ? x.data_intervento : m, null) : null;
 			const scad = r ? r.scadenza || r.prossima_scadenza : null;
 			return {
 				...c,
-				agenda: ag ? ag.data_intervento : null,
 				scad,
-				g: scad ? cscGiorni(oggi, scad) : null
+				g: scad ? lcGiorni(oggi, scad) : null,
+				agenda: ag ? ag.data_intervento : null,
+				ultimo: f
 			};
 		});
-		const conData = righe.filter((c) => !c.agenda && c.g != null).sort((a, b) => a.g - b.g || a.nome.localeCompare(b.nome, "it"));
-		const fuori = righe.filter((c) => c.agenda || c.g == null);
-		const gruppi = [];
-		conData.forEach((c) => {
-			const u = gruppi[gruppi.length - 1];
-			if (u && c.g - u[0].g <= CSC_FINESTRA) u.push(c);
-			else gruppi.push([c]);
-		});
-		const dataApp = document.getElementById(opz.dataId)?.value || "";
-		const gApp = dataApp && cscGiorni(oggi, dataApp) > 0 ? cscGiorni(oggi, dataApp) : null;
-		const nR = conData.filter((c) => c.g < 0).length, nA = conData.filter((c) => c.g >= 0 && c.g <= CSC_SOGLIA).length, nV = conData.length - nR - nA;
-		const chk = (c) => `<label class="csc-chip${c.agenda ? " spento" : ""}" data-g="${!c.agenda && c.g != null ? c.g : "x"}" title="${escapeHtml(c.nome)}${c.sotto ? " · " + escapeHtml(c.sotto) : ""}"><input type="checkbox" class="${opz.chk}" value="${escapeHtml(c.key)}"${opz.preset?.has(c.key) ? " checked" : ""} onchange="cscCambio(this)"><i class="csc-p ${c.agenda ? "g" : cscSem(c.g)}"></i>${escapeHtml(c.nome)}<small>${c.agenda ? "in agenda " + cscData(c.agenda) : c.g == null ? "senza scadenza" : cscQuando(c.g, c.scad)}${c.sotto ? " · " + escapeHtml(c.sotto) : ""}</small></label>`;
-		const segno = (testo, cls) => `<div class="csc-segno ${cls}"><i></i><span></span><b>${testo}</b></div>`;
-		let h = `<div class="csc-cont"><span><b class="r">${nR}</b>scaduti</span><span><b class="a">${nA}</b>entro ${CSC_SOGLIA} giorni</span><span><b class="v">${nV}</b>con tempo</span></div>
-    <div class="csc-rapidi">
-      ${nR ? `<button type="button" onclick="cscRapido(this,-1)">Scaduti · ${nR}</button>` : ""}
-      ${nA ? `<button type="button" onclick="cscRapido(this,${CSC_SOGLIA})">Scaduti + entro ${CSC_SOGLIA} giorni · ${nR + nA}</button>` : ""}
-      ${gApp != null && gApp >= 0 ? `<button type="button" onclick="cscRapido(this,${gApp + 3})">Entro il ${cscData(dataApp)} · ${conData.filter((c) => c.g <= gApp + 3).length}</button>` : ""}
-    </div><div class="csc-linea">`;
-		let oggiMesso = false, appMesso = gApp == null;
-		gruppi.forEach((l) => {
-			if (!oggiMesso && l[0].g >= 0) {
-				h += segno("Oggi · " + cscData(oggi), "oggi");
-				oggiMesso = true;
-			}
-			if (!appMesso && l[0].g > gApp) {
-				h += segno("Appuntamento · " + cscData(dataApp), "app");
-				appMesso = true;
-			}
-			const r = l.filter((c) => c.g < 0).length, a = l.filter((c) => c.g >= 0 && c.g <= CSC_SOGLIA).length, v = l.length - r - a;
-			const da = cscData(l[0].scad), a2 = cscData(l[l.length - 1].scad);
-			h += `<div class="csc-gr"><div class="csc-rail"><i class="csc-p ${cscSem(l[0].g)}"></i></div><div class="csc-card">
-      <div class="csc-t"><span><b>${da === a2 ? da : da + " – " + a2}</b><small class="${cscSem(l[0].g)}">${[
-				r ? r + (r === 1 ? " scaduto" : " scaduti") : "",
-				a ? a + " in scadenza" : "",
-				v ? v + " con tempo" : ""
-			].filter(Boolean).join(" · ")}</small></span>
-        <button type="button" class="csc-tutti" onclick="cscGruppo(this)">Prendi tutti ${l.length}</button></div>
-      <div class="csc-chips">${l.map(chk).join("")}</div></div></div>`;
-		});
-		if (!oggiMesso) h += segno("Oggi · " + cscData(oggi), "oggi");
-		if (!appMesso) h += segno("Appuntamento · " + cscData(dataApp), "app");
-		h += `</div>`;
-		if (fuori.length) h += `<div class="csc-fuori"><b>Fuori dalla linea</b><span>già in agenda o senza scadenza</span><div class="csc-chips">${fuori.sort((a, b) => (a.agenda ? 1 : 0) - (b.agenda ? 1 : 0) || a.nome.localeCompare(b.nome, "it")).map(chk).join("")}</div></div>`;
-		box.classList.add("csc-on");
-		box._csc = {
-			cavalli,
-			opz
+	}
+	function lcPill(c) {
+		if (c.agenda) return {
+			cls: "ag",
+			t: "in agenda " + lcData(c.agenda)
 		};
-		box.dataset.cscCambio = opz.cambio || "";
-		box.dataset.cscChk = opz.chk;
-		box.innerHTML = h + (opz.coda || "");
-		cscAggiorna(box);
-		return true;
+		if (c.g == null) return null;
+		if (c.g < 0) return {
+			cls: "r",
+			t: "scaduta " + lcData(c.scad)
+		};
+		return {
+			cls: c.g <= LC_SOGLIA ? "a" : "v",
+			t: lcData(c.scad)
+		};
 	}
-	function cscBox(el) {
-		return el.closest(".csc-on");
-	}
-	function cscAggiorna(box) {
-		box.querySelectorAll(".csc-gr").forEach((g) => {
-			const cb = [...g.querySelectorAll("input[type=checkbox]")], tutti = cb.length && cb.every((x) => x.checked);
-			const b = g.querySelector(".csc-tutti");
-			if (b) {
-				b.textContent = tutti ? "Togli" : "Prendi tutti " + cb.length;
-				b.classList.toggle("on", tutti);
-			}
+	var lcUrgente = (c) => !c.agenda && c.g != null && c.g <= LC_SOGLIA;
+	function lcRender(box, cavalli, opz) {
+		box.classList.add("lc-on");
+		box._lc = {
+			cavalli: lcArricchisci(cavalli, null),
+			opz,
+			pronto: false
+		};
+		lcDisegna(box, new Set(opz.preset || []));
+		return lcCarica().then((d) => {
+			if (opz.ancora && !opz.ancora()) return false;
+			if (box._lc?.opz !== opz) return false;
+			const scelti = lcScelti(box);
+			box._lc.cavalli = lcArricchisci(cavalli, d);
+			box._lc.pronto = true;
+			lcDisegna(box, scelti);
+			return true;
+		}).catch((e) => {
+			console.warn("scadenze dei cavalli:", e);
+			return false;
 		});
 	}
-	function cscAvvisa(box) {
-		cscAggiorna(box);
-		const fn = box.dataset.cscCambio;
+	function lcScelti(box) {
+		return new Set([...box.querySelectorAll("input[type=checkbox]:checked")].map((x) => x.value));
+	}
+	function lcDisegna(box, sel) {
+		const { cavalli, opz, pronto } = box._lc;
+		const gruppi = new Set(cavalli.map((c) => c.proprietario || ""));
+		let ord = lcOrdine();
+		if (ord === "prop" && gruppi.size < 2) ord = "az";
+		const az = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
+		const l = cavalli.slice();
+		if (ord === "az") l.sort(az);
+		if (ord === "scad") l.sort((a, b) => (a.agenda ? 1 : 0) - (b.agenda ? 1 : 0) || (a.g == null ? 1e6 : a.g) - (b.g == null ? 1e6 : b.g) || az(a, b));
+		if (ord === "data") l.sort((a, b) => (a.ultimo || "9999").localeCompare(b.ultimo || "9999") || az(a, b));
+		if (ord === "prop") l.sort((a, b) => (a.proprietario || "").localeCompare(b.proprietario || "", "it") || az(a, b));
+		const urg = cavalli.filter(lcUrgente);
+		const tuttiUrg = urg.length && urg.every((c) => sel.has(c.key));
+		const chips = Object.keys(LC_NOMI).filter((k) => k !== "prop" || gruppi.size > 1).map((k) => `<button type="button" class="lc-ord${k === ord ? " on" : ""}" aria-pressed="${k === ord}" onclick="lcOrdina(this,'${k}')">${LC_NOMI[k]}</button>`).join("");
+		let righe = "", gruppo = null;
+		l.forEach((c) => {
+			if (ord === "prop" && (c.proprietario || "") !== gruppo) {
+				gruppo = c.proprietario || "";
+				righe += `<div class="lc-gruppo">${escapeHtml(gruppo ? "Di " + gruppo : "Della scuderia")}</div>`;
+			}
+			const p = lcPill(c);
+			const sotto = ord === "data" ? pronto ? c.ultimo ? "ultimo lavoro " + lcData(c.ultimo) : "nessun lavoro" : "" : [c.proprietario && ord !== "prop" ? "di " + c.proprietario : "", c.info || ""].filter(Boolean).join(" · ");
+			righe += `<label class="int-cav lc-riga"><input type="checkbox" class="${opz.chk}" value="${escapeHtml(c.key)}"${sel.has(c.key) ? " checked" : ""} onchange="lcCambio(this)">
+      <span class="lc-nome"><span>${escapeHtml(c.nome || "Cavallo")}</span>${sotto ? `<small>${escapeHtml(sotto)}</small>` : ""}</span>
+      ${p ? `<span class="lc-pill ${p.cls}">${escapeHtml(p.t)}</span>` : ""}</label>`;
+		});
+		box.innerHTML = `<div class="lc-barra"><span>Ordina</span>${chips}</div>
+    <div class="lc-spiega">${LC_SPIEGA[ord]}</div>
+    ${urg.length ? `<button type="button" class="lc-urgenti" onclick="lcUrgenti(this)">${tuttiUrg ? "Togli" : "Seleziona"} scaduti e in scadenza (${urg.length})</button>` : ""}
+    <div class="lc-lista">${righe}${opz.coda || ""}</div>
+    <div class="lc-legenda"><span><i class="r"></i>scaduta</span><span><i class="a"></i>entro ${LC_SOGLIA} giorni</span><span><i class="v"></i>più in là</span><span><i class="ag"></i>già in agenda</span></div>`;
+		box.querySelectorAll(".lc-lista input[type=checkbox]").forEach((x) => {
+			x.checked = sel.has(x.value);
+		});
+	}
+	function lcBox(el) {
+		return el.closest(".lc-on");
+	}
+	function lcAvvisa(box) {
+		const fn = box._lc?.opz?.cambio;
 		if (fn && typeof window[fn] === "function") window[fn]();
 	}
-	function cscCambio(el) {
-		const box = cscBox(el);
-		if (box) cscAvvisa(box);
+	function lcCambio(el) {
+		const box = lcBox(el);
+		if (!box) return;
+		const b = box.querySelector(".lc-urgenti");
+		if (b) {
+			const sel = lcScelti(box), urg = box._lc.cavalli.filter(lcUrgente);
+			b.textContent = (urg.every((c) => sel.has(c.key)) ? "Togli" : "Seleziona") + ` scaduti e in scadenza (${urg.length})`;
+		}
+		lcAvvisa(box);
 	}
-	function cscGruppo(btn) {
-		const box = cscBox(btn), cb = [...btn.closest(".csc-gr").querySelectorAll("input[type=checkbox]")];
-		const tutti = cb.every((x) => x.checked);
-		cb.forEach((x) => {
-			x.checked = !tutti;
-		});
-		cscAvvisa(box);
+	function lcOrdina(btn, k) {
+		const box = lcBox(btn);
+		if (!box) return;
+		try {
+			localStorage.setItem(LC_ORD, k);
+		} catch (e) {}
+		lcDisegna(box, lcScelti(box));
 	}
-	function cscRapido(btn, lim) {
-		const box = cscBox(btn);
-		const cb = [...box.querySelectorAll(".csc-gr input[type=checkbox]")].filter((x) => {
-			const g = Number(x.closest(".csc-chip").dataset.g);
-			return Number.isFinite(g) && g <= lim;
-		});
-		const tutti = cb.length && cb.every((x) => x.checked);
-		cb.forEach((x) => {
-			x.checked = !tutti;
-		});
-		cscAvvisa(box);
+	function lcUrgenti(btn) {
+		const box = lcBox(btn);
+		if (!box) return;
+		const sel = lcScelti(box), urg = box._lc.cavalli.filter(lcUrgente);
+		const tutti = urg.every((c) => sel.has(c.key));
+		urg.forEach((c) => tutti ? sel.delete(c.key) : sel.add(c.key));
+		lcDisegna(box, sel);
+		lcAvvisa(box);
 	}
-	function cscRidisegna(box) {
-		if (!box?._csc) return;
-		const sel = new Set([...box.querySelectorAll("input[type=checkbox]:checked")].map((x) => x.value));
-		cscRender(box, box._csc.cavalli, {
-			...box._csc.opz,
-			preset: sel
-		}).then((ok) => {
-			if (ok) {
-				const fn = box.dataset.cscCambio;
-				if (fn && typeof window[fn] === "function") window[fn]();
-			}
-		});
+	function lcTogli(box) {
+		if (box) {
+			box.classList.remove("lc-on");
+			box._lc = null;
+		}
 	}
-	document.addEventListener("change", (e) => {
-		const id = e.target?.id;
-		if (id === "intervento-data") cscRidisegna(document.getElementById("intervento-cavalli-multi"));
-		else if (id === "prop-str-data") cscRidisegna(document.getElementById("prop-str-cavalli"));
-	});
+	async function lcScadenzeStruttura(clienteId, idCavalliQui) {
+		const d = await lcCarica();
+		const oggi = lcOggi();
+		return d.richiami.filter((r) => r.cliente_mascalcia_id === clienteId || r.cavallo_cliente_id && idCavalliQui.has(r.cavallo_cliente_id)).map((r) => {
+			const s = r.scadenza || r.prossima_scadenza;
+			return {
+				scad: s,
+				g: s ? lcGiorni(oggi, s) : null
+			};
+		}).filter((x) => x.scad);
+	}
+	function lcSvuotaCache() {
+		lcCache.t = 0;
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
 	async function azioneGruppoStruttura(gruppoId, azione) {
 		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
@@ -7179,24 +7214,23 @@
 		document.getElementById("prop-str-note").value = "";
 		document.getElementById("prop-str-error").style.display = "none";
 		const box = document.getElementById("prop-str-cavalli");
-		box.classList.remove("csc-on");
-		box._csc = null;
+		lcTogli(box);
 		box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Caricamento…</div>";
 		openModal("modal-proponi-struttura");
 		const { data } = DEMO_MODE ? { data: [] } : await sb.rpc("pro_cavalli_struttura", { p_cliente_id: clienteId });
 		const cav = data || [];
-		box.innerHTML = cav.length ? cav.map((x) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px"><input type="checkbox" class="prop-str-cav" value="${x.id}" style="width:18px;height:18px"${p.cavallo_cliente_id === x.id || (p.cavalli || []).includes(x.id) ? " checked" : ""}> ${escapeHtml(x.nome)}${x.in_scuderia === false ? " <span class=\"muted\" style=\"font-size:11.5px\">(inserito da te, non nella scheda della scuderia)</span>" : ""}</label>`).join("") : "<div class=\"muted\" style=\"font-size:13px\">La scuderia non ha ancora cavalli in scheda: l'appuntamento sarà generico.</div>";
-		if (cav.length >= 4) cscRender(box, cav.map((x) => ({
+		if (propStrutturaClienteId !== clienteId) return;
+		if (cav.length) lcRender(box, cav.map((x) => ({
 			key: x.id,
 			id: x.id,
 			nome: x.nome,
-			sotto: x.in_scuderia === false ? "inserito da te" : ""
+			info: x.in_scuderia === false ? "inserito da te" : ""
 		})), {
 			chk: "prop-str-cav",
 			preset: new Set([p.cavallo_cliente_id].concat(p.cavalli || []).filter(Boolean)),
-			dataId: "prop-str-data",
 			ancora: () => propStrutturaClienteId === clienteId
-		}).catch((e) => console.warn("cavalli per scadenza:", e));
+		});
+		else box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">La scuderia non ha ancora cavalli in scheda: l'appuntamento sarà generico.</div>";
 	}
 	async function inviaPropostaStruttura() {
 		const err = document.getElementById("prop-str-error");
@@ -8931,11 +8965,6 @@
 	var CICLO_MIN = 7;
 	var CICLO_MAX = 180;
 	var CICLO_PARTENZA = 35;
-	var TIPI_CICLO = [
-		"ferratura",
-		"mezza_ferratura",
-		"pareggio"
-	];
 	var cicloTimer = null;
 	function intervalloStruttura(clienteId) {
 		const c = (clientiMascalcia || []).find((x) => x.id === clienteId);
@@ -8956,7 +8985,50 @@
     <div class="ciclo-riga"><span>Ferratura ogni</span>
       ${g ? `<div class="ciclo-step"><button type="button" onclick="cicloCambia(-1)" aria-label="Meno giorni">−</button><b id="ciclo-val">${g}</b><button type="button" onclick="cicloCambia(1)" aria-label="Più giorni">+</button></div><span>giorni</span>` : `<button type="button" class="btn btn-outline btn-sm" onclick="cicloCambia(0)">Imposta</button>`}</div>
     <div class="ciclo-nota">${g ? `Quando segni fatto un cavallo di questa struttura, la prossima scadenza è tra ${g} giorni. <button type="button" class="ciclo-link" onclick="cicloTogli()">Togli</button>` : "Non impostato: ogni cavallo usa il suo intervallo."}</div>
-    <button type="button" class="btn btn-outline btn-sm ciclo-allinea" onclick="apriAllineaScadenze()">Allinea le scadenze dei cavalli</button>`;
+    <button type="button" class="ciclo-fissa" onclick="fissaProssimoGiro()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg> Fissa il prossimo giro</button>
+    <div class="ciclo-conti" id="ciclo-conti"></div>
+    <div class="ciclo-nota">Apre il Nuovo appuntamento con la scuderia già scelta e la data della scadenza più vicina (oggi se è già passata). Scegli i cavalli e salvi.</div>`;
+		cicloContiStruttura(c);
+	}
+	var cicloProposta = {
+		id: null,
+		data: ""
+	};
+	async function cicloContiStruttura(c) {
+		cicloProposta = {
+			id: c.id,
+			data: ""
+		};
+		let l = [];
+		lcSvuotaCache();
+		try {
+			l = await lcScadenzeStruttura(c.id, new Set(cavalliQuiStanno(c.id).map((x) => x.id)));
+		} catch (e) {
+			l = [];
+		}
+		const box = document.getElementById("ciclo-conti");
+		if (!box || currentClienteId !== c.id) return;
+		const min = l.map((x) => x.scad).sort()[0];
+		cicloProposta = {
+			id: c.id,
+			data: min ? agDataPerFissare(min) : ""
+		};
+		const nR = l.filter((x) => x.g < 0).length, nA = l.filter((x) => x.g >= 0 && x.g <= 10).length;
+		const oggi = isoLocale(/* @__PURE__ */ new Date()), d = cicloProposta.data;
+		const quando = d ? (d === oggi ? "oggi, " : "") + (/* @__PURE__ */ new Date(d + "T12:00")).toLocaleDateString("it-IT", {
+			weekday: "short",
+			day: "numeric",
+			month: "short"
+		}).replace(/\./g, "") : "";
+		box.innerHTML = (nR ? `<span class="lc-pill r">${nR} ${nR === 1 ? "scaduto" : "scaduti"}</span>` : "") + (nA ? `<span class="lc-pill a">${nA} entro 10 giorni</span>` : "") + (quando ? `<span>· proposta: <b>${escapeHtml(quando)}</b></span>` : "");
+	}
+	function fissaProssimoGiro() {
+		const id = currentClienteId;
+		if (!id) return;
+		const data = cicloProposta.id === id ? cicloProposta.data : "";
+		const preset = data ? { data_intervento: data } : {};
+		if (isStrutturaCollegata(id)) return apriPropostaStruttura(id, preset);
+		return openInterventoModal(id, null, preset);
 	}
 	function cicloCambia(d) {
 		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
@@ -8983,72 +9055,6 @@
 		c.intervallo_giorni = null;
 		renderCicloStruttura(c);
 		cicloSalva(c.id, null);
-	}
-	var allineaLista = [];
-	async function apriAllineaScadenze() {
-		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
-		if (!c) return;
-		document.getElementById("all-tit").textContent = "Allinea le scadenze · " + c.nome;
-		document.getElementById("all-righe").innerHTML = "<div class=\"loading\"><div class=\"spinner\"></div> Caricamento...</div>";
-		document.getElementById("all-ok").disabled = true;
-		openModal("modal-allinea");
-		const tutti = await DB.ultimiFattiCliente(c.id, TIPI_CICLO);
-		const visti = /* @__PURE__ */ new Set();
-		allineaLista = [];
-		tutti.forEach((i) => {
-			const k = i.cavallo_cliente_id || i.horse_id;
-			if (!k || visti.has(k)) return;
-			visti.add(k);
-			if (i.prossima_scadenza) allineaLista.push(i);
-		});
-		allineaLista.sort((a, b) => a.prossima_scadenza.localeCompare(b.prossima_scadenza) || nomeAll(a).localeCompare(nomeAll(b)));
-		const inp = document.getElementById("all-data");
-		const oggi = isoLocale(/* @__PURE__ */ new Date());
-		const prima = allineaLista.length ? allineaLista[0].prossima_scadenza : aggiungiGiorniIso(oggi, intervalloStruttura(c.id) || CICLO_PARTENZA);
-		inp.min = oggi;
-		inp.value = prima < oggi ? oggi : prima;
-		allineaRender();
-	}
-	function nomeAll(i) {
-		return i.cavalli_clienti_mascalcia?.nome || "Cavallo";
-	}
-	function allineaRender() {
-		const d = document.getElementById("all-data").value;
-		const box = document.getElementById("all-righe"), ok = document.getElementById("all-ok");
-		if (!allineaLista.length) {
-			box.innerHTML = "<div class=\"muted\" style=\"font-size:13px\">Nessun cavallo di questa struttura ha una prossima scadenza: prima segna fatta una ferratura.</div>";
-			ok.disabled = true;
-			ok.textContent = "Allinea";
-			return;
-		}
-		const daCambiare = allineaLista.filter((i) => i.prossima_scadenza !== d).length;
-		box.innerHTML = allineaLista.map((i) => `<div class="all-riga${i.prossima_scadenza === d ? " uguale" : ""}"><b>${escapeHtml(nomeAll(i))}</b>
-      <span>${escapeHtml(formatDataBreve(i.prossima_scadenza))}${i.prossima_scadenza === d ? "" : " → " + escapeHtml(formatDataBreve(d))}</span></div>`).join("");
-		ok.disabled = !d || !daCambiare;
-		ok.textContent = !daCambiare ? "Già tutte allineate" : `Allinea ${daCambiare === 1 ? "1 cavallo" : daCambiare + " cavalli"} al ${formatDataBreve(d)}`;
-	}
-	async function confermaAllineaScadenze() {
-		const d = document.getElementById("all-data").value;
-		if (!d) {
-			showToast("Scegli la data");
-			return;
-		}
-		const ids = allineaLista.filter((i) => i.prossima_scadenza !== d).map((i) => i.id);
-		if (!ids.length) return;
-		const ok = document.getElementById("all-ok");
-		ok.disabled = true;
-		const { error } = await DB.allineaScadenze(ids, d);
-		if (error) {
-			ok.disabled = false;
-			showToast("Errore: " + error.message);
-			return;
-		}
-		closeModal("modal-allinea");
-		showToast(`${ids.length === 1 ? "1 cavallo" : ids.length + " cavalli"}: prossima scadenza ${formatDataBreve(d)}`);
-		try {
-			await openClienteDetail(currentClienteId);
-			await renderProDeadlines();
-		} catch (e) {}
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/103-intervallo-prezzo-anagrafica-cavallo.js
 	var INT_MIN = 7;
@@ -10599,29 +10605,26 @@
 		else if (cavalliClienteCorrente.length === 1) valore = cavalliClienteCorrente[0].key;
 		sel.value = valore;
 		const presetCavalli = new Set([valore].concat(interventoPreset?.cavalli || []).filter(Boolean));
-		multi.classList.remove("csc-on");
-		multi._csc = null;
-		multi.innerHTML = cavalliClienteCorrente.map((c) => `<label class="int-cav"><input type="checkbox" class="int-cav-chk" value="${c.key}"${presetCavalli.has(c.key) ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>${escapeHtml(c.nome)}${c.tipo === "equo" ? " <small>· su Equo</small>" : ""}${c.presso ? " <small>· 📍 " + escapeHtml(c.presso) + "</small>" : ""}${c.proprietarioId ? " <small>· 👤 di " + escapeHtml(c.proprietarioNome) + "</small>" : ""}</span></label>`).join("") + `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
-		if (!inMod && !isNuovo && cavalliClienteCorrente.length >= 4) {
-			const coda = multi.querySelector(".int-cav.nuovo")?.outerHTML || "";
-			cscRender(multi, cavalliClienteCorrente.map((c) => ({
-				key: c.key,
-				id: c.id,
-				horse_id: c.horse_id,
-				tipo: c.tipo,
-				nome: c.nome,
-				sotto: c.proprietarioId ? "di " + c.proprietarioNome : ""
-			})), {
-				chk: "int-cav-chk",
-				preset: presetCavalli,
-				dataId: "intervento-data",
-				cambio: "onCavalliMultiChange",
-				coda,
-				ancora: () => document.getElementById("intervento-cliente-select").value === clienteId
-			}).then((ok) => {
-				if (ok) toggleInterventoNuovoCavallo();
-			}).catch((e) => console.warn("cavalli per scadenza:", e));
-		}
+		lcTogli(multi);
+		const coda = `<label class="int-cav nuovo"><input type="checkbox" class="int-cav-chk" value="__nuovo_cavallo__"${presetCavalli.has("__nuovo_cavallo__") ? " checked" : ""} onchange="onCavalliMultiChange()"> <span>+ Aggiungi cavallo</span></label>`;
+		if (!inMod && cavalliClienteCorrente.length) lcRender(multi, cavalliClienteCorrente.map((c) => ({
+			key: c.key,
+			id: c.id,
+			horse_id: c.horse_id,
+			tipo: c.tipo,
+			nome: c.nome,
+			proprietario: c.proprietarioId ? c.proprietarioNome : "",
+			info: [c.tipo === "equo" ? "su Equo" : "", c.presso ? "📍 " + c.presso : ""].filter(Boolean).join(" · ")
+		})), {
+			chk: "int-cav-chk",
+			preset: presetCavalli,
+			cambio: "onCavalliMultiChange",
+			coda,
+			ancora: () => document.getElementById("intervento-cliente-select").value === clienteId
+		}).then((ok) => {
+			if (ok) toggleInterventoNuovoCavallo();
+		});
+		else multi.innerHTML = coda;
 		if (inMod && mRif && interventoInModifica.numero_ferro) {
 			const usato = {
 				s: interventoInModifica.misura_sistema || "italiana",
@@ -15417,9 +15420,9 @@
 		segnaFatto,
 		onbScansionaCavallo,
 		onbSollecita,
-		cscCambio,
-		cscGruppo,
-		cscRapido,
+		lcCambio,
+		lcOrdina,
+		lcUrgenti,
 		tcChiudi,
 		tcImpostaLettura,
 		tcLettura,
@@ -15464,11 +15467,9 @@
 		apriAnagraficaCavallo,
 		cavIntervalloCambia,
 		salvaAnagraficaCavallo,
-		allineaRender,
-		apriAllineaScadenze,
+		fissaProssimoGiro,
 		cicloCambia,
 		cicloTogli,
-		confermaAllineaScadenze,
 		ferDettaglio,
 		ferStatoSistema,
 		impostaMisuraPredefinita,

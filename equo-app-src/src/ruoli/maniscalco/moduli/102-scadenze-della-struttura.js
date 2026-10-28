@@ -1,17 +1,19 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
-import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
-import { openClienteDetail } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
-import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
+import { isStruttura, isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
+import { cavalliQuiStanno } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
+import { openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { agDataPerFissare } from "./053-agenda-settimanale-maniscalco.js";
+import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
+import { lcScadenzeStruttura, lcSvuotaCache } from "./118-lista-cavalli-scadenze.js";
 /* ---------- SCADENZE DELLA STRUTTURA (24/10/2026, richiesta di Francesco Bizzarri) ----------
    Molti maniscalchi ferrano tutti i cavalli di una struttura nella stessa visita.
    1) «Ferratura ogni N giorni» (clienti_mascalcia.intervallo_giorni): quando segna fatto un cavallo della struttura,
       la prossima scadenza proposta usa questi giorni (vedi giorniRichiamoSuggeriti).
-   2) «Allinea le scadenze»: porta la prossima scadenza di tutti i cavalli della struttura a una sola data, scelta da lui.
-      Si cambia la prossima_scadenza dell'ultima ferratura/pareggio fatto di ogni cavallo (libretto e scuderia seguono da soli). */
+   2) 28/10/2026: tolto «Allinea le scadenze» (portava tutti i cavalli alla stessa data: con 50 cavalli non ha senso).
+      Al suo posto «Fissa il prossimo giro»: apre il Nuovo appuntamento con la struttura già scelta e la data della
+      scadenza più vicina (oggi se è già passata); i cavalli si scelgono nella lista con le scadenze (118). */
 const CICLO_MIN = 7, CICLO_MAX = 180, CICLO_PARTENZA = 35;
-const TIPI_CICLO = ["ferratura", "mezza_ferratura", "pareggio"];
 let cicloTimer = null;
 
 function intervalloStruttura(clienteId){
@@ -32,7 +34,36 @@ function renderCicloStruttura(c){
           : `<button type="button" class="btn btn-outline btn-sm" onclick="cicloCambia(0)">Imposta</button>`}</div>
     <div class="ciclo-nota">${g ? `Quando segni fatto un cavallo di questa struttura, la prossima scadenza è tra ${g} giorni. <button type="button" class="ciclo-link" onclick="cicloTogli()">Togli</button>`
       : "Non impostato: ogni cavallo usa il suo intervallo."}</div>
-    <button type="button" class="btn btn-outline btn-sm ciclo-allinea" onclick="apriAllineaScadenze()">Allinea le scadenze dei cavalli</button>`;
+    <button type="button" class="ciclo-fissa" onclick="fissaProssimoGiro()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg> Fissa il prossimo giro</button>
+    <div class="ciclo-conti" id="ciclo-conti"></div>
+    <div class="ciclo-nota">Apre il Nuovo appuntamento con la scuderia già scelta e la data della scadenza più vicina (oggi se è già passata). Scegli i cavalli e salvi.</div>`;
+  cicloContiStruttura(c);
+}
+// sotto il tasto: quanti cavalli sono scaduti / entro 10 giorni e la data proposta (già in agenda esclusi)
+let cicloProposta = { id: null, data: "" };
+async function cicloContiStruttura(c){
+  cicloProposta = { id: c.id, data: "" };
+  let l = [];
+  lcSvuotaCache();
+  try{ l = await lcScadenzeStruttura(c.id, new Set(cavalliQuiStanno(c.id).map(x => x.id))); }catch(e){ l = []; }
+  const box = document.getElementById("ciclo-conti");
+  if(!box || currentClienteId !== c.id) return;
+  const min = l.map(x => x.scad).sort()[0];
+  cicloProposta = { id: c.id, data: min ? agDataPerFissare(min) : "" };
+  const nR = l.filter(x => x.g < 0).length, nA = l.filter(x => x.g >= 0 && x.g <= 10).length;
+  const oggi = isoLocale(new Date()), d = cicloProposta.data;
+  const quando = d ? (d === oggi ? "oggi, " : "") + new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "") : "";
+  box.innerHTML = (nR ? `<span class="lc-pill r">${nR} ${nR === 1 ? "scaduto" : "scaduti"}</span>` : "")
+    + (nA ? `<span class="lc-pill a">${nA} entro 10 giorni</span>` : "")
+    + (quando ? `<span>· proposta: <b>${escapeHtml(quando)}</b></span>` : "");
+}
+function fissaProssimoGiro(){
+  const id = currentClienteId;
+  if(!id) return;
+  const data = cicloProposta.id === id ? cicloProposta.data : "";
+  const preset = data ? { data_intervento: data } : {};
+  if(isStrutturaCollegata(id)) return apriPropostaStruttura(id, preset);
+  return openInterventoModal(id, null, preset);
 }
 function cicloCambia(d){
   const c = clientiMascalcia.find(x => x.id === currentClienteId);
@@ -58,59 +89,5 @@ function cicloTogli(){
   cicloSalva(c.id, null);
 }
 
-// «Allinea le scadenze»: elenco dei cavalli con la loro scadenza, una data per tutti
-let allineaLista = [];
-async function apriAllineaScadenze(){
-  const c = clientiMascalcia.find(x => x.id === currentClienteId);
-  if(!c) return;
-  document.getElementById("all-tit").textContent = "Allinea le scadenze · " + c.nome;
-  document.getElementById("all-righe").innerHTML = '<div class="loading"><div class="spinner"></div> Caricamento...</div>';
-  document.getElementById("all-ok").disabled = true;
-  openModal("modal-allinea");
-  const tutti = await DB.ultimiFattiCliente(c.id, TIPI_CICLO);
-  // l'ultimo intervento fatto di ogni cavallo; conta solo se ha una prossima scadenza
-  const visti = new Set();
-  allineaLista = [];
-  tutti.forEach(i => {
-    const k = i.cavallo_cliente_id || i.horse_id;
-    if(!k || visti.has(k)) return;
-    visti.add(k);
-    if(i.prossima_scadenza) allineaLista.push(i);
-  });
-  allineaLista.sort((a, b) => a.prossima_scadenza.localeCompare(b.prossima_scadenza) || nomeAll(a).localeCompare(nomeAll(b)));
-  const inp = document.getElementById("all-data");
-  const oggi = isoLocale(new Date());
-  // proposta: la scadenza più vicina (nessun cavallo resta indietro), mai nel passato
-  const prima = allineaLista.length ? allineaLista[0].prossima_scadenza : aggiungiGiorniIso(oggi, intervalloStruttura(c.id) || CICLO_PARTENZA);
-  inp.min = oggi;
-  inp.value = prima < oggi ? oggi : prima;
-  allineaRender();
-}
-function nomeAll(i){ return i.cavalli_clienti_mascalcia?.nome || "Cavallo"; }
-function allineaRender(){
-  const d = document.getElementById("all-data").value;
-  const box = document.getElementById("all-righe"), ok = document.getElementById("all-ok");
-  if(!allineaLista.length){
-    box.innerHTML = '<div class="muted" style="font-size:13px">Nessun cavallo di questa struttura ha una prossima scadenza: prima segna fatta una ferratura.</div>';
-    ok.disabled = true; ok.textContent = "Allinea"; return;
-  }
-  const daCambiare = allineaLista.filter(i => i.prossima_scadenza !== d).length;
-  box.innerHTML = allineaLista.map(i => `<div class="all-riga${i.prossima_scadenza === d ? " uguale" : ""}"><b>${escapeHtml(nomeAll(i))}</b>
-      <span>${escapeHtml(formatDataBreve(i.prossima_scadenza))}${i.prossima_scadenza === d ? "" : " → " + escapeHtml(formatDataBreve(d))}</span></div>`).join("");
-  ok.disabled = !d || !daCambiare;
-  ok.textContent = !daCambiare ? "Già tutte allineate" : `Allinea ${daCambiare === 1 ? "1 cavallo" : daCambiare + " cavalli"} al ${formatDataBreve(d)}`;
-}
-async function confermaAllineaScadenze(){
-  const d = document.getElementById("all-data").value;
-  if(!d){ showToast("Scegli la data"); return; }
-  const ids = allineaLista.filter(i => i.prossima_scadenza !== d).map(i => i.id);
-  if(!ids.length) return;
-  const ok = document.getElementById("all-ok"); ok.disabled = true;
-  const { error } = await DB.allineaScadenze(ids, d);
-  if(error){ ok.disabled = false; showToast("Errore: " + error.message); return; }
-  closeModal("modal-allinea");
-  showToast(`${ids.length === 1 ? "1 cavallo" : ids.length + " cavalli"}: prossima scadenza ${formatDataBreve(d)}`);
-  try { await openClienteDetail(currentClienteId); await renderProDeadlines(); } catch(e){}
-}
 
-export { allineaRender, apriAllineaScadenze, cicloCambia, cicloTogli, confermaAllineaScadenze, intervalloStruttura, renderCicloStruttura };
+export { cicloCambia, cicloTogli, fissaProssimoGiro, intervalloStruttura, renderCicloStruttura };
