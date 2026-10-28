@@ -11874,7 +11874,7 @@
     <div class="cli-chip-row">
       <button class="cli-chip" onclick="openChatThread(currentClienteId)"><span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi</button>
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
-      ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> Proprietari dei cavalli</button>` : ""}
+      ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> + Assegna proprietario a cavallo</button>` : ""}
     </div>
     <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>
     <div class="onb-stato" id="cli-onb" style="display:none"></div>`;
@@ -13133,10 +13133,11 @@
 			multi: !!daStruttura,
 			aperti: null
 		};
-		document.getElementById("cp-tit").textContent = daStruttura ? "Proprietari dei cavalli · " + cli.nome : "Cambia proprietario · " + (cavalli[0].nome || "cavallo");
+		document.getElementById("cp-tit").textContent = daStruttura ? "Assegna proprietario · " + cli.nome : "Cambia proprietario · " + (cavalli[0].nome || "cavallo");
 		const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
 		const pr = clientiAttivi().filter((c) => c.id !== cli.id && !isStruttura(c)).sort(alf), sc = clientiAttivi().filter((c) => c.id !== cli.id && isStruttura(c)).sort(alf);
 		document.getElementById("cp-dest").innerHTML = "<option value=\"\">Scegli il proprietario…</option><option value=\"__nuovo\">+ Nuovo proprietario</option>" + (pr.length ? `<optgroup label="Proprietari">${pr.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + (sc.length ? `<optgroup label="Altre scuderie">${sc.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "");
+		cpCercaInit([...pr, ...sc]);
 		document.getElementById("cp-nuovo").hidden = true;
 		document.getElementById("cp-nuovo-nome").value = "";
 		document.getElementById("cp-nuovo-tel").value = "";
@@ -13162,6 +13163,71 @@
 		if (t) t.textContent = `(${cpCtx.sel.size} scelti)`;
 		clearTimeout(cpCtx.timer);
 		cpCtx.timer = setTimeout(cpContaAperti, 300);
+	}
+	function cpCercaInit(candidati) {
+		const sel = document.getElementById("cp-dest");
+		let wrap = document.getElementById("cp-cerca-wrap");
+		if (!wrap) {
+			wrap = document.createElement("div");
+			wrap.id = "cp-cerca-wrap";
+			wrap.className = "rz-wrap int-cerca cp-cerca";
+			wrap.innerHTML = `<span class="cerca-lente">${CERCA_LENTE_SVG}</span><input class="input cerca-input" id="cp-cerca-input" type="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Cerca il proprietario…" aria-label="Cerca il proprietario"><button type="button" class="cp-cerca-x" id="cp-cerca-x" aria-label="Cambia" hidden>✕</button><div class="rz-lista" id="cp-cerca-lista"></div>`;
+			sel.parentNode.insertBefore(wrap, sel);
+			const inp = wrap.querySelector("input"), lista = wrap.querySelector(".rz-lista"), x = wrap.querySelector(".cp-cerca-x");
+			const mostra = () => {
+				const parole = cercaParole(inp.value);
+				const tutti = wrap._candidati || [];
+				const trovati = (parole.length ? tutti.filter((c) => cercaCorrisponde(parole, c.nome + " " + (c.telefono || "") + " " + nomiCavalliCliente(c).join(" "))) : tutti).slice(0, 12);
+				lista.innerHTML = `<button type="button" data-nuovo="1"><span><b>+ Nuovo proprietario</b>${inp.value.trim() ? ` <span class="muted">«${escapeHtml(inp.value.trim())}»</span>` : ""}</span></button>` + trovati.map((c) => `<button type="button" data-id="${escapeHtml(c.id)}"><span><b>${escapeHtml(c.nome)}</b>${nomiCavalliCliente(c).length ? ` <span class="muted">· ${escapeHtml(nomiCavalliCliente(c).slice(0, 3).join(", "))}</span>` : ""}</span><small>${isStruttura(c) ? "Scuderia" : "Proprietario"}</small></button>`).join("") + (parole.length && !trovati.length ? `<div class="rz-vuoto">Nessuno con «${escapeHtml(inp.value.trim())}»</div>` : "");
+				lista.classList.add("aperta");
+			};
+			const scegli = (val, testo) => {
+				sel.value = val;
+				cpDestCambiata(sel);
+				inp.value = testo;
+				inp.readOnly = !!val && val !== "__nuovo";
+				x.hidden = !val;
+				lista.classList.remove("aperta");
+			};
+			inp.addEventListener("input", () => {
+				if (sel.value) {
+					sel.value = "";
+					cpDestCambiata(sel);
+					x.hidden = true;
+				}
+				mostra();
+			});
+			inp.addEventListener("focus", () => {
+				if (!inp.readOnly) mostra();
+			});
+			lista.addEventListener("mousedown", (e) => e.preventDefault());
+			lista.addEventListener("click", (e) => {
+				const b = e.target.closest("button");
+				if (!b) return;
+				if (b.dataset.nuovo) {
+					const nome = inp.value.trim();
+					scegli("__nuovo", "+ Nuovo proprietario");
+					const campo = document.getElementById("cp-nuovo-nome");
+					if (campo && nome && !campo.value) campo.value = nome;
+					return;
+				}
+				const c = (wrap._candidati || []).find((k) => k.id === b.dataset.id);
+				if (c) scegli(c.id, c.nome);
+			});
+			x.addEventListener("click", () => {
+				scegli("", "");
+				inp.readOnly = false;
+				inp.focus();
+			});
+			inp.addEventListener("blur", () => setTimeout(() => lista.classList.remove("aperta"), 150));
+		}
+		wrap._candidati = candidati;
+		sel.style.display = "none";
+		const inp = document.getElementById("cp-cerca-input");
+		inp.value = "";
+		inp.readOnly = false;
+		document.getElementById("cp-cerca-x").hidden = true;
+		document.getElementById("cp-cerca-lista").classList.remove("aperta");
 	}
 	function cpDestCambiata(sel) {
 		document.getElementById("cp-nuovo").hidden = sel.value !== "__nuovo";

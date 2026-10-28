@@ -5,7 +5,7 @@ import { openClienteDetail } from "./034-strutture-collegate-a-equo-scuderia-pro
 import { creaClienteUnico } from "./116-onboarding.js";
 import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { contoEuro } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
-import { caricaCavalliMiei, cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
+import { caricaCavalliMiei, cavalliMieiLista, nomiCavalliCliente } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 /* ---------- CAMBIA PROPRIETARIO (24/10/2026) ----------
    In scuderia ci sono cavalli della struttura e cavalli di proprietari esterni: il maniscalco intesta un cavallo (o più cavalli
    insieme) al suo proprietario, che da lì paga. Il cavallo resta DOVE STA (nella scuderia, in «Qui stanno»).
@@ -31,12 +31,13 @@ async function apriCambiaProprietario(daStruttura){
     cavalli = [cv];
   }
   cpCtx = { daId: cli.id, daNome: cli.nome, struttura: isStruttura(cli), cavalli, sel: new Set(daStruttura ? [] : [cavalli[0].id]), multi: !!daStruttura, aperti: null };
-  document.getElementById("cp-tit").textContent = daStruttura ? "Proprietari dei cavalli · " + cli.nome : "Cambia proprietario · " + (cavalli[0].nome || "cavallo");
+  document.getElementById("cp-tit").textContent = daStruttura ? "Assegna proprietario · " + cli.nome : "Cambia proprietario · " + (cavalli[0].nome || "cavallo");
   const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
   const pr = clientiAttivi().filter(c => c.id !== cli.id && !isStruttura(c)).sort(alf), sc = clientiAttivi().filter(c => c.id !== cli.id && isStruttura(c)).sort(alf);
   document.getElementById("cp-dest").innerHTML = '<option value="">Scegli il proprietario…</option><option value="__nuovo">+ Nuovo proprietario</option>'
     + (pr.length ? `<optgroup label="Proprietari">${pr.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "")
     + (sc.length ? `<optgroup label="Altre scuderie">${sc.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "");
+  cpCercaInit([...pr, ...sc]);
   document.getElementById("cp-nuovo").hidden = true;
   document.getElementById("cp-nuovo-nome").value = ""; document.getElementById("cp-nuovo-tel").value = "";
   document.getElementById("cp-errore").style.display = "none";
@@ -60,6 +61,55 @@ function cpScegliCavallo(id, on){
   on ? cpCtx.sel.add(id) : cpCtx.sel.delete(id);
   const t = document.querySelector("#cp-cavalli .cp-sez .muted"); if(t) t.textContent = `(${cpCtx.sel.size} scelti)`;
   clearTimeout(cpCtx.timer); cpCtx.timer = setTimeout(cpContaAperti, 300);
+}
+/* 28/10/2026: il proprietario si cerca con la lente (nome, cavalli, telefono), come il cliente nel Nuovo appuntamento.
+   Il menu #cp-dest resta nascosto e tiene la scelta. */
+function cpCercaInit(candidati){
+  const sel = document.getElementById("cp-dest");
+  let wrap = document.getElementById("cp-cerca-wrap");
+  if(!wrap){
+    wrap = document.createElement("div");
+    wrap.id = "cp-cerca-wrap"; wrap.className = "rz-wrap int-cerca cp-cerca";
+    wrap.innerHTML = `<span class="cerca-lente">${CERCA_LENTE_SVG}</span><input class="input cerca-input" id="cp-cerca-input" type="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Cerca il proprietario…" aria-label="Cerca il proprietario"><button type="button" class="cp-cerca-x" id="cp-cerca-x" aria-label="Cambia" hidden>✕</button><div class="rz-lista" id="cp-cerca-lista"></div>`;
+    sel.parentNode.insertBefore(wrap, sel);
+    const inp = wrap.querySelector("input"), lista = wrap.querySelector(".rz-lista"), x = wrap.querySelector(".cp-cerca-x");
+    const mostra = () => {
+      const parole = cercaParole(inp.value);
+      const tutti = wrap._candidati || [];
+      const trovati = (parole.length ? tutti.filter(c => cercaCorrisponde(parole, c.nome + " " + (c.telefono || "") + " " + nomiCavalliCliente(c).join(" "))) : tutti).slice(0, 12);
+      lista.innerHTML = `<button type="button" data-nuovo="1"><span><b>+ Nuovo proprietario</b>${inp.value.trim() ? ` <span class="muted">«${escapeHtml(inp.value.trim())}»</span>` : ""}</span></button>`
+        + trovati.map(c => `<button type="button" data-id="${escapeHtml(c.id)}"><span><b>${escapeHtml(c.nome)}</b>${nomiCavalliCliente(c).length ? ` <span class="muted">· ${escapeHtml(nomiCavalliCliente(c).slice(0, 3).join(", "))}</span>` : ""}</span><small>${isStruttura(c) ? "Scuderia" : "Proprietario"}</small></button>`).join("")
+        + (parole.length && !trovati.length ? `<div class="rz-vuoto">Nessuno con «${escapeHtml(inp.value.trim())}»</div>` : "");
+      lista.classList.add("aperta");
+    };
+    const scegli = (val, testo) => {
+      sel.value = val; cpDestCambiata(sel);
+      inp.value = testo; inp.readOnly = !!val && val !== "__nuovo"; x.hidden = !val;
+      lista.classList.remove("aperta");
+    };
+    inp.addEventListener("input", () => { if(sel.value){ sel.value = ""; cpDestCambiata(sel); x.hidden = true; } mostra(); });
+    inp.addEventListener("focus", () => { if(!inp.readOnly) mostra(); });
+    lista.addEventListener("mousedown", e => e.preventDefault());
+    lista.addEventListener("click", e => {
+      const b = e.target.closest("button"); if(!b) return;
+      if(b.dataset.nuovo){
+        const nome = inp.value.trim();
+        scegli("__nuovo", "+ Nuovo proprietario");
+        const campo = document.getElementById("cp-nuovo-nome"); if(campo && nome && !campo.value) campo.value = nome;
+        return;
+      }
+      const c = (wrap._candidati || []).find(k => k.id === b.dataset.id);
+      if(c) scegli(c.id, c.nome);
+    });
+    x.addEventListener("click", () => { scegli("", ""); inp.readOnly = false; inp.focus(); });
+    inp.addEventListener("blur", () => setTimeout(() => lista.classList.remove("aperta"), 150));
+  }
+  wrap._candidati = candidati;
+  sel.style.display = "none";
+  const inp = document.getElementById("cp-cerca-input");
+  inp.value = ""; inp.readOnly = false;
+  document.getElementById("cp-cerca-x").hidden = true;
+  document.getElementById("cp-cerca-lista").classList.remove("aperta");
 }
 function cpDestCambiata(sel){
   document.getElementById("cp-nuovo").hidden = sel.value !== "__nuovo";

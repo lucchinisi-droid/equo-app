@@ -196,7 +196,7 @@ async function openClienteDetail(id){
     <div class="cli-chip-row">
       <button class="cli-chip" onclick="openChatThread(currentClienteId)"><span class="icon"><svg><use href="#i-inbox"/></svg></span> Messaggi</button>
       <button class="cli-chip" id="cli-chip-qr" onclick="toggleQrCliente()">QR e codice invito</button>
-      ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> Proprietari dei cavalli</button>` : ""}
+      ${isStruttura(c) && !c.archiviato_il ? `<button class="cli-chip" onclick="apriCambiaProprietario(true)"><span class="fa-icon"><i class="fa-solid fa-user"></i></span> + Assegna proprietario a cavallo</button>` : ""}
     </div>
     <div class="cli-ciclo" id="cli-ciclo" style="display:none"></div>
     <div class="onb-stato" id="cli-onb" style="display:none"></div>`;

@@ -61,3 +61,9 @@
 :where(body:not(.pl-owner)) .onb-nota{font-size:13px;line-height:1.5;margin-top:10px}
 :where(body:not(.pl-owner)) .onb-tasti{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 :where(body:not(.pl-owner)) .onb-ok{font-size:13px;font-weight:600;color:var(--primary)}
+
+/* 28/10/2026: Assegna proprietario a cavallo, ricerca del proprietario con la lente */
+:where(body:not(.pl-owner)) .cp-cerca{position:relative;margin-bottom:4px}
+:where(body:not(.pl-owner)) .cp-cerca .cerca-input[readonly]{font-weight:700;color:var(--text)}
+:where(body:not(.pl-owner)) .cp-cerca-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;border-radius:50%;background:var(--surface-2,#efe9dc);color:var(--muted);font-size:14px;cursor:pointer}
+:where(body:not(.pl-owner)) .cp-cerca-x[hidden]{display:none}
