@@ -232,8 +232,8 @@ function renderAzioneAi(box, azione){
     box.insertAdjacentHTML("beforeend", `
     <div class="chat-bubble ai event-proposal" id="${id}">
       <div class="event-proposal-title">Conto · ${escapeHtml(x.nome_cliente || "")}</div>
-      <div class="event-proposal-row">${nuovo ? `${x.n_liberi} ${x.n_liberi === 1 ? "lavoro da mettere" : "lavori da mettere"} in conto · <b>€ ${Number(x.totale_liberi || 0).toFixed(2)}</b>${x.senza_importo ? ` <span class="muted">(${x.senza_importo} senza importo)</span>` : ""}` : "Nessun lavoro nuovo da mettere in conto."}</div>
-      ${(x.aperti || []).map(c => `<div class="event-proposal-row">Già fatto: <b>${escapeHtml(c.codice)}</b> del ${formatDataBreve(c.creato_il)} · ${c.n_lavori} lavori · € ${Number(c.totale || 0).toFixed(2)} · da incassare</div>`).join("")}
+      <div class="event-proposal-row">${nuovo ? `${x.n_liberi} ${x.n_liberi === 1 ? "lavoro da mettere" : "lavori da mettere"} in conto · <b>${formatEuro(x.totale_liberi || 0)}</b>${x.senza_importo ? ` <span class="muted">(${x.senza_importo} senza importo)</span>` : ""}` : "Nessun lavoro nuovo da mettere in conto."}</div>
+      ${(x.aperti || []).map(c => `<div class="event-proposal-row">Già fatto: <b>${escapeHtml(c.codice)}</b> del ${formatDataBreve(c.creato_il)} · ${c.n_lavori} lavori · ${formatEuro(c.totale || 0)} · da incassare</div>`).join("")}
       <div class="event-proposal-actions">
         ${(x.aperti || []).map(c => `<button class="btn btn-outline btn-sm" onclick="closeAiSheet();apriInvioConto('${c.id}')">Apri ${escapeHtml(c.codice)}</button>`).join("")}
         ${nuovo || !(x.aperti || []).length ? `<button class="btn btn-primary btn-sm btn-conferma" onclick="closeAiSheet();apriNuovoConto('${x.cliente_mascalcia_id}')">Fai il conto</button>` : ""}
@@ -249,10 +249,10 @@ function renderAzioneAi(box, azione){
       `<span class="muted">All'ora giusta te lo scrivo qui e ti arriva la notifica.</span>`];
   } else if(azione.tipo === "spesa_officina"){
     titolo = `🚐 Spesa · ${escapeHtml({ aiutanti: "Aiutanti", carburante: "Carburante", materiali: "Materiali", mezzo: "Mezzo", altro: "Altro" }[x.categoria] || x.categoria)}`;
-    righe = [`<b>${escapeHtml(x.descrizione)}</b>`, `€ ${Number(x.importo).toFixed(2)} · ${formatDataBreve(x.data)}`, '<span class="muted">Va nelle spese dell\'Officina mobile e nel guadagno netto.</span>'];
+    righe = [`<b>${escapeHtml(x.descrizione)}</b>`, `${formatEuro(x.importo)} · ${formatDataBreve(x.data)}`, '<span class="muted">Va nelle spese dell\'Officina mobile e nel guadagno netto.</span>'];
   } else if(azione.tipo === "spesa"){
     titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
-    righe = [`Importo: € ${Number(x.amount).toFixed(2)}`, `Data: ${formatDate(x.date)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.notes ? escapeHtml(x.notes) : ""];
+    righe = [`Importo: ${formatEuro(x.amount)}`, `Data: ${formatDate(x.date)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.notes ? escapeHtml(x.notes) : ""];
   } else if(azione.tipo === "lezione"){
     titolo = `Calendario · ${LEZIONE_TIPO_LABELS[x.tipo] || escapeHtml(x.tipo)}`;
     righe = [`Data: ${formatDate(x.data)}`, x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "", x.note ? escapeHtml(x.note) : ""];
@@ -265,20 +265,20 @@ function renderAzioneAi(box, azione){
     titolo = `Agenda · ${escapeHtml(x.tipo === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo] || x.tipo))}`;
     righe = [`${escapeHtml(x.nome_cliente || "")}${nomeCv ? " · " + escapeHtml(nomeCv) : ""}${x.nuovo_cavallo_nome ? " (nuovo cavallo)" : ""}`,
       `${formatDataBreve(x.data)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
-      x.importo != null ? `<span class="solo-incassi">Importo: € ${Number(x.importo).toFixed(2)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}</span>` : "", x.note ? escapeHtml(x.note) : ""];
+      x.importo != null ? `<span class="solo-incassi">Importo: ${formatEuro(x.importo)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}</span>` : "", x.note ? escapeHtml(x.note) : ""];
   } else if(azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta"){
     const acc = azione.tipo === "accetta_richiesta";
     titolo = acc ? "Accetta richiesta" : "Rifiuta richiesta";
     righe = [`${escapeHtml(x.nome_cliente || "")}${x.cavallo ? " · " + escapeHtml(x.cavallo) : ""}`,
       `${escapeHtml(x.tipo_ferratura === "altro" && x.tipo_altro ? x.tipo_altro : (TIPO_MAN_LABEL[x.tipo_ferratura] || x.tipo_ferratura || ""))} · ${formatDataBreve(x.data_intervento)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
-      acc && x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)}` : "",
+      acc && x.importo != null ? `Importo: ${formatEuro(x.importo)}` : "",
       acc && x.invia_riepilogo ? "Poi apro la chat con il PDF di riepilogo" : "",
       !acc ? "Il cliente riceve un messaggio per trovare un'altra data" : ""];
   } else if(azione.tipo === "promemoria"){
     titolo = `Messaggio a ${escapeHtml(x.nome_cliente || "")}`;
     righe = [`<span style="white-space:pre-wrap">${escapeHtml(x.testo || "")}</span>`, x.collegato ? "" : "<span class=\"muted\">Cliente non su Equo: copia il testo e mandalo tu.</span>"];
   } else if(azione.tipo === "saldato"){
-    titolo = `Segna come saldato · € ${Number(x.totale || 0).toFixed(2)}`;
+    titolo = `Segna come saldato · ${formatEuro(x.totale || 0)}`;
     righe = (x.righe || []).map(r => escapeHtml(r));
   } else return;
   box.insertAdjacentHTML("beforeend", `
@@ -387,7 +387,7 @@ async function confermaAzioneAi(id){
   } else if(azione.tipo === "spesa_officina"){
     if(typeof ofSalvaSpesaDaHammer !== "function") error = { message: "Officina mobile non disponibile in questa vista" };
     else ({ error } = await ofSalvaSpesaDaHammer(x));
-    fatto = `✓ Spesa registrata nell'Officina mobile: ${escapeHtml(x.descrizione)} · € ${Number(x.importo).toFixed(2)}.`;
+    fatto = `✓ Spesa registrata nell'Officina mobile: ${escapeHtml(x.descrizione)} · ${formatEuro(x.importo)}.`;
   } else if(azione.tipo === "promemoria_personale"){
     if(typeof pmSalvaDaHammer !== "function") error = { message: "promemoria non disponibili in questa vista" };
     else ({ error } = await pmSalvaDaHammer(x));
@@ -397,7 +397,7 @@ async function confermaAzioneAi(id){
       const r = await DB.updateInterventoMascalcia(idInt, { stato_pagamento: "saldato" });
       if(r.error){ error = r.error; break; }
     }
-    fatto = `✓ Segnati come saldati (€ ${Number(x.totale || 0).toFixed(2)}).`;
+    fatto = `✓ Segnati come saldati (${formatEuro(x.totale || 0)}).`;
     if(!error) await aggiornaViteManiscalco(null);
   }
   if(error){

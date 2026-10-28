@@ -6,7 +6,7 @@ async function loadExpensesSummary(){
   const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
   const all = await DB.listExpenses();
   const total = all.filter(e => new Date(e.date) >= startOfMonth).reduce((sum, e) => sum + Number(e.amount || 0), 0);
-  document.getElementById("stat-expenses").textContent = "€ " + total.toFixed(0);
+  document.getElementById("stat-expenses").textContent = formatEuro(Math.round(total));
 }
 
 async function loadExpenses(){
@@ -21,14 +21,14 @@ async function loadExpenses(){
   }
   const startOfMonth = new Date(); startOfMonth.setDate(1);
   const monthTotal = data.filter(e => new Date(e.date) >= startOfMonth).reduce((s,e)=>s+Number(e.amount||0),0);
-  document.getElementById("expenses-month-total").textContent = "€ " + monthTotal.toFixed(2);
+  document.getElementById("expenses-month-total").textContent = formatEuro(monthTotal, { decimali: true });
   box.innerHTML = data.map(e => `
     <div class="event-item" style="cursor:pointer" onclick="openEditExpenseModal('${e.id}')">
       <div>
         <div style="font-weight:600;font-size:14px;text-transform:capitalize">${escapeHtml(e.category)}${e.horses?.name ? " · " + escapeHtml(e.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(e.date)}${e.notes ? " · " + escapeHtml(e.notes) : ""}</div>
       </div>
-      <div style="font-weight:700">€ ${Number(e.amount).toFixed(2)}</div>
+      <div style="font-weight:700">${formatEuro(e.amount, { decimali: true })}</div>
     </div>
   `).join("");
 }

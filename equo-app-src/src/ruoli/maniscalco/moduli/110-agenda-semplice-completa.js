@@ -3,8 +3,8 @@ import { giorniTra } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { euroTondo } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
-import { agGiornoLavoro, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
+import { openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { agDescrizioneTipoPro, agGiornoLavoro, agNomeCavallo, agNomeCavalloTesto, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
@@ -93,8 +93,8 @@ function agDisegnaScheda(){
   else if(agScheda === "saldare") agDisegnaSaldare();
 }
 const nomeCli = x => x.clienti_mascalcia?.nome || "Cliente";
-const nomeCav = x => agNomeCavallo(x) || "Cavallo non indicato";
-const tipoLav = x => (TIPO_FERRATURA_LABELS[x.tipo_ferratura] || x.tipo_ferratura || "Intervento") + (x.tipo_ferratura === "altro" && x.tipo_altro ? " · " + x.tipo_altro : "");
+const nomeCav = x => agNomeCavalloTesto(x);
+const tipoLav = x => agDescrizioneTipoPro(x) || "Intervento";   // 28/10/2026: stessa descrizione del resto dell'app
 function perCliente(lista){
   const m = new Map();
   lista.forEach(x => { const k = x.cliente_mascalcia_id || "?"; if(!m.has(k)) m.set(k, { id: k, nome: nomeCli(x), righe: [] }); m.get(k).righe.push(x); });
@@ -202,7 +202,7 @@ async function agNfSposta(n){
 async function agNfAnnulla(n){
   const g = agGruppiNonFatti()[n];
   if(!g) return;
-  if(!confirm(`Annullare ${g.righe.length === 1 ? "questo appuntamento" : "questi " + g.righe.length + " appuntamenti"} di ${formatDataBreve(g.data)} (${g.nome})?`)) return;
+  if(!await chiediConferma(`Annullare ${g.righe.length === 1 ? "questo appuntamento" : "questi " + g.righe.length + " appuntamenti"} di ${formatDataBreve(g.data)} (${g.nome})?`)) return;
   await agNfAggiorna(g.righe, { stato: "annullato" }, "Appuntamento annullato");
 }
 

@@ -12,7 +12,7 @@ async function creaPdfConto(c){
   const piede = () => {
     doc.setDrawColor(227, 221, 204); doc.line(M, 280, W - M, 280);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...grigio);
-    doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
+    doc.text("Conto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
   };
   doc.setFillColor(...verde); doc.rect(0, 0, W, 32, "F");
   doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("Equo", M, 20);
@@ -20,7 +20,7 @@ async function creaPdfConto(c){
   doc.text(contoData(c.creato_il), W - M, 20, { align: "right" });
   doc.setFillColor(...oro); doc.rect(0, 32, W, 1.5, "F");
   let y = 48;
-  doc.setTextColor(...verde); doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.text("Resoconto lavori", M, y);
+  doc.setTextColor(...verde); doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.text("Conto", M, y);
   doc.setFontSize(12); doc.setTextColor(...oro); doc.text(contoCodice(c), W - M, y, { align: "right" });
   y += 9; doc.setFontSize(15); doc.setTextColor(...verde); doc.text(cli?.nome || "", M, y);
   const pro = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || "";

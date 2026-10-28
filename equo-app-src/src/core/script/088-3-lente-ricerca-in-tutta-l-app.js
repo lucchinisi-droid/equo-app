@@ -125,7 +125,7 @@ function cercaTuttoMostra(){
       .map(e => ctRiga("fa-notes-medical", (EVENT_LABELS[e.type] || e.type) + " · " + nomeCav(e.horse_id), formatDate(e.date) + (e.next_due_date ? " · prossima " + formatDate(e.next_due_date) : "") + (e.notes ? " · " + e.notes : ""),
         vai(async () => { showPage("cavalli"); await openHorseDetail(e.horse_id); if(typeof openEditEventModal === "function") openEditEventModal(e.id); })));
     const spese = (d.spese || []).filter(s => ok(s.category, s.notes, s.horses?.name, formatDate(s.date), s.date, String(s.amount), "spesa"))
-      .map(s => ctRiga("fa-euro-sign", `${s.category ? s.category.charAt(0).toUpperCase() + s.category.slice(1) : "Spesa"} · € ${Number(s.amount || 0).toFixed(2)}`, [formatDate(s.date), s.horses?.name, s.notes].filter(Boolean).join(" · "),
+      .map(s => ctRiga("fa-euro-sign", `${s.category ? s.category.charAt(0).toUpperCase() + s.category.slice(1) : "Spesa"} · ${formatEuro(s.amount || 0)}`, [formatDate(s.date), s.horses?.name, s.notes].filter(Boolean).join(" · "),
         vai(() => { document.querySelector('[data-page="spese"]')?.click(); currentExpensesData = d.spese || []; openEditExpenseModal(s.id); })));
     const lezioni = (d.lezioni || []).filter(l => ok(l.tipo, l.note, l.horses?.name, formatDate(l.data), l.data, "lezione"))
       .map(l => ctRiga("fa-person-chalkboard", (l.tipo ? l.tipo.charAt(0).toUpperCase() + l.tipo.slice(1) : "Lezione") + (l.horses?.name ? " · " + l.horses.name : ""), formatDate(l.data) + (l.note ? " · " + l.note : ""),

@@ -7,7 +7,7 @@ import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-rich
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { luogoDi, renderDoveCavalloPro, spostamentoHtml } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { MISURA_SISTEMA_LABEL, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { chiediSiNo, openInterventoModal, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { chiediSiNo, openInterventoModal, siglaFerro, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_MESI } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { giorniTra } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
@@ -64,7 +64,7 @@ function renderAvvisoSimili(){
 async function unisciSimili(i){
   const p = similiCorrenti[i];
   if(!p || !currentClienteId) return;
-  if(!confirm(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
+  if(!await chiediConferma(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
   if(DEMO_MODE){
     demoState.interventiMascalcia.forEach(x => { if(x.cavallo_cliente_id === p.m.id) x.cavallo_cliente_id = p.c.id || null; });
     demoState.cavalliClientiMascalcia = demoState.cavalliClientiMascalcia.filter(x => x.id !== p.m.id);
@@ -328,7 +328,7 @@ function storicoCavalloHtml(lista, spostamenti){
     const ferro = (i.tipo_ferratura === "ferratura" || i.tipo_ferratura === "mezza_ferratura")
       ? [i.quantita_ferri ? i.quantita_ferri + " ferri" : null, i.numero_ferro ? siglaFerro(i.misura_sistema, i.numero_ferro) : null].filter(Boolean).join(" ") : "";
     const extra = [i.ferri_nuovi === true ? "ferri nuovi" : i.ferri_nuovi === false ? "rimessa" : null, testoFerroIntervento(i),
-      i.importo != null ? Number(i.importo).toLocaleString("it-IT") + " €" : null,
+      i.importo != null ? formatEuro(i.importo) : null,
       i.luogo_nome ? (/^A casa/.test(i.luogo_nome) ? "a casa" : "presso " + i.luogo_nome) : i.clienti_mascalcia?.nome && i.cliente_mascalcia_id !== currentClienteId ? "presso " + i.clienti_mascalcia.nome : null, i.note || null].filter(Boolean).join(" · ");
     return `<div class="cavpro-int" onclick="openInterventoModal(null, schedaStoricoCavallo.find(x => x.id === '${i.id}'))">
       <div class="cavpro-int-data"><b>${d.getDate()}</b>${AG_MESI[d.getMonth()]} ${d.getFullYear()}</div>

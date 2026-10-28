@@ -3,7 +3,7 @@ import { loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { clienteDiId, eLuogoScuderia } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { agDescrizioneTipo, agNomeCavallo } from "./053-agenda-settimanale-maniscalco.js";
+import { agDescrizioneTipo, agNomeCavallo, agNomeCavalloTesto } from "./053-agenda-settimanale-maniscalco.js";
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { ContoDB, contoCodice, contoData, contoEuro, contoLavori } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { caricaContiCliente } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
@@ -62,7 +62,7 @@ function contoToggleGruppo(nome){
 }
 function contoToggle(id){ contoCtx.sel.has(id) ? contoCtx.sel.delete(id) : contoCtx.sel.add(id); renderNuovoConto(); }
 function contoNomeProprietario(i){ return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente"; }
-function contoNomeCavallo(i){ return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo"; }
+function contoNomeCavallo(i){ return agNomeCavalloTesto(i); }   // 28/10/2026: stesso testo dappertutto
 function renderNuovoConto(){
   const c = contoCtx; if(!c) return;
   const chip = (k, t) => `<button type="button" class="btn ${c.periodo === k ? "btn-primary" : "btn-outline"} btn-sm" onclick="contoSetPeriodo('${k}')">${t}</button>`;

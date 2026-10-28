@@ -3,7 +3,7 @@ import { loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cav
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { clienteDiId, luogoEvento } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { notaModificaMan, openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { notaModificaMan, openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_GIORNI, AG_MESI, agDescrizioneTipoPro, agLunedi, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { richiesteCache, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agAttivaTrascina, agOrdinaGiro } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
@@ -93,10 +93,10 @@ async function rifiutaRichiesta(id){
   const r = richiesteCache[id] || agEventiCache[id];
   if(!r) return;
   if(r.gruppo_id){
-    if(!confirm("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
+    if(!await chiediConferma("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
     return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
   }
-  if(!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
+  if(!await chiediConferma("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
   const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
   if(error){ showToast("Errore: " + error.message); return; }
   await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: r.cliente_mascalcia_id, tipo: "testo",

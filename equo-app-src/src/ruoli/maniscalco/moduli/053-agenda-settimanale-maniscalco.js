@@ -33,6 +33,8 @@ function agNomeCavallo(i){
   return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
 }
 // solo per le schermate del maniscalco: aggiunge «ferri nuovi» / «rimessa» (i testi per i clienti usano agDescrizioneTipo)
+// 28/10/2026: un solo testo quando il cavallo non è indicato
+function agNomeCavalloTesto(i){ return agNomeCavallo(i) || "Cavallo non indicato"; }
 function agDescrizioneTipoPro(i){
   const t = agDescrizioneTipo(i);
   if(i.ferri_nuovi === false) return t + " · rimessa";
@@ -96,4 +98,4 @@ async function renderAgendaSettimana(direzione){
 }
 
 
-export { AG_GIORNI, AG_MESI, AG_MESI_LUNGHI, agDescrizioneTipo, agDescrizioneTipoPro, agGiornoLavoro, agLunedi, agNomeCavallo, renderAgendaSettimana };
+export { agNomeCavalloTesto, AG_GIORNI, AG_MESI, AG_MESI_LUNGHI, agDescrizioneTipo, agDescrizioneTipoPro, agGiornoLavoro, agLunedi, agNomeCavallo, renderAgendaSettimana };

@@ -3,7 +3,7 @@ import { loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-
 import { cavalliEditCache, messaggioErroreCollegaCliente, openClienteDetail, renderCavalliEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { razzaImposta, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { MISURA_SISTEMA_LABEL, MISURE_FERRO, misuraNorm, misuraPredefinita } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { siglaFerro } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { siglaFerro, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { intervalloCavallo, intervalloEffettivo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
@@ -218,7 +218,7 @@ async function aggiungiCavalloCodice(btn){
     let { data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: false });
     if(error){ showToast("Errore: " + error.message); return; }
     if(data && data.chiedi){
-      if(!confirm(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
+      if(!await chiediConferma(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
       ({ data, error } = await sb.rpc("pro_cavallo_da_codice", { p_cliente_id: currentClienteId, p_codice: codice, p_conferma: true }));
       if(error){ showToast("Errore: " + error.message); return; }
     }
@@ -251,7 +251,7 @@ async function aggiungiCavalloEditCliente(){
 }
 
 async function eliminaCavalloEditCliente(id){
-  if(!confirm("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
+  if(!await chiediConferma("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
   const { error } = await DB.deleteCavalloCliente(id);
   if(error){ showToast("Errore: " + error.message); return; }
   await renderCavalliEditCliente();

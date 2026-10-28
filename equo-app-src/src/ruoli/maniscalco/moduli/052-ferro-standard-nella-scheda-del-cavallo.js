@@ -425,6 +425,12 @@ function chiediSiNo(titolo, testo){
     document.getElementById("eq-pop-sino").classList.add("attivo");
   });
 }
+// 28/10/2026: le conferme passano tutte dal Sì/No di Equo (prima in molti punti c'era la finestrella del telefono).
+// Il testo si divide da solo: fino al primo «?» è il titolo, il resto la spiegazione.
+function chiediConferma(testo){
+  const t = String(testo || ""), i = t.indexOf("?");
+  return i > 0 && i < t.length - 1 ? chiediSiNo(t.slice(0, i + 1).replace(/\s+/g, " "), t.slice(i + 1).replace(/^\s+/, "")) : chiediSiNo(t, "");
+}
 function rispondiSiNo(si){
   document.getElementById("eq-pop-sino").classList.remove("attivo");
   const r = sinoResolve; sinoResolve = null;
@@ -571,7 +577,7 @@ async function salvaInterventoMascalcia(){
         && ((r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id) || (r.horse_id && i.horse_id === r.horse_id) || (!r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id)))).filter(Boolean);
       if(doppi.length){
         const cv = doppi.map(d => d.cavalli_clienti_mascalcia?.nome || agNomeCavallo(d) || "questo cavallo").join(", ");
-        if(!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`))
+        if(!await chiediConferma(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`))
           return errore("Non salvato: c'era già lo stesso appuntamento.");
       }
     }
@@ -704,7 +710,7 @@ function deveAvvisareAnnullo(e){
 
 async function eliminaInterventoInModifica(){
   if(!interventoInModifica) return;
-  if(!confirm(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+  if(!await chiediConferma(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
   const clienteId = interventoInModifica.cliente_mascalcia_id;
   const daAvvisare = deveAvvisareAnnullo(interventoInModifica) ? { ...interventoInModifica, cavallo: agNomeCavalloSicuro(interventoInModifica) || (cavalliClienteCorrente.find(c => c.id === interventoInModifica.cavallo_cliente_id) || {}).nome || "" } : null;
   const { error } = await DB.deleteInterventoMascalcia(interventoInModifica.id);
@@ -722,4 +728,4 @@ async function eliminaInterventoInModifica(){
 const createInterventoMascalcia = salvaInterventoMascalcia;
 
 
-export { aggiornaQuando, avvisaClienteAppuntamento, chiediSiNo, chiudiEditorFerro, clienteCollegatoEquo, deveAvvisareAnnullo, eliminaInterventoInModifica, ferroStd, modificaFerraturaDaIntervento, notaModificaMan, nuovoCavalloLavoro, onCavalliMultiChange, onInterventoClienteChange, openInterventoModal, quandoIntervento, rispondiSiNo, salvaInterventoMascalcia, sceltaModoIntervento, sceltaStraordinario, sceltaZoccolo, selezionaCavalloIntervento, selezionaQuantita, siglaFerro, testoPrimaModifica, toggleInterventoNuovoCavallo, toggleInterventoTipoFields };
+export { chiediConferma, aggiornaQuando, avvisaClienteAppuntamento, chiediSiNo, chiudiEditorFerro, clienteCollegatoEquo, deveAvvisareAnnullo, eliminaInterventoInModifica, ferroStd, modificaFerraturaDaIntervento, notaModificaMan, nuovoCavalloLavoro, onCavalliMultiChange, onInterventoClienteChange, openInterventoModal, quandoIntervento, rispondiSiNo, salvaInterventoMascalcia, sceltaModoIntervento, sceltaStraordinario, sceltaZoccolo, selezionaCavalloIntervento, selezionaQuantita, siglaFerro, testoPrimaModifica, toggleInterventoNuovoCavallo, toggleInterventoTipoFields };

@@ -17,7 +17,7 @@ async function caricaDaSaldare(){
   const badge = document.getElementById("owner-chat-nav-badge");
   if(badge && daSaldareStato.daRicordare) badge.style.display = "block";
 }
-function euroIt(v){ return "€ " + Number(v || 0).toFixed(2).replace(".", ","); }
+function euroIt(v){ return formatEuro(v, { decimali: true }); }   // 28/10/2026: formato unico
 // 27/10/2026: acconti e rate registrati dal maniscalco (pagato, piano: rate, pagate, prossima)
 const dsResto = r => Math.max(0, Number(r.importo || 0) - Number(r.pagato || 0));
 function dsOggi(){ const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }

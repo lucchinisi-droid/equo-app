@@ -1,4 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { apriNuovoConto } from "./059-foglio-fai-il-conto.js";
@@ -113,7 +114,7 @@ async function pmSalva(){
 }
 async function pmElimina(){
   if(!pmInModifica) return;
-  if(!confirm("Eliminare questo promemoria?")) return;
+  if(!await chiediConferma("Eliminare questo promemoria?")) return;
   const { error } = await PmDB.salva(pmInModifica.id, { stato: "annullato" });
   if(error){ showToast("Errore: " + error.message); return; }
   closeModal("modal-promemoria"); pmInModifica = null;

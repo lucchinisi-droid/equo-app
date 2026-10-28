@@ -17,7 +17,7 @@ import { pagCarica, pagHtmlLavoro, pagPagato, pagResiduo, pagVociIncasso } from 
 let incMesi = (() => { try { return Number(localStorage.getItem("equo-inc-mesi")) || 6; } catch(e){ return 6; } })();
 /* -> stato-condiviso.js */
 const INC_PERIODI = [["oggi", "Oggi", false], ["settimana", "Settimana", true], ["mese", "Mese", false], ["anno", "Anno", true], ["date", "Scegli date…", true]];
-function euroTondo(n){ return (Number(n) || 0).toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: Number(n) % 1 ? 2 : 0 }); }
+function euroTondo(n){ return formatEuro(n); }   // 28/10/2026: formato unico
 function giornoPagamento(i){ return i._giorno ? i._giorno : i.saldato_il ? isoLocale(new Date(i.saldato_il)) : (i.data_intervento || ""); }
 function incIntervallo(per){
   const oggi = new Date(), iso = isoLocale(oggi);

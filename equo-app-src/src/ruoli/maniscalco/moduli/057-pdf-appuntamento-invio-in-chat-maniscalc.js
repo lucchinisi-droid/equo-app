@@ -32,7 +32,7 @@ function testoRiepilogoEvento(e){
     (e.stato === "fatto" ? "Intervento del " : "Appuntamento: ") + quando,
     (cav ? cav + " — " : "") + agDescrizioneTipo(e)
   ];
-  if(e.importo != null) parti.push("€ " + Number(e.importo).toFixed(2).replace(".", ",") + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
+  if(e.importo != null) parti.push(contoEuro(e.importo) + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
   if(e.aiutante_nome) parti.push(e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `con l'aiutante ${e.aiutante_nome}`);
   return parti.join(" · ");
 }
@@ -88,7 +88,7 @@ async function creaPdfEvento(e){
     ["Tipo intervento", tipoTxt],
     misuraTxt ? ["Misura ferro", misuraTxt] : null,
     e.quantita_ferri ? ["Quantità ferri", String(e.quantita_ferri)] : null,
-    ["Importo", e.importo != null ? "€ " + Number(e.importo).toFixed(2).replace(".", ",") : "—"],
+    ["Importo", e.importo != null ? contoEuro(e.importo) : "—"],
     ["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
     ["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
     e.aiutante_nome ? ["Aiutante", e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `Con l'aiutante ${e.aiutante_nome}`] : null,
@@ -176,7 +176,7 @@ function rimuoviAllegatoChat(){
 /* -> stato-condiviso.js */   // conto mostrato nel foglio di invio
 const contoCodice = c => "C-" + c.anno + "-" + String(c.numero).padStart(3, "0");
 const contoLavori = n => n + (n === 1 ? " lavoro" : " lavori");
-const contoEuro = n => "€ " + Number(n || 0).toFixed(2).replace(".", ",");
+const contoEuro = n => formatEuro(n, { decimali: true });   // 28/10/2026: formato unico (core/script/046)
 const contoData = iso => { const [y, m, d] = String(iso).slice(0, 10).split("-"); return `${d}/${m}/${y}`; };
 
 const ContoDB = {

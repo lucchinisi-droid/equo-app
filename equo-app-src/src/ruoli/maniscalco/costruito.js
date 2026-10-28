@@ -3265,7 +3265,7 @@
 		return true;
 	}
 	async function ofArchiviaMezzo(id) {
-		if (!confirm("Archiviare questo mezzo? Lo storico e le spese restano.")) return;
+		if (!await chiediConferma("Archiviare questo mezzo? Lo storico e le spese restano.")) return;
 		await OfDB.salva("officina_mezzi", {
 			id,
 			archiviato: true
@@ -3374,7 +3374,7 @@
 		ofAggiornaRiepiloghi$1();
 	}
 	async function ofEliminaIntervento(id) {
-		if (!confirm("Eliminare questo intervento? Si toglie anche la sua spesa.")) return;
+		if (!await chiediConferma("Eliminare questo intervento? Si toglie anche la sua spesa.")) return;
 		await OfDB.elimina("officina_interventi", id);
 		await OfDB.spesaAuto(`int:${id}`, null);
 		OF.interventi = OF.interventi.filter((x) => x.id !== id);
@@ -3448,7 +3448,7 @@
 		return true;
 	}
 	async function ofTogliAiutante(id) {
-		if (!confirm("Togliere questo aiutante? Le spese e gli appuntamenti passati restano.")) return;
+		if (!await chiediConferma("Togliere questo aiutante? Le spese e gli appuntamenti passati restano.")) return;
 		await OfDB.salva("officina_aiutanti", {
 			id,
 			attivo: false
@@ -3527,7 +3527,7 @@
 		return true;
 	}
 	async function ofTogliMateriale(id) {
-		if (!confirm("Togliere questo materiale dall'elenco?")) return;
+		if (!await chiediConferma("Togliere questo materiale dall'elenco?")) return;
 		await OfDB.salva("officina_materiali", {
 			id,
 			attivo: false
@@ -3588,7 +3588,7 @@
 		ofAggiornaRiepiloghi$1();
 	}
 	async function ofEliminaSpesa(id) {
-		if (!confirm("Eliminare questa spesa?")) return;
+		if (!await chiediConferma("Eliminare questa spesa?")) return;
 		await OfDB.elimina("officina_spese", id);
 		await ofCaricaSpese();
 		closeModal("modal-officina");
@@ -4965,7 +4965,7 @@
 		const quando = `${AG_GIORNI[(new Date(y, m - 1, d).getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " ore " + String(e.ora).slice(0, 5) : ""}`;
 		const cav = agNomeCavallo(e);
 		const parti = [(e.stato === "fatto" ? "Intervento del " : "Appuntamento: ") + quando, (cav ? cav + " — " : "") + agDescrizioneTipo(e)];
-		if (e.importo != null) parti.push("€ " + Number(e.importo).toFixed(2).replace(".", ",") + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
+		if (e.importo != null) parti.push(contoEuro(e.importo) + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
 		if (e.aiutante_nome) parti.push(e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `con l'aiutante ${e.aiutante_nome}`);
 		return parti.join(" · ");
 	}
@@ -5054,7 +5054,7 @@
 			["Tipo intervento", tipoTxt],
 			misuraTxt ? ["Misura ferro", misuraTxt] : null,
 			e.quantita_ferri ? ["Quantità ferri", String(e.quantita_ferri)] : null,
-			["Importo", e.importo != null ? "€ " + Number(e.importo).toFixed(2).replace(".", ",") : "—"],
+			["Importo", e.importo != null ? contoEuro(e.importo) : "—"],
 			["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
 			["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
 			e.aiutante_nome ? ["Aiutante", e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `Con l'aiutante ${e.aiutante_nome}`] : null,
@@ -5164,7 +5164,7 @@
 	}
 	var contoCodice = (c) => "C-" + c.anno + "-" + String(c.numero).padStart(3, "0");
 	var contoLavori = (n) => n + (n === 1 ? " lavoro" : " lavori");
-	var contoEuro = (n) => "€ " + Number(n || 0).toFixed(2).replace(".", ",");
+	var contoEuro = (n) => formatEuro(n, { decimali: true });
 	var contoData = (iso) => {
 		const [y, m, d] = String(iso).slice(0, 10).split("-");
 		return `${d}/${m}/${y}`;
@@ -5312,11 +5312,7 @@
 	var pagRate = [];
 	var pag = null;
 	var r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
-	var pagEuro = (n) => (Number(n) || 0).toLocaleString("it-IT", {
-		style: "currency",
-		currency: "EUR",
-		maximumFractionDigits: r2(n) % 1 ? 2 : 0
-	});
+	var pagEuro = (n) => formatEuro(n);
 	var oggiIso$1 = () => isoLocale(/* @__PURE__ */ new Date());
 	var nomeModo = (k) => (PAG_MODI.find((m) => m[0] === k) || [k, k])[1];
 	async function pagCarica() {
@@ -5924,11 +5920,7 @@
 		]
 	];
 	function euroTondo(n) {
-		return (Number(n) || 0).toLocaleString("it-IT", {
-			style: "currency",
-			currency: "EUR",
-			maximumFractionDigits: Number(n) % 1 ? 2 : 0
-		});
+		return formatEuro(n);
 	}
 	function giornoPagamento(i) {
 		return i._giorno ? i._giorno : i.saldato_il ? isoLocale(new Date(i.saldato_il)) : i.data_intervento || "";
@@ -6209,7 +6201,7 @@
 			doc.setFont("helvetica", "normal");
 			doc.setFontSize(8.5);
 			doc.setTextColor(...grigio);
-			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
+			doc.text("Conto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
 		};
 		doc.setFillColor(...verde);
 		doc.rect(0, 0, W, 32, "F");
@@ -6227,7 +6219,7 @@
 		doc.setTextColor(...verde);
 		doc.setFont("helvetica", "bold");
 		doc.setFontSize(17);
-		doc.text("Resoconto lavori", M, y);
+		doc.text("Conto", M, y);
 		doc.setFontSize(12);
 		doc.setTextColor(...oro);
 		doc.text(contoCodice(c), 192, y, { align: "right" });
@@ -6591,7 +6583,7 @@
 		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
 	}
 	function contoNomeCavallo(i) {
-		return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo";
+		return agNomeCavalloTesto(i);
 	}
 	function renderNuovoConto() {
 		const c = contoCtx;
@@ -6822,7 +6814,7 @@
 	}
 	async function pmElimina() {
 		if (!pmInModifica) return;
-		if (!confirm("Eliminare questo promemoria?")) return;
+		if (!await chiediConferma("Eliminare questo promemoria?")) return;
 		const { error } = await PmDB.salva(pmInModifica.id, { stato: "annullato" });
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -7248,10 +7240,10 @@
 		const r = richiesteCache[id] || agEventiCache[id];
 		if (!r) return;
 		if (r.gruppo_id) {
-			if (!confirm("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
+			if (!await chiediConferma("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
 			return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
 		}
-		if (!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
+		if (!await chiediConferma("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
 		const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -7576,7 +7568,7 @@
 		document.getElementById("azioni-evento-dettaglio").innerHTML = [
 			`${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
 			escapeHtml(agDescrizioneTipoPro(e)),
-			"<span class=\"solo-incassi\">" + (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
+			"<span class=\"solo-incassi\">" + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
 			e.stato === "fatto" ? "<span style=\"color:var(--green);font-weight:700\">✓ Fatto</span>" : e.stato === "richiesto" ? "<span style=\"color:var(--accent);font-weight:700\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span style=\"color:var(--accent);font-weight:700\">In attesa della conferma della scuderia</span>" : "Da fare",
 			notaModificaMan(e, true),
 			e.gruppo_id ? "<span class=\"muted\" style=\"font-size:12px\">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>" : "",
@@ -7598,7 +7590,7 @@
 			closeModal("modal-azioni-evento");
 			openInterventoModal(null, e);
 		} else if (tipo === "annulla_struttura" && e.gruppo_id) {
-			if (!confirm("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
+			if (!await chiediConferma("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
 			closeModal("modal-azioni-evento");
 			await azioneGruppoStruttura(e.gruppo_id, "annulla");
 		} else if (tipo === "fatto" && e.stato === "richiesto") {
@@ -7619,7 +7611,7 @@
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} else if (tipo === "elimina") {
-			if (!confirm(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+			if (!await chiediConferma(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
 			const { error } = await DB.deleteInterventoMascalcia(e.id);
 			if (error) {
 				showToast("Errore: " + error.message);
@@ -8392,6 +8384,9 @@
 		const elenco = i.clienti_mascalcia?.nome_cavallo || "";
 		return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
 	}
+	function agNomeCavalloTesto(i) {
+		return agNomeCavallo(i) || "Cavallo non indicato";
+	}
 	function agDescrizioneTipoPro(i) {
 		const t = agDescrizioneTipo(i);
 		if (i.ferri_nuovi === false) return t + " · rimessa";
@@ -8682,7 +8677,7 @@
 			document.getElementById("ricaz-attuale").textContent = "Scadenza attuale: " + formatDataBreve(r.scadenza) + " (" + hpQuando(r) + ")";
 			richiamoAnteprima();
 		} else if (tipo === "chiudi") {
-			if (!confirm(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
+			if (!await chiediConferma(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
 			const { error } = await DB.setRichiamoStato(r.intervento_id, { chiuso_il: (/* @__PURE__ */ new Date()).toISOString() });
 			if (error) {
 				showToast("Errore: " + error.message);
@@ -9331,7 +9326,7 @@
 	async function unisciSimili(i) {
 		const p = similiCorrenti[i];
 		if (!p || !currentClienteId) return;
-		if (!confirm(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
+		if (!await chiediConferma(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
 		if (DEMO_MODE) {
 			demoState.interventiMascalcia.forEach((x) => {
 				if (x.cavallo_cliente_id === p.m.id) x.cavallo_cliente_id = p.c.id || null;
@@ -9685,7 +9680,7 @@
 			const extra = [
 				i.ferri_nuovi === true ? "ferri nuovi" : i.ferri_nuovi === false ? "rimessa" : null,
 				testoFerroIntervento(i),
-				i.importo != null ? Number(i.importo).toLocaleString("it-IT") + " €" : null,
+				i.importo != null ? formatEuro(i.importo) : null,
 				i.luogo_nome ? /^A casa/.test(i.luogo_nome) ? "a casa" : "presso " + i.luogo_nome : i.clienti_mascalcia?.nome && i.cliente_mascalcia_id !== currentClienteId ? "presso " + i.clienti_mascalcia.nome : null,
 				i.note || null
 			].filter(Boolean).join(" · ");
@@ -10802,6 +10797,10 @@
 			document.getElementById("eq-pop-sino").classList.add("attivo");
 		});
 	}
+	function chiediConferma(testo) {
+		const t = String(testo || ""), i = t.indexOf("?");
+		return i > 0 && i < t.length - 1 ? chiediSiNo(t.slice(0, i + 1).replace(/\s+/g, " "), t.slice(i + 1).replace(/^\s+/, "")) : chiediSiNo(t, "");
+	}
 	function rispondiSiNo(si) {
 		document.getElementById("eq-pop-sino").classList.remove("attivo");
 		const r = sinoResolve;
@@ -10977,7 +10976,7 @@
 				const doppi = righe.map((r) => (stessoGiorno || []).find((i) => i.cliente_mascalcia_id === (r.cliente || cliente_mascalcia_id) && i.tipo_ferratura === tipo_ferratura && (r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id || r.horse_id && i.horse_id === r.horse_id || !r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id))).filter(Boolean);
 				if (doppi.length) {
 					const cv = doppi.map((d) => d.cavalli_clienti_mascalcia?.nome || agNomeCavallo(d) || "questo cavallo").join(", ");
-					if (!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`)) return errore("Non salvato: c'era già lo stesso appuntamento.");
+					if (!await chiediConferma(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`)) return errore("Non salvato: c'era già lo stesso appuntamento.");
 				}
 			}
 			for (let n = 0; n < righe.length; n++) {
@@ -11150,7 +11149,7 @@
 	}
 	async function eliminaInterventoInModifica() {
 		if (!interventoInModifica) return;
-		if (!confirm(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+		if (!await chiediConferma(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
 		const clienteId = interventoInModifica.cliente_mascalcia_id;
 		const daAvvisare = deveAvvisareAnnullo(interventoInModifica) ? {
 			...interventoInModifica,
@@ -11475,7 +11474,7 @@
 				return;
 			}
 			if (data && data.chiedi) {
-				if (!confirm(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
+				if (!await chiediConferma(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
 				({data, error} = await sb.rpc("pro_cavallo_da_codice", {
 					p_cliente_id: currentClienteId,
 					p_codice: codice,
@@ -11531,7 +11530,7 @@
 		await syncNomeCavalloCliente();
 	}
 	async function eliminaCavalloEditCliente(id) {
-		if (!confirm("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
+		if (!await chiediConferma("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
 		const { error } = await DB.deleteCavalloCliente(id);
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -13645,11 +13644,11 @@
       ${r.testo ? `<button type="button" class="ecv-int${r.stato === "pubblicata" ? " on" : ""}" onclick="ecvReferenza(this,'${r.id}')" aria-label="Pubblica o nascondi" style="margin-left:auto"></button>` : ""}</div>`).join("") || "<div class=\"ecv-muted\">Nessuna referenza: chiedila a un cliente collegato su Equo.</div>";
 		return "";
 	}
-	function ecvTogliElemento(chiave, id) {
+	async function ecvTogliElemento(chiave, id) {
 		const arr = ecvDati()[chiave] || [];
 		const i = arr.findIndex((x) => x.id === id);
 		if (i < 0) return;
-		if (!confirm("Eliminare questa voce dal CV?")) return;
+		if (!await chiediConferma("Eliminare questa voce dal CV?")) return;
 		arr.splice(i, 1);
 		ecvSalva();
 		ecvAggiornaCompleto();
@@ -14537,8 +14536,8 @@
 		else if (agScheda === "saldare") agDisegnaSaldare();
 	}
 	var nomeCli = (x) => x.clienti_mascalcia?.nome || "Cliente";
-	var nomeCav = (x) => agNomeCavallo(x) || "Cavallo non indicato";
-	var tipoLav = (x) => (TIPO_FERRATURA_LABELS[x.tipo_ferratura] || x.tipo_ferratura || "Intervento") + (x.tipo_ferratura === "altro" && x.tipo_altro ? " · " + x.tipo_altro : "");
+	var nomeCav = (x) => agNomeCavalloTesto(x);
+	var tipoLav = (x) => agDescrizioneTipoPro(x) || "Intervento";
 	function perCliente(lista) {
 		const m = /* @__PURE__ */ new Map();
 		lista.forEach((x) => {
@@ -14708,7 +14707,7 @@
 	async function agNfAnnulla(n) {
 		const g = agGruppiNonFatti()[n];
 		if (!g) return;
-		if (!confirm(`Annullare ${g.righe.length === 1 ? "questo appuntamento" : "questi " + g.righe.length + " appuntamenti"} di ${formatDataBreve(g.data)} (${g.nome})?`)) return;
+		if (!await chiediConferma(`Annullare ${g.righe.length === 1 ? "questo appuntamento" : "questi " + g.righe.length + " appuntamenti"} di ${formatDataBreve(g.data)} (${g.nome})?`)) return;
 		await agNfAggiorna(g.righe, { stato: "annullato" }, "Appuntamento annullato");
 	}
 	function agDisegnaSaldare() {

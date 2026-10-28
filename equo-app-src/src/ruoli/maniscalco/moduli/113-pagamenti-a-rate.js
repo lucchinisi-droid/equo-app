@@ -16,7 +16,7 @@ let pagTranche = [], pagRate = [];
 let pag = null;   // stato della finestra «Registra pagamento»
 
 const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
-const pagEuro = n => (Number(n) || 0).toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: r2(n) % 1 ? 2 : 0 });
+const pagEuro = n => formatEuro(n);   // 28/10/2026: formato unico
 const oggiIso = () => isoLocale(new Date());
 const nomeModo = k => (PAG_MODI.find(m => m[0] === k) || [k, k])[1];
 

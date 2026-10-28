@@ -1116,7 +1116,7 @@
 		if (badge && daSaldareStato.daRicordare) badge.style.display = "block";
 	}
 	function euroIt(v) {
-		return "€ " + Number(v || 0).toFixed(2).replace(".", ",");
+		return formatEuro(v, { decimali: true });
 	}
 	var dsResto = (r) => Math.max(0, Number(r.importo || 0) - Number(r.pagato || 0));
 	function dsOggi() {
@@ -1202,7 +1202,7 @@
 		startOfMonth.setDate(1);
 		startOfMonth.setHours(0, 0, 0, 0);
 		const total = (await DB.listExpenses()).filter((e) => new Date(e.date) >= startOfMonth).reduce((sum, e) => sum + Number(e.amount || 0), 0);
-		document.getElementById("stat-expenses").textContent = "€ " + total.toFixed(0);
+		document.getElementById("stat-expenses").textContent = formatEuro(Math.round(total));
 	}
 	async function loadExpenses() {
 		const box = document.getElementById("expenses-list");
@@ -1217,14 +1217,14 @@
 		const startOfMonth = /* @__PURE__ */ new Date();
 		startOfMonth.setDate(1);
 		const monthTotal = data.filter((e) => new Date(e.date) >= startOfMonth).reduce((s, e) => s + Number(e.amount || 0), 0);
-		document.getElementById("expenses-month-total").textContent = "€ " + monthTotal.toFixed(2);
+		document.getElementById("expenses-month-total").textContent = formatEuro(monthTotal, { decimali: true });
 		box.innerHTML = data.map((e) => `
     <div class="event-item" style="cursor:pointer" onclick="openEditExpenseModal('${e.id}')">
       <div>
         <div style="font-weight:600;font-size:14px;text-transform:capitalize">${escapeHtml(e.category)}${e.horses?.name ? " · " + escapeHtml(e.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(e.date)}${e.notes ? " · " + escapeHtml(e.notes) : ""}</div>
       </div>
-      <div style="font-weight:700">€ ${Number(e.amount).toFixed(2)}</div>
+      <div style="font-weight:700">${formatEuro(e.amount, { decimali: true })}</div>
     </div>
   `).join("");
 	}

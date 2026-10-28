@@ -14,7 +14,7 @@ async function apriUpgradePro(){
     const d = await res.json().catch(() => ({}));
     if(!res.ok){ box.textContent = d.error || "Non riesco a calcolare la differenza, riprova."; return; }
     upgradeAnteprima = d;
-    const eur = c => "€ " + (Number(c || 0) / 100).toFixed(2).replace(".", ",");
+    const eur = c => formatEuro(Number(c || 0) / 100, { decimali: true });
     if(d.tipo === "lifetime"){
       box.innerHTML = `Hai il Premium <b>lifetime</b> da proprietario. Per sbloccare anche le funzioni da professionista paghi solo la differenza: <b>${eur(d.importo_cent)}</b> una volta sola (99 € − 49 €).`
         + (d.link ? "" : '<br><br>Il pagamento della differenza non è ancora attivo: scrivici dall\'assistenza e lo sistemiamo noi.');

@@ -1,4 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { euroTondo } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { luogoEvento } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
@@ -636,7 +637,7 @@ async function ofSalvaMezzo(dalWizard){
   return true;
 }
 async function ofArchiviaMezzo(id){
-  if(!confirm("Archiviare questo mezzo? Lo storico e le spese restano.")) return;
+  if(!await chiediConferma("Archiviare questo mezzo? Lo storico e le spese restano.")) return;
   await OfDB.salva("officina_mezzi", { id, archiviato: true });
   OF.mezzi = OF.mezzi.filter(m => m.id !== id); OF.vista = "home";
   closeModal("modal-officina"); ofDisegna(); ofAggiornaRiepiloghi();
@@ -684,7 +685,7 @@ async function ofSalvaIntervento(){
   closeModal("modal-officina"); showToast("Intervento salvato"); ofDisegna(); ofAggiornaRiepiloghi();
 }
 async function ofEliminaIntervento(id){
-  if(!confirm("Eliminare questo intervento? Si toglie anche la sua spesa.")) return;
+  if(!await chiediConferma("Eliminare questo intervento? Si toglie anche la sua spesa.")) return;
   await OfDB.elimina("officina_interventi", id); await OfDB.spesaAuto(`int:${id}`, null);
   OF.interventi = OF.interventi.filter(x => x.id !== id); await ofCaricaSpese();
   closeModal("modal-officina"); ofDisegna();
@@ -721,7 +722,7 @@ async function ofSalvaAiutante(dalWizard){
   return true;
 }
 async function ofTogliAiutante(id){
-  if(!confirm("Togliere questo aiutante? Le spese e gli appuntamenti passati restano.")) return;
+  if(!await chiediConferma("Togliere questo aiutante? Le spese e gli appuntamenti passati restano.")) return;
   await OfDB.salva("officina_aiutanti", { id, attivo: false });
   OF.aiutanti = OF.aiutanti.filter(a => a.id !== id);
   if(OF.imp?.aiutante_predefinito === id){ const r = await OfDB.impostazioni({ aiutante_predefinito: null }); if(!r.error) OF.imp = r.data; }
@@ -767,7 +768,7 @@ async function ofSalvaMateriale(dalWizard){
   return true;
 }
 async function ofTogliMateriale(id){
-  if(!confirm("Togliere questo materiale dall'elenco?")) return;
+  if(!await chiediConferma("Togliere questo materiale dall'elenco?")) return;
   await OfDB.salva("officina_materiali", { id, attivo: false });
   OF.materiali = OF.materiali.filter(m => m.id !== id);
   closeModal("modal-officina"); ofDisegna();
@@ -800,7 +801,7 @@ async function ofSalvaSpesa(){
   ofAggiornaRiepiloghi();
 }
 async function ofEliminaSpesa(id){
-  if(!confirm("Eliminare questa spesa?")) return;
+  if(!await chiediConferma("Eliminare questa spesa?")) return;
   await OfDB.elimina("officina_spese", id); await ofCaricaSpese();
   closeModal("modal-officina"); ofDisegna(); ofAggiornaRiepiloghi();
 }

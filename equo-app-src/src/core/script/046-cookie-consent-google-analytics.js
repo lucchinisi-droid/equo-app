@@ -43,8 +43,12 @@ function loadGoogleAnalytics(){
   gtag("config", GA_MEASUREMENT_ID);
 }
 
-function formatEuro(n){
-  return "€ " + (Number(n) || 0).toFixed(2);
+// 28/10/2026: UNICO formato dell'euro in tutta l'app: «€ 1234,50», cifra tonda «€ 16»;
+// { decimali: true } = sempre due decimali (conti, PDF, rate: «€ 16,00»)
+function formatEuro(n, opz){
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  const due = !!(opz && opz.decimali) || Math.abs(v % 1) > 0.0001;
+  return "€ " + v.toLocaleString("it-IT", { minimumFractionDigits: due ? 2 : 0, maximumFractionDigits: 2 });
 }
 function formatMeseLabel(yyyyMm){
   const [y, m] = yyyyMm.split("-");

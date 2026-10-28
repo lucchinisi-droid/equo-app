@@ -1,4 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
+import { chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { caricaJsPdf } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import { disegnaQrPdf, etichettaPro } from "./108-invito-qr.js";
 /* ---------- CARD DEI PROFESSIONISTI: EQUO PASS ed EQUO CV (26/10/2026) ----------
@@ -209,10 +210,10 @@ function ecvHtmlLista(chiave){
       ${r.testo ? `<button type="button" class="ecv-int${r.stato === "pubblicata" ? " on" : ""}" onclick="ecvReferenza(this,'${r.id}')" aria-label="Pubblica o nascondi" style="margin-left:auto"></button>` : ""}</div>`).join("") || '<div class="ecv-muted">Nessuna referenza: chiedila a un cliente collegato su Equo.</div>';
   return "";
 }
-function ecvTogliElemento(chiave, id){
+async function ecvTogliElemento(chiave, id){
   const arr = ecvDati()[chiave] || [];
   const i = arr.findIndex(x => x.id === id); if(i < 0) return;
-  if(!confirm("Eliminare questa voce dal CV?")) return;
+  if(!await chiediConferma("Eliminare questa voce dal CV?")) return;
   arr.splice(i, 1); ecvSalva(); ecvAggiornaCompleto(); ecvRidisegnaSez(chiave);
 }
 async function ecvCaricaFile(file){

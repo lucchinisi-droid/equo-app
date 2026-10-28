@@ -6,7 +6,7 @@ import { statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.j
 import { apriSchedaCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { isPremium } from "./042-incassi-pro.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
@@ -169,7 +169,7 @@ async function richiamoAzione(tipo){
     document.getElementById("ricaz-attuale").textContent = "Scadenza attuale: " + formatDataBreve(r.scadenza) + " (" + hpQuando(r) + ")";
     richiamoAnteprima();
   } else if(tipo === "chiudi"){
-    if(!confirm(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
+    if(!await chiediConferma(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
     const { error } = await DB.setRichiamoStato(r.intervento_id, { chiuso_il: new Date().toISOString() });
     if(error){ showToast("Errore: " + error.message); return; }
     closeModal("modal-richiamo-az");

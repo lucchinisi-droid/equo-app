@@ -1,7 +1,7 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
-import { avvisaClienteAppuntamento, chiediSiNo, deveAvvisareAnnullo, notaModificaMan, openInterventoModal } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { avvisaClienteAppuntamento, chiediSiNo, deveAvvisareAnnullo, notaModificaMan, openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipoPro, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { segnaFatto } from "./117-segna-fatto.js";
 import { accettaRichiesta, agDisegnaGriglia, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
@@ -163,7 +163,7 @@ function apriAzioniEvento(id){
   document.getElementById("azioni-evento-dettaglio").innerHTML = [
     `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
     escapeHtml(agDescrizioneTipoPro(e)),
-    '<span class="solo-incassi">' + (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
+    '<span class="solo-incassi">' + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
     e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della scuderia</span>' : "Da fare",
     notaModificaMan(e, true),
     e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>' : "",
@@ -186,7 +186,7 @@ async function azioneEvento(tipo){
     closeModal("modal-azioni-evento");
     openInterventoModal(null, e);
   } else if(tipo === "annulla_struttura" && e.gruppo_id){
-    if(!confirm("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
+    if(!await chiediConferma("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
     closeModal("modal-azioni-evento");
     await azioneGruppoStruttura(e.gruppo_id, "annulla");
   } else if(tipo === "fatto" && e.stato === "richiesto"){
@@ -205,7 +205,7 @@ async function azioneEvento(tipo){
     await renderIncassi();
     await renderProDeadlines();
   } else if(tipo === "elimina"){
-    if(!confirm(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+    if(!await chiediConferma(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
     const { error } = await DB.deleteInterventoMascalcia(e.id);
     if(error){ showToast("Errore: " + error.message); return; }
     if(deveAvvisareAnnullo(e)) await avvisaClienteAppuntamento("annullato", { ...e, cavallo: agNomeCavallo(e) });

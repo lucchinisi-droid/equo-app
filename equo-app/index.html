@@ -9783,7 +9783,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return true;
 	}
 	async function ofArchiviaMezzo(id) {
-		if (!confirm("Archiviare questo mezzo? Lo storico e le spese restano.")) return;
+		if (!await chiediConferma("Archiviare questo mezzo? Lo storico e le spese restano.")) return;
 		await OfDB.salva("officina_mezzi", {
 			id,
 			archiviato: true
@@ -9892,7 +9892,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		ofAggiornaRiepiloghi$1();
 	}
 	async function ofEliminaIntervento(id) {
-		if (!confirm("Eliminare questo intervento? Si toglie anche la sua spesa.")) return;
+		if (!await chiediConferma("Eliminare questo intervento? Si toglie anche la sua spesa.")) return;
 		await OfDB.elimina("officina_interventi", id);
 		await OfDB.spesaAuto(`int:${id}`, null);
 		OF.interventi = OF.interventi.filter((x) => x.id !== id);
@@ -9966,7 +9966,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return true;
 	}
 	async function ofTogliAiutante(id) {
-		if (!confirm("Togliere questo aiutante? Le spese e gli appuntamenti passati restano.")) return;
+		if (!await chiediConferma("Togliere questo aiutante? Le spese e gli appuntamenti passati restano.")) return;
 		await OfDB.salva("officina_aiutanti", {
 			id,
 			attivo: false
@@ -10045,7 +10045,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return true;
 	}
 	async function ofTogliMateriale(id) {
-		if (!confirm("Togliere questo materiale dall'elenco?")) return;
+		if (!await chiediConferma("Togliere questo materiale dall'elenco?")) return;
 		await OfDB.salva("officina_materiali", {
 			id,
 			attivo: false
@@ -10106,7 +10106,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		ofAggiornaRiepiloghi$1();
 	}
 	async function ofEliminaSpesa(id) {
-		if (!confirm("Eliminare questa spesa?")) return;
+		if (!await chiediConferma("Eliminare questa spesa?")) return;
 		await OfDB.elimina("officina_spese", id);
 		await ofCaricaSpese();
 		closeModal("modal-officina");
@@ -11483,7 +11483,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const quando = `${AG_GIORNI[(new Date(y, m - 1, d).getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " ore " + String(e.ora).slice(0, 5) : ""}`;
 		const cav = agNomeCavallo(e);
 		const parti = [(e.stato === "fatto" ? "Intervento del " : "Appuntamento: ") + quando, (cav ? cav + " — " : "") + agDescrizioneTipo(e)];
-		if (e.importo != null) parti.push("€ " + Number(e.importo).toFixed(2).replace(".", ",") + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
+		if (e.importo != null) parti.push(contoEuro(e.importo) + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
 		if (e.aiutante_nome) parti.push(e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `con l'aiutante ${e.aiutante_nome}`);
 		return parti.join(" · ");
 	}
@@ -11572,7 +11572,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			["Tipo intervento", tipoTxt],
 			misuraTxt ? ["Misura ferro", misuraTxt] : null,
 			e.quantita_ferri ? ["Quantità ferri", String(e.quantita_ferri)] : null,
-			["Importo", e.importo != null ? "€ " + Number(e.importo).toFixed(2).replace(".", ",") : "—"],
+			["Importo", e.importo != null ? contoEuro(e.importo) : "—"],
 			["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
 			["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
 			e.aiutante_nome ? ["Aiutante", e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `Con l'aiutante ${e.aiutante_nome}`] : null,
@@ -11682,7 +11682,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	var contoCodice = (c) => "C-" + c.anno + "-" + String(c.numero).padStart(3, "0");
 	var contoLavori = (n) => n + (n === 1 ? " lavoro" : " lavori");
-	var contoEuro = (n) => "€ " + Number(n || 0).toFixed(2).replace(".", ",");
+	var contoEuro = (n) => formatEuro(n, { decimali: true });
 	var contoData = (iso) => {
 		const [y, m, d] = String(iso).slice(0, 10).split("-");
 		return `${d}/${m}/${y}`;
@@ -11830,11 +11830,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	var pagRate = [];
 	var pag = null;
 	var r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
-	var pagEuro = (n) => (Number(n) || 0).toLocaleString("it-IT", {
-		style: "currency",
-		currency: "EUR",
-		maximumFractionDigits: r2(n) % 1 ? 2 : 0
-	});
+	var pagEuro = (n) => formatEuro(n);
 	var oggiIso$1 = () => isoLocale(/* @__PURE__ */ new Date());
 	var nomeModo = (k) => (PAG_MODI.find((m) => m[0] === k) || [k, k])[1];
 	async function pagCarica() {
@@ -12442,11 +12438,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		]
 	];
 	function euroTondo(n) {
-		return (Number(n) || 0).toLocaleString("it-IT", {
-			style: "currency",
-			currency: "EUR",
-			maximumFractionDigits: Number(n) % 1 ? 2 : 0
-		});
+		return formatEuro(n);
 	}
 	function giornoPagamento(i) {
 		return i._giorno ? i._giorno : i.saldato_il ? isoLocale(new Date(i.saldato_il)) : i.data_intervento || "";
@@ -12727,7 +12719,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			doc.setFont("helvetica", "normal");
 			doc.setFontSize(8.5);
 			doc.setTextColor(...grigio);
-			doc.text("Resoconto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
+			doc.text("Conto generato con Equo — equohub.com. Non è una fattura e non ha valore fiscale.", M, 285);
 		};
 		doc.setFillColor(...verde);
 		doc.rect(0, 0, W, 32, "F");
@@ -12745,7 +12737,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		doc.setTextColor(...verde);
 		doc.setFont("helvetica", "bold");
 		doc.setFontSize(17);
-		doc.text("Resoconto lavori", M, y);
+		doc.text("Conto", M, y);
 		doc.setFontSize(12);
 		doc.setTextColor(...oro);
 		doc.text(contoCodice(c), 192, y, { align: "right" });
@@ -13109,7 +13101,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
 	}
 	function contoNomeCavallo(i) {
-		return agNomeCavallo(i) || clienteDiId(i.cliente_mascalcia_id)?.nome_cavallo || "Cavallo";
+		return agNomeCavalloTesto(i);
 	}
 	function renderNuovoConto() {
 		const c = contoCtx;
@@ -13340,7 +13332,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	async function pmElimina() {
 		if (!pmInModifica) return;
-		if (!confirm("Eliminare questo promemoria?")) return;
+		if (!await chiediConferma("Eliminare questo promemoria?")) return;
 		const { error } = await PmDB.salva(pmInModifica.id, { stato: "annullato" });
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -13766,10 +13758,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const r = richiesteCache[id] || agEventiCache[id];
 		if (!r) return;
 		if (r.gruppo_id) {
-			if (!confirm("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
+			if (!await chiediConferma("Rifiutare la richiesta della scuderia? Riceve un messaggio in chat per trovare un'altra data.")) return;
 			return azioneGruppoStruttura(r.gruppo_id, "rifiuta");
 		}
-		if (!confirm("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
+		if (!await chiediConferma("Rifiutare la richiesta? Il cliente riceve un messaggio in chat per trovare un'altra data.")) return;
 		const { error } = await DB.updateInterventoMascalcia(id, { stato: "rifiutato" });
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -14094,7 +14086,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("azioni-evento-dettaglio").innerHTML = [
 			`${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
 			escapeHtml(agDescrizioneTipoPro(e)),
-			"<span class=\"solo-incassi\">" + (e.importo != null ? "€ " + Number(e.importo).toFixed(2) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
+			"<span class=\"solo-incassi\">" + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
 			e.stato === "fatto" ? "<span style=\"color:var(--green);font-weight:700\">✓ Fatto</span>" : e.stato === "richiesto" ? "<span style=\"color:var(--accent);font-weight:700\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span style=\"color:var(--accent);font-weight:700\">In attesa della conferma della scuderia</span>" : "Da fare",
 			notaModificaMan(e, true),
 			e.gruppo_id ? "<span class=\"muted\" style=\"font-size:12px\">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>" : "",
@@ -14116,7 +14108,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			closeModal("modal-azioni-evento");
 			openInterventoModal(null, e);
 		} else if (tipo === "annulla_struttura" && e.gruppo_id) {
-			if (!confirm("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
+			if (!await chiediConferma("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
 			closeModal("modal-azioni-evento");
 			await azioneGruppoStruttura(e.gruppo_id, "annulla");
 		} else if (tipo === "fatto" && e.stato === "richiesto") {
@@ -14137,7 +14129,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} else if (tipo === "elimina") {
-			if (!confirm(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+			if (!await chiediConferma(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
 			const { error } = await DB.deleteInterventoMascalcia(e.id);
 			if (error) {
 				showToast("Errore: " + error.message);
@@ -14910,6 +14902,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const elenco = i.clienti_mascalcia?.nome_cavallo || "";
 		return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
 	}
+	function agNomeCavalloTesto(i) {
+		return agNomeCavallo(i) || "Cavallo non indicato";
+	}
 	function agDescrizioneTipoPro(i) {
 		const t = agDescrizioneTipo(i);
 		if (i.ferri_nuovi === false) return t + " · rimessa";
@@ -15200,7 +15195,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			document.getElementById("ricaz-attuale").textContent = "Scadenza attuale: " + formatDataBreve(r.scadenza) + " (" + hpQuando(r) + ")";
 			richiamoAnteprima();
 		} else if (tipo === "chiudi") {
-			if (!confirm(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
+			if (!await chiediConferma(`Non ricordarti più ${hpTipo(r).toLowerCase()}${r.cavallo_nome ? " di " + r.cavallo_nome : ""}? Tornerà solo quando registrerai un nuovo intervento.`)) return;
 			const { error } = await DB.setRichiamoStato(r.intervento_id, { chiuso_il: (/* @__PURE__ */ new Date()).toISOString() });
 			if (error) {
 				showToast("Errore: " + error.message);
@@ -15849,7 +15844,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	async function unisciSimili(i) {
 		const p = similiCorrenti[i];
 		if (!p || !currentClienteId) return;
-		if (!confirm(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
+		if (!await chiediConferma(`Unire «${p.m.nome}» in «${p.c.nome}»? Resta una scheda sola, con lavori e avvisi di entrambe.`)) return;
 		if (DEMO_MODE) {
 			demoState.interventiMascalcia.forEach((x) => {
 				if (x.cavallo_cliente_id === p.m.id) x.cavallo_cliente_id = p.c.id || null;
@@ -16203,7 +16198,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			const extra = [
 				i.ferri_nuovi === true ? "ferri nuovi" : i.ferri_nuovi === false ? "rimessa" : null,
 				testoFerroIntervento(i),
-				i.importo != null ? Number(i.importo).toLocaleString("it-IT") + " €" : null,
+				i.importo != null ? formatEuro(i.importo) : null,
 				i.luogo_nome ? /^A casa/.test(i.luogo_nome) ? "a casa" : "presso " + i.luogo_nome : i.clienti_mascalcia?.nome && i.cliente_mascalcia_id !== currentClienteId ? "presso " + i.clienti_mascalcia.nome : null,
 				i.note || null
 			].filter(Boolean).join(" · ");
@@ -17320,6 +17315,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			document.getElementById("eq-pop-sino").classList.add("attivo");
 		});
 	}
+	function chiediConferma(testo) {
+		const t = String(testo || ""), i = t.indexOf("?");
+		return i > 0 && i < t.length - 1 ? chiediSiNo(t.slice(0, i + 1).replace(/\s+/g, " "), t.slice(i + 1).replace(/^\s+/, "")) : chiediSiNo(t, "");
+	}
 	function rispondiSiNo(si) {
 		document.getElementById("eq-pop-sino").classList.remove("attivo");
 		const r = sinoResolve;
@@ -17495,7 +17494,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				const doppi = righe.map((r) => (stessoGiorno || []).find((i) => i.cliente_mascalcia_id === (r.cliente || cliente_mascalcia_id) && i.tipo_ferratura === tipo_ferratura && (r.cavallo_cliente_id && i.cavallo_cliente_id === r.cavallo_cliente_id || r.horse_id && i.horse_id === r.horse_id || !r.cavallo_cliente_id && !r.horse_id && !i.cavallo_cliente_id && !i.horse_id))).filter(Boolean);
 				if (doppi.length) {
 					const cv = doppi.map((d) => d.cavalli_clienti_mascalcia?.nome || agNomeCavallo(d) || "questo cavallo").join(", ");
-					if (!confirm(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`)) return errore("Non salvato: c'era già lo stesso appuntamento.");
+					if (!await chiediConferma(`C'è già ${TIPO_MAN_LABEL[tipo_ferratura] ? TIPO_MAN_LABEL[tipo_ferratura].toLowerCase() : "un intervento"} per ${cv} il ${formatDataBreve(data_intervento)}.\n\nVuoi salvare comunque?`)) return errore("Non salvato: c'era già lo stesso appuntamento.");
 				}
 			}
 			for (let n = 0; n < righe.length; n++) {
@@ -17668,7 +17667,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	async function eliminaInterventoInModifica() {
 		if (!interventoInModifica) return;
-		if (!confirm(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+		if (!await chiediConferma(deveAvvisareAnnullo(interventoInModifica) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
 		const clienteId = interventoInModifica.cliente_mascalcia_id;
 		const daAvvisare = deveAvvisareAnnullo(interventoInModifica) ? {
 			...interventoInModifica,
@@ -17993,7 +17992,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				return;
 			}
 			if (data && data.chiedi) {
-				if (!confirm(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
+				if (!await chiediConferma(`${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}.\n\nVuoi spostarlo in ${data.a}? Storico e interventi restano con il cavallo${data.da ? "; se è lo stesso cavallo già presente qui con un altro codice, le due schede diventano una." : "."}`)) return;
 				({data, error} = await sb.rpc("pro_cavallo_da_codice", {
 					p_cliente_id: currentClienteId,
 					p_codice: codice,
@@ -18049,7 +18048,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		await syncNomeCavalloCliente();
 	}
 	async function eliminaCavalloEditCliente(id) {
-		if (!confirm("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
+		if (!await chiediConferma("Eliminare questo cavallo? Gli interventi già registrati restano nello storico.")) return;
 		const { error } = await DB.deleteCavalloCliente(id);
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -20163,11 +20162,11 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       ${r.testo ? `<button type="button" class="ecv-int${r.stato === "pubblicata" ? " on" : ""}" onclick="ecvReferenza(this,'${r.id}')" aria-label="Pubblica o nascondi" style="margin-left:auto"></button>` : ""}</div>`).join("") || "<div class=\"ecv-muted\">Nessuna referenza: chiedila a un cliente collegato su Equo.</div>";
 		return "";
 	}
-	function ecvTogliElemento(chiave, id) {
+	async function ecvTogliElemento(chiave, id) {
 		const arr = ecvDati()[chiave] || [];
 		const i = arr.findIndex((x) => x.id === id);
 		if (i < 0) return;
-		if (!confirm("Eliminare questa voce dal CV?")) return;
+		if (!await chiediConferma("Eliminare questa voce dal CV?")) return;
 		arr.splice(i, 1);
 		ecvSalva();
 		ecvAggiornaCompleto();
@@ -21055,8 +21054,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		else if (agScheda === "saldare") agDisegnaSaldare();
 	}
 	var nomeCli = (x) => x.clienti_mascalcia?.nome || "Cliente";
-	var nomeCav = (x) => agNomeCavallo(x) || "Cavallo non indicato";
-	var tipoLav = (x) => (TIPO_FERRATURA_LABELS[x.tipo_ferratura] || x.tipo_ferratura || "Intervento") + (x.tipo_ferratura === "altro" && x.tipo_altro ? " · " + x.tipo_altro : "");
+	var nomeCav = (x) => agNomeCavalloTesto(x);
+	var tipoLav = (x) => agDescrizioneTipoPro(x) || "Intervento";
 	function perCliente(lista) {
 		const m = /* @__PURE__ */ new Map();
 		lista.forEach((x) => {
@@ -21226,7 +21225,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	async function agNfAnnulla(n) {
 		const g = agGruppiNonFatti()[n];
 		if (!g) return;
-		if (!confirm(`Annullare ${g.righe.length === 1 ? "questo appuntamento" : "questi " + g.righe.length + " appuntamenti"} di ${formatDataBreve(g.data)} (${g.nome})?`)) return;
+		if (!await chiediConferma(`Annullare ${g.righe.length === 1 ? "questo appuntamento" : "questi " + g.righe.length + " appuntamenti"} di ${formatDataBreve(g.data)} (${g.nome})?`)) return;
 		await agNfAggiorna(g.righe, { stato: "annullato" }, "Appuntamento annullato");
 	}
 	function agDisegnaSaldare() {
@@ -25515,7 +25514,7 @@ async function apriUpgradePro(){
     const d = await res.json().catch(() => ({}));
     if(!res.ok){ box.textContent = d.error || "Non riesco a calcolare la differenza, riprova."; return; }
     upgradeAnteprima = d;
-    const eur = c => "€ " + (Number(c || 0) / 100).toFixed(2).replace(".", ",");
+    const eur = c => formatEuro(Number(c || 0) / 100, { decimali: true });
     if(d.tipo === "lifetime"){
       box.innerHTML = `Hai il Premium <b>lifetime</b> da proprietario. Per sbloccare anche le funzioni da professionista paghi solo la differenza: <b>${eur(d.importo_cent)}</b> una volta sola (99 € − 49 €).`
         + (d.link ? "" : '<br><br>Il pagamento della differenza non è ancora attivo: scrivici dall\'assistenza e lo sistemiamo noi.');
@@ -25742,8 +25741,12 @@ function loadGoogleAnalytics(){
   gtag("config", GA_MEASUREMENT_ID);
 }
 
-function formatEuro(n){
-  return "€ " + (Number(n) || 0).toFixed(2);
+// 28/10/2026: UNICO formato dell'euro in tutta l'app: «€ 1234,50», cifra tonda «€ 16»;
+// { decimali: true } = sempre due decimali (conti, PDF, rate: «€ 16,00»)
+function formatEuro(n, opz){
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  const due = !!(opz && opz.decimali) || Math.abs(v % 1) > 0.0001;
+  return "€ " + v.toLocaleString("it-IT", { minimumFractionDigits: due ? 2 : 0, maximumFractionDigits: 2 });
 }
 function formatMeseLabel(yyyyMm){
   const [y, m] = yyyyMm.split("-");
@@ -28020,8 +28023,8 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			box.insertAdjacentHTML("beforeend", `
     <div class="chat-bubble ai event-proposal" id="${id}">
       <div class="event-proposal-title">Conto · ${escapeHtml(x.nome_cliente || "")}</div>
-      <div class="event-proposal-row">${nuovo ? `${x.n_liberi} ${x.n_liberi === 1 ? "lavoro da mettere" : "lavori da mettere"} in conto · <b>€ ${Number(x.totale_liberi || 0).toFixed(2)}</b>${x.senza_importo ? ` <span class="muted">(${x.senza_importo} senza importo)</span>` : ""}` : "Nessun lavoro nuovo da mettere in conto."}</div>
-      ${(x.aperti || []).map((c) => `<div class="event-proposal-row">Già fatto: <b>${escapeHtml(c.codice)}</b> del ${formatDataBreve(c.creato_il)} · ${c.n_lavori} lavori · € ${Number(c.totale || 0).toFixed(2)} · da incassare</div>`).join("")}
+      <div class="event-proposal-row">${nuovo ? `${x.n_liberi} ${x.n_liberi === 1 ? "lavoro da mettere" : "lavori da mettere"} in conto · <b>${formatEuro(x.totale_liberi || 0)}</b>${x.senza_importo ? ` <span class="muted">(${x.senza_importo} senza importo)</span>` : ""}` : "Nessun lavoro nuovo da mettere in conto."}</div>
+      ${(x.aperti || []).map((c) => `<div class="event-proposal-row">Già fatto: <b>${escapeHtml(c.codice)}</b> del ${formatDataBreve(c.creato_il)} · ${c.n_lavori} lavori · ${formatEuro(c.totale || 0)} · da incassare</div>`).join("")}
       <div class="event-proposal-actions">
         ${(x.aperti || []).map((c) => `<button class="btn btn-outline btn-sm" onclick="closeAiSheet();apriInvioConto('${c.id}')">Apri ${escapeHtml(c.codice)}</button>`).join("")}
         ${nuovo || !(x.aperti || []).length ? `<button class="btn btn-primary btn-sm btn-conferma" onclick="closeAiSheet();apriNuovoConto('${x.cliente_mascalcia_id}')">Fai il conto</button>` : ""}
@@ -28048,13 +28051,13 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			}[x.categoria] || x.categoria)}`;
 			righe = [
 				`<b>${escapeHtml(x.descrizione)}</b>`,
-				`€ ${Number(x.importo).toFixed(2)} · ${formatDataBreve(x.data)}`,
+				`${formatEuro(x.importo)} · ${formatDataBreve(x.data)}`,
 				"<span class=\"muted\">Va nelle spese dell'Officina mobile e nel guadagno netto.</span>"
 			];
 		} else if (azione.tipo === "spesa") {
 			titolo = `Spesa · ${CAT_SPESA_LABEL[x.category] || escapeHtml(x.category)}`;
 			righe = [
-				`Importo: € ${Number(x.amount).toFixed(2)}`,
+				`Importo: ${formatEuro(x.amount)}`,
 				`Data: ${formatDate(x.date)}`,
 				x.horse_name ? `Cavallo: ${escapeHtml(x.horse_name)}` : "",
 				x.notes ? escapeHtml(x.notes) : ""
@@ -28079,7 +28082,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			righe = [
 				`${escapeHtml(x.nome_cliente || "")}${nomeCv ? " · " + escapeHtml(nomeCv) : ""}${x.nuovo_cavallo_nome ? " (nuovo cavallo)" : ""}`,
 				`${formatDataBreve(x.data)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
-				x.importo != null ? `<span class="solo-incassi">Importo: € ${Number(x.importo).toFixed(2)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}</span>` : "",
+				x.importo != null ? `<span class="solo-incassi">Importo: ${formatEuro(x.importo)} · ${x.stato_pagamento === "saldato" ? "saldato" : "da saldare"}</span>` : "",
 				x.note ? escapeHtml(x.note) : ""
 			];
 		} else if (azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta") {
@@ -28088,7 +28091,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			righe = [
 				`${escapeHtml(x.nome_cliente || "")}${x.cavallo ? " · " + escapeHtml(x.cavallo) : ""}`,
 				`${escapeHtml(x.tipo_ferratura === "altro" && x.tipo_altro ? x.tipo_altro : TIPO_MAN_LABEL[x.tipo_ferratura] || x.tipo_ferratura || "")} · ${formatDataBreve(x.data_intervento)}${x.ora ? " ore " + escapeHtml(x.ora) : ""}`,
-				acc && x.importo != null ? `Importo: € ${Number(x.importo).toFixed(2)}` : "",
+				acc && x.importo != null ? `Importo: ${formatEuro(x.importo)}` : "",
 				acc && x.invia_riepilogo ? "Poi apro la chat con il PDF di riepilogo" : "",
 				!acc ? "Il cliente riceve un messaggio per trovare un'altra data" : ""
 			];
@@ -28096,7 +28099,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			titolo = `Messaggio a ${escapeHtml(x.nome_cliente || "")}`;
 			righe = [`<span style="white-space:pre-wrap">${escapeHtml(x.testo || "")}</span>`, x.collegato ? "" : "<span class=\"muted\">Cliente non su Equo: copia il testo e mandalo tu.</span>"];
 		} else if (azione.tipo === "saldato") {
-			titolo = `Segna come saldato · € ${Number(x.totale || 0).toFixed(2)}`;
+			titolo = `Segna come saldato · ${formatEuro(x.totale || 0)}`;
 			righe = (x.righe || []).map((r) => escapeHtml(r));
 		} else return;
 		box.insertAdjacentHTML("beforeend", `
@@ -28277,7 +28280,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		} else if (azione.tipo === "spesa_officina") {
 			if (typeof ofSalvaSpesaDaHammer !== "function") error = { message: "Officina mobile non disponibile in questa vista" };
 			else ({error} = await ofSalvaSpesaDaHammer(x));
-			fatto = `✓ Spesa registrata nell'Officina mobile: ${escapeHtml(x.descrizione)} · € ${Number(x.importo).toFixed(2)}.`;
+			fatto = `✓ Spesa registrata nell'Officina mobile: ${escapeHtml(x.descrizione)} · ${formatEuro(x.importo)}.`;
 		} else if (azione.tipo === "promemoria_personale") {
 			if (typeof pmSalvaDaHammer !== "function") error = { message: "promemoria non disponibili in questa vista" };
 			else ({error} = await pmSalvaDaHammer(x));
@@ -28290,7 +28293,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 					break;
 				}
 			}
-			fatto = `✓ Segnati come saldati (€ ${Number(x.totale || 0).toFixed(2)}).`;
+			fatto = `✓ Segnati come saldati (${formatEuro(x.totale || 0)}).`;
 			if (!error) await aggiornaViteManiscalco(null);
 		}
 		if (error) {
@@ -28683,7 +28686,7 @@ const WG_IC = {
 // da 089-early-adopter-arrivo-dal-sito-ottobre-20.js
 const wgEsc = s => escapeHtml(String(s ?? ""));
 // da 089-early-adopter-arrivo-dal-sito-ottobre-20.js
-const wgEuro = n => "€ " + Math.round(Number(n) || 0).toLocaleString("it-IT");
+const wgEuro = n => formatEuro(Math.round(Number(n) || 0));   // 28/10/2026: formato unico, tondo nei riquadri
 // da 089-early-adopter-arrivo-dal-sito-ottobre-20.js
 const HM_IC = {
   hammer: '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.202-1.756L9 2.96l.92.82A6.18 6.18 0 0 1 12 8.4V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/></svg>',
@@ -29850,7 +29853,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		if (badge && daSaldareStato.daRicordare) badge.style.display = "block";
 	}
 	function euroIt(v) {
-		return "€ " + Number(v || 0).toFixed(2).replace(".", ",");
+		return formatEuro(v, { decimali: true });
 	}
 	var dsResto = (r) => Math.max(0, Number(r.importo || 0) - Number(r.pagato || 0));
 	function dsOggi() {
@@ -29936,7 +29939,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		startOfMonth.setDate(1);
 		startOfMonth.setHours(0, 0, 0, 0);
 		const total = (await DB.listExpenses()).filter((e) => new Date(e.date) >= startOfMonth).reduce((sum, e) => sum + Number(e.amount || 0), 0);
-		document.getElementById("stat-expenses").textContent = "€ " + total.toFixed(0);
+		document.getElementById("stat-expenses").textContent = formatEuro(Math.round(total));
 	}
 	async function loadExpenses() {
 		const box = document.getElementById("expenses-list");
@@ -29951,14 +29954,14 @@ const mlSigla = k => String(k || "").toUpperCase();
 		const startOfMonth = /* @__PURE__ */ new Date();
 		startOfMonth.setDate(1);
 		const monthTotal = data.filter((e) => new Date(e.date) >= startOfMonth).reduce((s, e) => s + Number(e.amount || 0), 0);
-		document.getElementById("expenses-month-total").textContent = "€ " + monthTotal.toFixed(2);
+		document.getElementById("expenses-month-total").textContent = formatEuro(monthTotal, { decimali: true });
 		box.innerHTML = data.map((e) => `
     <div class="event-item" style="cursor:pointer" onclick="openEditExpenseModal('${e.id}')">
       <div>
         <div style="font-weight:600;font-size:14px;text-transform:capitalize">${escapeHtml(e.category)}${e.horses?.name ? " · " + escapeHtml(e.horses.name) : ""}</div>
         <div class="muted" style="font-size:12px">${formatDate(e.date)}${e.notes ? " · " + escapeHtml(e.notes) : ""}</div>
       </div>
-      <div style="font-weight:700">€ ${Number(e.amount).toFixed(2)}</div>
+      <div style="font-weight:700">${formatEuro(e.amount, { decimali: true })}</div>
     </div>
   `).join("");
 	}
@@ -32481,7 +32484,7 @@ function cercaTuttoMostra(){
       .map(e => ctRiga("fa-notes-medical", (EVENT_LABELS[e.type] || e.type) + " · " + nomeCav(e.horse_id), formatDate(e.date) + (e.next_due_date ? " · prossima " + formatDate(e.next_due_date) : "") + (e.notes ? " · " + e.notes : ""),
         vai(async () => { showPage("cavalli"); await openHorseDetail(e.horse_id); if(typeof openEditEventModal === "function") openEditEventModal(e.id); })));
     const spese = (d.spese || []).filter(s => ok(s.category, s.notes, s.horses?.name, formatDate(s.date), s.date, String(s.amount), "spesa"))
-      .map(s => ctRiga("fa-euro-sign", `${s.category ? s.category.charAt(0).toUpperCase() + s.category.slice(1) : "Spesa"} · € ${Number(s.amount || 0).toFixed(2)}`, [formatDate(s.date), s.horses?.name, s.notes].filter(Boolean).join(" · "),
+      .map(s => ctRiga("fa-euro-sign", `${s.category ? s.category.charAt(0).toUpperCase() + s.category.slice(1) : "Spesa"} · ${formatEuro(s.amount || 0)}`, [formatDate(s.date), s.horses?.name, s.notes].filter(Boolean).join(" · "),
         vai(() => { document.querySelector('[data-page="spese"]')?.click(); currentExpensesData = d.spese || []; openEditExpenseModal(s.id); })));
     const lezioni = (d.lezioni || []).filter(l => ok(l.tipo, l.note, l.horses?.name, formatDate(l.data), l.data, "lezione"))
       .map(l => ctRiga("fa-person-chalkboard", (l.tipo ? l.tipo.charAt(0).toUpperCase() + l.tipo.slice(1) : "Lezione") + (l.horses?.name ? " · " + l.horses.name : ""), formatDate(l.data) + (l.note ? " · " + l.note : ""),
