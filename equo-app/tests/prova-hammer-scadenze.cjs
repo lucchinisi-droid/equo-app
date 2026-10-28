@@ -1,0 +1,17 @@
+const path=require("path");const {chromium}=require("playwright");
+const APP=path.resolve(__dirname,"..","index.html");
+const SUPA=path.join(path.dirname(require.resolve("@supabase/supabase-js/package.json")),"dist","umd","supabase.js");
+(async()=>{const b=await chromium.launch({args:["--allow-file-access-from-files"]});
+const pg=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
+const err=[];pg.on("pageerror",e=>err.push(String(e.message)));
+await pg.route("**/*",r=>{const u=r.request().url();if(u.includes("supabase-js"))return r.fulfill({path:SUPA,contentType:"application/javascript"});if(u.startsWith("file://")||u.startsWith("data:"))return r.continue();return r.abort();});
+await pg.goto("file://"+APP);await pg.waitForTimeout(1200);
+await pg.evaluate(()=>startDemo());await pg.waitForTimeout(600);
+await pg.evaluate(()=>{demoState.clientiMascalcia.push({id:"dc-s",nome:"Scuderia Le Querce",tipo_cliente:"struttura",maniscalco_id:currentUser.id,codice_invito:"EQUOS1"},{id:"dc-p",nome:"Paola Bianchi",tipo_cliente:"proprietario",maniscalco_id:currentUser.id,codice_invito:"EQUOP1",cliente_user_id:"u-paola"});
+ demoState.cavalliClientiMascalcia.push({id:"cvp",nome:"Stella",cliente_mascalcia_id:"dc-p",ubicazione_tipo:"scuderia",ubicazione_cliente_id:"dc-s",ubicazione_nome:"Scuderia Le Querce"});});
+await pg.evaluate(async()=>{currentUser.ruolo="maniscalco";await enterApp("maniscalco");});await pg.waitForTimeout(2500);
+console.log("chi paga (Stella di Paola, in scuderia):",await pg.evaluate(async()=>{const id=await clientePaganteCavallo("cvp","dc-s");return clientiMascalcia.find(c=>c.id===id)?.nome;}));
+const prima=await pg.evaluate(()=>(demoState.messaggiMascalcia||demoState.messaggi||[]).length);
+const av=await pg.evaluate(async()=>await avvisaNuovoSeCollegato({stato:"programmato",cliente_mascalcia_id:"dc-p",tipo_ferratura:"ferratura",data_intervento:new Date(Date.now()+4*864e5).toISOString().slice(0,10),ora:"09:00",cavallo:"Stella"}));
+console.log("avviso al cliente collegato:",av);
+console.log("errori:",err);await b.close();})();

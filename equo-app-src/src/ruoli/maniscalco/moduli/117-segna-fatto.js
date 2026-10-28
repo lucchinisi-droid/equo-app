@@ -3,7 +3,7 @@ import { giorniRichiamoSuggeriti, prendiFerriScelti, prendiImportiScelti, prendi
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
-import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { avvisaClienteAppuntamento, chiediSiNo, clienteCollegatoEquo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 /* ---------- «FATTO»: UNA SOLA REGOLA (28/10/2026, punto 3 dell'unificazione) ----------
@@ -56,4 +56,22 @@ async function prossimaAutomatica(e, dataFatto, importo){
   return s.giorni ? aggiungiGiorniIso(dataFatto || e.data_intervento, s.giorni) : null;
 }
 
-export { fattoInAnticipo, prossimaAutomatica, segnaFatto };
+/* ---- appuntamenti creati da Hammer: stesse regole del nuovo appuntamento a mano (28/10/2026, punto 5) ---- */
+// cavallo di un privato che sta in una scuderia: l'appuntamento (e il conto) va al proprietario, come a mano
+async function clientePaganteCavallo(cavallo_cliente_id, clienteId){
+  if(!cavallo_cliente_id) return clienteId;
+  let cid = null;
+  if(DEMO_MODE) cid = (demoState.cavalliClientiMascalcia || []).find(x => x.id === cavallo_cliente_id)?.cliente_mascalcia_id || null;
+  else{
+    try{ const { data } = await sb.from("cavalli_clienti_mascalcia").select("cliente_mascalcia_id").eq("id", cavallo_cliente_id).maybeSingle(); cid = data?.cliente_mascalcia_id || null; }catch(e){ cid = null; }
+  }
+  return cid || clienteId;
+}
+// appuntamento da fare con un cliente collegato a Equo: riceve l'avviso in chat come per quelli fatti a mano
+async function avvisaNuovoSeCollegato(i){
+  if(!i || i.stato !== "programmato" || !clienteCollegatoEquo(i.cliente_mascalcia_id)) return false;
+  await avvisaClienteAppuntamento("nuovo", i);
+  return true;
+}
+
+export { avvisaNuovoSeCollegato, clientePaganteCavallo, fattoInAnticipo, prossimaAutomatica, segnaFatto };

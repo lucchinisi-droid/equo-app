@@ -961,6 +961,8 @@
 				error = r.annullato ? { message: r.messaggio || "il cavallo c'è già" } : r.error;
 				cavallo_cliente_id = r.data?.id || null;
 			} else if (x.cavallo) ({cavallo_cliente_id, horse_id} = await DB.risolviCavalloPerIntervento(x.cliente_mascalcia_id, x.cavallo));
+			const clientePaga = !error && typeof window.clientePaganteCavallo === "function" ? await window.clientePaganteCavallo(cavallo_cliente_id, x.cliente_mascalcia_id) : x.cliente_mascalcia_id;
+			let avvisato = false;
 			if (!error) {
 				const futuro = (/* @__PURE__ */ new Date(x.data + "T" + (x.ora || "00:00"))).getTime() > Date.now();
 				const giorni = (await giorniRichiamoSuggeriti(x.tipo, cavallo_cliente_id, horse_id)).giorni;
@@ -972,7 +974,7 @@
 					data_intervento: x.data
 				}, x.data, x.importo) : void 0;
 				({error} = await DB.insertInterventoMascalcia({
-					cliente_mascalcia_id: x.cliente_mascalcia_id,
+					cliente_mascalcia_id: clientePaga,
 					cavallo_cliente_id,
 					horse_id,
 					tipo_ferratura: x.tipo,
@@ -988,8 +990,17 @@
 					stato_pagamento: x.stato_pagamento || "da_saldare",
 					note: x.note
 				}));
+				if (!error && futuro && typeof window.avvisaNuovoSeCollegato === "function") avvisato = await window.avvisaNuovoSeCollegato({
+					stato: "programmato",
+					cliente_mascalcia_id: clientePaga,
+					tipo_ferratura: x.tipo,
+					tipo_altro: x.tipo_altro,
+					data_intervento: x.data,
+					ora: x.ora,
+					cavallo: x.cavallo?.nome || x.nuovo_cavallo_nome || ""
+				}).catch(() => false);
 			}
-			fatto = "✓ Salvato in agenda. Misura e numero di ferri li aggiungi aprendo l'appuntamento.";
+			fatto = "✓ Salvato in agenda" + (avvisato ? ": il cliente riceve l'avviso in chat." : ".") + " Misura e ferri arrivano dalla scheda del cavallo.";
 			if (!error) await aggiornaViteManiscalco(x.cliente_mascalcia_id);
 		} else if ((azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta") && x.gruppo_id) {
 			const r = await sb.rpc("pro_azione_appuntamento_struttura", {

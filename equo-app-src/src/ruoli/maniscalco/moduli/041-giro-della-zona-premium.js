@@ -7,7 +7,7 @@ import { apriSchedaCavalloPro } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { isPremium } from "./042-incassi-pro.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
-import { renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
+import { agDataPerFissare, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { segnaFattoAgenda } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
@@ -146,7 +146,7 @@ async function richiamoAzione(tipo){
     const oggi = isoLocale(new Date());
     openInterventoModal(r.cliente_mascalcia_id, null, {
       tipo_ferratura: r.tipo_ferratura, tipo_altro: r.tipo_altro, misura_sistema: r.misura_sistema, numero_ferro: r.numero_ferro, quantita_ferri: r.quantita_ferri,
-      data_intervento: r.scadenza > oggi ? r.scadenza : oggi, cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id
+      data_intervento: agDataPerFissare(r.scadenza), cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id
     });
   } else if(tipo === "scrivi"){
     closeModal("modal-richiamo-az");

@@ -56,6 +56,12 @@ function agGiornoLavoro(iso){
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
 }
+// 28/10/2026: «Fissa appuntamento» da una scadenza, da qualunque punto (Agenda, Home → Scadenze, Agenda completa):
+// la scadenza se è futura, altrimenti oggi; se cade di domenica, il lunedì
+function agDataPerFissare(iso){
+  const oggi = isoLocale(new Date());
+  return agGiornoLavoro(!iso || iso < oggi ? oggi : iso);
+}
 
 async function renderAgendaSettimana(direzione){
   const box = document.getElementById("ag-week");
@@ -98,4 +104,4 @@ async function renderAgendaSettimana(direzione){
 }
 
 
-export { agNomeCavalloTesto, AG_GIORNI, AG_MESI, AG_MESI_LUNGHI, agDescrizioneTipo, agDescrizioneTipoPro, agGiornoLavoro, agLunedi, agNomeCavallo, renderAgendaSettimana };
+export { agDataPerFissare, agNomeCavalloTesto, AG_GIORNI, AG_MESI, AG_MESI_LUNGHI, agDescrizioneTipo, agDescrizioneTipoPro, agGiornoLavoro, agLunedi, agNomeCavallo, renderAgendaSettimana };

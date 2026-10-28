@@ -332,18 +332,24 @@ async function confermaAzioneAi(id){
     } else if(x.cavallo){
       ({ cavallo_cliente_id, horse_id } = await DB.risolviCavalloPerIntervento(x.cliente_mascalcia_id, x.cavallo));
     }
+    // 28/10/2026: chi paga come nel nuovo appuntamento a mano (cavallo di un privato in scuderia → il proprietario)
+    const clientePaga = !error && typeof window.clientePaganteCavallo === "function" ? await window.clientePaganteCavallo(cavallo_cliente_id, x.cliente_mascalcia_id) : x.cliente_mascalcia_id;
+    let avvisato = false;
     if(!error){
       const futuro = new Date(x.data + "T" + (x.ora || "00:00")).getTime() > Date.now();
       const giorni = (await giorniRichiamoSuggeriti(x.tipo, cavallo_cliente_id, horse_id)).giorni;
       // 28/10/2026: lavoro già fatto → stessa regola della Modalità Lavoro (con 0 € la prossima resta come prima)
       const psFatto = !futuro && typeof window.prossimaAutomatica === "function"
         ? await window.prossimaAutomatica({ tipo_ferratura: x.tipo, cavallo_cliente_id, horse_id, cliente_mascalcia_id: x.cliente_mascalcia_id, data_intervento: x.data }, x.data, x.importo) : undefined;
-      ({ error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: x.cliente_mascalcia_id, cavallo_cliente_id, horse_id,
+      ({ error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: clientePaga, cavallo_cliente_id, horse_id,
         tipo_ferratura: x.tipo, tipo_altro: x.tipo_altro, misura_sistema: null, numero_ferro: null, quantita_ferri: null,
         data_intervento: x.data, ora: x.ora, stato: futuro ? "programmato" : "fatto",
         prossima_scadenza: psFatto !== undefined ? psFatto : (giorni ? aggiungiGiorniIso(x.data, giorni) : null), importo: x.importo, stato_pagamento: x.stato_pagamento || "da_saldare", note: x.note }));
+      // 28/10/2026: il cliente collegato riceve l'avviso in chat come per gli appuntamenti fatti a mano
+      if(!error && futuro && typeof window.avvisaNuovoSeCollegato === "function")
+        avvisato = await window.avvisaNuovoSeCollegato({ stato: "programmato", cliente_mascalcia_id: clientePaga, tipo_ferratura: x.tipo, tipo_altro: x.tipo_altro, data_intervento: x.data, ora: x.ora, cavallo: x.cavallo?.nome || x.nuovo_cavallo_nome || "" }).catch(() => false);
     }
-    fatto = "✓ Salvato in agenda. Misura e numero di ferri li aggiungi aprendo l'appuntamento.";
+    fatto = "✓ Salvato in agenda" + (avvisato ? ": il cliente riceve l'avviso in chat." : ".") + " Misura e ferri arrivano dalla scheda del cavallo.";
     if(!error) await aggiornaViteManiscalco(x.cliente_mascalcia_id);
   } else if((azione.tipo === "accetta_richiesta" || azione.tipo === "rifiuta_richiesta") && x.gruppo_id){
     // richiesta di una struttura Equo Scuderia: si conferma/rifiuta tutto il gruppo con la doppia conferma

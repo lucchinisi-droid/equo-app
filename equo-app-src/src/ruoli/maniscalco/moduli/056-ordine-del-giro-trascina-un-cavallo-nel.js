@@ -2,7 +2,7 @@
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { avvisaClienteAppuntamento, chiediSiNo, deveAvvisareAnnullo, notaModificaMan, openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
-import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipoPro, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
+import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipoPro, agNomeCavallo, renderAgendaSettimana, agDataPerFissare } from "./053-agenda-settimanale-maniscalco.js";
 import { segnaFatto } from "./117-segna-fatto.js";
 import { accettaRichiesta, agDisegnaGriglia, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { generaPdfEvento, inviaEventoInChat } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
@@ -141,7 +141,7 @@ function fissaDaScadenza(id){
   openInterventoModal(sc.cliente_mascalcia_id, null, {
     tipo_ferratura: sc.tipo_ferratura, tipo_altro: sc.tipo_altro,
     misura_sistema: sc.misura_sistema, numero_ferro: sc.numero_ferro, quantita_ferri: sc.quantita_ferri,
-    data_intervento: sc.data_vista || sc.prossima_scadenza, cavallo_cliente_id: sc.cavallo_cliente_id, horse_id: sc.horse_id
+    data_intervento: agDataPerFissare(sc.prossima_scadenza || sc.data_vista), cavallo_cliente_id: sc.cavallo_cliente_id, horse_id: sc.horse_id
   });
 }
 

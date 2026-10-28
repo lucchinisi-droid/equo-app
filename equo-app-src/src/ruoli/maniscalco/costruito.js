@@ -4370,6 +4370,23 @@
 		if (Number(importo) === 0 && importo !== null && importo !== "" && s.prima) return s.prima;
 		return s.giorni ? aggiungiGiorniIso(dataFatto || e.data_intervento, s.giorni) : null;
 	}
+	async function clientePaganteCavallo(cavallo_cliente_id, clienteId) {
+		if (!cavallo_cliente_id) return clienteId;
+		let cid = null;
+		if (DEMO_MODE) cid = (demoState.cavalliClientiMascalcia || []).find((x) => x.id === cavallo_cliente_id)?.cliente_mascalcia_id || null;
+		else try {
+			const { data } = await sb.from("cavalli_clienti_mascalcia").select("cliente_mascalcia_id").eq("id", cavallo_cliente_id).maybeSingle();
+			cid = data?.cliente_mascalcia_id || null;
+		} catch (e) {
+			cid = null;
+		}
+		return cid || clienteId;
+	}
+	async function avvisaNuovoSeCollegato(i) {
+		if (!i || i.stato !== "programmato" || !clienteCollegatoEquo(i.cliente_mascalcia_id)) return false;
+		await avvisaClienteAppuntamento("nuovo", i);
+		return true;
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/092-fasi.js
 	async function mlPausaNotifiche(on) {
 		if (DEMO_MODE || !currentUser) return;
@@ -7550,7 +7567,7 @@
 			misura_sistema: sc.misura_sistema,
 			numero_ferro: sc.numero_ferro,
 			quantita_ferri: sc.quantita_ferri,
-			data_intervento: sc.data_vista || sc.prossima_scadenza,
+			data_intervento: agDataPerFissare(sc.prossima_scadenza || sc.data_vista),
 			cavallo_cliente_id: sc.cavallo_cliente_id,
 			horse_id: sc.horse_id
 		});
@@ -8406,6 +8423,10 @@
 		const [y, m, d] = iso.split("-").map(Number);
 		return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
 	}
+	function agDataPerFissare(iso) {
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		return agGiornoLavoro(!iso || iso < oggi ? oggi : iso);
+	}
 	async function renderAgendaSettimana$1(direzione) {
 		const box = document.getElementById("ag-week");
 		if (!box) return;
@@ -8642,14 +8663,14 @@
 		if (!r) return;
 		if (tipo === "fissa") {
 			closeModal("modal-richiamo-az");
-			const oggi = isoLocale(/* @__PURE__ */ new Date());
+			isoLocale(/* @__PURE__ */ new Date());
 			openInterventoModal(r.cliente_mascalcia_id, null, {
 				tipo_ferratura: r.tipo_ferratura,
 				tipo_altro: r.tipo_altro,
 				misura_sistema: r.misura_sistema,
 				numero_ferro: r.numero_ferro,
 				quantita_ferri: r.quantita_ferri,
-				data_intervento: r.scadenza > oggi ? r.scadenza : oggi,
+				data_intervento: agDataPerFissare(r.scadenza),
 				cavallo_cliente_id: r.cavallo_cliente_id,
 				horse_id: r.horse_id
 			});
@@ -14552,8 +14573,7 @@
 		return [...m.values()];
 	}
 	function agDataProposta(iso) {
-		const oggi = oggiIso();
-		return agGiornoLavoro(!iso || iso < oggi ? oggi : iso);
+		return agDataPerFissare(iso);
 	}
 	function agDisegnaProg() {
 		const box = document.getElementById("ag-sez-prog");
@@ -15325,6 +15345,8 @@
 	Object.assign(window, {
 		creaCavalloUnico,
 		creaClienteUnico,
+		avvisaNuovoSeCollegato,
+		clientePaganteCavallo,
 		prossimaAutomatica,
 		segnaFatto,
 		onbScansionaCavallo,

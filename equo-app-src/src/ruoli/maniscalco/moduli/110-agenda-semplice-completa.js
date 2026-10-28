@@ -4,7 +4,7 @@ import { isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-ca
 import { euroTondo } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { openInterventoModal, chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
-import { agDescrizioneTipoPro, agGiornoLavoro, agNomeCavallo, agNomeCavalloTesto, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
+import { agDataPerFissare, agDescrizioneTipoPro, agGiornoLavoro, agNomeCavallo, agNomeCavalloTesto, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
@@ -101,7 +101,7 @@ function perCliente(lista){
   return [...m.values()];
 }
 // data proposta: la scadenza (o oggi se è già passata), mai di domenica
-function agDataProposta(iso){ const oggi = oggiIso(); return agGiornoLavoro(!iso || iso < oggi ? oggi : iso); }
+function agDataProposta(iso){ return agDataPerFissare(iso); }   // 28/10/2026: regola unica (053)
 
 /* DA PROGRAMMARE */
 function agDisegnaProg(){
