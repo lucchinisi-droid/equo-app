@@ -221,7 +221,7 @@ async function onInterventoClienteChange(){
       data_intervento: document.getElementById("intervento-data").value,
       ora: document.getElementById("intervento-ora").value };
     closeModal("modal-add-intervento");
-    return apriPropostaStruttura(clienteId, preset);
+    return apriPropostaStruttura(clienteId, { ...preset, daNuovo: true });   // «Cambia cliente» riporta qui
   }
   const isNuovo = clienteId === "__nuovo__";
   document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";

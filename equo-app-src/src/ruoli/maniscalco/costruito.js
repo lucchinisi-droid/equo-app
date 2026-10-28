@@ -7217,8 +7217,12 @@
 		if (currentClienteId) await loadClienteInterventi(currentClienteId);
 	}
 	var propStrutturaClienteId = null;
+	var propStrDaNuovo = null;
 	async function apriPropostaStruttura(clienteId, preset) {
 		propStrutturaClienteId = clienteId;
+		propStrDaNuovo = preset?.daNuovo ? preset : null;
+		const cambia = document.getElementById("prop-str-cambia");
+		if (cambia) cambia.hidden = !propStrDaNuovo;
 		const c = clientiMascalcia.find((x) => x.id === clienteId);
 		document.getElementById("prop-str-nome").textContent = c?.nome || "Scuderia";
 		const p = preset || {};
@@ -7424,6 +7428,21 @@
 		}
 		box.innerHTML = `<div class="ag-griglia">${html}</div>`;
 		agAttivaTrascina(box);
+	}
+	function propStrCambiaCliente() {
+		const { daNuovo, cavalli, cavallo_cliente_id, ...resto } = propStrDaNuovo || {};
+		const tipo = document.getElementById("prop-str-tipo").value;
+		const preset = {
+			...resto,
+			tipo_ferratura: tipo,
+			tipo_altro: tipo === "altro" ? document.getElementById("prop-str-tipo-altro").value : "",
+			data_intervento: document.getElementById("prop-str-data").value || resto.data_intervento,
+			ora: document.getElementById("prop-str-ora").value
+		};
+		propStrutturaClienteId = null;
+		propStrDaNuovo = null;
+		closeModal("modal-proponi-struttura");
+		openInterventoModal(null, null, preset);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/056-ordine-del-giro-trascina-un-cavallo-nel.js
 	function agOrdinaGiro(l) {
@@ -10569,7 +10588,10 @@
 				ora: document.getElementById("intervento-ora").value
 			};
 			closeModal("modal-add-intervento");
-			return apriPropostaStruttura(clienteId, preset);
+			return apriPropostaStruttura(clienteId, {
+				...preset,
+				daNuovo: true
+			});
 		}
 		const isNuovo = clienteId === "__nuovo__";
 		document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
@@ -15522,6 +15544,7 @@
 		apriNuovoCliente,
 		apriNuovoConto,
 		apriPropostaStruttura,
+		propStrCambiaCliente,
 		apriRazzaCavallo,
 		apriRichiamo,
 		apriSchedaCavalloPro,

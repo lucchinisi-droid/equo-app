@@ -19,7 +19,7 @@ import { aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, 
 import { aggiornaQuando, avvisaClienteAppuntamento, chiediSiNo, chiudiEditorFerro, eliminaInterventoInModifica, modificaFerraturaDaIntervento, nuovoCavalloLavoro, onCavalliMultiChange, onInterventoClienteChange, openInterventoModal, quandoIntervento, rispondiSiNo, salvaInterventoMascalcia, sceltaModoIntervento, sceltaStraordinario, sceltaZoccolo, selezionaQuantita, siglaFerro, testoPrimaModifica, toggleInterventoNuovoCavallo, toggleInterventoTipoFields } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
-import { accettaRichiesta, apriPropostaStruttura, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
+import { accettaRichiesta, apriPropostaStruttura, propStrCambiaCliente, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { agOrdinaGiro, apriAzioniEvento, azioneEvento, cambiaSettimanaAgenda, fissaDaScadenza, nuovoAppuntamentoGiorno, segnaFattoAgenda, toggleGiornoAgenda, tornaSettimanaCorrente } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 import { caricaJsPdf, creaPdfEvento, generaPdfEvento, inviaEventoInChat, rimuoviAllegatoChat } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
 import "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
@@ -154,6 +154,7 @@ Object.assign(window, {
   apriNuovoCliente,
   apriNuovoConto,
   apriPropostaStruttura,
+  propStrCambiaCliente,
   apriRazzaCavallo,
   apriRichiamo,
   apriSchedaCavalloPro,

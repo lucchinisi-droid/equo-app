@@ -19,9 +19,13 @@ async function azioneGruppoStruttura(gruppoId, azione){
   if(currentClienteId) await loadClienteInterventi(currentClienteId);
 }
 
-let propStrutturaClienteId = null;
+let propStrutturaClienteId = null, propStrDaNuovo = null;
 async function apriPropostaStruttura(clienteId, preset){
   propStrutturaClienteId = clienteId;
+  // 28/10/2026: arrivati da «Nuovo appuntamento» scegliendo una scuderia su Equo → «Cambia cliente» per tornare indietro
+  propStrDaNuovo = preset?.daNuovo ? preset : null;
+  const cambia = document.getElementById("prop-str-cambia");
+  if(cambia) cambia.hidden = !propStrDaNuovo;
   const c = clientiMascalcia.find(x => x.id === clienteId);
   document.getElementById("prop-str-nome").textContent = c?.nome || "Scuderia";
   const p = preset || {};
@@ -206,4 +210,15 @@ function agDisegnaGriglia(){
 }
 
 
-export { accettaRichiesta, agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda };
+// torna a «Nuovo appuntamento» con il cliente da scegliere, tenendo tipo, data e ora
+function propStrCambiaCliente(){
+  const { daNuovo, cavalli, cavallo_cliente_id, ...resto } = propStrDaNuovo || {};
+  const tipo = document.getElementById("prop-str-tipo").value;
+  const preset = { ...resto, tipo_ferratura: tipo, tipo_altro: tipo === "altro" ? document.getElementById("prop-str-tipo-altro").value : "",
+    data_intervento: document.getElementById("prop-str-data").value || resto.data_intervento, ora: document.getElementById("prop-str-ora").value };
+  propStrutturaClienteId = null; propStrDaNuovo = null;
+  closeModal("modal-proponi-struttura");
+  openInterventoModal(null, null, preset);
+}
+
+export { accettaRichiesta, agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura, propStrCambiaCliente, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda };

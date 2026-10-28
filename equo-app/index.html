@@ -2681,6 +2681,9 @@ body.home-man .hm-flot.piu.aperto,body.home-man .hm-flot.msg.sopra{z-index:65}
 :where(body:not(.pl-owner)) .cp-cerca .cerca-input[readonly]{font-weight:700;color:var(--text)}
 :where(body:not(.pl-owner)) .cp-cerca-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;border-radius:50%;background:var(--surface-2,#efe9dc);color:var(--muted);font-size:14px;cursor:pointer}
 :where(body:not(.pl-owner)) .cp-cerca-x[hidden]{display:none}
+/* 28/10/2026: «Cambia cliente» in Proponi a scuderia (arrivati da Nuovo appuntamento) */
+:where(body:not(.pl-owner)) .prop-str-cambia{display:block;border:0;background:none;padding:0 0 8px;font:inherit;font-size:13.5px;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+:where(body:not(.pl-owner)) .prop-str-cambia[hidden]{display:none}
 /* CARD DEI PROFESSIONISTI: Equo Pass ed Equo CV (26/10/2026) */
 .ecv-pagina{--ecv-ok:#3fd18a;--ecv-oro:#e8b04b;--ecv-prem:#c58cff;position:fixed;inset:0;z-index:120;background:radial-gradient(120% 70% at 50% 0%,#5a4316 0%,#140e05 62%);color:#f7f0e2;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.25,1);overflow-y:auto;padding-bottom:calc(36px + env(safe-area-inset-bottom));visibility:hidden}
 .ecv-pagina.on{transform:none;visibility:visible}
@@ -5832,6 +5835,7 @@ body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):n
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-calendar-plus"></i></span>Proponi a <span id="prop-str-nome" style="margin-left:4px">scuderia</span></div>
+    <button type="button" class="prop-str-cambia" id="prop-str-cambia" hidden onclick="propStrCambiaCliente()">Cambia cliente</button>
     <div class="muted" style="font-size:12.5px;margin-bottom:12px;line-height:1.5">La scuderia riceve la proposta e la conferma, propone un'altra data o la annulla.</div>
     <div class="auth-form">
       <div class="input-group"><label class="input-label">Tipo</label>
@@ -13712,8 +13716,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (currentClienteId) await loadClienteInterventi(currentClienteId);
 	}
 	var propStrutturaClienteId = null;
+	var propStrDaNuovo = null;
 	async function apriPropostaStruttura(clienteId, preset) {
 		propStrutturaClienteId = clienteId;
+		propStrDaNuovo = preset?.daNuovo ? preset : null;
+		const cambia = document.getElementById("prop-str-cambia");
+		if (cambia) cambia.hidden = !propStrDaNuovo;
 		const c = clientiMascalcia.find((x) => x.id === clienteId);
 		document.getElementById("prop-str-nome").textContent = c?.nome || "Scuderia";
 		const p = preset || {};
@@ -13919,6 +13927,21 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}
 		box.innerHTML = `<div class="ag-griglia">${html}</div>`;
 		agAttivaTrascina(box);
+	}
+	function propStrCambiaCliente() {
+		const { daNuovo, cavalli, cavallo_cliente_id, ...resto } = propStrDaNuovo || {};
+		const tipo = document.getElementById("prop-str-tipo").value;
+		const preset = {
+			...resto,
+			tipo_ferratura: tipo,
+			tipo_altro: tipo === "altro" ? document.getElementById("prop-str-tipo-altro").value : "",
+			data_intervento: document.getElementById("prop-str-data").value || resto.data_intervento,
+			ora: document.getElementById("prop-str-ora").value
+		};
+		propStrutturaClienteId = null;
+		propStrDaNuovo = null;
+		closeModal("modal-proponi-struttura");
+		openInterventoModal(null, null, preset);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/056-ordine-del-giro-trascina-un-cavallo-nel.js
 	function agOrdinaGiro(l) {
@@ -17064,7 +17087,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				ora: document.getElementById("intervento-ora").value
 			};
 			closeModal("modal-add-intervento");
-			return apriPropostaStruttura(clienteId, preset);
+			return apriPropostaStruttura(clienteId, {
+				...preset,
+				daNuovo: true
+			});
 		}
 		const isNuovo = clienteId === "__nuovo__";
 		document.getElementById("intervento-nuovo-cliente-group").style.display = isNuovo ? "flex" : "none";
@@ -22017,6 +22043,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		apriNuovoCliente,
 		apriNuovoConto,
 		apriPropostaStruttura,
+		propStrCambiaCliente,
 		apriRazzaCavallo,
 		apriRichiamo,
 		apriSchedaCavalloPro,
