@@ -41,8 +41,14 @@ function reopenOnboarding(){
   showOnboardingStep(currentUser && PRO_ROLES.includes(currentUser.ruolo) ? 2 : 1);
 }
 
+// 28/10/2026: la Home è quella del profilo che si sta usando ORA (vistaAttiva), non del ruolo principale:
+// con un account proprietario + maniscalco l'indietro dalla vista maniscalco apriva la Home del proprietario
+function homeDellaVista(){
+  const v = currentUser ? (currentUser.vistaAttiva || currentUser.ruolo) : null;
+  return PRO_ROLES.includes(v) ? "pro-home" : "home";
+}
 function goHome(){
-  showPage(currentUser && PRO_ROLES.includes(currentUser.ruolo) ? "pro-home" : "home");
+  showPage(homeDellaVista());
 }
 
 function updateRoleBadgeUI(ruolo){
