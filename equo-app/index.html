@@ -3616,6 +3616,84 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 
 /* --- Nuovo appuntamento: il veterinario non sceglie «Ferrato / Mezza / Pareggio» per un cavallo nuovo --- */
 :where(body.pl-vet) #intervento-nuovo-cavallo-lavoro-group{display:none!important}
+
+/* --- Agenda (mockup Agenda 1 · Settimana): 4 schede, settimana su una riga, visite per posto --- */
+:where(body.pl-vet) #page-pro-agenda{background:var(--vt-fondo)}
+:where(body.pl-vet) #ag-vista,:where(body.pl-vet) #page-pro-agenda .ag-invito{display:none!important}
+:where(body.pl-vet) #ag-schede{background:var(--vt-chip);border-radius:999px;padding:4px;gap:2px}
+:where(body.pl-vet) #ag-schede button{border-radius:999px;font-size:12px;color:var(--vt-testo2)}
+:where(body.pl-vet) #ag-schede button.on{background:var(--vt-notte);color:#fff}
+:where(body.pl-vet) #pro-agenda-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
+:where(body.pl-vet) .ag-week{background:transparent;border:0;box-shadow:none;padding:0}
+:where(body.pl-vet) .ag-griglia{grid-template-columns:repeat(7,1fr);gap:5px}
+:where(body.pl-vet) .ag-tile{flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border-radius:12px;background:var(--vt-sup);border:1px solid var(--vt-bordo);color:var(--vt-testo);min-height:0}
+:where(body.pl-vet) .ag-tile.dom{grid-column:auto}
+:where(body.pl-vet) .ag-tile-gg{align-items:center}
+:where(body.pl-vet) .ag-tile-nome{font-size:10px;letter-spacing:0;text-transform:none;color:var(--vt-testo2)}
+:where(body.pl-vet) .ag-tile-data{font-size:16px;font-family:'Fraunces',serif}
+:where(body.pl-vet) .ag-tile .ag-mese,:where(body.pl-vet) .ag-tile .ag-chev,:where(body.pl-vet) .ag-tile-oggi,:where(body.pl-vet) .ag-tile .ag-fatti,:where(body.pl-vet) .ag-tile .ag-pm{display:none}
+:where(body.pl-vet) .ag-tile .ag-count{background:none;min-width:0;height:auto;font-size:11px;font-weight:600;color:var(--vt-testo2)}
+:where(body.pl-vet) .ag-tile.today .ag-tile-nome{color:var(--vt-tif)}
+:where(body.pl-vet) .ag-tile.aperto,:where(body.pl-vet) .ag-tile.today.aperto{background:var(--vt-notte);border-color:var(--vt-notte);color:#fff}
+:where(body.pl-vet) .ag-tile.aperto .ag-count,:where(body.pl-vet) .ag-tile.aperto .ag-tile-nome{color:var(--vt-su-blu);background:none}
+:where(body.pl-vet) .ag-tile.today.aperto .ag-tile-nome{color:var(--vt-tif)}
+:where(body.pl-vet) .ag-tile.riposo{border-style:dashed;background:transparent;opacity:.7}
+:where(body.pl-vet) .ag-tile.riposo .ag-riposo{font-size:10px}
+:where(body.pl-vet) .ag-pannello{background:transparent;border:0;padding:12px 0 0}
+:where(body.pl-vet) .ag-pannello-testa b{color:var(--vt-notte);font-size:17px}
+:where(body.pl-vet) .ag-gblock{background:var(--vt-sup);border:1px solid var(--vt-bordo);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+:where(body.pl-vet) .ag-gblock.vt-urg{background:var(--vt-urg-chiaro);border-color:#E3B5AE}
+:where(body.pl-vet) .ag-gblock .ag-cli-nome{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--vt-testo2)}
+:where(body.pl-vet) .ag-gblock.vt-urg .ag-cli-nome{color:var(--vt-urg)}
+:where(body.pl-vet) .ag-gblock .ag-cli-nav{border-color:var(--vt-tif);color:var(--vt-tif-testo)}
+:where(body.pl-vet) .ag-gblock .ag-ev{background:transparent}
+:where(body.pl-vet) .vt-b{flex:0 0 auto;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px}
+:where(body.pl-vet) .vt-b.urg{background:#F3D9D5;color:var(--vt-urg)}
+:where(body.pl-vet) .vt-b.tif{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vt-b.testo{background:none;padding:3px 0;font-weight:500;color:var(--vt-testo2)}
+:where(body.pl-vet) #pro-action-btn{position:fixed;right:18px;bottom:96px;width:54px;height:54px;border-radius:50%;padding:0;font-size:0;background:var(--vt-tif);border:3px solid #fff;box-shadow:0 6px 18px rgba(29,45,80,.25);z-index:30}
+:where(body.pl-vet) #pro-action-btn::before{content:"+";font-size:30px;line-height:1;color:var(--vt-notte);font-weight:400}
+:where(body.pl-vet) #ag-schede:not([hidden]){display:flex;flex-wrap:nowrap}
+:where(body.pl-vet) #ag-schede button{flex:1 1 auto;min-width:0;justify-content:center;gap:4px;padding:7px 6px;border:0;background:transparent;white-space:nowrap}
+:where(body.pl-vet) #ag-schede button b{background:none;color:inherit;font-weight:600;min-width:0;padding:0}
+:where(body.pl-vet) #ag-schede button[data-s="app"] b,:where(body.pl-vet) #ag-schede button[data-s="saldare"] b{display:none}
+:where(body.pl-vet) .vt-b{text-transform:none;letter-spacing:0}
+:where(body.pl-vet) .ag-gblock .ag-ev-fatto{background:var(--vt-tif);color:var(--vt-notte);border-color:var(--vt-tif)}
+
+/* --- Clienti (mockup Clienti 1 · Elenco): A–Z, filtri, crediti --- */
+:where(body.pl-vet) #page-pro-clienti{background:var(--vt-fondo)}
+:where(body.pl-vet) #clienti-list-view .section-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
+:where(body.pl-vet) #cli-cartelle{gap:6px;border:0;background:none}
+:where(body.pl-vet) #cli-cartelle button{border:1px solid var(--vt-bordo);background:var(--vt-sup);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--vt-testo)}
+:where(body.pl-vet) #cli-cartelle button.on{background:var(--vt-notte);border-color:var(--vt-notte);color:#fff}
+:where(body.pl-vet) #cli-cartella-sotto{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--vt-testo2)}
+:where(body.pl-vet) .vt-cli-nuovo{background:var(--vt-notte);color:#fff;border:0;border-radius:12px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
+:where(body.pl-vet) #clienti-list{position:relative;padding-right:14px}
+:where(body.pl-vet) #clienti-list .cli-lettera{color:var(--vt-tif-scuro);font-weight:700}
+:where(body.pl-vet) .vt-av{font-weight:700;font-size:13px;font-style:normal}
+:where(body.pl-vet) .vt-av.str{background:var(--vt-notte2);color:#fff}
+:where(body.pl-vet) .vt-av.equo{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vt-av.no{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vt-cli-deve{flex:0 0 auto;font-weight:700;font-size:13px;color:var(--vt-urg)}
+:where(body.pl-vet) .vt-cli-ok{flex:0 0 auto;font-weight:700;font-size:12px;color:var(--vt-tif-scuro)}
+:where(body.pl-vet) .vt-cli-invita{flex:0 0 auto;font-weight:700;font-size:12px;color:var(--vt-tif-testo);border:1.5px solid var(--vt-tif);border-radius:999px;padding:3px 10px;background:var(--vt-tif-chiaro)}
+:where(body.pl-vet) .vt-indice{position:absolute;right:-4px;top:4px;display:flex;flex-direction:column;gap:1px}
+:where(body.pl-vet) .vt-indice button{background:none;border:0;padding:0 2px;font-size:10px;font-weight:700;color:var(--vt-tif-scuro);cursor:pointer;line-height:1.35}
+
+/* --- Messaggi (mockup Messaggi 1 · Cartelle): matita, ricerca, etichette dei cavalli, urgenza --- */
+:where(body.pl-vet) #page-pro-inbox{background:var(--vt-fondo);position:relative}
+:where(body.pl-vet) #page-pro-inbox > .section-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
+:where(body.pl-vet) .vt-msg-testa{position:absolute;right:16px;top:12px}
+:where(body.pl-vet) .vt-matita{width:38px;height:38px;border-radius:50%;border:0;background:var(--vt-notte);color:var(--vt-tif);display:flex;align-items:center;justify-content:center;cursor:pointer}
+:where(body.pl-vet) .vt-matita svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:where(body.pl-vet) .vt-msg-cerca input{width:100%;height:40px;border-radius:999px;border:1px solid var(--vt-bordo);background:var(--vt-sup);padding:0 16px;font:inherit;font-size:14px;margin:0 0 10px;color:var(--vt-testo)}
+:where(body.pl-vet) #chat-cartelle button{border:1px solid var(--vt-bordo);background:var(--vt-sup);border-radius:999px;padding:6px 14px;font-weight:600;color:var(--vt-testo)}
+:where(body.pl-vet) #chat-cartelle button.on{background:var(--vt-notte);border-color:var(--vt-notte);color:#fff}
+:where(body.pl-vet) #page-pro-inbox .horse-avatar.vt-av{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border-radius:50%}
+:where(body.pl-vet) #page-pro-inbox .horse-avatar.vt-av.urg{background:var(--vt-urg);color:#fff}
+:where(body.pl-vet) .vt-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+:where(body.pl-vet) .vt-chip{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vt-chip.urg{background:#F3D9D5;color:var(--vt-urg)}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -12742,6 +12820,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       </div>`;
 	}
 	function agendaCompleta() {
+		if (typeof eVeterinario === "function" && eVeterinario()) return true;
 		try {
 			return localStorage.getItem("equo-agenda-vista") === "completa";
 		} catch (e) {
@@ -12754,7 +12833,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const daFare = agDaFare(d).length, sc = agScadGiorno(d).length, fatti = d.ev.length - daFare, aperto = agGiorniAperti.has(d.iso);
 		const riposo = d.k === 6 && !d.ev.length;
 		return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
-      <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
+      <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} <span class="ag-mese">${AG_MESI[d.g.getMonth()]}</span></span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
       ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
       ${(d.pm || []).some((p) => p.stato === "attivo") ? `<span class="ag-pm" title="Promemoria">🔔${(d.pm || []).filter((p) => p.stato === "attivo").length}</span>` : ""}
@@ -12769,10 +12848,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				gruppi.set(l.key, {
 					nome: l.nome,
 					l,
-					righe: []
+					righe: [],
+					ev: []
 				});
 				agLuoghi[l.key] = l;
 			}
+			gruppi.get(l.key).ev.push(x);
 			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "" : "";
 			gruppi.get(l.key).righe.push(riga(x, di));
 		};
@@ -12789,15 +12870,19 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			"Sabato",
 			"Domenica"
 		][d.k];
-		const corpo = [...gruppi.entries()].map(([k, gr]) => `
-      <div class="ag-gblock" data-cli="${escapeHtml(k)}">
-        <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span>
+		const etichetta = (gr) => typeof vetEtichettaGruppo === "function" && typeof eVeterinario === "function" && eVeterinario() ? vetEtichettaGruppo(gr.ev, gr.l) : null;
+		const corpo = [...gruppi.entries()].map(([k, gr]) => {
+			const et = etichetta(gr);
+			return `
+      <div class="ag-gblock${et && et.cls ? " " + et.cls : ""}" data-cli="${escapeHtml(k)}">
+        <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span>${et ? et.html : `<span>${gr.righe.length}</span>`}
           <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some((e) => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
         <div class="ag-gr">${gr.righe.join("")}</div>
-      </div>`).join("");
+      </div>`;
+		}).join("");
 		return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
-        <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+        <span>${nCli ? `${nCli} ${eVeterinario() ? nCli === 1 ? "posto" : "posti" : nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
       ${pmPannelloGiorno(d.pm)}
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
       ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
@@ -12809,7 +12894,15 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const box = document.getElementById("ag-week");
 		if (!box || !agGiorniDati.length) return;
 		let html = "";
-		for (const coppia of [
+		for (const coppia of typeof eVeterinario === "function" && eVeterinario() ? [[
+			0,
+			1,
+			2,
+			3,
+			4,
+			5,
+			6
+		]] : [
 			[0, 1],
 			[2, 3],
 			[4, 5],
@@ -18658,6 +18751,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function renderClientiList() {
 		const box = document.getElementById("clienti-list");
 		if (!box) return;
+		if (typeof eVeterinario === "function" && eVeterinario() && typeof vetRenderClienti === "function") return vetRenderClienti(box);
 		const attivi = clientiAttivi();
 		const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
 		const proprietari = attivi.filter((c) => !isStruttura(c)).sort(alfabetico);
@@ -21938,6 +22032,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		cavalliQuiStanno,
+		cavalliCartella,
+		pagResiduo,
 		ofStimaKm,
 		agDescrizioneTipo,
 		creaCavalloUnico,
@@ -36561,13 +36658,241 @@ plAggiorna();
 	quandoAggiornaBarra(function() {
 		vdPrepara();
 	});
+	// equo-app-src/src/ruoli/veterinario/moduli/03-agenda.js
+	function vetEtichettaGruppo(ev, luogo) {
+		const tipi = new Set((ev || []).map((e) => e.tipo_ferratura));
+		const nCav = new Set((ev || []).map((e) => e.cavallo_cliente_id || e.horse_id || e.id)).size;
+		if (tipi.has("urgenza")) return {
+			cls: "vt-urg",
+			html: "<span class=\"vt-b urg\">Urgente</span>"
+		};
+		const mf = [tipi.has("mtc") ? "MTC" : "", tipi.has("fisio") ? "Fisio" : ""].filter(Boolean);
+		if (mf.length) return {
+			cls: "",
+			html: `<span class="vt-b tif">${mf.join(" · ")}</span>`
+		};
+		if ((ev || []).length && ev.every((e) => {
+			const c = typeof clienteDiId === "function" ? clienteDiId(e.cliente_mascalcia_id) : null;
+			return c && c.tipo_cliente === "struttura";
+		}) && luogo && luogo.scuderia) return {
+			cls: "",
+			html: "<span class=\"vt-b testo\">paga la scuderia</span>"
+		};
+		return {
+			cls: "",
+			html: `<span class="vt-b testo">${nCav} ${nCav === 1 ? "cavallo" : "cavalli"}</span>`
+		};
+	}
+	function vetTestiAgenda() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		const s = document.querySelector("#ag-schede [data-s=\"prog\"] span");
+		if (s && s.textContent !== "Da fissare") s.textContent = "Da fissare";
+		const t = document.getElementById("pro-agenda-title");
+		if (t && t.textContent !== "Agenda") t.textContent = "Agenda";
+	}
+	quandoApriPagina(function(p) {
+		if (p === "pro-agenda") vetTestiAgenda();
+	});
+	// equo-app-src/src/ruoli/veterinario/moduli/04-clienti.js
+	var vetCliFiltro = (() => {
+		try {
+			return localStorage.getItem("equo-vet-cli-filtro") || "tutti";
+		} catch (e) {
+			return "tutti";
+		}
+	})();
+	function vetSuEquo(c) {
+		return !!(c.cliente_user_id || c.collegamento_stato === "attivo");
+	}
+	function vetSigla(nome) {
+		const p = String(nome || "?").trim().split(/\s+/).filter(Boolean);
+		return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : (p[0] || "").charAt(1) || "")).toUpperCase();
+	}
+	function vetCrediti() {
+		const out = {};
+		(typeof cliInterventi !== "undefined" ? cliInterventi : []).forEach((i) => {
+			if (i.stato !== "fatto" || i.stato_pagamento !== "da_saldare") return;
+			const resto = typeof pagResiduo === "function" ? pagResiduo(i) : Number(i.importo) || 0;
+			if (resto > 0) out[i.cliente_mascalcia_id] = (out[i.cliente_mascalcia_id] || 0) + resto;
+		});
+		return out;
+	}
+	function vetFiltroClienti(k) {
+		vetCliFiltro = k;
+		try {
+			localStorage.setItem("equo-vet-cli-filtro", k);
+		} catch (e) {}
+		const box = document.getElementById("clienti-list");
+		if (box) vetRenderClienti(box);
+	}
+	function vetVaiLettera(l) {
+		const el = document.querySelector(`#clienti-list .cli-lettera[data-l="${l}"]`);
+		if (el) el.scrollIntoView({
+			behavior: "smooth",
+			block: "start"
+		});
+	}
+	function vetRenderClienti(box) {
+		const attivi = clientiAttivi();
+		const crediti = vetCrediti();
+		const cavalli = typeof cavalliCartella === "function" ? cavalliCartella() : [];
+		const perCliente = {};
+		cavalli.forEach((cv) => {
+			(perCliente[cv.cliente_mascalcia_id] = perCliente[cv.cliente_mascalcia_id] || []).push(cv);
+		});
+		const filtri = [
+			["tutti", "Tutti"],
+			["privati", "Privati"],
+			["scuderie", "Scuderie"],
+			["crediti", "Crediti"]
+		];
+		if (!filtri.some((f) => f[0] === vetCliFiltro)) vetCliFiltro = "tutti";
+		document.getElementById("cli-cartelle").innerHTML = filtri.map(([k, t]) => `<button role="tab" aria-selected="${vetCliFiltro === k}" class="${vetCliFiltro === k ? "on" : ""}" onclick="vetFiltroClienti('${k}')">${t}</button>`).join("");
+		const nCli = attivi.length;
+		document.getElementById("cli-cartella-sotto").innerHTML = `<span>${nCli} ${nCli === 1 ? "cliente" : "clienti"} · ${cavalli.length} ${cavalli.length === 1 ? "cavallo" : "cavalli"}</span><button class="vt-cli-nuovo" onclick="apriNuovoCliente('proprietario')">+ Cliente</button>`;
+		const collega = document.getElementById("cli-collega-btn");
+		if (collega) collega.style.display = "none";
+		const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
+		if (f) f.inp.placeholder = "Nome, cavallo, microchip";
+		const lista = attivi.filter((c) => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		let html = "", lettera = "";
+		const lettere = [];
+		lista.forEach((c) => {
+			const l = (c.nome || "?").trim().charAt(0).toUpperCase();
+			if (l !== lettera) {
+				lettera = l;
+				lettere.push(l);
+				html += `<div class="cli-lettera" data-l="${escapeHtml(l)}">${escapeHtml(l)}</div>`;
+			}
+			const str = isStruttura(c), equo = vetSuEquo(c);
+			const suoi = perCliente[c.id] || [];
+			let sotto;
+			if (str) {
+				const qui = typeof cavalliQuiStanno === "function" ? cavalliQuiStanno(c.id).length : 0;
+				const n = suoi.length + qui;
+				sotto = [
+					"Scuderia",
+					n ? `${n} ${n === 1 ? "cavallo" : "cavalli"}` : "",
+					equo ? "su Equo" : "non ancora su Equo"
+				];
+			} else {
+				const nomi = suoi.length ? suoi.map((x) => x.nome) : typeof nomiCavalliCliente === "function" ? nomiCavalliCliente(c) : [];
+				const dove = suoi.find((x) => x.ubicazione_tipo === "scuderia" && x.ubicazione_cliente_id);
+				const posto = dove ? clienteDiId(dove.ubicazione_cliente_id)?.nome || dove.ubicazione_nome || "" : "";
+				sotto = [nomi.slice(0, 3).join(", ") + (nomi.length > 3 ? "…" : ""), posto || (equo ? "" : "non ancora su Equo")];
+			}
+			const deve = crediti[c.id] || 0;
+			const dx = deve > 0 ? `<span class="vt-cli-deve">${escapeHtml(formatEuro(deve))}</span>` : !equo ? `<span class="vt-cli-invita">Invita</span>` : `<span class="vt-cli-ok">in regola</span>`;
+			const cerca = [typeof paroleCercaCliente === "function" ? paroleCercaCliente(c) : "", ...suoi.map((x) => [
+				x.nome,
+				x.microchip,
+				x.codice_equo
+			].filter(Boolean).join(" "))].join(" ");
+			html += `<div class="cli-riga vt-cli" data-cerca="${escapeHtml(cerca)}" onclick="openClienteDetail('${c.id}')">
+      <span class="cli-av vt-av ${str ? "str" : equo ? "equo" : "no"}">${escapeHtml(vetSigla(c.nome))}</span>
+      <span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(sotto.filter(Boolean).join(" · "))}</span></span>
+      ${dx}</div>`;
+		});
+		if (!lista.length) html = `<div class="cli-vuoto cerca-ignora">${vetCliFiltro === "crediti" ? "Nessun cliente ti deve qualcosa: tutti in regola." : "Nessun cliente qui."}</div>`;
+		box.innerHTML = html + (lettere.length > 4 ? `<div class="vt-indice cerca-ignora">${lettere.map((l) => `<button onclick="event.stopPropagation();vetVaiLettera('${escapeHtml(l)}')">${escapeHtml(l)}</button>`).join("")}</div>` : "");
+		const arch = (clientiMascalcia || []).filter((c) => c.archiviato_il);
+		document.getElementById("clienti-archiviati-box").innerHTML = arch.length ? `<details class="clienti-archiviati" style="margin-top:14px">
+      <summary class="clienti-sez-title" style="cursor:pointer;padding:6px 0">ARCHIVIATI (${arch.length})</summary>
+      <div class="cli-lista" style="opacity:.72">${arch.map((c) => `<div class="cli-riga" onclick="openClienteDetail('${c.id}')"><span class="cli-av vt-av no">${escapeHtml(vetSigla(c.nome))}</span><span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(c.nome_cavallo || "")}</span></span><span class="cli-dx">›</span></div>`).join("")}</div></details>` : "";
+	}
+	// equo-app-src/src/ruoli/veterinario/moduli/05-messaggi.js
+	var VM_MATITA = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z\"/></svg>";
+	function vmCavalliDi(clienteId) {
+		const nomi = (typeof cavalliCartella === "function" ? cavalliCartella() : []).filter((c) => c.cliente_mascalcia_id === clienteId || c.ubicazione_cliente_id === clienteId).map((c) => c.nome).filter(Boolean);
+		return [...new Set(nomi)];
+	}
+	function vmUrgente(clienteId) {
+		return (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).some((e) => e.cliente_mascalcia_id === clienteId && e.tipo_ferratura === "urgenza" && e.stato !== "fatto");
+	}
+	function vmSigla(nome) {
+		const p = String(nome || "?").trim().split(/\s+/).filter(Boolean);
+		return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : "")).toUpperCase();
+	}
+	function vmDecora() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		document.querySelectorAll("#inbox-list .inbox-item, #inbox-strutture-list .inbox-item").forEach((it) => {
+			if (it.dataset.vt) return;
+			const m = (it.getAttribute("onclick") || "").match(/'([0-9a-zA-Z-]+)'\)\s*$/);
+			const id = m ? m[1] : null;
+			it.dataset.vt = "1";
+			if (!id) return;
+			const urg = vmUrgente(id), cav = vmCavalliDi(id).slice(0, 3);
+			const nome = (it.querySelector(".inbox-name")?.textContent || "").split(" · ")[0];
+			const av = it.querySelector(".horse-avatar");
+			if (av) {
+				av.innerHTML = escapeHtml(vmSigla(nome));
+				av.classList.add("vt-av", urg ? "urg" : it.closest("#inbox-strutture-list") ? "str" : "equo");
+			}
+			it.classList.toggle("vt-urg", urg);
+			const corpo = it.querySelector(".inbox-preview")?.parentElement;
+			if (corpo && (urg || cav.length)) {
+				const r = document.createElement("div");
+				r.className = "vt-chips";
+				r.innerHTML = (urg ? "<span class=\"vt-chip urg\">Urgente</span>" : "") + cav.map((n) => `<span class="vt-chip">${escapeHtml(n)}</span>`).join("");
+				corpo.appendChild(r);
+			}
+		});
+		vmFiltra();
+	}
+	function vmTesta() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		const pag = document.getElementById("page-pro-inbox");
+		if (!pag || pag.querySelector(".vt-msg-testa")) return;
+		const tit = pag.querySelector(":scope > .section-title");
+		const testa = document.createElement("div");
+		testa.className = "vt-msg-testa";
+		testa.innerHTML = `<button class="vt-matita" onclick="vmNuovoMessaggio()" aria-label="Nuovo messaggio">${VM_MATITA}</button>`;
+		if (tit) tit.after(testa);
+		const cerca = document.createElement("div");
+		cerca.className = "vt-msg-cerca";
+		cerca.innerHTML = "<input type=\"search\" id=\"vt-msg-cerca\" placeholder=\"Cerca persona o cavallo\" oninput=\"vmFiltra()\" autocomplete=\"off\">";
+		testa.after(cerca);
+	}
+	function vmFiltra() {
+		const q = (document.getElementById("vt-msg-cerca")?.value || "").trim().toLowerCase();
+		document.querySelectorAll("#page-pro-inbox .inbox-item").forEach((it) => {
+			it.style.display = !q || it.textContent.toLowerCase().includes(q) ? "" : "none";
+		});
+	}
+	function vmNuovoMessaggio() {
+		const lista = (typeof clientiAttivi === "function" ? clientiAttivi() : []).filter((c) => c.cliente_user_id || c.collegamento_stato === "attivo").sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		const corpo = lista.length ? lista.map((c) => `<button class="hm-tappa" onclick="hmChiudi();openChatThread('${c.id}')"><span class="o">${escapeHtml(vmSigla(c.nome))}</span>
+      <span class="c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(vmCavalliDi(c.id).slice(0, 3).join(", "))}</span></span></button>`).join("") : "<div class=\"muted\" style=\"font-size:13.5px;padding:8px 0\">Nessun cliente su Equo: invitali dalla pagina Clienti.</div>";
+		hmFoglio("Nuovo messaggio", "Scegli a chi scrivere: clienti e scuderie che usano Equo", corpo);
+	}
+	var vmOss = null;
+	quandoApriPagina(function(p) {
+		if (p !== "pro-inbox" || typeof eVeterinario !== "function" || !eVeterinario()) return;
+		vmTesta();
+		vmDecora();
+		if (!vmOss && typeof MutationObserver === "function") {
+			vmOss = new MutationObserver(() => vmDecora());
+			["inbox-list", "inbox-strutture-list"].forEach((id) => {
+				const el = document.getElementById(id);
+				if (el) vmOss.observe(el, { childList: true });
+			});
+		}
+	});
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
 		vhGiornata,
 		vhDetta,
 		vhMeteo,
-		vdPrepara
+		vdPrepara,
+		vetEtichettaGruppo,
+		vetTestiAgenda,
+		vetRenderClienti,
+		vetFiltroClienti,
+		vetVaiLettera,
+		vmDecora,
+		vmFiltra,
+		vmNuovoMessaggio
 	});
 })();
 

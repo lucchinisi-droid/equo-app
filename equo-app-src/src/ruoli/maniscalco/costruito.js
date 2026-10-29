@@ -6194,6 +6194,7 @@
       </div>`;
 	}
 	function agendaCompleta() {
+		if (typeof eVeterinario === "function" && eVeterinario()) return true;
 		try {
 			return localStorage.getItem("equo-agenda-vista") === "completa";
 		} catch (e) {
@@ -6206,7 +6207,7 @@
 		const daFare = agDaFare(d).length, sc = agScadGiorno(d).length, fatti = d.ev.length - daFare, aperto = agGiorniAperti.has(d.iso);
 		const riposo = d.k === 6 && !d.ev.length;
 		return `<button type="button" class="ag-tile${d.oggi ? " today" : ""}${aperto ? " aperto" : ""}${d.k === 6 ? " dom" : ""}${riposo ? " riposo" : ""}" data-iso="${d.iso}" aria-expanded="${aperto}" onclick="toggleGiornoAgenda('${d.iso}')">
-      <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}</span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
+      <span class="ag-tile-gg"><span class="ag-tile-nome">${AG_GIORNI[d.k]}</span><span class="ag-tile-data">${d.g.getDate()} <span class="ag-mese">${AG_MESI[d.g.getMonth()]}</span></span>${d.oggi ? "<span class=\"ag-tile-oggi\">oggi</span>" : ""}</span>
       ${sc ? `<span class="ag-scad" role="button" tabindex="0" aria-label="${sc} ${sc === 1 ? "cavallo da fissare" : "cavalli da fissare"}" onclick="event.stopPropagation();apriDaFissare('${d.iso}')">${sc}<span aria-hidden="true">⚠</span></span>` : ""}
       ${fatti && agendaCompleta() ? `<span class="ag-fatti">✓ ${fatti}</span>` : ""}
       ${(d.pm || []).some((p) => p.stato === "attivo") ? `<span class="ag-pm" title="Promemoria">🔔${(d.pm || []).filter((p) => p.stato === "attivo").length}</span>` : ""}
@@ -6221,10 +6222,12 @@
 				gruppi.set(l.key, {
 					nome: l.nome,
 					l,
-					righe: []
+					righe: [],
+					ev: []
 				});
 				agLuoghi[l.key] = l;
 			}
+			gruppi.get(l.key).ev.push(x);
 			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "" : "";
 			gruppi.get(l.key).righe.push(riga(x, di));
 		};
@@ -6241,15 +6244,19 @@
 			"Sabato",
 			"Domenica"
 		][d.k];
-		const corpo = [...gruppi.entries()].map(([k, gr]) => `
-      <div class="ag-gblock" data-cli="${escapeHtml(k)}">
-        <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span><span>${gr.righe.length}</span>
+		const etichetta = (gr) => typeof vetEtichettaGruppo === "function" && typeof eVeterinario === "function" && eVeterinario() ? vetEtichettaGruppo(gr.ev, gr.l) : null;
+		const corpo = [...gruppi.entries()].map(([k, gr]) => {
+			const et = etichetta(gr);
+			return `
+      <div class="ag-gblock${et && et.cls ? " " + et.cls : ""}" data-cli="${escapeHtml(k)}">
+        <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span>${et ? et.html : `<span>${gr.righe.length}</span>`}
           <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some((e) => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
         <div class="ag-gr">${gr.righe.join("")}</div>
-      </div>`).join("");
+      </div>`;
+		}).join("");
 		return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>
-        <span>${nCli ? `${nCli} ${nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
+        <span>${nCli ? `${nCli} ${eVeterinario() ? nCli === 1 ? "posto" : "posti" : nCli === 1 ? "tappa" : "tappe"} · ${cavalli} ${cavalli === 1 ? "cavallo" : "cavalli"}` : ""}</span></div>
       ${pmPannelloGiorno(d.pm)}
       <div class="ag-gruppi">${corpo || `<div class="ag-empty">${d.k === 6 ? "Domenica: riposo" : "Nessun appuntamento"}</div>`}</div>
       ${scad.length ? `<button type="button" class="ag-dafissare" onclick="apriDaFissare('${d.iso}')"><span>⚠</span>${scad.length} ${scad.length === 1 ? "cavallo da fissare" : "cavalli da fissare"} in questo giorno<b>Vedi</b></button>` : ""}
@@ -6261,7 +6268,15 @@
 		const box = document.getElementById("ag-week");
 		if (!box || !agGiorniDati.length) return;
 		let html = "";
-		for (const coppia of [
+		for (const coppia of typeof eVeterinario === "function" && eVeterinario() ? [[
+			0,
+			1,
+			2,
+			3,
+			4,
+			5,
+			6
+		]] : [
 			[0, 1],
 			[2, 3],
 			[4, 5],
@@ -12110,6 +12125,7 @@
 	function renderClientiList() {
 		const box = document.getElementById("clienti-list");
 		if (!box) return;
+		if (typeof eVeterinario === "function" && eVeterinario() && typeof vetRenderClienti === "function") return vetRenderClienti(box);
 		const attivi = clientiAttivi();
 		const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
 		const proprietari = attivi.filter((c) => !isStruttura(c)).sort(alfabetico);
@@ -15390,6 +15406,9 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		cavalliQuiStanno,
+		cavalliCartella,
+		pagResiduo,
 		ofStimaKm,
 		agDescrizioneTipo,
 		creaCavalloUnico,

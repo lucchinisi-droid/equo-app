@@ -40,6 +40,8 @@ function sceltaCartellaClienti(k){
 function renderClientiList(){
   const box = document.getElementById("clienti-list");
   if(!box) return;
+  // 29/10/2026: il veterinario vede un solo elenco A–Z con i filtri (mockup Clienti 1 · Elenco), stessi dati e stesse schede
+  if(typeof eVeterinario === "function" && eVeterinario() && typeof vetRenderClienti === "function") return vetRenderClienti(box);
   const attivi = clientiAttivi();
   const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
   const proprietari = attivi.filter(c => !isStruttura(c)).sort(alfabetico);

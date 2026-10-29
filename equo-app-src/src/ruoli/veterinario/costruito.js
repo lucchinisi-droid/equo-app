@@ -363,13 +363,241 @@
 	quandoAggiornaBarra(function() {
 		vdPrepara();
 	});
+	// equo-app-src/src/ruoli/veterinario/moduli/03-agenda.js
+	function vetEtichettaGruppo(ev, luogo) {
+		const tipi = new Set((ev || []).map((e) => e.tipo_ferratura));
+		const nCav = new Set((ev || []).map((e) => e.cavallo_cliente_id || e.horse_id || e.id)).size;
+		if (tipi.has("urgenza")) return {
+			cls: "vt-urg",
+			html: "<span class=\"vt-b urg\">Urgente</span>"
+		};
+		const mf = [tipi.has("mtc") ? "MTC" : "", tipi.has("fisio") ? "Fisio" : ""].filter(Boolean);
+		if (mf.length) return {
+			cls: "",
+			html: `<span class="vt-b tif">${mf.join(" · ")}</span>`
+		};
+		if ((ev || []).length && ev.every((e) => {
+			const c = typeof clienteDiId === "function" ? clienteDiId(e.cliente_mascalcia_id) : null;
+			return c && c.tipo_cliente === "struttura";
+		}) && luogo && luogo.scuderia) return {
+			cls: "",
+			html: "<span class=\"vt-b testo\">paga la scuderia</span>"
+		};
+		return {
+			cls: "",
+			html: `<span class="vt-b testo">${nCav} ${nCav === 1 ? "cavallo" : "cavalli"}</span>`
+		};
+	}
+	function vetTestiAgenda() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		const s = document.querySelector("#ag-schede [data-s=\"prog\"] span");
+		if (s && s.textContent !== "Da fissare") s.textContent = "Da fissare";
+		const t = document.getElementById("pro-agenda-title");
+		if (t && t.textContent !== "Agenda") t.textContent = "Agenda";
+	}
+	quandoApriPagina(function(p) {
+		if (p === "pro-agenda") vetTestiAgenda();
+	});
+	// equo-app-src/src/ruoli/veterinario/moduli/04-clienti.js
+	var vetCliFiltro = (() => {
+		try {
+			return localStorage.getItem("equo-vet-cli-filtro") || "tutti";
+		} catch (e) {
+			return "tutti";
+		}
+	})();
+	function vetSuEquo(c) {
+		return !!(c.cliente_user_id || c.collegamento_stato === "attivo");
+	}
+	function vetSigla(nome) {
+		const p = String(nome || "?").trim().split(/\s+/).filter(Boolean);
+		return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : (p[0] || "").charAt(1) || "")).toUpperCase();
+	}
+	function vetCrediti() {
+		const out = {};
+		(typeof cliInterventi !== "undefined" ? cliInterventi : []).forEach((i) => {
+			if (i.stato !== "fatto" || i.stato_pagamento !== "da_saldare") return;
+			const resto = typeof pagResiduo === "function" ? pagResiduo(i) : Number(i.importo) || 0;
+			if (resto > 0) out[i.cliente_mascalcia_id] = (out[i.cliente_mascalcia_id] || 0) + resto;
+		});
+		return out;
+	}
+	function vetFiltroClienti(k) {
+		vetCliFiltro = k;
+		try {
+			localStorage.setItem("equo-vet-cli-filtro", k);
+		} catch (e) {}
+		const box = document.getElementById("clienti-list");
+		if (box) vetRenderClienti(box);
+	}
+	function vetVaiLettera(l) {
+		const el = document.querySelector(`#clienti-list .cli-lettera[data-l="${l}"]`);
+		if (el) el.scrollIntoView({
+			behavior: "smooth",
+			block: "start"
+		});
+	}
+	function vetRenderClienti(box) {
+		const attivi = clientiAttivi();
+		const crediti = vetCrediti();
+		const cavalli = typeof cavalliCartella === "function" ? cavalliCartella() : [];
+		const perCliente = {};
+		cavalli.forEach((cv) => {
+			(perCliente[cv.cliente_mascalcia_id] = perCliente[cv.cliente_mascalcia_id] || []).push(cv);
+		});
+		const filtri = [
+			["tutti", "Tutti"],
+			["privati", "Privati"],
+			["scuderie", "Scuderie"],
+			["crediti", "Crediti"]
+		];
+		if (!filtri.some((f) => f[0] === vetCliFiltro)) vetCliFiltro = "tutti";
+		document.getElementById("cli-cartelle").innerHTML = filtri.map(([k, t]) => `<button role="tab" aria-selected="${vetCliFiltro === k}" class="${vetCliFiltro === k ? "on" : ""}" onclick="vetFiltroClienti('${k}')">${t}</button>`).join("");
+		const nCli = attivi.length;
+		document.getElementById("cli-cartella-sotto").innerHTML = `<span>${nCli} ${nCli === 1 ? "cliente" : "clienti"} · ${cavalli.length} ${cavalli.length === 1 ? "cavallo" : "cavalli"}</span><button class="vt-cli-nuovo" onclick="apriNuovoCliente('proprietario')">+ Cliente</button>`;
+		const collega = document.getElementById("cli-collega-btn");
+		if (collega) collega.style.display = "none";
+		const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
+		if (f) f.inp.placeholder = "Nome, cavallo, microchip";
+		const lista = attivi.filter((c) => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		let html = "", lettera = "";
+		const lettere = [];
+		lista.forEach((c) => {
+			const l = (c.nome || "?").trim().charAt(0).toUpperCase();
+			if (l !== lettera) {
+				lettera = l;
+				lettere.push(l);
+				html += `<div class="cli-lettera" data-l="${escapeHtml(l)}">${escapeHtml(l)}</div>`;
+			}
+			const str = isStruttura(c), equo = vetSuEquo(c);
+			const suoi = perCliente[c.id] || [];
+			let sotto;
+			if (str) {
+				const qui = typeof cavalliQuiStanno === "function" ? cavalliQuiStanno(c.id).length : 0;
+				const n = suoi.length + qui;
+				sotto = [
+					"Scuderia",
+					n ? `${n} ${n === 1 ? "cavallo" : "cavalli"}` : "",
+					equo ? "su Equo" : "non ancora su Equo"
+				];
+			} else {
+				const nomi = suoi.length ? suoi.map((x) => x.nome) : typeof nomiCavalliCliente === "function" ? nomiCavalliCliente(c) : [];
+				const dove = suoi.find((x) => x.ubicazione_tipo === "scuderia" && x.ubicazione_cliente_id);
+				const posto = dove ? clienteDiId(dove.ubicazione_cliente_id)?.nome || dove.ubicazione_nome || "" : "";
+				sotto = [nomi.slice(0, 3).join(", ") + (nomi.length > 3 ? "…" : ""), posto || (equo ? "" : "non ancora su Equo")];
+			}
+			const deve = crediti[c.id] || 0;
+			const dx = deve > 0 ? `<span class="vt-cli-deve">${escapeHtml(formatEuro(deve))}</span>` : !equo ? `<span class="vt-cli-invita">Invita</span>` : `<span class="vt-cli-ok">in regola</span>`;
+			const cerca = [typeof paroleCercaCliente === "function" ? paroleCercaCliente(c) : "", ...suoi.map((x) => [
+				x.nome,
+				x.microchip,
+				x.codice_equo
+			].filter(Boolean).join(" "))].join(" ");
+			html += `<div class="cli-riga vt-cli" data-cerca="${escapeHtml(cerca)}" onclick="openClienteDetail('${c.id}')">
+      <span class="cli-av vt-av ${str ? "str" : equo ? "equo" : "no"}">${escapeHtml(vetSigla(c.nome))}</span>
+      <span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(sotto.filter(Boolean).join(" · "))}</span></span>
+      ${dx}</div>`;
+		});
+		if (!lista.length) html = `<div class="cli-vuoto cerca-ignora">${vetCliFiltro === "crediti" ? "Nessun cliente ti deve qualcosa: tutti in regola." : "Nessun cliente qui."}</div>`;
+		box.innerHTML = html + (lettere.length > 4 ? `<div class="vt-indice cerca-ignora">${lettere.map((l) => `<button onclick="event.stopPropagation();vetVaiLettera('${escapeHtml(l)}')">${escapeHtml(l)}</button>`).join("")}</div>` : "");
+		const arch = (clientiMascalcia || []).filter((c) => c.archiviato_il);
+		document.getElementById("clienti-archiviati-box").innerHTML = arch.length ? `<details class="clienti-archiviati" style="margin-top:14px">
+      <summary class="clienti-sez-title" style="cursor:pointer;padding:6px 0">ARCHIVIATI (${arch.length})</summary>
+      <div class="cli-lista" style="opacity:.72">${arch.map((c) => `<div class="cli-riga" onclick="openClienteDetail('${c.id}')"><span class="cli-av vt-av no">${escapeHtml(vetSigla(c.nome))}</span><span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(c.nome_cavallo || "")}</span></span><span class="cli-dx">›</span></div>`).join("")}</div></details>` : "";
+	}
+	// equo-app-src/src/ruoli/veterinario/moduli/05-messaggi.js
+	var VM_MATITA = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z\"/></svg>";
+	function vmCavalliDi(clienteId) {
+		const nomi = (typeof cavalliCartella === "function" ? cavalliCartella() : []).filter((c) => c.cliente_mascalcia_id === clienteId || c.ubicazione_cliente_id === clienteId).map((c) => c.nome).filter(Boolean);
+		return [...new Set(nomi)];
+	}
+	function vmUrgente(clienteId) {
+		return (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).some((e) => e.cliente_mascalcia_id === clienteId && e.tipo_ferratura === "urgenza" && e.stato !== "fatto");
+	}
+	function vmSigla(nome) {
+		const p = String(nome || "?").trim().split(/\s+/).filter(Boolean);
+		return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : "")).toUpperCase();
+	}
+	function vmDecora() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		document.querySelectorAll("#inbox-list .inbox-item, #inbox-strutture-list .inbox-item").forEach((it) => {
+			if (it.dataset.vt) return;
+			const m = (it.getAttribute("onclick") || "").match(/'([0-9a-zA-Z-]+)'\)\s*$/);
+			const id = m ? m[1] : null;
+			it.dataset.vt = "1";
+			if (!id) return;
+			const urg = vmUrgente(id), cav = vmCavalliDi(id).slice(0, 3);
+			const nome = (it.querySelector(".inbox-name")?.textContent || "").split(" · ")[0];
+			const av = it.querySelector(".horse-avatar");
+			if (av) {
+				av.innerHTML = escapeHtml(vmSigla(nome));
+				av.classList.add("vt-av", urg ? "urg" : it.closest("#inbox-strutture-list") ? "str" : "equo");
+			}
+			it.classList.toggle("vt-urg", urg);
+			const corpo = it.querySelector(".inbox-preview")?.parentElement;
+			if (corpo && (urg || cav.length)) {
+				const r = document.createElement("div");
+				r.className = "vt-chips";
+				r.innerHTML = (urg ? "<span class=\"vt-chip urg\">Urgente</span>" : "") + cav.map((n) => `<span class="vt-chip">${escapeHtml(n)}</span>`).join("");
+				corpo.appendChild(r);
+			}
+		});
+		vmFiltra();
+	}
+	function vmTesta() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		const pag = document.getElementById("page-pro-inbox");
+		if (!pag || pag.querySelector(".vt-msg-testa")) return;
+		const tit = pag.querySelector(":scope > .section-title");
+		const testa = document.createElement("div");
+		testa.className = "vt-msg-testa";
+		testa.innerHTML = `<button class="vt-matita" onclick="vmNuovoMessaggio()" aria-label="Nuovo messaggio">${VM_MATITA}</button>`;
+		if (tit) tit.after(testa);
+		const cerca = document.createElement("div");
+		cerca.className = "vt-msg-cerca";
+		cerca.innerHTML = "<input type=\"search\" id=\"vt-msg-cerca\" placeholder=\"Cerca persona o cavallo\" oninput=\"vmFiltra()\" autocomplete=\"off\">";
+		testa.after(cerca);
+	}
+	function vmFiltra() {
+		const q = (document.getElementById("vt-msg-cerca")?.value || "").trim().toLowerCase();
+		document.querySelectorAll("#page-pro-inbox .inbox-item").forEach((it) => {
+			it.style.display = !q || it.textContent.toLowerCase().includes(q) ? "" : "none";
+		});
+	}
+	function vmNuovoMessaggio() {
+		const lista = (typeof clientiAttivi === "function" ? clientiAttivi() : []).filter((c) => c.cliente_user_id || c.collegamento_stato === "attivo").sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		const corpo = lista.length ? lista.map((c) => `<button class="hm-tappa" onclick="hmChiudi();openChatThread('${c.id}')"><span class="o">${escapeHtml(vmSigla(c.nome))}</span>
+      <span class="c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(vmCavalliDi(c.id).slice(0, 3).join(", "))}</span></span></button>`).join("") : "<div class=\"muted\" style=\"font-size:13.5px;padding:8px 0\">Nessun cliente su Equo: invitali dalla pagina Clienti.</div>";
+		hmFoglio("Nuovo messaggio", "Scegli a chi scrivere: clienti e scuderie che usano Equo", corpo);
+	}
+	var vmOss = null;
+	quandoApriPagina(function(p) {
+		if (p !== "pro-inbox" || typeof eVeterinario !== "function" || !eVeterinario()) return;
+		vmTesta();
+		vmDecora();
+		if (!vmOss && typeof MutationObserver === "function") {
+			vmOss = new MutationObserver(() => vmDecora());
+			["inbox-list", "inbox-strutture-list"].forEach((id) => {
+				const el = document.getElementById(id);
+				if (el) vmOss.observe(el, { childList: true });
+			});
+		}
+	});
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
 		vhGiornata,
 		vhDetta,
 		vhMeteo,
-		vdPrepara
+		vdPrepara,
+		vetEtichettaGruppo,
+		vetTestiAgenda,
+		vetRenderClienti,
+		vetFiltroClienti,
+		vetVaiLettera,
+		vmDecora,
+		vmFiltra,
+		vmNuovoMessaggio
 	});
 })();
 

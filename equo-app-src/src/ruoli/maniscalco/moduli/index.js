@@ -1,11 +1,11 @@
 // Ingresso dei moduli del maniscalco: l'ordine e quello originale dei file.
 import "./031-mascalcia-clienti-interventi-del-profess.js";
 import { caricaRichiamiPredefiniti, clientiAttivi, giorniRichiamoSuggeriti, giorniTra, importiSuggeriti, loadClientiMascalcia, richiamoCambia, richiamoConferma, richiamoFerriN, richiamoFerriRender, richiamoPagamento, richiamoRuotaScroll, richiamoTotale, richiamoVaiA, salvaRichiamiPredefiniti } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
-import { apriCavalloDaCartella, apriNuovoCavalloCartella, isStruttura, isStrutturaCollegata, ncavClienteCambiato, salvaNuovoCavalloCartella, sceltaCartellaClienti } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
+import { cavalliCartella, apriCavalloDaCartella, apriNuovoCavalloCartella, isStruttura, isStrutturaCollegata, ncavClienteCambiato, salvaNuovoCavalloCartella, sceltaCartellaClienti } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { aggiornaEtichetteNuovoCliente, apriCollegaStruttura, apriFerroCavallo, apriNuovoCliente, apriRazzaCavallo, confermaScollegaStruttura, creaCavalliDaTesto, createClienteMascalcia, inviaRichiestaStruttura, mostraLimiteClienti, openClienteDetail, openEditCliente, rispondiInvitoStruttura, salvaFerroCavallo, salvaRazzaCavallo, scollegaStrutturaCorrente, toggleQrCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferLavoro, ferMisura, ferSistema, ferStatoSistema, ferTipo, impostaMisuraPredefinita, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 import { confermaArchiviaCliente, deleteCurrentCliente, mostraSpostaCavalli, spostaCavalliCliente } from "./036-archivia-elimina-cliente.js";
-import { loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { cavalliQuiStanno, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
 import { aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderBoxCavalliCliente, renderCorpoCavalloPro, renderTabCavalloPro, unisciSimili } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { razzaImposta, razzaSegnala, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { hpGiornoEtichetta, renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
@@ -54,7 +54,7 @@ import { lcCambio, lcOrdina, lcUrgenti } from "./118-lista-cavalli-scadenze.js";
 import { creaCavalloUnico, creaClienteUnico, onbScansionaCavallo, onbSollecita } from "./116-onboarding.js";
 import { avvisaNuovoSeCollegato, clientePaganteCavallo, prossimaAutomatica, segnaFatto } from "./117-segna-fatto.js";
 import { tcChiudi, tcImpostaLettura, tcLettura, tcNaviga, tcRiepilogo, tcSalvaCasaQui, tcSalvaMattina, tcScegliKm, tcTornaACasa } from "./114-torna-a-casa.js";
-import { pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
+import { pagResiduo, pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
 import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 import { cicloCambia, cicloTogli, fissaProssimoGiro } from "./102-scadenze-della-struttura.js";
 import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } from "./101-importazione-vecchia-app.js";
@@ -62,6 +62,9 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  cavalliQuiStanno,
+  cavalliCartella,
+  pagResiduo,
   ofStimaKm,
   agDescrizioneTipo,
   creaCavalloUnico,
