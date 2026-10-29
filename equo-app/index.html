@@ -1019,6 +1019,16 @@ select.input{cursor:pointer}
 .role-card-title{font-weight:700;font-size:14.5px}
 .role-card-desc{font-size:12px;color:var(--muted);margin-top:2px}
 
+/* codice di prova veterinario nel modulo «Equo per veterinari» (29/10/2026) */
+.cand-codice{background:var(--surface-2,rgba(0,0,0,.03));border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px}
+.cand-codice-t{display:flex;flex-direction:column;font-size:13px;line-height:1.4;margin-bottom:8px}
+.cand-codice-t span{color:var(--muted);font-size:12.5px}
+.cand-codice-riga{display:flex;gap:8px}
+.cand-codice-riga .input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.06em}
+.cand-codice-riga .btn{flex:0 0 auto;padding-left:18px;padding-right:18px}
+.cand-codice-chiedi{background:none;border:0;padding:8px 0 0;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline}
+.cand-codice-o{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px;text-transform:uppercase;letter-spacing:.06em}
+#cand-codice-box .auth-error{margin-top:8px}
 /* APP SHELL */
 #screen-app{background:var(--bg)}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
@@ -3817,7 +3827,7 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
       </button>
       <button class="role-card" onclick="apriCandidatura('veterinario','app_primo_accesso')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
-        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">Entra con il codice di prova o candidati</div></div>
       </button>
       <button class="role-card" onclick="chooseMainRole('istruttore')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
@@ -5696,7 +5706,7 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
       </button>
       <button class="role-card" onclick="closeModal('modal-add-pro-role');apriCandidatura('veterinario','app_aggiungi_profilo')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-stethoscope"></i></span></div>
-        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">In costruzione: candidati per progettarla con noi</div></div>
+        <div><div class="role-card-title">Veterinario</div><div class="role-card-desc">Entra con il codice di prova o candidati</div></div>
       </button>
       <button class="role-card" onclick="confirmAddSecondaryRole('istruttore')">
         <div class="role-card-icon"><span class="fa-icon"><i class="fa-solid fa-graduation-cap"></i></span></div>
@@ -5712,6 +5722,17 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
     <div id="cand-form">
       <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-stethoscope" id="cand-ico"></i></span><span id="cand-titolo">Veterinari e trainer</span></div>
       <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Stiamo costruendo gli strumenti di Equo per veterinari e istruttori. Lasciaci i tuoi contatti: ti ricontattiamo per progettarli insieme e darti l'accesso in anteprima.</div>
+      <!-- 29/10/2026: con un codice di prova il veterinario entra subito (SQL 27, equo_attiva_codice_prova) -->
+      <div class="cand-codice" id="cand-codice-box">
+        <div class="cand-codice-t"><b>Hai un codice di prova?</b><span>Entri subito nell'app per veterinari.</span></div>
+        <div class="cand-codice-riga">
+          <input class="input" id="cand-codice" maxlength="40" autocapitalize="characters" autocomplete="off" placeholder="es. GALENO26" onkeydown="if(event.key==='Enter')attivaCodiceProva()">
+          <button class="btn btn-primary" id="cand-codice-btn" onclick="attivaCodiceProva()">Entra</button>
+        </div>
+        <div class="auth-error" id="cand-codice-error" style="display:none"></div>
+        <button type="button" class="cand-codice-chiedi" onclick="chiediCodiceProva()">Non hai il codice? Chiedicelo via email</button>
+        <div class="cand-codice-o">oppure lasciaci i tuoi contatti</div>
+      </div>
       <div class="auth-form" style="max-width:none">
         <div class="input-group"><label class="input-label">Professione *</label>
           <select class="input" id="cand-professione" onchange="aggiornaCandidatura()"><option value="veterinario">Veterinario</option><option value="istruttore">Istruttore o trainer</option></select></div>
@@ -23995,12 +24016,14 @@ function aggiornaCandidatura(){
   const vet = document.getElementById("cand-professione").value === "veterinario";
   document.getElementById("cand-titolo").textContent = vet ? "Equo per veterinari" : "Equo per istruttori e trainer";
   document.getElementById("cand-ico").className = vet ? "fa-solid fa-stethoscope" : "fa-solid fa-graduation-cap";
+  const box = document.getElementById("cand-codice-box"); if(box) box.style.display = vet ? "" : "none";
 }
 function apriCandidatura(professione, origine){
   candOrigine = origine || "app_primo_accesso";
   document.getElementById("cand-professione").value = professione === "istruttore" ? "istruttore" : "veterinario";
   aggiornaCandidatura();
-  ["cand-telefono","cand-citta","cand-provincia","cand-spec","cand-msg"].forEach(id => document.getElementById(id).value = "");
+  ["cand-telefono","cand-citta","cand-provincia","cand-spec","cand-msg","cand-codice"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  { const e = document.getElementById("cand-codice-error"); if(e) e.style.display = "none"; }
   document.getElementById("cand-nome").value = currentUser?.fullName || "";
   document.getElementById("cand-email").value = currentUser?.email || "";
   // al primo accesso, se ha già accettato termini e privacy nella schermata, la casella è già spuntata
@@ -24038,6 +24061,51 @@ async function inviaCandidatura(){
     : "Ti ricontattiamo presto all'email o al telefono che ci hai lasciato.";
 }
 
+
+/* ---------- CODICE DI PROVA (29/10/2026): il veterinario entra subito con un codice (SQL 27) ---------- */
+const CODICE_PROVA_ERRORI = {
+  codice_non_valido: "Codice non valido: controlla di averlo scritto bene.",
+  codice_scaduto: "Questo codice è scaduto: chiedicene uno nuovo.",
+  codice_esaurito: "Questo codice è già stato usato: chiedicene uno nuovo.",
+  altra_professione: "Il tuo account ha già un'altra professione: per casi particolari scrivici.",
+  profilo_struttura: "Il profilo struttura non si combina con altri profili.",
+  consenso: "Prima accetta i Termini e l'Informativa Privacy: chiudi questa finestra, spunta la casella nella schermata e riprova.",
+  non_autenticato: "Accedi di nuovo e riprova."
+};
+async function attivaCodiceProva(){
+  const inp = document.getElementById("cand-codice"), err = document.getElementById("cand-codice-error"), btn = document.getElementById("cand-codice-btn");
+  const errore = t => { err.textContent = t; err.style.display = "block"; };
+  err.style.display = "none";
+  const codice = (inp.value || "").replace(/\s/g, "").toUpperCase();
+  if(codice.length < 4) return errore("Scrivi il codice che ti abbiamo mandato.");
+  const consenso = !!document.getElementById("onb-consent")?.checked || !!currentUser?.consensoTerminiPrivacy;
+  let res = { ok: true, campo: candOrigine === "app_primo_accesso" ? "ruolo" : "ruolo_secondario" };
+  btn.disabled = true;
+  if(!DEMO_MODE){
+    const { data, error } = await sb.rpc("equo_attiva_codice_prova", { p_codice: codice, p_consenso: consenso });
+    res = error ? { ok: false, errore: "rete", msg: error.message } : data;
+  }
+  btn.disabled = false;
+  if(!res || !res.ok){
+    return errore(CODICE_PROVA_ERRORI[res?.errore] || "Non sono riuscito a controllare il codice, riprova.");
+  }
+  if(res.campo === "ruolo") currentUser.ruolo = "veterinario"; else currentUser.ruoloSecondario = "veterinario";
+  if(consenso && !currentUser.consensoTerminiPrivacy) currentUser.consensoTerminiPrivacy = new Date().toISOString();
+  closeModal("modal-candidatura");
+  closeModal("modal-menu");
+  document.getElementById("screen-onboarding")?.classList.remove("active");
+  showToast("Benvenuto in Equo Veterinario");
+  await enterApp("veterinario");
+}
+// email a Equo per chiedere il codice, con nome ed email già scritti
+function chiediCodiceProva(){
+  const nome = (document.getElementById("cand-nome")?.value || currentUser?.fullName || "").trim();
+  const email = (document.getElementById("cand-email")?.value || currentUser?.email || "").trim();
+  const oggetto = "Codice di prova Equo Veterinario";
+  const testo = "Ciao, sono un veterinario e vorrei provare Equo.\n\nNome e cognome: " + nome + "\nEmail dell'account: " + email
+    + "\nTelefono: \nCittà: \n\nGrazie!";
+  location.href = "mailto:gestione.equo@gmail.com?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(testo);
+}
 /* ---------- RICHIESTE DI CONTATTO (struttura al primo accesso / altro profilo) ---------- */
 function openRichiestaStruttura(){
   ["rs-nome","rs-via","rs-citta","rs-telefono"].forEach(id => document.getElementById(id).value = "");

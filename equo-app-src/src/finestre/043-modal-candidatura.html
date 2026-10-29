@@ -4,6 +4,17 @@
     <div id="cand-form">
       <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-stethoscope" id="cand-ico"></i></span><span id="cand-titolo">Veterinari e trainer</span></div>
       <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">Stiamo costruendo gli strumenti di Equo per veterinari e istruttori. Lasciaci i tuoi contatti: ti ricontattiamo per progettarli insieme e darti l'accesso in anteprima.</div>
+      <!-- 29/10/2026: con un codice di prova il veterinario entra subito (SQL 27, equo_attiva_codice_prova) -->
+      <div class="cand-codice" id="cand-codice-box">
+        <div class="cand-codice-t"><b>Hai un codice di prova?</b><span>Entri subito nell'app per veterinari.</span></div>
+        <div class="cand-codice-riga">
+          <input class="input" id="cand-codice" maxlength="40" autocapitalize="characters" autocomplete="off" placeholder="es. GALENO26" onkeydown="if(event.key==='Enter')attivaCodiceProva()">
+          <button class="btn btn-primary" id="cand-codice-btn" onclick="attivaCodiceProva()">Entra</button>
+        </div>
+        <div class="auth-error" id="cand-codice-error" style="display:none"></div>
+        <button type="button" class="cand-codice-chiedi" onclick="chiediCodiceProva()">Non hai il codice? Chiedicelo via email</button>
+        <div class="cand-codice-o">oppure lasciaci i tuoi contatti</div>
+      </div>
       <div class="auth-form" style="max-width:none">
         <div class="input-group"><label class="input-label">Professione *</label>
           <select class="input" id="cand-professione" onchange="aggiornaCandidatura()"><option value="veterinario">Veterinario</option><option value="istruttore">Istruttore o trainer</option></select></div>

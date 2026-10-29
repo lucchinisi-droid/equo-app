@@ -4,12 +4,14 @@ function aggiornaCandidatura(){
   const vet = document.getElementById("cand-professione").value === "veterinario";
   document.getElementById("cand-titolo").textContent = vet ? "Equo per veterinari" : "Equo per istruttori e trainer";
   document.getElementById("cand-ico").className = vet ? "fa-solid fa-stethoscope" : "fa-solid fa-graduation-cap";
+  const box = document.getElementById("cand-codice-box"); if(box) box.style.display = vet ? "" : "none";
 }
 function apriCandidatura(professione, origine){
   candOrigine = origine || "app_primo_accesso";
   document.getElementById("cand-professione").value = professione === "istruttore" ? "istruttore" : "veterinario";
   aggiornaCandidatura();
-  ["cand-telefono","cand-citta","cand-provincia","cand-spec","cand-msg"].forEach(id => document.getElementById(id).value = "");
+  ["cand-telefono","cand-citta","cand-provincia","cand-spec","cand-msg","cand-codice"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  { const e = document.getElementById("cand-codice-error"); if(e) e.style.display = "none"; }
   document.getElementById("cand-nome").value = currentUser?.fullName || "";
   document.getElementById("cand-email").value = currentUser?.email || "";
   // al primo accesso, se ha già accettato termini e privacy nella schermata, la casella è già spuntata
@@ -47,3 +49,48 @@ async function inviaCandidatura(){
     : "Ti ricontattiamo presto all'email o al telefono che ci hai lasciato.";
 }
 
+
+/* ---------- CODICE DI PROVA (29/10/2026): il veterinario entra subito con un codice (SQL 27) ---------- */
+const CODICE_PROVA_ERRORI = {
+  codice_non_valido: "Codice non valido: controlla di averlo scritto bene.",
+  codice_scaduto: "Questo codice è scaduto: chiedicene uno nuovo.",
+  codice_esaurito: "Questo codice è già stato usato: chiedicene uno nuovo.",
+  altra_professione: "Il tuo account ha già un'altra professione: per casi particolari scrivici.",
+  profilo_struttura: "Il profilo struttura non si combina con altri profili.",
+  consenso: "Prima accetta i Termini e l'Informativa Privacy: chiudi questa finestra, spunta la casella nella schermata e riprova.",
+  non_autenticato: "Accedi di nuovo e riprova."
+};
+async function attivaCodiceProva(){
+  const inp = document.getElementById("cand-codice"), err = document.getElementById("cand-codice-error"), btn = document.getElementById("cand-codice-btn");
+  const errore = t => { err.textContent = t; err.style.display = "block"; };
+  err.style.display = "none";
+  const codice = (inp.value || "").replace(/\s/g, "").toUpperCase();
+  if(codice.length < 4) return errore("Scrivi il codice che ti abbiamo mandato.");
+  const consenso = !!document.getElementById("onb-consent")?.checked || !!currentUser?.consensoTerminiPrivacy;
+  let res = { ok: true, campo: candOrigine === "app_primo_accesso" ? "ruolo" : "ruolo_secondario" };
+  btn.disabled = true;
+  if(!DEMO_MODE){
+    const { data, error } = await sb.rpc("equo_attiva_codice_prova", { p_codice: codice, p_consenso: consenso });
+    res = error ? { ok: false, errore: "rete", msg: error.message } : data;
+  }
+  btn.disabled = false;
+  if(!res || !res.ok){
+    return errore(CODICE_PROVA_ERRORI[res?.errore] || "Non sono riuscito a controllare il codice, riprova.");
+  }
+  if(res.campo === "ruolo") currentUser.ruolo = "veterinario"; else currentUser.ruoloSecondario = "veterinario";
+  if(consenso && !currentUser.consensoTerminiPrivacy) currentUser.consensoTerminiPrivacy = new Date().toISOString();
+  closeModal("modal-candidatura");
+  closeModal("modal-menu");
+  document.getElementById("screen-onboarding")?.classList.remove("active");
+  showToast("Benvenuto in Equo Veterinario");
+  await enterApp("veterinario");
+}
+// email a Equo per chiedere il codice, con nome ed email già scritti
+function chiediCodiceProva(){
+  const nome = (document.getElementById("cand-nome")?.value || currentUser?.fullName || "").trim();
+  const email = (document.getElementById("cand-email")?.value || currentUser?.email || "").trim();
+  const oggetto = "Codice di prova Equo Veterinario";
+  const testo = "Ciao, sono un veterinario e vorrei provare Equo.\n\nNome e cognome: " + nome + "\nEmail dell'account: " + email
+    + "\nTelefono: \nCittà: \n\nGrazie!";
+  location.href = "mailto:gestione.equo@gmail.com?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(testo);
+}
