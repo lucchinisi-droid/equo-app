@@ -19,7 +19,7 @@ const RUOLI = [
   { ruolo: "proprietario", home: "#page-home" },
   { ruolo: "maniscalco", home: "#hm" },
   { ruolo: "istruttore", home: "#tr-home" },
-  { ruolo: "veterinario", home: "#page-pro-home" },
+  { ruolo: "veterinario", home: "#vh" },
 ];
 // Cerca negli attributi onclick/onchange/... della pagina le funzioni chiamate che non esistono.
 const PULSANTI_SENZA_FUNZIONE = () => {

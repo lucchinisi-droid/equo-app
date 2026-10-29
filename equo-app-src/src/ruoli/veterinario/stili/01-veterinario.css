@@ -1,0 +1,53 @@
+/* ===== VETERINARIO (29/10/2026) · colori C: blu notte + verde Tiffany, oro per vaccini e richiami, rosso per urgenze e crediti =====
+   Solo per il veterinario: tutte le regole partono da :where(body.pl-vet). Cosa si vede nella Home: core/stili/10-regole-ruoli.css */
+:where(body.pl-vet){
+  --vt-fondo:#F7F4EE; --vt-sup:#FFFDFA; --vt-bordo:#E6E0D4; --vt-notte:#1D2D50; --vt-notte2:#2B3F6B; --vt-notte3:#3A4E7A;
+  --vt-tif:#7FD1C9; --vt-tif-scuro:#2E8F88; --vt-tif-chiaro:#E3F4F2; --vt-tif-testo:#1F6E68;
+  --vt-oro:#C9A96E; --vt-oro-chiaro:#F4EEE1; --vt-oro-testo:#8A6D2E; --vt-chip:#EDE8DD;
+  --vt-testo:#1A2236; --vt-testo2:#677086; --vt-su-blu:#B9C3D9; --vt-urg:#A9443B; --vt-urg-chiaro:#FBF0EE;
+}
+:where(body.pl-vet) #page-pro-home{background:var(--vt-fondo)}
+
+/* --- Home --- */
+:where(body.pl-vet) .vh{color:var(--vt-testo);padding:4px 2px 96px}
+:where(body.pl-vet) .vh svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+:where(body.pl-vet) .vh svg.pieno{fill:currentColor;stroke:none}
+:where(body.pl-vet) .vh button{font:inherit;color:inherit;cursor:pointer}
+:where(body.pl-vet) .vh-saluto{margin:6px 2px 10px;font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--vt-testo2)}
+:where(body.pl-vet) .vh-giro{background:var(--vt-notte);color:#fff;border-radius:22px;padding:16px 16px 14px}
+:where(body.pl-vet) .vh-giro-et{color:var(--vt-tif);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+:where(body.pl-vet) .vh-giro-riga{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:4px}
+:where(body.pl-vet) .vh-giro-n{font-family:'Fraunces',serif;font-size:32px;font-weight:700;line-height:1.05}
+:where(body.pl-vet) .vh-giro-s{color:var(--vt-su-blu);font-size:13px;margin-top:4px}
+:where(body.pl-vet) .vh-giornata{background:var(--vt-tif);color:#12233F!important;border:0;border-radius:12px;padding:9px 16px;font-weight:700;font-size:14px}
+:where(body.pl-vet) .vh-giro-num{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
+:where(body.pl-vet) .vh-giro-num button{background:var(--vt-notte3);border:0;border-radius:12px;padding:10px 12px;text-align:left;color:#fff!important}
+:where(body.pl-vet) .vh-giro-num b{display:block;font-size:17px}
+:where(body.pl-vet) .vh-giro-num span{font-size:12px;color:var(--vt-su-blu)}
+:where(body.pl-vet) .vh-cerchi{display:flex;justify-content:space-between;margin:16px 0 4px}
+:where(body.pl-vet) .vh-cerchi button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:6px;width:20%;font-size:11.5px;font-weight:600;color:var(--vt-testo)!important;line-height:1.2;text-align:center}
+:where(body.pl-vet) .vh-cerchi .c{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--vt-tif);background:var(--vt-sup);color:var(--vt-notte);display:flex;align-items:center;justify-content:center}
+:where(body.pl-vet) .vh-tit{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin:16px 2px 10px;color:var(--vt-notte)}
+:where(body.pl-vet) .vh-visita{width:100%;display:flex;align-items:center;gap:12px;background:var(--vt-sup);border:1px solid var(--vt-bordo);border-radius:16px;padding:12px 14px;margin-bottom:8px;text-align:left}
+:where(body.pl-vet) .vh-visita.urg{background:var(--vt-urg-chiaro);border-color:#E3B5AE}
+:where(body.pl-vet) .vh-visita .o{font-weight:700;font-size:15px;min-width:44px;color:var(--vt-testo)}
+:where(body.pl-vet) .vh-visita .o small{display:block;font-size:10.5px;font-weight:600;color:var(--vt-testo2)}
+:where(body.pl-vet) .vh-visita.urg .o{color:var(--vt-urg)}
+:where(body.pl-vet) .vh-visita .c{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vh-visita .t{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(body.pl-vet) .vh-visita .l{font-size:12.5px;color:var(--vt-testo2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(body.pl-vet) .vh-et{flex:0 0 auto;font-size:11px;font-weight:700;border-radius:999px;padding:4px 10px}
+:where(body.pl-vet) .vh-et.urg{background:#F3D9D5;color:var(--vt-urg)}
+:where(body.pl-vet) .vh-et.tif{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vh-et.oro{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vh-vuoto{font-size:13.5px;color:var(--vt-testo2);padding:6px 2px}
+:where(body.pl-vet) .vh-vuoto button{background:none;border:0;color:var(--vt-tif-scuro)!important;font-weight:700;padding:0}
+:where(body.pl-vet) .vh-galeno{width:100%;display:flex;align-items:center;gap:12px;background:var(--vt-tif-chiaro);border:0;border-radius:16px;padding:12px 14px;margin-top:6px;text-align:left;font-size:13.5px}
+:where(body.pl-vet) .vh-galeno .g{flex:0 0 30px;height:30px;border-radius:50%;background:var(--vt-notte);border:2px solid var(--vt-tif);color:var(--vt-oro);display:flex;align-items:center;justify-content:center}
+:where(body.pl-vet) .vh-galeno .g svg{width:15px;height:15px}
+
+/* --- Barra in basso: Galeno blu notte con anello Tiffany --- */
+:where(body.pl-vet) #bottom-nav-pro .nav-hammer .hm-ham{box-shadow:0 0 0 3px var(--vt-tif)}
+
+/* --- Nuovo appuntamento: il veterinario non sceglie «Ferrato / Mezza / Pareggio» per un cavallo nuovo --- */
+:where(body.pl-vet) #intervento-nuovo-cavallo-lavoro-group{display:none!important}

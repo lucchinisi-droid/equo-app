@@ -12,6 +12,7 @@ const { build } = await import(pathToFileURL(path.join(viteDir, "node_modules", 
 const MODULI = [
   { nome: "allenatore", ingresso: "ruoli/allenatore/moduli/index.js", uscita: "ruoli/allenatore/costruito.js", globale: "EquoAllenatore" },
   { nome: "maniscalco", ingresso: "ruoli/maniscalco/moduli/index.js", uscita: "ruoli/maniscalco/costruito.js", globale: "EquoManiscalco" },
+  { nome: "veterinario", ingresso: "ruoli/veterinario/moduli/index.js", uscita: "ruoli/veterinario/costruito.js", globale: "EquoVeterinario" },
   { nome: "proprietario", ingresso: "ruoli/proprietario/moduli/index.js", uscita: "ruoli/proprietario/costruito.js", globale: "EquoProprietario" },
   { nome: "chat", ingresso: "comune/chat/moduli/index.js", uscita: "comune/chat/costruito.js", globale: "EquoChat" },
   { nome: "agenti", ingresso: "comune/agenti/moduli/index.js", uscita: "comune/agenti/costruito.js", globale: "EquoAgenti" },

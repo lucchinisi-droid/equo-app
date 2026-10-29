@@ -11,6 +11,7 @@ function applicaVistaHome(){
 }
 function wgRidisegna(){
   if(currentUser && document.body.classList.contains("home-man")) try{ renderHomeMan(); }catch(e){ console.error("renderHomeMan:", e); }
+  if(currentUser && typeof eVeterinario === "function" && eVeterinario() && typeof renderHomeVet === "function") try{ renderHomeVet(); }catch(e){ console.error("renderHomeVet:", e); }
   if(!currentUser || !vistaWidgetAttiva()) return;
   if(vistaAi() === "professionista") renderWidgetPro(); else renderWidgetOwner();
 }

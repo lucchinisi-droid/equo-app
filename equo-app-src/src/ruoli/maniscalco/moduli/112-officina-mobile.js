@@ -995,7 +995,7 @@ setTimeout(() => quandoApriPagina(p => {
   if(p === "pro-home") ofAggiornaRiepiloghi();
 }), 0);
 
-export { CARBURANTE, OfDB, costoCarburante, ofCarica, ofGiornataProposta, ofLavoriGiorno, ofMezzo, ofSalvaGiornata, OF, ofMatRapido, ofTitoloDaTipo, ofAggiornaAiutanteData, ofSalvaSpesaDaHammer, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa,
+export { ofStimaKm, CARBURANTE, OfDB, costoCarburante, ofCarica, ofGiornataProposta, ofLavoriGiorno, ofMezzo, ofSalvaGiornata, OF, ofMatRapido, ofTitoloDaTipo, ofAggiornaAiutanteData, ofSalvaSpesaDaHammer, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa,
   ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante,
   ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo,
   ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi };

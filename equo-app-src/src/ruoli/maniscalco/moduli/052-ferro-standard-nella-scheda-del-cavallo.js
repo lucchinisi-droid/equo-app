@@ -153,7 +153,8 @@ async function openInterventoModal(clienteId, intervento, preset){
   document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
   // «Mezza ferratura» non è più una scelta dell'appuntamento: la decide la scheda del cavallo
   tipoOriginaleIntervento = interventoInModifica ? interventoInModifica.tipo_ferratura : null;
-  document.getElementById("intervento-tipo").value = i.tipo_ferratura || "ferratura";
+  intPreparaTipi();
+  document.getElementById("intervento-tipo").value = i.tipo_ferratura || (eVeterinario() ? "visita" : "ferratura");
   document.getElementById("intervento-tipo-altro").value = i.tipo_altro || "";
   // lavoro: come da scheda; un «Altro» già salvato si riapre come straordinario (Completa)
   intModo = "scheda"; intStr = { preset: null, zoccolo: null };
@@ -309,9 +310,22 @@ function quantitaPredefinita(){
   return sc.length && sc.every(cavalloMezza) ? 2 : 4;
 }
 function intConCavalli(){ return cavalliSceltiIntervento().some(Boolean); }
+// 29/10/2026: il veterinario sceglie sempre il tipo di visita e scrive il motivo (salvato in tipo_altro)
+function intPreparaTipi(){
+  const sel = document.getElementById("intervento-tipo"); if(!sel) return;
+  const vet = eVeterinario(), tipi = vet ? TIPI_VET : TIPI_MAN;
+  if(sel.dataset.ruolo !== (vet ? "vet" : "man")){
+    sel.innerHTML = tipi.map(t => `<option value="${t}">${TIPO_FERRATURA_LABELS[t]}</option>`).join("");
+    sel.dataset.ruolo = vet ? "vet" : "man";
+  }
+  const lab = document.querySelector("#intervento-tipo-altro-group .input-label");
+  if(lab) lab.textContent = vet ? "Motivo" : "Specifica";
+  const inp = document.getElementById("intervento-tipo-altro");
+  if(inp) inp.placeholder = vet ? "es. zoppia anteriore sinistro" : "es. controllo zoccoli";
+}
 // il tipo si sceglie a mano solo senza cavallo (o correggendo un «Altro» nella versione Semplice)
 function intTipoManuale(){
-  if(!intConCavalli()) return true;
+  if(eVeterinario() || !intConCavalli()) return true;
   return !!(interventoInModifica && tipoOriginaleIntervento === "altro" && !vistaCompleta());
 }
 function intStraordinario(){ return vistaCompleta() && intConCavalli() && !intTipoManuale() && intModo === "straordinario"; }
@@ -393,7 +407,7 @@ function toggleInterventoTipoFields(){
     document.getElementById("intervento-str-zoccoli").innerHTML = STR_ZOCCOLI.map(z =>
       `<button type="button" class="${intStr.zoccolo === z ? "on" : ""}" onclick="sceltaZoccolo('${z}')">${z}</button>`).join("");
   }
-  document.getElementById("intervento-tipo-altro-group").style.display = (manuale && tipo === "altro") || (str && intStr.preset === "altro") ? "flex" : "none";
+  document.getElementById("intervento-tipo-altro-group").style.display = (manuale && (tipo === "altro" || eVeterinario())) || (str && intStr.preset === "altro") ? "flex" : "none";
   renderFerroRighe();
 }
 // Quando: Oggi / Domani / Scegli giorno
@@ -450,7 +464,7 @@ async function salvaInterventoMascalcia(){
   const straord = intStraordinario();
   if(straord && !intStr.preset) return errore("Scegli il lavoro straordinario.");
   const tipo_ferratura = tipoPerCavallo(null, scelti.find(Boolean) || "");
-  const tipo_altro = tipo_ferratura === "altro"
+  const tipo_altro = tipo_ferratura === "altro" || TIPI_VET.includes(tipo_ferratura) && tipo_ferratura !== "altro" && eVeterinario()
     ? (straord ? testoStraordinario() : (document.getElementById("intervento-tipo-altro").value.trim() || null)) : null;
   const conFerri = t => t === "ferratura" || t === "mezza_ferratura";
   const data_intervento = document.getElementById("intervento-data").value;
@@ -602,7 +616,7 @@ async function salvaInterventoMascalcia(){
       const quantitaRiga = !fr ? null : ferriScelti && ferriScelti.nuovi ? Math.max(1, Math.min(4, Number(ferriScelti.n) || qScheda))
         : (interventoInModifica && Number(interventoInModifica.quantita_ferri) >= 1 && interventoInModifica.tipo_ferratura === tipoRiga ? Number(interventoInModifica.quantita_ferri) : qScheda);
       const ferri_nuovi = !fr ? null : ferriScelti ? ferriScelti.nuovi : (interventoInModifica ? interventoInModifica.ferri_nuovi ?? null : null);
-      const payload = { cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, tipo_ferratura: tipoRiga, tipo_altro: tipoRiga === "altro" ? tipo_altro : null,
+      const payload = { cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, tipo_ferratura: tipoRiga, tipo_altro: tipoRiga === "altro" || eVeterinario() ? tipo_altro : null,
         misura_sistema: fr ? r.misura_sistema : null, numero_ferro: fr ? r.numero_ferro : null, quantita_ferri: quantitaRiga, ferri_nuovi,
         data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento: statoPagamento, note,
         ...(typeof ofCampiAiutanteIntervento === "function" ? ofCampiAiutanteIntervento(interventoInModifica) : {}) };
@@ -683,7 +697,10 @@ async function avvisaClienteAppuntamento(tipo, i, prec){
   const { error } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: i.cliente_mascalcia_id, tipo: "testo", testo });
   if(error) console.error("avvisaClienteAppuntamento:", error);
 }
-function etichettaServizio(t, altro){ return t === "altro" && altro ? altro : (TIPO_FERRATURA_LABELS[t] || t || "Appuntamento"); }
+function etichettaServizio(t, altro){
+  if(t === "altro" && altro) return altro;
+  return (TIPO_FERRATURA_LABELS[t] || t || "Appuntamento") + (TIPI_VET.includes(t) && t !== "altro" && altro ? " · " + altro : "");
+}
 function servizioCambiato(a, b){ return (a.tipo_ferratura || "") !== (b.tipo_ferratura || "") || (a.tipo_altro || "") !== (b.tipo_altro || ""); }
 // «Modificato · prima: Ferratura, gio 8 ott»: testo breve dalla colonna «modifica» (com'era prima)
 function testoPrimaModifica(m){

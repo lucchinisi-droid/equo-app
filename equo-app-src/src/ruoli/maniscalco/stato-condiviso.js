@@ -7,7 +7,11 @@ let proUnreadTotal = 0;
 // da 031-mascalcia-clienti-interventi-del-profess.js
 let currentClienteId = null;
 // da 031-mascalcia-clienti-interventi-del-profess.js
-const TIPO_FERRATURA_LABELS = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro" };
+const TIPO_FERRATURA_LABELS = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratura", pareggio: "Pareggio", altro: "Altro",
+  visita: "Visita", vaccino: "Vaccino", urgenza: "Urgenza", terapia: "Terapia", mtc: "Agopuntura · MTC", fisio: "Fisioterapia" };
+// 29/10/2026: tipi del veterinario (per lui tipo_altro è il motivo: «colica lieve», «influenza e tetano»)
+const TIPI_VET = ["visita", "vaccino", "urgenza", "terapia", "mtc", "fisio", "altro"];
+const TIPI_MAN = ["ferratura", "mezza_ferratura", "pareggio", "altro"];
 // da 031-mascalcia-clienti-interventi-del-profess.js
 const TIPO_FERRATURA_INTERVALLI = { ferratura: 35, mezza_ferratura: 35, pareggio: 56 };
 // da 033-clienti-a-cartelle-stile-telegram-cavall.js

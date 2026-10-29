@@ -17,7 +17,7 @@ import { aggiungiPrezziMancanti, rispondiPrezzi, segnaSaldatoIncassi } from "./0
 import { apriSpostaCavalloPro, apriSpostaCavalloProprietario, caricaUbicazioni, clienteDiId, confermaSposta, luogoDi, luogoEvento, luogoProprietario, navigaLuogo, renderDoveStaProprietario, spAggiorna, spCerca, spostamentoHtml, ubicDi, wgNavigaEvento } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, selezionaMisura } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { aggiornaQuando, avvisaClienteAppuntamento, chiediSiNo, chiudiEditorFerro, eliminaInterventoInModifica, modificaFerraturaDaIntervento, nuovoCavalloLavoro, onCavalliMultiChange, onInterventoClienteChange, openInterventoModal, quandoIntervento, rispondiSiNo, salvaInterventoMascalcia, sceltaModoIntervento, sceltaStraordinario, sceltaZoccolo, selezionaQuantita, siglaFerro, testoPrimaModifica, toggleInterventoNuovoCavallo, toggleInterventoTipoFields } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
-import { agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
+import { agDescrizioneTipo, agNomeCavallo, renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve, testoRichiesta } from "./054-richieste-di-appuntamento-step-5d.js";
 import { accettaRichiesta, apriPropostaStruttura, propStrCambiaCliente, inviaPropostaStruttura, rifiutaRichiesta, vaiAllaDataAgenda } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { agOrdinaGiro, apriAzioniEvento, azioneEvento, cambiaSettimanaAgenda, fissaDaScadenza, nuovoAppuntamentoGiorno, segnaFattoAgenda, toggleGiornoAgenda, tornaSettimanaCorrente } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
@@ -45,7 +45,7 @@ import { usaPosizioneQui } from "./106-posizione-attuale.js";
 import { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
 import { condividiInvitoCliente } from "./108-invito-qr.js";
 import { apriCardPro, chiudiCardPro, ecvAggiungiEsperienza, ecvAggiungiFormazione, ecvAggiungiVoce, ecvCampo, ecvChiediReferenza, ecvCopiaLink, ecvGiraPass, ecvHammer, ecvIndietro, ecvInterruttore, ecvLingua, ecvModello, ecvMostra, ecvPdfCv, ecvPdfPass, ecvPubblica, ecvReferenza, ecvSlug, ecvSpec, ecvTogliElemento, ecvTogliVoce } from "./109-equo-cv-pass.js";
-import { ofMatRapido, ofTitoloDaTipo, ofSalvaSpesaDaHammer, ofAggiornaAiutanteData, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa, ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante, ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo, ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi } from "./112-officina-mobile.js";
+import { ofStimaKm, ofMatRapido, ofTitoloDaTipo, ofSalvaSpesaDaHammer, ofAggiornaAiutanteData, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa, ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante, ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo, ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi } from "./112-officina-mobile.js";
 import { pmAggiornaAzione, pmAggiornaQuando, pmApriNuovo, pmDomani, pmElimina, pmEsegui, pmFatto, pmModifica, pmQuando, pmRenderHome, pmSalva, pmSalvaDaHammer, pmTastiChat } from "./111-promemoria-personali.js";
 import { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSaldato, agFiltroProg, agFissaScadenza, agFissaTutti, agNfAnnulla, agNfSposta, condividiInvitoAgenda, scegliSchedaAgenda, scegliVistaAgenda } from "./110-agenda-semplice-completa.js";
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
@@ -62,6 +62,8 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  ofStimaKm,
+  agDescrizioneTipo,
   creaCavalloUnico,
   creaClienteUnico,
   avvisaNuovoSeCollegato,

@@ -9,6 +9,10 @@ function vistaAi(){
 function agenteAiHammer(){
   return vistaAi() === "professionista" && (currentUser?.vistaAttiva || currentUser?.ruolo) === "maniscalco";
 }
+// 29/10/2026: veterinario = vista professionista con ruolo veterinario (stesse tabelle e stessi sistemi del maniscalco)
+function eVeterinario(){
+  return vistaAi() === "professionista" && (currentUser?.vistaAttiva || currentUser?.ruolo) === "veterinario";
+}
 function nomeAgenteAi(){
   return agenteAiHammer() ? "Hammer" : vistaAi() === "proprietario" ? "Pegasus" : (currentUser?.vistaAttiva || currentUser?.ruolo) === "veterinario" ? "Galeno" : (currentUser?.vistaAttiva || currentUser?.ruolo) === "istruttore" ? "Ares" : "Equo AI";
 }

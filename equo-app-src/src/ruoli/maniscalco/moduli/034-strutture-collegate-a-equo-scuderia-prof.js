@@ -15,7 +15,8 @@ import { ferroStd, siglaFerro } from "./052-ferro-standard-nella-scheda-del-cava
    La struttura è un cliente "struttura" con centro_id. Collegamento con doppia conferma:
    invito dalla struttura → il maniscalco accetta qui; richiesta del maniscalco (codice del centro) → accetta la struttura. */
 function isManiscalcoUtente(){
-  return !!currentUser && [currentUser.ruolo, currentUser.ruoloSecondario, currentUser.ruolo_secondario].includes("maniscalco");
+  const r = [currentUser?.ruolo, currentUser?.ruoloSecondario, currentUser?.ruolo_secondario];
+  return !!currentUser && (r.includes("maniscalco") || r.includes("veterinario"));
 }
 function badgeCollegamentoCliente(c){
   if(c.collegamento_stato === "attivo") return '<span class="badge badge-green" style="font-size:10.5px;flex-shrink:0">Equo Scuderia</span>';

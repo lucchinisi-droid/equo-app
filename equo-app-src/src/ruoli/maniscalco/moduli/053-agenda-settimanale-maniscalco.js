@@ -44,6 +44,7 @@ function agDescrizioneTipoPro(i){
 function agDescrizioneTipo(i){
   let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
   if(i.tipo_ferratura === "altro" && i.tipo_altro) t = i.tipo_altro;
+  else if(TIPI_VET.includes(i.tipo_ferratura) && i.tipo_altro) t += " · " + i.tipo_altro;
   const extra = [];
   if(i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
   if(i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");

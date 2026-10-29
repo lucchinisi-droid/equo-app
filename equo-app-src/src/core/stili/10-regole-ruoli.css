@@ -13,5 +13,9 @@ body.home-man #page-pro-home > #hm{display:block!important}
 body.pl-istr #page-pro-home > :not(#tr-home){display:none!important}
 body.pl-istr #page-pro-home > #tr-home{display:block!important}
 
-/* veterinario e altri professionisti con la Home a widget */
-body.vista-widget:not(.home-man):not(.pl-istr) #page-pro-home > :not(.wh-keep):not(.wh){display:none!important}
+/* veterinario (Home nuova: #vh, 29/10/2026) */
+body.pl-vet #page-pro-home > :not(#vh){display:none!important}
+body.pl-vet #page-pro-home > #vh{display:block!important}
+
+/* altri professionisti con la Home a widget */
+body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :not(.wh-keep):not(.wh){display:none!important}

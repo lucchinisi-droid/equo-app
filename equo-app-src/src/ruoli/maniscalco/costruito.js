@@ -3761,6 +3761,11 @@
 		} catch (e) {
 			console.error("renderHomeMan:", e);
 		}
+		if (currentUser && typeof eVeterinario === "function" && eVeterinario() && typeof renderHomeVet === "function") try {
+			renderHomeVet();
+		} catch (e) {
+			console.error("renderHomeVet:", e);
+		}
 		if (!currentUser || !vistaWidgetAttiva()) return;
 		if (vistaAi() === "professionista") renderWidgetPro();
 		else renderWidgetOwner();
@@ -7325,6 +7330,7 @@
 	function agDescrizioneTipo(i) {
 		let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
 		if (i.tipo_ferratura === "altro" && i.tipo_altro) t = i.tipo_altro;
+		else if (TIPI_VET.includes(i.tipo_ferratura) && i.tipo_altro) t += " · " + i.tipo_altro;
 		const extra = [];
 		if (i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
 		if (i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
@@ -10508,7 +10514,8 @@
 		document.getElementById("intervento-nuovo-cavallo-nome").value = "";
 		document.getElementById("intervento-nuovo-cavallo-microchip").value = "";
 		tipoOriginaleIntervento = interventoInModifica ? interventoInModifica.tipo_ferratura : null;
-		document.getElementById("intervento-tipo").value = i.tipo_ferratura || "ferratura";
+		intPreparaTipi();
+		document.getElementById("intervento-tipo").value = i.tipo_ferratura || (eVeterinario() ? "visita" : "ferratura");
 		document.getElementById("intervento-tipo-altro").value = i.tipo_altro || "";
 		intModo = "scheda";
 		intStr = {
@@ -10690,8 +10697,21 @@
 	function intConCavalli() {
 		return cavalliSceltiIntervento().some(Boolean);
 	}
+	function intPreparaTipi() {
+		const sel = document.getElementById("intervento-tipo");
+		if (!sel) return;
+		const vet = eVeterinario(), tipi = vet ? TIPI_VET : TIPI_MAN;
+		if (sel.dataset.ruolo !== (vet ? "vet" : "man")) {
+			sel.innerHTML = tipi.map((t) => `<option value="${t}">${TIPO_FERRATURA_LABELS[t]}</option>`).join("");
+			sel.dataset.ruolo = vet ? "vet" : "man";
+		}
+		const lab = document.querySelector("#intervento-tipo-altro-group .input-label");
+		if (lab) lab.textContent = vet ? "Motivo" : "Specifica";
+		const inp = document.getElementById("intervento-tipo-altro");
+		if (inp) inp.placeholder = vet ? "es. zoppia anteriore sinistro" : "es. controllo zoccoli";
+	}
 	function intTipoManuale() {
-		if (!intConCavalli()) return true;
+		if (eVeterinario() || !intConCavalli()) return true;
 		return !!(interventoInModifica && tipoOriginaleIntervento === "altro" && !vistaCompleta());
 	}
 	function intStraordinario() {
@@ -10817,7 +10837,7 @@
 			document.getElementById("intervento-str-zoccoli-box").style.display = conZ ? "block" : "none";
 			document.getElementById("intervento-str-zoccoli").innerHTML = STR_ZOCCOLI.map((z) => `<button type="button" class="${intStr.zoccolo === z ? "on" : ""}" onclick="sceltaZoccolo('${z}')">${z}</button>`).join("");
 		}
-		document.getElementById("intervento-tipo-altro-group").style.display = manuale && tipo === "altro" || str && intStr.preset === "altro" ? "flex" : "none";
+		document.getElementById("intervento-tipo-altro-group").style.display = manuale && (tipo === "altro" || eVeterinario()) || str && intStr.preset === "altro" ? "flex" : "none";
 		renderFerroRighe();
 	}
 	function quandoIntervento(q) {
@@ -10880,7 +10900,7 @@
 		const straord = intStraordinario();
 		if (straord && !intStr.preset) return errore("Scegli il lavoro straordinario.");
 		const tipo_ferratura = tipoPerCavallo(null, scelti.find(Boolean) || "");
-		const tipo_altro = tipo_ferratura === "altro" ? straord ? testoStraordinario() : document.getElementById("intervento-tipo-altro").value.trim() || null : null;
+		const tipo_altro = tipo_ferratura === "altro" || TIPI_VET.includes(tipo_ferratura) && tipo_ferratura !== "altro" && eVeterinario() ? straord ? testoStraordinario() : document.getElementById("intervento-tipo-altro").value.trim() || null : null;
 		const conFerri = (t) => t === "ferratura" || t === "mezza_ferratura";
 		const data_intervento = document.getElementById("intervento-data").value;
 		const ora = document.getElementById("intervento-ora").value || null;
@@ -11058,7 +11078,7 @@
 					cavallo_cliente_id: r.cavallo_cliente_id,
 					horse_id: r.horse_id,
 					tipo_ferratura: tipoRiga,
-					tipo_altro: tipoRiga === "altro" ? tipo_altro : null,
+					tipo_altro: tipoRiga === "altro" || eVeterinario() ? tipo_altro : null,
 					misura_sistema: fr ? r.misura_sistema : null,
 					numero_ferro: fr ? r.numero_ferro : null,
 					quantita_ferri: quantitaRiga,
@@ -11180,7 +11200,8 @@
 		if (error) console.error("avvisaClienteAppuntamento:", error);
 	}
 	function etichettaServizio(t, altro) {
-		return t === "altro" && altro ? altro : TIPO_FERRATURA_LABELS[t] || t || "Appuntamento";
+		if (t === "altro" && altro) return altro;
+		return (TIPO_FERRATURA_LABELS[t] || t || "Appuntamento") + (TIPI_VET.includes(t) && t !== "altro" && altro ? " · " + altro : "");
 	}
 	function servizioCambiato(a, b) {
 		return (a.tipo_ferratura || "") !== (b.tipo_ferratura || "") || (a.tipo_altro || "") !== (b.tipo_altro || "");
@@ -11588,11 +11609,12 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/034-strutture-collegate-a-equo-scuderia-prof.js
 	function isManiscalcoUtente() {
-		return !!currentUser && [
-			currentUser.ruolo,
-			currentUser.ruoloSecondario,
-			currentUser.ruolo_secondario
-		].includes("maniscalco");
+		const r = [
+			currentUser?.ruolo,
+			currentUser?.ruoloSecondario,
+			currentUser?.ruolo_secondario
+		];
+		return !!currentUser && (r.includes("maniscalco") || r.includes("veterinario"));
 	}
 	function badgeCollegamentoCliente(c) {
 		if (c.collegamento_stato === "attivo") return "<span class=\"badge badge-green\" style=\"font-size:10.5px;flex-shrink:0\">Equo Scuderia</span>";
@@ -15368,6 +15390,8 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		ofStimaKm,
+		agDescrizioneTipo,
 		creaCavalloUnico,
 		creaClienteUnico,
 		avvisaNuovoSeCollegato,
