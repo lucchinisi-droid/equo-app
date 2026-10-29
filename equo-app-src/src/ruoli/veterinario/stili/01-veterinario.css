@@ -6,7 +6,23 @@
   --vt-oro:#C9A96E; --vt-oro-chiaro:#F4EEE1; --vt-oro-testo:#8A6D2E; --vt-chip:#EDE8DD;
   --vt-testo:#1A2236; --vt-testo2:#677086; --vt-su-blu:#B9C3D9; --vt-urg:#A9443B; --vt-urg-chiaro:#FBF0EE;
 }
-:where(body.pl-vet) #page-pro-home{background:var(--vt-fondo)}
+:where(body.pl-vet) .page-content{background:transparent}
+
+/* ===== TEMA DEL VETERINARIO (29/10/2026): SOLO colori del mockup C, bianco come base =====
+   Le variabili comuni dell'app (--bg, --surface, --accent, ...) si ridefiniscono sul body del veterinario:
+   così cambiano insieme tutte le pagine, le finestre, i fogli e le sottosezioni. */
+:where(:root[data-theme="light"]) :where(body.pl-vet){
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface2:#F7F4EE; --card:#FFFFFF; --border:#E6E0D4;
+  --accent:#1D2D50; --accent2:#2B3F6B; --text:#1A2236; --muted:#677086; --green:#2E8F88; --red:#A9443B;
+  --grad-top:#FFFFFF; --grad-bottom:#FFFFFF; color-scheme:light;
+}
+:where(:root:not([data-theme="light"])) :where(body.pl-vet){
+  --bg:#1D2D50; --surface:#24375E; --surface2:#2B3F6B; --card:#24375E; --border:#3A4E7A;
+  --accent:#7FD1C9; --accent2:#2E8F88; --text:#FFFFFF; --muted:#B9C3D9; --green:#7FD1C9; --red:#E3B5AE;
+  --grad-top:#1D2D50; --grad-bottom:#1D2D50; color-scheme:dark;
+  --vt-fondo:#1D2D50; --vt-sup:#24375E; --vt-bordo:#3A4E7A; --vt-testo:#FFFFFF; --vt-testo2:#B9C3D9; --vt-chip:#2B3F6B;
+}
+:where(body.pl-vet)[data-tono] #screen-app{--tono:var(--bg)!important;background:var(--bg)}
 
 /* --- Home --- */
 :where(body.pl-vet) .vh{color:var(--vt-testo);padding:4px 2px 96px}
@@ -53,7 +69,6 @@
 :where(body.pl-vet) #intervento-nuovo-cavallo-lavoro-group{display:none!important}
 
 /* --- Agenda (mockup Agenda 1 · Settimana): 4 schede, settimana su una riga, visite per posto --- */
-:where(body.pl-vet) #page-pro-agenda{background:var(--vt-fondo)}
 :where(body.pl-vet) #ag-vista,:where(body.pl-vet) #page-pro-agenda .ag-invito{display:none!important}
 :where(body.pl-vet) #ag-schede{background:var(--vt-chip);border-radius:999px;padding:4px;gap:2px}
 :where(body.pl-vet) #ag-schede button{border-radius:999px;font-size:12px;color:var(--vt-testo2)}
@@ -86,8 +101,8 @@
 :where(body.pl-vet) .vt-b.urg{background:#F3D9D5;color:var(--vt-urg)}
 :where(body.pl-vet) .vt-b.tif{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
 :where(body.pl-vet) .vt-b.testo{background:none;padding:3px 0;font-weight:500;color:var(--vt-testo2)}
-:where(body.pl-vet) #pro-action-btn{position:fixed;right:18px;bottom:96px;width:54px;height:54px;border-radius:50%;padding:0;font-size:0;background:var(--vt-tif);border:3px solid #fff;box-shadow:0 6px 18px rgba(29,45,80,.25);z-index:30}
-:where(body.pl-vet) #pro-action-btn::before{content:"+";font-size:30px;line-height:1;color:var(--vt-notte);font-weight:400}
+/* «+ Nuovo appuntamento» sotto la settimana; il «+» flottante è il menu, uguale in tutte le pagine (con «Nuovo appuntamento» come prima voce) */
+body.pl-vet #pro-action-btn{margin-top:4px;border-radius:14px}
 :where(body.pl-vet) #ag-schede:not([hidden]){display:flex;flex-wrap:nowrap}
 :where(body.pl-vet) #ag-schede button{flex:1 1 auto;min-width:0;justify-content:center;gap:4px;padding:7px 6px;border:0;background:transparent;white-space:nowrap}
 :where(body.pl-vet) #ag-schede button b{background:none;color:inherit;font-weight:600;min-width:0;padding:0}
@@ -96,7 +111,6 @@
 :where(body.pl-vet) .ag-gblock .ag-ev-fatto{background:var(--vt-tif);color:var(--vt-notte);border-color:var(--vt-tif)}
 
 /* --- Clienti (mockup Clienti 1 · Elenco): A–Z, filtri, crediti --- */
-:where(body.pl-vet) #page-pro-clienti{background:var(--vt-fondo)}
 :where(body.pl-vet) #clienti-list-view .section-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
 :where(body.pl-vet) #cli-cartelle{gap:6px;border:0;background:none}
 :where(body.pl-vet) #cli-cartelle button{border:1px solid var(--vt-bordo);background:var(--vt-sup);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--vt-testo)}
@@ -116,7 +130,7 @@
 :where(body.pl-vet) .vt-indice button{background:none;border:0;padding:0 2px;font-size:10px;font-weight:700;color:var(--vt-tif-scuro);cursor:pointer;line-height:1.35}
 
 /* --- Messaggi (mockup Messaggi 1 · Cartelle): matita, ricerca, etichette dei cavalli, urgenza --- */
-:where(body.pl-vet) #page-pro-inbox{background:var(--vt-fondo);position:relative}
+:where(body.pl-vet) #page-pro-inbox{position:relative}
 :where(body.pl-vet) #page-pro-inbox > .section-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
 :where(body.pl-vet) .vt-msg-testa{position:absolute;right:16px;top:12px}
 :where(body.pl-vet) .vt-matita{width:38px;height:38px;border-radius:50%;border:0;background:var(--vt-notte);color:var(--vt-tif);display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -129,3 +143,75 @@
 :where(body.pl-vet) .vt-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 :where(body.pl-vet) .vt-chip{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
 :where(body.pl-vet) .vt-chip.urg{background:#F3D9D5;color:var(--vt-urg)}
+
+/* --- Colori comuni scritti a mano nell'app (tasti, barra, avatar, fogli): per il veterinario solo il mockup --- */
+body.pl-vet .btn-primary,body.pl-vet .btn-conferma{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--bg)!important}
+body.pl-vet .btn-outline{background:var(--surface)!important;border-color:var(--border)!important;color:var(--accent)!important}
+body.pl-vet .btn-danger{background:var(--red)!important;border-color:var(--red)!important;color:#fff!important}
+body.pl-vet .badge-green{background:#E3F4F2!important;color:#1F6E68!important}
+body.pl-vet .badge-red{background:#FBF0EE!important;color:#A9443B!important}
+body.pl-vet .badge-accent{background:#F4EEE1!important;color:#8A6D2E!important}
+body.pl-vet button.on:not(.ag-tile){background:var(--accent);border-color:var(--accent);color:var(--bg)}
+/* barra in basso come nel mockup: bianca, voce attiva blu notte, le altre grigie */
+body.pl-vet #bottom-nav-pro{background:var(--surface)!important;border-color:var(--border)!important;box-shadow:0 6px 24px rgba(29,45,80,.10)!important}
+body.pl-vet #bottom-nav-pro .nav-btn{background:transparent!important;color:var(--muted)!important}
+body.pl-vet #bottom-nav-pro .nav-btn svg,body.pl-vet #bottom-nav-pro .nav-btn svg *{color:inherit!important;stroke:currentColor!important}
+body.pl-vet #bottom-nav-pro .nav-btn small{color:inherit!important}
+body.pl-vet #bottom-nav-pro .nav-btn.active{color:var(--accent)!important;font-weight:700}
+body.pl-vet #bottom-nav-pro .nav-hammer small{color:var(--accent)!important}
+body.pl-vet #bottom-nav-pro .nav-hammer .hm-ham{box-shadow:0 0 0 3px #7FD1C9!important}
+/* tasto + flottante e profilo in alto */
+body.pl-vet .hm-flot.piu{background:#7FD1C9!important;color:#12233F!important;border-color:#fff!important}
+body.pl-vet .hm-flot.piu svg{stroke:#12233F!important;color:#12233F!important}
+body.pl-vet .hm-flot.msg{background:var(--accent)!important;color:#fff!important}
+body.pl-vet .topbar-avatar,body.pl-vet .menu-profile-avatar{background:#2B3F6B!important;color:#fff!important;border:2px solid #7FD1C9!important;box-shadow:none!important}
+body.pl-vet .tb-pallino{background:#C9A96E!important}
+body.pl-vet .topbar .icon-btn,body.pl-vet .topbar button:not(.topbar-avatar){color:var(--accent)}
+/* fogli della Home (Portami da, Scadenze, Altro) */
+body.pl-vet .hm-velo{background:rgba(29,45,80,.45)!important}
+body.pl-vet .hm-tappa.su{border-color:#7FD1C9!important}
+body.pl-vet .hm-tappa .vai{background:var(--accent)!important;color:#7FD1C9!important}
+body.pl-vet .hm-griglia button > span{background:#E3F4F2!important;color:var(--accent)!important}
+body.pl-vet .hm-griglia button > span svg{stroke:var(--accent)!important}
+/* chat */
+body.pl-vet .mchat-messages{background:var(--surface2)!important}
+body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(--accent)!important}
+
+/* --- Tema scuro del veterinario: stessi colori del mockup, su blu notte --- */
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-giro{background:#2B3F6B;border:1px solid #3A4E7A}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-giro-num button{background:#24375E}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-cerchi .c{color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-tit,
+:where(:root:not([data-theme="light"])) body.pl-vet #pro-agenda-title,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-pannello-testa b,
+:where(:root:not([data-theme="light"])) body.pl-vet #clienti-list-view .section-title,
+:where(:root:not([data-theme="light"])) body.pl-vet #page-pro-inbox > .section-title{color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-visita.urg,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-gblock.vt-urg{background:rgba(169,68,59,.30);border-color:#A9443B}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-visita.urg .o,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-gblock.vt-urg .ag-cli-nome{color:#E3B5AE}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-galeno{background:#2B3F6B}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-et.tif,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-b.tif,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-chip{background:#2B3F6B;color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-et.oro{background:#2B3F6B;color:#C9A96E}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-et.urg,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-b.urg,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-chip.urg{background:#A9443B;color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet #ag-schede button.on,
+:where(:root:not([data-theme="light"])) body.pl-vet #cli-cartelle button.on,
+:where(:root:not([data-theme="light"])) body.pl-vet #chat-cartelle button.on,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-tile.aperto{background:#7FD1C9;border-color:#7FD1C9;color:#12233F}
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-tile.aperto .ag-count,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-tile.aperto .ag-tile-nome{color:#1D2D50}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-nuovo,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-matita{background:#7FD1C9;color:#12233F}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-av.str{background:#3A4E7A}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-av.equo{background:#2B3F6B;color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-av.no{background:#2B3F6B;color:#C9A96E}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-deve{color:#E3B5AE}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-ok{color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-invita{background:transparent;color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .btn-primary,
+:where(:root:not([data-theme="light"])) body.pl-vet .btn-conferma{color:#12233F!important}
+:where(:root:not([data-theme="light"])) body.pl-vet #bottom-nav-pro .nav-btn.active{color:#7FD1C9!important}

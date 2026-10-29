@@ -3573,7 +3573,402 @@ body.pl-vet #page-pro-home > #vh{display:block!important}
 /* altri professionisti con la Home a widget */
 body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :not(.wh-keep):not(.wh){display:none!important}
 </style>
-<style id="vet-css">/* ===== VETERINARIO (29/10/2026) · colori C: blu notte + verde Tiffany, oro per vaccini e richiami, rosso per urgenze e crediti =====
+<style id="vet-css">/* GENERATO da equo-app-src/strumenti/colori-veterinario.cjs: NON modificare qui. Colori del mockup C per il veterinario. */
+/* core/stili/09-meteo-7-giorni-home-app-equo-scuderia.css */
+:where(body.pl-vet) .meteo-scheletro{background:linear-gradient(90deg,var(--surface2,var(--muted-bg,#F7F4EE)) 0%,var(--border) 50%,var(--surface2,var(--muted-bg,#F7F4EE)) 100%)}
+:where(body.pl-vet) .mi-sereno{color:#2E8F88}
+:where(body.pl-vet) .mi-sereno.notte{color:#2B3F6B}
+:where(body.pl-vet) .mi-variabile{color:#2E8F88}
+:where(body.pl-vet) .mi-nubi,:where(body.pl-vet) .mi-nebbia{color:#677086}
+:where(body.pl-vet) .mi-pioviggine,:where(body.pl-vet) .mi-pioggia{color:#2B3F6B}
+:where(body.pl-vet) .mi-pioggia_forte{color:#2B3F6B}
+:where(body.pl-vet) .mi-temporale{color:#2B3F6B}
+:where(body.pl-vet) .mi-neve,:where(body.pl-vet) .mi-nevischio{color:#2B3F6B}
+:where(body.pl-vet) .meteo-velo{background:rgba(29,45,80,.45)}
+:where(body.pl-vet) .meteo-x{background:var(--surface2,var(--muted-bg,#F7F4EE))}
+:where(body.pl-vet) .meteo-riga .p{color:#2B3F6B}
+/* core/stili/base-01-inizio.css */
+:where(body.pl-vet) .dr-sett .m .ic{color:#2E8F88}
+/* core/stili/base-02-auth.css */
+:where(body.pl-vet) .auth-tab.active{color:#1A2236}
+:where(body.pl-vet) .btn-primary{color:#1A2236}
+/* core/stili/base-03-tasti-di-conferma-salvataggio-verde-equo.css */
+:where(body.pl-vet) .btn-primary{background:#1D2D50;border:2px solid #7FD1C9}
+:where(body.pl-vet) .btn-danger{background:rgba(169,68,59,.15);border:1px solid rgba(169,68,59,.3)}
+:where(body.pl-vet) .auth-error{background:rgba(169,68,59,.1);border:1px solid rgba(169,68,59,.3)}
+/* core/stili/base-05-app-shell.css */
+:where(body.pl-vet) .topbar-avatar{color:#1A2236}
+:where(body.pl-vet) .badge-accent{background:rgba(127,209,201,.18)}
+:where(body.pl-vet) .badge-green{background:rgba(227,244,242,.18)}
+:where(body.pl-vet) .badge-red{background:rgba(169,68,59,.18)}
+/* core/stili/base-09-ricerca-rapida.css */
+:where(body.pl-vet) .rz-lista{border:1px solid var(--border,#E6E0D4)}
+:where(body.pl-vet) .rz-lista button{color:var(--text,#1D2D50)}
+:where(body.pl-vet) .rz-lista button:hover{background:var(--surface2,var(--muted-bg,#F7F4EE))}
+:where(body.pl-vet) .rz-lista button small{color:var(--muted,#677086);background:var(--surface2,var(--muted-bg,#F7F4EE))}
+:where(body.pl-vet) .rz-lista .rz-fissa{color:var(--muted,#677086)}
+:where(body.pl-vet) .rz-lista .rz-altra{color:#1D2D50}
+:where(body.pl-vet) .rz-sep{background:var(--border,#EDE8DD)}
+:where(body.pl-vet) .rz-vuoto{color:var(--muted,#677086)}
+:where(body.pl-vet) .rz-nota{color:var(--muted,#677086)}
+:where(body.pl-vet) .rz-errore input{border-color:#A9443B!important}
+:where(body.pl-vet) .rz-errore .rz-nota{color:#A9443B}
+/* core/stili/base-12-menu.css */
+:where(body.pl-vet) .menu-profile-avatar{color:#1A2236}
+/* core/stili/base-14-criterio-doppio-tasto-simone-30-09-2026.css */
+:where(body.pl-vet) .btn.btn-conferma,:where(body.pl-vet) .btn-conferma{background:#1D2D50!important;border:2px solid #7FD1C9!important}
+:where(body.pl-vet) .btn.btn-variazione,:where(body.pl-vet) .btn-variazione{background:#7FD1C9!important;color:#1D2D50!important}
+/* core/stili/base-15-palette-per-profilo-sfumatura-stile-revo.css */
+:where(body.pl-vet) .role-chip.active{color:#1A2236}
+:where(body.pl-vet) .pm-type-btn.active{background:rgba(127,209,201,.08)}
+/* core/stili/base-18-ai-fab-sheet.css */
+:where(body.pl-vet) .ai-fab{color:#1A2236}
+:where(body.pl-vet) .ai-fab-dot{background:#A9443B}
+/* core/stili/base-18b-chat-a-giorni.css */
+:where(body.pl-vet) .chat-bubble.ai.importante{border:1.5px solid #7FD1C9;background:linear-gradient(180deg,rgba(127,209,201,.12),transparent 60%),var(--surface);box-shadow:0 4px 14px rgba(29,45,80,.12)}
+:where(body.pl-vet) .ai-imp-testa{color:#2E8F88;background:rgba(127,209,201,.18)}
+:where(body.pl-vet) .ai-imp-testa::before{background:#A9443B}
+:where(body.pl-vet) .ai-imp-tag{background:#A9443B;box-shadow:0 3px 10px rgba(169,68,59,.3)}
+:where(body.pl-vet) .ai-imp-tag::after{border-top-color:#A9443B}
+:where(body.pl-vet) .btn.ai-rosso{border-color:rgba(169,68,59,.4)}
+/* core/stili/base-20-barra-in-alto.css */
+:where(body.pl-vet) .tb2 .tb-pallino{background:#A9443B}
+/* core/stili/base-20-pop-up-di-sistema-offline-aggiornamento.css */
+:where(body.pl-vet) .eq-pop-overlay{background:rgba(29,45,80,.28)}
+:where(body.pl-vet) .eq-pop{color:var(--text,#1D2D50);border:1px solid color-mix(in srgb,var(--border,#E6E0D4) 70%,transparent)}
+:where(body.pl-vet) .eq-pop .ic.off{background:#F7F4EE;color:#1D2D50}
+:where(body.pl-vet) .eq-pop .ic.agg{background:#E3F4F2;color:#1D2D50}
+:where(body.pl-vet) .eq-pop p{color:var(--text,#1D2D50)}
+:where(body.pl-vet) .eq-pop .piccolo{color:var(--muted,#677086)}
+:where(body.pl-vet) .eq-pop details{border:1px solid color-mix(in srgb,var(--border,#E6E0D4) 80%,transparent)}
+:where(body.pl-vet) .eq-pill-stato.coda{background:#F7F4EE;color:#1D2D50}
+:where(body.pl-vet) .eq-pill-stato.off{background:rgba(247,244,238,.92);color:#1D2D50}
+:where(body.pl-vet) .eq-pill-stato.agg{background:rgba(227,244,242,.94);color:#1D2D50}
+:where(body.pl-vet) .eq-pop .ic.ric{background:#F7F4EE;color:#1D2D50}
+:where(body.pl-vet) .ric-pag-scelte button.on[data-p="saldato"]{background:#1D2D50}
+:where(body.pl-vet) .ric-pag-scelte button.on[data-p="da_saldare"]{background:#7FD1C9;color:#1A2236}
+:where(body.pl-vet) .nota-modifica{color:#1D2D50;background:rgba(127,209,201,.22);border:1px solid rgba(127,209,201,.55)}
+:where(body.pl-vet) .btn-equo-ok{background:#1D2D50;border:2.5px solid #7FD1C9}
+:where(body.pl-vet) .btn-equo-cambia{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ric-ruota .n{color:var(--muted,#677086)}
+:where(body.pl-vet) .ric-ruota .n.sel{color:var(--text,#1D2D50)}
+:where(body.pl-vet) .ric-ruota-box::before{border-top:2px solid #7FD1C9;border-bottom:2px solid #7FD1C9}
+:where(body.pl-vet) .ric-ruota-box::after{color:var(--muted,#677086)}
+/* core/stili/base-22-ai-chat.css */
+:where(body.pl-vet) .chat-bubble.user{color:#1A2236}
+/* core/stili/base-26-legale-privacy-cookie-termini-riusa-il-l.css */
+:where(body.pl-vet) .legal-tab.active{color:#1A2236}
+/* core/stili/base-27-cookie-banner.css */
+@media (min-width:600px){body:where(.pl-vet){background:#000000}}
+/* core/stili/base-46-invito-a-installare-l-app.css */
+:where(body.pl-vet) .ii-velo{background:rgba(29,45,80,.55)}
+:where(body.pl-vet) .ii-card{background:#F7F4EE;border:1.5px solid #7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ii-testa b{color:#1D2D50}
+:where(body.pl-vet) .ii-testa span{color:#677086}
+:where(body.pl-vet) .ii-passo{border-top:1px solid #E6E0D4}
+:where(body.pl-vet) .ii-passo span{background:#1D2D50}
+:where(body.pl-vet) .ii-btn{background:#1D2D50;border:2px solid #7FD1C9}
+:where(body.pl-vet) .ii-dopo{color:#677086}
+/* comune/barra/stili/03-pill-css.css */
+:where(body.pl-vet) .hm-flot.piu{background:#7FD1C9;color:#1D2D50;box-shadow:0 10px 22px rgba(29,45,80,.35)}
+@media (max-width:767px){body:where(.pl-vet) .bottom-nav{background:rgba(247,244,238,.82);box-shadow:0 12px 30px rgba(29,45,80,.25)}}
+@media (max-width:767px){@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body:where(.pl-vet) .bottom-nav{background:#F7F4EE}}}
+@media (max-width:767px){body:where(.pl-vet) .bottom-nav .nav-btn{color:#1D2D50}}
+@media (max-width:767px){body:where(.pl-vet) .bottom-nav .nav-btn.active{background:#1D2D50;color:#2E8F88}}
+@media (max-width:767px){body:where(.pl-vet) .nav-hammer small{color:#1D2D50}}
+@media (max-width:767px){:where(body.pl-vet) .nav-hammer .hm-ham::before{background:radial-gradient(circle at 50% 2px,#F7F4EE 0,#7FD1C9 1.6px,rgba(127,209,201,0) 4.5px)}}
+@media (max-width:767px){:where(body.pl-vet) .nav-hammer .hm-ham::after{background:#1D2D50 url(assets/agenti/hammer.webp) center/cover no-repeat;box-shadow:0 8px 18px rgba(29,45,80,.4)}}
+:where(body.pl-vet) .hm-menu-piu{background:rgba(247,244,238,.9)}
+:where(body.pl-vet) .hm-menu-piu .pl-tl span.pi-c{background:#1D2D50;color:#2E8F88}
+:where(body.pl-vet) .hm-menu-piu .pl-tl.o span.pi-c{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .hm-menu-piu .pl-peg{background:#7FD1C9;border:1px solid #7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .hm-menu-piu .pl-peg .im{background:#1D2D50;border:2px solid #E6E0D4}
+:where(body.pl-vet) .hm-menu-piu .pl-peg span.t{color:#1D2D50}
+body.pl-vet:where(.pl-vet) .ai-fab{background:#1D2D50 center/cover no-repeat;border:2px solid #7FD1C9}
+html body[data-tono]:where(.pl-vet) #screen-app{--tono:#F7F4EE}
+html body[data-tono="2"]:where(.pl-vet) #screen-app{--tono:#F7F4EE}
+html body[data-tono="3"]:where(.pl-vet) #screen-app{--tono:#7FD1C9}
+html body[data-tono="4"]:where(.pl-vet) #screen-app{--tono:#E6E0D4}
+html body[data-tono="5"]:where(.pl-vet) #screen-app{--tono:#677086}
+/* comune/chat/stili/base-23-mascalcia-chat-stile-whatsapp-palette-eq.css */
+:where(body.pl-vet) .mchat-messages{background:radial-gradient(ellipse at top left,rgba(127,209,201,.07),transparent 55%),
+    radial-gradient(ellipse at bottom right,rgba(227,244,242,.06),transparent 55%),
+    var(--bg)}
+:where(body.pl-vet) .mchat-bubble.out{color:#1A2236}
+/* comune/chat/stili/base-24-risposta-a-un-messaggio-stile-whatsapp-c.css */
+:where(body.pl-vet) .mchat-cit{border-left:3px solid #1D2D50;background:rgba(29,45,80,.07)}
+:where(body.pl-vet) .mchat-cit b{color:#1D2D50}
+:where(body.pl-vet) .risposta-bar .rb-cit{border-left:3px solid #1D2D50}
+:where(body.pl-vet) .risposta-bar .rb-cit b{color:#1D2D50}
+:where(body.pl-vet) .ferri-invio{color:rgba(26,34,54,.45)}
+:where(body.pl-vet) .mchat-nuovi{color:#1A2236}
+/* comune/chat/stili/base-25-spunte-di-lettura-a-pallini-1-grigio-inv.css */
+:where(body.pl-vet) .ferri-inviato,:where(body.pl-vet) .ferri-consegnato{color:rgba(26,34,54,.45)}
+:where(body.pl-vet) .ferri-letto{color:#1D2D50}
+/* comune/chat/stili/base-44-allegato-pdf-in-chat-maniscalco.css */
+:where(body.pl-vet) .mchat-doc-ico{background:#A9443B}
+/* comune/home-widget/stili/base-47-home-a-widget.css */
+:where(body.pl-vet) .wg-premium{background:#7FD1C9;color:#1D2D50}
+/* comune/home-widget/stili/base-48-blocco-evidenziato-prossimo-appuntamento.css */
+:where(body.pl-vet) .wg-prossimo{background:#1D2D50;color:#FFFFFF}
+:where(body.pl-vet) .wg-prossimo.rosso{background:#A9443B}
+:where(body.pl-vet) .wg-quando{color:#2E8F88}
+:where(body.pl-vet) .wg-dove{color:#677086}
+:where(body.pl-vet) .wg-azioni button.oro{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .wg-azioni.chiaro button.oro{background:#1D2D50}
+:where(body.pl-vet) .wg-sem.ocra{background:#7FD1C9}
+/* comune/home-widget/stili/base-49-widget-pieni-verde-con-cerchio-oro-chiar.css */
+:where(body.pl-vet) .wg-pieno{background:#1D2D50;border-color:#1D2D50}
+:where(body.pl-vet) .wg-pieno .wg-riga{color:#677086}
+:where(body.pl-vet) .wg-pieno .wg-riga.evid{color:#2E8F88}
+:where(body.pl-vet) .wg-pieno .wg-num small{color:#677086}
+:where(body.pl-vet) .wg-cerchio{background:#7FD1C9;color:#1D2D50}
+:root:not([data-theme="light"]) :where(body.pl-vet) .wg-pieno{background:#7FD1C9;border-color:#7FD1C9;color:#1D2D50}
+:root:not([data-theme="light"]) :where(body.pl-vet) .wg-pieno .wg-riga,:root:not([data-theme="light"]) :where(body.pl-vet) .wg-pieno .wg-num small{color:#1D2D50}
+:root:not([data-theme="light"]) :where(body.pl-vet) .wg-pieno .wg-riga.evid{color:#1D2D50}
+:root:not([data-theme="light"]) :where(body.pl-vet) .wg-pieno .wg-cerchio{background:#1D2D50;color:#2E8F88}
+:root:not([data-theme="light"]) :where(body.pl-vet) .wg-azione .wg-riga.forte{color:#1D2D50}
+/* comune/home-widget/stili/base-50-settimana.css */
+:where(body.pl-vet) .wg-barra.oggi i{background:#1D2D50}
+/* ruoli/maniscalco/stili/base-10-home-pro-prossimi-appuntamenti-da-richia.css */
+:where(body.pl-vet) .hp-dot.rosso{background:#A9443B}
+:where(body.pl-vet) .hp-dot.ocra{background:#7FD1C9}
+:where(body.pl-vet) .hp-dot.verde{background:#2E8F88}
+:where(body.pl-vet) .hp-main span.rosso{color:#A9443B}
+:where(body.pl-vet) .hp-main span.ocra{color:#1D2D50}
+:where(body.pl-vet) .hp-filtri button.on{background:#1D2D50;border-color:#1D2D50}
+:where(body.pl-vet) .int-richiesta-box{background:color-mix(in srgb,#7FD1C9 15%,var(--surface));border:1.5px solid color-mix(in srgb,#7FD1C9 55%,transparent)}
+:where(body.pl-vet) .int-cambiata #intervento-data,:where(body.pl-vet) .int-cambiata #intervento-ora{border-color:#7FD1C9;box-shadow:0 0 0 2px color-mix(in srgb,#7FD1C9 35%,transparent)}
+:where(body.pl-vet) .hp-giro{background:color-mix(in srgb,#7FD1C9 16%,var(--surface));border:1.5px solid color-mix(in srgb,#7FD1C9 55%,transparent)}
+:where(body.pl-vet) .hp-giro-ic{background:#1D2D50;color:#2E8F88}
+:where(body.pl-vet) .hp-main .hp-prem,:where(body.pl-vet) .hp-prem{color:#1D2D50!important;background:#7FD1C9;color:#1D2D50}
+/* ruoli/maniscalco/stili/base-28-ruota-misure-ferro-modal-appuntamento-ma.css */
+:where(body.pl-vet) .misura-wheel-band{background:rgba(127,209,201,.08)}
+:where(body.pl-vet) .lc-on .lc-ord{background:var(--card,#F7F4EE)}
+:where(body.pl-vet) .lc-on .lc-ord.on{background:var(--green,#1D2D50);border-color:var(--green,#1D2D50);color:#FFFFFF}
+:where(body.pl-vet) .lc-on .lc-lista{background:var(--card,#F7F4EE)}
+:where(body.pl-vet) .lc-pill.r{background:#E6E0D4;color:#A9443B;border-color:#E6E0D4}
+:where(body.pl-vet) .lc-pill.a{background:#F7F4EE;color:#1D2D50;border-color:#7FD1C9}
+:where(body.pl-vet) .lc-pill.v{background:#E3F4F2;color:#1D2D50;border-color:#E3F4F2}
+:where(body.pl-vet) .lc-pill.ag{background:#F7F4EE;color:#1D2D50;border-color:#E6E0D4}
+:where(body.pl-vet) .lc-on .lc-legenda i.r{background:#A9443B}
+:where(body.pl-vet) .lc-on .lc-legenda i.a{background:#7FD1C9}
+:where(body.pl-vet) .lc-on .lc-legenda i.v{background:#2E8F88}
+:where(body.pl-vet) .lc-on .lc-legenda i.ag{background:#E6E0D4}
+/* ruoli/maniscalco/stili/base-30-ferratura-del-cavallo-scheda.css */
+:where(body.pl-vet) .fer-lavoro button.on{border-color:var(--green,#1D2D50);background:var(--green,#1D2D50)}
+:where(body.pl-vet) .fer-lavoro button.on small{color:#8A6D2E}
+:where(body.pl-vet) .fer-scelta button.on{background:var(--green,#1D2D50)}
+:where(body.pl-vet) .fer-scelta button.on[data-v="correttivo"]{background:#7FD1C9}
+:where(body.pl-vet) .int-quando button.on{border-color:var(--green,#1D2D50);background:var(--green,#1D2D50)}
+:where(body.pl-vet) .str-zoccoli button.on{border-color:var(--green,#1D2D50);background:var(--green,#1D2D50)}
+/* ruoli/maniscalco/stili/base-33-sposta-cavallo.css */
+:where(body.pl-vet) .sposta-voce .data b{color:#2B3F6B}
+/* ruoli/maniscalco/stili/base-34-modalita-lavoro-maniscalco-schermo-scuro.css */
+:where(body.pl-vet) .ml{color:#8A6D2E;background:radial-gradient(90% 40% at 100% 0%,rgba(127,209,201,.2),rgba(127,209,201,0) 60%),radial-gradient(90% 50% at 0% 80%,rgba(29,45,80,.3),rgba(29,45,80,0) 60%),linear-gradient(180deg,#1D2D50,#1D2D50)}
+:where(body.pl-vet) .ml-barra{background:linear-gradient(90deg,rgba(127,209,201,.22),rgba(127,209,201,.06));border:1px solid rgba(127,209,201,.3)}
+:where(body.pl-vet) .ml-pul{background:#7FD1C9;box-shadow:0 0 0 5px rgba(127,209,201,.25)}
+:where(body.pl-vet) .ml-barra b{color:#2E8F88}
+:where(body.pl-vet) .ml-barra span:last-child{color:#677086}
+:where(body.pl-vet) .ml-esci{border:1.5px solid rgba(127,209,201,.35);background:rgba(247,244,238,.08);color:#8A6D2E}
+:where(body.pl-vet) .ml-vuoto{color:#677086}
+:where(body.pl-vet) .ml-av{color:#1D2D50;background:radial-gradient(120% 120% at 30% 20%,#F7F4EE,#7FD1C9 50%,#7FD1C9)}
+:where(body.pl-vet) .ml-card{background:rgba(247,244,238,.07);border:1px solid rgba(127,209,201,.2)}
+:where(body.pl-vet) .ml-h small{color:#677086}
+:where(body.pl-vet) .ml-al.sic{background:rgba(169,68,59,.18);border:1px solid rgba(169,68,59,.55);color:#677086}
+:where(body.pl-vet) .ml-al.pie{background:rgba(127,209,201,.15);border:1px solid rgba(127,209,201,.45)}
+:where(body.pl-vet) .ml-al.pie b{color:#2E8F88}
+:where(body.pl-vet) .ml-al.ok{color:#2E8F88}
+:where(body.pl-vet) .ml-sig{background:#7FD1C9;color:#1D2D50}
+/* ruoli/maniscalco/stili/base-35-slider-si-conferma-trascinando-mai-con-u.css */
+:where(body.pl-vet) .ml-slider{background:rgba(46,143,136,.14);border:2px solid rgba(46,143,136,.5)}
+:where(body.pl-vet) .ml-slider b{color:#2E8F88}
+:where(body.pl-vet) .ml-pom{background:radial-gradient(120% 120% at 30% 20%,#E3F4F2,#2E8F88 50%,#1D2D50);color:#1D2D50;box-shadow:0 10px 20px -8px rgba(46,143,136,.8)}
+:where(body.pl-vet) .ml-slider.oro,:where(body.pl-vet) .ml-slider:not(.verde){background:rgba(127,209,201,.14);border-color:rgba(127,209,201,.55)}
+:where(body.pl-vet) .ml-slider.oro .ml-pom,:where(body.pl-vet) .ml-slider:not(.verde) .ml-pom{background:radial-gradient(120% 120% at 30% 20%,#F7F4EE,#7FD1C9 50%,#7FD1C9);color:#1D2D50;box-shadow:0 10px 20px -8px rgba(127,209,201,.8)}
+:where(body.pl-vet) .ml-slider.oro b,:where(body.pl-vet) .ml-slider:not(.verde) b{color:#2E8F88}
+:where(body.pl-vet) .ml-sugg{color:#677086}
+/* ruoli/maniscalco/stili/base-36-durante.css */
+:where(body.pl-vet) .ml-cer{color:#2E8F88;border:2px solid rgba(127,209,201,.4);box-shadow:0 0 0 18px rgba(127,209,201,.07),0 0 0 38px rgba(127,209,201,.035)}
+:where(body.pl-vet) .ml-quiete p{color:#677086}
+/* ruoli/maniscalco/stili/base-37-dopo.css */
+:where(body.pl-vet) .ml-riga{background:rgba(247,244,238,.07);border:1px solid rgba(127,209,201,.2)}
+:where(body.pl-vet) .ml-t span{color:#677086}
+:where(body.pl-vet) .ml-imp{border:1px solid rgba(127,209,201,.25)}
+:where(body.pl-vet) .ml-imp span{color:#677086}
+:where(body.pl-vet) .ml-imp input{color:#8A6D2E}
+:where(body.pl-vet) .ml-st.ok{color:#2E8F88;background:rgba(46,143,136,.15)}
+:where(body.pl-vet) .ml-st.pb{color:#1D2D50;background:#7FD1C9}
+:where(body.pl-vet) .ml-st.pb .ml-sig{background:#1D2D50;color:#2E8F88}
+:where(body.pl-vet) .ml-pbb{border:1.5px solid rgba(127,209,201,.55);background:rgba(127,209,201,.12);color:#2E8F88}
+:where(body.pl-vet) .ml-tot{color:#677086}
+:where(body.pl-vet) .ml-tot b{color:#8A6D2E}
+:where(body.pl-vet) .ml-pag button{border:2px solid rgba(127,209,201,.22);background:rgba(247,244,238,.06);color:#8A6D2E}
+:where(body.pl-vet) .ml-pag button small{color:#677086}
+:where(body.pl-vet) .ml-pag button.on{border-color:#7FD1C9;background:rgba(127,209,201,.2)}
+:where(body.pl-vet) .ml-prox{color:#2E8F88}
+/* ruoli/maniscalco/stili/base-38-problema-i-quattro-piedi-a-cerchi.css */
+:where(body.pl-vet) .ml-cav p{color:#677086}
+:where(body.pl-vet) .ml-piede{color:#8A6D2E;background:linear-gradient(180deg,rgba(247,244,238,.12),rgba(247,244,238,.04));border:3px solid rgba(127,209,201,.35)}
+:where(body.pl-vet) .ml-piede small{color:#677086}
+:where(body.pl-vet) .ml-piede .pi{color:#2E8F88}
+:where(body.pl-vet) .ml-piede em{color:#1D2D50;background:#7FD1C9}
+:where(body.pl-vet) .ml-piede.sel{border-color:#7FD1C9;background:radial-gradient(120% 120% at 30% 20%,rgba(247,244,238,.35),rgba(127,209,201,.12));box-shadow:0 0 0 7px rgba(127,209,201,.15)}
+:where(body.pl-vet) .ml-piede.sel small{color:#2E8F88}
+:where(body.pl-vet) .ml-ok{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ml-dd{color:#677086}
+:where(body.pl-vet) .ml-lab{color:#677086}
+:where(body.pl-vet) .ml-voci button{border:2px solid rgba(127,209,201,.22);background:rgba(247,244,238,.06);color:#8A6D2E}
+:where(body.pl-vet) .ml-voci button .li,:where(body.pl-vet) .ml-voci button .pi{color:#2E8F88}
+:where(body.pl-vet) .ml-voci button.on{border-color:#7FD1C9;background:rgba(127,209,201,.22)}
+:where(body.pl-vet) .ml-racc button{border:2px solid rgba(127,209,201,.22);background:rgba(247,244,238,.08);color:#8A6D2E}
+:where(body.pl-vet) .ml-racc button.fatto{border-color:#2E8F88;color:#2E8F88}
+:where(body.pl-vet) .ml-racc button.ham{background:radial-gradient(120% 120% at 30% 20%,#1D2D50,#1D2D50 55%,#1D2D50);color:#2E8F88;border-color:rgba(127,209,201,.45)}
+:where(body.pl-vet) .ml-nota{border:1.5px solid rgba(127,209,201,.25);color:#8A6D2E}
+:where(body.pl-vet) .ml-nota::placeholder{color:#677086}
+:where(body.pl-vet) .ml-stor{color:#2E8F88;background:rgba(247,244,238,.05)}
+:where(body.pl-vet) .ml-stor b{color:#2E8F88}
+:where(body.pl-vet) .ml-ric .li{color:#2E8F88}
+:where(body.pl-vet) .ml-ric button{border:2px solid rgba(127,209,201,.22);background:rgba(247,244,238,.06);color:#8A6D2E}
+:where(body.pl-vet) .ml-ric button.on{border-color:#7FD1C9;background:rgba(127,209,201,.22)}
+:where(body.pl-vet) .ml-tg{border:2px solid rgba(127,209,201,.18);background:rgba(247,244,238,.05);color:#8A6D2E}
+:where(body.pl-vet) .ml-tg .li{color:#2E8F88}
+:where(body.pl-vet) .ml-tg i{background:rgba(247,244,238,.18)}
+:where(body.pl-vet) .ml-tg i::after{background:#F7F4EE}
+:where(body.pl-vet) .ml-tg.on{border-color:rgba(127,209,201,.6)}
+:where(body.pl-vet) .ml-tg.on i{background:#2E8F88}
+/* ruoli/maniscalco/stili/base-39-sei-arrivato-e-tasto-lavoro-in-agenda.css */
+:where(body.pl-vet) .ml-arr span{background:#F7F4EE;border:1px solid #7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ag-cli-lav{color:#2E8F88;background:#1D2D50}
+/* ruoli/maniscalco/stili/base-40-incassi-vista-semplice-completa.css */
+:where(body.pl-vet) .inc-avviso{background:color-mix(in srgb,#7FD1C9 14%,var(--surface));border:1px solid color-mix(in srgb,#7FD1C9 45%,var(--border))}
+:where(body.pl-vet) .inc-avviso b{color:#2E8F88}
+/* ruoli/maniscalco/stili/base-43-scheda-cliente-a-box-scheda-cavallo-mani.css */
+:where(body.pl-vet) .cav-sem.arancio{background:#7FD1C9}
+:where(body.pl-vet) .badge-certified{color:#1D2D50;background:linear-gradient(135deg,#7FD1C9,#7FD1C9)}
+:where(body.pl-vet) .share-opt.primary{background:rgba(127,209,201,.10)}
+:where(body.pl-vet) .share-opt.primary .share-opt-ico{color:#1D2D50}
+:where(body.pl-vet) .ag-ev-fatto{border:2px solid #7FD1C9;background:#1D2D50}
+/* ruoli/maniscalco/stili/base-45-ripristinati-27-09-chip-mappa-servizi-ba.css */
+:where(body.pl-vet) .chip.active{background:var(--primary,#1D2D50);border-color:var(--primary,#1D2D50)}
+:where(body.pl-vet) .partner-banner{background:var(--card,#1D2D50)}
+:where(body.pl-vet) .partner-tag{background:rgba(127,209,201,.18);color:var(--gold,#2E8F88)}
+/* ruoli/maniscalco/stili/base-53-tastierino-pin.css */
+:where(body.pl-vet) .pin-lucch{background:#1D2D50;color:#2E8F88}
+/* ruoli/maniscalco/stili/base-55-banner-a-riquadri-scorre-da-solo-si-sfog.css */
+:where(body.pl-vet) .hm-slide.foto::before{background:linear-gradient(90deg,rgba(29,45,80,.92) 0%,rgba(29,45,80,.62) 36%,rgba(29,45,80,0) 66%)}
+/* ruoli/maniscalco/stili/base-56-cerchi.css */
+:where(body.pl-vet) .hm-cerchio .c{box-shadow:0 4px 10px rgba(127,209,201,.25)}
+/* ruoli/maniscalco/stili/base-57-righe.css */
+:where(body.pl-vet) .r-cav{--tinta:#E3F4F2;--colore:#1D2D50}
+:where(body.pl-vet) .r-cli{--tinta:#E6E0D4;--colore:#2B3F6B}
+:where(body.pl-vet) .r-scu{--tinta:#F7F4EE;--colore:#7FD1C9}
+:where(body.pl-vet) .r-inc{--tinta:#F7F4EE;--colore:#7FD1C9}
+:where(body.pl-vet) .r-app{--tinta:#2B3F6B;--colore:#2B3F6B}
+:root:not([data-theme="light"]) :where(body.pl-vet) .r-cav{--colore:#E3F4F2}
+:root:not([data-theme="light"]) :where(body.pl-vet) .r-cli{--colore:#2B3F6B}
+:root:not([data-theme="light"]) :where(body.pl-vet) .r-scu{--colore:#7FD1C9}
+:root:not([data-theme="light"]) :where(body.pl-vet) .r-inc{--colore:#7FD1C9}
+:root:not([data-theme="light"]) :where(body.pl-vet) .r-app{--colore:#2B3F6B}
+/* ruoli/maniscalco/stili/base-58-messaggi-sinistra-e-destra-flottanti-sol.css */
+:where(body.pl-vet) .hm-flot{box-shadow:0 8px 20px rgba(29,45,80,.25)}
+:where(body.pl-vet) .hm-flot.piu{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .hm-flot.piu.aperto{background:#1D2D50;color:#2E8F88}
+:where(body.pl-vet) .hm-velo{background:rgba(29,45,80,.38)}
+:where(body.pl-vet) .hm-menu-piu{box-shadow:0 18px 40px rgba(29,45,80,.3)}
+/* ruoli/maniscalco/stili/base-59-foglio-dal-basso-portami-da-scadenze-alt.css */
+:where(body.pl-vet) .hm-foglio{box-shadow:0 -10px 30px rgba(29,45,80,.2)}
+:where(body.pl-vet) .hm-tappa.su{border:2px solid #1D2D50}
+:where(body.pl-vet) .hm-tappa .vai{background:#1D2D50;color:#2E8F88}
+/* ruoli/maniscalco/stili/base-60-menu-in-basso-del-maniscalco-home-agenda.css */
+:where(body.pl-vet) .nav-hammer .hm-ham::before{background:conic-gradient(from 0deg,#F7F4EE,#7FD1C9 22%,rgba(127,209,201,0) 46%,rgba(127,209,201,0) 68%,#7FD1C9 90%,#F7F4EE)}
+:where(body.pl-vet) .nav-hammer .hm-ham::after{background:#1D2D50;box-shadow:0 8px 18px rgba(29,45,80,.4)}
+:where(body.pl-vet) .nav-hammer .hm-ham svg{color:#2E8F88}
+:where(body.pl-vet) .nav-hammer .hm-ham-dot{background:#A9443B}
+/* ruoli/maniscalco/stili/base-61-pannello-di-hammer-ottobre-2026-contesto.css */
+:where(body.pl-vet) .hp-scelte button{border:1.5px solid #7FD1C9}
+:where(body.pl-vet) .hp-limite{border:2px solid #7FD1C9}
+:where(body.pl-vet) .hp-b.v{background:#1D2D50;color:#2E8F88}
+/* ruoli/maniscalco/stili/base-62-focus.css */
+:where(body.pl-vet) .hp-f-scatti button.on{border-color:#1D2D50;background:#1D2D50;color:#2E8F88}
+:where(body.pl-vet) .hp-f-cornice{background:#1D2D50}
+:where(body.pl-vet) .hp-f-guida{border:2.5px dashed #7FD1C9;color:#2E8F88}
+:where(body.pl-vet) .hp-f-cornice.gira .hp-f-gira{background:conic-gradient(from var(--hpa),#F7F4EE,#7FD1C9 22%,rgba(127,209,201,0) 46%,rgba(127,209,201,0) 68%,#7FD1C9 90%,#F7F4EE)}
+/* ruoli/maniscalco/stili/base-62d-card-pro.css */
+:where(body.pl-vet) .ecv-pagina{--ecv-ok:#2E8F88;--ecv-oro:#7FD1C9;--ecv-prem:#E6E0D4;background:radial-gradient(120% 70% at 50% 0%,#1D2D50 0%,#1D2D50 62%);color:#8A6D2E}
+:root[data-theme="light"] :where(body.pl-vet) .ecv-pagina{background:radial-gradient(120% 70% at 50% 0%,#F7F4EE 0%,#F7F4EE 70%);color:#1D2D50;--ecv-ok:#2E8F88;--ecv-oro:#7FD1C9;--ecv-prem:#E6E0D4}
+:root[data-theme="light"] :where(body.pl-vet) .ecv-tessera{border-color:rgba(29,45,80,.12)}
+:where(body.pl-vet) .ecv-ico{background:linear-gradient(135deg,#7FD1C9,#7FD1C9)}
+:where(body.pl-vet) .ecv-ico-p{background:linear-gradient(135deg,#E6E0D4,#E6E0D4)}
+:where(body.pl-vet) .ecv-badge.v{background:rgba(46,143,136,.2)}
+:where(body.pl-vet) .ecv-badge.a{background:rgba(127,209,201,.15)}
+:where(body.pl-vet) .ecv-badge.g{background:rgba(103,112,134,.12);border:1px solid rgba(103,112,134,.4)}
+:where(body.pl-vet) .ecv-badge.p{background:rgba(230,224,212,.18)}
+:where(body.pl-vet) .ecv-lato{background:#F7F4EE;color:#1D2D50}
+:where(body.pl-vet) .ecv-band{background:linear-gradient(135deg,#1D2D50 0%,#1D2D50 55%,#7FD1C9 120%)}
+:where(body.pl-vet) .ecv-foto{background:linear-gradient(160deg,#7FD1C9,#E6E0D4) center/cover no-repeat}
+:where(body.pl-vet) .ecv-ruolo{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ecv-nome{background:#1D2D50}
+:where(body.pl-vet) .ecv-zona{background:#F7F4EE}
+:where(body.pl-vet) .ecv-cert{color:#1D2D50}
+:where(body.pl-vet) .ecv-cert i{background:#2E8F88}
+:where(body.pl-vet) .ecv-spec span{background:#1D2D50;color:#2E8F88}
+:where(body.pl-vet) .ecv-cod small{color:#677086}
+:where(body.pl-vet) .ecv-qr{box-shadow:0 0 0 1px #E6E0D4}
+:where(body.pl-vet) .ecv-rtit{color:#677086}
+:where(body.pl-vet) .ecv-numeri div{background:#F7F4EE}
+:where(body.pl-vet) .ecv-numeri b{color:#1D2D50}
+:where(body.pl-vet) .ecv-numeri small{color:#677086}
+:where(body.pl-vet) .ecv-rlista div{border-bottom:1px solid #E6E0D4}
+:where(body.pl-vet) .ecv-rlista span{color:#677086}
+:where(body.pl-vet) .ecv-verifica{color:#677086}
+:where(body.pl-vet) .ecv-azioni button{border:1px solid rgba(103,112,134,.3)}
+:where(body.pl-vet) .ecv-azioni button.princ{color:#1D2D50}
+:where(body.pl-vet) .ecv-compl{border:1px solid rgba(103,112,134,.25)}
+:where(body.pl-vet) .ecv-barra{background:rgba(103,112,134,.3)}
+:where(body.pl-vet) .ecv-sez{border:1px solid rgba(103,112,134,.25)}
+:where(body.pl-vet) .ecv-pagina input,:where(body.pl-vet) .ecv-pagina textarea,:where(body.pl-vet) .ecv-pagina select{border:1px solid rgba(103,112,134,.35)}
+:where(body.pl-vet) .ecv-pagina select option{color:#1D2D50}
+:where(body.pl-vet) .ecv-riga{border-top:1px solid rgba(103,112,134,.2)}
+:where(body.pl-vet) .ecv-int{background:rgba(103,112,134,.35)}
+:where(body.pl-vet) .ecv-chips button{border:1px solid rgba(103,112,134,.4)}
+:where(body.pl-vet) .ecv-chips button.on{color:#1D2D50}
+:where(body.pl-vet) .ecv-tag{color:#1D2D50}
+:where(body.pl-vet) .ecv-voce{border-top:1px solid rgba(103,112,134,.2)}
+:where(body.pl-vet) .ecv-mini{background:linear-gradient(135deg,#E6E0D4,#1D2D50)}
+:where(body.pl-vet) .ecv-mini.v{background:linear-gradient(135deg,#2E8F88,#1D2D50)}
+:where(body.pl-vet) .ecv-nuovo{border-top:1px dashed rgba(103,112,134,.35)}
+:where(body.pl-vet) .ecv-modelli button{border:2px solid rgba(103,112,134,.3)}
+/* ruoli/maniscalco/stili/base-62e-agenda-semplice-completa.css */
+:where(body.pl-vet) .ag-schede button b.o{background:rgba(127,209,201,.2);color:#2E8F88}
+:where(body.pl-vet) .ag-schede button b.r{background:rgba(169,68,59,.14)}
+:where(body.pl-vet) .ag-pill.r{background:rgba(169,68,59,.14)}
+:where(body.pl-vet) .ag-pill.o{background:rgba(127,209,201,.2);color:#2E8F88}
+:where(body.pl-vet) .ag-pill.v{background:rgba(46,143,136,.14)}
+:where(body.pl-vet) .btn.ag-rosso{border-color:rgba(169,68,59,.4)}
+:where(body.pl-vet) .pm-home{border:1.5px solid #7FD1C9;box-shadow:0 4px 14px rgba(29,45,80,.08)}
+:where(body.pl-vet) .pm-giorno{background:rgba(127,209,201,.1)}
+:where(body.pl-vet) .pm-giorno-t{color:#2E8F88}
+/* ruoli/maniscalco/stili/base-62f-officina-mobile.css */
+:where(body.pl-vet) .of-hero{background:linear-gradient(150deg,#1D2D50 0%,#1D2D50 55%,#1D2D50 130%);box-shadow:0 12px 26px rgba(29,45,80,.32)}
+:where(body.pl-vet) .of-pill span{border:1px solid rgba(127,209,201,.45)}
+:where(body.pl-vet) .of-cta{background:linear-gradient(135deg,#7FD1C9,var(--of-oro2))}
+:where(body.pl-vet) .of-cta.piccolo{box-shadow:0 6px 14px rgba(29,45,80,.25)}
+:where(body.pl-vet) .of-km{background:linear-gradient(90deg,rgba(127,209,201,.12),transparent)}
+:where(body.pl-vet) .of-sc.allerta{border-color:#A9443B;background:linear-gradient(180deg,var(--surface),rgba(169,68,59,.07))}
+:where(body.pl-vet) .of-pred{background:rgba(46,143,136,.14)}
+:where(body.pl-vet) .of-allerta{background:linear-gradient(90deg,rgba(169,68,59,.1),transparent);border:1px solid #A9443B}
+:where(body.pl-vet) .of-liv.basso i{background:linear-gradient(90deg,#7FD1C9,var(--red))}
+:where(body.pl-vet) .of-netto{background:linear-gradient(160deg,var(--surface) 0%,rgba(127,209,201,.18) 100%)}
+:where(body.pl-vet) .of-auto{background:rgba(46,143,136,.14)}
+:where(body.pl-vet) .of-barra i{background:linear-gradient(90deg,var(--of-verde3),var(--of-oro2) 70%,#7FD1C9)}
+:where(body.pl-vet) .of-tg{background:#7FD1C9}
+:where(body.pl-vet) .of-striscia{background:linear-gradient(135deg,#1D2D50,#1D2D50 60%,#1D2D50 140%);box-shadow:0 8px 18px rgba(29,45,80,.25)}
+:where(body.pl-vet) .hm-riga.r-off{background:linear-gradient(120deg,#1D2D50,#1D2D50 55%,#7FD1C9 150%)!important;box-shadow:0 8px 20px rgba(29,45,80,.28)}
+:where(body.pl-vet) .hm-riga.r-off .tx span{color:#2E8F88!important}
+:where(body.pl-vet) .hm-riga.r-off .ic{border:1px solid rgba(127,209,201,.5);color:#2E8F88}
+:where(body.pl-vet) .hm-riga.r-off .fr{color:#2E8F88}
+/* ===== VETERINARIO (29/10/2026) · colori C: blu notte + verde Tiffany, oro per vaccini e richiami, rosso per urgenze e crediti =====
    Solo per il veterinario: tutte le regole partono da :where(body.pl-vet). Cosa si vede nella Home: core/stili/10-regole-ruoli.css */
 :where(body.pl-vet){
   --vt-fondo:#F7F4EE; --vt-sup:#FFFDFA; --vt-bordo:#E6E0D4; --vt-notte:#1D2D50; --vt-notte2:#2B3F6B; --vt-notte3:#3A4E7A;
@@ -3581,7 +3976,23 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
   --vt-oro:#C9A96E; --vt-oro-chiaro:#F4EEE1; --vt-oro-testo:#8A6D2E; --vt-chip:#EDE8DD;
   --vt-testo:#1A2236; --vt-testo2:#677086; --vt-su-blu:#B9C3D9; --vt-urg:#A9443B; --vt-urg-chiaro:#FBF0EE;
 }
-:where(body.pl-vet) #page-pro-home{background:var(--vt-fondo)}
+:where(body.pl-vet) .page-content{background:transparent}
+
+/* ===== TEMA DEL VETERINARIO (29/10/2026): SOLO colori del mockup C, bianco come base =====
+   Le variabili comuni dell'app (--bg, --surface, --accent, ...) si ridefiniscono sul body del veterinario:
+   così cambiano insieme tutte le pagine, le finestre, i fogli e le sottosezioni. */
+:where(:root[data-theme="light"]) :where(body.pl-vet){
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface2:#F7F4EE; --card:#FFFFFF; --border:#E6E0D4;
+  --accent:#1D2D50; --accent2:#2B3F6B; --text:#1A2236; --muted:#677086; --green:#2E8F88; --red:#A9443B;
+  --grad-top:#FFFFFF; --grad-bottom:#FFFFFF; color-scheme:light;
+}
+:where(:root:not([data-theme="light"])) :where(body.pl-vet){
+  --bg:#1D2D50; --surface:#24375E; --surface2:#2B3F6B; --card:#24375E; --border:#3A4E7A;
+  --accent:#7FD1C9; --accent2:#2E8F88; --text:#FFFFFF; --muted:#B9C3D9; --green:#7FD1C9; --red:#E3B5AE;
+  --grad-top:#1D2D50; --grad-bottom:#1D2D50; color-scheme:dark;
+  --vt-fondo:#1D2D50; --vt-sup:#24375E; --vt-bordo:#3A4E7A; --vt-testo:#FFFFFF; --vt-testo2:#B9C3D9; --vt-chip:#2B3F6B;
+}
+:where(body.pl-vet)[data-tono] #screen-app{--tono:var(--bg)!important;background:var(--bg)}
 
 /* --- Home --- */
 :where(body.pl-vet) .vh{color:var(--vt-testo);padding:4px 2px 96px}
@@ -3628,7 +4039,6 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 :where(body.pl-vet) #intervento-nuovo-cavallo-lavoro-group{display:none!important}
 
 /* --- Agenda (mockup Agenda 1 · Settimana): 4 schede, settimana su una riga, visite per posto --- */
-:where(body.pl-vet) #page-pro-agenda{background:var(--vt-fondo)}
 :where(body.pl-vet) #ag-vista,:where(body.pl-vet) #page-pro-agenda .ag-invito{display:none!important}
 :where(body.pl-vet) #ag-schede{background:var(--vt-chip);border-radius:999px;padding:4px;gap:2px}
 :where(body.pl-vet) #ag-schede button{border-radius:999px;font-size:12px;color:var(--vt-testo2)}
@@ -3661,8 +4071,8 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 :where(body.pl-vet) .vt-b.urg{background:#F3D9D5;color:var(--vt-urg)}
 :where(body.pl-vet) .vt-b.tif{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
 :where(body.pl-vet) .vt-b.testo{background:none;padding:3px 0;font-weight:500;color:var(--vt-testo2)}
-:where(body.pl-vet) #pro-action-btn{position:fixed;right:18px;bottom:96px;width:54px;height:54px;border-radius:50%;padding:0;font-size:0;background:var(--vt-tif);border:3px solid #fff;box-shadow:0 6px 18px rgba(29,45,80,.25);z-index:30}
-:where(body.pl-vet) #pro-action-btn::before{content:"+";font-size:30px;line-height:1;color:var(--vt-notte);font-weight:400}
+/* «+ Nuovo appuntamento» sotto la settimana; il «+» flottante è il menu, uguale in tutte le pagine (con «Nuovo appuntamento» come prima voce) */
+body.pl-vet #pro-action-btn{margin-top:4px;border-radius:14px}
 :where(body.pl-vet) #ag-schede:not([hidden]){display:flex;flex-wrap:nowrap}
 :where(body.pl-vet) #ag-schede button{flex:1 1 auto;min-width:0;justify-content:center;gap:4px;padding:7px 6px;border:0;background:transparent;white-space:nowrap}
 :where(body.pl-vet) #ag-schede button b{background:none;color:inherit;font-weight:600;min-width:0;padding:0}
@@ -3671,7 +4081,6 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 :where(body.pl-vet) .ag-gblock .ag-ev-fatto{background:var(--vt-tif);color:var(--vt-notte);border-color:var(--vt-tif)}
 
 /* --- Clienti (mockup Clienti 1 · Elenco): A–Z, filtri, crediti --- */
-:where(body.pl-vet) #page-pro-clienti{background:var(--vt-fondo)}
 :where(body.pl-vet) #clienti-list-view .section-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
 :where(body.pl-vet) #cli-cartelle{gap:6px;border:0;background:none}
 :where(body.pl-vet) #cli-cartelle button{border:1px solid var(--vt-bordo);background:var(--vt-sup);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--vt-testo)}
@@ -3691,7 +4100,7 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 :where(body.pl-vet) .vt-indice button{background:none;border:0;padding:0 2px;font-size:10px;font-weight:700;color:var(--vt-tif-scuro);cursor:pointer;line-height:1.35}
 
 /* --- Messaggi (mockup Messaggi 1 · Cartelle): matita, ricerca, etichette dei cavalli, urgenza --- */
-:where(body.pl-vet) #page-pro-inbox{background:var(--vt-fondo);position:relative}
+:where(body.pl-vet) #page-pro-inbox{position:relative}
 :where(body.pl-vet) #page-pro-inbox > .section-title{font-family:'Fraunces',serif;color:var(--vt-notte)}
 :where(body.pl-vet) .vt-msg-testa{position:absolute;right:16px;top:12px}
 :where(body.pl-vet) .vt-matita{width:38px;height:38px;border-radius:50%;border:0;background:var(--vt-notte);color:var(--vt-tif);display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -3704,6 +4113,78 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 :where(body.pl-vet) .vt-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 :where(body.pl-vet) .vt-chip{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
 :where(body.pl-vet) .vt-chip.urg{background:#F3D9D5;color:var(--vt-urg)}
+
+/* --- Colori comuni scritti a mano nell'app (tasti, barra, avatar, fogli): per il veterinario solo il mockup --- */
+body.pl-vet .btn-primary,body.pl-vet .btn-conferma{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--bg)!important}
+body.pl-vet .btn-outline{background:var(--surface)!important;border-color:var(--border)!important;color:var(--accent)!important}
+body.pl-vet .btn-danger{background:var(--red)!important;border-color:var(--red)!important;color:#fff!important}
+body.pl-vet .badge-green{background:#E3F4F2!important;color:#1F6E68!important}
+body.pl-vet .badge-red{background:#FBF0EE!important;color:#A9443B!important}
+body.pl-vet .badge-accent{background:#F4EEE1!important;color:#8A6D2E!important}
+body.pl-vet button.on:not(.ag-tile){background:var(--accent);border-color:var(--accent);color:var(--bg)}
+/* barra in basso come nel mockup: bianca, voce attiva blu notte, le altre grigie */
+body.pl-vet #bottom-nav-pro{background:var(--surface)!important;border-color:var(--border)!important;box-shadow:0 6px 24px rgba(29,45,80,.10)!important}
+body.pl-vet #bottom-nav-pro .nav-btn{background:transparent!important;color:var(--muted)!important}
+body.pl-vet #bottom-nav-pro .nav-btn svg,body.pl-vet #bottom-nav-pro .nav-btn svg *{color:inherit!important;stroke:currentColor!important}
+body.pl-vet #bottom-nav-pro .nav-btn small{color:inherit!important}
+body.pl-vet #bottom-nav-pro .nav-btn.active{color:var(--accent)!important;font-weight:700}
+body.pl-vet #bottom-nav-pro .nav-hammer small{color:var(--accent)!important}
+body.pl-vet #bottom-nav-pro .nav-hammer .hm-ham{box-shadow:0 0 0 3px #7FD1C9!important}
+/* tasto + flottante e profilo in alto */
+body.pl-vet .hm-flot.piu{background:#7FD1C9!important;color:#12233F!important;border-color:#fff!important}
+body.pl-vet .hm-flot.piu svg{stroke:#12233F!important;color:#12233F!important}
+body.pl-vet .hm-flot.msg{background:var(--accent)!important;color:#fff!important}
+body.pl-vet .topbar-avatar,body.pl-vet .menu-profile-avatar{background:#2B3F6B!important;color:#fff!important;border:2px solid #7FD1C9!important;box-shadow:none!important}
+body.pl-vet .tb-pallino{background:#C9A96E!important}
+body.pl-vet .topbar .icon-btn,body.pl-vet .topbar button:not(.topbar-avatar){color:var(--accent)}
+/* fogli della Home (Portami da, Scadenze, Altro) */
+body.pl-vet .hm-velo{background:rgba(29,45,80,.45)!important}
+body.pl-vet .hm-tappa.su{border-color:#7FD1C9!important}
+body.pl-vet .hm-tappa .vai{background:var(--accent)!important;color:#7FD1C9!important}
+body.pl-vet .hm-griglia button > span{background:#E3F4F2!important;color:var(--accent)!important}
+body.pl-vet .hm-griglia button > span svg{stroke:var(--accent)!important}
+/* chat */
+body.pl-vet .mchat-messages{background:var(--surface2)!important}
+body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(--accent)!important}
+
+/* --- Tema scuro del veterinario: stessi colori del mockup, su blu notte --- */
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-giro{background:#2B3F6B;border:1px solid #3A4E7A}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-giro-num button{background:#24375E}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-cerchi .c{color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-tit,
+:where(:root:not([data-theme="light"])) body.pl-vet #pro-agenda-title,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-pannello-testa b,
+:where(:root:not([data-theme="light"])) body.pl-vet #clienti-list-view .section-title,
+:where(:root:not([data-theme="light"])) body.pl-vet #page-pro-inbox > .section-title{color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-visita.urg,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-gblock.vt-urg{background:rgba(169,68,59,.30);border-color:#A9443B}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-visita.urg .o,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-gblock.vt-urg .ag-cli-nome{color:#E3B5AE}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-galeno{background:#2B3F6B}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-et.tif,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-b.tif,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-chip{background:#2B3F6B;color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-et.oro{background:#2B3F6B;color:#C9A96E}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-et.urg,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-b.urg,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-chip.urg{background:#A9443B;color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet #ag-schede button.on,
+:where(:root:not([data-theme="light"])) body.pl-vet #cli-cartelle button.on,
+:where(:root:not([data-theme="light"])) body.pl-vet #chat-cartelle button.on,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-tile.aperto{background:#7FD1C9;border-color:#7FD1C9;color:#12233F}
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-tile.aperto .ag-count,
+:where(:root:not([data-theme="light"])) body.pl-vet .ag-tile.aperto .ag-tile-nome{color:#1D2D50}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-nuovo,
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-matita{background:#7FD1C9;color:#12233F}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-av.str{background:#3A4E7A}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-av.equo{background:#2B3F6B;color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-av.no{background:#2B3F6B;color:#C9A96E}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-deve{color:#E3B5AE}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-ok{color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-invita{background:transparent;color:#7FD1C9}
+:where(:root:not([data-theme="light"])) body.pl-vet .btn-primary,
+:where(:root:not([data-theme="light"])) body.pl-vet .btn-conferma{color:#12233F!important}
+:where(:root:not([data-theme="light"])) body.pl-vet #bottom-nav-pro .nav-btn.active{color:#7FD1C9!important}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -33781,7 +34262,9 @@ quandoAggiornaBarra(function(){
 });
 registraPerRuolo("plCostruisciMenu", Object.keys(PL_AGENTE), function(){
   const m = document.getElementById("hm-menu-piu"); if(!m) return;
-  m.innerHTML = plSez("Vai a", [
+  // 29/10/2026: per il veterinario la prima voce è «Nuovo appuntamento» (mockup Agenda: il «+» aggiunge un appuntamento)
+  const nuovo = plRuolo() === "vet" ? [plTile(HM_IC.cal, "Nuovo appuntamento", "openInterventoModal(null)")] : [];
+  m.innerHTML = plSez("Vai a", [...nuovo,
     plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
     plTile(HM_IC.users, "Clienti", "showPage('pro-clienti')"),
     plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),

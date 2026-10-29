@@ -25,7 +25,9 @@ quandoAggiornaBarra(function(){
 });
 registraPerRuolo("plCostruisciMenu", Object.keys(PL_AGENTE), function(){
   const m = document.getElementById("hm-menu-piu"); if(!m) return;
-  m.innerHTML = plSez("Vai a", [
+  // 29/10/2026: per il veterinario la prima voce è «Nuovo appuntamento» (mockup Agenda: il «+» aggiunge un appuntamento)
+  const nuovo = plRuolo() === "vet" ? [plTile(HM_IC.cal, "Nuovo appuntamento", "openInterventoModal(null)")] : [];
+  m.innerHTML = plSez("Vai a", [...nuovo,
     plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
     plTile(HM_IC.users, "Clienti", "showPage('pro-clienti')"),
     plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
