@@ -40,6 +40,8 @@
 :where(body.pl-vet) .rz-errore .rz-nota{color:#A9443B}
 /* core/stili/base-12-menu.css */
 :where(body.pl-vet) .menu-profile-avatar{color:#1A2236}
+:where(body.pl-vet) .menu-riga-big.no{border-color:#E6E0D4;background:color-mix(in srgb,#A9443B 7%,var(--surface))}
+:where(body.pl-vet) .menu-riga-big.no .tx small{color:#A9443B}
 /* core/stili/base-14-criterio-doppio-tasto-simone-30-09-2026.css */
 :where(body.pl-vet) .btn.btn-conferma,:where(body.pl-vet) .btn-conferma{background:#1D2D50!important;border:2px solid #7FD1C9!important}
 :where(body.pl-vet) .btn.btn-variazione,:where(body.pl-vet) .btn-variazione{background:#7FD1C9!important;color:#1D2D50!important}

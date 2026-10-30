@@ -9,14 +9,20 @@ import { mlControllaArrivo, mlRiprendi } from "./094-arrivo-sul-posto-se-apri-l-
 import { tcRenderHome } from "./114-torna-a-casa.js";
 /* ---------- banner: riquadri dalla tabella home_banner (gestita da noi); se manca, i 3 di partenza ---------- */
 const HM_BANNER_BASE = [
+  { id: null, tipo: "certified", titolo: "Fai vedere ai clienti che sei un professionista verificato.", testo: "Diventa Equo Certified" },
   { id: null, tipo: "foto", immagine: "assets/banner/cavallo.webp", titolo: "La cura del cavallo inizia dai dettagli." },
   { id: null, tipo: "oggi" },
   { id: null, tipo: "hammer", immagine: "assets/banner/hammer.webp", titolo: "Chiedi a Hammer:<br>«Chi devo richiamare questa settimana?»", testo: "Prova Hammer" },
 ];
 let hmBanner = null, hmBannerTimer = null, hmBannerVisti = new Set(), hmBannerFermo = 0;
+// 30/10/2026: il riquadro Equo Certified solo a chi non l'ha ancora chiesto (o se è stato respinto)
+function hmBannerPerMe(lista){
+  const stato = currentUser?.certificazioneStato || "nessuno";
+  return lista.filter(b => b.tipo !== "certified" || stato === "nessuno" || stato === "respinto");
+}
 async function hmCaricaBanner(){
   if(hmBanner) return hmBanner;
-  hmBanner = HM_BANNER_BASE;
+  hmBanner = hmBannerPerMe(HM_BANNER_BASE);
   if(DEMO_MODE) return hmBanner;
   try{
     const oggi = isoLocale(new Date());
@@ -25,7 +31,7 @@ async function hmCaricaBanner(){
     if(!error && data && data.length){
       const prem = isPremium();
       const validi = data.filter(b => (!b.dal || b.dal <= oggi) && (!b.al || b.al >= oggi) && (b.pubblico === "tutti" || !b.pubblico || (b.pubblico === "premium") === prem));
-      if(validi.length) hmBanner = validi;
+      if(validi.length) hmBanner = hmBannerPerMe(validi);
     }
   }catch(e){}
   return hmBanner;
@@ -43,6 +49,7 @@ function hmSlideHtml(b, i){
       ${app.length ? `<div class="lista">${righe}${app.length > 3 ? `<div class="r"><b>+${app.length - 3}</b><span>altri in agenda</span></div>` : ""}</div>`
         : `<div class="vuoto">Oggi niente in agenda.<small>Tocca per aprire l'agenda della settimana</small></div>`}</div>`;
   }
+  if(b.tipo === "certified") return `<div class="hm-slide cert" data-i="${i}" onclick="hmToccaBanner(${i})"><div class="cerchio-oro"></div><span class="badge-certified">✓ Equo Certified</span><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="chip">${escapeHtml(b.testo || "Diventa Equo Certified")}</div></div>`;
   if(b.tipo === "hammer") return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="chip">${HM_IC.hammer}${escapeHtml(b.testo || "Prova Hammer")}</div></div>`;
   if(b.tipo === "foto") return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="marchio"><img src="assets/icona-equo.png" alt="">Equo</div></div>`;
   // sponsor / messaggi nostri: immagine, titolo, testo e (facoltativo) link
@@ -53,6 +60,7 @@ function hmToccaBanner(i){
   hmBannerEvento(b, "tocco");
   if(b.tipo === "oggi") return showPage("pro-agenda");
   if(b.tipo === "hammer") return openAiSheet();
+  if(b.tipo === "certified") return typeof apriCertified === "function" ? apriCertified() : null;
   if(b.link && /^https:\/\//.test(b.link)) return window.open(b.link, "_blank", "noopener");
 }
 function hmBannerEvento(b, tipo){

@@ -16,6 +16,9 @@ function renderMenuDualRole(){
   // la sezione "Chat" (codice personale proprietario) si vede solo in vista proprietario
   const ownerSection = document.getElementById("menu-owner-section");
   if(ownerSection) ownerSection.style.display = (attiva === "proprietario") ? "block" : "none";
+  const ownerEquo = document.getElementById("menu-owner-equo");   // 30/10/2026: Segnala un maneggio, partner
+  if(ownerEquo) ownerEquo.style.display = (attiva === "proprietario") ? "block" : "none";
+  if(typeof renderCertRiga === "function") renderCertRiga();
 
   // il gestore struttura non partecipa al doppio ruolo (usa Equo Scuderia)
   if(!primario || primario === "gestore_struttura"){

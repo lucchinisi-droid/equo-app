@@ -23,3 +23,6 @@
 :where(body:not(.pl-owner)) .hm-pall{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
 :where(body:not(.pl-owner)) .hm-pall i{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.4);transition:width .2s}
 .hm-pall i.on{width:20px;background:var(--oro)}
+/* 30/10/2026: riquadro «Diventa Equo Certified» (solo a chi non ha ancora chiesto il badge) */
+.hm-slide.cert .badge-certified{left:20px;top:18px;font-size:11.5px;padding:4px 10px}
+.hm-slide.cert .frase{top:52px;max-width:78%}

@@ -1250,6 +1250,28 @@ body.ct-aperta{overflow:hidden}
 .menu-row-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
 
 .role-chip-row{display:flex;gap:8px;margin-top:8px}
+/* 30/10/2026: righe grandi del menu (Equo Certified del professionista, sezione Equo del proprietario) */
+.menu-riga-big{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:12px 14px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:inherit;font:inherit;text-align:left;cursor:pointer;box-sizing:border-box}
+.menu-riga-big + .menu-riga-big{margin-top:8px}
+.menu-riga-big.oro{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.menu-riga-big.ok{border-color:color-mix(in srgb,var(--green) 40%,var(--border));background:color-mix(in srgb,var(--green) 8%,var(--surface))}
+.menu-riga-big.no{border-color:#efc3b9;background:color-mix(in srgb,#c0392b 7%,var(--surface))}
+.menu-riga-big .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.menu-riga-big .tx b{font-size:14.5px}
+.menu-riga-big .tx small{font-size:12px;color:var(--muted);line-height:1.35}
+.menu-riga-big.ok .tx small{color:var(--green)}
+.menu-riga-big.no .tx small{color:#9e3220}
+.menu-riga-big .fr{font-size:20px;font-weight:700;color:var(--accent);line-height:1}
+.menu-riga-big .ic{flex-shrink:0;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.menu-riga-big.oro .ic{background:var(--accent)}
+.menu-riga-big .ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.menu-riga-big.cert .badge-certified{font-size:11px;padding:4px 9px;flex-shrink:0}
+#menu-cert-row:empty{display:none}
+#menu-cert-row{margin-bottom:8px}
+.cert-foglio{border:none!important;padding:4px 2px 8px}
+.menu-riga-big.tratt{border-style:dashed}
+#home-segnala:empty{display:none}
+#home-segnala{margin:12px 0}
 /* interruttore profilo proprietario <-> professionista */
 .profilo-switch-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;
   background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
@@ -2454,6 +2476,9 @@ body.home-man .ai-fab{display:none!important}
 :where(body:not(.pl-owner)) .hm-pall{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
 :where(body:not(.pl-owner)) .hm-pall i{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.4);transition:width .2s}
 .hm-pall i.on{width:20px;background:var(--oro)}
+/* 30/10/2026: riquadro «Diventa Equo Certified» (solo a chi non ha ancora chiesto il badge) */
+.hm-slide.cert .badge-certified{left:20px;top:18px;font-size:11.5px;padding:4px 10px}
+.hm-slide.cert .frase{top:52px;max-width:78%}
 /* cerchi */
 :where(body:not(.pl-owner)) .hm-cerchi{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin:16px 0 2px}
 body.incassi-nascosti .hm-cerchi{grid-template-columns:repeat(4,1fr)}
@@ -3615,6 +3640,8 @@ body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :no
 :where(body.pl-vet) .rz-errore .rz-nota{color:#A9443B}
 /* core/stili/base-12-menu.css */
 :where(body.pl-vet) .menu-profile-avatar{color:#1A2236}
+:where(body.pl-vet) .menu-riga-big.no{border-color:#E6E0D4;background:color-mix(in srgb,#A9443B 7%,var(--surface))}
+:where(body.pl-vet) .menu-riga-big.no .tx small{color:#A9443B}
 /* core/stili/base-14-criterio-doppio-tasto-simone-30-09-2026.css */
 :where(body.pl-vet) .btn.btn-conferma,:where(body.pl-vet) .btn-conferma{background:#1D2D50!important;border:2px solid #7FD1C9!important}
 :where(body.pl-vet) .btn.btn-variazione,:where(body.pl-vet) .btn-variazione{background:#7FD1C9!important;color:#1D2D50!important}
@@ -4347,6 +4374,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
     <div id="home-oggi"></div>
     <div id="home-da-saldare" style="display:none"></div>
     <div class="wh" id="wh-owner"></div>
+    <div id="home-segnala"></div>
     <div id="home-ti-seguono"></div>
     <div id="home-proposte"></div>
     <div id="home-lasciati"></div>
@@ -4613,7 +4641,6 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
     <div class="meteo-box wh-keep" id="meteo-pro" aria-label="Meteo dei prossimi 7 giorni"></div>
     <div class="wh" id="wh-pro"></div>
 
-    <div class="card cert-card wh-keep" id="certified-card" style="display:none;margin-bottom:14px"></div>
 
     <div class="card solo-incassi" style="margin-bottom:14px;cursor:pointer" onclick="showPage('pro-incassi')">
       <div style="font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Incassi questo mese</div>
@@ -6041,6 +6068,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 
     <div id="menu-pro-section" style="display:none">
       <div class="menu-section-label">Attività professionale</div>
+      <div id="menu-cert-row"></div>
       <div class="menu-row" style="cursor:pointer" onclick="openDatiPagamentoModal()">
         <div class="menu-row-label">
           <span class="fa-icon"><i class="fa-solid fa-money-check-dollar"></i></span>
@@ -6122,6 +6150,20 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
       </div>
     </div>
 
+    <div id="menu-owner-equo" style="display:none">
+      <div class="menu-section-label">Equo</div>
+      <button type="button" class="menu-riga-big oro" onclick="closeModal('modal-menu');openModal('modal-segnala-maneggio')">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7c2 0 5 .5 5-1.5S13.5 4 12 7"/></svg></span>
+        <span class="tx"><b>Segnala un maneggio</b><small>Se si iscrive a Equo, hai 1 mese di Premium gratis</small></span>
+        <span class="fr" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="menu-riga-big" onclick="window.location.href='mailto:gestione.equo@gmail.com?subject='+encodeURIComponent('Vorrei comparire come partner su Equo')">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l14-6v14L3 13zM7 13v5h3v-4"/></svg></span>
+        <span class="tx"><b>Hai un'attività per cavalli e cavalieri?</b><small>Selleria, mangimi, trasporti, servizi: diventa partner di Equo</small></span>
+        <span class="fr" aria-hidden="true">›</span>
+      </button>
+    </div>
+
     <div class="menu-section-label">Metodo di pagamento</div>
     <div class="card" id="payment-methods-card">
       <div id="payment-methods-list" class="muted" style="font-size:13px">Nessun metodo salvato.</div>
@@ -6146,6 +6188,13 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
   </div>
 </div>
 
+<!-- 30/10/2026: Equo Certified (prima era una carta nella Home vecchia dei professionisti, rimasta nascosta) -->
+<div class="modal-overlay" id="modal-certified" onclick="closeOut(event,'modal-certified')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="cert-card cert-foglio" id="certified-card"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-delete-account" onclick="closeOut(event,'modal-delete-account')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -10684,6 +10733,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	var HM_BANNER_BASE = [
 		{
 			id: null,
+			tipo: "certified",
+			titolo: "Fai vedere ai clienti che sei un professionista verificato.",
+			testo: "Diventa Equo Certified"
+		},
+		{
+			id: null,
 			tipo: "foto",
 			immagine: "assets/banner/cavallo.webp",
 			titolo: "La cura del cavallo inizia dai dettagli."
@@ -10704,9 +10759,13 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	var hmBannerTimer = null;
 	var hmBannerVisti = /* @__PURE__ */ new Set();
 	var hmBannerFermo = 0;
+	function hmBannerPerMe(lista) {
+		const stato = currentUser?.certificazioneStato || "nessuno";
+		return lista.filter((b) => b.tipo !== "certified" || stato === "nessuno" || stato === "respinto");
+	}
 	async function hmCaricaBanner() {
 		if (hmBanner) return hmBanner;
-		hmBanner = HM_BANNER_BASE;
+		hmBanner = hmBannerPerMe(HM_BANNER_BASE);
 		if (DEMO_MODE) return hmBanner;
 		try {
 			const oggi = isoLocale(/* @__PURE__ */ new Date());
@@ -10714,7 +10773,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			if (!error && data && data.length) {
 				const prem = isPremium();
 				const validi = data.filter((b) => (!b.dal || b.dal <= oggi) && (!b.al || b.al >= oggi) && (b.pubblico === "tutti" || !b.pubblico || b.pubblico === "premium" === prem));
-				if (validi.length) hmBanner = validi;
+				if (validi.length) hmBanner = hmBannerPerMe(validi);
 			}
 		} catch (e) {}
 		return hmBanner;
@@ -10732,6 +10791,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       <div class="eti">${HM_IC.cal}Oggi${app.length ? " · " + app.length + (app.length === 1 ? " appuntamento" : " appuntamenti") : ""}</div>
       ${app.length ? `<div class="lista">${righe}${app.length > 3 ? `<div class="r"><b>+${app.length - 3}</b><span>altri in agenda</span></div>` : ""}</div>` : `<div class="vuoto">Oggi niente in agenda.<small>Tocca per aprire l'agenda della settimana</small></div>`}</div>`;
 		}
+		if (b.tipo === "certified") return `<div class="hm-slide cert" data-i="${i}" onclick="hmToccaBanner(${i})"><div class="cerchio-oro"></div><span class="badge-certified">✓ Equo Certified</span><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="chip">${escapeHtml(b.testo || "Diventa Equo Certified")}</div></div>`;
 		if (b.tipo === "hammer") return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="chip">${HM_IC.hammer}${escapeHtml(b.testo || "Prova Hammer")}</div></div>`;
 		if (b.tipo === "foto") return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="marchio"><img src="assets/icona-equo.png" alt="">Equo</div></div>`;
 		return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div>${b.testo ? `<div class="chip">${escapeHtml(b.testo)}</div>` : ""}</div>`;
@@ -10742,6 +10802,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		hmBannerEvento(b, "tocco");
 		if (b.tipo === "oggi") return showPage("pro-agenda");
 		if (b.tipo === "hammer") return openAiSheet();
+		if (b.tipo === "certified") return typeof apriCertified === "function" ? apriCertified() : null;
 		if (b.link && /^https:\/\//.test(b.link)) return window.open(b.link, "_blank", "noopener");
 	}
 	function hmBannerEvento(b, tipo) {
@@ -24737,6 +24798,9 @@ function renderMenuDualRole(){
   // la sezione "Chat" (codice personale proprietario) si vede solo in vista proprietario
   const ownerSection = document.getElementById("menu-owner-section");
   if(ownerSection) ownerSection.style.display = (attiva === "proprietario") ? "block" : "none";
+  const ownerEquo = document.getElementById("menu-owner-equo");   // 30/10/2026: Segnala un maneggio, partner
+  if(ownerEquo) ownerEquo.style.display = (attiva === "proprietario") ? "block" : "none";
+  if(typeof renderCertRiga === "function") renderCertRiga();
 
   // il gestore struttura non partecipa al doppio ruolo (usa Equo Scuderia)
   if(!primario || primario === "gestore_struttura"){
@@ -24941,6 +25005,7 @@ function renderBadgeProfilo(){
 }
 
 function renderCertifiedCard(){
+  renderCertRiga();
   const box = document.getElementById("certified-card");
   if(!box || !currentUser) return;
   const stato = currentUser.certificazioneStato || "nessuno";
@@ -24973,6 +25038,23 @@ function renderCertifiedCard(){
     ${riga(r.foto, "Foto profilo", "document.getElementById('avatar-file-input').click()")}
     <button class="btn btn-primary" style="width:100%;margin-top:10px" ${tutti ? "" : "disabled"} onclick="richiediCertified()">${tutti ? "Richiedi il badge" : "Completa i 3 passaggi per richiederlo"}</button>`;
 }
+
+// 30/10/2026: riga «Equo Certified» in cima ad «Attività professionale» nel menu; il tocco apre il foglio con la carta
+function renderCertRiga(){
+  const box = document.getElementById("menu-cert-row");
+  if(!box || !currentUser) return;
+  const stato = currentUser.certificazioneStato || "nessuno", r = requisitiCertified();
+  const fatti = [r.piva, r.nome, r.foto].filter(Boolean).length;
+  const manca = !r.piva ? "la Partita IVA" : !r.nome ? "il nome o la ragione sociale" : "la foto profilo";
+  const badge = '<span class="badge-certified">✓ Equo Certified</span>';
+  let cls = "oro", tit = "Diventa Equo Certified", sub = fatti === 3 ? "Pronto: tocca per richiederlo" : `${fatti} di 3 passaggi fatti · manca ${manca}`, sx = badge, fr = true;
+  if(stato === "in_verifica"){ cls = ""; tit = "Equo Certified in verifica"; sub = "Ti avvisiamo appena è approvato (di solito 48 ore)";
+    sx = '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>'; fr = false; }
+  else if(stato === "verificato"){ cls = "ok"; tit = "Sei Equo Certified"; sub = "I clienti vedono il badge accanto al tuo nome"; fr = false; }
+  else if(stato === "respinto"){ cls = "no"; tit = "Richiesta non approvata"; sub = "Correggi i dati e richiedilo di nuovo"; }
+  box.innerHTML = `<button type="button" class="menu-riga-big cert ${cls}" onclick="apriCertified()">${sx}<span class="tx"><b>${tit}</b><small>${escapeHtml(sub)}</small></span>${fr ? '<span class="fr" aria-hidden="true">›</span>' : ""}</button>`;
+}
+function apriCertified(){ renderCertifiedCard(); openModal("modal-certified"); }
 
 async function richiediCertified(){
   const r = requisitiCertified();
@@ -29513,6 +29595,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		if (onbAgganciato || typeof estendiDopo !== "function") return;
 		onbAgganciato = true;
 		estendiDopo("renderHome", onbNascondiSetup);
+		estendiDopo("renderHome", onbSegnalaScuderia);
 		estendiPrima("eseguiSalvataggioHorse", async (payload) => {
 			const oggi = /* @__PURE__ */ new Date(), iso = oggi.getFullYear() + "-" + String(oggi.getMonth() + 1).padStart(2, "0") + "-" + String(oggi.getDate()).padStart(2, "0");
 			if (!payload?.birth_date || payload.birth_date < iso) return true;
@@ -29526,8 +29609,18 @@ const mlSigla = k => String(k || "").toUpperCase();
 			return ok;
 		});
 	}
+	function onbSegnalaScuderia() {
+		const box = document.getElementById("home-segnala");
+		if (!box) return;
+		const lista = typeof horses !== "undefined" ? horses : [];
+		box.innerHTML = lista.length > 0 && !lista.some((h) => h.stable_id) ? `<button type="button" class="menu-riga-big oro tratt" onclick="openModal('modal-segnala-maneggio')">
+      <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11M9 21v-6h6v6"/></svg></span>
+      <span class="tx"><b>La tua scuderia non è su Equo?</b><small>Segnalacela: se si iscrive, hai 1 mese di Premium gratis</small></span>
+      <span class="fr" aria-hidden="true">›</span></button>` : "";
+	}
 	async function onbCaricaTiSeguono() {
 		onbAggancia();
+		onbSegnalaScuderia();
 		const box = document.getElementById("home-ti-seguono");
 		if (!box) return;
 		if (DEMO_MODE) {

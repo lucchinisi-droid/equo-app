@@ -80,6 +80,7 @@
 
     <div id="menu-pro-section" style="display:none">
       <div class="menu-section-label">Attività professionale</div>
+      <div id="menu-cert-row"></div>
       <div class="menu-row" style="cursor:pointer" onclick="openDatiPagamentoModal()">
         <div class="menu-row-label">
           <span class="fa-icon"><i class="fa-solid fa-money-check-dollar"></i></span>
@@ -159,6 +160,20 @@
         </div>
         <button class="btn btn-primary btn-sm" id="piano-btn" onclick="togglePiano()">Passa a Premium</button>
       </div>
+    </div>
+
+    <div id="menu-owner-equo" style="display:none">
+      <div class="menu-section-label">Equo</div>
+      <button type="button" class="menu-riga-big oro" onclick="closeModal('modal-menu');openModal('modal-segnala-maneggio')">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7c2 0 5 .5 5-1.5S13.5 4 12 7"/></svg></span>
+        <span class="tx"><b>Segnala un maneggio</b><small>Se si iscrive a Equo, hai 1 mese di Premium gratis</small></span>
+        <span class="fr" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="menu-riga-big" onclick="window.location.href='mailto:gestione.equo@gmail.com?subject='+encodeURIComponent('Vorrei comparire come partner su Equo')">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l14-6v14L3 13zM7 13v5h3v-4"/></svg></span>
+        <span class="tx"><b>Hai un'attività per cavalli e cavalieri?</b><small>Selleria, mangimi, trasporti, servizi: diventa partner di Equo</small></span>
+        <span class="fr" aria-hidden="true">›</span>
+      </button>
     </div>
 
     <div class="menu-section-label">Metodo di pagamento</div>

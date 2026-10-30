@@ -14,3 +14,25 @@
 .menu-row-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
 
 .role-chip-row{display:flex;gap:8px;margin-top:8px}
+/* 30/10/2026: righe grandi del menu (Equo Certified del professionista, sezione Equo del proprietario) */
+.menu-riga-big{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:12px 14px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface);color:inherit;font:inherit;text-align:left;cursor:pointer;box-sizing:border-box}
+.menu-riga-big + .menu-riga-big{margin-top:8px}
+.menu-riga-big.oro{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.menu-riga-big.ok{border-color:color-mix(in srgb,var(--green) 40%,var(--border));background:color-mix(in srgb,var(--green) 8%,var(--surface))}
+.menu-riga-big.no{border-color:#efc3b9;background:color-mix(in srgb,#c0392b 7%,var(--surface))}
+.menu-riga-big .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.menu-riga-big .tx b{font-size:14.5px}
+.menu-riga-big .tx small{font-size:12px;color:var(--muted);line-height:1.35}
+.menu-riga-big.ok .tx small{color:var(--green)}
+.menu-riga-big.no .tx small{color:#9e3220}
+.menu-riga-big .fr{font-size:20px;font-weight:700;color:var(--accent);line-height:1}
+.menu-riga-big .ic{flex-shrink:0;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.menu-riga-big.oro .ic{background:var(--accent)}
+.menu-riga-big .ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.menu-riga-big.cert .badge-certified{font-size:11px;padding:4px 9px;flex-shrink:0}
+#menu-cert-row:empty{display:none}
+#menu-cert-row{margin-bottom:8px}
+.cert-foglio{border:none!important;padding:4px 2px 8px}
+.menu-riga-big.tratt{border-style:dashed}
+#home-segnala:empty{display:none}
+#home-segnala{margin:12px 0}

@@ -33,6 +33,7 @@ function renderBadgeProfilo(){
 }
 
 function renderCertifiedCard(){
+  renderCertRiga();
   const box = document.getElementById("certified-card");
   if(!box || !currentUser) return;
   const stato = currentUser.certificazioneStato || "nessuno";
@@ -65,6 +66,23 @@ function renderCertifiedCard(){
     ${riga(r.foto, "Foto profilo", "document.getElementById('avatar-file-input').click()")}
     <button class="btn btn-primary" style="width:100%;margin-top:10px" ${tutti ? "" : "disabled"} onclick="richiediCertified()">${tutti ? "Richiedi il badge" : "Completa i 3 passaggi per richiederlo"}</button>`;
 }
+
+// 30/10/2026: riga «Equo Certified» in cima ad «Attività professionale» nel menu; il tocco apre il foglio con la carta
+function renderCertRiga(){
+  const box = document.getElementById("menu-cert-row");
+  if(!box || !currentUser) return;
+  const stato = currentUser.certificazioneStato || "nessuno", r = requisitiCertified();
+  const fatti = [r.piva, r.nome, r.foto].filter(Boolean).length;
+  const manca = !r.piva ? "la Partita IVA" : !r.nome ? "il nome o la ragione sociale" : "la foto profilo";
+  const badge = '<span class="badge-certified">✓ Equo Certified</span>';
+  let cls = "oro", tit = "Diventa Equo Certified", sub = fatti === 3 ? "Pronto: tocca per richiederlo" : `${fatti} di 3 passaggi fatti · manca ${manca}`, sx = badge, fr = true;
+  if(stato === "in_verifica"){ cls = ""; tit = "Equo Certified in verifica"; sub = "Ti avvisiamo appena è approvato (di solito 48 ore)";
+    sx = '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>'; fr = false; }
+  else if(stato === "verificato"){ cls = "ok"; tit = "Sei Equo Certified"; sub = "I clienti vedono il badge accanto al tuo nome"; fr = false; }
+  else if(stato === "respinto"){ cls = "no"; tit = "Richiesta non approvata"; sub = "Correggi i dati e richiedilo di nuovo"; }
+  box.innerHTML = `<button type="button" class="menu-riga-big cert ${cls}" onclick="apriCertified()">${sx}<span class="tx"><b>${tit}</b><small>${escapeHtml(sub)}</small></span>${fr ? '<span class="fr" aria-hidden="true">›</span>' : ""}</button>`;
+}
+function apriCertified(){ renderCertifiedCard(); openModal("modal-certified"); }
 
 async function richiediCertified(){
   const r = requisitiCertified();

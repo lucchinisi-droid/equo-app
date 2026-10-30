@@ -3556,6 +3556,12 @@
 	var HM_BANNER_BASE = [
 		{
 			id: null,
+			tipo: "certified",
+			titolo: "Fai vedere ai clienti che sei un professionista verificato.",
+			testo: "Diventa Equo Certified"
+		},
+		{
+			id: null,
 			tipo: "foto",
 			immagine: "assets/banner/cavallo.webp",
 			titolo: "La cura del cavallo inizia dai dettagli."
@@ -3576,9 +3582,13 @@
 	var hmBannerTimer = null;
 	var hmBannerVisti = /* @__PURE__ */ new Set();
 	var hmBannerFermo = 0;
+	function hmBannerPerMe(lista) {
+		const stato = currentUser?.certificazioneStato || "nessuno";
+		return lista.filter((b) => b.tipo !== "certified" || stato === "nessuno" || stato === "respinto");
+	}
 	async function hmCaricaBanner() {
 		if (hmBanner) return hmBanner;
-		hmBanner = HM_BANNER_BASE;
+		hmBanner = hmBannerPerMe(HM_BANNER_BASE);
 		if (DEMO_MODE) return hmBanner;
 		try {
 			const oggi = isoLocale(/* @__PURE__ */ new Date());
@@ -3586,7 +3596,7 @@
 			if (!error && data && data.length) {
 				const prem = isPremium();
 				const validi = data.filter((b) => (!b.dal || b.dal <= oggi) && (!b.al || b.al >= oggi) && (b.pubblico === "tutti" || !b.pubblico || b.pubblico === "premium" === prem));
-				if (validi.length) hmBanner = validi;
+				if (validi.length) hmBanner = hmBannerPerMe(validi);
 			}
 		} catch (e) {}
 		return hmBanner;
@@ -3604,6 +3614,7 @@
       <div class="eti">${HM_IC.cal}Oggi${app.length ? " · " + app.length + (app.length === 1 ? " appuntamento" : " appuntamenti") : ""}</div>
       ${app.length ? `<div class="lista">${righe}${app.length > 3 ? `<div class="r"><b>+${app.length - 3}</b><span>altri in agenda</span></div>` : ""}</div>` : `<div class="vuoto">Oggi niente in agenda.<small>Tocca per aprire l'agenda della settimana</small></div>`}</div>`;
 		}
+		if (b.tipo === "certified") return `<div class="hm-slide cert" data-i="${i}" onclick="hmToccaBanner(${i})"><div class="cerchio-oro"></div><span class="badge-certified">✓ Equo Certified</span><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="chip">${escapeHtml(b.testo || "Diventa Equo Certified")}</div></div>`;
 		if (b.tipo === "hammer") return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="chip">${HM_IC.hammer}${escapeHtml(b.testo || "Prova Hammer")}</div></div>`;
 		if (b.tipo === "foto") return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div><div class="marchio"><img src="assets/icona-equo.png" alt="">Equo</div></div>`;
 		return `<div class="hm-slide foto" data-i="${i}"${img} onclick="hmToccaBanner(${i})"><div class="frase">${hmTestoBanner(b.titolo)}</div>${b.testo ? `<div class="chip">${escapeHtml(b.testo)}</div>` : ""}</div>`;
@@ -3614,6 +3625,7 @@
 		hmBannerEvento(b, "tocco");
 		if (b.tipo === "oggi") return showPage("pro-agenda");
 		if (b.tipo === "hammer") return openAiSheet();
+		if (b.tipo === "certified") return typeof apriCertified === "function" ? apriCertified() : null;
 		if (b.link && /^https:\/\//.test(b.link)) return window.open(b.link, "_blank", "noopener");
 	}
 	function hmBannerEvento(b, tipo) {

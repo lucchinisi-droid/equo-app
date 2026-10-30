@@ -18,6 +18,7 @@ function onbAggancia(){
   if(onbAgganciato || typeof estendiDopo !== "function") return;
   onbAgganciato = true;
   estendiDopo("renderHome", onbNascondiSetup);
+  estendiDopo("renderHome", onbSegnalaScuderia);
   estendiPrima("eseguiSalvataggioHorse", async payload => {
     const oggi = new Date(), iso = oggi.getFullYear() + "-" + String(oggi.getMonth() + 1).padStart(2, "0") + "-" + String(oggi.getDate()).padStart(2, "0");
     if(!payload?.birth_date || payload.birth_date < iso) return true;
@@ -27,8 +28,20 @@ function onbAggancia(){
     return ok;
   });
 }
+// 30/10/2026: «La tua scuderia non è su Equo?» in Home, solo se nessun cavallo è collegato a una scuderia su Equo
+function onbSegnalaScuderia(){
+  const box = document.getElementById("home-segnala");
+  if(!box) return;
+  const lista = typeof horses !== "undefined" ? horses : [];
+  const mostra = lista.length > 0 && !lista.some(h => h.stable_id);
+  box.innerHTML = mostra ? `<button type="button" class="menu-riga-big oro tratt" onclick="openModal('modal-segnala-maneggio')">
+      <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11M9 21v-6h6v6"/></svg></span>
+      <span class="tx"><b>La tua scuderia non è su Equo?</b><small>Segnalacela: se si iscrive, hai 1 mese di Premium gratis</small></span>
+      <span class="fr" aria-hidden="true">›</span></button>` : "";
+}
 async function onbCaricaTiSeguono(){
   onbAggancia();
+  onbSegnalaScuderia();
   const box = document.getElementById("home-ti-seguono");
   if(!box) return;
   if(DEMO_MODE){ box.innerHTML = ""; return; }
