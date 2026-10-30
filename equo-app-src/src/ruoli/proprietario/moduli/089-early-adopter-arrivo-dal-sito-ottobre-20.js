@@ -317,6 +317,22 @@ function applicaHomeManBase(){
     if(document.getElementById("page-pro-home")?.classList.contains("active")) setTimeout(() => { try{ meteoHome(); }catch(e){} }, 0);
   }
 }
+// 30/10/2026: all'ingresso la Home nuova e la sua barra si accendono subito (prima dei dati), così non compare
+// per qualche istante la Home vecchia dei professionisti; applicaHomeMan() poi la riempie quando i dati sono arrivati
+function homeManPrepara(){
+  const on = homeManAttiva();
+  document.body.classList.toggle("home-man", on);
+  if(!on) return;
+  const nav = document.getElementById("bottom-nav-pro");
+  if(nav){
+    if(hmNavOriginale === null) hmNavOriginale = nav.innerHTML;
+    if(!nav.dataset.man){ nav.innerHTML = HM_NAV; nav.dataset.man = "1"; }
+  }
+  hmNavAttivo("pro-home");
+  const s = document.getElementById("hm-saluto"), d = document.getElementById("hm-data");
+  if(s) s.textContent = testoSaluto();
+  if(d) d.textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+}
 // Clienti e Cavalli aprono la stessa pagina su cartelle diverse: si accende quello giusto
 function hmNavAttivo(page){
   document.body.dataset.pagina = page;
@@ -451,4 +467,4 @@ async function mlCarica(){
 function mlRigaCavallo(e){ return { nome: agNomeCavallo(e) || "Cavallo", cli: e.clienti_mascalcia?.nome || clienteDiId(e.cliente_mascalcia_id)?.nome || "" }; }
 
 
-export { invitoControlla, applicaHomeMan, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva };
+export { invitoControlla, applicaHomeMan, homeManPrepara, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva };

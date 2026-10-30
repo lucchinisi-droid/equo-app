@@ -1664,6 +1664,27 @@
 			}, 0);
 		}
 	}
+	function homeManPrepara() {
+		const on = homeManAttiva();
+		document.body.classList.toggle("home-man", on);
+		if (!on) return;
+		const nav = document.getElementById("bottom-nav-pro");
+		if (nav) {
+			if (hmNavOriginale === null) hmNavOriginale = nav.innerHTML;
+			if (!nav.dataset.man) {
+				nav.innerHTML = HM_NAV;
+				nav.dataset.man = "1";
+			}
+		}
+		hmNavAttivo("pro-home");
+		const s = document.getElementById("hm-saluto"), d = document.getElementById("hm-data");
+		if (s) s.textContent = testoSaluto();
+		if (d) d.textContent = (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", {
+			weekday: "long",
+			day: "numeric",
+			month: "long"
+		});
+	}
 	function hmNavAttivo(page) {
 		document.body.dataset.pagina = page;
 		if (!document.body.classList.contains("home-man")) return;
@@ -3346,6 +3367,7 @@
 		accettaTuttiProposte,
 		annullaRichiestaAppuntamento,
 		applicaHomeMan,
+		homeManPrepara,
 		apriAppuntamentiManiscalco,
 		askDeleteHorse,
 		askDeleteHorseStep2,

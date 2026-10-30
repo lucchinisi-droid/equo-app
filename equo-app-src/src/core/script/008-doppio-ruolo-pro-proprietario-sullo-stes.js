@@ -139,6 +139,7 @@ async function setupProNav(ruolo){
   renderProAgendaHeader(ruolo);
   renderProHomeGreeting();
   showPage("pro-home");
+  if(typeof homeManPrepara === "function") homeManPrepara();   // 30/10/2026: niente Home vecchia mentre arrivano i dati
   await loadClientiMascalcia();
   await loadInboxMascalcia();
   loadColleghiList();

@@ -15,7 +15,7 @@ import { deleteExpenseFromModal, loadExpenses, loadExpensesSummary, openAddExpen
 import { filterServices, focusServiceOnMap, loadServicesData, openServicesMap } from "./083-services-map.js";
 import { onbCollegati, onbNonSonoIo, onbVaiAiProposti } from "./103-onboarding-proprietario.js";
 import { apriEquoCard, chiudiEquoCard, ecAzione, ecCondividi, ecGira, ecMostraQr } from "./102-equo-card.js";
-import { invitoControlla, applicaHomeMan, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
+import { invitoControlla, applicaHomeMan, homeManPrepara, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
 import { cambiaIncassi, renderWidgetOwner, wgApriAppMan, wgChattaAppuntamento, wgControllaResetPin, wgFissaManiscalco, wgNuovoEvento } from "./101-proprietario.js";
 
 // API PUBBLICA (proprietario): le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
@@ -29,6 +29,7 @@ Object.assign(window, {
   accettaTuttiProposte,
   annullaRichiestaAppuntamento,
   applicaHomeMan,
+  homeManPrepara,
   apriAppuntamentiManiscalco,
   askDeleteHorse,
   askDeleteHorseStep2,
