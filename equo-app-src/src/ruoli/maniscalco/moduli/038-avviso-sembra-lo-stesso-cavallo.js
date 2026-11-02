@@ -275,8 +275,14 @@ function chiudiSchedaCavalloPro(){
   document.getElementById("clienti-detail-view").style.display = "block";
   renderBoxCavalliCliente();
 }
+// veterinario (2/11/2026): Clinica e Documenti al posto di Ferratura e Allegati (ruoli/veterinario/moduli/12-scheda-cavallo.js)
+const schedaVet = () => typeof eVeterinario === "function" && eVeterinario() && typeof vcSezioniHtml === "function";
 function renderTabCavalloPro(){
-  const tabs = [["tutto", "Tutto"], ["ana", "Anagrafica"], ["fer", "Ferratura"], ["sto", "Storico"], ["all", "Allegati"]];
+  const vet = schedaVet();
+  if(vet && ["fer", "all"].includes(schedaCavalloTab)) schedaCavalloTab = schedaCavalloTab === "fer" ? "cli" : "doc";
+  if(!vet && ["cli", "doc"].includes(schedaCavalloTab)) schedaCavalloTab = "tutto";
+  const tabs = vet ? [["tutto", "Tutto"], ["ana", "Anagrafica"], ["cli", "Clinica"], ["sto", "Storico"], ["doc", "Documenti"]]
+    : [["tutto", "Tutto"], ["ana", "Anagrafica"], ["fer", "Ferratura"], ["sto", "Storico"], ["all", "Allegati"]];
   document.getElementById("cavpro-tab").innerHTML = tabs.map(([k, t]) => `<button class="${schedaCavalloTab === k ? "on" : ""}" onclick="schedaCavalloTab='${k}';renderTabCavalloPro();renderCorpoCavalloPro()">${t}</button>`).join("");
 }
 function renderCorpoCavalloPro(){
@@ -288,6 +294,7 @@ function renderCorpoCavalloPro(){
   const ultimiNuovi = schedaStoricoCavallo.filter(i => i.stato === "fatto" && i.ferri_nuovi === true).sort((a, b) => b.data_intervento.localeCompare(a.data_intervento))[0];
   const modificabile = cv.tipo === "manuale";
   const allegatiPrima = document.getElementById("cavpro-allegati")?.innerHTML;
+  const vet = schedaVet(), vc = vet ? vcSezioniHtml(cv, vedi) : null;
   document.getElementById("cavpro-corpo").innerHTML =
     sez("ana", "Anagrafica", `<button class="btn btn-outline btn-sm" onclick="modificaAnagraficaCavalloPro()">Modifica</button>`, `
       <dl class="cavpro-kv">
@@ -299,7 +306,8 @@ function renderCorpoCavalloPro(){
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
       ${cv.tipo === "equo" || cv.horse_id || cv.scuderia_cavallo_id ? '<div class="muted" style="font-size:11.5px;margin-top:8px">Nome, razza e nascita li gestisce ' + (cv.tipo !== "equo" && !cv.horse_id ? "la scuderia" : "il proprietario") + ' nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>' : ""}`)
-    + sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
+    + (vet ? vc.clinica : "")
+    + (vet ? "" : sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
         ${ultimiNuovi ? '<span class="solo-completa">Ultimi ferri nuovi: ' + formatDataBreve(ultimiNuovi.data_intervento) + "<br></span>" : ""}
@@ -309,12 +317,15 @@ function renderCorpoCavalloPro(){
           : 'Prossima: <b style="color:var(--text)">—</b>'}</div></div>
       ${riquadroIntervalloPrezzo(cv, currentClienteId, schedaStoricoCavallo)}
       <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Vale per tutti i suoi appuntamenti: nel nuovo appuntamento basta scegliere il cavallo. Lavoro e tipo di ferro vanno anche nel libretto del proprietario e nella scheda della scuderia; «ferri nuovi/rimessa» resta solo tuo.</div>`)
+    )
     + sez("sto", "Storico di " + escapeHtml(cv.nome), `<span style="display:flex;gap:6px"><button class="btn btn-outline btn-sm solo-completa" onclick="nuovoInterventoCavalloPro('straordinario')">Straordinario</button><button class="btn btn-outline btn-sm" onclick="nuovoInterventoCavalloPro()">+ Intervento</button></span>`, storicoCavalloHtml(schedaStoricoCavallo, schedaSpostamenti))
-    + (vedi("all") ? `<div class="card cavpro-sez"><div class="cavpro-sez-testa"><span>Allegati</span><button class="btn btn-outline btn-sm" onclick="document.getElementById('cavpro-allegati-file').click()">+ Carica</button></div>
+    + (vet ? vc.documenti : "")
+    + (vedi("all") && !vet ? `<div class="card cavpro-sez"><div class="cavpro-sez-testa"><span>Allegati</span><button class="btn btn-outline btn-sm" onclick="document.getElementById('cavpro-allegati-file').click()">+ Carica</button></div>
         <input type="file" id="cavpro-allegati-file" accept="application/pdf,image/*" style="display:none" onchange="caricaAllegatoCavallo(this, 'cavpro-allegati', 'maniscalco')">
         <div id="cavpro-allegati">${allegatiPrima || '<div class="muted" style="font-size:13px">Caricamento…</div>'}</div>
         <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Li vedono anche il proprietario collegato e la scuderia dove sta il cavallo. Ognuno può eliminare solo i file caricati da lui.</div></div>` : "");
-  if(vedi("all") && (!allegatiPrima || allegatiCtx["cavpro-allegati"]?.cv !== cv)) caricaAllegatiCavallo("cavpro-allegati", "maniscalco", cv);
+  if(vedi("all") && !vet && (!allegatiPrima || allegatiCtx["cavpro-allegati"]?.cv !== cv)) caricaAllegatiCavallo("cavpro-allegati", "maniscalco", cv);
+  if(vet && typeof vcCarica === "function") vcCarica(cv);
 }
 function storicoCavalloHtml(lista, spostamenti){
   if(!lista.length && !(spostamenti || []).length) return '<div class="muted" style="font-size:13px">Nessun intervento per questo cavallo.</div>';

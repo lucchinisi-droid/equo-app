@@ -172,7 +172,9 @@ const vsNomeCliente = e => e?.clienti_mascalcia?.nome || (typeof clienteDiId ===
 
 // ingresso: dalla visita in agenda (id dell'intervento)
 async function vsApriDaEvento(id){
-  const e = (typeof agEventiCache !== "undefined" && agEventiCache[id]) || (hpAppuntamenti || []).find(x => x.id === id);
+  // anche le visite vecchie dalla scheda del cavallo (storico già caricato)
+  const e = (typeof agEventiCache !== "undefined" && agEventiCache[id]) || (hpAppuntamenti || []).find(x => x.id === id)
+    || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find(x => x.id === id);
   if(!e) return showToast("Visita non trovata");
   try{ closeModal("modal-azioni-evento"); }catch(_){}
   VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset(); if(typeof vdReset === "function") vdReset(); if(typeof ptReset === "function") ptReset();

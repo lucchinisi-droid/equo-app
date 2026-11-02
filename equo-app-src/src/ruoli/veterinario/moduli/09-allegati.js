@@ -170,4 +170,4 @@ async function vaFaiVedere(docId, centroId){
 // nuova scheda aperta: si azzera e si carica
 function vaReset(){ VA.lista = []; VA.altri = []; VA.attesa = null; VA.aperto = null; VA.chi = {}; }
 
-export { vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA };
+export { vaRiduci, vaDurata, VA_TIPI, VA_ZONE, vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA };
