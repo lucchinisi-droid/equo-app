@@ -160,6 +160,8 @@ function vsFoglio(){
 function vsTesta(t, s){ document.getElementById("vs-titolo").textContent = t; document.getElementById("vs-sotto").textContent = s || ""; }
 function vsChiudi(){ vsSalvaSubito(); const f = document.getElementById("vs-foglio"); if(f) f.classList.remove("aperto"); document.body.classList.remove("vs-aperto"); }
 function vsIndietro(){
+  if(VS.schermo === "referto") return vsMostraScheda();
+  if(VS.schermo === "referto-fatto") return vsChiudi();
   if(VS.schermo === "modello-edit" || VS.schermo === "miei") return vsMostraScelta();
   if(VS.schermo === "scheda" && !VS.visita?.id && !Object.keys(VS.visita?.dati || {}).length) return vsMostraScelta();
   vsChiudi();
@@ -229,8 +231,8 @@ function vsMostraScheda(){
   vsTesta("Visita · " + (vsNomeCavallo(VS.e) || "cavallo"), v.modello_nome + (v.stato === "conclusa" ? " · conclusa" : ""));
   vsDisegnaCorpo();
   document.getElementById("vs-piede").innerHTML = v.stato === "conclusa"
-    ? '<button class="vs-btn" onclick="vsChiudi()">Chiudi</button>'
-    : '<button class="vs-btn" onclick="vsChiudi()">Salva e chiudi</button><button class="vs-btn pri" onclick="vsConcludi()">Concludi la visita</button>';
+    ? '<button class="vs-btn" onclick="vsChiudi()">Chiudi</button><button class="vs-btn pri" onclick="vrApri()">Referto</button>'
+    : '<button class="vs-btn" onclick="vrApri()">Referto</button><button class="vs-btn pri" onclick="vsConcludi()">Concludi la visita</button>';
 }
 function vsDisegnaCorpo(){
   const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
@@ -241,8 +243,9 @@ function vsDisegnaCorpo(){
   const sola = v.stato === "conclusa";
   document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs
     + (sola ? '<div class="vs-nota">Visita conclusa: la scheda è in sola lettura.</div>' : "")
+    + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "")
     + sezioni.map(s => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map(c => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("")
-    + '<div class="vs-nota">Foto, video, referto e dettatura arrivano nei prossimi aggiornamenti.</div>';
+    + '<div class="vs-nota">Foto, video e dettatura arrivano nei prossimi aggiornamenti.</div>';
 }
 function vsTab(k){ VS.tab = k; vsDisegnaCorpo(); document.getElementById("vs-corpo").scrollTop = 0; }
 
@@ -398,5 +401,5 @@ function vsDemoPrepara(){
     stato: "conclusa", data_visita: isoLocale(g), dati: { motivo: "Zoppia ASx", diagnosi: "Sospetto ascesso subsolare ASx", zop_as: 2 }, professione: "veterinario" });
 }
 
-export { vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
+export { vsSalvaSubito, vsTesta, vsNomeCavallo, vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB };

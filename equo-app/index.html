@@ -2282,6 +2282,9 @@ dl.cavpro-kv dt{color:var(--muted)} dl.cavpro-kv dd{margin:0;font-weight:600;min
 .mchat-doc{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.06);margin-bottom:6px;text-decoration:none;color:inherit}
 .mchat-doc-ico{width:34px;height:40px;border-radius:6px;background:#c0392b;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .mchat-doc-nome{font-size:12.5px;font-weight:600;word-break:break-all}
+/* 2/11/2026: documento privato in chat (bolla con link temporaneo) */
+button.mchat-doc{border:0;font:inherit;color:inherit;width:100%;text-align:left;cursor:pointer;flex-wrap:wrap}
+.mchat-doc-priv{flex-basis:100%;font-size:11px;opacity:.7;margin-left:42px;margin-top:-4px}
 /* ripristinati 27/09 (chip mappa servizi, banner partner) */
 .chip{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;white-space:nowrap}
 .chip.active{background:var(--primary,#03491d);border-color:var(--primary,#03491d);color:#fff}
@@ -4284,6 +4287,29 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .vs-nuovo-campo summary{font-weight:700;color:var(--vt-tif-testo);cursor:pointer;margin-bottom:4px}
 :where(body.pl-vet) .vs-nuovo-campo .vs-btn{width:100%;margin-top:4px}
 :where(body.pl-vet) .vs-azione{order:-1}
+
+/* ---------- REFERTO (2/11/2026 · 08-referto.js) ---------- */
+:where(body.pl-vet) .vs-galeno{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo);border-radius:14px;padding:11px 14px;font-size:13.5px;line-height:1.45;margin-bottom:10px}
+:where(body.pl-vet) .vr-foglio{background:#FFFFFF;border:1px solid var(--vt-bordo);border-radius:16px;overflow:hidden;color:var(--vt-testo)}
+:where(body.pl-vet) .vr-testa{display:flex;justify-content:space-between;gap:10px;align-items:baseline;background:var(--vt-notte);color:#FFFFFF;padding:11px 14px}
+:where(body.pl-vet) .vr-testa span{color:var(--vt-su-blu);font-size:12px}
+:where(body.pl-vet) .vr-sez{padding:10px 14px;border-top:1px solid var(--vt-bordo)}
+:where(body.pl-vet) .vr-sez h4{margin:0 0 6px;font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vr-r{display:flex;gap:10px;font-size:13.5px;padding:2px 0}
+:where(body.pl-vet) .vr-r span{flex:0 0 42%;color:var(--vt-testo2)}
+:where(body.pl-vet) .vr-r b{flex:1;font-weight:600;min-width:0;overflow-wrap:anywhere}
+:where(body.pl-vet) .vr-dest{display:flex;gap:12px;align-items:center;background:var(--vt-sup);border:1px solid var(--vt-bordo);border-radius:14px;padding:11px 14px;margin-bottom:8px;cursor:pointer}
+:where(body.pl-vet) .vr-dest.fuori{opacity:.65;cursor:default}
+:where(body.pl-vet) .vr-dest input{width:22px;height:22px;accent-color:var(--vt-tif-scuro);flex:none}
+:where(body.pl-vet) .vr-dest span{display:flex;flex-direction:column}
+:where(body.pl-vet) .vr-dest small{color:var(--vt-testo2);font-size:12.5px}
+:where(body.pl-vet) .vr-scorri{position:relative;height:58px;border-radius:999px;background:var(--vt-notte);margin:16px 0 8px;touch-action:none;user-select:none;overflow:hidden}
+:where(body.pl-vet) .vr-man{position:absolute;top:5px;left:5px;width:48px;height:48px;border-radius:50%;background:var(--vt-tif);color:#12233F;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;transition:left .2s;z-index:1}
+:where(body.pl-vet) .vr-tx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:700;font-size:14.5px;padding-left:40px}
+:where(body.pl-vet) .vr-ok{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:40px 10px 20px}
+:where(body.pl-vet) .vr-ok b{font-family:'Fraunces',serif;font-size:22px;color:var(--vt-notte)}
+:where(body.pl-vet) .vr-ok span{color:var(--vt-testo2);font-size:14px;line-height:1.45}
+:where(body.pl-vet) .vr-spunta{width:64px;height:64px;border-radius:50%;background:var(--vt-tif);color:#12233F!important;font-size:34px!important;display:flex;align-items:center;justify-content:center}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -23768,6 +23794,49 @@ Object.assign(DB, {
     }
     await sb.from("horses").update({ stable_id: stableId }).eq("id", horseId);
   },
+
+  /* -- Documenti privati (2/11/2026, SQL 32 · claude/Equo_Privacy_documenti.md): spazio «documenti», niente link pubblici.
+        Vede: autore, proprietario, chi ha un accesso; decide: proprietario → struttura → autore. -- */
+  async caricaDocumentoPrivato({ blob, nomeFile, mime, categoria, titolo, horse_id, cavallo_cliente_id, scuderia_cavallo_id, visita_id, autore_ruolo, sanitario_obbligatorio }){
+    const riga = { categoria: categoria || "documento", titolo: String(titolo || nomeFile || "Documento").slice(0, 160), horse_id: horse_id || null,
+      cavallo_cliente_id: cavallo_cliente_id || null, scuderia_cavallo_id: scuderia_cavallo_id || null, visita_id: visita_id || null,
+      autore_ruolo: autore_ruolo || null, sanitario_obbligatorio: !!sanitario_obbligatorio, mime: mime || blob?.type || null, byte: blob?.size || null };
+    if(DEMO_MODE){
+      const id = "doc-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      (demoState.documenti = demoState.documenti || []).push({ id, ...riga, autore_user_id: currentUser.id, url: URL.createObjectURL(blob), accessi: [] });
+      return { id, error: null };
+    }
+    const est = (String(nomeFile || "").match(/\.([a-z0-9]{2,5})$/i) || [, (riga.mime || "").split("/")[1] || "bin"])[1].toLowerCase();
+    const rnd = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+    const path = `${currentUser.id}/${rnd}.${est}`;
+    const up = await sb.storage.from("documenti").upload(path, blob, { contentType: riga.mime || "application/octet-stream" });
+    if(up.error){ console.error("caricaDocumentoPrivato:", up.error); return { id: null, error: up.error }; }
+    const { data, error } = await sb.from("documenti").insert({ ...riga, path, autore_user_id: currentUser.id }).select("id").single();
+    if(error){ console.error("caricaDocumentoPrivato:", error); await sb.storage.from("documenti").remove([path]); return { id: null, error }; }
+    return { id: data.id, error: null };
+  },
+  async apriUrlDocumento(id, secondi = 300){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); return d ? { url: d.url, error: null } : { url: null, error: "accesso" }; }
+    const { data, error } = await sb.from("documenti").select("path").eq("id", id).maybeSingle();
+    if(error || !data) return { url: null, error: error ? "rete" : "accesso" };
+    const s = await sb.storage.from("documenti").createSignedUrl(data.path, secondi);
+    return s.error ? { url: null, error: "accesso" } : { url: s.data.signedUrl, error: null };
+  },
+  async condividiDocumento(id, { user_id = null, centro_id = null, motivo = "condivisione" } = {}){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); if(d) d.accessi.push({ id: "acc-" + d.accessi.length, user_id, centro_id, motivo }); return { ok: !!d }; }
+    const { data, error } = await sb.rpc("equo_doc_condividi", { p_doc: id, p_user: user_id, p_centro: centro_id, p_motivo: motivo });
+    return error ? { ok: false, errore: error.message } : data;
+  },
+  async revocaAccessoDocumento(accessoId){
+    if(DEMO_MODE){ (demoState.documenti || []).forEach(d => { d.accessi = d.accessi.filter(a => a.id !== accessoId); }); return { ok: true }; }
+    const { data, error } = await sb.rpc("equo_doc_revoca", { p_accesso: accessoId });
+    return error ? { ok: false, errore: error.message } : data;
+  },
+  async chiVedeDocumento(id){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); return d ? { decide: "autore", puoi_decidere: true, accessi: d.accessi } : null; }
+    const { data, error } = await sb.rpc("equo_doc_chi_vede", { p_doc: id });
+    return error ? null : data;
+  },
 });
 /* ---------- DB · Mascalcia: clienti e interventi del maniscalco ---------- */
 Object.assign(DB, {
@@ -29918,9 +29987,22 @@ const mlSigla = k => String(k || "").toUpperCase();
 	// equo-app-src/src/ruoli/proprietario/moduli/073-chat-col-proprio-maniscalco-lato-proprie.js
 	function bollaAllegato(tipo, url, nome, testo) {
 		const extra = testo ? `<div class="mchat-bubble-text">${escapeHtml(testo)}</div>` : "";
+		const priv = /^equo-doc:[0-9a-zA-Z-]+$/.test(String(url || "")) ? String(url).slice(9) : null;
+		if (priv) return `<button type="button" class="mchat-doc" onclick="apriDocumentoPrivato('${escapeHtml(priv)}')"><span class="mchat-doc-ico">${tipo === "foto" ? "FOTO" : tipo === "video" ? "VIDEO" : "PDF"}</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento")}</span><span class="mchat-doc-priv">Privato · tocca per aprire</span></button>${extra}`;
 		if (tipo === "foto") return `<a href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><img class="mchat-foto" src="${escapeHtml(urlSicuro(url))}" alt="Foto" loading="lazy"></a>${extra}`;
 		if (tipo === "video") return `<video class="mchat-foto" controls playsinline preload="metadata" src="${escapeHtml(url || "")}"></video>${extra}`;
 		return `<a class="mchat-doc" href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
+	}
+	async function apriDocumentoPrivato(id) {
+		const w = window.open("", "_blank");
+		const { url, error } = await DB.apriUrlDocumento(id);
+		if (!url) {
+			if (w) w.close();
+			showToast(error === "accesso" ? "Non hai accesso a questo documento: chi lo gestisce può avertelo tolto." : "Non riesco ad aprire il documento, riprova.");
+			return;
+		}
+		if (w) w.location.href = url;
+		else window.location.href = url;
 	}
 	function previewAllegato(tipo, nome) {
 		if (tipo === "foto") return "📷 Foto";
@@ -33024,6 +33106,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		apriAppuntamentiManiscalco,
 		askDeleteHorse,
 		askDeleteHorseStep2,
+		apriDocumentoPrivato,
 		bollaAllegato,
 		cambiaIncassi,
 		caricaConfermePro,
@@ -38461,6 +38544,8 @@ plAggiorna();
 		document.body.classList.remove("vs-aperto");
 	}
 	function vsIndietro() {
+		if (VS.schermo === "referto") return vsMostraScheda();
+		if (VS.schermo === "referto-fatto") return vsChiudi();
 		if (VS.schermo === "modello-edit" || VS.schermo === "miei") return vsMostraScelta();
 		if (VS.schermo === "scheda" && !VS.visita?.id && !Object.keys(VS.visita?.dati || {}).length) return vsMostraScelta();
 		vsChiudi();
@@ -38554,7 +38639,7 @@ plAggiorna();
 		if (v.modello === "mtc" && !TAB_MTC.some((t) => t[0] === VS.tab)) VS.tab = "mtc";
 		vsTesta("Visita · " + (vsNomeCavallo(VS.e) || "cavallo"), v.modello_nome + (v.stato === "conclusa" ? " · conclusa" : ""));
 		vsDisegnaCorpo();
-		document.getElementById("vs-piede").innerHTML = v.stato === "conclusa" ? "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Chiudi</button>" : "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Salva e chiudi</button><button class=\"vs-btn pri\" onclick=\"vsConcludi()\">Concludi la visita</button>";
+		document.getElementById("vs-piede").innerHTML = v.stato === "conclusa" ? "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Chiudi</button><button class=\"vs-btn pri\" onclick=\"vrApri()\">Referto</button>" : "<button class=\"vs-btn\" onclick=\"vrApri()\">Referto</button><button class=\"vs-btn pri\" onclick=\"vsConcludi()\">Concludi la visita</button>";
 	}
 	function vsDisegnaCorpo() {
 		const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
@@ -38573,7 +38658,7 @@ plAggiorna();
 		});
 		const tabs = mtc ? `<div class="vs-tabs" role="tablist">${TAB_MTC.map(([k, t]) => `<button role="tab" aria-selected="${VS.tab === k}" class="${VS.tab === k ? "on" : ""}" onclick="vsTab('${k}')">${t}</button>`).join("")}</div>` : "";
 		const sola = v.stato === "conclusa";
-		document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs + (sola ? "<div class=\"vs-nota\">Visita conclusa: la scheda è in sola lettura.</div>" : "") + sezioni.map((s) => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map((c) => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("") + "<div class=\"vs-nota\">Foto, video, referto e dettatura arrivano nei prossimi aggiornamenti.</div>";
+		document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs + (sola ? "<div class=\"vs-nota\">Visita conclusa: la scheda è in sola lettura.</div>" : "") + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "") + sezioni.map((s) => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map((c) => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("") + "<div class=\"vs-nota\">Foto, video e dettatura arrivano nei prossimi aggiornamenti.</div>";
 	}
 	function vsTab(k) {
 		VS.tab = k;
@@ -38846,6 +38931,376 @@ plAggiorna();
 			professione: "veterinario"
 		});
 	}
+	// equo-app-src/src/ruoli/veterinario/moduli/08-referto.js
+	var vrEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	function vrValore(c, v) {
+		if (v == null || v === "" || Array.isArray(v) && !v.length) return null;
+		if (Array.isArray(v)) return v.join(", ");
+		if (c.t === "sino") return v ? "Sì" : "No";
+		if (c.t === "scala") return v + "/" + (c.max || 5);
+		if (c.t === "data") {
+			const [y, m, d] = String(v).split("-");
+			return d ? `${d}/${m}/${y}` : String(v);
+		}
+		return String(v);
+	}
+	function vrSezioni() {
+		const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
+		const out = [];
+		(VS.campi || []).forEach((c) => {
+			const val = vrValore(c, d[c.k]);
+			if (val == null) return;
+			const nomeSez = mtc ? {
+				mtc: "Valutazione MTC",
+				fisio: "Fisioterapia",
+				tratt: "Trattamento"
+			}[c.tab] + " · " + c.s : c.s || "Visita";
+			let s = out.find((x) => x.n === nomeSez);
+			if (!s) {
+				s = {
+					n: nomeSez,
+					r: []
+				};
+				out.push(s);
+			}
+			s.r.push([c.e, val]);
+		});
+		return out;
+	}
+	function vrCavallo() {
+		const e = VS.e;
+		const cv = (typeof cavalliCartella === "function" ? cavalliCartella() : []).find((x) => x.id === e.cavallo_cliente_id) || {};
+		const eta = cv.anno_nascita ? (/* @__PURE__ */ new Date()).getFullYear() - Number(cv.anno_nascita) + " anni" : cv.data_nascita ? (/* @__PURE__ */ new Date()).getFullYear() - Number(String(cv.data_nascita).slice(0, 4)) + " anni" : "";
+		return {
+			nome: cv.nome || vsNomeCavallo(e) || "Cavallo",
+			razza: cv.razza || "",
+			sesso: cv.sesso || "",
+			eta,
+			microchip: cv.microchip || "",
+			codice: cv.codice_equo || "",
+			proprietarioId: cv.cliente_mascalcia_id || e.cliente_mascalcia_id,
+			luogoId: cv.ubicazione_cliente_id || null
+		};
+	}
+	var vrCliente = (id) => typeof clienteDiId === "function" ? clienteDiId(id) : null;
+	var vrStruttura = (c) => !!(c && (c.tipo_cliente === "struttura" || c.centro_id));
+	function vrNomePro() {
+		return currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "Veterinario";
+	}
+	function vrDestinatari() {
+		const cav = vrCavallo(), e = VS.e, l = [];
+		const prop = vrCliente(cav.proprietarioId);
+		if (prop && !vrStruttura(prop)) l.push({
+			k: "prop",
+			cliente: prop,
+			nome: prop.nome,
+			ruolo: "Proprietario",
+			suEquo: !!prop.cliente_user_id,
+			on: !!prop.cliente_user_id
+		});
+		const str = vrCliente(cav.luogoId || (vrStruttura(vrCliente(e.cliente_mascalcia_id)) ? e.cliente_mascalcia_id : null));
+		if (str && vrStruttura(str) && !l.some((x) => x.cliente.id === str.id)) l.push({
+			k: "str",
+			cliente: str,
+			nome: str.nome,
+			ruolo: prop && !vrStruttura(prop) ? "Scuderia dove sta il cavallo" : "Proprietario (scuderia)",
+			suEquo: !!(str.centro_id || str.cliente_user_id),
+			on: !prop && !!(str.centro_id || str.cliente_user_id)
+		});
+		return l;
+	}
+	var VR = { dest: [] };
+	async function vrApri() {
+		await vsSalvaSubito();
+		if (!VS.visita?.id) return showToast("Scrivi prima qualcosa nella scheda");
+		VS.schermo = "referto";
+		const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {};
+		if (!sez.length) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
+		VR.dest = vrDestinatari();
+		vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
+		const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
+		document.getElementById("vs-corpo").innerHTML = `
+    <div class="vs-galeno">Ho preparato il referto con i dati della scheda. <b>Rileggilo:</b> lo mandi tu, nessuno lo vede prima.</div>${gia}
+    <div class="vr-foglio">
+      <div class="vr-testa"><b>Referto · ${vrEsc(cav.nome)}</b><span>${(/* @__PURE__ */ new Date((VS.visita.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT")} · PDF</span></div>
+      ${sez.map((s) => `<div class="vr-sez"><h4>${vrEsc(s.n)}</h4>${s.r.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>`).join("")}
+    </div>
+    <div class="vs-h">Chi lo riceve</div>
+    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" ${x.on ? "checked" : ""} ${x.suEquo ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
+      <span><b>${vrEsc(x.nome)}</b><small>${vrEsc(x.ruolo)}${x.suEquo ? " · in chat su Equo" : " · non è su Equo: usa «Condividi»"}</small></span></label>`).join("") : "<div class=\"vs-nota\">Nessun destinatario su Equo per questo cavallo: usa «Condividi» per mandarlo con WhatsApp o email.</div>"}
+    <div class="vs-nota">Il referto resta nella cartella del cavallo in uno spazio privato: lo vedono tu e il proprietario, e chi lo riceve. Il proprietario può togliere l'accesso a chi vuole (non a te).</div>
+    <div class="vr-scorri" id="vr-scorri" role="slider" aria-label="Scorri per firmare e inviare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"
+      onkeydown="if(event.key==='Enter')vrInvia()"><span class="vr-man" id="vr-man">›</span><span class="vr-tx">Scorri per firmare e inviare</span></div>`;
+		document.getElementById("vs-piede").innerHTML = "<button class=\"vs-btn\" onclick=\"vsMostraScheda()\">Torna alla scheda</button><button class=\"vs-btn\" onclick=\"vrCondividi()\">Condividi</button>";
+		vrScorri();
+	}
+	function vrScorri() {
+		const s = document.getElementById("vr-scorri"), m = document.getElementById("vr-man");
+		if (!s || !m) return;
+		let x0 = null;
+		s.addEventListener("pointerdown", (e) => {
+			x0 = e.clientX;
+			m.style.transition = "none";
+			try {
+				s.setPointerCapture(e.pointerId);
+			} catch (_) {}
+		});
+		s.addEventListener("pointermove", (e) => {
+			if (x0 === null) return;
+			m.style.left = Math.max(5, Math.min(s.clientWidth - 53, 5 + e.clientX - x0)) + "px";
+		});
+		s.addEventListener("pointerup", (e) => {
+			if (x0 === null) return;
+			m.style.transition = "";
+			const fatto = e.clientX - x0 > s.clientWidth * .6;
+			x0 = null;
+			if (fatto) {
+				m.style.left = s.clientWidth - 53 + "px";
+				vrInvia();
+			} else m.style.left = "5px";
+		});
+	}
+	async function vrCreaPdf() {
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const W = 210, M = 18, notte = [
+			29,
+			45,
+			80
+		], tif = [
+			127,
+			209,
+			201
+		], grigio = [
+			103,
+			112,
+			134
+		], testo = [
+			26,
+			34,
+			54
+		], chiaro = [
+			247,
+			244,
+			238
+		];
+		const cav = vrCavallo(), sez = vrSezioni(), prop = vrCliente(cav.proprietarioId);
+		const dataVisita = (/* @__PURE__ */ new Date((VS.visita.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "long",
+			year: "numeric"
+		});
+		const testa = () => {
+			doc.setFillColor(...notte);
+			doc.rect(0, 0, W, 30, "F");
+			doc.setTextColor(255, 255, 255);
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(20);
+			doc.text("Referto veterinario", M, 18);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10);
+			doc.text(dataVisita, 192, 18, { align: "right" });
+			doc.setFillColor(...tif);
+			doc.rect(0, 30, W, 1.4, "F");
+		};
+		const piede = () => {
+			doc.setDrawColor(230, 224, 212);
+			doc.setLineWidth(.2);
+			doc.line(M, 278, 192, 278);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.2);
+			doc.setTextColor(...grigio);
+			doc.text("Documento clinico riservato. Generato con Equo (equohub.com). Conferma in app, non firma digitale qualificata.", M, 283);
+		};
+		testa();
+		let y = 44;
+		doc.setTextColor(...notte);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(19);
+		doc.text(cav.nome, M, y);
+		y += 6;
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10.5);
+		doc.setTextColor(...grigio);
+		doc.text([
+			cav.razza,
+			cav.sesso,
+			cav.eta
+		].filter(Boolean).join(" · ") || " ", M, y);
+		y += 8;
+		const info = [
+			["Proprietario", prop?.nome || "—"],
+			["Veterinario", vrNomePro() + (currentUser?.certificazioneStato === "verificato" ? " · Equo Certified" : "")],
+			["Visita", VS.visita.modello_nome || "Visita"],
+			cav.microchip ? ["Microchip", cav.microchip] : null,
+			cav.codice ? ["Codice Equo", cav.codice] : null
+		].filter(Boolean);
+		doc.setFontSize(10.5);
+		info.forEach(([k, v]) => {
+			doc.setFont("helvetica", "bold");
+			doc.setTextColor(...grigio);
+			doc.text(k, M, y);
+			doc.setFont("helvetica", "normal");
+			doc.setTextColor(...testo);
+			doc.text(String(v), 52, y);
+			y += 6;
+		});
+		y += 4;
+		const nuovaPagina = () => {
+			piede();
+			doc.addPage();
+			testa();
+			y = 42;
+		};
+		sez.forEach((s) => {
+			if (y > 255) nuovaPagina();
+			doc.setFillColor(...chiaro);
+			doc.rect(M, y - 5, 174, 8, "F");
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...notte);
+			doc.text(s.n.toUpperCase(), 21, y);
+			y += 8;
+			s.r.forEach(([k, v]) => {
+				const righe = doc.splitTextToSize(String(v), 114);
+				const h = Math.max(6.2, righe.length * 5 + 1.6);
+				if (y + h > 272) nuovaPagina();
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(10);
+				doc.setTextColor(...grigio);
+				doc.text(doc.splitTextToSize(k, 54), 21, y);
+				doc.setTextColor(...testo);
+				doc.text(righe, 78, y);
+				y += h;
+			});
+			y += 3;
+		});
+		if (y > 250) nuovaPagina();
+		y += 8;
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.setTextColor(...testo);
+		doc.text("Confermato in app da " + vrNomePro() + " il " + (/* @__PURE__ */ new Date()).toLocaleString("it-IT", {
+			day: "numeric",
+			month: "long",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit"
+		}) + ".", M, y);
+		piede();
+		const pulisci = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+		const nome = [
+			"Referto",
+			pulisci(cav.nome),
+			VS.visita.data_visita
+		].filter(Boolean).join("_") + ".pdf";
+		return {
+			blob: doc.output("blob"),
+			nome,
+			titolo: "Referto " + cav.nome + " · " + dataVisita
+		};
+	}
+	async function vrCondividi() {
+		try {
+			showToast("Creo il PDF…");
+			const { blob, nome } = await vrCreaPdf();
+			const file = new File([blob], nome, { type: "application/pdf" });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
+				await navigator.share({
+					files: [file],
+					title: nome
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			const url = URL.createObjectURL(blob), a = document.createElement("a");
+			a.href = url;
+			a.download = nome;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 3e4);
+		} catch (err) {
+			console.error("referto:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	async function vrInvia() {
+		if (VR.invio) return;
+		VR.invio = true;
+		try {
+			const scelti = VR.dest.filter((x) => x.on && x.suEquo);
+			showToast("Preparo e invio il referto…");
+			const { blob, nome, titolo } = await vrCreaPdf();
+			const v = VS.visita, e = VS.e;
+			const { id, error } = await DB.caricaDocumentoPrivato({
+				blob,
+				nomeFile: nome,
+				mime: "application/pdf",
+				categoria: "referto",
+				titolo,
+				cavallo_cliente_id: v.cavallo_cliente_id || e.cavallo_cliente_id || null,
+				horse_id: v.horse_id || e.horse_id || null,
+				visita_id: v.id,
+				autore_ruolo: "veterinario"
+			});
+			if (!id) {
+				showToast(/documenti|bucket|not found|does not exist/i.test(error?.message || "") ? "Lo spazio privato dei documenti non è ancora attivo (SQL 32)." : "Errore nel salvare il referto: " + (error?.message || "riprova"));
+				return;
+			}
+			const inviati = [], avvisi = [];
+			for (const x of scelti) {
+				const c = x.cliente;
+				const acc = c.centro_id && !c.cliente_user_id ? await DB.condividiDocumento(id, {
+					centro_id: c.centro_id,
+					motivo: "chat"
+				}) : c.cliente_user_id ? await DB.condividiDocumento(id, {
+					user_id: c.cliente_user_id,
+					motivo: "chat"
+				}) : { ok: false };
+				if (!acc?.ok) {
+					avvisi.push(x.nome + (String(acc?.errore || "").startsWith("decide_proprietario") ? ": lo vedrà se il proprietario lo condivide" : ": non condiviso"));
+					continue;
+				}
+				const { error: em } = await DB.insertMessaggioMascalcia({
+					cliente_mascalcia_id: c.id,
+					tipo: "documento",
+					testo: "Referto della visita di " + vrCavallo().nome + " (" + (/* @__PURE__ */ new Date((v.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT") + ")",
+					file_url: "equo-doc:" + id,
+					file_nome: nome
+				});
+				if (em) avvisi.push(x.nome + ": messaggio non inviato");
+				else inviati.push(x.nome);
+			}
+			v.dati = {
+				...v.dati || {},
+				_referto: {
+					il: (/* @__PURE__ */ new Date()).toISOString(),
+					a: inviati,
+					documento_id: id
+				}
+			};
+			await vsSalvaSubito();
+			vrFatto(inviati, avvisi);
+		} catch (err) {
+			console.error("referto:", err);
+			showToast("Impossibile inviare il referto: " + (err?.message || err));
+		} finally {
+			VR.invio = false;
+		}
+	}
+	function vrFatto(inviati, avvisi) {
+		VS.schermo = "referto-fatto";
+		vsTesta("Fatto", vrCavallo().nome);
+		const prop = VR.dest.find((x) => x.k === "prop" && inviati.includes(x.nome));
+		document.getElementById("vs-corpo").innerHTML = `<div class="vr-ok"><span class="vr-spunta">✓</span><b>Referto ${inviati.length ? "inviato" : "salvato"}</b>
+    <span>${inviati.length ? "In chat a " + vrEsc(inviati.join(", ")) + "." : "È nella cartella del cavallo, nello spazio privato."} Lo trovi anche nella scheda della visita.</span></div>
+    ${avvisi.length ? `<div class="vs-nota">${avvisi.map(vrEsc).join("<br>")}</div>` : ""}`;
+		document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + "<button class=\"vs-btn pri\" onclick=\"vsChiudi()\">Chiudi</button>";
+	}
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
@@ -38862,6 +39317,14 @@ plAggiorna();
 		vmFiltra,
 		vmNuovoMessaggio,
 		galenoTestata,
+		vsMostraScheda,
+		vrApri,
+		vrInvia,
+		vrCondividi,
+		vrCreaPdf,
+		vrSezioni,
+		vrDestinatari,
+		VR,
 		vsApriDaEvento,
 		vsMostraScelta,
 		vsMostraMiei,

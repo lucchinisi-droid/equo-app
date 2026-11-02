@@ -1426,6 +1426,8 @@
 		document.body.classList.remove("vs-aperto");
 	}
 	function vsIndietro() {
+		if (VS.schermo === "referto") return vsMostraScheda();
+		if (VS.schermo === "referto-fatto") return vsChiudi();
 		if (VS.schermo === "modello-edit" || VS.schermo === "miei") return vsMostraScelta();
 		if (VS.schermo === "scheda" && !VS.visita?.id && !Object.keys(VS.visita?.dati || {}).length) return vsMostraScelta();
 		vsChiudi();
@@ -1519,7 +1521,7 @@
 		if (v.modello === "mtc" && !TAB_MTC.some((t) => t[0] === VS.tab)) VS.tab = "mtc";
 		vsTesta("Visita · " + (vsNomeCavallo(VS.e) || "cavallo"), v.modello_nome + (v.stato === "conclusa" ? " · conclusa" : ""));
 		vsDisegnaCorpo();
-		document.getElementById("vs-piede").innerHTML = v.stato === "conclusa" ? "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Chiudi</button>" : "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Salva e chiudi</button><button class=\"vs-btn pri\" onclick=\"vsConcludi()\">Concludi la visita</button>";
+		document.getElementById("vs-piede").innerHTML = v.stato === "conclusa" ? "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Chiudi</button><button class=\"vs-btn pri\" onclick=\"vrApri()\">Referto</button>" : "<button class=\"vs-btn\" onclick=\"vrApri()\">Referto</button><button class=\"vs-btn pri\" onclick=\"vsConcludi()\">Concludi la visita</button>";
 	}
 	function vsDisegnaCorpo() {
 		const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
@@ -1538,7 +1540,7 @@
 		});
 		const tabs = mtc ? `<div class="vs-tabs" role="tablist">${TAB_MTC.map(([k, t]) => `<button role="tab" aria-selected="${VS.tab === k}" class="${VS.tab === k ? "on" : ""}" onclick="vsTab('${k}')">${t}</button>`).join("")}</div>` : "";
 		const sola = v.stato === "conclusa";
-		document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs + (sola ? "<div class=\"vs-nota\">Visita conclusa: la scheda è in sola lettura.</div>" : "") + sezioni.map((s) => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map((c) => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("") + "<div class=\"vs-nota\">Foto, video, referto e dettatura arrivano nei prossimi aggiornamenti.</div>";
+		document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs + (sola ? "<div class=\"vs-nota\">Visita conclusa: la scheda è in sola lettura.</div>" : "") + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "") + sezioni.map((s) => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map((c) => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("") + "<div class=\"vs-nota\">Foto, video e dettatura arrivano nei prossimi aggiornamenti.</div>";
 	}
 	function vsTab(k) {
 		VS.tab = k;
@@ -1811,6 +1813,376 @@
 			professione: "veterinario"
 		});
 	}
+	// equo-app-src/src/ruoli/veterinario/moduli/08-referto.js
+	var vrEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	function vrValore(c, v) {
+		if (v == null || v === "" || Array.isArray(v) && !v.length) return null;
+		if (Array.isArray(v)) return v.join(", ");
+		if (c.t === "sino") return v ? "Sì" : "No";
+		if (c.t === "scala") return v + "/" + (c.max || 5);
+		if (c.t === "data") {
+			const [y, m, d] = String(v).split("-");
+			return d ? `${d}/${m}/${y}` : String(v);
+		}
+		return String(v);
+	}
+	function vrSezioni() {
+		const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
+		const out = [];
+		(VS.campi || []).forEach((c) => {
+			const val = vrValore(c, d[c.k]);
+			if (val == null) return;
+			const nomeSez = mtc ? {
+				mtc: "Valutazione MTC",
+				fisio: "Fisioterapia",
+				tratt: "Trattamento"
+			}[c.tab] + " · " + c.s : c.s || "Visita";
+			let s = out.find((x) => x.n === nomeSez);
+			if (!s) {
+				s = {
+					n: nomeSez,
+					r: []
+				};
+				out.push(s);
+			}
+			s.r.push([c.e, val]);
+		});
+		return out;
+	}
+	function vrCavallo() {
+		const e = VS.e;
+		const cv = (typeof cavalliCartella === "function" ? cavalliCartella() : []).find((x) => x.id === e.cavallo_cliente_id) || {};
+		const eta = cv.anno_nascita ? (/* @__PURE__ */ new Date()).getFullYear() - Number(cv.anno_nascita) + " anni" : cv.data_nascita ? (/* @__PURE__ */ new Date()).getFullYear() - Number(String(cv.data_nascita).slice(0, 4)) + " anni" : "";
+		return {
+			nome: cv.nome || vsNomeCavallo(e) || "Cavallo",
+			razza: cv.razza || "",
+			sesso: cv.sesso || "",
+			eta,
+			microchip: cv.microchip || "",
+			codice: cv.codice_equo || "",
+			proprietarioId: cv.cliente_mascalcia_id || e.cliente_mascalcia_id,
+			luogoId: cv.ubicazione_cliente_id || null
+		};
+	}
+	var vrCliente = (id) => typeof clienteDiId === "function" ? clienteDiId(id) : null;
+	var vrStruttura = (c) => !!(c && (c.tipo_cliente === "struttura" || c.centro_id));
+	function vrNomePro() {
+		return currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "Veterinario";
+	}
+	function vrDestinatari() {
+		const cav = vrCavallo(), e = VS.e, l = [];
+		const prop = vrCliente(cav.proprietarioId);
+		if (prop && !vrStruttura(prop)) l.push({
+			k: "prop",
+			cliente: prop,
+			nome: prop.nome,
+			ruolo: "Proprietario",
+			suEquo: !!prop.cliente_user_id,
+			on: !!prop.cliente_user_id
+		});
+		const str = vrCliente(cav.luogoId || (vrStruttura(vrCliente(e.cliente_mascalcia_id)) ? e.cliente_mascalcia_id : null));
+		if (str && vrStruttura(str) && !l.some((x) => x.cliente.id === str.id)) l.push({
+			k: "str",
+			cliente: str,
+			nome: str.nome,
+			ruolo: prop && !vrStruttura(prop) ? "Scuderia dove sta il cavallo" : "Proprietario (scuderia)",
+			suEquo: !!(str.centro_id || str.cliente_user_id),
+			on: !prop && !!(str.centro_id || str.cliente_user_id)
+		});
+		return l;
+	}
+	var VR = { dest: [] };
+	async function vrApri() {
+		await vsSalvaSubito();
+		if (!VS.visita?.id) return showToast("Scrivi prima qualcosa nella scheda");
+		VS.schermo = "referto";
+		const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {};
+		if (!sez.length) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
+		VR.dest = vrDestinatari();
+		vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
+		const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
+		document.getElementById("vs-corpo").innerHTML = `
+    <div class="vs-galeno">Ho preparato il referto con i dati della scheda. <b>Rileggilo:</b> lo mandi tu, nessuno lo vede prima.</div>${gia}
+    <div class="vr-foglio">
+      <div class="vr-testa"><b>Referto · ${vrEsc(cav.nome)}</b><span>${(/* @__PURE__ */ new Date((VS.visita.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT")} · PDF</span></div>
+      ${sez.map((s) => `<div class="vr-sez"><h4>${vrEsc(s.n)}</h4>${s.r.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>`).join("")}
+    </div>
+    <div class="vs-h">Chi lo riceve</div>
+    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" ${x.on ? "checked" : ""} ${x.suEquo ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
+      <span><b>${vrEsc(x.nome)}</b><small>${vrEsc(x.ruolo)}${x.suEquo ? " · in chat su Equo" : " · non è su Equo: usa «Condividi»"}</small></span></label>`).join("") : "<div class=\"vs-nota\">Nessun destinatario su Equo per questo cavallo: usa «Condividi» per mandarlo con WhatsApp o email.</div>"}
+    <div class="vs-nota">Il referto resta nella cartella del cavallo in uno spazio privato: lo vedono tu e il proprietario, e chi lo riceve. Il proprietario può togliere l'accesso a chi vuole (non a te).</div>
+    <div class="vr-scorri" id="vr-scorri" role="slider" aria-label="Scorri per firmare e inviare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"
+      onkeydown="if(event.key==='Enter')vrInvia()"><span class="vr-man" id="vr-man">›</span><span class="vr-tx">Scorri per firmare e inviare</span></div>`;
+		document.getElementById("vs-piede").innerHTML = "<button class=\"vs-btn\" onclick=\"vsMostraScheda()\">Torna alla scheda</button><button class=\"vs-btn\" onclick=\"vrCondividi()\">Condividi</button>";
+		vrScorri();
+	}
+	function vrScorri() {
+		const s = document.getElementById("vr-scorri"), m = document.getElementById("vr-man");
+		if (!s || !m) return;
+		let x0 = null;
+		s.addEventListener("pointerdown", (e) => {
+			x0 = e.clientX;
+			m.style.transition = "none";
+			try {
+				s.setPointerCapture(e.pointerId);
+			} catch (_) {}
+		});
+		s.addEventListener("pointermove", (e) => {
+			if (x0 === null) return;
+			m.style.left = Math.max(5, Math.min(s.clientWidth - 53, 5 + e.clientX - x0)) + "px";
+		});
+		s.addEventListener("pointerup", (e) => {
+			if (x0 === null) return;
+			m.style.transition = "";
+			const fatto = e.clientX - x0 > s.clientWidth * .6;
+			x0 = null;
+			if (fatto) {
+				m.style.left = s.clientWidth - 53 + "px";
+				vrInvia();
+			} else m.style.left = "5px";
+		});
+	}
+	async function vrCreaPdf() {
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const W = 210, M = 18, notte = [
+			29,
+			45,
+			80
+		], tif = [
+			127,
+			209,
+			201
+		], grigio = [
+			103,
+			112,
+			134
+		], testo = [
+			26,
+			34,
+			54
+		], chiaro = [
+			247,
+			244,
+			238
+		];
+		const cav = vrCavallo(), sez = vrSezioni(), prop = vrCliente(cav.proprietarioId);
+		const dataVisita = (/* @__PURE__ */ new Date((VS.visita.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "long",
+			year: "numeric"
+		});
+		const testa = () => {
+			doc.setFillColor(...notte);
+			doc.rect(0, 0, W, 30, "F");
+			doc.setTextColor(255, 255, 255);
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(20);
+			doc.text("Referto veterinario", M, 18);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10);
+			doc.text(dataVisita, 192, 18, { align: "right" });
+			doc.setFillColor(...tif);
+			doc.rect(0, 30, W, 1.4, "F");
+		};
+		const piede = () => {
+			doc.setDrawColor(230, 224, 212);
+			doc.setLineWidth(.2);
+			doc.line(M, 278, 192, 278);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.2);
+			doc.setTextColor(...grigio);
+			doc.text("Documento clinico riservato. Generato con Equo (equohub.com). Conferma in app, non firma digitale qualificata.", M, 283);
+		};
+		testa();
+		let y = 44;
+		doc.setTextColor(...notte);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(19);
+		doc.text(cav.nome, M, y);
+		y += 6;
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10.5);
+		doc.setTextColor(...grigio);
+		doc.text([
+			cav.razza,
+			cav.sesso,
+			cav.eta
+		].filter(Boolean).join(" · ") || " ", M, y);
+		y += 8;
+		const info = [
+			["Proprietario", prop?.nome || "—"],
+			["Veterinario", vrNomePro() + (currentUser?.certificazioneStato === "verificato" ? " · Equo Certified" : "")],
+			["Visita", VS.visita.modello_nome || "Visita"],
+			cav.microchip ? ["Microchip", cav.microchip] : null,
+			cav.codice ? ["Codice Equo", cav.codice] : null
+		].filter(Boolean);
+		doc.setFontSize(10.5);
+		info.forEach(([k, v]) => {
+			doc.setFont("helvetica", "bold");
+			doc.setTextColor(...grigio);
+			doc.text(k, M, y);
+			doc.setFont("helvetica", "normal");
+			doc.setTextColor(...testo);
+			doc.text(String(v), 52, y);
+			y += 6;
+		});
+		y += 4;
+		const nuovaPagina = () => {
+			piede();
+			doc.addPage();
+			testa();
+			y = 42;
+		};
+		sez.forEach((s) => {
+			if (y > 255) nuovaPagina();
+			doc.setFillColor(...chiaro);
+			doc.rect(M, y - 5, 174, 8, "F");
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...notte);
+			doc.text(s.n.toUpperCase(), 21, y);
+			y += 8;
+			s.r.forEach(([k, v]) => {
+				const righe = doc.splitTextToSize(String(v), 114);
+				const h = Math.max(6.2, righe.length * 5 + 1.6);
+				if (y + h > 272) nuovaPagina();
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(10);
+				doc.setTextColor(...grigio);
+				doc.text(doc.splitTextToSize(k, 54), 21, y);
+				doc.setTextColor(...testo);
+				doc.text(righe, 78, y);
+				y += h;
+			});
+			y += 3;
+		});
+		if (y > 250) nuovaPagina();
+		y += 8;
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.setTextColor(...testo);
+		doc.text("Confermato in app da " + vrNomePro() + " il " + (/* @__PURE__ */ new Date()).toLocaleString("it-IT", {
+			day: "numeric",
+			month: "long",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit"
+		}) + ".", M, y);
+		piede();
+		const pulisci = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+		const nome = [
+			"Referto",
+			pulisci(cav.nome),
+			VS.visita.data_visita
+		].filter(Boolean).join("_") + ".pdf";
+		return {
+			blob: doc.output("blob"),
+			nome,
+			titolo: "Referto " + cav.nome + " · " + dataVisita
+		};
+	}
+	async function vrCondividi() {
+		try {
+			showToast("Creo il PDF…");
+			const { blob, nome } = await vrCreaPdf();
+			const file = new File([blob], nome, { type: "application/pdf" });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
+				await navigator.share({
+					files: [file],
+					title: nome
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			const url = URL.createObjectURL(blob), a = document.createElement("a");
+			a.href = url;
+			a.download = nome;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 3e4);
+		} catch (err) {
+			console.error("referto:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	async function vrInvia() {
+		if (VR.invio) return;
+		VR.invio = true;
+		try {
+			const scelti = VR.dest.filter((x) => x.on && x.suEquo);
+			showToast("Preparo e invio il referto…");
+			const { blob, nome, titolo } = await vrCreaPdf();
+			const v = VS.visita, e = VS.e;
+			const { id, error } = await DB.caricaDocumentoPrivato({
+				blob,
+				nomeFile: nome,
+				mime: "application/pdf",
+				categoria: "referto",
+				titolo,
+				cavallo_cliente_id: v.cavallo_cliente_id || e.cavallo_cliente_id || null,
+				horse_id: v.horse_id || e.horse_id || null,
+				visita_id: v.id,
+				autore_ruolo: "veterinario"
+			});
+			if (!id) {
+				showToast(/documenti|bucket|not found|does not exist/i.test(error?.message || "") ? "Lo spazio privato dei documenti non è ancora attivo (SQL 32)." : "Errore nel salvare il referto: " + (error?.message || "riprova"));
+				return;
+			}
+			const inviati = [], avvisi = [];
+			for (const x of scelti) {
+				const c = x.cliente;
+				const acc = c.centro_id && !c.cliente_user_id ? await DB.condividiDocumento(id, {
+					centro_id: c.centro_id,
+					motivo: "chat"
+				}) : c.cliente_user_id ? await DB.condividiDocumento(id, {
+					user_id: c.cliente_user_id,
+					motivo: "chat"
+				}) : { ok: false };
+				if (!acc?.ok) {
+					avvisi.push(x.nome + (String(acc?.errore || "").startsWith("decide_proprietario") ? ": lo vedrà se il proprietario lo condivide" : ": non condiviso"));
+					continue;
+				}
+				const { error: em } = await DB.insertMessaggioMascalcia({
+					cliente_mascalcia_id: c.id,
+					tipo: "documento",
+					testo: "Referto della visita di " + vrCavallo().nome + " (" + (/* @__PURE__ */ new Date((v.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT") + ")",
+					file_url: "equo-doc:" + id,
+					file_nome: nome
+				});
+				if (em) avvisi.push(x.nome + ": messaggio non inviato");
+				else inviati.push(x.nome);
+			}
+			v.dati = {
+				...v.dati || {},
+				_referto: {
+					il: (/* @__PURE__ */ new Date()).toISOString(),
+					a: inviati,
+					documento_id: id
+				}
+			};
+			await vsSalvaSubito();
+			vrFatto(inviati, avvisi);
+		} catch (err) {
+			console.error("referto:", err);
+			showToast("Impossibile inviare il referto: " + (err?.message || err));
+		} finally {
+			VR.invio = false;
+		}
+	}
+	function vrFatto(inviati, avvisi) {
+		VS.schermo = "referto-fatto";
+		vsTesta("Fatto", vrCavallo().nome);
+		const prop = VR.dest.find((x) => x.k === "prop" && inviati.includes(x.nome));
+		document.getElementById("vs-corpo").innerHTML = `<div class="vr-ok"><span class="vr-spunta">✓</span><b>Referto ${inviati.length ? "inviato" : "salvato"}</b>
+    <span>${inviati.length ? "In chat a " + vrEsc(inviati.join(", ")) + "." : "È nella cartella del cavallo, nello spazio privato."} Lo trovi anche nella scheda della visita.</span></div>
+    ${avvisi.length ? `<div class="vs-nota">${avvisi.map(vrEsc).join("<br>")}</div>` : ""}`;
+		document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + "<button class=\"vs-btn pri\" onclick=\"vsChiudi()\">Chiudi</button>";
+	}
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
@@ -1827,6 +2199,14 @@
 		vmFiltra,
 		vmNuovoMessaggio,
 		galenoTestata,
+		vsMostraScheda,
+		vrApri,
+		vrInvia,
+		vrCondividi,
+		vrCreaPdf,
+		vrSezioni,
+		vrDestinatari,
+		VR,
 		vsApriDaEvento,
 		vsMostraScelta,
 		vsMostraMiei,

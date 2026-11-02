@@ -276,9 +276,22 @@
 	// equo-app-src/src/ruoli/proprietario/moduli/073-chat-col-proprio-maniscalco-lato-proprie.js
 	function bollaAllegato(tipo, url, nome, testo) {
 		const extra = testo ? `<div class="mchat-bubble-text">${escapeHtml(testo)}</div>` : "";
+		const priv = /^equo-doc:[0-9a-zA-Z-]+$/.test(String(url || "")) ? String(url).slice(9) : null;
+		if (priv) return `<button type="button" class="mchat-doc" onclick="apriDocumentoPrivato('${escapeHtml(priv)}')"><span class="mchat-doc-ico">${tipo === "foto" ? "FOTO" : tipo === "video" ? "VIDEO" : "PDF"}</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento")}</span><span class="mchat-doc-priv">Privato · tocca per aprire</span></button>${extra}`;
 		if (tipo === "foto") return `<a href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><img class="mchat-foto" src="${escapeHtml(urlSicuro(url))}" alt="Foto" loading="lazy"></a>${extra}`;
 		if (tipo === "video") return `<video class="mchat-foto" controls playsinline preload="metadata" src="${escapeHtml(url || "")}"></video>${extra}`;
 		return `<a class="mchat-doc" href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
+	}
+	async function apriDocumentoPrivato(id) {
+		const w = window.open("", "_blank");
+		const { url, error } = await DB.apriUrlDocumento(id);
+		if (!url) {
+			if (w) w.close();
+			showToast(error === "accesso" ? "Non hai accesso a questo documento: chi lo gestisce può avertelo tolto." : "Non riesco ad aprire il documento, riprova.");
+			return;
+		}
+		if (w) w.location.href = url;
+		else window.location.href = url;
 	}
 	function previewAllegato(tipo, nome) {
 		if (tipo === "foto") return "📷 Foto";
@@ -3382,6 +3395,7 @@
 		apriAppuntamentiManiscalco,
 		askDeleteHorse,
 		askDeleteHorseStep2,
+		apriDocumentoPrivato,
 		bollaAllegato,
 		cambiaIncassi,
 		caricaConfermePro,

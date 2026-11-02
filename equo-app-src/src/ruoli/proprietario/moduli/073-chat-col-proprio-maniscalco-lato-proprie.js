@@ -5,9 +5,23 @@
 // Corpo di una bolla con allegato (foto o PDF), uguale in tutte le chat
 function bollaAllegato(tipo, url, nome, testo){
   const extra = testo ? `<div class="mchat-bubble-text">${escapeHtml(testo)}</div>` : "";
+  // 2/11/2026: documento privato (SQL 32): «equo-doc:<id>» si apre solo con un link temporaneo, se hai l'accesso
+  const priv = /^equo-doc:[0-9a-zA-Z-]+$/.test(String(url || "")) ? String(url).slice(9) : null;
+  if(priv) return `<button type="button" class="mchat-doc" onclick="apriDocumentoPrivato('${escapeHtml(priv)}')"><span class="mchat-doc-ico">${tipo === "foto" ? "FOTO" : tipo === "video" ? "VIDEO" : "PDF"}</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento")}</span><span class="mchat-doc-priv">Privato · tocca per aprire</span></button>${extra}`;
   if(tipo === "foto") return `<a href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><img class="mchat-foto" src="${escapeHtml(urlSicuro(url))}" alt="Foto" loading="lazy"></a>${extra}`;
   if(tipo === "video") return `<video class="mchat-foto" controls playsinline preload="metadata" src="${escapeHtml(url || "")}"></video>${extra}`;
   return `<a class="mchat-doc" href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
+}
+// apre un documento privato con un link che vale pochi minuti (la finestra si apre subito, se no il telefono la blocca)
+async function apriDocumentoPrivato(id){
+  const w = window.open("", "_blank");
+  const { url, error } = await DB.apriUrlDocumento(id);
+  if(!url){
+    if(w) w.close();
+    showToast(error === "accesso" ? "Non hai accesso a questo documento: chi lo gestisce può avertelo tolto." : "Non riesco ad aprire il documento, riprova.");
+    return;
+  }
+  if(w) w.location.href = url; else window.location.href = url;
 }
 function previewAllegato(tipo, nome){
   if(tipo === "foto") return "📷 Foto";
@@ -88,4 +102,4 @@ async function collegaManiscalco(){
 }
 
 
-export { bollaAllegato, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia };
+export { apriDocumentoPrivato, bollaAllegato, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia };

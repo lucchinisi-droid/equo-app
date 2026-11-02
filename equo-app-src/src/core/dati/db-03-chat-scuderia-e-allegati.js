@@ -69,4 +69,47 @@ Object.assign(DB, {
     }
     await sb.from("horses").update({ stable_id: stableId }).eq("id", horseId);
   },
+
+  /* -- Documenti privati (2/11/2026, SQL 32 · claude/Equo_Privacy_documenti.md): spazio «documenti», niente link pubblici.
+        Vede: autore, proprietario, chi ha un accesso; decide: proprietario → struttura → autore. -- */
+  async caricaDocumentoPrivato({ blob, nomeFile, mime, categoria, titolo, horse_id, cavallo_cliente_id, scuderia_cavallo_id, visita_id, autore_ruolo, sanitario_obbligatorio }){
+    const riga = { categoria: categoria || "documento", titolo: String(titolo || nomeFile || "Documento").slice(0, 160), horse_id: horse_id || null,
+      cavallo_cliente_id: cavallo_cliente_id || null, scuderia_cavallo_id: scuderia_cavallo_id || null, visita_id: visita_id || null,
+      autore_ruolo: autore_ruolo || null, sanitario_obbligatorio: !!sanitario_obbligatorio, mime: mime || blob?.type || null, byte: blob?.size || null };
+    if(DEMO_MODE){
+      const id = "doc-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      (demoState.documenti = demoState.documenti || []).push({ id, ...riga, autore_user_id: currentUser.id, url: URL.createObjectURL(blob), accessi: [] });
+      return { id, error: null };
+    }
+    const est = (String(nomeFile || "").match(/\.([a-z0-9]{2,5})$/i) || [, (riga.mime || "").split("/")[1] || "bin"])[1].toLowerCase();
+    const rnd = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+    const path = `${currentUser.id}/${rnd}.${est}`;
+    const up = await sb.storage.from("documenti").upload(path, blob, { contentType: riga.mime || "application/octet-stream" });
+    if(up.error){ console.error("caricaDocumentoPrivato:", up.error); return { id: null, error: up.error }; }
+    const { data, error } = await sb.from("documenti").insert({ ...riga, path, autore_user_id: currentUser.id }).select("id").single();
+    if(error){ console.error("caricaDocumentoPrivato:", error); await sb.storage.from("documenti").remove([path]); return { id: null, error }; }
+    return { id: data.id, error: null };
+  },
+  async apriUrlDocumento(id, secondi = 300){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); return d ? { url: d.url, error: null } : { url: null, error: "accesso" }; }
+    const { data, error } = await sb.from("documenti").select("path").eq("id", id).maybeSingle();
+    if(error || !data) return { url: null, error: error ? "rete" : "accesso" };
+    const s = await sb.storage.from("documenti").createSignedUrl(data.path, secondi);
+    return s.error ? { url: null, error: "accesso" } : { url: s.data.signedUrl, error: null };
+  },
+  async condividiDocumento(id, { user_id = null, centro_id = null, motivo = "condivisione" } = {}){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); if(d) d.accessi.push({ id: "acc-" + d.accessi.length, user_id, centro_id, motivo }); return { ok: !!d }; }
+    const { data, error } = await sb.rpc("equo_doc_condividi", { p_doc: id, p_user: user_id, p_centro: centro_id, p_motivo: motivo });
+    return error ? { ok: false, errore: error.message } : data;
+  },
+  async revocaAccessoDocumento(accessoId){
+    if(DEMO_MODE){ (demoState.documenti || []).forEach(d => { d.accessi = d.accessi.filter(a => a.id !== accessoId); }); return { ok: true }; }
+    const { data, error } = await sb.rpc("equo_doc_revoca", { p_accesso: accessoId });
+    return error ? { ok: false, errore: error.message } : data;
+  },
+  async chiVedeDocumento(id){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); return d ? { decide: "autore", puoi_decidere: true, accessi: d.accessi } : null; }
+    const { data, error } = await sb.rpc("equo_doc_chi_vede", { p_doc: id });
+    return error ? null : data;
+  },
 });
