@@ -22,6 +22,8 @@ const CAMPI_STANDARD = [
   ...zoppiaArti("Apparato locomotore"),
   { k: "flessione", e: "Test di flessione", t: "riga", s: "Apparato locomotore", ph: "es. positivo distale ASx" },
   { k: "polso", e: "Polso digitale", t: "riga", s: "Apparato locomotore" },
+  // mappa del cavallo (2/11/2026, 13-mappe.js): dolore, ferite, gonfiori toccando il disegno
+  { k: "mappa", e: "Mappa del cavallo", t: "mappa", modo: "segni", s: "Mappa del cavallo" },
   { k: "diagnosi", e: "Diagnosi / ipotesi", t: "testo", s: "Diagnosi e piano" },
   { k: "cosa_fare", e: "Cosa fare", t: "testo", s: "Diagnosi e piano" },
   { k: "terapia", e: "Terapia", t: "testo", s: "Diagnosi e piano", ph: "farmaci, cure, esercizi" },
@@ -46,7 +48,10 @@ const CAMPI_MTC = [
   { k: "polso_sx", e: "Polso sinistro", t: "riga", s: "Polso", tab: "mtc", ph: "profondità, forza, frequenza" },
   { k: "polso_dx", e: "Polso destro", t: "riga", s: "Polso", tab: "mtc", ph: "profondità, forza, frequenza" },
   { k: "polso_q", e: "Qualità del polso", t: "multi", o: ["Scivoloso", "A corda", "Sottile", "Irregolare"], s: "Polso", tab: "mtc" },
-  ...PUNTI_DIAGNOSTICI.map(([p, n]) => ({ k: "scan_" + p, e: p + " · " + n, t: "scala", max: 3, s: "Scansione dei punti diagnostici (reattività 0–3)", tab: "mtc", rosso: true })),
+  // 2/11/2026: i punti si segnano sul disegno del cavallo, dove li trova il veterinario (13-mappe.js)
+  { k: "mappa_mtc", e: "Punti sul cavallo", t: "mappa", modo: "punti", s: "Scansione dei punti diagnostici (reattività 0–3)", tab: "mtc" },
+  // vecchia scansione a elenco: si vede solo nelle visite che la usavano già
+  ...PUNTI_DIAGNOSTICI.map(([p, n]) => ({ k: "scan_" + p, e: p + " · " + n, t: "scala", max: 3, s: "Scansione dei punti diagnostici (reattività 0–3)", tab: "mtc", rosso: true, vecchio: true, se: d => d["scan_" + p] != null })),
   { k: "pr_yy", e: "Yin / Yang", t: "scelta", o: ["Yin", "Yang"], s: "Otto principi e sindrome", tab: "mtc" },
   { k: "pr_ie", e: "Interno / Esterno", t: "scelta", o: ["Interno", "Esterno"], s: "Otto principi e sindrome", tab: "mtc" },
   { k: "pr_fc", e: "Freddo / Calore", t: "scelta", o: ["Freddo", "Calore"], s: "Otto principi e sindrome", tab: "mtc" },
@@ -55,6 +60,7 @@ const CAMPI_MTC = [
   ...zoppiaArti("Zoppia (AAEP 0–5)", "fisio"),
   { k: "postura", e: "Postura e appiombi", t: "multi", o: ["Appiombi regolari", "Carico avanti", "Sotto di sé dietro", "Collo invertito", "Dorso rigido"], s: "Postura e appiombi", tab: "fisio" },
   ...ZONE_PALPAZIONE.map((z, i) => ({ k: "palp_" + i, e: z, t: "scala", max: 3, s: "Palpazione muscolare (dolore 0–3)", tab: "fisio", rosso: true })),
+  { k: "mappa_fisio", e: "Mappa del dolore", t: "mappa", modo: "segni", s: "Mappa del dolore", tab: "fisio" },
   { k: "collo", e: "Collo (flessione laterale con la carota)", t: "scelta", o: ["Normale", "Ridotta a sx", "Ridotta a dx", "Ridotta entrambi"], s: "Mobilità e test", tab: "fisio" },
   { k: "riflessi", e: "Riflessi dorsali", t: "scelta", o: ["Normali", "Ridotti", "Dolorosi"], s: "Mobilità e test", tab: "fisio" },
   { k: "sella", e: "Sella", t: "scelta", o: ["Ok", "Da controllare", "Non adatta"], s: "Mobilità e test", tab: "fisio" },
@@ -94,8 +100,9 @@ const ESEMPI_MODELLI = [
     { k: "richiamo", e: "Prossimo richiamo", t: "data", s: "Vaccinazione" }] }
 ];
 const TIPI_CAMPO = [["riga", "Testo breve"], ["testo", "Testo lungo"], ["numero", "Numero"], ["scelta", "Scelta"], ["multi", "Scelta multipla"],
-  ["scala", "Scala 0–5"], ["scala3", "Scala 0–3"], ["sino", "Sì / No"], ["data", "Data"]];
+  ["scala", "Scala 0–5"], ["scala3", "Scala 0–3"], ["sino", "Sì / No"], ["data", "Data"], ["mappa_segni", "Mappa del cavallo · segni"], ["mappa_punti", "Mappa del cavallo · punti"]];
 const NOME_TIPO = Object.fromEntries(TIPI_CAMPO);
+NOME_TIPO.mappa = "Mappa del cavallo";
 
 /* ===================== DATI ===================== */
 const vsEsc = s => escapeHtml(s == null ? "" : String(s));
@@ -177,7 +184,7 @@ async function vsApriDaEvento(id, evento){
     || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find(x => x.id === id);
   if(!e) return showToast("Visita non trovata");
   try{ closeModal("modal-azioni-evento"); }catch(_){}
-  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset(); if(typeof vdReset === "function") vdReset(); if(typeof ptReset === "function") ptReset();
+  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset(); if(typeof vdReset === "function") vdReset(); if(typeof ptReset === "function") ptReset(); if(typeof mpReset === "function") mpReset();
   vsFoglio().classList.add("aperto"); document.body.classList.add("vs-aperto");
   document.getElementById("vs-corpo").innerHTML = '<div class="vs-vuoto">Carico la scheda…</div>';
   document.getElementById("vs-piede").innerHTML = "";
@@ -255,6 +262,7 @@ function vsDisegnaCorpo(){
     + (typeof ptSezioneHtml === "function" ? ptSezioneHtml() : "")
     + (typeof vaSezioneHtml === "function" ? vaSezioneHtml() : "");
   if(typeof ptDisegna === "function") ptDisegna();
+  if(typeof mpAttivaTutte === "function") mpAttivaTutte();   // mappe del cavallo (13)
 }
 function vsTab(k){ VS.tab = k; vsDisegnaCorpo(); document.getElementById("vs-corpo").scrollTop = 0; }
 
@@ -270,6 +278,7 @@ function vsCampoHtml(c, val, sola){
     case "multi": { const sel = Array.isArray(val) ? val : []; return `<div class="${cls} pieno"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-chips">${(c.o || []).map(o => chip(o, sel.includes(o), `vsMulti('${c.k}', ${vsJs(o)})`)).join("")}</div></div>`; }
     case "scala": { const max = c.max || 5, n = Number(val) || 0;
       return `<div class="${cls} pieno vs-scala-r"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-scala">${Array.from({ length: max + 1 }, (_, i) => `<button type="button" class="${i === n && val != null ? "on" : ""}${c.rosso && i >= Math.ceil(max / 2) ? " alto" : ""}" aria-pressed="${i === n && val != null}"${dis} onclick="vsScegli('${c.k}', ${i})">${i}</button>`).join("")}</div></div>`; }
+    case "mappa": return typeof mpCampoHtml === "function" ? mpCampoHtml(c, val, sola) : "";
     case "sino": return `<div class="${cls} pieno"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-chips">${chip("Sì", val === true, `vsScegli('${c.k}', true)`)}${chip("No", val === false, `vsScegli('${c.k}', false)`)}</div></div>`;
     default: return `<div class="${cls}">${lab}<input id="${id}" value="${vsEsc(val || "")}" placeholder="${vsEsc(c.ph || "")}"${dis} oninput="vsCambia('${c.k}', this.value)"></div>`;
   }
@@ -334,7 +343,7 @@ function vsMostraMiei(){
     + `<div class="vs-h">Oppure</div><div class="vs-chips"><button class="vs-chip" onclick="vsModelloDa('standard')">Copia la visita standard</button><button class="vs-chip" onclick="vsModelloDa('mtc')">Copia MTC · Fisio</button><button class="vs-chip" onclick="vsModelloDa('vuoto')">+ Nuovo vuoto</button></div>`;
   document.getElementById("vs-piede").innerHTML = "";
 }
-const vsCopiaCampi = l => l.map(({ se, ...c }) => ({ ...c, attivo: c.attivo !== false }));
+const vsCopiaCampi = l => l.filter(c => !c.vecchio).map(({ se, ...c }) => ({ ...c, attivo: c.attivo !== false }));
 function vsModelloDaEsempio(nome){ const x = ESEMPI_MODELLI.find(m => m.nome === nome); VS.modello = { nome: x.nome, base: x.base, campi: vsCopiaCampi(x.campi) }; vsMostraEditor(); }
 function vsModelloDa(base){
   VS.modello = { nome: base === "mtc" ? "La mia seduta MTC" : base === "vuoto" ? "Nuovo modello" : "La mia visita", base,
@@ -369,7 +378,8 @@ function vsAggiungiCampo(){
   if(["scelta", "multi"].includes(tipo) && opz.length < 2) return showToast("Scrivi almeno due scelte, separate da virgola");
   const base = nome.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 30) || "campo";
   let k = "u_" + base, n = 2; while(VS.modello.campi.some(c => c.k === k)) k = "u_" + base + "_" + n++;
-  const c = { k, e: nome, t: tipo === "scala3" ? "scala" : tipo, s: document.getElementById("vs-nc-sez").value.trim() || "Visita", attivo: true };
+  const c = { k, e: nome, t: tipo === "scala3" ? "scala" : /^mappa_/.test(tipo) ? "mappa" : tipo, s: document.getElementById("vs-nc-sez").value.trim() || "Visita", attivo: true };
+  if(/^mappa_/.test(tipo)) c.modo = tipo === "mappa_punti" ? "punti" : "segni";
   if(tipo === "scala3") c.max = 3; else if(tipo === "scala") c.max = 5;
   if(opz.length) c.o = opz;
   VS.modello.campi.push(c); vsMostraEditor();

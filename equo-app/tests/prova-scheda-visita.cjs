@@ -29,7 +29,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   // 3 · Visita standard: motivo dall'appuntamento, campi, bozza salvata da sola
   await pg.evaluate(() => vsNuova("standard")); await attesa(300);
   const st = await pg.evaluate(() => ({ sez: [...document.querySelectorAll(".vs-sez:not(#va-box):not(#vd-box):not(#pt-box) h3")].map(h => h.textContent), motivo: document.getElementById("vs-f-motivo")?.value }));
-  ok(st.sez.join(",") === "Anamnesi,Esame obiettivo generale,Apparato locomotore,Diagnosi e piano" && st.motivo === "zoppia ASx", "Standard: 4 sezioni, motivo «zoppia ASx» " + JSON.stringify(st));
+  ok(st.sez.join(",") === "Anamnesi,Esame obiettivo generale,Apparato locomotore,Mappa del cavallo,Diagnosi e piano" && st.motivo === "zoppia ASx", "Standard: 4 sezioni, motivo «zoppia ASx» " + JSON.stringify(st));
   await pg.fill("#vs-f-temp", "37,8"); await pg.fill("#vs-f-diagnosi", "Sospetto ascesso subsolare ASx");
   await pg.evaluate(() => vsScegli("zop_as", 2)); await attesa(1200);
   const bz = await pg.evaluate(() => demoState.visitePro.visite.filter(v => v.intervento_id === "vi-2").map(v => ({ s: v.stato, t: v.dati.temp, z: v.dati.zop_as, m: v.modello })));
@@ -57,13 +57,13 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   await pg.evaluate(() => vsApriDaEvento("vi-4")); await attesa(500);
   const su = await pg.evaluate(() => document.querySelector(".vs-carta.sugg b")?.textContent);
   await pg.evaluate(() => vsNuova("mtc")); await attesa(300);
-  const t1 = await pg.evaluate(() => ({ tabs: [...document.querySelectorAll(".vs-tabs button")].map(b => b.textContent), punti: [...document.querySelectorAll(".vs-sez")].find(x => x.querySelector("h3").textContent.startsWith("Scansione"))?.querySelectorAll(".vs-scala").length }));
+  const t1 = await pg.evaluate(() => ({ tabs: [...document.querySelectorAll(".vs-tabs button")].map(b => b.textContent), punti: [...document.querySelectorAll(".vs-sez")].find(x => x.querySelector("h3").textContent.startsWith("Scansione"))?.querySelectorAll(".vs-scala").length, mappa: !!document.querySelector("#mp-mappa_mtc .mp-svg") }));
   await pg.evaluate(() => vsTab("tratt")); await attesa(200);
   const hz0 = await pg.evaluate(() => !!document.getElementById("vs-f-hz"));
   await pg.evaluate(() => vsMulti("tecnica", "Elettroagopuntura")); await attesa(200);
   const hz1 = await pg.evaluate(() => !!document.getElementById("vs-f-hz"));
-  ok(su === "Agopuntura · MTC · Fisioterapia" && t1.tabs.join(",") === "Valutazione MTC,Fisioterapia,Trattamento" && t1.punti === 12 && !hz0 && hz1,
-    "MTC · Fisio: proposta per Tango, 3 schede, 12 punti 0–3, Hz con l'elettroagopuntura " + JSON.stringify({ su, t1, hz0, hz1 }));
+  ok(su === "Agopuntura · MTC · Fisioterapia" && t1.tabs.join(",") === "Valutazione MTC,Fisioterapia,Trattamento" && t1.punti === 0 && t1.mappa && !hz0 && hz1,
+    "MTC · Fisio: proposta per Tango, 3 schede, punti sul disegno del cavallo (2/11), Hz con l'elettroagopuntura " + JSON.stringify({ su, t1, hz0, hz1 }));
   await pg.evaluate(() => vsChiudi()); await attesa(900);
 
   // 6 · I miei modelli: dall'esempio «Controllo zoppia», spengo un campo, ne aggiungo uno, salvo e lo uso

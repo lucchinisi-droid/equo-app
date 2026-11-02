@@ -15,6 +15,7 @@ const vrEsc = s => escapeHtml(s == null ? "" : String(s));
 /* ---- testo del referto dai campi compilati ---- */
 function vrValore(c, v){
   if(v == null || v === "" || (Array.isArray(v) && !v.length)) return null;
+  if(c.t === "mappa") return typeof mpTesto === "function" ? mpTesto(c, v) : null;   // mappe del cavallo (13)
   if(Array.isArray(v)) return v.join(", ");
   if(c.t === "sino") return v ? "Sì" : "No";
   if(c.t === "scala") return v + "/" + (c.max || 5);

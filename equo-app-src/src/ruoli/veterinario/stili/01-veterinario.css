@@ -430,3 +430,34 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 
 /* il giro: urgenze · terapie · richiami su una riga (mockup del 2/11/2026) */
 :where(body.pl-vet) .vh-giro-num{grid-template-columns:repeat(3,1fr)}
+
+/* MAPPE DEL CAVALLO (2/11/2026, 13-mappe.js): disegno con punti e segni, viste, pannello, elenco */
+.mp .vs-chips.mp-tipi{margin-bottom:8px}
+.mp-viste{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:6px;scrollbar-width:none}
+.mp-viste button{flex:0 0 auto;border:1px solid var(--vt-bordo);background:var(--vt-sup);color:var(--vt-testo);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}
+.mp-viste button.on{background:var(--vt-tif-chiaro);border-color:var(--vt-tif);color:var(--vt-tif-testo);font-weight:800}
+.mp-viste button b{display:inline-block;min-width:18px;border-radius:999px;background:var(--vt-notte);color:#FFFFFF;font-size:11px;padding:1px 5px;margin-left:2px}
+.mp-aiuto{font-size:12.5px;color:var(--vt-testo2);line-height:1.4;margin:2px 2px 8px}
+.mp-aiuto.on{color:var(--vt-oro-testo);background:var(--vt-oro-chiaro);border-radius:10px;padding:7px 10px}
+.mp-box{background:#FFFFFF;border:1px solid var(--vt-bordo);border-radius:14px;padding:6px;overflow:auto;touch-action:pan-y pinch-zoom}
+.mp-box.zoom .mp-svg{width:200%;max-width:none}
+.mp-svg{display:block;width:100%;height:auto;max-height:62vh;color:var(--vt-notte);cursor:crosshair;user-select:none;-webkit-user-select:none}
+.mp-box.zoom .mp-svg{max-height:none}
+.mp-m{cursor:grab}
+.mp-barra{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.mp-lente{border:1px solid var(--vt-bordo);background:var(--vt-sup);color:var(--vt-notte);border-radius:10px;padding:6px 10px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.mp-pan{margin-top:8px;border:1.5px solid var(--vt-notte);border-radius:14px;padding:10px 12px;background:var(--vt-sup)}
+.mp-pan-t{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.mp-pan-t b{color:var(--vt-notte);font-size:15px}.mp-pan-t small{color:var(--vt-testo2);font-size:12px}
+.mp-gradi{display:flex;gap:6px}
+.mp-gradi button{flex:1;min-height:42px;border-radius:10px;border:1px solid var(--vt-bordo);background:var(--vt-chip);color:var(--vt-notte);font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.mp-pan-az{display:flex;gap:8px;margin-top:10px}
+.mp-pan-az button{flex:1;min-height:38px;border-radius:10px;border:1px solid var(--vt-bordo);background:#FFFFFF;color:var(--vt-notte);font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.mp-pan-az button.urg{color:var(--vt-urg)}
+.mp-nota,.mp-cerca{width:100%;box-sizing:border-box;border:1px solid var(--vt-bordo);border-radius:10px;background:var(--vt-fondo);color:var(--vt-testo);font:inherit;font-size:16px;padding:9px 10px;margin-top:8px}
+.mp-nomi{margin-top:8px}.mp-nomi .vs-chips{margin-top:8px;max-height:180px;overflow-y:auto}
+.mp-el{margin-top:8px}
+.mp-el button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 2px;border:none;border-bottom:1px solid var(--vt-bordo);background:none;color:var(--vt-testo);font:inherit;font-size:13.5px;cursor:pointer}
+.mp-el b{color:var(--vt-notte);display:flex;align-items:center;gap:6px}
+.mp-el span{color:var(--vt-testo2);font-size:12.5px;display:flex;align-items:center;gap:5px;text-align:right}
+.mp-el i{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--vt-bordo);flex-shrink:0}
+:where(:root:not([data-theme="light"])) body.pl-vet .mp-box{background:#FFFFFF}

@@ -122,19 +122,20 @@ async function pagina(b){
     const { pg, err } = await pagina(b); const attesa = ms => pg.waitForTimeout(ms);
     await pg.evaluate(async () => { currentUser.ruolo = "proprietario"; await enterApp("proprietario"); }); await attesa(2500);
     await pg.evaluate(() => {
-      const h = horses[0], ora = Date.now(), oggi = isoLocale(new Date()), hh = d => new Date(d).toTimeString().slice(0, 5);
+      const h = horses[0], ora = Date.now(), fine = new Date(); fine.setHours(23, 58, 0, 0); const fut = Math.min(ora + 2 * 3600000, fine.getTime()); window.__lontana = fut - ora > 31 * 60000;
+      const oggi = isoLocale(new Date()), hh = d => new Date(d).toTimeString().slice(0, 5);
       const t = demoState.terapie = { piani: [], voci: [], somm: [] };
       t.piani.push({ id: "pp1", professionista_id: "vet-x", horse_id: h.id, cavallo_nome: h.name, stato: "attivo", chiedi_conferme: true, inviato_il: new Date().toISOString(), attesa_fino: "2027-05-10" },
                    { id: "pp2", professionista_id: "vet-x", horse_id: h.id, cavallo_nome: h.name, stato: "attivo", chiedi_conferme: false, inviato_il: null });   // bozza non mandata: non si vede
-      t.voci.push({ id: "pv1", piano_id: "pp1", ordine: 0, tipo: "farmaco", nome: "Fenilbutazone", dose: "1 bustina", via: "Bocca", orari: [hh(ora - 3600000), hh(ora + 3 * 3600000)], ogni_giorni: 1, giorni: 5, inizio: oggi, note: "dopo il pasto" });
+      t.voci.push({ id: "pv1", piano_id: "pp1", ordine: 0, tipo: "farmaco", nome: "Fenilbutazone", dose: "1 bustina", via: "Bocca", orari: [hh(ora - 3600000), hh(fut)], ogni_giorni: 1, giorni: 5, inizio: oggi, note: "dopo il pasto" });
       t.somm.push({ id: "s-pas", piano_id: "pp1", voce_id: "pv1", previsto_il: new Date(ora - 3600000).toISOString(), fatto_il: null },
-                  { id: "s-fut", piano_id: "pp1", voce_id: "pv1", previsto_il: new Date(ora + 3 * 3600000).toISOString(), fatto_il: null });
+                  { id: "s-fut", piano_id: "pp1", voce_id: "pv1", previsto_il: new Date(fut).toISOString(), fatto_il: null });
       window.__h = h.id; TER.il = 0;
     });
     await pg.evaluate(() => { showPage("home"); renderHome(); }); await attesa(1200);
     const hm = await pg.evaluate(() => ({ tit: document.querySelector("#home-terapie .ter-tit")?.textContent, righe: [...document.querySelectorAll("#home-terapie .ter-somm")].map(r => r.querySelector(".o").textContent + " " + r.querySelector("b").textContent + " " + (r.querySelector("button") ? (r.querySelector("button").disabled ? "[off]" : "[Fatto]") : "")),
-      piani: document.querySelectorAll("#home-terapie .ter-piano").length }));
-    ok(hm.tit === "💊 Terapie di oggi" && hm.piani === 1 && hm.righe.length === 2 && /Fenilbutazone \[Fatto\]$/.test(hm.righe[0]) && /\[off\]$/.test(hm.righe[1]),
+      piani: document.querySelectorAll("#home-terapie .ter-piano").length, lontana: window.__lontana }));
+    ok(hm.tit === "💊 Terapie di oggi" && hm.piani === 1 && hm.righe.length === 2 && /Fenilbutazone \[Fatto\]$/.test(hm.righe[0]) && (hm.lontana ? /\[off\]$/.test(hm.righe[1]) : true),
       "Proprietario, Home: terapie di oggi (solo il piano mandato), Fatto sulla passata " + JSON.stringify(hm));
     await pg.evaluate(() => terFatto("s-pas")); await attesa(700);
     const dopo = await pg.evaluate(() => ({ fatto: !!demoState.terapie.somm.find(s => s.id === "s-pas").fatto_il, riga: document.querySelector("#home-terapie .ter-somm .ter-fatta")?.textContent }));
