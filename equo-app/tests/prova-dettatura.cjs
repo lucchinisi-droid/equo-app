@@ -53,8 +53,8 @@ async function conAgente(pg, risposta, azione){
     await pg.evaluate(() => vsNuova("standard")); await attesa(400);
     await pg.evaluate(() => { vsCambia("diagnosi", "Sospetto ascesso subsolare ASx"); vsScegli("zop_as", 2); }); await attesa(900);
     const sez = await pg.evaluate(() => ({ box: !!document.querySelector("#vd-box .vd-detta"), tit: document.querySelector("#vd-box h3")?.textContent,
-      vecchia: document.getElementById("vs-corpo").textContent.includes("prossimo aggiornamento"), ordine: [...document.querySelectorAll("#vs-corpo .vs-sez h3")].map(h => h.textContent).slice(-2) }));
-    ok(sez.box && sez.tit === "Relazione per il referto" && !sez.vecchia && sez.ordine.join("|") === "Relazione per il referto|Foto, video e lastre", "Scheda: sezione Relazione con «Detta», prima degli allegati " + JSON.stringify(sez));
+      vecchia: document.getElementById("vs-corpo").textContent.includes("prossimo aggiornamento"), ordine: [...document.querySelectorAll("#vs-corpo .vs-sez h3")].map(h => h.textContent).slice(-3) }));
+    ok(sez.box && sez.tit === "Relazione per il referto" && !sez.vecchia && sez.ordine.join("|") === "Relazione per il referto|Piano terapeutico|Foto, video e lastre", "Scheda: sezione Relazione con «Detta», prima degli allegati " + JSON.stringify(sez));
 
     // pannello: microfono di Equo, testo che arriva parlando
     await pg.evaluate(() => vdDetta()); await attesa(300);

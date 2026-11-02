@@ -17,10 +17,12 @@ import { onbCollegati, onbNonSonoIo, onbVaiAiProposti } from "./103-onboarding-p
 import { apriEquoCard, chiudiEquoCard, ecAzione, ecCondividi, ecGira, ecMostraQr } from "./102-equo-card.js";
 import { invitoControlla, applicaHomeMan, homeManPrepara, earlyAggiornaBottoneLifetime, earlyCancella, earlyControlla, earlyDopoRitorno, earlyLeggi, earlyNonOra, earlyPaga, hmCartella, hmChiudi, hmDaIncassare, hmFoglio, hmGiaFatto, hmMessaggi, hmNavAttivo, hmNovitaHammer, hmPiu, incassiNascosti, mlApri, mlCarica, mlCavId, mlOggi, mlRigaCavallo, mlSalva, mlTappeOggi, referralControlla, vistaWidgetAttiva } from "./089-early-adopter-arrivo-dal-sito-ottobre-20.js";
 import { cambiaIncassi, renderWidgetOwner, wgApriAppMan, wgChattaAppuntamento, wgControllaResetPin, wgFissaManiscalco, wgNuovoEvento } from "./101-proprietario.js";
+import { terCarica, terRenderHome, terRenderCavallo, terFatto, TER } from "./104-terapie.js";
 
 // API PUBBLICA (proprietario): le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione di questo ruolo, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  terCarica, terRenderHome, terRenderCavallo, terFatto, TER,
   onbCollegati,
   onbNonSonoIo,
   onbVaiAiProposti,

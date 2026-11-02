@@ -21,6 +21,10 @@
 [functions."invia-promemoria"]
   schedule = "*/5 * * * *"
 
+# Piano terapeutico del veterinario (SQL 34): all'ora della somministrazione push al proprietario (o email se la push non parte), ogni 5 minuti.
+[functions."invia-terapie"]
+  schedule = "*/5 * * * *"
+
 # Pegasus: riepilogo settimanale il lunedì, ogni ora 6-9 UTC (8-11 in estate, 7-10 in inverno).
 # Più giri = più utenti elaborati senza superare i 30 s delle funzioni programmate.
 [functions."riepilogo-settimanale"]

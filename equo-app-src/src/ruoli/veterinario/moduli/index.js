@@ -11,6 +11,9 @@ import { vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, 
 import { vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA } from "./09-allegati.js";
 import { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR } from "./08-referto.js";
 import { vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD } from "./10-dettatura.js";
+import { ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoce, ptCampo, ptVolte, ptOrario, ptTornaScheda, ptSalvaVoce, ptEliminaVoce, ptConferme,
+  ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
+  ptAttesaFino, ptPeriodo, PT } from "./11-piano-terapia.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
 Object.assign(window, {
@@ -31,6 +34,9 @@ Object.assign(window, {
   vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA,
   vsMostraScheda, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR,
   vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD,
+  ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoce, ptCampo, ptVolte, ptOrario, ptTornaScheda, ptSalvaVoce, ptEliminaVoce, ptConferme,
+  ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
+  ptAttesaFino, ptPeriodo, PT,
   vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB
 });

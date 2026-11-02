@@ -5,9 +5,9 @@
 // 3) se la push non parte (nessun dispositivo iscritto, notifiche spente, iPhone senza app installata) → email con Resend.
 // Il promemoria si «prenota» prima di inviarlo (inviato_il), così due giri sovrapposti non lo mandano due volte.
 const { createClient } = require("@supabase/supabase-js");
-const URL_APP = "https://app.equohub.com";
+const avvisi = require("../agente/avvisi");
+const { URL_APP, esc } = avvisi;
 const TEMPO_MAX_MS = 20000;
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const quandoIt = (iso) => new Date(iso).toLocaleString("it-IT", { timeZone: "Europe/Rome", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
 const AZIONE_TESTO = { conto: "Fai il conto", chat: "Scrivi al cliente", naviga: "Naviga" };
 
@@ -16,26 +16,13 @@ function testoChat(p, cliente) {
     + `\n\n*Me l'avevi chiesto per ${quandoIt(p.quando)}.* Tocca «Fatto» quando hai finito, oppure «Domani» per rimandarlo.`;
 }
 
-async function inviaPush(p, cliente) {
-  if (!process.env.ONESIGNAL_APP_ID || !process.env.ONESIGNAL_REST_API_KEY) return false;
-  try {
-    const res = await fetch("https://api.onesignal.com/notifications?c=push", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Key ${process.env.ONESIGNAL_REST_API_KEY}` },
-      body: JSON.stringify({ app_id: process.env.ONESIGNAL_APP_ID, target_channel: "push", include_aliases: { external_id: [p.user_id] },
-        headings: { en: "⏰ Promemoria · Hammer" }, contents: { en: (p.testo + (cliente ? " · " + cliente : "")).slice(0, 140) },
-        data: { apri: "chat", c: "ai", id: "promemoria", v: p.vista }, url: `${URL_APP}/?apri=chat&c=ai&id=promemoria&v=${p.vista}` }),
-    });
-    const j = await res.json().catch(() => ({}));
-    // OneSignal risponde 200 anche senza destinatari: in quel caso id vuoto o errors («not subscribed»)
-    const ok = res.ok && !!j.id && !(Array.isArray(j.errors) ? j.errors.length : j.errors);
-    if (!ok) console.log("promemoria push non consegnata:", p.id, JSON.stringify(j).slice(0, 200));
-    return ok;
-  } catch (e) { console.error("promemoria push:", e); return false; }
+// push ed email: codice comune in netlify/agente/avvisi.js (2/11/2026, usato anche da invia-terapie)
+function inviaPush(p, cliente) {
+  return avvisi.inviaPush({ userId: p.user_id, titolo: "⏰ Promemoria · Hammer", testo: p.testo + (cliente ? " · " + cliente : ""), etichetta: "promemoria " + p.id,
+    dati: { apri: "chat", c: "ai", id: "promemoria", v: p.vista }, url: `${URL_APP}/?apri=chat&c=ai&id=promemoria&v=${p.vista}` });
 }
 
-async function inviaEmail(to, nome, p, cliente) {
-  if (!to || !process.env.RESEND_API_KEY || !process.env.EMAIL_MITTENTE) return false;
+function inviaEmail(to, nome, p, cliente) {
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:auto;color:#1c2b22;font-size:15px;line-height:1.5">
 <p>Ciao${nome ? " " + esc(String(nome).split(" ")[0]) : ""},</p>
 <p style="font-size:17px;margin:14px 0"><b>⏰ ${esc(p.testo)}</b></p>
@@ -43,16 +30,7 @@ ${cliente ? `<p>Cliente: <b>${esc(cliente)}</b></p>` : ""}
 <p style="color:#6b7a70">Promemoria che avevi chiesto a Hammer per ${esc(quandoIt(p.quando))}.</p>
 <p style="margin:22px 0"><a href="${URL_APP}/?apri=chat&c=ai&id=promemoria&v=${p.vista}" style="background:#a8721c;color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-weight:600">Apri Equo${p.azione && AZIONE_TESTO[p.azione] ? " · " + AZIONE_TESTO[p.azione] : ""}</a></p>
 <p style="color:#6b7a70;font-size:12px">Ti arriva per email perché le notifiche di Equo su questo telefono non sono attive. Attivale da Equo (menu profilo) per riceverle lì.</p></div>`;
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-      body: JSON.stringify({ from: process.env.EMAIL_MITTENTE, reply_to: process.env.EMAIL_RISPOSTE || "gestione.equo@gmail.com",
-        to: [to], subject: `⏰ Promemoria: ${p.testo.slice(0, 80)}`, html }),
-    });
-    if (!res.ok) console.error("promemoria email:", await res.text());
-    return res.ok;
-  } catch (e) { console.error("promemoria email:", e); return false; }
+  return avvisi.inviaEmail({ to, oggetto: `⏰ Promemoria: ${p.testo.slice(0, 80)}`, html, etichetta: "promemoria" });
 }
 
 async function invia(admin, p) {

@@ -157,3 +157,110 @@ Object.assign(DB, {
     return { error };
   },
 });
+
+/* ---------- DB · Piano terapeutico del veterinario (SQL 34, 2/11/2026) ----------
+   Il veterinario scrive piano e voci (orari, giorni, dose scritta da lui); le somministrazioni previste le crea il database
+   (equo_terapia_genera) e il «Fatto» passa da equo_terapia_fatto. Il proprietario vede il piano solo dopo l'invio.
+   Saltata = non confermata 12 ore dopo l'orario (decisione di Simone). */
+const TERAPIA_SALTATA_ORE = 12;
+Object.assign(DB, {
+  _ter(){ return (demoState.terapie = demoState.terapie || { piani: [], voci: [], somm: [] }); },
+  _terSql(e){ return /piani_terapia|terapie_somministrazioni|equo_terapia|does not exist|schema cache/i.test(e?.message || ""); },
+  // piano della visita (veterinario) con le voci
+  async pianoDiVisita(visitaId){
+    if(!visitaId) return null;
+    if(DEMO_MODE){ const t = this._ter(); const p = t.piani.find(x => x.visita_id === visitaId); return p ? { ...p, voci: t.voci.filter(v => v.piano_id === p.id).sort((a, b) => a.ordine - b.ordine) } : null; }
+    const { data, error } = await sb.from("piani_terapia").select("*, voci:piani_terapia_voci(*)").eq("visita_id", visitaId).eq("professionista_id", currentUser.id).maybeSingle();
+    if(error){ if(!this._terSql(error)) console.warn("piani_terapia:", error.message); return null; }
+    if(data) data.voci = (data.voci || []).sort((a, b) => a.ordine - b.ordine);
+    return data;
+  },
+  async salvaPiano(p){
+    const { voci, somm, visite_pro, ...campi } = p;
+    if(DEMO_MODE){
+      const t = this._ter();
+      if(campi.id){ const r = t.piani.find(x => x.id === campi.id); Object.assign(r, campi, { aggiornato_il: new Date().toISOString() }); return { data: r, error: null }; }
+      const r = { stato: "bozza", chiedi_conferme: false, ...campi, id: "pt" + Math.random().toString(36).slice(2, 10), professionista_id: currentUser.id, creato_il: new Date().toISOString() };
+      t.piani.push(r); return { data: r, error: null };
+    }
+    const { id, creato_il, aggiornato_il, professionista_id, ...resto } = campi;
+    const q = id ? sb.from("piani_terapia").update(resto).eq("id", id) : sb.from("piani_terapia").insert(resto);
+    return await q.select().single();
+  },
+  async salvaVoceTerapia(v){
+    if(DEMO_MODE){
+      const t = this._ter();
+      if(v.id){ const r = t.voci.find(x => x.id === v.id); Object.assign(r, v); return { data: r, error: null }; }
+      const r = { ordine: 0, ogni_giorni: 1, giorni: 1, orari: [], ...v, id: "pv" + Math.random().toString(36).slice(2, 10) }; t.voci.push(r); return { data: r, error: null };
+    }
+    const { id, creato_il, ...resto } = v;
+    const q = id ? sb.from("piani_terapia_voci").update(resto).eq("id", id) : sb.from("piani_terapia_voci").insert(resto);
+    return await q.select().single();
+  },
+  async eliminaVoceTerapia(id){
+    if(DEMO_MODE){ const t = this._ter(); t.voci = t.voci.filter(x => x.id !== id); t.somm = t.somm.filter(s => s.voce_id !== id); return { error: null }; }
+    return await sb.from("piani_terapia_voci").delete().eq("id", id);
+  },
+  // somministrazioni previste future (si rifanno a ogni cambio; quelle passate e quelle fatte restano)
+  async generaSomministrazioni(pianoId){
+    if(DEMO_MODE){
+      const t = this._ter(), p = t.piani.find(x => x.id === pianoId); if(!p) return { data: 0 };
+      const ora = Date.now();
+      t.somm = t.somm.filter(s => !(s.piano_id === pianoId && !s.fatto_il && new Date(s.previsto_il).getTime() > ora));
+      if(p.stato !== "attivo") return { data: 0 };
+      let n = 0;
+      t.voci.filter(v => v.piano_id === pianoId).forEach(v => {
+        for(let g = 0; g < (v.giorni || 1); g += Math.max(1, v.ogni_giorni || 1)){
+          (v.orari || []).forEach(o => {
+            const d = new Date(v.inizio + "T" + o + ":00"); d.setDate(d.getDate() + g);
+            if(d.getTime() <= ora || t.somm.some(s => s.voce_id === v.id && s.previsto_il === d.toISOString())) return;
+            t.somm.push({ id: "ps" + Math.random().toString(36).slice(2, 10), piano_id: pianoId, voce_id: v.id, previsto_il: d.toISOString(), fatto_il: null }); n++;
+          });
+        }
+      });
+      return { data: n };
+    }
+    const { data, error } = await sb.rpc("equo_terapia_genera", { p_piano: pianoId });
+    if(error) console.warn("equo_terapia_genera:", error.message);
+    return { data, error };
+  },
+  // piani attivi o sospesi visibili (veterinario: i suoi; proprietario: quelli mandati a lui), con voci e somministrazioni
+  async terapieInCorso({ comePro = false, horseIds = null } = {}){
+    const unisci = (piani, voci, somm) => piani.map(p => ({ ...p, voci: voci.filter(v => v.piano_id === p.id).sort((a, b) => a.ordine - b.ordine),
+      somm: somm.filter(s => s.piano_id === p.id).sort((a, b) => String(a.previsto_il).localeCompare(String(b.previsto_il))) }));
+    if(DEMO_MODE){
+      const t = this._ter();
+      const piani = t.piani.filter(p => ["attivo", "sospeso"].includes(p.stato) && (comePro ? p.professionista_id === currentUser.id
+        : p.inviato_il && p.professionista_id !== currentUser.id && (!horseIds || horseIds.includes(p.horse_id))));
+      return unisci(piani, t.voci, t.somm);
+    }
+    let q = sb.from("piani_terapia").select("*, visite_pro(intervento_id)").in("stato", ["attivo", "sospeso"]).order("creato_il", { ascending: false }).limit(200);
+    q = comePro ? q.eq("professionista_id", currentUser.id) : q.neq("professionista_id", currentUser.id).not("inviato_il", "is", null);
+    const { data: piani, error } = await q;
+    if(error){ if(!this._terSql(error)) console.warn("terapie:", error.message); return []; }
+    if(!piani || !piani.length) return [];
+    const ids = piani.map(p => p.id);
+    const [rv, rs] = await Promise.all([sb.from("piani_terapia_voci").select("*").in("piano_id", ids),
+      sb.from("terapie_somministrazioni").select("id, piano_id, voce_id, previsto_il, fatto_il, fatto_da").in("piano_id", ids).order("previsto_il").limit(5000)]);
+    return unisci(piani, rv.data || [], rs.data || []);
+  },
+  async terapiaFatto(id, fatto = true){
+    if(DEMO_MODE){ const s = this._ter().somm.find(x => x.id === id); if(s){ s.fatto_il = fatto ? new Date().toISOString() : null; s.fatto_da = fatto ? currentUser.id : null; } return { data: !!s, error: null }; }
+    const { data, error } = await sb.rpc("equo_terapia_fatto", { p_id: id, p_fatto: !!fatto });
+    return { data, error };
+  }
+});
+// stato di una somministrazione: fatta · saltata (12 ore dopo l'orario senza conferma) · da fare
+function statoSomministrazione(s, ora){
+  if(s.fatto_il) return "fatta";
+  return new Date(s.previsto_il).getTime() < (ora || Date.now()) - TERAPIA_SALTATA_ORE * 3600000 ? "saltata" : "da_fare";
+}
+// «2 volte al giorno (08:00, 20:00) · 5 giorni dal 2 nov»
+function testoVoceTerapia(v){
+  const n = (v.orari || []).length;
+  const quando = !n ? "al bisogno" : (n === 1 ? "1 volta" : n + " volte") + (v.ogni_giorni > 1 ? (v.ogni_giorni === 2 ? " a giorni alterni" : " ogni " + v.ogni_giorni + " giorni") : " al giorno") + " (" + v.orari.join(", ") + ")";
+  const dal = v.inizio ? new Date(v.inizio + "T12:00").toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : "";
+  return [quando, (v.giorni || 1) + (v.giorni === 1 ? " giorno" : " giorni") + (dal ? " dal " + dal : "")].join(" · ");
+}
+// ultimo giorno della voce (data ISO)
+function fineVoceTerapia(v){ const d = new Date((v.inizio || isoLocale(new Date())) + "T12:00"); d.setDate(d.getDate() + Math.max(1, v.giorni || 1) - 1); return isoLocale(d); }

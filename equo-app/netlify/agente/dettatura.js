@@ -15,8 +15,13 @@ function leggiJson(s) {
   try { return JSON.parse(t.slice(a, b + 1)); } catch (_) { return null; }
 }
 
+const TIPI_VOCE = ["farmaco", "cura", "esercizio", "riposo", "altro"];
 function pulisciReferto(j) {
-  return { relazione: testo(j.relazione, 6000), terapia: testo(j.terapia, 3000), da_controllare: testo(j.da_controllare, 400) };
+  const piano = (Array.isArray(j.piano) ? j.piano : []).slice(0, 12).map((v) => ({
+    tipo: TIPI_VOCE.includes(v && v.tipo) ? v.tipo : "farmaco", nome: testo(v && v.nome, 120), dose: testo(v && v.dose, 120), via: testo(v && v.via, 40),
+    volte_giorno: Math.max(0, Math.min(4, Math.round(Number(v && v.volte_giorno)) || 0)), giorni: Math.max(0, Math.min(365, Math.round(Number(v && v.giorni)) || 0)), note: testo(v && v.note, 300),
+  })).filter((v) => v.nome);
+  return { relazione: testo(j.relazione, 6000), terapia: testo(j.terapia, 3000), piano, da_controllare: testo(j.da_controllare, 400) };
 }
 function pulisciFerratura(j) {
   const s = j.scheda && typeof j.scheda === "object" ? j.scheda : {};

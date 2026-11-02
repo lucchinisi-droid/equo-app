@@ -40,9 +40,11 @@ function vrSezioni(){
 function vrParteScritta(){
   const d = VS.visita?.dati || {}, campi = VS.campi || [];
   const righe = chiavi => chiavi.map(k => { const c = campi.find(x => x.k === k); const val = c ? vrValore(c, d[k]) : null; return val == null ? null : [c.e, val]; }).filter(Boolean);
-  return { relazione: String(d.relazione || "").trim(), rel: righe(VR_REL), indicazioni: String(d.indicazioni || "").trim(), ter: righe(VR_TER) };
+  // piano terapeutico (11): voci e fine del tempo di attesa
+  const piano = typeof ptRigheReferto === "function" ? ptRigheReferto() : [], attesa = typeof ptAttesaReferto === "function" ? ptAttesaReferto() : "";
+  return { relazione: String(d.relazione || "").trim(), rel: righe(VR_REL), indicazioni: String(d.indicazioni || "").trim(), ter: righe(VR_TER), piano, attesa };
 }
-const vrScrittaVuota = p => !p.relazione && !p.rel.length && !p.indicazioni && !p.ter.length;
+const vrScrittaVuota = p => !p.relazione && !p.rel.length && !p.indicazioni && !p.ter.length && !p.piano.length;
 function vrCavallo(){
   const e = VS.e;
   const cv = (typeof cavalliCartella === "function" ? cavalliCartella() : []).find(x => x.id === e.cavallo_cliente_id) || {};
@@ -87,7 +89,8 @@ async function vrApri(){
         ${ps.rel.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>
       <div class="vr-sez vr-scritta"><h4>Terapia e indicazioni</h4>
         <textarea id="vr-indicazioni" rows="${Math.min(10, Math.max(2, Math.ceil(ps.indicazioni.length / 45)))}" placeholder="Farmaci, dosi, durata, cosa fare a casa" oninput="vsCambia('indicazioni', this.value)">${vrEsc(ps.indicazioni)}</textarea>
-        ${ps.ter.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>
+        ${ps.ter.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}
+        ${ps.piano.length ? `<div class="vr-piano"><h5>Piano terapeutico</h5>${ps.piano.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}${ps.attesa ? `<div class="vr-attesa">${vrEsc(ps.attesa)}</div>` : ""}</div>` : ""}</div>
       <button type="button" class="vd-detta piccolo" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
     </div>
     ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map(a => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
@@ -173,7 +176,16 @@ async function vrCreaPdf(){
     doc.setFont("helvetica", "normal"); doc.setTextColor(...testo); doc.text(righe, M + 60, y); y += h;
   });
   if(ps.relazione || ps.rel.length){ titoloSez("RELAZIONE DEL VETERINARIO"); paragrafi(ps.relazione); righeCampi(ps.rel); y += 3; }
-  if(ps.indicazioni || ps.ter.length){ titoloSez("TERAPIA E INDICAZIONI"); paragrafi(ps.indicazioni); righeCampi(ps.ter); y += 3; }
+  if(ps.indicazioni || ps.ter.length || ps.piano.length){
+    titoloSez("TERAPIA E INDICAZIONI"); paragrafi(ps.indicazioni); righeCampi(ps.ter);
+    if(ps.piano.length){
+      if(y > 262) nuovaPagina();
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...notte); doc.text("Piano terapeutico", M + 3, y); y += 6;
+      righeCampi(ps.piano);
+      if(ps.attesa){ if(y > 272) nuovaPagina(); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...testo); doc.text(ps.attesa, M + 3, y); y += 6; }
+    }
+    y += 3;
+  }
   const alleg = VA.lista.filter(a => VR.alleg.has(a.id));
   if(alleg.length){
     if(y > 245) nuovaPagina();
@@ -238,6 +250,8 @@ async function vrInvia(){
           testo: a.titolo, file_url: "equo-doc:" + a.id, file_nome: DB.nomeFileDocumento(a, vrCavallo().nome) });
       }
     }
+    // piano terapeutico ancora in bozza: parte con il referto (il riassunto è nel PDF)
+    if(typeof ptAvviaDaReferto === "function"){ try{ await ptAvviaDaReferto(); }catch(err){ avvisi.push("Piano terapeutico non avviato: " + (err?.message || err)); } }
     v.dati = { ...(v.dati || {}), _referto: { il: new Date().toISOString(), a: inviati, documento_id: id, allegati: alleg.length } };
     await vsSalvaSubito();
     vrFatto(inviati, avvisi);

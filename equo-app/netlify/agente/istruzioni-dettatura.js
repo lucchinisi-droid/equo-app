@@ -18,9 +18,10 @@ Il referto ha già, in forma di dati, i campi compilati a mano nella scheda (te 
 ${REGOLE_DETTATURA}
 
 ## Cosa produci
-{"relazione": "...", "terapia": "...", "da_controllare": "..."}
+{"relazione": "...", "terapia": "...", "piano": [...], "da_controllare": "..."}
 - "relazione": la relazione del veterinario in prosa, in forma impersonale («Si rileva…», «All'esame…», «Il quadro è compatibile con…»): cosa è stato osservato, cosa significa, conclusione. Spiega i dati della scheda quando il veterinario li commenta, ma non ricopiarli uno per uno. Se nella scheda c'è già una diagnosi, la relazione ci arriva in modo coerente; non ripeterla parola per parola.
-- "terapia": farmaci, dosi, vie, durate, cosa fare a casa, riposo, lavoro, ricontrollo: SOLO quello che il veterinario ha detto. Se nella scheda c'è già una terapia scritta, aggiungi solo ciò che il dettato dice in più. Vuoto ("") se non ha parlato di terapia.
+- "terapia": farmaci, dosi, vie, durate, cosa fare a casa, riposo, lavoro, ricontrollo: SOLO quello che il veterinario ha detto. Se nella scheda c'è già una terapia scritta, aggiungi solo ciò che il dettato dice in più. Vuoto ("") se non ha parlato di terapia. Farmaci e cure con orari o giorni vanno nel "piano": in "terapia" scrivi solo quello che il piano non dice (indicazioni, controlli, cosa osservare), senza ripetere le voci del piano.
+- "piano": le voci del piano terapeutico, SOLO se il veterinario le ha dette, una per farmaco o cura: {"tipo": "farmaco"|"cura"|"esercizio"|"riposo"|"altro", "nome": "...", "dose": "..." (come detta, senza calcoli; "" se non detta), "via": "Bocca"|"Intramuscolo"|"Endovena"|"Sottocute"|"Locale"|"Occhio"|"Inalazione"|"" , "volte_giorno": 0-4 (0 = al bisogno o non detto), "giorni": numero di giorni detto (0 se non detto), "note": "..."}. Elenco vuoto [] se non ha detto una terapia. Non inventare dose, via, volte o giorni non detti: lasciali vuoti o 0 e segnalali in "da_controllare".
 - "da_controllare": una riga breve per il veterinario (non va nel referto) con i punti incerti: parole non chiare, farmaco senza dose o durata, lato o arto non chiaro. Vuoto se è tutto chiaro.
 - Scrivi per un proprietario: termini tecnici corretti, ma chiari; niente abbreviazioni oscure (scrivi «anteriore sinistro» invece di «AS» la prima volta).`;
 

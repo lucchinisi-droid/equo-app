@@ -24,3 +24,27 @@
 .deadline-dot.soon{background:var(--accent)}
 .deadline-dot.late{background:var(--red)}
 .rz-wrap{position:relative}
+
+/* TERAPIE DEL VETERINARIO (2/11/2026, proprietario/104-terapie.js): Home «Terapie di oggi» e scheda del cavallo */
+.ter-card{margin-bottom:14px}
+.ter-tit{font-weight:800;font-size:15px;margin-bottom:8px}
+.ter-sotto{font-size:12.5px;margin:-4px 0 8px}
+.ter-piano+.ter-piano{border-top:1px solid var(--border);margin-top:10px;padding-top:10px}
+.ter-cav{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.ter-cav small{color:var(--muted);font-size:12px}
+.ter-somm{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ter-somm:last-of-type{border-bottom:none}
+.ter-somm .o{font-weight:800;min-width:44px;font-variant-numeric:tabular-nums}
+.ter-somm .c{flex:1;min-width:0;display:flex;flex-direction:column}
+.ter-somm .c small{color:var(--muted);font-size:12px}
+.ter-somm.ok .c b{color:var(--muted)}
+.ter-fatta{color:var(--green);font-weight:800;font-size:13px}
+.ter-saltata{color:var(--red);font-weight:800;font-size:13px}
+.ter-btn{min-width:72px}
+.ter-vuoto{font-size:13px;padding:4px 0}
+.ter-link{background:none;border:none;color:var(--accent);font:inherit;font-weight:700;font-size:13px;padding:6px 0 0;cursor:pointer}
+.ter-voce{display:flex;flex-direction:column;padding:6px 0;border-bottom:1px solid var(--border)}
+.ter-voce small{color:var(--muted);font-size:12.5px}
+.ter-attesa{margin-top:8px;font-size:13px;padding:8px 10px;border-radius:10px;background:var(--surface2)}
+.ter-oggi-t{font-weight:800;font-size:13px;margin:10px 0 2px}
+.ter-nota{font-size:12px;margin-top:8px}

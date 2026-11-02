@@ -50,20 +50,25 @@ function vdDetta(){
       const d = VS.visita?.dati || {};
       return [
         { k: "relazione", titolo: "Relazione del veterinario", testo: r.relazione || "", modificabile: true, on: true, nota: d.relazione ? "Si aggiunge alla relazione che c'è già." : "" },
-        { k: "indicazioni", titolo: "Terapia e indicazioni", testo: r.terapia || "", modificabile: true, on: true, nota: d.indicazioni ? "Si aggiunge a quella che c'è già." : "" }
-      ];
+        { k: "indicazioni", titolo: "Terapia e indicazioni", testo: r.terapia || "", modificabile: true, on: true, nota: d.indicazioni ? "Si aggiunge a quella che c'è già." : "" },
+        // voci del piano terapeutico (11): si aggiungono al piano, poi orari e giorni si controllano lì
+        (r.piano || []).length && typeof ptAggiungiVoci === "function" ? { k: "piano", titolo: "Piano terapeutico · " + r.piano.length + (r.piano.length === 1 ? " voce" : " voci"),
+          testo: r.piano.map(v => "• " + v.nome + (v.dose ? " " + v.dose : "") + (v.via ? " · " + v.via.toLowerCase() : "") + (v.volte_giorno ? " · " + v.volte_giorno + (v.volte_giorno === 1 ? " volta" : " volte") + " al giorno" : " · orari da scegliere") + (v.giorni ? " · " + v.giorni + " giorni" : " · giorni da scegliere")).join("\n"),
+          on: true, nota: "Si aggiungono al piano della visita: poi controlla orari, giorni e tempo di attesa." } : null
+      ].filter(Boolean);
     },
-    conferma: async scelte => {
+    conferma: async (scelte, r) => {
       const d = { ...(VS.visita.dati || {}) };
-      scelte.forEach(x => { const t = String(x.testo).trim(); d[x.k] = d[x.k] ? String(d[x.k]).trim() + "\n\n" + t : t; });
+      scelte.filter(x => x.k !== "piano").forEach(x => { const t = String(x.testo).trim(); d[x.k] = d[x.k] ? String(d[x.k]).trim() + "\n\n" + t : t; });
       VS.visita.dati = d;
       await vsSalvaSubito(true);
+      if(scelte.some(x => x.k === "piano")) await ptAggiungiVoci(r.piano || []);
       if(VS.schermo === "scheda") vsRidisegna();
       else if(VS.schermo === "referto" && typeof vrApri === "function") return vrApri();
       showToast("Inserito nella scheda: lo trovi nel referto");
       setTimeout(() => document.getElementById("vd-box")?.scrollIntoView({ block: "start", behavior: "smooth" }), 60);
     },
-    demo: dettato => ({ relazione: dettato, terapia: "", da_controllare: "In prova Galeno non risponde: il dettato è riportato così com'è." })
+    demo: dettato => ({ relazione: dettato, terapia: "", piano: [], da_controllare: "In prova Galeno non risponde: il dettato è riportato così com'è." })
   });
 }
 

@@ -55,6 +55,9 @@ function renderHomeVet(){
   const diOggi = app.filter(e => e.data_intervento === oggi);
   const urg = diOggi.filter(e => e.tipo_ferratura === "urgenza").length;
   const ric = (hpRichiamiLista || []).filter(r => r.giorni <= 7).length;
+  // terapie in corso (piano terapeutico, 11): si leggono una volta e la Home si ridisegna
+  const ter = typeof ptConteggi === "function" ? ptConteggi() : { n: 0, saltate: 0 };
+  if(typeof ptCaricaInCorso === "function" && !PT.inCorso && !PT.promessa) ptCaricaInCorso().then(() => { if(document.getElementById("vh")) renderHomeVet(); });
   const prima = diOggi.map(vhOra).filter(o => o !== "—").sort()[0];
   const km = vhKm.giorno === oggi && vhKm.km ? `${vhKm.km} km` : "";
   // prossime visite: prima l'urgenza, poi in ordine di orario; da adesso in avanti (quelle di oggi già passate restano finché non sono fatte)
@@ -78,6 +81,7 @@ function renderHomeVet(){
       </div>
       <div class="vh-giro-num">
         <button onclick="vhGiornata()"><b>${urg}</b><span>${urg === 1 ? "urgenza" : "urgenze"}</span></button>
+        <button onclick="ptElenco()"><b>${ter.n}</b><span>${ter.n === 1 ? "terapia" : "terapie"}${ter.saltate ? ` · <em class="vh-saltate">${ter.saltate} ${ter.saltate === 1 ? "saltata" : "saltate"}</em>` : ""}</span></button>
         <button onclick="hmScadenze()"><b>${ric}</b><span>${ric === 1 ? "richiamo" : "richiami"}</span></button>
       </div>
     </div>

@@ -361,3 +361,31 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .dt-avviso{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
 :where(body.pl-vet) .dt-errore{background:var(--vt-urg-chiaro);color:var(--vt-urg)}
 :where(body.pl-vet) .dt-aiuto{color:var(--vt-testo)}
+
+/* PIANO TERAPEUTICO (2/11/2026, 11-piano-terapia.js): sezione nella scheda, voci, editor, referto, Home e Clienti */
+.pt-sez h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pt-stato{font-size:11.5px;font-weight:800;letter-spacing:.02em;border-radius:999px;padding:3px 9px;background:var(--vt-chip);color:var(--vt-testo2)}
+.pt-stato.attivo{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
+.pt-stato.sospeso{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
+.pt-periodo{font-size:13.5px;color:var(--vt-testo2);margin:0 2px 8px;line-height:1.45}
+.pt-saltate{color:var(--vt-urg);font-weight:800}
+.pt-attesa{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo);border-radius:12px;padding:9px 12px;font-size:13.5px;margin-bottom:10px}
+.pt-voce{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px;margin-bottom:8px;border-radius:14px;border:1px solid var(--vt-bordo);background:var(--vt-sup);color:var(--vt-testo);font:inherit;cursor:pointer}
+.pt-voce:disabled{cursor:default}
+.pt-voce .ic{font-size:20px;width:28px;text-align:center;flex-shrink:0}
+.pt-voce .c{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pt-voce .c b{color:var(--vt-notte);font-size:15px}
+.pt-voce .c small{color:var(--vt-testo2);font-size:12.5px;line-height:1.4}
+.pt-voce .fr{color:var(--vt-testo2);font-size:20px}
+.pt-aggiungi{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px}
+.pt-conferme{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--vt-tif-chiaro);margin-bottom:10px;cursor:pointer}
+.pt-conferme input{width:20px;height:20px;accent-color:var(--vt-tif-scuro);margin-top:2px;flex-shrink:0}
+.pt-conferme b{display:block;color:var(--vt-notte);font-size:14.5px}.pt-conferme small{color:var(--vt-tif-testo);font-size:12.5px;line-height:1.4}
+.pt-azioni{display:flex;gap:10px}
+.pt-orari{display:flex;gap:8px;flex-wrap:wrap}
+.pt-orari input{border:1px solid var(--vt-bordo);border-radius:12px;background:var(--vt-fondo);color:var(--vt-testo);font:inherit;font-size:16px;padding:9px 10px}
+.vr-piano{margin-top:8px}
+.vr-piano h5{margin:6px 0 4px;font-size:13px;color:var(--vt-notte)}
+.vr-attesa{margin-top:6px;font-size:13px;font-weight:700;color:var(--vt-oro-testo)}
+.vh-saltate{font-style:normal;color:var(--vt-urg);font-weight:800}
+.vt-cli-ter{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;margin-left:6px;background:var(--vt-tif-chiaro);color:var(--vt-tif-testo);vertical-align:middle}

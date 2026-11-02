@@ -37,7 +37,10 @@ function vetRenderClienti(box){
   const cavalli = typeof cavalliCartella === "function" ? cavalliCartella() : [];
   const perCliente = {};
   cavalli.forEach(cv => { (perCliente[cv.cliente_mascalcia_id] = perCliente[cv.cliente_mascalcia_id] || []).push(cv); });
-  const filtri = [["tutti", "Tutti"], ["privati", "Privati"], ["scuderie", "Scuderie"], ["crediti", "Crediti"]];
+  const filtri = [["tutti", "Tutti"], ["privati", "Privati"], ["scuderie", "Scuderie"], ["terapia", "In terapia"], ["crediti", "Crediti"]];
+  // clienti con un cavallo in terapia (piano terapeutico, 11): si leggono una volta e l'elenco si ridisegna
+  if(typeof ptCaricaInCorso === "function" && !PT.inCorso && !PT.promessa) ptCaricaInCorso().then(() => { const b = document.getElementById("clienti-list"); if(b) vetRenderClienti(b); });
+  const inTerapia = typeof ptClientiInTerapia === "function" ? ptClientiInTerapia() : new Set();
   if(!filtri.some(f => f[0] === vetCliFiltro)) vetCliFiltro = "tutti";
   document.getElementById("cli-cartelle").innerHTML = filtri.map(([k, t]) =>
     `<button role="tab" aria-selected="${vetCliFiltro === k}" class="${vetCliFiltro === k ? "on" : ""}" onclick="vetFiltroClienti('${k}')">${t}</button>`).join("");
@@ -48,7 +51,7 @@ function vetRenderClienti(box){
   const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
   if(f) f.inp.placeholder = "Nome, cavallo, microchip";
 
-  const lista = attivi.filter(c => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true)
+  const lista = attivi.filter(c => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "terapia" ? inTerapia.has(c.id) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true)
     .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
   let html = "", lettera = "";
   const lettere = [];
@@ -75,10 +78,10 @@ function vetRenderClienti(box){
     const cerca = [typeof paroleCercaCliente === "function" ? paroleCercaCliente(c) : "", ...suoi.map(x => [x.nome, x.microchip, x.codice_equo].filter(Boolean).join(" "))].join(" ");
     html += `<div class="cli-riga vt-cli" data-cerca="${escapeHtml(cerca)}" onclick="openClienteDetail('${c.id}')">
       <span class="cli-av vt-av ${str ? "str" : equo ? "equo" : "no"}">${escapeHtml(vetSigla(c.nome))}</span>
-      <span class="cli-c"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml(sotto.filter(Boolean).join(" · "))}</span></span>
+      <span class="cli-c"><b>${escapeHtml(c.nome)}${inTerapia.has(c.id) ? ' <span class="vt-cli-ter">in terapia</span>' : ""}</b><span>${escapeHtml(sotto.filter(Boolean).join(" · "))}</span></span>
       ${dx}</div>`;
   });
-  if(!lista.length) html = `<div class="cli-vuoto cerca-ignora">${vetCliFiltro === "crediti" ? "Nessun cliente ti deve qualcosa: tutti in regola." : "Nessun cliente qui."}</div>`;
+  if(!lista.length) html = `<div class="cli-vuoto cerca-ignora">${vetCliFiltro === "crediti" ? "Nessun cliente ti deve qualcosa: tutti in regola." : vetCliFiltro === "terapia" ? "Nessun cavallo in terapia." : "Nessun cliente qui."}</div>`;
   box.innerHTML = html + (lettere.length > 4 ? `<div class="vt-indice cerca-ignora">${lettere.map(l => `<button onclick="event.stopPropagation();vetVaiLettera('${escapeHtml(l)}')">${escapeHtml(l)}</button>`).join("")}</div>` : "");
   // archiviati: come per il maniscalco, in fondo
   const arch = (clientiMascalcia || []).filter(c => c.archiviato_il);
