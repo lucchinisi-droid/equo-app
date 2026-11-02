@@ -153,6 +153,17 @@ const STRUMENTI_ARES = [
   { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 
+// ---------------------------------------------------------------- GALENO (veterinari, vista professionista) · 2/11/2026
+// Fase 1: schede verificate (ambito veterinario) e guida all'app. Non legge né modifica agenda, clienti, cavalli o incassi.
+const STRUMENTI_GALENO = [
+  { ...clonaStrumento("cerca_conoscenze"), description: "Cerca nelle schede verificate di Equo per veterinari equini: urgenze (colica, sepsi), malattie infettive e vaccini, medicina interna (asma, PPID, sindrome metabolica), riproduzione e neonatologia, antibiotico-resistenza, ferite, ortopedia e riabilitazione, normativa italiana ed europea (farmaco veterinario, DPA/non DPA, sostanze essenziali, antimicrobici, anemia infettiva, West Nile, antidoping FEI). Restituisce testo, fonte e link." },
+  clonaStrumento("guida_app"),
+  clonaStrumento("salva_memoria"),
+  clonaStrumento("riferisci_ai_boss"),
+  clonaStrumento("le_mie_segnalazioni"),
+  { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
+];
+
 // ---------------------------------------------------------------- ATHENA (Equo Scuderia: gestori, staff, istruttori)
 const STRUMENTI_ATHENA = [
   clonaStrumento("guida_app"),
@@ -193,4 +204,4 @@ const STRUMENTI_MERLINO = [
 
 // ---- supporto strumenti gestionali (sempre con il client dell'utente: RLS del maniscalco)
 
-module.exports = { STRUMENTI, STRUMENTI_ARES, STRUMENTI_ARES_SCUD, STRUMENTI_ATHENA, STRUMENTI_ATHENA_BASIC, STRUMENTI_GESTIONE, STRUMENTI_HAMMER, STRUMENTI_HAMMER_SCUD, STRUMENTI_MERLINO, TIPI_INTERVENTO, TIPO_INTERVENTO_LABEL };
+module.exports = { STRUMENTI, STRUMENTI_ARES, STRUMENTI_ARES_SCUD, STRUMENTI_ATHENA, STRUMENTI_ATHENA_BASIC, STRUMENTI_GALENO, STRUMENTI_GESTIONE, STRUMENTI_HAMMER, STRUMENTI_HAMMER_SCUD, STRUMENTI_MERLINO, TIPI_INTERVENTO, TIPO_INTERVENTO_LABEL };

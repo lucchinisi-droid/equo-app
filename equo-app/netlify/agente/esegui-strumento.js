@@ -1,6 +1,7 @@
 // Equo · agenti AI (netlify/functions/agent.js) · esecuzione degli strumenti chiesti dagli agenti
 const { SEL_INTERVENTO, aggiungiGiorni, cavalliCliente, clientiManiscalco, descrTipo, interventoDelManiscalco, isoValida, oggiISO, rigaIntervento, risolviCliente, trovaCavallo, trovaPerNome } = require("./aiuti");
 const { TIPI_EVENTO } = require("./configurazione");
+const { GUIDE_SOLO_MANISCALCO } = require("./istruzioni-galeno");
 const { strumentoMeteo } = require("./meteo");
 const { STRUMENTI_GESTIONE, TIPI_INTERVENTO } = require("./strumenti");
 
@@ -82,15 +83,27 @@ async function eseguiStrumento(nome, input, ctx) {
 
     case "guida_app": {
       const ambitoGuida = ctx.guida || "proprietario";
+      // Galeno (veterinario): le sue guide + quelle del maniscalco sulle parti comuni dell'app, senza quelle solo da maniscalco (2/11/2026)
+      const ambiti = ambitoGuida === "veterinario" ? ["veterinario", "maniscalco"] : [ambitoGuida];
+      const vale = (titolo, a) => !(ambitoGuida === "veterinario" && a === "maniscalco" && GUIDE_SOLO_MANISCALCO.test(String(titolo || "")));
       if (input.elenco) {
-        const { data, error } = await db.rpc("indice_guida", { p_ambito: ambitoGuida });
-        if (error) return "Errore nel leggere la guida.";
-        return { schede_disponibili: data || [], nota: "Per i passi di una funzione richiama guida_app con la domanda." };
+        const schede = [];
+        for (const a of ambiti) {
+          const { data, error } = await db.rpc("indice_guida", { p_ambito: a });
+          if (error) return "Errore nel leggere la guida.";
+          schede.push(...(data || []).filter((t) => vale(t, a)));
+        }
+        return { schede_disponibili: schede, nota: "Per i passi di una funzione richiama guida_app con la domanda." };
       }
       const domanda = String(input.domanda || "").slice(0, 300);
       if (!domanda.trim()) return "Scrivi cosa cercare.";
-      const { data, error } = await db.rpc("cerca_guida", { p_query: domanda, p_ambito: ambitoGuida, p_limite: 3 });
-      if (error) { console.error("guida_app:", error); return "Errore nel leggere la guida."; }
+      const trovate = [];
+      for (const a of ambiti) {
+        const { data: righe, error } = await db.rpc("cerca_guida", { p_query: domanda, p_ambito: a, p_limite: 3 });
+        if (error) { console.error("guida_app:", error); return "Errore nel leggere la guida."; }
+        trovate.push(...(righe || []).filter((s) => vale(s.titolo, a)));
+      }
+      const data = trovate.slice(0, ambiti.length > 1 ? 4 : 3);
       if (!(data || []).length) return "Nessuna scheda trovata: riprova con altre parole (sinonimi, nome del menu) o con elenco = true per vedere tutte le schede. Non inventare percorsi.";
       return data;
     }

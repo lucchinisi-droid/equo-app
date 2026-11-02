@@ -23,11 +23,12 @@ const { linkCitati, oggiISO, senzaImporti, testoDaBlocchi, utenteDaToken } = req
 const { CHIAVE_PUBBLICA, COSTO_RICERCA_USD, LIMITI, MAX_GIRI_TOOL, MODELLO, PREZZI } = require("../agente/configurazione");
 const { eseguiStrumento } = require("../agente/esegui-strumento");
 const { ISTRUZIONI_ARES } = require("../agente/istruzioni-ares");
+const { ISTRUZIONI_GALENO } = require("../agente/istruzioni-galeno");
 const { ISTRUZIONI_CASO, ISTRUZIONI_FOTO_GUIDATA, ISTRUZIONI_HAMMER } = require("../agente/istruzioni-hammer");
 const { ISTRUZIONI_MERLINO } = require("../agente/istruzioni-merlino");
 const { ISTRUZIONI, ISTRUZIONI_PEGASUS } = require("../agente/istruzioni-proprietario");
 const { ISTRUZIONI_ARES_SCUD, ISTRUZIONI_ATHENA, ISTRUZIONI_ATHENA_BASIC, ISTRUZIONI_HAMMER_SCUD } = require("../agente/istruzioni-scuderia");
-const { STRUMENTI, STRUMENTI_ARES, STRUMENTI_ARES_SCUD, STRUMENTI_ATHENA, STRUMENTI_ATHENA_BASIC, STRUMENTI_GESTIONE, STRUMENTI_HAMMER, STRUMENTI_HAMMER_SCUD, STRUMENTI_MERLINO } = require("../agente/strumenti");
+const { STRUMENTI, STRUMENTI_ARES, STRUMENTI_ARES_SCUD, STRUMENTI_ATHENA, STRUMENTI_ATHENA_BASIC, STRUMENTI_GALENO, STRUMENTI_GESTIONE, STRUMENTI_HAMMER, STRUMENTI_HAMMER_SCUD, STRUMENTI_MERLINO } = require("../agente/strumenti");
 const ORIGINI_OK = ["https://scuderia.equohub.com", "https://app.equohub.com"];
 let corsOrigine = "https://app.equohub.com";
 const intestazioniCors = () => ({ "Access-Control-Allow-Origin": corsOrigine, "Vary": "Origin",
@@ -139,11 +140,13 @@ exports.handler = async (event) => {
   const chiaveMese = merlino ? mese + "-merlino" : agScud ? mese + "-" + agScud : athena ? mese + "-athena" : periodo;
   // Hammer: vista professionista di un utente che è maniscalco (ruolo letto dal DB, non dall'app)
   const hammer = vista === "professionista" && [profilo?.ruolo, profilo?.ruolo_secondario].includes("maniscalco");
-  // Pegasus: vista proprietario. Veterinari/istruttori (vista professionista non maniscalco): Equo AI neutro
+  // Pegasus: vista proprietario. Professionisti senza agente proprio: Equo AI neutro
   const pegasus = vista === "proprietario";
   // Ares: vista professionista di un utente che è istruttore/trainer (ruolo letto dal DB, non dall'app)
   const ares = vista === "professionista" && !hammer && [profilo?.ruolo, profilo?.ruolo_secondario].includes("istruttore");
-  const agente = merlino ? "merlino" : agScud ? agScud : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : pegasus ? "pegasus" : "equo";
+  // Galeno: vista professionista di un utente che è veterinario (ruolo letto dal DB, non dall'app) · 2/11/2026
+  const galeno = vista === "professionista" && !hammer && !ares && [profilo?.ruolo, profilo?.ruolo_secondario].includes("veterinario");
+  const agente = merlino ? "merlino" : agScud ? agScud : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : galeno ? "galeno" : pegasus ? "pegasus" : "equo";
   const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", chiaveMese).maybeSingle();
   let limite = LIMITI[piano], usati = uso?.conteggio || 0;
   if (scud) {
@@ -224,6 +227,7 @@ exports.handler = async (event) => {
     (memoria || []).length ? "Cose da ricordare:\n" + memoria.map((m) => "- " + (m.horse_id ? `[${listaCavalli.find((c) => c.id === m.horse_id)?.name || "cavallo"}] ` : "") + m.testo).join("\n") : "",
     hammer ? "Stai parlando con un maniscalco (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non quelli dei clienti." :
       ares ? "Stai parlando con un istruttore/trainer (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali; i cavalli che segue come istruttore li leggi con cavalli_seguiti." :
+      galeno ? "Stai parlando con un veterinario (vista professionista). I cavalli elencati sopra, se ci sono, sono i SUOI cavalli personali, non i pazienti." :
       vista === "professionista" ? "L'utente sta usando la vista professionista: gli strumenti professionali arrivano a breve; per ora aiutalo con conoscenze generali e con l'uso dell'app." : "",
     hammer && contestoApp ? "IN QUESTO MOMENTO IL MANISCALCO STA GUARDANDO (dati dell'app, usali per rispondere senza chiederli di nuovo):\n" + contestoApp : "",
     hammer && modalita === "foto" ? ISTRUZIONI_FOTO_GUIDATA : "",
@@ -247,8 +251,8 @@ exports.handler = async (event) => {
 
   const contestoConversazione = [...(storia || []).slice(0, 6).reverse().map((m) => ({ ruolo: m.ruolo, testo: String(m.contenuto || "").slice(0, 600) })),
     { ruolo: "user", testo: (messaggio || "(allegato)").slice(0, 600) }];
-  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer || agScud === "hammer" ? "maniscalco" : ares || agScud === "ares" ? "istruttore" : "proprietario",
-    guida: scud ? "scuderia" : ares ? "istruttore" : vista === "professionista" ? "maniscalco" : "proprietario",
+  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer || agScud === "hammer" ? "maniscalco" : ares || agScud === "ares" ? "istruttore" : galeno ? "veterinario" : "proprietario",
+    guida: scud ? "scuderia" : ares ? "istruttore" : galeno ? "veterinario" : vista === "professionista" ? "maniscalco" : "proprietario",
     strumenti: merlino ? STRUMENTI_MERLINO : agScud === "hammer" ? STRUMENTI_HAMMER_SCUD : agScud === "ares" ? STRUMENTI_ARES_SCUD : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
     centroId: centro?.id || null, agente, vista, contestoConversazione };
   // ultima posizione nota del telefono (solo per il meteo, arrotondata a ~1 km dall'app)
@@ -271,12 +275,12 @@ exports.handler = async (event) => {
         headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
           model: MODELLO,
-          max_tokens: allegati.length ? 2000 : (hammer || merlino || ares || agScud ? 1600 : 1200),
+          max_tokens: allegati.length ? 2000 : (hammer || merlino || ares || galeno || agScud ? 1600 : 1200),
           system: [
-            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : galeno ? ISTRUZIONI_GALENO : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
-          tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : STRUMENTI,
+          tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : galeno ? STRUMENTI_GALENO : STRUMENTI,
           messages,
         }),
       });
@@ -340,4 +344,4 @@ exports.handler = async (event) => {
 };
 
 // esportati solo per i test
-exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, ISTRUZIONI_ARES, STRUMENTI_ARES, ISTRUZIONI_HAMMER_SCUD, STRUMENTI_HAMMER_SCUD, ISTRUZIONI_ARES_SCUD, STRUMENTI_ARES_SCUD, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };
+exports._interni = { eseguiStrumento, ISTRUZIONI_ATHENA, STRUMENTI_ATHENA, ISTRUZIONI_ATHENA_BASIC, STRUMENTI_ATHENA_BASIC, ISTRUZIONI_MERLINO, STRUMENTI_MERLINO, ISTRUZIONI, ISTRUZIONI_PEGASUS, STRUMENTI, ISTRUZIONI_HAMMER, STRUMENTI_HAMMER, ISTRUZIONI_ARES, STRUMENTI_ARES, ISTRUZIONI_GALENO, STRUMENTI_GALENO, ISTRUZIONI_HAMMER_SCUD, STRUMENTI_HAMMER_SCUD, ISTRUZIONI_ARES_SCUD, STRUMENTI_ARES_SCUD, STRUMENTI_GESTIONE, testoDaBlocchi, linkCitati };

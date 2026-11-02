@@ -5,6 +5,7 @@ import { vdPrepara } from "./02-demo.js";
 import { vetEtichettaGruppo, vetTestiAgenda } from "./03-agenda.js";
 import { vetRenderClienti, vetFiltroClienti, vetVaiLettera } from "./04-clienti.js";
 import { vmDecora, vmFiltra, vmNuovoMessaggio } from "./05-messaggi.js";
+import { galenoTestata } from "./06-galeno.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
 Object.assign(window, {
@@ -20,5 +21,6 @@ Object.assign(window, {
   vetVaiLettera,
   vmDecora,
   vmFiltra,
-  vmNuovoMessaggio
+  vmNuovoMessaggio,
+  galenoTestata
 });

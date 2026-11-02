@@ -583,6 +583,28 @@
 			});
 		}
 	});
+	// equo-app-src/src/ruoli/veterinario/moduli/06-galeno.js
+	var GALENO_BENVENUTO = "Ciao, sono <strong>Galeno</strong>, l'agente di Equo per i veterinari. Cerco nelle schede verificate (clinica, prevenzione, normativa italiana ed europea) e ti dico sempre la fonte; ti spiego anche come usare l'app. Prova <em>\"criteri SIRS nel cavallo adulto\"</em>, <em>\"cosa faccio prima di trattare un cavallo DPA?\"</em> o <em>\"come aggiungo un appuntamento?\"</em>. Non prescrivo e non do dosi: la decisione clinica resta tua.";
+	function galenoTestata() {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		const t = document.getElementById("ai-sheet-titolo");
+		if (t) t.textContent = "Galeno · veterinaria";
+		const b = document.getElementById("ai-benvenuto");
+		if (b) b.innerHTML = GALENO_BENVENUTO;
+		const i = document.getElementById("chat-input");
+		if (i) i.placeholder = "Chiedi a Galeno…";
+	}
+	try {
+		estendiDopo("aggiornaTestataAi", function() {
+			try {
+				galenoTestata();
+			} catch (e) {
+				console.error("galeno:", e);
+			}
+		});
+	} catch (e) {
+		console.error("galeno:", e);
+	}
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
@@ -597,7 +619,8 @@
 		vetVaiLettera,
 		vmDecora,
 		vmFiltra,
-		vmNuovoMessaggio
+		vmNuovoMessaggio,
+		galenoTestata
 	});
 })();
 
