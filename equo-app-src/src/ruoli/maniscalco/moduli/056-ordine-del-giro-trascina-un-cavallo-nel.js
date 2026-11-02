@@ -176,6 +176,7 @@ function apriAzioniEvento(id){
   if(btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto","programmato"].includes(e.stato) ? "" : "none";
   const btnElim = document.getElementById("azioni-evento-elimina");
   if(btnElim) btnElim.style.display = e.gruppo_id && e.stato !== "fatto" ? "none" : "";
+  eseguiEstensioniSubito(estensioniDopo, "apriAzioniEvento", [e]);   // 2/11/2026: il veterinario aggiunge «Scheda visita»
   openModal("modal-azioni-evento");
 }
 
