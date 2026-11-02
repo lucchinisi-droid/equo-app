@@ -174,7 +174,7 @@ async function vsApriDaEvento(id){
   const e = (typeof agEventiCache !== "undefined" && agEventiCache[id]) || (hpAppuntamenti || []).find(x => x.id === id);
   if(!e) return showToast("Visita non trovata");
   try{ closeModal("modal-azioni-evento"); }catch(_){}
-  VS.e = e; VS.precedenti = []; vsDemoPrepara();
+  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset();
   vsFoglio().classList.add("aperto"); document.body.classList.add("vs-aperto");
   document.getElementById("vs-corpo").innerHTML = '<div class="vs-vuoto">Carico la scheda…</div>';
   document.getElementById("vs-piede").innerHTML = "";
@@ -233,6 +233,7 @@ function vsMostraScheda(){
   document.getElementById("vs-piede").innerHTML = v.stato === "conclusa"
     ? '<button class="vs-btn" onclick="vsChiudi()">Chiudi</button><button class="vs-btn pri" onclick="vrApri()">Referto</button>'
     : '<button class="vs-btn" onclick="vrApri()">Referto</button><button class="vs-btn pri" onclick="vsConcludi()">Concludi la visita</button>';
+  if(typeof vaCarica === "function") vaCarica();
 }
 function vsDisegnaCorpo(){
   const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
@@ -245,7 +246,8 @@ function vsDisegnaCorpo(){
     + (sola ? '<div class="vs-nota">Visita conclusa: la scheda è in sola lettura.</div>' : "")
     + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "")
     + sezioni.map(s => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map(c => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("")
-    + '<div class="vs-nota">Foto, video e dettatura arrivano nei prossimi aggiornamenti.</div>';
+    + (typeof vaSezioneHtml === "function" ? vaSezioneHtml() : "")
+    + '<div class="vs-nota">La dettatura arriva nel prossimo aggiornamento.</div>';
 }
 function vsTab(k){ VS.tab = k; vsDisegnaCorpo(); document.getElementById("vs-corpo").scrollTop = 0; }
 
@@ -282,11 +284,11 @@ function vsRidisegna(){ const b = document.getElementById("vs-corpo"), top = b.s
 
 /* ---- salvataggio automatico della bozza ---- */
 function vsSalvaPresto(){ clearTimeout(VS.timer); vsStato("…"); VS.timer = setTimeout(vsSalvaSubito, 700); }
-async function vsSalvaSubito(){
+async function vsSalvaSubito(forza){
   clearTimeout(VS.timer); VS.timer = null;
   while(VS.salvando) await new Promise(r => setTimeout(r, 80));
   const v = VS.visita; if(!v) return;
-  if(!v.id && !Object.values(v.dati || {}).some(x => x != null && x !== "" && !(Array.isArray(x) && !x.length))) return;
+  if(!v.id && !forza && !Object.values(v.dati || {}).some(x => x != null && x !== "" && !(Array.isArray(x) && !x.length))) return;
   VS.salvando = true;
   const { data, error } = await VsDB.salvaVisita({ ...v, campi: v.campi ? v.campi.map(({ se, ...c }) => c) : null });
   VS.salvando = false;

@@ -5,6 +5,7 @@
 // Arrivano dopo: riassunto scritto da Galeno (dettatura), maniscalco come destinatario, piano terapeutico.
 
 import { VS, vsSalvaSubito, vsTesta, vsNomeCavallo, vsMostraScheda, vsChiudi } from "./07-scheda-visita.js";
+import { VA } from "./09-allegati.js";
 
 const vrEsc = s => escapeHtml(s == null ? "" : String(s));
 
@@ -52,14 +53,14 @@ function vrDestinatari(){
 }
 
 /* ---- anteprima ---- */
-let VR = { dest: [] };
+let VR = { dest: [], alleg: new Set() };
 async function vrApri(){
   await vsSalvaSubito();
   if(!VS.visita?.id) return showToast("Scrivi prima qualcosa nella scheda");
   VS.schermo = "referto";
   const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {};
   if(!sez.length) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
-  VR.dest = vrDestinatari();
+  VR.dest = vrDestinatari(); VR.alleg = new Set([...VR.alleg].filter(id => VA.lista.some(a => a.id === id)));
   vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
   const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
   document.getElementById("vs-corpo").innerHTML = `
@@ -68,6 +69,7 @@ async function vrApri(){
       <div class="vr-testa"><b>Referto · ${vrEsc(cav.nome)}</b><span>${new Date((VS.visita.data_visita || isoLocale(new Date())) + "T12:00").toLocaleDateString("it-IT")} · PDF</span></div>
       ${sez.map(s => `<div class="vr-sez"><h4>${vrEsc(s.n)}</h4>${s.r.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>`).join("")}
     </div>
+    ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map(a => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
     <div class="vs-h">Chi lo riceve</div>
     ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" ${x.on ? "checked" : ""} ${x.suEquo ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
       <span><b>${vrEsc(x.nome)}</b><small>${vrEsc(x.ruolo)}${x.suEquo ? " · in chat su Equo" : " · non è su Equo: usa «Condividi»"}</small></span></label>`).join("")
@@ -134,12 +136,21 @@ async function vrCreaPdf(){
     });
     y += 3;
   });
+  const alleg = VA.lista.filter(a => VR.alleg.has(a.id));
+  if(alleg.length){
+    if(y > 245) nuovaPagina();
+    doc.setFillColor(...chiaro); doc.rect(M, y - 5, W - M * 2, 8, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...notte); doc.text("ALLEGATI", M + 3, y); y += 8;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...testo);
+    alleg.forEach(a => { if(y > 272) nuovaPagina(); doc.text("· " + a.titolo, M + 3, y); y += 6; });
+  }
   if(y > 250) nuovaPagina();
   y += 8; doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...testo);
   doc.text("Confermato in app da " + vrNomePro() + " il " + new Date().toLocaleString("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) + ".", M, y);
   piede();
   const pulisci = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const nome = ["Referto", pulisci(cav.nome), VS.visita.data_visita].filter(Boolean).join("_") + ".pdf";
+  const nome = DB.nomeFileDocumento({ mime: "application/pdf", data_documento: VS.visita.data_visita, categoria: "referto" }, cav.nome);   // void pulisci
+  void pulisci;
   return { blob: doc.output("blob"), nome, titolo: "Referto " + cav.nome + " · " + dataVisita };
 }
 
@@ -165,9 +176,11 @@ async function vrInvia(){
     showToast("Preparo e invio il referto…");
     const { blob, nome, titolo } = await vrCreaPdf();
     const v = VS.visita, e = VS.e;
-    const { id, error } = await DB.caricaDocumentoPrivato({ blob, nomeFile: nome, mime: "application/pdf", categoria: "referto", titolo,
+    const { id, error, numero } = await DB.caricaDocumentoPrivato({ blob, mime: "application/pdf", categoria: "referto", cavallo_nome: vrCavallo().nome, data_documento: v.data_visita,
       cavallo_cliente_id: v.cavallo_cliente_id || e.cavallo_cliente_id || null, horse_id: v.horse_id || e.horse_id || null, visita_id: v.id, autore_ruolo: "veterinario" });
     if(!id){ showToast(/documenti|bucket|not found|does not exist/i.test(error?.message || "") ? "Lo spazio privato dei documenti non è ancora attivo (SQL 32)." : "Errore nel salvare il referto: " + (error?.message || "riprova")); return; }
+    const nomeFile = DB.nomeFileDocumento({ mime: "application/pdf", data_documento: v.data_visita, categoria: "referto", numero }, vrCavallo().nome);
+    const alleg = VA.lista.filter(a => VR.alleg.has(a.id));
     const inviati = [], avvisi = [];
     for(const x of scelti){
       const c = x.cliente;
@@ -175,10 +188,19 @@ async function vrInvia(){
         : c.cliente_user_id ? await DB.condividiDocumento(id, { user_id: c.cliente_user_id, motivo: "chat" }) : { ok: false };
       if(!acc?.ok){ avvisi.push(x.nome + (String(acc?.errore || "").startsWith("decide_proprietario") ? ": lo vedrà se il proprietario lo condivide" : ": non condiviso")); continue; }
       const { error: em } = await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: c.id, tipo: "documento",
-        testo: "Referto della visita di " + vrCavallo().nome + " (" + new Date((v.data_visita || isoLocale(new Date())) + "T12:00").toLocaleDateString("it-IT") + ")", file_url: "equo-doc:" + id, file_nome: nome });
-      if(em) avvisi.push(x.nome + ": messaggio non inviato"); else inviati.push(x.nome);
+        testo: "Referto della visita di " + vrCavallo().nome + " (" + new Date((v.data_visita || isoLocale(new Date())) + "T12:00").toLocaleDateString("it-IT") + ")", file_url: "equo-doc:" + id, file_nome: nomeFile });
+      if(em){ avvisi.push(x.nome + ": messaggio non inviato"); continue; }
+      inviati.push(x.nome);
+      // allegati scelti: stesso destinatario, stesso accesso, un messaggio ciascuno
+      for(const a of alleg){
+        const dest = c.centro_id && !c.cliente_user_id ? { centro_id: c.centro_id, motivo: "chat" } : { user_id: c.cliente_user_id, motivo: "chat" };
+        const ra = await DB.condividiDocumento(a.id, dest);
+        if(!ra?.ok){ avvisi.push(a.titolo + " → " + x.nome + ": non condiviso"); continue; }
+        await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: c.id, tipo: /^image\//.test(a.mime || "") ? "foto" : /^video\//.test(a.mime || "") ? "video" : "documento",
+          testo: a.titolo, file_url: "equo-doc:" + a.id, file_nome: DB.nomeFileDocumento(a, vrCavallo().nome) });
+      }
     }
-    v.dati = { ...(v.dati || {}), _referto: { il: new Date().toISOString(), a: inviati, documento_id: id } };
+    v.dati = { ...(v.dati || {}), _referto: { il: new Date().toISOString(), a: inviati, documento_id: id, allegati: alleg.length } };
     await vsSalvaSubito();
     vrFatto(inviati, avvisi);
   }catch(err){ console.error("referto:", err); showToast("Impossibile inviare il referto: " + (err?.message || err)); }

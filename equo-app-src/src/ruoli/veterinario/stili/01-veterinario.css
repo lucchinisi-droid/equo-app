@@ -310,3 +310,28 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .vr-ok b{font-family:'Fraunces',serif;font-size:22px;color:var(--vt-notte)}
 :where(body.pl-vet) .vr-ok span{color:var(--vt-testo2);font-size:14px;line-height:1.45}
 :where(body.pl-vet) .vr-spunta{width:64px;height:64px;border-radius:50%;background:var(--vt-tif);color:#12233F!important;font-size:34px!important;display:flex;align-items:center;justify-content:center}
+
+/* ---------- ALLEGATI DELLA VISITA (2/11/2026 · 09-allegati.js) ---------- */
+:where(body.pl-vet) .va-tasti{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+:where(body.pl-vet) .va-tasti button{min-height:44px;border-radius:12px;border:1.5px solid var(--vt-tif);background:var(--vt-sup);color:var(--vt-notte);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+:where(body.pl-vet) .va-attesa{display:flex;flex-direction:column;gap:7px;background:var(--vt-tif-chiaro);border-radius:14px;padding:12px;margin-bottom:10px}
+:where(body.pl-vet) .va-attesa > b{color:var(--vt-notte)}
+:where(body.pl-vet) .va-anteprima-nome{font-size:12.5px;color:var(--vt-testo2)}
+:where(body.pl-vet) .va-anteprima-nome b{color:var(--vt-testo)}
+:where(body.pl-vet) .va-bott{display:flex;gap:8px}
+:where(body.pl-vet) .va-doc{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--vt-bordo)}
+:where(body.pl-vet) .va-mini{width:52px;height:52px;border-radius:10px;border:1px solid var(--vt-bordo);background:var(--vt-chip);overflow:hidden;padding:0;flex:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+:where(body.pl-vet) .va-mini img{width:100%;height:100%;object-fit:cover}
+:where(body.pl-vet) .va-mini span{font-size:10.5px;font-weight:700;color:var(--vt-notte)}
+:where(body.pl-vet) .va-tit{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:none;border:0;padding:0;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .va-tit b{font-size:13.5px;overflow-wrap:anywhere}
+:where(body.pl-vet) .va-tit small{font-size:12px;color:var(--vt-testo2)}
+:where(body.pl-vet) .va-azioni{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px}
+:where(body.pl-vet) .va-azioni button,:where(body.pl-vet) .va-chi-r button{border:1px solid var(--vt-bordo);background:var(--vt-sup);color:var(--vt-notte);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+:where(body.pl-vet) .va-azioni button.urg{color:var(--vt-urg);border-color:var(--vt-urg)}
+:where(body.pl-vet) .va-chi{flex-basis:100%;background:var(--vt-fondo);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+:where(body.pl-vet) .va-chi-r{display:flex;align-items:center;justify-content:space-between;gap:8px}
+:where(body.pl-vet) .va-chi-r span{display:flex;flex-direction:column}
+:where(body.pl-vet) .va-chi-r small{font-size:12px;color:var(--vt-testo2)}
+:where(body.pl-vet) .va-altri{margin-top:6px}
+:where(body.pl-vet) .va-altri summary{font-weight:700;color:var(--vt-notte);cursor:pointer;font-size:13.5px;padding:6px 0}

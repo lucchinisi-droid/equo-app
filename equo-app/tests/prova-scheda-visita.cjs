@@ -28,7 +28,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
 
   // 3 · Visita standard: motivo dall'appuntamento, campi, bozza salvata da sola
   await pg.evaluate(() => vsNuova("standard")); await attesa(300);
-  const st = await pg.evaluate(() => ({ sez: [...document.querySelectorAll(".vs-sez h3")].map(h => h.textContent), motivo: document.getElementById("vs-f-motivo")?.value }));
+  const st = await pg.evaluate(() => ({ sez: [...document.querySelectorAll(".vs-sez:not(#va-box) h3")].map(h => h.textContent), motivo: document.getElementById("vs-f-motivo")?.value }));
   ok(st.sez.join(",") === "Anamnesi,Esame obiettivo generale,Apparato locomotore,Diagnosi e piano" && st.motivo === "zoppia ASx", "Standard: 4 sezioni, motivo «zoppia ASx» " + JSON.stringify(st));
   await pg.fill("#vs-f-temp", "37,8"); await pg.fill("#vs-f-diagnosi", "Sospetto ascesso subsolare ASx");
   await pg.evaluate(() => vsScegli("zop_as", 2)); await attesa(1200);

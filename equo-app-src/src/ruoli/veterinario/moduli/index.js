@@ -8,6 +8,7 @@ import { vmDecora, vmFiltra, vmNuovoMessaggio } from "./05-messaggi.js";
 import { galenoTestata } from "./06-galeno.js";
 import { vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB } from "./07-scheda-visita.js";
+import { vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA } from "./09-allegati.js";
 import { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrDestinatari, VR } from "./08-referto.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
@@ -26,6 +27,7 @@ Object.assign(window, {
   vmFiltra,
   vmNuovoMessaggio,
   galenoTestata,
+  vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA,
   vsMostraScheda, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrDestinatari, VR,
   vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB

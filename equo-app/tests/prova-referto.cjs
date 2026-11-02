@@ -50,7 +50,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
       referto: v.dati._referto && { a: v.dati._referto.a, doc: v.dati._referto.documento_id === (d && d.id) }, fatto: document.getElementById("vs-titolo").textContent };
   });
   ok(inv.doc && inv.doc.cat === "referto" && inv.doc.visita && inv.doc.cav === "vv-au" && inv.doc.acc.join() === "demo-gv:chat", "Documento privato: referto della visita, accesso alla proprietaria " + JSON.stringify(inv.doc));
-  ok(inv.msg.length === 1 && inv.msg[0].c === "vc-gv" && inv.msg[0].url && /^Referto_Aurora_.*\.pdf$/.test(inv.msg[0].nome), "In chat: un messaggio a Giulia con «equo-doc:» " + JSON.stringify(inv.msg));
+  ok(inv.msg.length === 1 && inv.msg[0].c === "vc-gv" && inv.msg[0].url && /^Equo_Aurora_2026-\d\d-\d\d_Referto\.pdf$/.test(inv.msg[0].nome), "In chat: un messaggio a Giulia con «equo-doc:» " + JSON.stringify(inv.msg));
   ok(inv.referto && inv.referto.a.join() === "Giulia Verdi" && inv.referto.doc && inv.fatto === "Fatto", "Scheda: «Referto inviato» salvato " + JSON.stringify(inv.referto));
 
   // bolla della chat: il documento privato si apre con il link temporaneo; i PDF normali restano link
