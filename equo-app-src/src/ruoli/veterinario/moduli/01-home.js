@@ -106,8 +106,8 @@ function renderHomeVet(){
 
 // «Giornata»: l'agenda di oggi, con le visite raggruppate per posto e l'ordine del giro
 function vhGiornata(){ showPage("pro-agenda"); if(typeof tornaSettimanaCorrente === "function") tornaSettimanaCorrente(); }
-// «Detta»: per ora apre Galeno (la dettatura arriverà con Galeno)
-function vhDetta(){ openAiSheet(); }
+// «Detta» (2/11/2026): scegli una visita di oggi e si apre la sua scheda con la dettatura; senza visite oggi apre Galeno
+function vhDetta(){ if(typeof vdDaHome === "function") return vdDaHome(); openAiSheet(); }
 function vhMeteo(){ const m = document.getElementById("hm-meteo"); if(m) m.click(); }
 
 quandoApriPagina(function(p){ if(p === "pro-home") renderHomeVet(); });

@@ -2,7 +2,7 @@
 // Prototipo: ux/prova-veterinario («Che visita fai?», Visita standard, Agopuntura · MTC · Fisioterapia, I miei modelli).
 // Dati: visite_pro e modelli_visita (SQL 31), visibili solo al veterinario che le scrive.
 // Si apre dalle azioni della visita in Agenda e in Home («Scheda visita»); «Concludi la visita» usa il «Fatto» unico (segnaFatto).
-// Arrivano dopo: referto (passo 2), foto/video (3), dettatura (4), piano terapeutico (5), disegno dei punti sul cavallo.
+// Referto (passo 2, 08), foto/video (3, 09), dettatura della relazione (4, 10). Arrivano dopo: piano terapeutico (5), disegno dei punti sul cavallo.
 
 /* ===================== MODELLI ===================== */
 // campo: { k, e: etichetta, t: tipo, s: sezione, o: opzioni, max, ph, tab, attivo }
@@ -158,7 +158,7 @@ function vsFoglio(){
   return f;
 }
 function vsTesta(t, s){ document.getElementById("vs-titolo").textContent = t; document.getElementById("vs-sotto").textContent = s || ""; }
-function vsChiudi(){ vsSalvaSubito(); const f = document.getElementById("vs-foglio"); if(f) f.classList.remove("aperto"); document.body.classList.remove("vs-aperto"); }
+function vsChiudi(){ if(typeof vdReset === "function") vdReset(); vsSalvaSubito(); const f = document.getElementById("vs-foglio"); if(f) f.classList.remove("aperto"); document.body.classList.remove("vs-aperto"); }
 function vsIndietro(){
   if(VS.schermo === "referto") return vsMostraScheda();
   if(VS.schermo === "referto-fatto") return vsChiudi();
@@ -174,7 +174,7 @@ async function vsApriDaEvento(id){
   const e = (typeof agEventiCache !== "undefined" && agEventiCache[id]) || (hpAppuntamenti || []).find(x => x.id === id);
   if(!e) return showToast("Visita non trovata");
   try{ closeModal("modal-azioni-evento"); }catch(_){}
-  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset();
+  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset(); if(typeof vdReset === "function") vdReset();
   vsFoglio().classList.add("aperto"); document.body.classList.add("vs-aperto");
   document.getElementById("vs-corpo").innerHTML = '<div class="vs-vuoto">Carico la scheda…</div>';
   document.getElementById("vs-piede").innerHTML = "";
@@ -234,6 +234,7 @@ function vsMostraScheda(){
     ? '<button class="vs-btn" onclick="vsChiudi()">Chiudi</button><button class="vs-btn pri" onclick="vrApri()">Referto</button>'
     : '<button class="vs-btn" onclick="vrApri()">Referto</button><button class="vs-btn pri" onclick="vsConcludi()">Concludi la visita</button>';
   if(typeof vaCarica === "function") vaCarica();
+  if(typeof vdDopoScheda === "function") vdDopoScheda();   // «Detta» dalla Home: la dettatura parte appena c'è la scheda
 }
 function vsDisegnaCorpo(){
   const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
@@ -246,8 +247,8 @@ function vsDisegnaCorpo(){
     + (sola ? '<div class="vs-nota">Visita conclusa: la scheda è in sola lettura.</div>' : "")
     + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "")
     + sezioni.map(s => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map(c => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("")
-    + (typeof vaSezioneHtml === "function" ? vaSezioneHtml() : "")
-    + '<div class="vs-nota">La dettatura arriva nel prossimo aggiornamento.</div>';
+    + (typeof vdSezioneHtml === "function" ? vdSezioneHtml() : "")
+    + (typeof vaSezioneHtml === "function" ? vaSezioneHtml() : "");
 }
 function vsTab(k){ VS.tab = k; vsDisegnaCorpo(); document.getElementById("vs-corpo").scrollTop = 0; }
 
@@ -403,5 +404,5 @@ function vsDemoPrepara(){
     stato: "conclusa", data_visita: isoLocale(g), dati: { motivo: "Zoppia ASx", diagnosi: "Sospetto ascesso subsolare ASx", zop_as: 2 }, professione: "veterinario" });
 }
 
-export { vsSalvaSubito, vsTesta, vsNomeCavallo, vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
+export { vsRidisegna, vsSalvaSubito, vsTesta, vsNomeCavallo, vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB };

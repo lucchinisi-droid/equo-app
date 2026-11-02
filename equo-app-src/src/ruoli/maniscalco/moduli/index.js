@@ -51,6 +51,8 @@ import { apriDaFissare, agAggiornaSchede, agApplicaVistaAgenda, agDsApri, agDsSa
 import { annullaLasciaCavallo, apriLasciaCavallo, confermaLasciaCavallo, ripristinaCavallo } from "./107-lascia-cavallo.js";
 import { apriResoconto, resChi, resCondividi, resDate, resPeriodo, resScarica } from "./105-resoconto-pdf.js";
 import { lcCambio, lcOrdina, lcUrgenti } from "./118-lista-cavalli-scadenze.js";
+import { ferStatoAttuale } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
+import { ferDetta, ferDettaDaMenu, ferDettaApri, fdApplicaScheda, fdContesto, fdDescriviScheda, FD } from "./119-dettatura-ferratura.js";
 import { creaCavalloUnico, creaClienteUnico, onbScansionaCavallo, onbSollecita } from "./116-onboarding.js";
 import { avvisaNuovoSeCollegato, clientePaganteCavallo, prossimaAutomatica, segnaFatto } from "./117-segna-fatto.js";
 import { tcChiudi, tcImpostaLettura, tcLettura, tcNaviga, tcRiepilogo, tcSalvaCasaQui, tcSalvaMattina, tcScegliKm, tcTornaACasa } from "./114-torna-a-casa.js";
@@ -62,6 +64,7 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  ferDetta, ferDettaDaMenu, ferDettaApri, fdApplicaScheda, fdContesto, fdDescriviScheda, FD, ferStatoAttuale,
   cavalliQuiStanno,
   cavalliCartella,
   pagResiduo,

@@ -3446,7 +3446,7 @@
 		for (const t of tappe) {
 			const k = mlOggi() + "|" + t.l.key;
 			if (visti[k]) continue;
-			const c = t.l.clienteId ? clienteDiId(t.l.clienteId) : null;
+			const c = t.l.clienteId ? clienteDiId$1(t.l.clienteId) : null;
 			const p = t.l.indirizzo ? { indirizzo: t.l.indirizzo } : c ? await wgMeteoPos(c) : null;
 			if (!p) continue;
 			const d = await EquoMeteo.previsione(p, {
@@ -4746,7 +4746,7 @@
 		return `<div class="conti-aperti">
     <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
     ${lista.map((c) => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
-      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small>${pagHtmlConto(c)}</span>
+      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId$1(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small>${pagHtmlConto(c)}</span>
       <span class="e">${contoEuro(Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)))}<small>Apri</small></span></button>`).join("")}
   </div>`;
 	}
@@ -5069,7 +5069,7 @@
 			111,
 			103
 		];
-		const cli = clienteDiId(c.cliente_mascalcia_id);
+		const cli = clienteDiId$1(c.cliente_mascalcia_id);
 		const piede = () => {
 			doc.setDrawColor(227, 221, 204);
 			doc.line(M, 280, 192, 280);
@@ -5248,7 +5248,7 @@
 			return;
 		}
 		contoAperto = c;
-		const cli = clienteDiId(c.cliente_mascalcia_id);
+		const cli = clienteDiId$1(c.cliente_mascalcia_id);
 		const stato = c.stato === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : c.stato === "annullato" ? "<span class=\"badge\">Annullato</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
 		document.getElementById("conto-invio-titolo").textContent = "Conto " + contoCodice(c);
 		document.getElementById("conto-invio-corpo").innerHTML = `
@@ -5276,7 +5276,7 @@
 		document.getElementById("mchat-allegato").classList.add("active");
 	}
 	function contoNomeFile(c) {
-		const n = String(clienteDiId(c.cliente_mascalcia_id)?.nome || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+		const n = String(clienteDiId$1(c.cliente_mascalcia_id)?.nome || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
 		return [
 			"Equo",
 			"Conto",
@@ -5368,8 +5368,8 @@
 			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il conto.");
 			return;
 		}
-		if (!clienteDiId(clienteId)) await loadClientiMascalcia().catch(() => {});
-		const cli = clienteDiId(clienteId);
+		if (!clienteDiId$1(clienteId)) await loadClientiMascalcia().catch(() => {});
+		const cli = clienteDiId$1(clienteId);
 		contoCtx = {
 			clienteId,
 			scuderia: eLuogoScuderia(cli),
@@ -5455,7 +5455,7 @@
 		renderNuovoConto();
 	}
 	function contoNomeProprietario(i) {
-		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
+		return clienteDiId$1(i.cliente_mascalcia_id)?.nome || "Cliente";
 	}
 	function contoNomeCavallo(i) {
 		return agNomeCavalloTesto(i);
@@ -6240,7 +6240,7 @@
 				agLuoghi[l.key] = l;
 			}
 			gruppi.get(l.key).ev.push(x);
-			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "" : "";
+			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId$1(x.cliente_mascalcia_id)?.nome || "" : "";
 			gruppi.get(l.key).righe.push(riga(x, di));
 		};
 		agOrdinaGiro(d.ev).forEach((e) => metti(e, false, agRigaEvento));
@@ -6942,7 +6942,7 @@
 		});
 		return cavalliMieiCache;
 	}
-	function clienteDiId(id) {
+	function clienteDiId$1(id) {
 		return (clientiMascalcia || []).find((x) => x.id === id) || null;
 	}
 	function eLuogoScuderia(c) {
@@ -6952,10 +6952,10 @@
 		return c ? eLuogoScuderia(c) ? c.nome : "A casa · " + c.nome : "Cliente";
 	}
 	function luogoDi(r) {
-		const cli = clienteDiId(r?.cliente_mascalcia_id);
+		const cli = clienteDiId$1(r?.cliente_mascalcia_id);
 		const dal = r?.ubicazione_dal || null;
 		if (r?.ubicazione_tipo === "scuderia") {
-			const u = clienteDiId(r.ubicazione_cliente_id);
+			const u = clienteDiId$1(r.ubicazione_cliente_id);
 			return {
 				key: r.ubicazione_cliente_id ? "c:" + r.ubicazione_cliente_id : "n:" + (r.ubicazione_nome || ""),
 				nome: u?.nome || r.ubicazione_nome || "Scuderia",
@@ -6990,7 +6990,7 @@
 	}
 	function luogoEvento(e, attuale) {
 		if (!attuale && e.stato === "fatto" && e.luogo_nome) {
-			const lc = e.luogo_cliente_id ? clienteDiId(e.luogo_cliente_id) : null;
+			const lc = e.luogo_cliente_id ? clienteDiId$1(e.luogo_cliente_id) : null;
 			if (lc) return {
 				key: "c:" + lc.id,
 				nome: nomeLuogoCliente(lc),
@@ -7064,7 +7064,7 @@
 		}
 		await caricaUbicazioni();
 		const ub = cv.ub || { cliente_mascalcia_id: currentClienteId };
-		const att = luogoDi(ub), pagante = clienteDiId(ub.cliente_mascalcia_id || currentClienteId);
+		const att = luogoDi(ub), pagante = clienteDiId$1(ub.cliente_mascalcia_id || currentClienteId);
 		const scuderie = clientiAttivi().filter((c) => eLuogoScuderia(c)).sort((a, b) => a.nome.localeCompare(b.nome, "it")).map((c) => ({
 			v: "cli:" + c.id,
 			nome: c.nome,
@@ -7235,7 +7235,7 @@
 		const trovalo = c.vista === "maniscalco" && r.luogo !== "A casa" ? ` · lo trovi anche nella scheda di ${r.luogo}, sotto «Qui stanno»` : "";
 		showToast(`${c.nome}: ${r.luogo === "A casa" ? "a casa" : "ora sta a " + r.luogo}${r.arrivo ? " · la scuderia riceve la richiesta" : ""}${trovalo}`);
 		if (c.vista === "maniscalco") {
-			if (r.scuderia_cliente_id && !clienteDiId(r.scuderia_cliente_id)) await loadClientiMascalcia();
+			if (r.scuderia_cliente_id && !clienteDiId$1(r.scuderia_cliente_id)) await loadClientiMascalcia();
 			await caricaUbicazioni(true);
 			await caricaCavalliMiei();
 			if (typeof renderClientiList === "function") renderClientiList();
@@ -11428,6 +11428,9 @@
 	function ferStatoSistema() {
 		return ferStato ? ferStato.s : null;
 	}
+	function ferStatoAttuale() {
+		return ferStato;
+	}
 	function ferDettaglio(lato, v) {
 		const f = ferStato;
 		if (!f || !DETTAGLI_CORRETTIVO.includes(v)) return;
@@ -13111,7 +13114,7 @@
 	// equo-app-src/src/ruoli/maniscalco/moduli/104-cambia-proprietario.js
 	var cpCtx = null;
 	async function apriCambiaProprietario(daStruttura) {
-		const cli = clienteDiId(currentClienteId);
+		const cli = clienteDiId$1(currentClienteId);
 		if (!cli) return;
 		let cavalli;
 		if (daStruttura) {
@@ -13299,7 +13302,7 @@
 			closeModal("modal-cambia-proprietario");
 			await loadClientiMascalcia();
 			await caricaCavalliMiei().catch(() => {});
-			const nomeDest = clienteDiId(dest)?.nome || "nuovo proprietario";
+			const nomeDest = clienteDiId$1(dest)?.nome || "nuovo proprietario";
 			showToast(`${res.spostati === 1 ? "1 cavallo" : res.spostati + " cavalli"} intestati a «${nomeDest}»` + (res.lavori ? ` · ${res.lavori === 1 ? "1 lavoro da saldare passato" : res.lavori + " lavori da saldare passati"}` : ""));
 			cpCtx = null;
 			await openClienteDetail(c.daId);
@@ -14925,7 +14928,7 @@
 			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il resoconto.");
 			return;
 		}
-		const cli = clienteDiId(clienteId);
+		const cli = clienteDiId$1(clienteId);
 		if (!cli) return;
 		resCtx = {
 			clienteId,
@@ -14969,7 +14972,7 @@
 		return ["", ""];
 	}
 	function resProprietario(i) {
-		return clienteDiId(i.cliente_mascalcia_id)?.nome || "Cliente";
+		return clienteDiId$1(i.cliente_mascalcia_id)?.nome || "Cliente";
 	}
 	function resApplica() {
 		const c = resCtx;
@@ -15018,7 +15021,7 @@
 	}
 	function resNomeFile() {
 		const c = resCtx;
-		const chi = c.chi === "tutti" ? clienteDiId(c.clienteId)?.nome : clienteDiId(c.chi)?.nome;
+		const chi = c.chi === "tutti" ? clienteDiId$1(c.clienteId)?.nome : clienteDiId$1(c.chi)?.nome;
 		return [
 			"Equo",
 			"Resoconto",
@@ -15071,8 +15074,8 @@
 		doc.setFillColor(...oro);
 		doc.rect(0, 32, W, 1.5, "F");
 		let y = 48;
-		const luogo = clienteDiId(c.clienteId);
-		const solo = c.chi !== "tutti" ? clienteDiId(c.chi) : null;
+		const luogo = clienteDiId$1(c.clienteId);
+		const solo = c.chi !== "tutti" ? clienteDiId$1(c.chi) : null;
 		doc.setTextColor(...verde);
 		doc.setFont("helvetica", "bold");
 		doc.setFontSize(17);
@@ -15277,6 +15280,193 @@
 			showToast("Impossibile creare il PDF: " + (err?.message || err));
 		}
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/119-dettatura-ferratura.js
+	var FD = { intervento: null };
+	var fdNomeLavoro = (k) => LAVORO_CAV[k] ? LAVORO_CAV[k].t + " (" + LAVORO_CAV[k].s + ")" : "";
+	function fdContesto() {
+		const f = ferStatoAttuale();
+		if (!f) return "";
+		const misura = f.idx >= 0 ? "n. " + MISURE_FERRO[f.s][f.idx] + " " + (MISURA_SISTEMA_LABEL[f.s] || "") : "non impostata";
+		const tipo = (t, det) => t === "correttivo" ? "correttivo" + (det && det.length ? " (" + det.join(", ") + ")" : "") : "standard";
+		return [
+			"Cavallo: " + (f.cv?.nome || "—"),
+			"Lavoro: " + fdNomeLavoro(f.lavoro),
+			f.lavoro !== "pareggio" ? "Misura del ferro: " + misura + " (sistema " + f.s + ")" : "",
+			f.lavoro !== "pareggio" ? "Tipo di ferro" + (f.ftp ? " davanti" : "") + ": " + tipo(f.ft, f.det) : "",
+			f.lavoro !== "pareggio" && f.ftp ? "Tipo di ferro dietro: " + tipo(f.ftp, f.detp) : "",
+			"Intervallo: " + (f.int ? f.int + " giorni" : "non impostato (" + (f.intEff?.giorni || "—") + " giorni di base)"),
+			"Note della scheda: " + (document.getElementById("fer-note")?.value || "—"),
+			"Avviso di sicurezza: " + (document.getElementById("fer-avviso")?.value || "—"),
+			FD.intervento ? "Appuntamento di oggi: " + (FD.intervento.tipo_altro || FD.intervento.tipo_ferratura || "") + (FD.intervento.note ? " · nota già scritta: " + FD.intervento.note : "") : "Oggi non c'è un appuntamento per questo cavallo."
+		].filter(Boolean).join("\n");
+	}
+	function fdDescriviScheda(s) {
+		const p = [];
+		if (s.lavoro) p.push(LAVORO_CAV[s.lavoro]?.t || s.lavoro);
+		if (s.ferro_tipo) p.push((s.ferro_tipo_post ? "davanti " : "") + s.ferro_tipo + (s.dettagli?.length ? " (" + s.dettagli.join(", ") + ")" : ""));
+		else if (s.dettagli?.length) p.push("correttivo (" + s.dettagli.join(", ") + ")");
+		if (s.ferro_tipo_post) p.push("dietro " + s.ferro_tipo_post + (s.dettagli_post?.length ? " (" + s.dettagli_post.join(", ") + ")" : ""));
+		if (s.misura) p.push("misura " + s.misura);
+		if (s.intervallo_giorni) p.push("ogni " + s.intervallo_giorni + " giorni");
+		if (s.note) p.push("note: " + s.note);
+		if (s.avviso_sicurezza) p.push("avviso: " + s.avviso_sicurezza);
+		return p.join(" · ");
+	}
+	async function fdInterventoDiOggi(cv, evId) {
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		if (evId) {
+			const e = (hpAppuntamenti || []).find((x) => x.id === evId) || (typeof agEventiCache !== "undefined" ? agEventiCache[evId] : null);
+			if (e) return e;
+		}
+		try {
+			return (await DB.listInterventiCavallo(cv)).find((i) => i.data_intervento === oggi && !["annullato", "rifiutato"].includes(i.stato)) || null;
+		} catch (_) {
+			return null;
+		}
+	}
+	async function ferDetta(evId) {
+		const f = ferStatoAttuale();
+		if (!f) return;
+		FD.intervento = await fdInterventoDiOggi(f.cv, evId);
+		const clienteId = FD.intervento?.cliente_mascalcia_id || f.cv?.cliente_mascalcia_id || f.clienteId;
+		const cliente = typeof clienteDiId === "function" ? clienteDiId(clienteId) : null;
+		const collegato = clienteId && clienteCollegatoEquo(clienteId);
+		apriDettatura({
+			tipo: "ferratura",
+			agente: "Hammer",
+			titolo: "Detta a Hammer",
+			sotto: (f.cv?.nome || "Cavallo") + " · " + fdNomeLavoro(f.lavoro),
+			aiuto: "Racconta il lavoro di oggi: cosa hai fatto, cosa hai visto, cosa cambia nella ferratura e cosa deve fare il proprietario.",
+			segnaposto: "Es. ferrato completo, misura 2; anteriore sinistro tallone basso, messo il pad; da ora ogni cinque settimane. Il proprietario tenga il box asciutto.",
+			contesto: fdContesto,
+			tastoConferma: "Conferma",
+			proposte: (r) => {
+				const desc = fdDescriviScheda(r.scheda || {});
+				return [
+					desc ? {
+						k: "scheda",
+						titolo: "Cambi della scheda ferratura",
+						testo: desc,
+						on: true,
+						nota: "Si applicano alla scheda aperta: poi tocca «Salva»."
+					} : null,
+					r.nota_lavoro ? {
+						k: "nota",
+						titolo: "Nota del lavoro",
+						testo: r.nota_lavoro,
+						modificabile: true,
+						on: !!FD.intervento,
+						disabilitata: !FD.intervento,
+						nota: FD.intervento ? "Va nell'appuntamento di oggi e resta nello storico del cavallo." : "Oggi non c'è un appuntamento per questo cavallo: segna prima il lavoro, poi detta di nuovo."
+					} : null,
+					r.per_proprietario ? {
+						k: "msg",
+						titolo: "Messaggio a " + (cliente?.nome || "il proprietario"),
+						testo: r.per_proprietario,
+						modificabile: true,
+						on: false,
+						disabilitata: !collegato,
+						nota: collegato ? "Arriva in chat solo se metti la spunta." : "Il proprietario non usa Equo: copia il testo se vuoi mandarglielo."
+					} : null
+				].filter(Boolean);
+			},
+			conferma: async (scelte, r) => {
+				const fatto = [];
+				for (const x of scelte) {
+					if (x.k === "scheda" && fdApplicaScheda(r.scheda || {})) fatto.push("scheda da salvare");
+					if (x.k === "nota" && FD.intervento) {
+						const i = FD.intervento, note = (i.note ? String(i.note).trim() + "\n" : "") + String(x.testo).trim();
+						const { error } = await DB.updateInterventoMascalcia(i.id, { note });
+						if (error) throw new Error("nota del lavoro non salvata");
+						i.note = note;
+						[hpAppuntamenti || [], typeof agEventiCache !== "undefined" ? Object.values(agEventiCache || {}) : []].forEach((l) => l.forEach((e) => {
+							if (e.id === i.id) e.note = note;
+						}));
+						fatto.push("nota del lavoro");
+					}
+					if (x.k === "msg" && collegato) {
+						const { error } = await DB.insertMessaggioMascalcia({
+							cliente_mascalcia_id: clienteId,
+							tipo: "testo",
+							testo: String(x.testo).trim()
+						});
+						if (error) throw new Error("messaggio non inviato");
+						fatto.push("messaggio in chat");
+					}
+				}
+				showToast(fatto.includes("scheda da salvare") ? "Scheda aggiornata: controlla e tocca «Salva»" : fatto.length ? "Fatto: " + fatto.join(", ") : "Niente da inserire");
+			},
+			demo: (dettato) => ({
+				nota_lavoro: dettato,
+				scheda: {},
+				per_proprietario: "",
+				da_controllare: "In prova Hammer non risponde: il dettato è riportato così com'è."
+			})
+		});
+	}
+	function fdApplicaScheda(s) {
+		const f = ferStatoAttuale();
+		if (!f) return false;
+		if (s.lavoro && LAVORO_CAV[s.lavoro]) f.lavoro = s.lavoro;
+		if (s.ferro_tipo) f.ft = s.ferro_tipo;
+		if (s.ferro_tipo_post) f.ftp = s.ferro_tipo_post;
+		if (s.dettagli?.length) {
+			if (!s.ferro_tipo) f.ft = "correttivo";
+			f.det = DETTAGLI_CORRETTIVO.filter((d) => s.dettagli.includes(d));
+		}
+		if (s.dettagli_post?.length) {
+			if (!s.ferro_tipo_post) f.ftp = "correttivo";
+			f.detp = DETTAGLI_CORRETTIVO.filter((d) => s.dettagli_post.includes(d));
+		}
+		if (s.misura) {
+			const n = misuraNorm(s.misura), idx = (MISURE_FERRO[f.s] || []).indexOf(n);
+			if (idx >= 0) f.idx = idx;
+			else showToast("Misura «" + s.misura + "» non trovata nella " + (MISURA_SISTEMA_LABEL[f.s] || "misura scelta") + ": impostala a mano");
+		}
+		if (s.intervallo_giorni) f.int = Math.max(7, Math.min(180, Number(s.intervallo_giorni)));
+		const note = document.getElementById("fer-note");
+		if (s.note && note) note.value = (note.value.trim() ? note.value.trim() + " · " : "") + s.note;
+		if (note) note.value = note.value.slice(0, 160);
+		const avv = document.getElementById("fer-avviso");
+		if (s.avviso_sicurezza && avv) avv.value = s.avviso_sicurezza.slice(0, 160);
+		ferRender();
+		return true;
+	}
+	function ferDettaDaMenu() {
+		dtScegliDiOggi({
+			titolo: "Detta a Hammer",
+			sotto: "Di quale cavallo?",
+			cerca: true,
+			vuoto: "Oggi non hai appuntamenti con cavalli: cerca il cavallo qui sopra.",
+			onScelta: ({ e, cv }) => ferDettaApri(e || null, cv || null)
+		});
+	}
+	function ferDettaApri(e, cv) {
+		if (e && !cv) cv = cavalliCartella().find((x) => e.cavallo_cliente_id && x.id === e.cavallo_cliente_id || e.horse_id && x.horse_id === e.horse_id) || null;
+		if (!cv) return showToast("Cavallo non trovato nelle tue cartelle");
+		apriSchedaFerratura(cv, cv.cliente_mascalcia_id || e?.cliente_mascalcia_id || null, null);
+		ferDetta(e ? e.id : null);
+	}
+	function fdRegistraPiu() {
+		try {
+			estendiDopo("plCostruisciMenu", fdVoceDetta);
+		} catch (err) {
+			console.error("detta nel +:", err);
+		}
+	}
+	function fdVoceDetta() {
+		const m = document.getElementById("hm-menu-piu");
+		if (!m || typeof plRuolo !== "function") return;
+		const r = plRuolo();
+		if (r !== "man" && r !== "vet") return;
+		const griglia = m.querySelector(".pl-tg");
+		if (!griglia || griglia.querySelector(".pl-detta")) return;
+		const html = plTile("<svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"9\" y=\"2\" width=\"6\" height=\"12\" rx=\"3\"/><path d=\"M5 10a7 7 0 0 0 14 0M12 17v5\"/></svg>", "Detta", r === "man" ? "ferDettaDaMenu()" : "vhDetta()", r === "man" ? 1 : 0, "pl-detta");
+		if (r === "vet" && griglia.firstElementChild) griglia.firstElementChild.insertAdjacentHTML("afterend", html);
+		else griglia.insertAdjacentHTML("beforeend", html);
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fdRegistraPiu, { once: true });
+	else fdRegistraPiu();
 	// equo-app-src/src/ruoli/maniscalco/moduli/101-importazione-vecchia-app.js
 	var impScelte = [];
 	var impDate = [];
@@ -15419,6 +15609,14 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		ferDetta,
+		ferDettaDaMenu,
+		ferDettaApri,
+		fdApplicaScheda,
+		fdContesto,
+		fdDescriviScheda,
+		FD,
+		ferStatoAttuale,
 		cavalliQuiStanno,
 		cavalliCartella,
 		pagResiduo,
@@ -15535,7 +15733,7 @@
 		chiediSiNo,
 		chiudiEditorFerro,
 		chiudiSchedaCavalloPro,
-		clienteDiId,
+		clienteDiId: clienteDiId$1,
 		clientiAttivi,
 		closeClienteDetail,
 		closeFarrierChatThread,

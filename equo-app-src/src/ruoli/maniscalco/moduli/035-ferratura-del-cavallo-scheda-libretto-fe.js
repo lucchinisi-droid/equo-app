@@ -114,6 +114,8 @@ function ferIntervallo(d){
 function ferIntervalloImposta(v){ const f = ferStato; if(!f) return; f.int = v; ferRender(); }
 const TESTO_MISURA = { italiana: "misura italiana", olandese: "misura olandese / internazionale", tedesca: "misura tedesca" };
 function ferStatoSistema(){ return ferStato ? ferStato.s : null; }
+// scheda aperta, per «Detta a Hammer» (119-dettatura-ferratura.js, 2/11/2026)
+function ferStatoAttuale(){ return ferStato; }
 function ferDettaglio(lato, v){
   const f = ferStato; if(!f || !DETTAGLI_CORRETTIVO.includes(v)) return;
   const l = f[lato] || [];
@@ -273,4 +275,4 @@ function closeClienteDetail(){
 }
 
 
-export { syncNomeCavalloCliente, DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };
+export { syncNomeCavalloCliente, DETTAGLI_CORRETTIVO, LAVORO_CAV, ferDettaglio, ferRender, ferStatoAttuale, ferIntervallo, ferIntervalloImposta, ferStatoSistema, impostaMisuraPredefinita, testoDettagliFerro, apriSchedaFerratura, closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferLavoro, ferMisura, ferSistema, ferTipo, lavoroCav, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento, tipoDaScheda };

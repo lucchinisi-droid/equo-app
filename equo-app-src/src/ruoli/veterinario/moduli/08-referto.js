@@ -2,7 +2,10 @@
 // Dalla scheda della visita: anteprima («Referto pronto»), chi lo riceve, «Scorri per firmare e inviare».
 // Il PDF va nello spazio PRIVATO «documenti» (SQL 32): in chat arriva come «equo-doc:<id>» e si apre solo con un link temporaneo,
 // per chi ha l'accesso (claude/Equo_Privacy_documenti.md). «Condividi» manda il file fuori da Equo (WhatsApp, email): scelta del veterinario.
-// Arrivano dopo: riassunto scritto da Galeno (dettatura), maniscalco come destinatario, piano terapeutico.
+// 2/11/2026 (passo 4): il referto è come un esame vero: prima i DATI della scheda, poi la PARTE SCRITTA
+//   «Relazione del veterinario» (relazione dettata + diagnosi/conclusioni) e «Terapia e indicazioni» (terapia dettata + campi
+//   terapia, cosa fare, ricontrollo, REV, DPA, sospensione): questi campi escono dai dati per non comparire due volte.
+// Arrivano dopo: maniscalco come destinatario, piano terapeutico.
 
 import { VS, vsSalvaSubito, vsTesta, vsNomeCavallo, vsMostraScheda, vsChiudi } from "./07-scheda-visita.js";
 import { VA } from "./09-allegati.js";
@@ -18,10 +21,14 @@ function vrValore(c, v){
   if(c.t === "data") { const [y, m, d] = String(v).split("-"); return d ? `${d}/${m}/${y}` : String(v); }
   return String(v);
 }
+// campi che nel referto vanno nella parte scritta (sezioni 3 e 4) e non nei dati
+const VR_REL = ["diagnosi", "conclusioni"];
+const VR_TER = ["terapia", "cosa_fare", "ricontrollo", "rev", "dpa", "sospensione"];
 function vrSezioni(){
   const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
   const out = [];
   (VS.campi || []).forEach(c => {
+    if(VR_REL.includes(c.k) || VR_TER.includes(c.k)) return;
     const val = vrValore(c, d[c.k]); if(val == null) return;
     const nomeSez = mtc ? ({ mtc: "Valutazione MTC", fisio: "Fisioterapia", tratt: "Trattamento" }[c.tab] + " · " + c.s) : (c.s || "Visita");
     let s = out.find(x => x.n === nomeSez); if(!s){ s = { n: nomeSez, r: [] }; out.push(s); }
@@ -29,6 +36,13 @@ function vrSezioni(){
   });
   return out;
 }
+// parte scritta: { relazione, rel: [[campo, valore]], indicazioni, ter: [[campo, valore]] }
+function vrParteScritta(){
+  const d = VS.visita?.dati || {}, campi = VS.campi || [];
+  const righe = chiavi => chiavi.map(k => { const c = campi.find(x => x.k === k); const val = c ? vrValore(c, d[k]) : null; return val == null ? null : [c.e, val]; }).filter(Boolean);
+  return { relazione: String(d.relazione || "").trim(), rel: righe(VR_REL), indicazioni: String(d.indicazioni || "").trim(), ter: righe(VR_TER) };
+}
+const vrScrittaVuota = p => !p.relazione && !p.rel.length && !p.indicazioni && !p.ter.length;
 function vrCavallo(){
   const e = VS.e;
   const cv = (typeof cavalliCartella === "function" ? cavalliCartella() : []).find(x => x.id === e.cavallo_cliente_id) || {};
@@ -58,16 +72,23 @@ async function vrApri(){
   await vsSalvaSubito();
   if(!VS.visita?.id) return showToast("Scrivi prima qualcosa nella scheda");
   VS.schermo = "referto";
-  const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {};
-  if(!sez.length) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
+  const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {}, ps = vrParteScritta();
+  if(!sez.length && vrScrittaVuota(ps)) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
   VR.dest = vrDestinatari(); VR.alleg = new Set([...VR.alleg].filter(id => VA.lista.some(a => a.id === id)));
   vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
   const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
   document.getElementById("vs-corpo").innerHTML = `
-    <div class="vs-galeno">Ho preparato il referto con i dati della scheda. <b>Rileggilo:</b> lo mandi tu, nessuno lo vede prima.</div>${gia}
+    <div class="vs-galeno">Ho preparato il referto con i dati della scheda${ps.relazione ? " e la tua relazione" : ""}. <b>Rileggilo:</b> lo mandi tu, nessuno lo vede prima.</div>${gia}
     <div class="vr-foglio">
       <div class="vr-testa"><b>Referto · ${vrEsc(cav.nome)}</b><span>${new Date((VS.visita.data_visita || isoLocale(new Date())) + "T12:00").toLocaleDateString("it-IT")} · PDF</span></div>
       ${sez.map(s => `<div class="vr-sez"><h4>${vrEsc(s.n)}</h4>${s.r.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>`).join("")}
+      <div class="vr-sez vr-scritta"><h4>Relazione del veterinario</h4>
+        <textarea id="vr-relazione" rows="${Math.min(12, Math.max(3, Math.ceil(ps.relazione.length / 45)))}" placeholder="Scrivila qui o dettala" oninput="vsCambia('relazione', this.value)">${vrEsc(ps.relazione)}</textarea>
+        ${ps.rel.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>
+      <div class="vr-sez vr-scritta"><h4>Terapia e indicazioni</h4>
+        <textarea id="vr-indicazioni" rows="${Math.min(10, Math.max(2, Math.ceil(ps.indicazioni.length / 45)))}" placeholder="Farmaci, dosi, durata, cosa fare a casa" oninput="vsCambia('indicazioni', this.value)">${vrEsc(ps.indicazioni)}</textarea>
+        ${ps.ter.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>
+      <button type="button" class="vd-detta piccolo" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
     </div>
     ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map(a => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
     <div class="vs-h">Chi lo riceve</div>
@@ -136,6 +157,23 @@ async function vrCreaPdf(){
     });
     y += 3;
   });
+  // parte scritta: relazione e terapia in prosa, a tutta larghezza, poi i campi che le completano
+  const ps = vrParteScritta();
+  const titoloSez = t => { if(y > 255) nuovaPagina(); doc.setFillColor(...chiaro); doc.rect(M, y - 5, W - M * 2, 8, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...notte); doc.text(t, M + 3, y); y += 8; };
+  const paragrafi = t => String(t || "").split(/\n+/).map(x => x.trim()).filter(Boolean).forEach(par => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...testo);
+    doc.splitTextToSize(par, W - M * 2 - 6).forEach(r => { if(y > 272) nuovaPagina(); doc.text(r, M + 3, y); y += 5.4; });
+    y += 2;
+  });
+  const righeCampi = l => l.forEach(([k, v]) => {
+    const righe = doc.splitTextToSize(String(v), W - M * 2 - 60), h = Math.max(6.2, righe.length * 5 + 1.6);
+    if(y + h > 272) nuovaPagina();
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...grigio); doc.text(doc.splitTextToSize(k, 54), M + 3, y);
+    doc.setFont("helvetica", "normal"); doc.setTextColor(...testo); doc.text(righe, M + 60, y); y += h;
+  });
+  if(ps.relazione || ps.rel.length){ titoloSez("RELAZIONE DEL VETERINARIO"); paragrafi(ps.relazione); righeCampi(ps.rel); y += 3; }
+  if(ps.indicazioni || ps.ter.length){ titoloSez("TERAPIA E INDICAZIONI"); paragrafi(ps.indicazioni); righeCampi(ps.ter); y += 3; }
   const alleg = VA.lista.filter(a => VR.alleg.has(a.id));
   if(alleg.length){
     if(y > 245) nuovaPagina();
@@ -216,4 +254,4 @@ function vrFatto(inviati, avvisi){
   document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + '<button class="vs-btn pri" onclick="vsChiudi()">Chiudi</button>';
 }
 
-export { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrDestinatari, VR };
+export { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR };

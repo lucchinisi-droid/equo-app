@@ -335,3 +335,29 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .va-chi-r small{font-size:12px;color:var(--vt-testo2)}
 :where(body.pl-vet) .va-altri{margin-top:6px}
 :where(body.pl-vet) .va-altri summary{font-weight:700;color:var(--vt-notte);cursor:pointer;font-size:13.5px;padding:6px 0}
+
+/* DETTATURA del veterinario (2/11/2026): «Relazione per il referto», «Detta», pannello comune nei colori del mockup C */
+.vd-detta{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 12px;margin:2px 0 12px;border-radius:14px;border:1.5px solid var(--vt-tif);background:var(--vt-tif-chiaro);color:var(--vt-testo);font:inherit;cursor:pointer}
+.vd-detta .c{width:40px;height:40px;border-radius:50%;background:var(--vt-notte);color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vd-detta svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vd-detta b{display:block;font-size:15px;color:var(--vt-notte)}.vd-detta small{color:var(--vt-testo2);font-size:12.5px}
+.vd-detta.piccolo{margin-top:10px}
+.vr-scritta textarea{width:100%;box-sizing:border-box;border:1px solid var(--vt-bordo);border-radius:10px;background:var(--vt-fondo);color:var(--vt-testo);font:inherit;font-size:15px;line-height:1.5;padding:9px 10px;resize:vertical;margin:2px 0 6px}
+.vr-scritta textarea:focus{outline:2px solid var(--vt-tif);border-color:var(--vt-tif)}
+:where(body.pl-vet) .dt-box{background:var(--vt-fondo);color:var(--vt-testo)}
+:where(body.pl-vet) .dt-testa,:where(body.pl-vet) .dt-piede{border-color:var(--vt-bordo)}
+:where(body.pl-vet) .dt-tt b{color:var(--vt-notte)}
+:where(body.pl-vet) .dt-tt small,:where(body.pl-vet) .dt-nota,:where(body.pl-vet) .dt-stato,:where(body.pl-vet) .dt-prop-n,:where(body.pl-vet) .dt-h,:where(body.pl-vet) .dt-scelta .c small,:where(body.pl-vet) .dt-scelta .fr{color:var(--vt-testo2)}
+:where(body.pl-vet) .dt-x,:where(body.pl-vet) .dt-btn{background:var(--vt-sup);color:var(--vt-notte);border-color:var(--vt-notte)}
+:where(body.pl-vet) .dt-x{border-color:var(--vt-bordo)}
+:where(body.pl-vet) .dt-btn.pri{background:var(--vt-tif);border-color:var(--vt-tif);color:#12233F}
+:where(body.pl-vet) .dt-testo,:where(body.pl-vet) .dt-prop-x,:where(body.pl-vet) .dt-cerca{background:var(--vt-fondo);color:var(--vt-testo);border-color:var(--vt-bordo)}
+:where(body.pl-vet) .dt-testo:focus,:where(body.pl-vet) .dt-prop-x:focus,:where(body.pl-vet) .dt-cerca:focus{outline:2px solid var(--vt-tif);border-color:var(--vt-tif)}
+:where(body.pl-vet) .dt-mic{background:var(--vt-notte);color:#FFFFFF}
+:where(body.pl-vet) .dt-mic.on{background:var(--vt-urg);color:#FFFFFF}
+:where(body.pl-vet) .dt-prop,:where(body.pl-vet) .dt-scelta{background:var(--vt-sup);border-color:var(--vt-bordo);color:var(--vt-testo)}
+:where(body.pl-vet) .dt-prop.on{border-color:var(--vt-tif)}
+:where(body.pl-vet) .dt-prop-t input{accent-color:var(--vt-tif-scuro)}
+:where(body.pl-vet) .dt-avviso{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
+:where(body.pl-vet) .dt-errore{background:var(--vt-urg-chiaro);color:var(--vt-urg)}
+:where(body.pl-vet) .dt-aiuto{color:var(--vt-testo)}

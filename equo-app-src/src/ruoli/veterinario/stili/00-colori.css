@@ -83,6 +83,9 @@
 :where(body.pl-vet) .ric-ruota-box::after{color:var(--muted,#677086)}
 /* core/stili/base-22-ai-chat.css */
 :where(body.pl-vet) .chat-bubble.user{color:#1A2236}
+:where(body.pl-vet) .dt-btn.pri{color:#1A2236}
+:where(body.pl-vet) .dt-mic{color:#1A2236}
+:where(body.pl-vet) .fer-detta .c{color:#1A2236}
 /* core/stili/base-26-legale-privacy-cookie-termini-riusa-il-l.css */
 :where(body.pl-vet) .legal-tab.active{color:#1A2236}
 /* core/stili/base-27-cookie-banner.css */

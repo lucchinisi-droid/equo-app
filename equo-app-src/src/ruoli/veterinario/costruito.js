@@ -160,6 +160,7 @@
 		if (typeof tornaSettimanaCorrente === "function") tornaSettimanaCorrente();
 	}
 	function vhDetta() {
+		if (typeof vdDaHome === "function") return vdDaHome();
 		openAiSheet();
 	}
 	function vhMeteo() {
@@ -1420,6 +1421,7 @@
 		document.getElementById("vs-sotto").textContent = s || "";
 	}
 	function vsChiudi() {
+		if (typeof vdReset === "function") vdReset();
 		vsSalvaSubito();
 		const f = document.getElementById("vs-foglio");
 		if (f) f.classList.remove("aperto");
@@ -1450,6 +1452,7 @@
 		VS.precedenti = [];
 		vsDemoPrepara();
 		if (typeof vaReset === "function") vaReset();
+		if (typeof vdReset === "function") vdReset();
 		vsFoglio().classList.add("aperto");
 		document.body.classList.add("vs-aperto");
 		document.getElementById("vs-corpo").innerHTML = "<div class=\"vs-vuoto\">Carico la scheda…</div>";
@@ -1524,6 +1527,7 @@
 		vsDisegnaCorpo();
 		document.getElementById("vs-piede").innerHTML = v.stato === "conclusa" ? "<button class=\"vs-btn\" onclick=\"vsChiudi()\">Chiudi</button><button class=\"vs-btn pri\" onclick=\"vrApri()\">Referto</button>" : "<button class=\"vs-btn\" onclick=\"vrApri()\">Referto</button><button class=\"vs-btn pri\" onclick=\"vsConcludi()\">Concludi la visita</button>";
 		if (typeof vaCarica === "function") vaCarica();
+		if (typeof vdDopoScheda === "function") vdDopoScheda();
 	}
 	function vsDisegnaCorpo() {
 		const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
@@ -1542,7 +1546,7 @@
 		});
 		const tabs = mtc ? `<div class="vs-tabs" role="tablist">${TAB_MTC.map(([k, t]) => `<button role="tab" aria-selected="${VS.tab === k}" class="${VS.tab === k ? "on" : ""}" onclick="vsTab('${k}')">${t}</button>`).join("")}</div>` : "";
 		const sola = v.stato === "conclusa";
-		document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs + (sola ? "<div class=\"vs-nota\">Visita conclusa: la scheda è in sola lettura.</div>" : "") + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "") + sezioni.map((s) => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map((c) => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("") + (typeof vaSezioneHtml === "function" ? vaSezioneHtml() : "") + "<div class=\"vs-nota\">La dettatura arriva nel prossimo aggiornamento.</div>";
+		document.getElementById("vs-corpo").innerHTML = vsPrecedentiHtml() + tabs + (sola ? "<div class=\"vs-nota\">Visita conclusa: la scheda è in sola lettura.</div>" : "") + (d._referto ? `<div class="vs-nota">Referto inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vsEsc(d._referto.a.join(", ")) : ""}.</div>` : "") + sezioni.map((s) => `<section class="vs-sez"><h3>${vsEsc(s.n)}</h3><div class="vs-griglia">${s.c.map((c) => vsCampoHtml(c, d[c.k], sola)).join("")}</div></section>`).join("") + (typeof vdSezioneHtml === "function" ? vdSezioneHtml() : "") + (typeof vaSezioneHtml === "function" ? vaSezioneHtml() : "");
 	}
 	function vsTab(k) {
 		VS.tab = k;
@@ -2163,10 +2167,20 @@
 		}
 		return String(v);
 	}
+	var VR_REL = ["diagnosi", "conclusioni"];
+	var VR_TER = [
+		"terapia",
+		"cosa_fare",
+		"ricontrollo",
+		"rev",
+		"dpa",
+		"sospensione"
+	];
 	function vrSezioni() {
 		const v = VS.visita, d = v.dati || {}, mtc = v.modello === "mtc";
 		const out = [];
 		(VS.campi || []).forEach((c) => {
+			if (VR_REL.includes(c.k) || VR_TER.includes(c.k)) return;
 			const val = vrValore(c, d[c.k]);
 			if (val == null) return;
 			const nomeSez = mtc ? {
@@ -2186,6 +2200,21 @@
 		});
 		return out;
 	}
+	function vrParteScritta() {
+		const d = VS.visita?.dati || {}, campi = VS.campi || [];
+		const righe = (chiavi) => chiavi.map((k) => {
+			const c = campi.find((x) => x.k === k);
+			const val = c ? vrValore(c, d[k]) : null;
+			return val == null ? null : [c.e, val];
+		}).filter(Boolean);
+		return {
+			relazione: String(d.relazione || "").trim(),
+			rel: righe(VR_REL),
+			indicazioni: String(d.indicazioni || "").trim(),
+			ter: righe(VR_TER)
+		};
+	}
+	var vrScrittaVuota = (p) => !p.relazione && !p.rel.length && !p.indicazioni && !p.ter.length;
 	function vrCavallo() {
 		const e = VS.e;
 		const cv = (typeof cavalliCartella === "function" ? cavalliCartella() : []).find((x) => x.id === e.cavallo_cliente_id) || {};
@@ -2232,21 +2261,28 @@
 		dest: [],
 		alleg: /* @__PURE__ */ new Set()
 	};
-	async function vrApri() {
+	async function vrApri$1() {
 		await vsSalvaSubito();
 		if (!VS.visita?.id) return showToast("Scrivi prima qualcosa nella scheda");
 		VS.schermo = "referto";
-		const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {};
-		if (!sez.length) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
+		const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {}, ps = vrParteScritta();
+		if (!sez.length && vrScrittaVuota(ps)) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
 		VR.dest = vrDestinatari$1();
 		VR.alleg = new Set([...VR.alleg].filter((id) => VA.lista.some((a) => a.id === id)));
 		vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
 		const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
 		document.getElementById("vs-corpo").innerHTML = `
-    <div class="vs-galeno">Ho preparato il referto con i dati della scheda. <b>Rileggilo:</b> lo mandi tu, nessuno lo vede prima.</div>${gia}
+    <div class="vs-galeno">Ho preparato il referto con i dati della scheda${ps.relazione ? " e la tua relazione" : ""}. <b>Rileggilo:</b> lo mandi tu, nessuno lo vede prima.</div>${gia}
     <div class="vr-foglio">
       <div class="vr-testa"><b>Referto · ${vrEsc(cav.nome)}</b><span>${(/* @__PURE__ */ new Date((VS.visita.data_visita || isoLocale(/* @__PURE__ */ new Date())) + "T12:00")).toLocaleDateString("it-IT")} · PDF</span></div>
       ${sez.map((s) => `<div class="vr-sez"><h4>${vrEsc(s.n)}</h4>${s.r.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>`).join("")}
+      <div class="vr-sez vr-scritta"><h4>Relazione del veterinario</h4>
+        <textarea id="vr-relazione" rows="${Math.min(12, Math.max(3, Math.ceil(ps.relazione.length / 45)))}" placeholder="Scrivila qui o dettala" oninput="vsCambia('relazione', this.value)">${vrEsc(ps.relazione)}</textarea>
+        ${ps.rel.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>
+      <div class="vr-sez vr-scritta"><h4>Terapia e indicazioni</h4>
+        <textarea id="vr-indicazioni" rows="${Math.min(10, Math.max(2, Math.ceil(ps.indicazioni.length / 45)))}" placeholder="Farmaci, dosi, durata, cosa fare a casa" oninput="vsCambia('indicazioni', this.value)">${vrEsc(ps.indicazioni)}</textarea>
+        ${ps.ter.map(([k, v]) => `<div class="vr-r"><span>${vrEsc(k)}</span><b>${vrEsc(v)}</b></div>`).join("")}</div>
+      <button type="button" class="vd-detta piccolo" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
     </div>
     ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map((a) => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
     <div class="vs-h">Chi lo riceve</div>
@@ -2401,6 +2437,52 @@
 			});
 			y += 3;
 		});
+		const ps = vrParteScritta();
+		const titoloSez = (t) => {
+			if (y > 255) nuovaPagina();
+			doc.setFillColor(...chiaro);
+			doc.rect(M, y - 5, 174, 8, "F");
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...notte);
+			doc.text(t, 21, y);
+			y += 8;
+		};
+		const paragrafi = (t) => String(t || "").split(/\n+/).map((x) => x.trim()).filter(Boolean).forEach((par) => {
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...testo);
+			doc.splitTextToSize(par, 168).forEach((r) => {
+				if (y > 272) nuovaPagina();
+				doc.text(r, 21, y);
+				y += 5.4;
+			});
+			y += 2;
+		});
+		const righeCampi = (l) => l.forEach(([k, v]) => {
+			const righe = doc.splitTextToSize(String(v), 114), h = Math.max(6.2, righe.length * 5 + 1.6);
+			if (y + h > 272) nuovaPagina();
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(10);
+			doc.setTextColor(...grigio);
+			doc.text(doc.splitTextToSize(k, 54), 21, y);
+			doc.setFont("helvetica", "normal");
+			doc.setTextColor(...testo);
+			doc.text(righe, 78, y);
+			y += h;
+		});
+		if (ps.relazione || ps.rel.length) {
+			titoloSez("RELAZIONE DEL VETERINARIO");
+			paragrafi(ps.relazione);
+			righeCampi(ps.rel);
+			y += 3;
+		}
+		if (ps.indicazioni || ps.ter.length) {
+			titoloSez("TERAPIA E INDICAZIONI");
+			paragrafi(ps.indicazioni);
+			righeCampi(ps.ter);
+			y += 3;
+		}
 		const alleg = VA.lista.filter((a) => VR.alleg.has(a.id));
 		if (alleg.length) {
 			if (y > 245) nuovaPagina();
@@ -2574,6 +2656,118 @@
     ${avvisi.length ? `<div class="vs-nota">${avvisi.map(vrEsc).join("<br>")}</div>` : ""}`;
 		document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + "<button class=\"vs-btn pri\" onclick=\"vsChiudi()\">Chiudi</button>";
 	}
+	// equo-app-src/src/ruoli/veterinario/moduli/10-dettatura.js
+	var vdEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var VD = { attesa: false };
+	function vdSezioneHtml$1() {
+		const v = VS.visita;
+		if (!v) return "";
+		const d = v.dati || {}, dis = "";
+		return `<section class="vs-sez vd-sez" id="vd-box"><h3>Relazione per il referto</h3>
+    <div class="vs-nota">La parte scritta del referto: cosa hai visto, cosa significa e cosa fare. Dettala: Galeno la sistema e tu la confermi.</div>
+    <button type="button" class="vd-detta" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
+    <div class="vs-griglia">
+      <div class="vs-campo pieno"><label for="vs-f-relazione">Relazione del veterinario</label><textarea id="vs-f-relazione" rows="4" placeholder="Si rileva…"${dis} oninput="vsCambia('relazione', this.value)">${vdEsc(d.relazione || "")}</textarea></div>
+      <div class="vs-campo pieno"><label for="vs-f-indicazioni">Terapia e indicazioni</label><textarea id="vs-f-indicazioni" rows="3" placeholder="Farmaci, dosi, durata, cosa fare a casa, ricontrollo"${dis} oninput="vsCambia('indicazioni', this.value)">${vdEsc(d.indicazioni || "")}</textarea></div>
+    </div></section>`;
+	}
+	function vdContesto() {
+		const v = VS.visita || {};
+		const righe = [`Visita: ${v.modello_nome || "Visita"} · cavallo ${vsNomeCavallo(VS.e) || "—"} · data ${v.data_visita || ""}`];
+		try {
+			vrSezioni().forEach((s) => s.r.forEach(([k, val]) => righe.push(`${s.n} · ${k}: ${val}`)));
+		} catch (_) {}
+		const d = v.dati || {};
+		[
+			"diagnosi",
+			"conclusioni",
+			"terapia",
+			"cosa_fare"
+		].forEach((k) => {
+			if (d[k] && !righe.some((r) => r.endsWith(": " + d[k]))) righe.push(k + ": " + d[k]);
+		});
+		if (d.relazione) righe.push("Relazione già scritta: " + d.relazione);
+		if (d.indicazioni) righe.push("Terapia e indicazioni già scritte: " + d.indicazioni);
+		return righe.join("\n");
+	}
+	function vdDetta() {
+		const v = VS.visita;
+		if (!v) return;
+		apriDettatura({
+			tipo: "referto",
+			agente: "Galeno",
+			titolo: "Detta la relazione",
+			sotto: (vsNomeCavallo(VS.e) || "Visita") + " · " + (v.modello_nome || ""),
+			aiuto: "Racconta la visita come la spiegheresti al proprietario: cosa hai visto, cosa significa, cosa fare. I dati già nella scheda non serve ripeterli.",
+			segnaposto: "Es. zoppia 2 su 5 all'anteriore sinistro, peggiora sul duro; pinza positiva in punta. Sospetto ascesso subsolare: apertura e impacco per tre giorni, riposo in box, ricontrollo tra una settimana.",
+			contesto: vdContesto,
+			proposte: (r) => {
+				const d = VS.visita?.dati || {};
+				return [{
+					k: "relazione",
+					titolo: "Relazione del veterinario",
+					testo: r.relazione || "",
+					modificabile: true,
+					on: true,
+					nota: d.relazione ? "Si aggiunge alla relazione che c'è già." : ""
+				}, {
+					k: "indicazioni",
+					titolo: "Terapia e indicazioni",
+					testo: r.terapia || "",
+					modificabile: true,
+					on: true,
+					nota: d.indicazioni ? "Si aggiunge a quella che c'è già." : ""
+				}];
+			},
+			conferma: async (scelte) => {
+				const d = { ...VS.visita.dati || {} };
+				scelte.forEach((x) => {
+					const t = String(x.testo).trim();
+					d[x.k] = d[x.k] ? String(d[x.k]).trim() + "\n\n" + t : t;
+				});
+				VS.visita.dati = d;
+				await vsSalvaSubito(true);
+				if (VS.schermo === "scheda") vsRidisegna();
+				else if (VS.schermo === "referto" && typeof vrApri === "function") return vrApri();
+				showToast("Inserito nella scheda: lo trovi nel referto");
+				setTimeout(() => document.getElementById("vd-box")?.scrollIntoView({
+					block: "start",
+					behavior: "smooth"
+				}), 60);
+			},
+			demo: (dettato) => ({
+				relazione: dettato,
+				terapia: "",
+				da_controllare: "In prova Galeno non risponde: il dettato è riportato così com'è."
+			})
+		});
+	}
+	function vdDaHome$1() {
+		if (!dtDiOggi().length) return openAiSheet();
+		dtScegliDiOggi({
+			titolo: "Detta",
+			sotto: "Di quale visita di oggi?",
+			onScelta: ({ e }) => {
+				if (e) vdApriDaEvento(e.id);
+			}
+		});
+	}
+	async function vdApriDaEvento(id) {
+		await vsApriDaEvento(id);
+		if (VS.schermo === "scheda") vdDetta();
+		else if (VS.schermo === "scelta") {
+			VD.attesa = true;
+			showToast("Scegli il tipo di visita: poi si apre la dettatura");
+		}
+	}
+	function vdDopoScheda$1() {
+		if (!VD.attesa) return;
+		VD.attesa = false;
+		if (VS.visita) vdDetta();
+	}
+	function vdReset$1() {
+		VD.attesa = false;
+	}
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
@@ -2608,13 +2802,22 @@
 		vaReset: vaReset$1,
 		VA,
 		vsMostraScheda,
-		vrApri,
+		vrApri: vrApri$1,
 		vrInvia,
 		vrCondividi,
 		vrCreaPdf,
 		vrSezioni,
+		vrParteScritta,
 		vrDestinatari: vrDestinatari$1,
 		VR,
+		vdSezioneHtml: vdSezioneHtml$1,
+		vdContesto,
+		vdDetta,
+		vdDaHome: vdDaHome$1,
+		vdApriDaEvento,
+		vdDopoScheda: vdDopoScheda$1,
+		vdReset: vdReset$1,
+		VD,
 		vsApriDaEvento,
 		vsMostraScelta,
 		vsMostraMiei,

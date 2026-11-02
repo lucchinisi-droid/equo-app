@@ -21,6 +21,7 @@
 const { createClient } = require("@supabase/supabase-js");
 const { linkCitati, oggiISO, senzaImporti, testoDaBlocchi, utenteDaToken } = require("../agente/aiuti");
 const { CHIAVE_PUBBLICA, COSTO_RICERCA_USD, LIMITI, MAX_GIRI_TOOL, MODELLO, PREZZI } = require("../agente/configurazione");
+const { eseguiDettatura } = require("../agente/dettatura");
 const { eseguiStrumento } = require("../agente/esegui-strumento");
 const { ISTRUZIONI_ARES } = require("../agente/istruzioni-ares");
 const { ISTRUZIONI_GALENO } = require("../agente/istruzioni-galeno");
@@ -83,7 +84,8 @@ exports.handler = async (event) => {
 
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch (e) { return risposta(400, { error: "Richiesta non valida" }); }
-  const messaggio = String(body.message || "").trim().slice(0, 4000);
+  // dettatura (2/11/2026): il dettato può essere più lungo di un messaggio normale
+  const messaggio = String(body.message || "").trim().slice(0, body.modalita === "dettatura" ? 8000 : 4000);
   // allegati: max 3 immagini (jpeg/png/webp/gif) o PDF, già ridotti dall'app; ~5 MB totali in base64
   const allegati = (Array.isArray(body.allegati) ? body.allegati : []).slice(0, 3).filter((a) =>
     a && typeof a.data === "string" && ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"].includes(a.media_type));
@@ -91,9 +93,12 @@ exports.handler = async (event) => {
   if (!messaggio && !allegati.length) return risposta(400, { error: "Messaggio mancante" });
   const vista = body.vista === "professionista" ? "professionista" : body.vista === "scuderia" ? "scuderia" : "proprietario";
   // Hammer: modalità del pannello (analisi foto guidata, consulta un caso, riassunto dello storico) e quello che il maniscalco sta guardando
-  const modalita = ["foto", "caso", "storico"].includes(body.modalita) ? body.modalita : null;
+  const modalita = ["foto", "caso", "storico", "dettatura"].includes(body.modalita) ? body.modalita : null;
+  // Dettatura (2/11/2026): «referto» per il veterinario (Galeno), «ferratura» per il maniscalco (Hammer); vedi agente/dettatura.js
+  const dettatura = modalita === "dettatura" ? (["referto", "ferratura"].includes(body.dettatura) ? body.dettatura : null) : null;
+  if (modalita === "dettatura" && (!dettatura || allegati.length)) return risposta(400, { error: "Dettatura non valida" });
   if (modalita === "foto" && !allegati.some((a) => a.media_type !== "application/pdf")) return risposta(400, { error: "Serve una foto" });
-  const contestoApp = typeof body.contesto_app === "string" ? body.contesto_app.replace(/\s+\n/g, "\n").slice(0, 2500) : "";
+  const contestoApp = typeof body.contesto_app === "string" ? body.contesto_app.replace(/\s+\n/g, "\n").slice(0, dettatura ? 5000 : 2500) : "";
   // Athena (Equo Scuderia): serve il centro e l'appartenenza al suo staff (verificata qui, non dall'app)
   let centro = null, membro = null;
   if (vista === "scuderia") {
@@ -146,7 +151,10 @@ exports.handler = async (event) => {
   const ares = vista === "professionista" && !hammer && [profilo?.ruolo, profilo?.ruolo_secondario].includes("istruttore");
   // Galeno: vista professionista di un utente che è veterinario (ruolo letto dal DB, non dall'app) · 2/11/2026
   const galeno = vista === "professionista" && !hammer && !ares && [profilo?.ruolo, profilo?.ruolo_secondario].includes("veterinario");
-  const agente = merlino ? "merlino" : agScud ? agScud : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : galeno ? "galeno" : pegasus ? "pegasus" : "equo";
+  // dettatura: solo nella vista professionista e per il ruolo giusto (letto dal DB, non dall'app)
+  if (dettatura && (scud || vista !== "professionista" || ![profilo?.ruolo, profilo?.ruolo_secondario].includes(dettatura === "referto" ? "veterinario" : "maniscalco")))
+    return risposta(403, { error: "Dettatura non disponibile per questo profilo" });
+  const agente = dettatura ? (dettatura === "referto" ? "galeno" : "hammer") : merlino ? "merlino" : agScud ? agScud : athena ? "athena" : hammer ? "hammer" : ares ? "ares" : galeno ? "galeno" : pegasus ? "pegasus" : "equo";
   const { data: uso } = await admin.from("ai_utilizzo").select("conteggio, costo_usd").eq("user_id", user.id).eq("mese", chiaveMese).maybeSingle();
   let limite = LIMITI[piano], usati = uso?.conteggio || 0;
   if (scud) {
@@ -186,6 +194,24 @@ exports.handler = async (event) => {
     }
     if (k === 0) usati = Math.max(usati, Number(pren) - 1);
     prenotato++;
+  }
+
+  // DETTATURA: una sola chiamata, niente strumenti, la conversazione NON si salva (resta solo ciò che il professionista conferma)
+  if (dettatura) {
+    let esito;
+    try { esito = await eseguiDettatura({ tipo: dettatura, dettato: messaggio, contestoApp }); } catch (e) { console.error("dettatura", e); esito = { ok: false, usage: {} }; }
+    if (!esito.ok) {
+      for (let j = 0; j < prenotato; j++) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: periodo }).then(() => {}, () => {});
+      return risposta(200, { errore: true, reply: "Non riesco a sistemare il testo in questo momento, riprova tra poco.", uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
+    }
+    const u = esito.usage || {}, pz = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
+    const costoD = ((u.input_tokens || 0) * pz.in + (u.output_tokens || 0) * pz.out + (u.cache_read_input_tokens || 0) * pz.cacheRead + (u.cache_creation_input_tokens || 0) * pz.cacheWrite) / 1e6;
+    await admin.from("ai_utilizzo").upsert({ user_id: user.id, mese: chiaveMese, conteggio: (uso?.conteggio || 0) + peso, costo_usd: Number(uso?.costo_usd || 0) + costoD, aggiornato_il: new Date().toISOString() }, { onConflict: "user_id,mese" });
+    try {
+      await admin.from("ai_costi").insert({ user_id: user.id, centro_id: null, agente, vista, modello: MODELLO, token_in: u.input_tokens || 0, token_out: u.output_tokens || 0,
+        cache_read: u.cache_read_input_tokens || 0, cache_write: u.cache_creation_input_tokens || 0, ricerche: 0, giri: 1, prova: false, costo_usd: Math.round(costoD * 100000) / 100000 });
+    } catch (_) {}
+    return risposta(200, { dettatura: esito.dati, agente, modalita, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   }
 
   // chat del giorno o chat dello storico riaperta dall'utente (27/10/2026). Se lo SQL non c'è ancora si prosegue come prima.
