@@ -16,7 +16,8 @@ import { ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoc
   ptAttesaFino, ptPeriodo, PT } from "./11-piano-terapia.js";
 import { vcSezioniHtml, vcCarica, vcDisegna, vcApriVisita, vcScegli, vcFile, vcImposta, vcAnnulla, vcSalva, vcNomeLive, VC } from "./12-scheda-cavallo.js";
 import { mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, mpTesto, mpVista, mpTipo, mpZoom, mpElencoNomi, mpCerca, mpSeleziona, mpChiudi,
-  mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, MP, MP_PUNTI } from "./13-mappe.js";
+  mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, mpDente, mpDenteVicino, mpZonaScegli, mpZonaSegno, mpNotaOggetto,
+  mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET } from "./13-mappe.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
 Object.assign(window, {
@@ -42,7 +43,8 @@ Object.assign(window, {
   ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
   ptAttesaFino, ptPeriodo, PT,
   mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, mpTesto, mpVista, mpTipo, mpZoom, mpElencoNomi, mpCerca, mpSeleziona, mpChiudi,
-  mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, MP, MP_PUNTI,
+  mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, mpDente, mpDenteVicino, mpZonaScegli, mpZonaSegno, mpNotaOggetto,
+  mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET,
   vcSezioniHtml, vcCarica, vcDisegna, vcApriVisita, vcScegli, vcFile, vcImposta, vcAnnulla, vcSalva, vcNomeLive, VC,
   vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB

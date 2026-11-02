@@ -123,6 +123,8 @@ async function vrCreaPdf(){
   const doc = new JsPDF({ unit: "mm", format: "a4" });
   const W = 210, M = 18, notte = [29, 45, 80], tif = [127, 209, 201], grigio = [103, 112, 134], testo = [26, 34, 54], chiaro = [247, 244, 238];
   const cav = vrCavallo(), sez = vrSezioni(), prop = vrCliente(cav.proprietarioId);
+  // disegni compilati (mappe, arti, zoccoli, lingua, denti: 13-mappe.js), dopo i dati
+  const disegni = typeof mpImmaginiPdf === "function" ? await mpImmaginiPdf().catch(() => []) : [];
   const dataVisita = new Date((VS.visita.data_visita || isoLocale(new Date())) + "T12:00").toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
   const testa = () => {
     doc.setFillColor(...notte); doc.rect(0, 0, W, 30, "F");
@@ -161,6 +163,27 @@ async function vrCreaPdf(){
     });
     y += 3;
   });
+  if(disegni.length){
+    if(y > 225) nuovaPagina();
+    doc.setFillColor(...chiaro); doc.rect(M, y - 5, W - M * 2, 8, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...notte); doc.text("DISEGNI", M + 3, y); y += 8;
+    const larg = (W - M * 2 - 6) / 2;   // due per riga; denti e lingua da soli
+    let col = 0, hRiga = 0;
+    const aCapo = () => { y += hRiga + 4; col = 0; hRiga = 0; };
+    disegni.forEach(im => {
+      const box = im.grande ? [W - M * 2, 125] : [larg, 72];
+      const s = Math.min(box[0] / im.w, box[1] / im.h), w = im.w * s, h = im.h * s;
+      if(im.grande && col) aCapo();
+      if(y + h + 6 > 272){ nuovaPagina(); col = 0; hRiga = 0; }
+      const x0 = im.grande ? M : M + col * (larg + 6), lw = im.grande ? W - M * 2 : larg;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...grigio); doc.text(im.titolo, x0 + lw / 2, y, { align: "center" });
+      doc.addImage(im.url, "JPEG", x0 + (lw - w) / 2, y + 2, w, h);
+      hRiga = Math.max(hRiga, h + 4);
+      if(im.grande || col === 1) aCapo(); else col = 1;
+    });
+    if(col) aCapo();
+    y += 3;
+  }
   // parte scritta: relazione e terapia in prosa, a tutta larghezza, poi i campi che le completano
   const ps = vrParteScritta();
   const titoloSez = t => { if(y > 255) nuovaPagina(); doc.setFillColor(...chiaro); doc.rect(M, y - 5, W - M * 2, 8, "F");

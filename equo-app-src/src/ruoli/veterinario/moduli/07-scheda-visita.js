@@ -2,7 +2,7 @@
 // Prototipo: ux/prova-veterinario («Che visita fai?», Visita standard, Agopuntura · MTC · Fisioterapia, I miei modelli).
 // Dati: visite_pro e modelli_visita (SQL 31), visibili solo al veterinario che le scrive.
 // Si apre dalle azioni della visita in Agenda e in Home («Scheda visita»); «Concludi la visita» usa il «Fatto» unico (segnaFatto).
-// Referto (passo 2, 08), foto/video (3, 09), dettatura della relazione (4, 10), piano terapeutico (5, 11). Arriva dopo: disegno dei punti sul cavallo.
+// Referto (passo 2, 08), foto/video (3, 09), dettatura della relazione (4, 10), piano terapeutico (5, 11), mappe del cavallo, arti, zoccoli, lingua, dentatura (13).
 
 /* ===================== MODELLI ===================== */
 // campo: { k, e: etichetta, t: tipo, s: sezione, o: opzioni, max, ph, tab, attivo }
@@ -22,6 +22,9 @@ const CAMPI_STANDARD = [
   ...zoppiaArti("Apparato locomotore"),
   { k: "flessione", e: "Test di flessione", t: "riga", s: "Apparato locomotore", ph: "es. positivo distale ASx" },
   { k: "polso", e: "Polso digitale", t: "riga", s: "Apparato locomotore" },
+  // arti e zoccoli (2/11/2026, 13-mappe.js): segni sul disegno, zone dei tendini 1A–3C da sole
+  { k: "arti", e: "Arti · tendini", t: "mappa", modo: "segni", disegno: "arto", s: "Apparato locomotore" },
+  { k: "zoccoli", e: "Zoccoli · suola", t: "mappa", modo: "segni", disegno: "zoccoli", s: "Apparato locomotore" },
   // mappa del cavallo (2/11/2026, 13-mappe.js): dolore, ferite, gonfiori toccando il disegno
   { k: "mappa", e: "Mappa del cavallo", t: "mappa", modo: "segni", s: "Mappa del cavallo" },
   { k: "diagnosi", e: "Diagnosi / ipotesi", t: "testo", s: "Diagnosi e piano" },
@@ -41,10 +44,12 @@ const CAMPI_MTC = [
   { k: "motivo", e: "Motivo della seduta", t: "riga", s: "Seduta", tab: "mtc" },
   { k: "cost", e: "Costituzione (5 elementi)", t: "scelta", o: ["Legno", "Fuoco", "Terra", "Metallo", "Acqua"], s: "Costituzione e Shen", tab: "mtc" },
   { k: "shen", e: "Shen (spirito)", t: "scelta", o: ["Calmo", "Vigile", "Ansioso", "Spento", "Aggressivo"], s: "Costituzione e Shen", tab: "mtc" },
-  { k: "lingua", e: "Colore", t: "scelta", o: ["Rosa", "Pallida", "Rossa", "Viola"], s: "Lingua", tab: "mtc" },
-  { k: "patina", e: "Patina", t: "scelta", o: ["Assente", "Sottile", "Spessa", "Gialla"], s: "Lingua", tab: "mtc" },
-  { k: "umidita", e: "Umidità", t: "scelta", o: ["Secca", "Normale", "Umida"], s: "Lingua", tab: "mtc" },
-  { k: "forma", e: "Forma", t: "multi", o: ["Gonfia", "Segni dei denti", "Fessure"], s: "Lingua", tab: "mtc" },
+  // 2/11/2026: la lingua si valuta per zone sul disegno (13-mappe.js); i 4 campi generali restano solo nelle visite che li usavano già
+  { k: "lingua_zone", e: "Lingua per zone", t: "mappa", modo: "zone", s: "Lingua", tab: "mtc" },
+  { k: "lingua", e: "Colore", t: "scelta", o: ["Rosa", "Pallida", "Rossa", "Viola"], s: "Lingua", tab: "mtc", vecchio: true, se: d => !!d.lingua },
+  { k: "patina", e: "Patina", t: "scelta", o: ["Assente", "Sottile", "Spessa", "Gialla"], s: "Lingua", tab: "mtc", vecchio: true, se: d => !!d.patina },
+  { k: "umidita", e: "Umidità", t: "scelta", o: ["Secca", "Normale", "Umida"], s: "Lingua", tab: "mtc", vecchio: true, se: d => !!d.umidita },
+  { k: "forma", e: "Forma", t: "multi", o: ["Gonfia", "Segni dei denti", "Fessure"], s: "Lingua", tab: "mtc", vecchio: true, se: d => Array.isArray(d.forma) && d.forma.length > 0 },
   { k: "polso_sx", e: "Polso sinistro", t: "riga", s: "Polso", tab: "mtc", ph: "profondità, forza, frequenza" },
   { k: "polso_dx", e: "Polso destro", t: "riga", s: "Polso", tab: "mtc", ph: "profondità, forza, frequenza" },
   { k: "polso_q", e: "Qualità del polso", t: "multi", o: ["Scivoloso", "A corda", "Sottile", "Irregolare"], s: "Polso", tab: "mtc" },
@@ -82,7 +87,7 @@ const STD = k => ({ ...CAMPI_STANDARD.find(c => c.k === k) });
 const ESEMPI_MODELLI = [
   { nome: "Controllo zoppia", base: "standard", campi: [STD("motivo"), STD("anamnesi"), ...zoppiaArti("Apparato locomotore"),
     { k: "flessione", e: "Test di flessione", t: "scelta", o: ["Negativo", "Positivo distale", "Positivo prossimale", "Dubbio"], s: "Apparato locomotore" },
-    STD("polso"), { k: "blocchi", e: "Blocchi anestetici", t: "testo", s: "Apparato locomotore", attivo: false },
+    STD("polso"), STD("arti"), STD("zoccoli"), { k: "blocchi", e: "Blocchi anestetici", t: "testo", s: "Apparato locomotore", attivo: false },
     STD("diagnosi"), STD("terapia"), STD("ricontrollo")] },
   { nome: "Pre-acquisto", base: "standard", campi: [
     { k: "committente", e: "Per conto di", t: "riga", s: "Visita" }, STD("motivo"), STD("temp"), STD("fc"), STD("fr"), STD("mucose"),
@@ -91,7 +96,7 @@ const ESEMPI_MODELLI = [
     { k: "esami", e: "Esami eseguiti o richiesti", t: "multi", o: ["Radiografie", "Ecografie", "Endoscopia", "Esami del sangue", "Antidoping"], s: "Esami" },
     { k: "conclusioni", e: "Conclusioni", t: "testo", s: "Conclusioni" }] },
   { nome: "Dentale", base: "standard", campi: [STD("motivo"), STD("anamnesi"),
-    { k: "sedazione", e: "Sedazione", t: "sino", s: "Visita" }, { k: "reperti", e: "Reperti dentali", t: "testo", s: "Visita" },
+    { k: "sedazione", e: "Sedazione", t: "sino", s: "Visita" }, { k: "denti", e: "Dentatura", t: "mappa", modo: "denti", s: "Dentatura" }, { k: "reperti", e: "Reperti dentali", t: "testo", s: "Visita" },
     { k: "trattamento", e: "Trattamento", t: "testo", s: "Visita" }, STD("ricontrollo")] },
   { nome: "Vaccinazione", base: "standard", campi: [
     { k: "vaccini", e: "Vaccini", t: "multi", o: ["Influenza", "Tetano", "Rinopolmonite (EHV)", "West Nile"], s: "Vaccinazione" },
@@ -100,9 +105,15 @@ const ESEMPI_MODELLI = [
     { k: "richiamo", e: "Prossimo richiamo", t: "data", s: "Vaccinazione" }] }
 ];
 const TIPI_CAMPO = [["riga", "Testo breve"], ["testo", "Testo lungo"], ["numero", "Numero"], ["scelta", "Scelta"], ["multi", "Scelta multipla"],
-  ["scala", "Scala 0–5"], ["scala3", "Scala 0–3"], ["sino", "Sì / No"], ["data", "Data"], ["mappa_segni", "Mappa del cavallo · segni"], ["mappa_punti", "Mappa del cavallo · punti"]];
+  ["scala", "Scala 0–5"], ["scala3", "Scala 0–3"], ["sino", "Sì / No"], ["data", "Data"], ["mappa_segni", "Mappa del cavallo · segni"], ["mappa_punti", "Mappa del cavallo · punti"],
+  ["mappa_arti", "Arti · tendini"], ["mappa_zoccoli", "Zoccoli · suola"], ["mappa_denti", "Dentatura"], ["mappa_lingua", "Lingua per zone"]];
 const NOME_TIPO = Object.fromEntries(TIPI_CAMPO);
 NOME_TIPO.mappa = "Mappa del cavallo";
+// tipo «mappa_…» dell'editor ⇄ campo { t: "mappa", modo, disegno }
+const TIPO_MAPPA = { mappa_segni: { modo: "segni" }, mappa_punti: { modo: "punti" }, mappa_arti: { modo: "segni", disegno: "arto" },
+  mappa_zoccoli: { modo: "segni", disegno: "zoccoli" }, mappa_denti: { modo: "denti" }, mappa_lingua: { modo: "zone" } };
+const vsNomeTipo = c => c.t === "mappa" ? NOME_TIPO[Object.keys(TIPO_MAPPA).find(t => TIPO_MAPPA[t].modo === c.modo && (TIPO_MAPPA[t].disegno || "") === (c.disegno || "")) || "mappa_segni"]
+  : NOME_TIPO[c.t === "scala" && c.max === 3 ? "scala3" : c.t] || c.t;
 
 /* ===================== DATI ===================== */
 const vsEsc = s => escapeHtml(s == null ? "" : String(s));
@@ -358,7 +369,7 @@ function vsMostraEditor(){
   vsTesta(m.id ? "Modifica modello" : "Nuovo modello", "Accendi i campi che usi, spegni gli altri");
   document.getElementById("vs-corpo").innerHTML = `<div class="vs-campo pieno"><label for="vs-mod-nome">Nome del modello</label><input id="vs-mod-nome" maxlength="80" value="${vsEsc(m.nome)}" oninput="VS.modello.nome = this.value"></div>
     <div class="vs-pila">${m.campi.map((c, i) => `<div class="vs-cm${c.attivo === false ? " spento" : ""}">
-      <span class="sp"><b>${vsEsc(c.e)}</b><small>${vsEsc(NOME_TIPO[c.t === "scala" && c.max === 3 ? "scala3" : c.t] || c.t)} · ${vsEsc(c.s || "")}</small></span>
+      <span class="sp"><b>${vsEsc(c.e)}</b><small>${vsEsc(vsNomeTipo(c))} · ${vsEsc(c.s || "")}</small></span>
       <button class="vs-fr" aria-label="Sposta su" onclick="vsSposta(${i}, -1)"${i === 0 ? " disabled" : ""}>↑</button><button class="vs-fr" aria-label="Sposta giù" onclick="vsSposta(${i}, 1)"${i === m.campi.length - 1 ? " disabled" : ""}>↓</button>
       <button class="vs-inter${c.attivo !== false ? " on" : ""}" role="switch" aria-checked="${c.attivo !== false}" aria-label="Campo ${vsEsc(c.e)}" onclick="vsAccendi(${i})"><span></span></button></div>`).join("") || '<div class="vs-nota">Nessun campo: aggiungine uno.</div>'}</div>
     <details class="vs-nuovo-campo" id="vs-nuovo-campo"><summary>+ Aggiungi un campo</summary>
@@ -379,7 +390,7 @@ function vsAggiungiCampo(){
   const base = nome.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 30) || "campo";
   let k = "u_" + base, n = 2; while(VS.modello.campi.some(c => c.k === k)) k = "u_" + base + "_" + n++;
   const c = { k, e: nome, t: tipo === "scala3" ? "scala" : /^mappa_/.test(tipo) ? "mappa" : tipo, s: document.getElementById("vs-nc-sez").value.trim() || "Visita", attivo: true };
-  if(/^mappa_/.test(tipo)) c.modo = tipo === "mappa_punti" ? "punti" : "segni";
+  if(TIPO_MAPPA[tipo]) Object.assign(c, TIPO_MAPPA[tipo]);
   if(tipo === "scala3") c.max = 3; else if(tipo === "scala") c.max = 5;
   if(opz.length) c.o = opz;
   VS.modello.campi.push(c); vsMostraEditor();

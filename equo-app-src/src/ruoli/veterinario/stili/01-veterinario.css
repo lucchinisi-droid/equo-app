@@ -461,3 +461,10 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 .mp-el span{color:var(--vt-testo2);font-size:12.5px;display:flex;align-items:center;gap:5px;text-align:right}
 .mp-el i{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--vt-bordo);flex-shrink:0}
 :where(:root:not([data-theme="light"])) body.pl-vet .mp-box{background:#FFFFFF}
+/* mappe: titolo del campo, legenda dei denti, gruppi di scelte della lingua (2/11/2026) */
+.mp-tit{margin:0 2px 6px}
+.mp-barra .mp-leg{flex:1;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:11.5px;color:var(--vt-testo2)}
+.mp-leg span{display:inline-flex;align-items:center;gap:4px}.mp-leg i{display:inline-block;width:11px;height:11px;border-radius:3px}
+.mp-gr{margin-top:6px}.mp-gr>span{display:block;font-size:12px;font-weight:700;color:var(--vt-testo2);margin:0 2px 4px}
+.mp-denti .mp-z,.mp-lingua .mp-z{cursor:pointer}
+.mp-denti-c .mp-svg{max-height:78vh}
