@@ -314,7 +314,7 @@
 		const oggi = cfg.eventi || dtDiOggi(), oggiIso = isoLocale(/* @__PURE__ */ new Date());
 		const nome = (e) => {
 			try {
-				return agNomeCavallo(e) || "";
+				return agNomeCavallo(e) || (e.cavallo_cliente_id && typeof cavalliCartella === "function" ? cavalliCartella().find((c) => c.id === e.cavallo_cliente_id)?.nome : "") || "";
 			} catch (_) {
 				return "";
 			}

@@ -193,7 +193,8 @@ function dtDisegnaScelta(q){
   const cfg = DT.scelta; if(!cfg) return;
   // cfg.eventi: elenco già pronto (veterinario: oggi + ultimi 7 giorni), raggruppato per giorno
   const oggi = cfg.eventi || dtDiOggi(), oggiIso = isoLocale(new Date());
-  const nome = e => { try{ return agNomeCavallo(e) || ""; }catch(_){ return ""; } };
+  // nome del cavallo: dall'appuntamento o, se manca, dall'archivio dei cavalli dei clienti (es. visite del veterinario)
+  const nome = e => { try{ return agNomeCavallo(e) || (e.cavallo_cliente_id && typeof cavalliCartella === "function" ? cavalliCartella().find(c => c.id === e.cavallo_cliente_id)?.nome : "") || ""; }catch(_){ return ""; } };
   const luogo = e => e.clienti_mascalcia?.nome || (typeof clienteDiId === "function" ? clienteDiId(e.cliente_mascalcia_id)?.nome : "") || "";
   const qq = String(q || "").trim().toLowerCase();
   const cavalli = cfg.cerca && qq.length >= 2 && typeof cavalliCartella === "function"
