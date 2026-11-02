@@ -408,3 +408,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 .vc-visita .fr{color:var(--vt-testo2);font-size:20px}
 .vc-doc .et{width:46px;height:46px;border-radius:10px;background:var(--vt-chip);color:var(--vt-notte);font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .vc-attesa-box{margin-bottom:10px}
+
+/* ICONE (2/11/2026, richiesta di Simone): nell'app del veterinario lo stetoscopio al posto del martello del maniscalco
+   (finestra Sì/No «Già fatto oggi?» e ogni altra icona fa-hammer che il veterinario può vedere) */
+:where(body.pl-vet) .fa-hammer::before{content:"\f0f1"}

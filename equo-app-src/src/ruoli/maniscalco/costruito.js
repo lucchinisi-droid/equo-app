@@ -515,6 +515,7 @@
 		});
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/093-problema-su-un-piede.js
+	var mlVet = () => typeof eVeterinario === "function" && eVeterinario();
 	function mlApriProblema(evId) {
 		const e = mlEventi.find((x) => x.id === evId);
 		if (!e) return;
@@ -558,7 +559,7 @@
 			const coll = clienteCollegatoEquo(e.cliente_mascalcia_id);
 			el.innerHTML = testa(r.nome + " · " + mlProb.piedi.map(mlSigla).join(" "), mlProb.voci.join(" · ")) + `<button class="ml-esci" onclick="mlProb.passo=1;mlRender()" aria-label="Indietro">${ML_IC.indietro}</button><div class="ml-corpo"><div class="ml-lab">Se serve</div>
         <div class="ml-racc"><button type="button" class="${mlProb.foto ? "fatto" : ""}" onclick="document.getElementById('ml-foto').click()">${ML_IC.cam}Foto${mlProb.foto ? " ✓" : ""}</button>
-          <button type="button" class="ham" onclick="mlHammer()">${ML_IC.hammer}Hammer</button></div>
+          <button type="button" class="ham" onclick="mlHammer()">${mlVet() ? "<svg class=\"li\" viewBox=\"0 0 24 24\"><path d=\"M11 2v2M5 2v2\"/><path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/><path d=\"M8 15a6 6 0 0 0 12 0v-3\"/><circle cx=\"20\" cy=\"10\" r=\"2\"/></svg>Galeno" : ML_IC.hammer + "Hammer"}</button></div>
         <input type="file" id="ml-foto" accept="image/*" capture="environment" hidden onchange="mlFoto(this)">
         ${mlProb.fotoUrl ? `<img class="ml-fotoprev" src="${mlProb.fotoUrl}" alt="">` : ""}
         <textarea class="ml-nota" rows="2" maxlength="300" placeholder="Nota (anche a voce: tocca il microfono della tastiera)" oninput="mlProb.nota=this.value">${escapeHtml(mlProb.nota)}</textarea>
