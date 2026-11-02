@@ -18,7 +18,12 @@ async function nuovaPagina(b){
     // microfono finto: start() → il test chiama window.__parla(testo, finale)
     class FintoSR { constructor(){ window.__sr = this; } start(){ this.attivo = true; window.__srStart = (window.__srStart || 0) + 1; } stop(){ this.attivo = false; } }
     window.webkitSpeechRecognition = FintoSR; window.SpeechRecognition = FintoSR;
-    window.__parla = (t, fin) => { const r = window.__sr; const res = [{ 0: { transcript: t }, isFinal: !!fin, length: 1 }]; r.onresult({ resultIndex: 0, results: res }); };
+    // come il vero SpeechRecognition: «results» è l'elenco di TUTTA la sessione; un risultato provvisorio si sostituisce,
+    // uno finale resta. __fine() chiude la sessione (pausa di Android: onend, poi riparte).
+    window.__ris = [];
+    window.__parla = (t, fin) => { const r = window.__sr; const l = window.__ris; if(l.length && !l[l.length - 1].isFinal) l.pop();
+      const x = { 0: { transcript: t }, isFinal: !!fin, length: 1 }; l.push(x); r.onresult({ resultIndex: l.length - 1, results: l.slice() }); };
+    window.__fine = () => { window.__ris = []; window.__sr.onend && window.__sr.onend(); };
   });
   await pg.goto("file://" + APP); await pg.waitForTimeout(1200);
   await pg.evaluate(() => startDemo()); await pg.waitForTimeout(600);
@@ -63,6 +68,14 @@ async function conAgente(pg, risposta, azione){
     await pg.evaluate(() => dtMic()); await attesa(100);
     await pg.evaluate(() => { __parla("zoppia anteriore sinistro", false); __parla("zoppia anteriore sinistro due su cinque", true); __parla("pinza positiva", true); }); await attesa(100);
     const parlato = await pg.evaluate(() => ({ t: document.getElementById("dt-testo").value, on: document.getElementById("dt-mic").classList.contains("on") }));
+    // Android (video di Simone del 2/11): a ogni pausa torna la frase intera detta fin lì → niente ripetizioni
+    await pg.evaluate(() => { __fine(); __parla("ferrato", true); __parla("ferrato completo", true); __parla("ferrato completo con il pad", true); __parla("ferrato completo con il pad e", false); }); await attesa(100);
+    const android = await pg.evaluate(() => document.getElementById("dt-testo").value);
+    await pg.evaluate(() => { __fine(); __parla("misura due", true); }); await attesa(100);
+    const dopoPausa = await pg.evaluate(() => document.getElementById("dt-testo").value);
+    ok(android === "zoppia anteriore sinistro due su cinque pinza positiva ferrato completo con il pad e" && dopoPausa === "zoppia anteriore sinistro due su cinque pinza positiva ferrato completo con il pad e misura due",
+      "Microfono come su Android: frase intera a ogni pausa, nessuna ripetizione " + JSON.stringify({ android, dopoPausa }));
+    await pg.evaluate(() => { __fine(); document.getElementById("dt-testo").value = "zoppia anteriore sinistro due su cinque pinza positiva"; dtScrivi("zoppia anteriore sinistro due su cinque pinza positiva"); });
     ok(p1.aperto && p1.mic && p1.tit === "Detta la relazione" && /Sistema con Galeno/.test(p1.tasto) && parlato.on && parlato.t === "zoppia anteriore sinistro due su cinque pinza positiva",
       "Pannello: microfono di Equo e testo dettato " + JSON.stringify({ p1, parlato }));
 
@@ -113,7 +126,7 @@ async function conAgente(pg, risposta, azione){
     await pg.evaluate(() => document.querySelector("#dt-corpo .dt-scelta").click()); await attesa(900);
     let st = await pg.evaluate(() => ({ schermo: VS.schermo, dt: document.getElementById("dt-foglio").classList.contains("aperto"), attesa: VD.attesa }));
     if(st.schermo === "scelta"){ await pg.evaluate(() => vsNuova("standard")); await attesa(400); st = await pg.evaluate(() => ({ schermo: VS.schermo, dt: document.getElementById("dt-foglio").classList.contains("aperto"), attesa: VD.attesa, tit: document.getElementById("dt-titolo").textContent })); }
-    ok(oggi.length >= 1 && scelta.righe === oggi.length && /visita di oggi/.test(scelta.sotto) && st.schermo === "scheda" && st.dt && !st.attesa, "Home «Detta»: scelta della visita di oggi, scheda e dettatura " + JSON.stringify({ oggi, scelta, st }));
+    ok(oggi.length >= 1 && scelta.righe >= oggi.length && /Di quale visita/.test(scelta.sotto) && st.schermo === "scheda" && st.dt && !st.attesa, "Home «Detta»: scelta della visita di oggi, scheda e dettatura " + JSON.stringify({ oggi, scelta, st }));
     await pg.evaluate(() => { dtChiudi(); vsChiudi(); });
 
     // «+»: voce «Detta» subito dopo «Nuovo appuntamento»

@@ -99,7 +99,10 @@ function renderHomeVet(){
         <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
         <span class="vh-et ${et.cls}">${et.txt}</span></button>`; }).join("")
       : `<div class="vh-vuoto">Nessuna visita in agenda. <button onclick="openInterventoModal(null)">Aggiungine una</button></div>`}
-    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}`;
+    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
+    ${vhRigheHtml()}
+    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
+      <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
   // chilometri del giro di oggi: stessa stima della Giornata dell'officina (una volta al giorno)
   if(diOggi.length && vhKm.giorno !== oggi && typeof ofStimaKm === "function"){
     vhKm = { giorno: oggi, km: null };
@@ -108,13 +111,35 @@ function renderHomeVet(){
   void adesso;
 }
 
+// righe come nella Home del maniscalco (2/11/2026, mockup approvato da Simone): Cavalli · Clienti · Scuderie · Incassi.
+// Le icone sono quelle della Home del maniscalco (pagina 008, nascosta per il veterinario): si riusano da lì, non si copiano.
+function vhIcona(cls){ return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || ""; }
+function vhRigheHtml(){
+  const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
+  const nCav = typeof cavalliCartella === "function" ? cavalliCartella().length : 0;
+  const str = c => typeof isStruttura === "function" && isStruttura(c);
+  const nCli = attivi.filter(c => !str(c)).length, nScu = attivi.filter(str).length;
+  const mese = new Date().toLocaleDateString("it-IT", { month: "long" });
+  const euro = n => formatEuro(Math.round(Number(n) || 0));
+  const inc = `${escapeHtml(mese)} <strong>${euro(wgPro?.incassatoMese)}</strong>` + (wgPro?.daIncassareMese ? ` · da incassare <strong>${euro(wgPro.daIncassareMese)}</strong>` : "");
+  const riga = (cls, az, t, sotto, extra) => `<button class="hm-riga ${cls}${extra ? " " + extra : ""}" onclick="${az}"><span class="ic">${vhIcona(cls)}</span>
+    <span class="tx"><b>${t}</b><span>${sotto}</span></span><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
+  return `<div class="hm-righe vh-righe">
+    ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
+    ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
+    ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}
+    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}</div>`;
+}
+// Clienti del veterinario con il filtro giusto (04-clienti): cavalli, proprietari, scuderie
+function vhVai(filtro){ showPage("pro-clienti"); if(typeof closeClienteDetail === "function") try{ closeClienteDetail(); }catch(_){} if(typeof vetFiltroClienti === "function") vetFiltroClienti(filtro); }
+
 // «Giornata»: l'agenda di oggi, con le visite raggruppate per posto e l'ordine del giro
 function vhGiornata(){ showPage("pro-agenda"); if(typeof tornaSettimanaCorrente === "function") tornaSettimanaCorrente(); }
-// «Detta» (2/11/2026): scegli una visita di oggi e si apre la sua scheda con la dettatura; senza visite oggi apre Galeno
-function vhDetta(){ if(typeof vdDaHome === "function") return vdDaHome(); openAiSheet(); }
+// «Detta» (2/11/2026): scegli una visita di oggi o degli ultimi 7 giorni e si apre la sua scheda con la dettatura (10-dettatura)
+function vhDetta(){ if(typeof vdDaHome === "function") return vdDaHome(); }
 function vhMeteo(){ const m = document.getElementById("hm-meteo"); if(m) m.click(); }
 
 quandoApriPagina(function(p){ if(p === "pro-home") renderHomeVet(); });
 quandoAggiornaBarra(function(){ if(document.body.classList.contains("pl-vet") && !document.getElementById("vh")) renderHomeVet(); });
 
-export { renderHomeVet, vhGiornata, vhDetta, vhMeteo };
+export { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml };

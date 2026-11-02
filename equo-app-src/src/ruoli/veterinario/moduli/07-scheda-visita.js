@@ -171,9 +171,9 @@ const vsNomeCavallo = e => { try{ return agNomeCavallo(e) || ""; }catch(_){ retu
 const vsNomeCliente = e => e?.clienti_mascalcia?.nome || (typeof clienteDiId === "function" ? clienteDiId(e?.cliente_mascalcia_id)?.nome : "") || "";
 
 // ingresso: dalla visita in agenda (id dell'intervento)
-async function vsApriDaEvento(id){
-  // anche le visite vecchie dalla scheda del cavallo (storico già caricato)
-  const e = (typeof agEventiCache !== "undefined" && agEventiCache[id]) || (hpAppuntamenti || []).find(x => x.id === id)
+async function vsApriDaEvento(id, evento){
+  // anche le visite vecchie dalla scheda del cavallo (storico già caricato) o dalla scelta di «Detta» (evento passato)
+  const e = evento || (typeof agEventiCache !== "undefined" && agEventiCache[id]) || (hpAppuntamenti || []).find(x => x.id === id)
     || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find(x => x.id === id);
   if(!e) return showToast("Visita non trovata");
   try{ closeModal("modal-azioni-evento"); }catch(_){}

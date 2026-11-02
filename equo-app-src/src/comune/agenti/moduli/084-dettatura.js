@@ -76,22 +76,32 @@ function dtDisegna(){
       : `<div class="dt-aiuto">Non ho trovato niente da inserire. Torna al dettato e aggiungi qualcosa.</div>`);
   piede.innerHTML = `<button class="dt-btn" onclick="dtIndietro()">Torna al dettato</button><button class="dt-btn pri" onclick="dtConferma()"${p.length ? "" : " disabled"}>${dtEsc(DT.cfg.tastoConferma || "Inserisci")}</button>`;
 }
-function dtScrivi(v){ DT.testo = v; if(DT.ascolta) DT.base = v; }
+function dtScrivi(v){ DT.testo = v; if(DT.ascolta){ DT.base = v; DT.da = DT.nRis || 0; } }
 
-/* ---- microfono di Equo (riconoscimento vocale del telefono, italiano) ---- */
+/* ---- microfono di Equo (riconoscimento vocale del telefono, italiano) ----
+   2/11/2026: il testo della sessione si ricostruisce ogni volta da TUTTI i risultati. Chrome su Android, in ascolto continuo,
+   rimanda a ogni pausa la frase intera detta fin lì («afferrato», «afferrato aressinetto», …): se un pezzo ripete il precedente
+   lo sostituisce invece di aggiungersi. Su iPhone e computer i pezzi sono già separati e si mettono in fila. */
+function dtTestoSessione(results, da){
+  const parti = [];
+  for(let i = da || 0; i < results.length; i++){
+    const t = String(results[i][0]?.transcript || "").replace(/\s+/g, " ").trim(); if(!t) continue;
+    const ult = parti[parti.length - 1], tl = t.toLowerCase(), ul = (ult || "").toLowerCase();
+    if(ult && tl.startsWith(ul)) parti[parti.length - 1] = t;          // stessa frase, più lunga (Android)
+    else if(ult && ul.startsWith(tl)) continue;                          // ripetizione più corta: niente
+    else parti.push(t);
+  }
+  return parti.join(" ");
+}
 function dtMic(){
   if(DT.ascolta) return dtFerma(true);
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if(!SR) return;
   const r = new SR(); r.lang = "it-IT"; r.continuous = true; r.interimResults = true;
-  DT.rec = r; DT.ascolta = true; DT.base = DT.testo;
+  DT.rec = r; DT.ascolta = true; DT.base = DT.testo; DT.da = 0; DT.nRis = 0;
   r.onresult = ev => {
-    let prov = "";
-    for(let i = ev.resultIndex; i < ev.results.length; i++){
-      const t = String(ev.results[i][0]?.transcript || "").trim(); if(!t) continue;
-      if(ev.results[i].isFinal) DT.base = DT.base + (DT.base && !/\s$/.test(DT.base) ? " " : "") + t;
-      else prov += (prov ? " " : "") + t;
-    }
-    DT.testo = DT.base + (prov ? (DT.base && !/\s$/.test(DT.base) ? " " : "") + prov : "");
+    DT.nRis = ev.results.length;
+    const sess = dtTestoSessione(ev.results, DT.da);
+    DT.testo = DT.base + (sess ? (DT.base && !/\s$/.test(DT.base) ? " " : "") + sess : "");
     const ta = document.getElementById("dt-testo"); if(ta){ ta.value = DT.testo; ta.scrollTop = ta.scrollHeight; }
   };
   r.onerror = ev => {
@@ -100,15 +110,17 @@ function dtMic(){
     showToast(ev.error === "not-allowed" || ev.error === "service-not-allowed" ? "Il microfono non è permesso: attivalo nelle impostazioni del telefono, oppure usa il 🎙 della tastiera." : "Il riconoscimento vocale si è fermato: usa il 🎙 della tastiera.");
     if(DT.passo === "detta") dtDisegna();
   };
-  // Android si ferma dopo qualche secondo di silenzio: se stai ancora dettando riparte da solo
-  r.onend = () => { if(DT.ascolta && DT.rec === r){ try{ r.start(); }catch(_){ DT.ascolta = false; if(DT.passo === "detta") dtDisegna(); } } };
+  // Android si ferma dopo qualche secondo di silenzio: quello detto resta e, se stai ancora dettando, riparte da solo
+  r.onend = () => {
+    DT.base = DT.testo; DT.da = 0; DT.nRis = 0;
+    if(DT.ascolta && DT.rec === r){ try{ r.start(); }catch(_){ DT.ascolta = false; if(DT.passo === "detta") dtDisegna(); } }
+  };
   try{ r.start(); }catch(_){ DT.ascolta = false; showToast("Il microfono non parte: usa il 🎙 della tastiera."); }
   dtDisegna();
 }
 function dtFerma(ridisegna){
   const r = DT.rec; DT.ascolta = false; DT.rec = null;
   if(r){ try{ r.stop(); }catch(_){} }
-  DT.testo = DT.base || DT.testo;
   if(ridisegna && DT.passo === "detta") dtDisegna();
 }
 
@@ -179,7 +191,8 @@ function dtScegliDiOggi(cfg){
 }
 function dtDisegnaScelta(q){
   const cfg = DT.scelta; if(!cfg) return;
-  const oggi = dtDiOggi();
+  // cfg.eventi: elenco già pronto (veterinario: oggi + ultimi 7 giorni), raggruppato per giorno
+  const oggi = cfg.eventi || dtDiOggi(), oggiIso = isoLocale(new Date());
   const nome = e => { try{ return agNomeCavallo(e) || ""; }catch(_){ return ""; } };
   const luogo = e => e.clienti_mascalcia?.nome || (typeof clienteDiId === "function" ? clienteDiId(e.cliente_mascalcia_id)?.nome : "") || "";
   const qq = String(q || "").trim().toLowerCase();
@@ -188,8 +201,11 @@ function dtDisegnaScelta(q){
   const riga = (az, t, s, o) => `<button class="dt-scelta" onclick="${az}">${o ? `<span class="o">${dtEsc(o)}</span>` : ""}<span class="c"><b>${dtEsc(t)}</b><small>${dtEsc(s)}</small></span><span class="fr">›</span></button>`;
   const corpo = document.getElementById("dt-corpo");
   const giaCerca = document.getElementById("dt-cerca");
-  const lista = (oggi.length ? `<div class="dt-h">Oggi</div>` + oggi.map(e => riga(`dtScelto('${e.id}')`, nome(e) || "Cavallo", [luogo(e), e.tipo_altro].filter(Boolean).join(" · "), e.ora ? String(e.ora).slice(0, 5) : "")).join("")
-      : `<div class="dt-aiuto">${dtEsc(cfg.vuoto || "Oggi non hai appuntamenti.")}</div>`)
+  const giorno = d => d === oggiIso ? "Oggi" : new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+  let ultimo = null;
+  const lista = (oggi.length ? oggi.map(e => { const g = e.data_intervento || oggiIso, testa = g !== ultimo ? `<div class="dt-h">${dtEsc(giorno(g))}</div>` : ""; ultimo = g;
+        return testa + riga(`dtScelto('${e.id}')`, nome(e) || "Cavallo", [luogo(e), e.tipo_altro].filter(Boolean).join(" · "), e.ora ? String(e.ora).slice(0, 5) : ""); }).join("")
+      : `<div class="dt-aiuto">${dtEsc(cfg.vuoto || "Oggi non hai appuntamenti.")}</div>` + (cfg.azioneVuoto ? `<button type="button" class="dt-btn pri dt-vuoto-az" onclick="dtChiudi();${cfg.azioneVuoto.az}">${dtEsc(cfg.azioneVuoto.testo)}</button>` : ""))
     + (cavalli.length ? `<div class="dt-h">Cavalli</div>` + cavalli.map(c => riga(`dtSceltoCavallo('${dtEsc(c.key || c.id || c.horse_id)}')`, c.nome || "Cavallo", (typeof clienteDiId === "function" ? clienteDiId(c.cliente_mascalcia_id)?.nome : "") || "")).join("")
       : cfg.cerca && qq.length >= 2 ? `<div class="dt-nota">Nessun cavallo con questo nome.</div>` : "");
   if(cfg.cerca && giaCerca){ document.getElementById("dt-lista").innerHTML = lista; return; }
@@ -197,7 +213,7 @@ function dtDisegnaScelta(q){
   document.getElementById("dt-piede").innerHTML = `<button class="dt-btn" onclick="dtChiudi()">Annulla</button>`;
 }
 function dtScelto(id){
-  const cfg = DT.scelta, e = dtDiOggi().find(x => x.id === id); if(!cfg || !e) return;
+  const cfg = DT.scelta, e = (cfg?.eventi || dtDiOggi()).find(x => x.id === id); if(!cfg || !e) return;
   dtChiudi(); cfg.onScelta({ e });
 }
 function dtSceltoCavallo(chiave){

@@ -1,6 +1,6 @@
 // Ingresso dei moduli del veterinario (29/10/2026). Il veterinario è un ruolo dentro la stessa app:
 // stesse tabelle, stessi sistemi del maniscalco (agenda, «Fatto», conti, chat, collegamenti). Qui solo ciò che è suo.
-import { renderHomeVet, vhGiornata, vhDetta, vhMeteo } from "./01-home.js";
+import { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml } from "./01-home.js";
 import { vdPrepara } from "./02-demo.js";
 import { vetEtichettaGruppo, vetTestiAgenda } from "./03-agenda.js";
 import { vetRenderClienti, vetFiltroClienti, vetVaiLettera } from "./04-clienti.js";
@@ -10,7 +10,7 @@ import { vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, 
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB } from "./07-scheda-visita.js";
 import { vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA } from "./09-allegati.js";
 import { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR } from "./08-referto.js";
-import { vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD } from "./10-dettatura.js";
+import { vdVisiteRecenti, vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD } from "./10-dettatura.js";
 import { ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoce, ptCampo, ptVolte, ptOrario, ptTornaScheda, ptSalvaVoce, ptEliminaVoce, ptConferme,
   ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
   ptAttesaFino, ptPeriodo, PT } from "./11-piano-terapia.js";
@@ -22,6 +22,7 @@ Object.assign(window, {
   vhGiornata,
   vhDetta,
   vhMeteo,
+  vhVai, vhRigheHtml,
   vdPrepara,
   vetEtichettaGruppo,
   vetTestiAgenda,
@@ -34,7 +35,7 @@ Object.assign(window, {
   galenoTestata,
   vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA,
   vsMostraScheda, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR,
-  vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD,
+  vdVisiteRecenti, vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD,
   ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoce, ptCampo, ptVolte, ptOrario, ptTornaScheda, ptSalvaVoce, ptEliminaVoce, ptConferme,
   ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
   ptAttesaFino, ptPeriodo, PT,

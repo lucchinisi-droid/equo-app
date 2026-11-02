@@ -72,13 +72,33 @@ function vdDetta(){
   });
 }
 
-/* ---- «Detta» dalla Home: scegli la visita di oggi, si apre la sua scheda con la dettatura ---- */
-function vdDaHome(){
-  if(!dtDiOggi().length) return openAiSheet();
-  dtScegliDiOggi({ titolo: "Detta", sotto: "Di quale visita di oggi?", onScelta: ({ e }) => { if(e) vdApriDaEvento(e.id); } });
+/* ---- «Detta» dalla Home e dal «+» (2/11/2026): visite di oggi e degli ultimi 7 giorni, si apre la scheda con la dettatura.
+   Senza visite: una riga spiega che serve una visita e c'è «Nuovo appuntamento» (non si apre più Galeno). ---- */
+async function vdVisiteRecenti(){
+  const oggi = isoLocale(new Date()), d = new Date(); d.setDate(d.getDate() - 7); const da = isoLocale(d);
+  const buona = e => e && e.data_intervento >= da && e.data_intervento <= oggi && !["annullato", "rifiutato"].includes(e.stato) && (e.cavallo_cliente_id || e.horse_id);
+  let l = [];
+  if(DEMO_MODE) l = (demoState.interventiMascalcia || []).filter(buona);
+  else {
+    const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).gte("data_intervento", da).lte("data_intervento", oggi).not("stato", "in", "(annullato,rifiutato)")
+      .order("data_intervento", { ascending: false }).order("ora", { ascending: true }).limit(60);
+    if(error) console.warn("visite recenti:", error.message);
+    l = (data || []).filter(buona);
+  }
+  // anche quelle già in memoria (agenda, Home) che la lettura non avesse ancora
+  (hpAppuntamenti || []).filter(buona).forEach(e => { if(!l.some(x => x.id === e.id)) l.push(e); });
+  return l.sort((a, b) => b.data_intervento.localeCompare(a.data_intervento) || String(a.ora || "99").localeCompare(String(b.ora || "99")));
 }
-async function vdApriDaEvento(id){
-  await vsApriDaEvento(id);
+async function vdDaHome(){
+  const eventi = await vdVisiteRecenti();
+  dtScegliDiOggi({ titolo: "Detta", sotto: "Di quale visita?", eventi,
+    vuoto: "Per dettare serve una visita: non ne hai oggi né negli ultimi 7 giorni. Crea l'appuntamento, poi apri la sua scheda e tocca «Detta».",
+    azioneVuoto: { testo: "Nuovo appuntamento", az: "openInterventoModal(null)" },
+    onScelta: ({ e }) => { if(e) vdApriDaEvento(e.id, e); } });
+}
+async function vdApriDaEvento(id, evento){
+  await vsApriDaEvento(id, evento);
   // visita già iniziata: si detta subito; altrimenti prima «Che visita fai?» e la dettatura parte appena c'è la scheda
   if(VS.schermo === "scheda") vdDetta();
   else if(VS.schermo === "scelta"){ VD.attesa = true; showToast("Scegli il tipo di visita: poi si apre la dettatura"); }
@@ -90,4 +110,4 @@ function vdDopoScheda(){
 }
 function vdReset(){ VD.attesa = false; }
 
-export { vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD };
+export { vdVisiteRecenti, vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD };

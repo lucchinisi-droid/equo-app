@@ -149,7 +149,10 @@
         <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
         <span class="vh-et ${et.cls}">${et.txt}</span></button>`;
 		}).join("") : `<div class="vh-vuoto">Nessuna visita in agenda. <button onclick="openInterventoModal(null)">Aggiungine una</button></div>`}
-    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}`;
+    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
+    ${vhRigheHtml()}
+    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
+      <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
 		if (diOggi.length && vhKm.giorno !== oggi && typeof ofStimaKm === "function") {
 			vhKm = {
 				giorno: oggi,
@@ -163,13 +166,38 @@
 			}).catch(() => {});
 		}
 	}
+	function vhIcona(cls) {
+		return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || "";
+	}
+	function vhRigheHtml() {
+		const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
+		const nCav = typeof cavalliCartella === "function" ? cavalliCartella().length : 0;
+		const str = (c) => typeof isStruttura === "function" && isStruttura(c);
+		const nCli = attivi.filter((c) => !str(c)).length, nScu = attivi.filter(str).length;
+		const mese = (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", { month: "long" });
+		const euro = (n) => formatEuro(Math.round(Number(n) || 0));
+		const inc = `${escapeHtml(mese)} <strong>${euro(wgPro?.incassatoMese)}</strong>` + (wgPro?.daIncassareMese ? ` · da incassare <strong>${euro(wgPro.daIncassareMese)}</strong>` : "");
+		const riga = (cls, az, t, sotto, extra) => `<button class="hm-riga ${cls}${extra ? " " + extra : ""}" onclick="${az}"><span class="ic">${vhIcona(cls)}</span>
+    <span class="tx"><b>${t}</b><span>${sotto}</span></span><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
+		return `<div class="hm-righe vh-righe">
+    ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
+    ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
+    ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}
+    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}</div>`;
+	}
+	function vhVai(filtro) {
+		showPage("pro-clienti");
+		if (typeof closeClienteDetail === "function") try {
+			closeClienteDetail();
+		} catch (_) {}
+		if (typeof vetFiltroClienti === "function") vetFiltroClienti(filtro);
+	}
 	function vhGiornata() {
 		showPage("pro-agenda");
 		if (typeof tornaSettimanaCorrente === "function") tornaSettimanaCorrente();
 	}
 	function vhDetta() {
 		if (typeof vdDaHome === "function") return vdDaHome();
-		openAiSheet();
 	}
 	function vhMeteo() {
 		const m = document.getElementById("hm-meteo");
@@ -415,6 +443,7 @@
 			return "tutti";
 		}
 	})();
+	var clienteDi = (id) => (typeof clienteDiId === "function" ? clienteDiId(id) : null) || (clientiMascalcia || []).find((c) => c.id === id) || null;
 	function vetSuEquo(c) {
 		return !!(c.cliente_user_id || c.collegamento_stato === "attivo");
 	}
@@ -431,7 +460,7 @@
 		});
 		return out;
 	}
-	function vetFiltroClienti(k) {
+	function vetFiltroClienti$1(k) {
 		vetCliFiltro = k;
 		try {
 			localStorage.setItem("equo-vet-cli-filtro", k);
@@ -458,6 +487,7 @@
 			["tutti", "Tutti"],
 			["privati", "Privati"],
 			["scuderie", "Scuderie"],
+			["cavalli", "Cavalli"],
 			["terapia", "In terapia"],
 			["crediti", "Crediti"]
 		];
@@ -474,6 +504,24 @@
 		if (collega) collega.style.display = "none";
 		const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
 		if (f) f.inp.placeholder = "Nome, cavallo, microchip";
+		if (vetCliFiltro === "cavalli") {
+			const cav = cavalli.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+			const terCav = new Set((typeof PT !== "undefined" && PT.inCorso?.piani || []).flatMap((p) => [p.cavallo_cliente_id, p.horse_id]).filter(Boolean));
+			box.innerHTML = cav.length ? cav.map((cv) => {
+				const cli = clienteDi(cv.cliente_mascalcia_id);
+				const cerca = [
+					cv.nome,
+					cv.microchip,
+					cv.codice_equo,
+					cli?.nome
+				].filter(Boolean).join(" ");
+				return `<div class="cli-riga vt-cli" data-cerca="${escapeHtml(cerca)}" onclick="apriCavalloDaCartella('${cv.cliente_mascalcia_id}', ${cv.id ? `'${cv.id}'` : "null"}, ${cv.horse_id ? `'${cv.horse_id}'` : "null"})">
+        <span class="cli-av vt-av equo">${escapeHtml(vetSigla(cv.nome))}</span>
+        <span class="cli-c"><b>${escapeHtml(cv.nome || "Cavallo")}${terCav.has(cv.id) || terCav.has(cv.horse_id) ? " <span class=\"vt-cli-ter\">in terapia</span>" : ""}</b><span>${escapeHtml([cv.razza, cli?.nome].filter(Boolean).join(" · "))}</span></span></div>`;
+			}).join("") : "<div class=\"cli-vuoto cerca-ignora\">Nessun cavallo: si aggiungono dalla scheda del cliente.</div>";
+			document.getElementById("clienti-archiviati-box").innerHTML = "";
+			return;
+		}
 		const lista = attivi.filter((c) => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "terapia" ? inTerapia.has(c.id) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 		let html = "", lettera = "";
 		const lettere = [];
@@ -1457,8 +1505,8 @@
 		}
 	};
 	var vsNomeCliente = (e) => e?.clienti_mascalcia?.nome || (typeof clienteDiId === "function" ? clienteDiId(e?.cliente_mascalcia_id)?.nome : "") || "";
-	async function vsApriDaEvento(id) {
-		const e = typeof agEventiCache !== "undefined" && agEventiCache[id] || (hpAppuntamenti || []).find((x) => x.id === id) || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find((x) => x.id === id);
+	async function vsApriDaEvento(id, evento) {
+		const e = evento || typeof agEventiCache !== "undefined" && agEventiCache[id] || (hpAppuntamenti || []).find((x) => x.id === id) || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find((x) => x.id === id);
 		if (!e) return showToast("Visita non trovata");
 		try {
 			closeModal("modal-azioni-evento");
@@ -2798,18 +2846,41 @@
 			})
 		});
 	}
-	function vdDaHome$1() {
-		if (!dtDiOggi().length) return openAiSheet();
+	async function vdVisiteRecenti() {
+		const oggi = isoLocale(/* @__PURE__ */ new Date()), d = /* @__PURE__ */ new Date();
+		d.setDate(d.getDate() - 7);
+		const da = isoLocale(d);
+		const buona = (e) => e && e.data_intervento >= da && e.data_intervento <= oggi && !["annullato", "rifiutato"].includes(e.stato) && (e.cavallo_cliente_id || e.horse_id);
+		let l = [];
+		if (DEMO_MODE) l = (demoState.interventiMascalcia || []).filter(buona);
+		else {
+			const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)").eq("maniscalco_id", currentUser.id).gte("data_intervento", da).lte("data_intervento", oggi).not("stato", "in", "(annullato,rifiutato)").order("data_intervento", { ascending: false }).order("ora", { ascending: true }).limit(60);
+			if (error) console.warn("visite recenti:", error.message);
+			l = (data || []).filter(buona);
+		}
+		(hpAppuntamenti || []).filter(buona).forEach((e) => {
+			if (!l.some((x) => x.id === e.id)) l.push(e);
+		});
+		return l.sort((a, b) => b.data_intervento.localeCompare(a.data_intervento) || String(a.ora || "99").localeCompare(String(b.ora || "99")));
+	}
+	async function vdDaHome$1() {
+		const eventi = await vdVisiteRecenti();
 		dtScegliDiOggi({
 			titolo: "Detta",
-			sotto: "Di quale visita di oggi?",
+			sotto: "Di quale visita?",
+			eventi,
+			vuoto: "Per dettare serve una visita: non ne hai oggi né negli ultimi 7 giorni. Crea l'appuntamento, poi apri la sua scheda e tocca «Detta».",
+			azioneVuoto: {
+				testo: "Nuovo appuntamento",
+				az: "openInterventoModal(null)"
+			},
 			onScelta: ({ e }) => {
-				if (e) vdApriDaEvento(e.id);
+				if (e) vdApriDaEvento(e.id, e);
 			}
 		});
 	}
-	async function vdApriDaEvento(id) {
-		await vsApriDaEvento(id);
+	async function vdApriDaEvento(id, evento) {
+		await vsApriDaEvento(id, evento);
 		if (VS.schermo === "scheda") vdDetta();
 		else if (VS.schermo === "scelta") {
 			VD.attesa = true;
@@ -3517,11 +3588,13 @@
 		vhGiornata,
 		vhDetta,
 		vhMeteo,
+		vhVai,
+		vhRigheHtml,
 		vdPrepara,
 		vetEtichettaGruppo,
 		vetTestiAgenda,
 		vetRenderClienti,
-		vetFiltroClienti,
+		vetFiltroClienti: vetFiltroClienti$1,
 		vetVaiLettera,
 		vmDecora,
 		vmFiltra,
@@ -3553,6 +3626,7 @@
 		vrParteScritta,
 		vrDestinatari: vrDestinatari$1,
 		VR,
+		vdVisiteRecenti,
 		vdSezioneHtml: vdSezioneHtml$1,
 		vdContesto,
 		vdDetta,

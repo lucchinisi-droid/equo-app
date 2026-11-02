@@ -5,6 +5,7 @@
 
 let vetCliFiltro = (() => { try { return localStorage.getItem("equo-vet-cli-filtro") || "tutti"; } catch(e){ return "tutti"; } })();
 
+const clienteDi = id => (typeof clienteDiId === "function" ? clienteDiId(id) : null) || (clientiMascalcia || []).find(c => c.id === id) || null;
 function vetSuEquo(c){ return !!(c.cliente_user_id || c.collegamento_stato === "attivo"); }
 function vetSigla(nome){
   const p = String(nome || "?").trim().split(/\s+/).filter(Boolean);
@@ -37,7 +38,7 @@ function vetRenderClienti(box){
   const cavalli = typeof cavalliCartella === "function" ? cavalliCartella() : [];
   const perCliente = {};
   cavalli.forEach(cv => { (perCliente[cv.cliente_mascalcia_id] = perCliente[cv.cliente_mascalcia_id] || []).push(cv); });
-  const filtri = [["tutti", "Tutti"], ["privati", "Privati"], ["scuderie", "Scuderie"], ["terapia", "In terapia"], ["crediti", "Crediti"]];
+  const filtri = [["tutti", "Tutti"], ["privati", "Privati"], ["scuderie", "Scuderie"], ["cavalli", "Cavalli"], ["terapia", "In terapia"], ["crediti", "Crediti"]];
   // clienti con un cavallo in terapia (piano terapeutico, 11): si leggono una volta e l'elenco si ridisegna
   if(typeof ptCaricaInCorso === "function" && !PT.inCorso && !PT.promessa) ptCaricaInCorso().then(() => { const b = document.getElementById("clienti-list"); if(b) vetRenderClienti(b); });
   const inTerapia = typeof ptClientiInTerapia === "function" ? ptClientiInTerapia() : new Set();
@@ -51,6 +52,19 @@ function vetRenderClienti(box){
   const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
   if(f) f.inp.placeholder = "Nome, cavallo, microchip";
 
+  // Cavalli (2/11/2026, dalla riga «Cavalli» della Home): tutti i cavalli che segui, A–Z, si apre la scheda del cavallo
+  if(vetCliFiltro === "cavalli"){
+    const cav = cavalli.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+    const terCav = new Set(((typeof PT !== "undefined" && PT.inCorso?.piani) || []).flatMap(p => [p.cavallo_cliente_id, p.horse_id]).filter(Boolean));
+    box.innerHTML = cav.length ? cav.map(cv => { const cli = clienteDi(cv.cliente_mascalcia_id);
+      const cerca = [cv.nome, cv.microchip, cv.codice_equo, cli?.nome].filter(Boolean).join(" ");
+      return `<div class="cli-riga vt-cli" data-cerca="${escapeHtml(cerca)}" onclick="apriCavalloDaCartella('${cv.cliente_mascalcia_id}', ${cv.id ? `'${cv.id}'` : "null"}, ${cv.horse_id ? `'${cv.horse_id}'` : "null"})">
+        <span class="cli-av vt-av equo">${escapeHtml(vetSigla(cv.nome))}</span>
+        <span class="cli-c"><b>${escapeHtml(cv.nome || "Cavallo")}${terCav.has(cv.id) || terCav.has(cv.horse_id) ? ' <span class="vt-cli-ter">in terapia</span>' : ""}</b><span>${escapeHtml([cv.razza, cli?.nome].filter(Boolean).join(" · "))}</span></span></div>`; }).join("")
+      : '<div class="cli-vuoto cerca-ignora">Nessun cavallo: si aggiungono dalla scheda del cliente.</div>';
+    document.getElementById("clienti-archiviati-box").innerHTML = "";
+    return;
+  }
   const lista = attivi.filter(c => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "terapia" ? inTerapia.has(c.id) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true)
     .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
   let html = "", lettera = "";

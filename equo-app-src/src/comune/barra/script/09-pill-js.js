@@ -91,8 +91,8 @@ function plCostruisciMenuBase(){
   m.innerHTML = h; m.classList.add("pl-menu");
 }
 estendiPrima("hmPiu", function(){ plCostruisciMenu(); });
-// vet e istruttori: l'agente non c'è ancora → «presto disponibile»
-registraPerRuolo("openAiSheet", "vet", function(){ showToast(nomeAgenteAi() + " è presto disponibile"); });
+// 2/11/2026: il veterinario ha Galeno (netlify/agente/istruzioni-galeno.js, ruoli/veterinario/moduli/06-galeno.js):
+// tolto il vecchio «presto disponibile», il tasto apre la chat come per Hammer e Pegasus.
 // l'etichetta «Versione» del menu profilo compare solo se c'è l'interruttore Completa/Semplice
 estendiDopo("aggiornaSwitchHome", function(){
   const row = document.getElementById("menu-vista-man-row"), lab = document.getElementById("menu-home-label");

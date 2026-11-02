@@ -43,7 +43,7 @@ const SUPABASE = process.env.SUPABASE_UMD || path.join(path.dirname(require.reso
   await pg.evaluate(() => showPage("pro-clienti")); await pg.waitForTimeout(1500);
   const cl = await pg.evaluate(() => ({ filtri: [...document.querySelectorAll("#cli-cartelle button")].map(b => b.textContent).join(","), righe: document.querySelectorAll("#clienti-list .vt-cli").length,
     deve: [...document.querySelectorAll(".vt-cli-deve")].map(x => x.textContent).join(" ") }));
-  ok(cl.filtri === "Tutti,Privati,Scuderie,In terapia,Crediti" && cl.righe === 8 && cl.deve.includes("120"), "Clienti: filtri, 8 clienti, crediti " + JSON.stringify(cl));
+  ok(cl.filtri === "Tutti,Privati,Scuderie,Cavalli,In terapia,Crediti" && cl.righe === 8 && cl.deve.includes("120"), "Clienti: filtri, 8 clienti, crediti " + JSON.stringify(cl));
   await pg.evaluate(() => vetFiltroClienti("crediti")); await pg.waitForTimeout(300);
   const cr = await pg.evaluate(() => document.querySelectorAll("#clienti-list .vt-cli").length);
   ok(cr === 3, "Clienti · Crediti: 3 clienti (" + cr + ")");

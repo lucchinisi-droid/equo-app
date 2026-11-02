@@ -1617,6 +1617,7 @@ body.ai-aperta{overflow:hidden}
 .fer-detta .c{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#14231b;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .fer-detta svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .fer-detta b{display:block;font-size:15px}.fer-detta small{color:var(--muted);font-size:12.5px}
+.dt-vuoto-az{width:100%;margin-top:6px;flex:none}
 /* MASCALCIA CHAT (stile WhatsApp, palette Equo) */
 .mchat-overlay{display:none;position:fixed;inset:0;z-index:70;flex-direction:column;background:var(--bg)}
 .mchat-overlay.active{display:flex}
@@ -4486,6 +4487,24 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 /* ICONE (2/11/2026, richiesta di Simone): nell'app del veterinario lo stetoscopio al posto del martello del maniscalco
    (finestra Sì/No «Già fatto oggi?» e ogni altra icona fa-hammer che il veterinario può vedere) */
 :where(body.pl-vet) .fa-hammer::before{content:"\f0f1"}
+
+/* HOME DEL VETERINARIO (2/11/2026, mockup approvato): righe come la Home del maniscalco e «Segnalaci un problema o un consiglio» */
+:where(body.pl-vet) .vh-righe{display:flex;flex-direction:column;gap:10px;margin:18px 0 4px}
+:where(body.pl-vet) .vh-righe .hm-riga{--tinta:var(--vt-tif-chiaro);--colore:var(--vt-tif-testo);background:var(--vt-sup);border-color:var(--vt-bordo);color:var(--vt-testo)}
+:where(body.pl-vet) .vh-righe .hm-riga .tx b{color:var(--vt-notte)}
+:where(body.pl-vet) .vh-righe .hm-riga .tx span{color:var(--vt-testo2)}
+:where(body.pl-vet) .vh-righe .hm-riga .tx span strong{color:var(--vt-testo)}
+:where(body.pl-vet) .vh-righe .hm-riga .fr{color:var(--vt-testo2);position:relative}
+:where(body.pl-vet) .vh-righe .hm-riga .fr svg{width:20px;height:20px}
+:where(body.pl-vet) .vh-aiuto{display:flex;align-items:center;gap:12px;background:var(--vt-fondo);border:1px solid var(--vt-bordo);border-radius:18px;padding:14px;margin:16px 0 8px}
+:where(body.pl-vet) .vh-aiuto .ic{width:42px;height:42px;border-radius:50%;background:var(--vt-notte);color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+:where(body.pl-vet) .vh-aiuto .t{flex:1;min-width:0}
+:where(body.pl-vet) .vh-aiuto b{display:block;font-size:15px;color:var(--vt-notte)}
+:where(body.pl-vet) .vh-aiuto small{display:block;color:var(--vt-testo2);font-size:12.5px;line-height:1.4;margin-top:2px}
+:where(body.pl-vet) .vh-aiuto-bt{flex-shrink:0;border:1.5px solid var(--vt-notte);border-radius:12px;padding:8px 12px;font:inherit;font-weight:700;font-size:13px;color:var(--vt-notte)!important;background:var(--vt-sup)}
+
+/* il giro: urgenze · terapie · richiami su una riga (mockup del 2/11/2026) */
+:where(body.pl-vet) .vh-giro-num{grid-template-columns:repeat(3,1fr)}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -28832,7 +28851,22 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 	}
 	function dtScrivi(v) {
 		DT.testo = v;
-		if (DT.ascolta) DT.base = v;
+		if (DT.ascolta) {
+			DT.base = v;
+			DT.da = DT.nRis || 0;
+		}
+	}
+	function dtTestoSessione(results, da) {
+		const parti = [];
+		for (let i = da || 0; i < results.length; i++) {
+			const t = String(results[i][0]?.transcript || "").replace(/\s+/g, " ").trim();
+			if (!t) continue;
+			const ult = parti[parti.length - 1], tl = t.toLowerCase(), ul = (ult || "").toLowerCase();
+			if (ult && tl.startsWith(ul)) parti[parti.length - 1] = t;
+			else if (ult && ul.startsWith(tl)) continue;
+			else parti.push(t);
+		}
+		return parti.join(" ");
 	}
 	function dtMic() {
 		if (DT.ascolta) return dtFerma(true);
@@ -28845,15 +28879,12 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		DT.rec = r;
 		DT.ascolta = true;
 		DT.base = DT.testo;
+		DT.da = 0;
+		DT.nRis = 0;
 		r.onresult = (ev) => {
-			let prov = "";
-			for (let i = ev.resultIndex; i < ev.results.length; i++) {
-				const t = String(ev.results[i][0]?.transcript || "").trim();
-				if (!t) continue;
-				if (ev.results[i].isFinal) DT.base = DT.base + (DT.base && !/\s$/.test(DT.base) ? " " : "") + t;
-				else prov += (prov ? " " : "") + t;
-			}
-			DT.testo = DT.base + (prov ? (DT.base && !/\s$/.test(DT.base) ? " " : "") + prov : "");
+			DT.nRis = ev.results.length;
+			const sess = dtTestoSessione(ev.results, DT.da);
+			DT.testo = DT.base + (sess ? (DT.base && !/\s$/.test(DT.base) ? " " : "") + sess : "");
 			const ta = document.getElementById("dt-testo");
 			if (ta) {
 				ta.value = DT.testo;
@@ -28867,6 +28898,9 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 			if (DT.passo === "detta") dtDisegna();
 		};
 		r.onend = () => {
+			DT.base = DT.testo;
+			DT.da = 0;
+			DT.nRis = 0;
 			if (DT.ascolta && DT.rec === r) try {
 				r.start();
 			} catch (_) {
@@ -28889,7 +28923,6 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		if (r) try {
 			r.stop();
 		} catch (_) {}
-		DT.testo = DT.base || DT.testo;
 		if (ridisegna && DT.passo === "detta") dtDisegna();
 	}
 	async function dtSistema() {
@@ -29022,7 +29055,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 	function dtDisegnaScelta(q) {
 		const cfg = DT.scelta;
 		if (!cfg) return;
-		const oggi = dtDiOggi();
+		const oggi = cfg.eventi || dtDiOggi(), oggiIso = isoLocale(/* @__PURE__ */ new Date());
 		const nome = (e) => {
 			try {
 				return agNomeCavallo(e) || "";
@@ -29036,7 +29069,17 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		const riga = (az, t, s, o) => `<button class="dt-scelta" onclick="${az}">${o ? `<span class="o">${dtEsc(o)}</span>` : ""}<span class="c"><b>${dtEsc(t)}</b><small>${dtEsc(s)}</small></span><span class="fr">›</span></button>`;
 		const corpo = document.getElementById("dt-corpo");
 		const giaCerca = document.getElementById("dt-cerca");
-		const lista = (oggi.length ? `<div class="dt-h">Oggi</div>` + oggi.map((e) => riga(`dtScelto('${e.id}')`, nome(e) || "Cavallo", [luogo(e), e.tipo_altro].filter(Boolean).join(" · "), e.ora ? String(e.ora).slice(0, 5) : "")).join("") : `<div class="dt-aiuto">${dtEsc(cfg.vuoto || "Oggi non hai appuntamenti.")}</div>`) + (cavalli.length ? `<div class="dt-h">Cavalli</div>` + cavalli.map((c) => riga(`dtSceltoCavallo('${dtEsc(c.key || c.id || c.horse_id)}')`, c.nome || "Cavallo", (typeof clienteDiId === "function" ? clienteDiId(c.cliente_mascalcia_id)?.nome : "") || "")).join("") : cfg.cerca && qq.length >= 2 ? `<div class="dt-nota">Nessun cavallo con questo nome.</div>` : "");
+		const giorno = (d) => d === oggiIso ? "Oggi" : (/* @__PURE__ */ new Date(d + "T12:00")).toLocaleDateString("it-IT", {
+			weekday: "long",
+			day: "numeric",
+			month: "long"
+		});
+		let ultimo = null;
+		const lista = (oggi.length ? oggi.map((e) => {
+			const g = e.data_intervento || oggiIso, testa = g !== ultimo ? `<div class="dt-h">${dtEsc(giorno(g))}</div>` : "";
+			ultimo = g;
+			return testa + riga(`dtScelto('${e.id}')`, nome(e) || "Cavallo", [luogo(e), e.tipo_altro].filter(Boolean).join(" · "), e.ora ? String(e.ora).slice(0, 5) : "");
+		}).join("") : `<div class="dt-aiuto">${dtEsc(cfg.vuoto || "Oggi non hai appuntamenti.")}</div>` + (cfg.azioneVuoto ? `<button type="button" class="dt-btn pri dt-vuoto-az" onclick="dtChiudi();${cfg.azioneVuoto.az}">${dtEsc(cfg.azioneVuoto.testo)}</button>` : "")) + (cavalli.length ? `<div class="dt-h">Cavalli</div>` + cavalli.map((c) => riga(`dtSceltoCavallo('${dtEsc(c.key || c.id || c.horse_id)}')`, c.nome || "Cavallo", (typeof clienteDiId === "function" ? clienteDiId(c.cliente_mascalcia_id)?.nome : "") || "")).join("") : cfg.cerca && qq.length >= 2 ? `<div class="dt-nota">Nessun cavallo con questo nome.</div>` : "");
 		if (cfg.cerca && giaCerca) {
 			document.getElementById("dt-lista").innerHTML = lista;
 			return;
@@ -29045,7 +29088,7 @@ const TIPO_MAN_LABEL = { ferratura: "Ferratura", mezza_ferratura: "Mezza ferratu
 		document.getElementById("dt-piede").innerHTML = `<button class="dt-btn" onclick="dtChiudi()">Annulla</button>`;
 	}
 	function dtScelto(id) {
-		const cfg = DT.scelta, e = dtDiOggi().find((x) => x.id === id);
+		const cfg = DT.scelta, e = (cfg?.eventi || dtDiOggi()).find((x) => x.id === id);
 		if (!cfg || !e) return;
 		dtChiudi();
 		cfg.onScelta({ e });
@@ -35501,8 +35544,8 @@ function plCostruisciMenuBase(){
   m.innerHTML = h; m.classList.add("pl-menu");
 }
 estendiPrima("hmPiu", function(){ plCostruisciMenu(); });
-// vet e istruttori: l'agente non c'è ancora → «presto disponibile»
-registraPerRuolo("openAiSheet", "vet", function(){ showToast(nomeAgenteAi() + " è presto disponibile"); });
+// 2/11/2026: il veterinario ha Galeno (netlify/agente/istruzioni-galeno.js, ruoli/veterinario/moduli/06-galeno.js):
+// tolto il vecchio «presto disponibile», il tasto apre la chat come per Hammer e Pegasus.
 // l'etichetta «Versione» del menu profilo compare solo se c'è l'interruttore Completa/Semplice
 estendiDopo("aggiornaSwitchHome", function(){
   const row = document.getElementById("menu-vista-man-row"), lab = document.getElementById("menu-home-label");
@@ -38269,7 +38312,10 @@ plAggiorna();
         <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
         <span class="vh-et ${et.cls}">${et.txt}</span></button>`;
 		}).join("") : `<div class="vh-vuoto">Nessuna visita in agenda. <button onclick="openInterventoModal(null)">Aggiungine una</button></div>`}
-    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}`;
+    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
+    ${vhRigheHtml()}
+    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
+      <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
 		if (diOggi.length && vhKm.giorno !== oggi && typeof ofStimaKm === "function") {
 			vhKm = {
 				giorno: oggi,
@@ -38283,13 +38329,38 @@ plAggiorna();
 			}).catch(() => {});
 		}
 	}
+	function vhIcona(cls) {
+		return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || "";
+	}
+	function vhRigheHtml() {
+		const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
+		const nCav = typeof cavalliCartella === "function" ? cavalliCartella().length : 0;
+		const str = (c) => typeof isStruttura === "function" && isStruttura(c);
+		const nCli = attivi.filter((c) => !str(c)).length, nScu = attivi.filter(str).length;
+		const mese = (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", { month: "long" });
+		const euro = (n) => formatEuro(Math.round(Number(n) || 0));
+		const inc = `${escapeHtml(mese)} <strong>${euro(wgPro?.incassatoMese)}</strong>` + (wgPro?.daIncassareMese ? ` · da incassare <strong>${euro(wgPro.daIncassareMese)}</strong>` : "");
+		const riga = (cls, az, t, sotto, extra) => `<button class="hm-riga ${cls}${extra ? " " + extra : ""}" onclick="${az}"><span class="ic">${vhIcona(cls)}</span>
+    <span class="tx"><b>${t}</b><span>${sotto}</span></span><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
+		return `<div class="hm-righe vh-righe">
+    ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
+    ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
+    ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}
+    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}</div>`;
+	}
+	function vhVai(filtro) {
+		showPage("pro-clienti");
+		if (typeof closeClienteDetail === "function") try {
+			closeClienteDetail();
+		} catch (_) {}
+		if (typeof vetFiltroClienti === "function") vetFiltroClienti(filtro);
+	}
 	function vhGiornata() {
 		showPage("pro-agenda");
 		if (typeof tornaSettimanaCorrente === "function") tornaSettimanaCorrente();
 	}
 	function vhDetta() {
 		if (typeof vdDaHome === "function") return vdDaHome();
-		openAiSheet();
 	}
 	function vhMeteo() {
 		const m = document.getElementById("hm-meteo");
@@ -38535,6 +38606,7 @@ plAggiorna();
 			return "tutti";
 		}
 	})();
+	var clienteDi = (id) => (typeof clienteDiId === "function" ? clienteDiId(id) : null) || (clientiMascalcia || []).find((c) => c.id === id) || null;
 	function vetSuEquo(c) {
 		return !!(c.cliente_user_id || c.collegamento_stato === "attivo");
 	}
@@ -38551,7 +38623,7 @@ plAggiorna();
 		});
 		return out;
 	}
-	function vetFiltroClienti(k) {
+	function vetFiltroClienti$1(k) {
 		vetCliFiltro = k;
 		try {
 			localStorage.setItem("equo-vet-cli-filtro", k);
@@ -38578,6 +38650,7 @@ plAggiorna();
 			["tutti", "Tutti"],
 			["privati", "Privati"],
 			["scuderie", "Scuderie"],
+			["cavalli", "Cavalli"],
 			["terapia", "In terapia"],
 			["crediti", "Crediti"]
 		];
@@ -38594,6 +38667,24 @@ plAggiorna();
 		if (collega) collega.style.display = "none";
 		const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
 		if (f) f.inp.placeholder = "Nome, cavallo, microchip";
+		if (vetCliFiltro === "cavalli") {
+			const cav = cavalli.slice().sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+			const terCav = new Set((typeof PT !== "undefined" && PT.inCorso?.piani || []).flatMap((p) => [p.cavallo_cliente_id, p.horse_id]).filter(Boolean));
+			box.innerHTML = cav.length ? cav.map((cv) => {
+				const cli = clienteDi(cv.cliente_mascalcia_id);
+				const cerca = [
+					cv.nome,
+					cv.microchip,
+					cv.codice_equo,
+					cli?.nome
+				].filter(Boolean).join(" ");
+				return `<div class="cli-riga vt-cli" data-cerca="${escapeHtml(cerca)}" onclick="apriCavalloDaCartella('${cv.cliente_mascalcia_id}', ${cv.id ? `'${cv.id}'` : "null"}, ${cv.horse_id ? `'${cv.horse_id}'` : "null"})">
+        <span class="cli-av vt-av equo">${escapeHtml(vetSigla(cv.nome))}</span>
+        <span class="cli-c"><b>${escapeHtml(cv.nome || "Cavallo")}${terCav.has(cv.id) || terCav.has(cv.horse_id) ? " <span class=\"vt-cli-ter\">in terapia</span>" : ""}</b><span>${escapeHtml([cv.razza, cli?.nome].filter(Boolean).join(" · "))}</span></span></div>`;
+			}).join("") : "<div class=\"cli-vuoto cerca-ignora\">Nessun cavallo: si aggiungono dalla scheda del cliente.</div>";
+			document.getElementById("clienti-archiviati-box").innerHTML = "";
+			return;
+		}
 		const lista = attivi.filter((c) => vetCliFiltro === "privati" ? !isStruttura(c) : vetCliFiltro === "scuderie" ? isStruttura(c) : vetCliFiltro === "terapia" ? inTerapia.has(c.id) : vetCliFiltro === "crediti" ? crediti[c.id] > 0 : true).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 		let html = "", lettera = "";
 		const lettere = [];
@@ -39577,8 +39668,8 @@ plAggiorna();
 		}
 	};
 	var vsNomeCliente = (e) => e?.clienti_mascalcia?.nome || (typeof clienteDiId === "function" ? clienteDiId(e?.cliente_mascalcia_id)?.nome : "") || "";
-	async function vsApriDaEvento(id) {
-		const e = typeof agEventiCache !== "undefined" && agEventiCache[id] || (hpAppuntamenti || []).find((x) => x.id === id) || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find((x) => x.id === id);
+	async function vsApriDaEvento(id, evento) {
+		const e = evento || typeof agEventiCache !== "undefined" && agEventiCache[id] || (hpAppuntamenti || []).find((x) => x.id === id) || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find((x) => x.id === id);
 		if (!e) return showToast("Visita non trovata");
 		try {
 			closeModal("modal-azioni-evento");
@@ -40918,18 +41009,41 @@ plAggiorna();
 			})
 		});
 	}
-	function vdDaHome$1() {
-		if (!dtDiOggi().length) return openAiSheet();
+	async function vdVisiteRecenti() {
+		const oggi = isoLocale(/* @__PURE__ */ new Date()), d = /* @__PURE__ */ new Date();
+		d.setDate(d.getDate() - 7);
+		const da = isoLocale(d);
+		const buona = (e) => e && e.data_intervento >= da && e.data_intervento <= oggi && !["annullato", "rifiutato"].includes(e.stato) && (e.cavallo_cliente_id || e.horse_id);
+		let l = [];
+		if (DEMO_MODE) l = (demoState.interventiMascalcia || []).filter(buona);
+		else {
+			const { data, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)").eq("maniscalco_id", currentUser.id).gte("data_intervento", da).lte("data_intervento", oggi).not("stato", "in", "(annullato,rifiutato)").order("data_intervento", { ascending: false }).order("ora", { ascending: true }).limit(60);
+			if (error) console.warn("visite recenti:", error.message);
+			l = (data || []).filter(buona);
+		}
+		(hpAppuntamenti || []).filter(buona).forEach((e) => {
+			if (!l.some((x) => x.id === e.id)) l.push(e);
+		});
+		return l.sort((a, b) => b.data_intervento.localeCompare(a.data_intervento) || String(a.ora || "99").localeCompare(String(b.ora || "99")));
+	}
+	async function vdDaHome$1() {
+		const eventi = await vdVisiteRecenti();
 		dtScegliDiOggi({
 			titolo: "Detta",
-			sotto: "Di quale visita di oggi?",
+			sotto: "Di quale visita?",
+			eventi,
+			vuoto: "Per dettare serve una visita: non ne hai oggi né negli ultimi 7 giorni. Crea l'appuntamento, poi apri la sua scheda e tocca «Detta».",
+			azioneVuoto: {
+				testo: "Nuovo appuntamento",
+				az: "openInterventoModal(null)"
+			},
 			onScelta: ({ e }) => {
-				if (e) vdApriDaEvento(e.id);
+				if (e) vdApriDaEvento(e.id, e);
 			}
 		});
 	}
-	async function vdApriDaEvento(id) {
-		await vsApriDaEvento(id);
+	async function vdApriDaEvento(id, evento) {
+		await vsApriDaEvento(id, evento);
 		if (VS.schermo === "scheda") vdDetta();
 		else if (VS.schermo === "scelta") {
 			VD.attesa = true;
@@ -41637,11 +41751,13 @@ plAggiorna();
 		vhGiornata,
 		vhDetta,
 		vhMeteo,
+		vhVai,
+		vhRigheHtml,
 		vdPrepara,
 		vetEtichettaGruppo,
 		vetTestiAgenda,
 		vetRenderClienti,
-		vetFiltroClienti,
+		vetFiltroClienti: vetFiltroClienti$1,
 		vetVaiLettera,
 		vmDecora,
 		vmFiltra,
@@ -41673,6 +41789,7 @@ plAggiorna();
 		vrParteScritta,
 		vrDestinatari: vrDestinatari$1,
 		VR,
+		vdVisiteRecenti,
 		vdSezioneHtml: vdSezioneHtml$1,
 		vdContesto,
 		vdDetta,

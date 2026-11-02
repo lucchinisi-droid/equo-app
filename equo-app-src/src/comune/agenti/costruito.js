@@ -107,7 +107,22 @@
 	}
 	function dtScrivi(v) {
 		DT.testo = v;
-		if (DT.ascolta) DT.base = v;
+		if (DT.ascolta) {
+			DT.base = v;
+			DT.da = DT.nRis || 0;
+		}
+	}
+	function dtTestoSessione(results, da) {
+		const parti = [];
+		for (let i = da || 0; i < results.length; i++) {
+			const t = String(results[i][0]?.transcript || "").replace(/\s+/g, " ").trim();
+			if (!t) continue;
+			const ult = parti[parti.length - 1], tl = t.toLowerCase(), ul = (ult || "").toLowerCase();
+			if (ult && tl.startsWith(ul)) parti[parti.length - 1] = t;
+			else if (ult && ul.startsWith(tl)) continue;
+			else parti.push(t);
+		}
+		return parti.join(" ");
 	}
 	function dtMic() {
 		if (DT.ascolta) return dtFerma(true);
@@ -120,15 +135,12 @@
 		DT.rec = r;
 		DT.ascolta = true;
 		DT.base = DT.testo;
+		DT.da = 0;
+		DT.nRis = 0;
 		r.onresult = (ev) => {
-			let prov = "";
-			for (let i = ev.resultIndex; i < ev.results.length; i++) {
-				const t = String(ev.results[i][0]?.transcript || "").trim();
-				if (!t) continue;
-				if (ev.results[i].isFinal) DT.base = DT.base + (DT.base && !/\s$/.test(DT.base) ? " " : "") + t;
-				else prov += (prov ? " " : "") + t;
-			}
-			DT.testo = DT.base + (prov ? (DT.base && !/\s$/.test(DT.base) ? " " : "") + prov : "");
+			DT.nRis = ev.results.length;
+			const sess = dtTestoSessione(ev.results, DT.da);
+			DT.testo = DT.base + (sess ? (DT.base && !/\s$/.test(DT.base) ? " " : "") + sess : "");
 			const ta = document.getElementById("dt-testo");
 			if (ta) {
 				ta.value = DT.testo;
@@ -142,6 +154,9 @@
 			if (DT.passo === "detta") dtDisegna();
 		};
 		r.onend = () => {
+			DT.base = DT.testo;
+			DT.da = 0;
+			DT.nRis = 0;
 			if (DT.ascolta && DT.rec === r) try {
 				r.start();
 			} catch (_) {
@@ -164,7 +179,6 @@
 		if (r) try {
 			r.stop();
 		} catch (_) {}
-		DT.testo = DT.base || DT.testo;
 		if (ridisegna && DT.passo === "detta") dtDisegna();
 	}
 	async function dtSistema() {
@@ -297,7 +311,7 @@
 	function dtDisegnaScelta(q) {
 		const cfg = DT.scelta;
 		if (!cfg) return;
-		const oggi = dtDiOggi();
+		const oggi = cfg.eventi || dtDiOggi(), oggiIso = isoLocale(/* @__PURE__ */ new Date());
 		const nome = (e) => {
 			try {
 				return agNomeCavallo(e) || "";
@@ -311,7 +325,17 @@
 		const riga = (az, t, s, o) => `<button class="dt-scelta" onclick="${az}">${o ? `<span class="o">${dtEsc(o)}</span>` : ""}<span class="c"><b>${dtEsc(t)}</b><small>${dtEsc(s)}</small></span><span class="fr">›</span></button>`;
 		const corpo = document.getElementById("dt-corpo");
 		const giaCerca = document.getElementById("dt-cerca");
-		const lista = (oggi.length ? `<div class="dt-h">Oggi</div>` + oggi.map((e) => riga(`dtScelto('${e.id}')`, nome(e) || "Cavallo", [luogo(e), e.tipo_altro].filter(Boolean).join(" · "), e.ora ? String(e.ora).slice(0, 5) : "")).join("") : `<div class="dt-aiuto">${dtEsc(cfg.vuoto || "Oggi non hai appuntamenti.")}</div>`) + (cavalli.length ? `<div class="dt-h">Cavalli</div>` + cavalli.map((c) => riga(`dtSceltoCavallo('${dtEsc(c.key || c.id || c.horse_id)}')`, c.nome || "Cavallo", (typeof clienteDiId === "function" ? clienteDiId(c.cliente_mascalcia_id)?.nome : "") || "")).join("") : cfg.cerca && qq.length >= 2 ? `<div class="dt-nota">Nessun cavallo con questo nome.</div>` : "");
+		const giorno = (d) => d === oggiIso ? "Oggi" : (/* @__PURE__ */ new Date(d + "T12:00")).toLocaleDateString("it-IT", {
+			weekday: "long",
+			day: "numeric",
+			month: "long"
+		});
+		let ultimo = null;
+		const lista = (oggi.length ? oggi.map((e) => {
+			const g = e.data_intervento || oggiIso, testa = g !== ultimo ? `<div class="dt-h">${dtEsc(giorno(g))}</div>` : "";
+			ultimo = g;
+			return testa + riga(`dtScelto('${e.id}')`, nome(e) || "Cavallo", [luogo(e), e.tipo_altro].filter(Boolean).join(" · "), e.ora ? String(e.ora).slice(0, 5) : "");
+		}).join("") : `<div class="dt-aiuto">${dtEsc(cfg.vuoto || "Oggi non hai appuntamenti.")}</div>` + (cfg.azioneVuoto ? `<button type="button" class="dt-btn pri dt-vuoto-az" onclick="dtChiudi();${cfg.azioneVuoto.az}">${dtEsc(cfg.azioneVuoto.testo)}</button>` : "")) + (cavalli.length ? `<div class="dt-h">Cavalli</div>` + cavalli.map((c) => riga(`dtSceltoCavallo('${dtEsc(c.key || c.id || c.horse_id)}')`, c.nome || "Cavallo", (typeof clienteDiId === "function" ? clienteDiId(c.cliente_mascalcia_id)?.nome : "") || "")).join("") : cfg.cerca && qq.length >= 2 ? `<div class="dt-nota">Nessun cavallo con questo nome.</div>` : "");
 		if (cfg.cerca && giaCerca) {
 			document.getElementById("dt-lista").innerHTML = lista;
 			return;
@@ -320,7 +344,7 @@
 		document.getElementById("dt-piede").innerHTML = `<button class="dt-btn" onclick="dtChiudi()">Annulla</button>`;
 	}
 	function dtScelto(id) {
-		const cfg = DT.scelta, e = dtDiOggi().find((x) => x.id === id);
+		const cfg = DT.scelta, e = (cfg?.eventi || dtDiOggi()).find((x) => x.id === id);
 		if (!cfg || !e) return;
 		dtChiudi();
 		cfg.onScelta({ e });
