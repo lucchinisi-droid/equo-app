@@ -43,7 +43,9 @@ function openModal(id){
     const x = document.createElement("button");
     x.type = "button"; x.className = "modal-close-x"; x.setAttribute("aria-label", "Chiudi");
     x.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-    x.onclick = () => closeModal(id);
+    // 3/11/2026: la X fa quello che fa il tocco fuori dalla finestra (es. «Manca il prezzo» → salva senza prezzo):
+    // prima chiudeva e basta, e un salvataggio che aspettava la risposta restava bloccato (appuntamenti del veterinario non salvati)
+    x.onclick = () => { if(el.getAttribute("onclick")) el.click(); else closeModal(id); };
     box.insertBefore(x, box.firstChild);
   }
   el.classList.add("active");
