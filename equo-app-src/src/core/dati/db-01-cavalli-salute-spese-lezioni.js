@@ -244,6 +244,25 @@ Object.assign(DB, {
       sb.from("terapie_somministrazioni").select("id, piano_id, voce_id, previsto_il, fatto_il, fatto_da").in("piano_id", ids).order("previsto_il").limit(5000)]);
     return unisci(piani, rv.data || [], rs.data || []);
   },
+  // diario del cavallo in scuderia (SQL 36): attività segnate dal groom o dal gestionale, solo per il proprietario
+  async diarioScuderia(horseId, giorni = 7){
+    if(!horseId) return null;
+    if(DEMO_MODE){
+      const primo = (typeof horses !== "undefined" ? horses : [])[0];
+      if(!primo || primo.id !== horseId) return null;
+      const oggi = isoLocale(new Date()), ieri = isoLocale(new Date(Date.now() - 86400000));
+      return { scuderia: "Centro Ippico Demo", oggi, attiva: true,
+        mostra: ["pasto_mattina", "pasto_sera", "fieno", "paddock", "lavorato", "farmaco", "box_pulito"],
+        voci: [
+          { giorno: oggi, tipo: "pasto_mattina", ora: "07:10", da: "Rahim" }, { giorno: oggi, tipo: "fieno", ora: "07:15", da: "Rahim" },
+          { giorno: oggi, tipo: "paddock", ora: "10:30", da: "Ion" }, { giorno: oggi, tipo: "farmaco", ora: "12:00", da: "Rahim" },
+          { giorno: ieri, tipo: "pasto_mattina", ora: "07:05", da: "Rahim" }, { giorno: ieri, tipo: "lavorato", ora: "16:00", da: "Ion" },
+          { giorno: ieri, tipo: "box_pulito", ora: "17:20", da: "Ion" }, { giorno: ieri, tipo: "pasto_sera", ora: "18:30", da: "Rahim" } ] };
+    }
+    const { data, error } = await sb.rpc("mio_diario_scuderia", { p_horse: horseId, p_giorni: giorni });
+    if(error){ if(!/mio_diario_scuderia|schema cache|does not exist/i.test(error.message || "")) console.warn("diario scuderia:", error.message); return null; }
+    return data || null;
+  },
   async terapiaFatto(id, fatto = true){
     if(DEMO_MODE){ const s = this._ter().somm.find(x => x.id === id); if(s){ s.fatto_il = fatto ? new Date().toISOString() : null; s.fatto_da = fatto ? currentUser.id : null; } return { data: !!s, error: null }; }
     const { data, error } = await sb.rpc("equo_terapia_fatto", { p_id: id, p_fatto: !!fatto });

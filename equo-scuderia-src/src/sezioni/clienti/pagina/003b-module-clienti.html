@@ -1,0 +1,25 @@
+        <div class="module-page" id="module-clienti" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-address-book"></i></span> Clienti</h1>
+              <p>Allievi, genitori e proprietari, anche senza l'app Equo. Telefono, email e dati dei minori li vedete solo tu e lo staff di livello 2 e 3.</p>
+            </div>
+          </div>
+          <div class="card" id="card-clienti" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+              <h3 style="margin:0">Tutti i clienti (<span id="clienti-count">0</span>)</h3>
+              <button class="btn btn-outline btn-sm" onclick="openClienteForm()"><i class="fa-solid fa-user-plus"></i> Nuovo cliente</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <input class="input" id="clienti-cerca" placeholder="Cerca per nome, telefono o email" oninput="filtraClienti()" style="flex:1;min-width:180px">
+              <select class="input" id="clienti-ruolo" onchange="filtraClienti()" style="width:auto"><option value="">Tutti</option><option value="allievo">Allievi e genitori</option><option value="proprietario">Proprietari</option></select>
+            </div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Nome</th><th>Ruolo</th><th>Contatti</th><th>Età</th><th></th></tr></thead>
+              <tbody id="clienti-table-body"></tbody>
+            </table></div>
+            <div class="empty-state" id="clienti-empty" style="display:none"><i class="fa-solid fa-address-book"></i><div>Nessun cliente ancora. Tocca «Nuovo cliente»: non serve che abbia l'app.</div></div>
+          </div>
+
+          <div class="card empty-state" id="clienti-non-autorizzato" style="display:none"><i class="fa-solid fa-lock"></i><div>I clienti li gestiscono l'amministratore e lo staff di livello 2 e 3.</div></div>
+        </div>

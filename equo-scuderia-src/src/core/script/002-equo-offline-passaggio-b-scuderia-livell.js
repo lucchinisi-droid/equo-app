@@ -56,8 +56,8 @@ const CONTATTO_TIPO_LABELS = {
   fornitore:"Fornitore", altro:"Altro",
 };
 const COMING_SOON_COPY = {
-  store: { icon:"fa-store", titolo:"Store", testo:"Vendi ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
-  fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"Genera e invia fatture elettroniche conformi SDI direttamente dagli abbonamenti e dalle lezioni registrate nel gestionale." },
+  store: { icon:"fa-store", titolo:"Store", testo:"In arrivo: venderai ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
+  fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"In arrivo: genererai e invierai fatture elettroniche conformi SDI dai pacchetti e dalle lezioni registrate nel gestionale." },
 };
 const ACTIVE_PLACEHOLDER_COPY = {};
 

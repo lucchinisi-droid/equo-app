@@ -1,0 +1,25 @@
+<div class="modal-overlay" id="modal-cliente" onclick="closeOut(event,'modal-cliente')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-cliente-title">Nuovo cliente</span> <span class="x" onclick="closeModal('modal-cliente')">✕</span></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Nome e cognome</label><input class="input" id="cli-nome" maxlength="80" placeholder="Es. Sofia Rossi"></div>
+      <div class="field"><label>Ruolo</label><select class="input" id="cli-ruolo"><option value="allievo">Allievo o genitore</option><option value="proprietario">Proprietario di un cavallo</option></select></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Telefono</label><input class="input" id="cli-telefono" type="tel" maxlength="30" placeholder="Es. 333 1234567"></div>
+      <div class="field"><label>Email</label><input class="input" id="cli-email" type="email" maxlength="120" placeholder="nome@esempio.it"></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data di nascita</label><input class="input" id="cli-nascita" type="date" onchange="clienteNascitaCambiata()"></div>
+      <div class="field"><label>Genitore o referente <span id="cli-ref-obbl" style="color:#8a6a12;font-weight:600;display:none">· obbligatorio per i minori</span></label>
+        <select class="input" id="cli-referente"><option value="">— nessuno —</option></select></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="cli-note" maxlength="1000" placeholder="Facoltativo: allergie, livello, preferenze…"></div>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;margin:4px 0 10px"><input type="checkbox" id="cli-consenso" style="margin-top:3px">
+      <span>Il cliente (o il genitore, per i minori) ha dato il consenso al trattamento dei dati per la gestione del centro. <span id="cli-consenso-data" style="color:var(--muted)"></span></span></label>
+    <div id="cli-collegati" style="display:none;font-size:13px;color:var(--muted);margin:0 0 10px"></div>
+    <p style="color:var(--muted);font-size:12px;margin:0 0 10px"><i class="fa-solid fa-lock"></i> Telefono, email, data di nascita e referente li vedono solo l'amministratore e lo staff di livello 2 e 3.</p>
+    <div class="auth-error" id="cliente-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveCliente()">Salva</button>
+  </div>
+</div>

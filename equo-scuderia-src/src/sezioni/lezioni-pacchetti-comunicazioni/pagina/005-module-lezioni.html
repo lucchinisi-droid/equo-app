@@ -11,6 +11,11 @@
               <button class="btn btn-sm lez-filter-btn active" data-filter="prossime" onclick="setLezioniFilter('prossime')">Prossime</button>
               <button class="btn btn-sm lez-filter-btn" data-filter="passate" onclick="setLezioniFilter('passate')">Passate</button>
               <button class="btn btn-sm lez-filter-btn" data-filter="tutte" onclick="setLezioniFilter('tutte')">Tutte</button>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)" data-tip="Chi disdice prima non perde la lezione del carnet; dopo, la lezione si considera usata.">
+                <i class="fa-solid fa-ticket"></i> Disdetta senza perdere la lezione fino a
+                <select class="input" id="lez-disdetta-ore" onchange="salvaDisdettaOre()" style="width:auto;padding:4px 8px;height:auto">
+                  <option value="0">0</option><option value="6">6</option><option value="12">12</option><option value="24">24</option><option value="48">48</option><option value="72">72</option>
+                </select> ore prima</span>
             </div>
           </div>
           <div class="card">

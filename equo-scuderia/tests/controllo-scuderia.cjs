@@ -72,6 +72,26 @@ const SCHERMI = [
         const senza = await pg.evaluate(PULSANTI_SENZA_FUNZIONE);
         if(senza.length) male("in " + k + " ci sono pulsanti che chiamano funzioni inesistenti: " + senza.join(", "));
       }
+      // carnet collegato alle lezioni (Fase 3): 10 lezioni, completata = 1, di nuovo prenotata = 0, disdetta tardiva = 1
+      const carnet = await pg.evaluate(async () => {
+        const w = t => new Promise(r => setTimeout(r, t));
+        document.querySelectorAll(".modal-overlay.active, .modal.active").forEach(m => m.classList.remove("active"));
+        const cliente = (demoState.membri.find(m => m.ruolo === "allievo") || {}).id;
+        const p = { id: "pc-test", centro_id: demoState.centro.id, cliente: "Prova", membro_id: cliente, tipo: "carnet", unita_totali: 10, unita_usate: 0, data_inizio: null, data_scadenza: null };
+        demoState.pacchetti.push(p);
+        const oggi = isoLoc(new Date()), tra2ore = new Date(Date.now() + 2 * 3600000);
+        const l = { id: "lz-test", centro_id: demoState.centro.id, data: oggi, ora_inizio: "23:59", allievo_id: cliente, stato: "prenotata", pacchetto_id: "pc-test" };
+        const l2 = { id: "lz-test2", centro_id: demoState.centro.id, data: isoLoc(tra2ore), ora_inizio: String(tra2ore.getHours()).padStart(2, "0") + ":" + String(tra2ore.getMinutes()).padStart(2, "0"), allievo_id: cliente, stato: "prenotata", pacchetto_id: "pc-test" };
+        demoState.lezioni.push(l, l2);
+        const r = [];
+        await setLezioneStato("lz-test", "completata"); await w(50); r.push(p.unita_usate);
+        await setLezioneStato("lz-test", "prenotata"); await w(50); r.push(p.unita_usate);
+        await setLezioneStato("lz-test2", "annullata"); await w(50); r.push(p.unita_usate);
+        demoState.pacchetti = demoState.pacchetti.filter(x => x.id !== "pc-test");
+        demoState.lezioni = demoState.lezioni.filter(x => !String(x.id).startsWith("lz-test"));
+        return r.join(",");
+      });
+      if(carnet !== "1,0,1") male("carnet e lezioni non si parlano: contatori " + carnet + " invece di 1,0,1");
       jsErr.forEach(e => male("errore JavaScript: " + e));
       console.log((errori.some(x => x.startsWith(sc.nome + ":")) ? "KO " : "OK ") + sc.nome + " · sezioni: " + voci.join(", "));
     } catch(e){ male("il controllo si e fermato: " + e.message); }

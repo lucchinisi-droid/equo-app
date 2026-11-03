@@ -7,7 +7,10 @@
     </div>
     <div class="field"><label>Istruttore</label><select class="input" id="lez-istruttore"></select></div>
     <div class="field"><label>Cavallo</label><select class="input" id="lez-cavallo" onchange="lezioneCavalloCambiato()"><option value="">Nessuno / da definire</option></select></div>
-    <div class="field"><label>Allievo / Proprietario</label><select class="input" id="lez-allievo" onchange="aggiornaCavalieriSuggeriti()"></select></div>
+    <div class="field"><label>Allievo / Proprietario</label><select class="input" id="lez-allievo" onchange="aggiornaCavalieriSuggeriti();lezioneAggiornaCarnet()"></select></div>
+    <div class="field" id="lez-carnet-field"><label>Carnet da cui scalare</label>
+      <select class="input" id="lez-pacchetto" onchange="lezioneCarnetInfo()"><option value="">— nessuno —</option></select>
+      <div id="lez-carnet-info" style="font-size:12.5px;margin-top:4px;color:var(--muted)"></div></div>
     <div class="field"><label>Chi monta <span style="color:var(--muted);font-weight:400">(se diverso, es. figlio o figlia)</span></label>
       <input class="input" id="lez-cavaliere" list="lez-cavalieri-suggeriti" maxlength="80" placeholder="Facoltativo, es. Sofia">
       <datalist id="lez-cavalieri-suggeriti"></datalist></div>

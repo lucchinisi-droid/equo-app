@@ -2064,6 +2064,9 @@ textarea.input{resize:vertical}
         <button class="nav-item" data-module="centro" onclick="showModule('centro')">
           <i class="fa-solid fa-house-chimney"></i> <span class="nav-label">Il tuo Centro</span>
         </button>
+        <button class="nav-item" data-module="clienti" onclick="showModule('clienti')" style="display:none">
+          <i class="fa-solid fa-address-book"></i> <span class="nav-label">Clienti</span>
+        </button>
         <button class="nav-item" data-module="cavalli" onclick="showModule('cavalli')">
           <i class="fa-solid fa-horse-head"></i> <span class="nav-label">Cavalli &amp; Salute</span> <span class="nav-unread-badge sem-verde" id="cavalli-nav-badge" title="Scadenze sanitarie">0</span>
         </button>
@@ -2279,6 +2282,31 @@ textarea.input{resize:vertical}
         </div>
 
         <!-- MODULI GESTIONE -->
+        <div class="module-page" id="module-clienti" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-address-book"></i></span> Clienti</h1>
+              <p>Allievi, genitori e proprietari, anche senza l'app Equo. Telefono, email e dati dei minori li vedete solo tu e lo staff di livello 2 e 3.</p>
+            </div>
+          </div>
+          <div class="card" id="card-clienti" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+              <h3 style="margin:0">Tutti i clienti (<span id="clienti-count">0</span>)</h3>
+              <button class="btn btn-outline btn-sm" onclick="openClienteForm()"><i class="fa-solid fa-user-plus"></i> Nuovo cliente</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <input class="input" id="clienti-cerca" placeholder="Cerca per nome, telefono o email" oninput="filtraClienti()" style="flex:1;min-width:180px">
+              <select class="input" id="clienti-ruolo" onchange="filtraClienti()" style="width:auto"><option value="">Tutti</option><option value="allievo">Allievi e genitori</option><option value="proprietario">Proprietari</option></select>
+            </div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Nome</th><th>Ruolo</th><th>Contatti</th><th>Età</th><th></th></tr></thead>
+              <tbody id="clienti-table-body"></tbody>
+            </table></div>
+            <div class="empty-state" id="clienti-empty" style="display:none"><i class="fa-solid fa-address-book"></i><div>Nessun cliente ancora. Tocca «Nuovo cliente»: non serve che abbia l'app.</div></div>
+          </div>
+
+          <div class="card empty-state" id="clienti-non-autorizzato" style="display:none"><i class="fa-solid fa-lock"></i><div>I clienti li gestiscono l'amministratore e lo staff di livello 2 e 3.</div></div>
+        </div>
         <div class="module-page" id="module-cavalli" style="display:none">
           <!-- LISTA CAVALLI -->
           <div id="cavalli-list-view">
@@ -2411,6 +2439,11 @@ textarea.input{resize:vertical}
               <button class="btn btn-sm lez-filter-btn active" data-filter="prossime" onclick="setLezioniFilter('prossime')">Prossime</button>
               <button class="btn btn-sm lez-filter-btn" data-filter="passate" onclick="setLezioniFilter('passate')">Passate</button>
               <button class="btn btn-sm lez-filter-btn" data-filter="tutte" onclick="setLezioniFilter('tutte')">Tutte</button>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)" data-tip="Chi disdice prima non perde la lezione del carnet; dopo, la lezione si considera usata.">
+                <i class="fa-solid fa-ticket"></i> Disdetta senza perdere la lezione fino a
+                <select class="input" id="lez-disdetta-ore" onchange="salvaDisdettaOre()" style="width:auto;padding:4px 8px;height:auto">
+                  <option value="0">0</option><option value="6">6</option><option value="12">12</option><option value="24">24</option><option value="48">48</option><option value="72">72</option>
+                </select> ore prima</span>
             </div>
           </div>
           <div class="card">
@@ -2644,6 +2677,7 @@ textarea.input{resize:vertical}
               <div><i class="fa-solid fa-hand-pointer"></i><span><b>3.</b> Tocca le icone del box: qui vedi chi l'ha fatto e a che ora.</span></div>
             </div>
             <button class="btn btn-ghost btn-sm" onclick="window.open('/groom?demo=1','_blank')"><i class="fa-solid fa-mobile-screen"></i> Prova l'app Groom</button>
+            <button class="btn btn-ghost btn-sm" onclick="boxApriImpostazioni()" data-tip="Scegli quali attività vede il proprietario nella scheda del suo cavallo."><i class="fa-solid fa-eye"></i> Cosa vede il proprietario</button>
           </div>
           <div class="card"><div id="groom-lista"></div>
             <div class="empty-state" id="groom-vuoto" style="display:none"><i class="fa-solid fa-id-badge"></i><div>Nessun groom ancora. Tocca "Aggiungi groom": in un minuto è operativo.</div></div>
@@ -3149,7 +3183,7 @@ textarea.input{resize:vertical}
 <div class="modal-overlay" id="modal-box-impost" onclick="closeOut(event,'modal-box-impost')">
   <div class="modal">
     <div class="modal-title">Icone del giorno <span class="x" onclick="closeModal('modal-box-impost')">✕</span></div>
-    <p style="color:var(--muted);font-size:13px;margin:-6px 0 10px">Le prime 8 ci sono sempre; attiva quelle facoltative che usate nel centro. Ogni giorno a mezzanotte le icone si spengono da sole.</p>
+    <p style="color:var(--muted);font-size:13px;margin:-6px 0 10px">Le prime 8 ci sono sempre sui box; attiva quelle facoltative che usate nel centro. Ogni giorno a mezzanotte le icone si spengono da sole.<br>Nella colonna «Al proprietario» scegli cosa vede chi ha il cavallo da voi: nella sua app Equo trova l’ora e chi l’ha fatto.</p>
     <div id="box-impost-lista"></div>
     <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="boxSalvaImpostazioni()">Salva</button>
   </div>
@@ -3238,7 +3272,10 @@ textarea.input{resize:vertical}
     </div>
     <div class="field"><label>Istruttore</label><select class="input" id="lez-istruttore"></select></div>
     <div class="field"><label>Cavallo</label><select class="input" id="lez-cavallo" onchange="lezioneCavalloCambiato()"><option value="">Nessuno / da definire</option></select></div>
-    <div class="field"><label>Allievo / Proprietario</label><select class="input" id="lez-allievo" onchange="aggiornaCavalieriSuggeriti()"></select></div>
+    <div class="field"><label>Allievo / Proprietario</label><select class="input" id="lez-allievo" onchange="aggiornaCavalieriSuggeriti();lezioneAggiornaCarnet()"></select></div>
+    <div class="field" id="lez-carnet-field"><label>Carnet da cui scalare</label>
+      <select class="input" id="lez-pacchetto" onchange="lezioneCarnetInfo()"><option value="">— nessuno —</option></select>
+      <div id="lez-carnet-info" style="font-size:12.5px;margin-top:4px;color:var(--muted)"></div></div>
     <div class="field"><label>Chi monta <span style="color:var(--muted);font-weight:400">(se diverso, es. figlio o figlia)</span></label>
       <input class="input" id="lez-cavaliere" list="lez-cavalieri-suggeriti" maxlength="80" placeholder="Facoltativo, es. Sofia">
       <datalist id="lez-cavalieri-suggeriti"></datalist></div>
@@ -3269,11 +3306,12 @@ textarea.input{resize:vertical}
 <div class="modal-overlay" id="modal-pacchetto" onclick="closeOut(event,'modal-pacchetto')">
   <div class="modal">
     <div class="modal-title"><span id="modal-pacchetto-title">Nuovo pacchetto</span> <span class="x" onclick="closeModal('modal-pacchetto')">✕</span></div>
-    <div class="field"><label>Cliente</label><input class="input" id="pac-cliente" placeholder="Nome allievo / proprietario"></div>
-    <div class="field">
-      <label>Collega a un membro del team (opzionale, per Chatta)</label>
-      <select class="input" id="pac-membro"><option value="">— nessuno (solo testo libero) —</option></select>
+    <div class="field"><label>Cliente</label>
+      <div style="display:flex;gap:8px"><select class="input" id="pac-membro" onchange="pacchettoClienteCambiato()" style="flex:1"><option value="">— scegli il cliente —</option></select>
+        <button type="button" class="btn btn-outline btn-sm" id="pac-nuovo-cliente" onclick="openClienteForm(null, true)" title="Nuovo cliente"><i class="fa-solid fa-user-plus"></i></button></div>
+      <div id="pac-da-collegare" style="display:none;font-size:12.5px;margin-top:5px;color:#8a6a12">Questo pacchetto è intestato solo a un nome scritto a mano («<b id="pac-nome-vecchio"></b>»): scegli il cliente giusto, o crealo con il tasto accanto.</div>
     </div>
+    <div class="field"><label>Nome sul pacchetto</label><input class="input" id="pac-cliente" placeholder="Si compila da solo con il nome del cliente"></div>
     <div class="field">
       <label>Tipo</label>
       <select class="input" id="pac-tipo" onchange="toggleTipoPacchetto()">
@@ -3288,6 +3326,11 @@ textarea.input{resize:vertical}
       <div class="field"><label>Lezioni totali</label><input class="input" id="pac-unita-totali" type="number" min="1" placeholder="Es. 10"></div>
       <div class="field"><label>Lezioni usate</label><input class="input" id="pac-unita-usate" type="number" min="0" value="0"></div>
     </div>
+    <div class="grid grid-2" id="pac-correzione" style="display:none">
+      <div class="field"><label>Correggi le lezioni usate (±)</label><input class="input" id="pac-corr-q" type="number" step="1" placeholder="Es. -1 per ridarne una"></div>
+      <div class="field"><label>Motivo della correzione</label><input class="input" id="pac-corr-nota" maxlength="200" placeholder="Es. lezione regalata"></div>
+    </div>
+    <div id="pac-storico" style="display:none;font-size:13px;margin:-4px 0 12px"></div>
     <div class="grid grid-2">
       <div class="field"><label>Data inizio</label><input class="input" id="pac-inizio" type="date"></div>
       <div class="field"><label>Scadenza</label><input class="input" id="pac-scadenza" type="date"></div>
@@ -3520,6 +3563,31 @@ textarea.input{resize:vertical}
 </div>
 
 <!-- MODAL: nuovo messaggio -->
+<div class="modal-overlay" id="modal-cliente" onclick="closeOut(event,'modal-cliente')">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-cliente-title">Nuovo cliente</span> <span class="x" onclick="closeModal('modal-cliente')">✕</span></div>
+    <div class="grid grid-2">
+      <div class="field"><label>Nome e cognome</label><input class="input" id="cli-nome" maxlength="80" placeholder="Es. Sofia Rossi"></div>
+      <div class="field"><label>Ruolo</label><select class="input" id="cli-ruolo"><option value="allievo">Allievo o genitore</option><option value="proprietario">Proprietario di un cavallo</option></select></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Telefono</label><input class="input" id="cli-telefono" type="tel" maxlength="30" placeholder="Es. 333 1234567"></div>
+      <div class="field"><label>Email</label><input class="input" id="cli-email" type="email" maxlength="120" placeholder="nome@esempio.it"></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field"><label>Data di nascita</label><input class="input" id="cli-nascita" type="date" onchange="clienteNascitaCambiata()"></div>
+      <div class="field"><label>Genitore o referente <span id="cli-ref-obbl" style="color:#8a6a12;font-weight:600;display:none">· obbligatorio per i minori</span></label>
+        <select class="input" id="cli-referente"><option value="">— nessuno —</option></select></div>
+    </div>
+    <div class="field"><label>Note</label><input class="input" id="cli-note" maxlength="1000" placeholder="Facoltativo: allergie, livello, preferenze…"></div>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;margin:4px 0 10px"><input type="checkbox" id="cli-consenso" style="margin-top:3px">
+      <span>Il cliente (o il genitore, per i minori) ha dato il consenso al trattamento dei dati per la gestione del centro. <span id="cli-consenso-data" style="color:var(--muted)"></span></span></label>
+    <div id="cli-collegati" style="display:none;font-size:13px;color:var(--muted);margin:0 0 10px"></div>
+    <p style="color:var(--muted);font-size:12px;margin:0 0 10px"><i class="fa-solid fa-lock"></i> Telefono, email, data di nascita e referente li vedono solo l'amministratore e lo staff di livello 2 e 3.</p>
+    <div class="auth-error" id="cliente-error"></div>
+    <button class="btn btn-primary btn-block" onclick="saveCliente()">Salva</button>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-messaggio" onclick="closeOut(event,'modal-messaggio')">
   <div class="modal">
     <div class="modal-title">Nuovo messaggio <span class="x" onclick="closeModal('modal-messaggio')">✕</span></div>
@@ -3624,8 +3692,8 @@ const CONTATTO_TIPO_LABELS = {
   fornitore:"Fornitore", altro:"Altro",
 };
 const COMING_SOON_COPY = {
-  store: { icon:"fa-store", titolo:"Store", testo:"Vendi ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
-  fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"Genera e invia fatture elettroniche conformi SDI direttamente dagli abbonamenti e dalle lezioni registrate nel gestionale." },
+  store: { icon:"fa-store", titolo:"Store", testo:"In arrivo: venderai ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
+  fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"In arrivo: genererai e invierai fatture elettroniche conformi SDI dai pacchetti e dalle lezioni registrate nel gestionale." },
 };
 const ACTIVE_PLACEHOLDER_COPY = {};
 
@@ -5691,6 +5759,7 @@ function enterAppShell(){
   document.getElementById("user-avatar-mobile").textContent = initial;
 
   renderTeam();
+  caricaClienti();
   renderPlaceholderModules();
   applySavedSidebarState();
   applySavedTheme();
@@ -8682,6 +8751,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			"fa-lock": "Non incluso nel tuo pacchetto: tocca per saperne di più"
 		};
 		const MODULI_TIP = {
+			clienti: "Allievi, genitori e proprietari con contatti e referenti",
 			home: "Panoramica del centro, accesso rapido e promemoria",
 			centro: "Dati del centro, team, codice invito e il tuo pacchetto",
 			cavalli: "Anagrafica cavalli, scadenzario sanitario e Box / Stalla",
@@ -11983,22 +12053,52 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		await refreshBoxSezione();
 	}
 	// equo-scuderia-src/src/sezioni/cavalli/moduli/060-impostazioni-icone-4-facoltative.js
-	function boxApriImpostazioni() {
+	var DIARIO_DEFAULT = [
+		"pasto_mattina",
+		"pasto_sera",
+		"fieno",
+		"paddock",
+		"lavorato",
+		"farmaco",
+		"box_pulito"
+	];
+	async function boxDiarioAttivita() {
+		if (Array.isArray(currentCentro?.diario_attivita)) return currentCentro.diario_attivita;
+		if (!DEMO_MODE && currentCentro?.id) {
+			const { data, error } = await sb.from("centri").select("diario_attivita").eq("id", currentCentro.id).maybeSingle();
+			if (!error && Array.isArray(data?.diario_attivita)) {
+				currentCentro.diario_attivita = data.diario_attivita;
+				return data.diario_attivita;
+			}
+		}
+		return DIARIO_DEFAULT;
+	}
+	async function boxApriImpostazioni() {
 		const extra = currentCentro?.box_icone_extra || [];
-		document.getElementById("box-impost-lista").innerHTML = Object.entries(BOX_ICONE).map(([k, d]) => `<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px">
-    <input type="checkbox" value="${k}" ${!d.extra ? "checked disabled" : extra.includes(k) ? "checked" : ""}> <span class="box-ic on" style="--ic-col:${d.col};opacity:1">${iconHtml(d.icon)}</span> ${d.nome} <small style="color:var(--muted);margin-left:auto">${d.extra ? "facoltativa" : "sempre"}</small></label>`).join("");
+		const diario = await boxDiarioAttivita();
+		document.getElementById("box-impost-lista").innerHTML = `<div style="display:flex;gap:10px;padding:0 0 6px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em"><span style="flex:1">Icona</span><span style="width:76px;text-align:center">Nel box</span><span style="width:76px;text-align:center">Al proprietario</span></div>` + Object.entries(BOX_ICONE).map(([k, d]) => `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px">
+    <span style="flex:1;display:flex;align-items:center;gap:10px"><span class="box-ic on" style="--ic-col:${d.col};opacity:1">${iconHtml(d.icon)}</span> ${d.nome}${d.extra ? " <small style=\"color:var(--muted)\">facoltativa</small>" : ""}</span>
+    <label style="width:76px;text-align:center" title="${d.extra ? "Mostra questa icona sui box" : "Sempre presente sui box"}"><input type="checkbox" class="box-imp-box" value="${k}" ${!d.extra ? "checked disabled" : extra.includes(k) ? "checked" : ""}></label>
+    <label style="width:76px;text-align:center" title="Il proprietario la vede nella scheda del suo cavallo"><input type="checkbox" class="box-imp-diario" value="${k}" ${diario.includes(k) ? "checked" : ""}></label></div>`).join("");
 		openModal("modal-box-impost");
 	}
 	async function boxSalvaImpostazioni() {
-		const extra = [...document.querySelectorAll("#box-impost-lista input:not([disabled]):checked")].map((i) => i.value);
+		const extra = [...document.querySelectorAll("#box-impost-lista .box-imp-box:not([disabled]):checked")].map((i) => i.value);
+		const diario = [...document.querySelectorAll("#box-impost-lista .box-imp-diario:checked")].map((i) => i.value);
 		if (!DEMO_MODE) {
 			const { error } = await sb.from("centri").update({ box_icone_extra: extra }).eq("id", currentCentro.id);
 			if (error) {
 				showToast(error.message);
 				return;
 			}
+			const r = await sb.from("centri").update({ diario_attivita: diario }).eq("id", currentCentro.id);
+			if (r.error && !/diario_attivita/.test(r.error.message || "")) {
+				showToast(r.error.message);
+				return;
+			}
 		}
 		currentCentro.box_icone_extra = extra;
+		currentCentro.diario_attivita = diario;
 		closeModal("modal-box-impost");
 		renderBox();
 		showToast("Icone del giorno aggiornate.");
@@ -12084,7 +12184,11 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 	};
 	async function refreshLezioniModule() {
 		if (cavalliList.length === 0) await loadCavalli();
-		await loadLezioni();
+		await Promise.all([
+			loadLezioni(),
+			loadPacchetti().catch(() => {}),
+			caricaDisdettaOre()
+		]);
 		populateLezioneSelects();
 		renderLezioni();
 	}
@@ -12094,7 +12198,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			aggiornaContatoriNav();
 			return;
 		}
-		const { data, error } = await sb.from("scuderia_lezioni").select("id, centro_id, data, ora_inizio, istruttore_id, cavallo_id, allievo_id, stato, note, cavaliere").eq("centro_id", currentCentro.id).order("data", { ascending: true }).order("ora_inizio", { ascending: true });
+		const { data, error } = await sb.from("scuderia_lezioni").select("*").eq("centro_id", currentCentro.id).order("data", { ascending: true }).order("ora_inizio", { ascending: true });
 		if (!error) lezioniList = data || [];
 		aggiornaContatoriNav();
 	}
@@ -12128,7 +12232,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
       <td>${l.ora_inizio ? String(l.ora_inizio).slice(0, 5) : "—"}</td>
       <td>${escapeHtml(membroNome(l.istruttore_id))}</td>
       <td>${escapeHtml(cavalloNome(l.cavallo_id))}</td>
-      <td>${escapeHtml(membroNome(l.allievo_id))}${l.cavaliere ? `<div style="color:var(--muted);font-size:12px">monta ${escapeHtml(l.cavaliere)}</div>` : ""}</td>
+      <td>${escapeHtml(membroNome(l.allievo_id))}${l.cavaliere ? `<div style="color:var(--muted);font-size:12px">monta ${escapeHtml(l.cavaliere)}</div>` : ""}${carnetBreve(l.pacchetto_id)}</td>
       <td><span class="badge-pill badge-${STATO_LEZIONE_BADGE[l.stato] || "gray"}">${STATO_LEZIONE_LABELS[l.stato] || l.stato}</span></td>
       <td style="text-align:right">
         ${l.allievo_id ? `<button class="btn btn-ghost btn-sm" onclick="chattaConMembro('${l.allievo_id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
@@ -12179,6 +12283,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 		document.getElementById("lez-stato").value = l?.stato || "prenotata";
 		document.getElementById("lez-cavaliere").value = l?.cavaliere || "";
 		aggiornaCavalieriSuggeriti();
+		lezioneAggiornaCarnet(l?.pacchetto_id || null, !l);
 		if (l?.istruttore_id) document.getElementById("lez-istruttore").value = l.istruttore_id;
 		openModal("modal-lezione");
 	}
@@ -12204,7 +12309,8 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			cavallo_id,
 			allievo_id,
 			note,
-			cavaliere
+			cavaliere,
+			pacchetto_id: document.getElementById("lez-pacchetto").value || null
 		};
 		if (editingLezioneId) payload.stato = document.getElementById("lez-stato").value || "prenotata";
 		else payload.stato = "prenotata";
@@ -12212,12 +12318,26 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			if (DEMO_MODE) {
 				if (editingLezioneId) {
 					const l = demoState.lezioni.find((x) => x.id === editingLezioneId);
-					if (l) Object.assign(l, payload);
-				} else demoState.lezioni.push({
-					id: "l" + (demoIdCounter++ + 200),
-					centro_id: demoState.centro.id,
-					...payload
-				});
+					if (l) {
+						const prima = l.stato, pacPrima = l.pacchetto_id;
+						if (pacPrima && pacPrima !== payload.pacchetto_id) {
+							l.stato = "prenotata";
+							demoScalo(l, prima);
+							l.stato = prima;
+							l.pacchetto_id = pacPrima;
+						}
+						Object.assign(l, payload);
+						demoScalo(l, prima);
+					}
+				} else {
+					const l = {
+						id: "l" + (demoIdCounter++ + 200),
+						centro_id: demoState.centro.id,
+						...payload
+					};
+					demoState.lezioni.push(l);
+					demoScalo(l, null);
+				}
 			} else if (editingLezioneId) {
 				const { error } = await sb.from("scuderia_lezioni").update(payload).eq("id", editingLezioneId);
 				if (error) throw error;
@@ -12230,7 +12350,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			}
 			const modificata = !!editingLezioneId;
 			editingLezioneId = null;
-			await loadLezioni();
+			await Promise.all([loadLezioni(), loadPacchetti().catch(() => {})]);
 			renderLezioni();
 			closeModal("modal-lezione");
 			showToast(modificata ? "Lezione aggiornata." : "Lezione aggiunta.");
@@ -12242,7 +12362,11 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 	async function setLezioneStato(id, stato) {
 		if (DEMO_MODE) {
 			const l = demoState.lezioni.find((x) => x.id === id);
-			if (l) l.stato = stato;
+			if (l) {
+				const prima = l.stato;
+				l.stato = stato;
+				demoScalo(l, prima);
+			}
 		} else {
 			const { error } = await sb.from("scuderia_lezioni").update({ stato }).eq("id", id);
 			if (error) {
@@ -12250,9 +12374,10 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 				return;
 			}
 		}
-		await loadLezioni();
+		await Promise.all([loadLezioni(), loadPacchetti().catch(() => {})]);
 		renderLezioni();
-		showToast("Lezione aggiornata.");
+		const l = lezioniList.find((x) => x.id === id), p = l?.pacchetto_id ? pacchettiList.find((x) => x.id === l.pacchetto_id) : null;
+		showToast(stato === "completata" && p && p.unita_totali != null ? `Lezione completata · nel carnet restano ${Math.max(p.unita_totali - (p.unita_usate || 0), 0)} lezioni.` : "Lezione aggiornata.");
 	}
 	function askDeleteLezione(id) {
 		lezioneToDelete = id;
@@ -12260,8 +12385,15 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 	}
 	async function confirmDeleteLezione() {
 		if (!lezioneToDelete) return;
-		if (DEMO_MODE) demoState.lezioni = demoState.lezioni.filter((l) => l.id !== lezioneToDelete);
-		else {
+		if (DEMO_MODE) {
+			const l = demoState.lezioni.find((x) => x.id === lezioneToDelete);
+			if (l) {
+				const prima = l.stato;
+				l.stato = "prenotata";
+				demoScalo(l, prima);
+			}
+			demoState.lezioni = demoState.lezioni.filter((l) => l.id !== lezioneToDelete);
+		} else {
 			const { error } = await sb.from("scuderia_lezioni").delete().eq("id", lezioneToDelete);
 			if (error) {
 				showToast("Errore nell'eliminazione.");
@@ -12274,11 +12406,102 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 		closeModal("modal-delete-lezione");
 		showToast("Lezione eliminata.");
 	}
+	function carnetValidiPer(allievoId, data) {
+		if (!allievoId) return [];
+		const ref = typeof clientiDati !== "undefined" ? clientiDati[allievoId]?.referente_id : null;
+		return (pacchettiList || []).filter((p) => p.tipo === "carnet" && (p.membro_id === allievoId || ref && p.membro_id === ref) && (!p.data_scadenza || p.data_scadenza >= data) && (!p.data_inizio || p.data_inizio <= data)).sort((a, b) => (a.data_scadenza || "9999").localeCompare(b.data_scadenza || "9999"));
+	}
+	function carnetRimaste(p) {
+		return p && p.unita_totali != null ? p.unita_totali - (p.unita_usate || 0) : null;
+	}
+	function carnetBreve(id) {
+		const p = id ? (pacchettiList || []).find((x) => x.id === id) : null;
+		if (!p) return "";
+		const r = carnetRimaste(p);
+		return `<div style="color:${r != null && r <= 2 ? "#8a6a12" : "var(--muted)"};font-size:12px"><i class="fa-solid fa-ticket"></i> carnet ${p.unita_usate || 0}/${p.unita_totali ?? "—"}</div>`;
+	}
+	function lezioneAggiornaCarnet(scelto, proponi) {
+		const sel = document.getElementById("lez-pacchetto");
+		if (!sel) return;
+		const allievo = document.getElementById("lez-allievo").value;
+		const validi = carnetValidiPer(allievo, document.getElementById("lez-data").value || isoLoc(/* @__PURE__ */ new Date()));
+		const attuale = scelto !== void 0 && scelto !== null ? scelto : sel.value;
+		const extra = attuale && !validi.some((p) => p.id === attuale) ? (pacchettiList || []).filter((p) => p.id === attuale) : [];
+		sel.innerHTML = `<option value="">— nessuno —</option>` + [...validi, ...extra].map((p) => {
+			const r = carnetRimaste(p);
+			return `<option value="${p.id}">${escapeHtml(p.cliente)} · ${r == null ? "senza limite" : r + " su " + p.unita_totali + " rimaste"}${p.data_scadenza ? " · scade " + formatDate(p.data_scadenza) : ""}</option>`;
+		}).join("");
+		const libero = validi.find((p) => carnetRimaste(p) == null || carnetRimaste(p) > 0);
+		sel.value = attuale && [...sel.options].some((o) => o.value === attuale) ? attuale : proponi !== false && !attuale && libero ? libero.id : "";
+		lezioneCarnetInfo();
+	}
+	function lezioneCarnetInfo() {
+		const info = document.getElementById("lez-carnet-info");
+		if (!info) return;
+		const allievo = document.getElementById("lez-allievo").value, id = document.getElementById("lez-pacchetto").value;
+		const p = id ? (pacchettiList || []).find((x) => x.id === id) : null, r = carnetRimaste(p);
+		if (p) info.innerHTML = r == null ? "Lezioni senza limite." : r <= 0 ? "<span style=\"color:var(--danger)\">Questo carnet è finito: la lezione si salva, ma conviene un carnet nuovo.</span>" : `Quando la segni completata, la lezione si scala da qui: ne restano ${r}.`;
+		else info.innerHTML = allievo ? "Nessun carnet valido: la lezione si salva lo stesso, senza scalare." : "";
+	}
+	async function caricaDisdettaOre() {
+		if (!DEMO_MODE && currentCentro?.id && currentCentro.disdetta_ore == null) {
+			const { data, error } = await sb.from("centri").select("disdetta_ore").eq("id", currentCentro.id).maybeSingle();
+			if (!error && data?.disdetta_ore != null) currentCentro.disdetta_ore = data.disdetta_ore;
+		}
+		const sel = document.getElementById("lez-disdetta-ore");
+		if (!sel) return;
+		const ore = String(currentCentro?.disdetta_ore ?? 24);
+		if (![...sel.options].some((o) => o.value === ore)) sel.insertAdjacentHTML("beforeend", `<option value="${ore}">${ore}</option>`);
+		sel.value = ore;
+		sel.disabled = currentMembro?.ruolo !== "admin";
+	}
+	async function salvaDisdettaOre() {
+		const ore = parseInt(document.getElementById("lez-disdetta-ore").value, 10);
+		if (!DEMO_MODE) {
+			const { error } = await sb.from("centri").update({ disdetta_ore: ore }).eq("id", currentCentro.id);
+			if (error) {
+				showToast(error.message);
+				return;
+			}
+		}
+		currentCentro.disdetta_ore = ore;
+		showToast(ore ? `Disdetta senza perdere la lezione fino a ${ore} ore prima.` : "Le lezioni disdette non si perdono mai.");
+	}
+	function demoScalo(l, statoPrima) {
+		if (!DEMO_MODE || !l) return;
+		demoState.movimenti = demoState.movimenti || [];
+		if (!l.pacchetto_id && l.allievo_id && l.stato === "completata" && statoPrima !== "completata") {
+			const libero = carnetValidiPer(l.allievo_id, l.data).find((p) => carnetRimaste(p) == null || carnetRimaste(p) > 0);
+			l.pacchetto_id = libero ? libero.id : null;
+		}
+		const p = demoState.pacchetti.find((x) => x.id === l.pacchetto_id && x.tipo === "carnet");
+		if (!p) return;
+		const netto = demoState.movimenti.filter((m) => m.lezione_id === l.id && m.pacchetto_id === p.id).reduce((s, m) => s + m.quantita, 0);
+		let target, motivo = "lezione";
+		if (l.stato === "completata") target = 1;
+		else if (l.stato === "annullata" && statoPrima && statoPrima !== "annullata") {
+			const inizio = (/* @__PURE__ */ new Date(l.data + "T" + String(l.ora_inizio || "00:00").slice(0, 5))).getTime();
+			target = Date.now() > inizio - (currentCentro?.disdetta_ore ?? 24) * 36e5 ? 1 : 0;
+			motivo = "disdetta_tardiva";
+		} else if (l.stato === "annullata") target = netto;
+		else target = 0;
+		if (target === netto) return;
+		demoState.movimenti.push({
+			id: "mv" + demoIdCounter++,
+			pacchetto_id: p.id,
+			lezione_id: l.id,
+			quantita: target - netto,
+			motivo: target > netto ? motivo : "restituito",
+			nota: "lezione del " + formatDate(l.data),
+			creato_il: (/* @__PURE__ */ new Date()).toISOString()
+		});
+		p.unita_usate = Math.max((p.unita_usate || 0) + target - netto, 0);
+	}
 	// equo-scuderia-src/src/sezioni/lezioni-pacchetti-comunicazioni/moduli/045-pacchetti-abbonamenti.js
 	async function refreshPacchettiModule() {
 		if (cavalliList.length === 0) await loadCavalli();
 		await loadEventiAll();
-		await loadPacchetti();
+		await loadPacchetti$1();
 		populatePacchettoMembroSelect();
 		renderCruscotto();
 		renderPacchetti();
@@ -12286,9 +12509,13 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 	function populatePacchettoMembroSelect() {
 		const sel = document.getElementById("pac-membro");
 		if (!sel) return;
-		sel.innerHTML = `<option value="">— nessuno (solo testo libero) —</option>` + teamList.map((m) => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])} (${RUOLO_LABELS[m.ruolo] || m.ruolo})</option>`).join("");
+		const opt = (m) => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])} (${RUOLO_LABELS[m.ruolo] || m.ruolo})</option>`;
+		const ord = (a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it");
+		const clienti = teamList.filter((m) => ["allievo", "proprietario"].includes(m.ruolo)).sort(ord);
+		const staff = teamList.filter((m) => !["allievo", "proprietario"].includes(m.ruolo)).sort(ord);
+		sel.innerHTML = `<option value="">— scegli il cliente —</option>` + (clienti.length ? `<optgroup label="Clienti">${clienti.map(opt).join("")}</optgroup>` : "") + (staff.length ? `<optgroup label="Staff">${staff.map(opt).join("")}</optgroup>` : "");
 	}
-	async function loadPacchetti() {
+	async function loadPacchetti$1() {
 		if (DEMO_MODE) {
 			pacchettiList = demoState.pacchetti;
 			aggiornaContatoriNav();
@@ -12364,7 +12591,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			const dettaglio = p.tipo === "carnet" ? `${p.unita_usate ?? 0} / ${p.unita_totali ?? "—"} lezioni` : p.prezzo ? `€ ${Number(p.prezzo).toFixed(2)}` : "—";
 			const tr = document.createElement("tr");
 			tr.innerHTML = `
-      <td>${escapeHtml(p.cliente)}</td>
+      <td>${escapeHtml(p.cliente)}${p.membro_id ? "" : " <span class=\"badge-pill badge-yellow\" title=\"Apri il pacchetto e scegli il cliente\">da collegare</span>"}</td>
       <td>${TIPO_PACCHETTO_LABELS[p.tipo] || p.tipo}</td>
       <td>${dettaglio}</td>
       <td>${p.data_scadenza ? formatDate(p.data_scadenza) : "—"}</td>
@@ -12392,6 +12619,11 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 		document.getElementById("pacchetto-error").style.display = "none";
 		document.getElementById("modal-pacchetto-title").textContent = editingPacchettoId ? "Modifica pacchetto" : "Nuovo pacchetto";
 		populatePacchettoMembroSelect();
+		const btnNuovo = document.getElementById("pac-nuovo-cliente");
+		if (btnNuovo) btnNuovo.style.display = typeof puoVedereClienti === "function" && puoVedereClienti() ? "" : "none";
+		const pv = editingPacchettoId ? pacchettiList.find((x) => x.id === editingPacchettoId) : null;
+		document.getElementById("pac-da-collegare").style.display = pv && !pv.membro_id ? "block" : "none";
+		document.getElementById("pac-nome-vecchio").textContent = pv?.cliente || "";
 		if (editingPacchettoId) {
 			const p = pacchettiList.find((x) => x.id === editingPacchettoId);
 			document.getElementById("pac-cliente").value = p?.cliente || "";
@@ -12417,15 +12649,56 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			document.getElementById("pac-note").value = "";
 		}
 		toggleTipoPacchetto();
+		pacchettoMostraCrediti(editingPacchettoId ? pacchettiList.find((x) => x.id === editingPacchettoId) : null);
 		openModal("modal-pacchetto");
 	}
+	var MOTIVO_CREDITO = {
+		lezione: "Lezione",
+		disdetta_tardiva: "Disdetta tardiva",
+		restituito: "Restituita",
+		correzione: "Correzione",
+		iniziale: "Già usate all'inizio"
+	};
+	async function pacchettoMostraCrediti(p) {
+		const esistente = !!(p && p.tipo === "carnet");
+		document.getElementById("pac-unita-usate").disabled = esistente;
+		document.getElementById("pac-correzione").style.display = esistente ? "grid" : "none";
+		document.getElementById("pac-corr-q").value = "";
+		document.getElementById("pac-corr-nota").value = "";
+		const box = document.getElementById("pac-storico");
+		box.style.display = "none";
+		box.innerHTML = "";
+		if (!esistente) return;
+		let mov = [];
+		if (DEMO_MODE) mov = (demoState.movimenti || []).filter((m) => m.pacchetto_id === p.id);
+		else {
+			const { data, error } = await sb.from("scuderia_crediti_movimenti").select("quantita, motivo, nota, creato_il").eq("pacchetto_id", p.id).order("creato_il", { ascending: false }).limit(30);
+			if (!error) mov = data || [];
+		}
+		mov = [...mov].sort((a, b) => String(b.creato_il).localeCompare(String(a.creato_il)));
+		if (!mov.length) return;
+		box.innerHTML = `<div style="font-weight:600;margin-bottom:4px">Movimenti del carnet</div>` + mov.map((m) => `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+    <span style="width:44px;color:var(--muted)">${escapeHtml(formatDate(String(m.creato_il).slice(0, 10)).slice(0, 5))}</span>
+    <span style="flex:1">${escapeHtml(MOTIVO_CREDITO[m.motivo] || m.motivo)}${m.nota ? ` <span style="color:var(--muted)">· ${escapeHtml(m.nota)}</span>` : ""}</span>
+    <b style="color:${m.quantita > 0 ? "var(--text)" : "#2c5228"}">${m.quantita > 0 ? "−" + m.quantita : "+" + Math.abs(m.quantita)}</b></div>`).join("");
+		box.style.display = "block";
+	}
 	async function savePacchetto() {
-		const cliente = document.getElementById("pac-cliente").value.trim();
-		const tipo = document.getElementById("pac-tipo").value;
+		const membroScelto = document.getElementById("pac-membro").value;
 		const errBox = document.getElementById("pacchetto-error");
 		errBox.style.display = "none";
-		if (!cliente) {
-			errBox.textContent = "Inserisci il nome del cliente.";
+		if (!membroScelto) {
+			errBox.textContent = "Scegli il cliente dall'elenco (se non c'è, crealo con il tasto accanto).";
+			errBox.style.display = "block";
+			return;
+		}
+		if (!document.getElementById("pac-cliente").value.trim()) document.getElementById("pac-cliente").value = teamList.find((m) => m.id === membroScelto)?.nome_visualizzato || "";
+		const cliente = document.getElementById("pac-cliente").value.trim() || "Cliente";
+		const tipo = document.getElementById("pac-tipo").value;
+		const corrQ = parseInt(document.getElementById("pac-corr-q").value, 10) || 0;
+		const corrNota = document.getElementById("pac-corr-nota").value.trim();
+		if (editingPacchettoId && corrQ && !corrNota) {
+			errBox.textContent = "Scrivi il motivo della correzione.";
 			errBox.style.display = "block";
 			return;
 		}
@@ -12441,6 +12714,8 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			note: document.getElementById("pac-note").value.trim() || null,
 			cavallo_id: tipo === "carnet" ? null : document.getElementById("pac-cavallo").value || null
 		};
+		const pv = editingPacchettoId ? pacchettiList.find((x) => x.id === editingPacchettoId) : null;
+		if (pv && pv.tipo === "carnet" && tipo === "carnet") delete payload.unita_usate;
 		try {
 			if (DEMO_MODE) {
 				if (editingPacchettoId) {
@@ -12449,6 +12724,18 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 						...demoState.pacchetti[idx],
 						...payload
 					};
+					if (idx >= 0 && corrQ) {
+						const p = demoState.pacchetti[idx];
+						p.unita_usate = Math.max((p.unita_usate || 0) + corrQ, 0);
+						(demoState.movimenti = demoState.movimenti || []).push({
+							id: "mv" + demoIdCounter++,
+							pacchetto_id: p.id,
+							quantita: corrQ,
+							motivo: "correzione",
+							nota: corrNota,
+							creato_il: (/* @__PURE__ */ new Date()).toISOString()
+						});
+					}
 				} else demoState.pacchetti.push({
 					id: "p" + (demoIdCounter++ + 300),
 					centro_id: demoState.centro.id,
@@ -12457,6 +12744,14 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 			} else if (editingPacchettoId) {
 				const { error } = await sb.from("scuderia_pacchetti").update(payload).eq("id", editingPacchettoId);
 				if (error) throw error;
+				if (corrQ) {
+					const r = await sb.rpc("correggi_crediti", {
+						p_pacchetto: editingPacchettoId,
+						p_quantita: corrQ,
+						p_nota: corrNota
+					});
+					if (r.error) throw r.error;
+				}
 			} else {
 				const { error } = await sb.from("scuderia_pacchetti").insert({
 					centro_id: currentCentro.id,
@@ -12464,15 +12759,27 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 				});
 				if (error) throw error;
 			}
-			await loadPacchetti();
+			await loadPacchetti$1();
 			renderCruscotto();
 			renderPacchetti();
 			closeModal("modal-pacchetto");
 			showToast("Pacchetto salvato.");
 		} catch (err) {
-			errBox.textContent = err.message || "Errore nel salvataggio.";
+			errBox.textContent = /PACCHETTO_SENZA_CLIENTE/.test(err.message || "") ? "Scegli il cliente dall'elenco." : err.message || "Errore nel salvataggio.";
 			errBox.style.display = "block";
 		}
+	}
+	var pacNomeAuto = "";
+	function pacchettoClienteCambiato() {
+		const nome = teamList.find((m) => m.id === document.getElementById("pac-membro").value)?.nome_visualizzato || "";
+		const campo = document.getElementById("pac-cliente");
+		if (!campo.value.trim() || campo.value.trim() === pacNomeAuto || document.getElementById("pac-da-collegare").style.display === "block") campo.value = nome;
+		pacNomeAuto = nome;
+	}
+	function pacchettoScegliCliente(id) {
+		populatePacchettoMembroSelect();
+		document.getElementById("pac-membro").value = id;
+		pacchettoClienteCambiato();
 	}
 	function askDeletePacchetto(id) {
 		pacchettoToDelete = id;
@@ -12489,7 +12796,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 				return;
 			}
 		}
-		await loadPacchetti();
+		await loadPacchetti$1();
 		renderCruscotto();
 		renderPacchetti();
 		closeModal("modal-delete-pacchetto");
@@ -12503,6 +12810,12 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 	}
 	// equo-scuderia-src/src/sezioni/lezioni-pacchetti-comunicazioni/moduli/index.js
 	Object.assign(window, {
+		lezioneAggiornaCarnet,
+		lezioneCarnetInfo,
+		caricaDisdettaOre,
+		salvaDisdettaOre,
+		carnetValidiPer,
+		pacchettoMostraCrediti,
 		aggiornaCavalieriSuggeriti,
 		askDeleteLezione,
 		askDeletePacchetto,
@@ -12511,7 +12824,7 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 		confirmDeletePacchetto,
 		lezioneCavalloCambiato,
 		loadLezioni,
-		loadPacchetti,
+		loadPacchetti: loadPacchetti$1,
 		membroNome,
 		openLezioneForm,
 		openPacchettoForm,
@@ -12523,7 +12836,9 @@ const TIPO_PACCHETTO_LABELS = { carnet:"Carnet lezioni", abbonamento:"Abbonament
 		setLezioneStato,
 		setLezioniFilter,
 		statusPacchetto,
-		toggleTipoPacchetto
+		toggleTipoPacchetto,
+		pacchettoClienteCambiato,
+		pacchettoScegliCliente
 	});
 })();
 
@@ -12541,7 +12856,7 @@ const oggiLocaleIso = () => { const d = new Date(); return d.getFullYear() + "-"
 let notaColoreSelezionato = "giallo";
 // da 053-drag-drop-post-it-mouse-e-touch.js
 const MODULE_TITLES = {
-  home:"Home", centro:"Il tuo Centro", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
+  home:"Home", centro:"Il tuo Centro", clienti:"Clienti", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
   pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Messaggi",
   professionisti:"Professionisti", groom:"Gestione Groom", magazzino:"Magazzino", statistiche:"Statistiche", store:"Store", fatturazione:"Fatturazione SDI", ai:"Agenti AI",
 };
@@ -13100,6 +13415,178 @@ const MODULE_TITLES = {
 	});
 })();
 
+// Equo Scuderia · sezione CLIENTI (3/11/2026 · SQL 37) · script normale: le funzioni sono globali
+// Allievi, genitori e proprietari come clienti veri, anche senza app (salva_cliente).
+// Telefono, email, data di nascita e referente stanno in scuderia_clienti_dati: li vedono solo admin e livelli 2 e 3
+// (regola nel database: puo_vedere_clienti). Un minore deve avere un genitore o referente.
+const RUOLI_CLIENTE = ["allievo", "proprietario"];
+let clientiDati = {};
+const clientiFiltro = { q: "", ruolo: "" };
+let editingClienteId = null;
+let clienteDaPacchetto = false;
+
+function puoVedereClienti(){ return !!currentMembro && (currentMembro.ruolo === "admin" || ["admin", "2", "3"].includes(String(currentMembro.livello || ""))); }
+function clientiElenco(){ return (teamList || []).filter(m => RUOLI_CLIENTE.includes(m.ruolo)); }
+function etaDi(d){
+  if(!d) return null;
+  const n = new Date(d + "T12:00"), o = new Date(); let e = o.getFullYear() - n.getFullYear();
+  if(o.getMonth() < n.getMonth() || (o.getMonth() === n.getMonth() && o.getDate() < n.getDate())) e--;
+  return e;
+}
+function nomeCliente(id){ const m = (teamList || []).find(x => x.id === id); return m ? (m.nome_visualizzato || "Cliente") : "—"; }
+
+async function caricaClienti(){
+  const card = document.getElementById("card-clienti"); if(!card) return;
+  const ok = puoVedereClienti();
+  card.style.display = ok ? "block" : "none";
+  const no = document.getElementById("clienti-non-autorizzato"); if(no) no.style.display = ok ? "none" : "block";
+  document.querySelectorAll('.nav-item[data-module="clienti"]').forEach(b => { b.style.display = ok ? "" : "none"; });
+  if(!ok) return;
+  if(DEMO_MODE){
+    if(!demoState.clientiDati) demoState.clientiDati = { m3: { membro_id: "m3", telefono: "333 1112223", email: "giulia@esempio.it", data_nascita: "2001-06-12", referente_id: null, note: "", consenso_privacy_il: isoLoc(new Date()) } };
+    clientiDati = demoState.clientiDati;
+  } else {
+    const { data, error } = await sb.from("scuderia_clienti_dati").select("membro_id, telefono, email, data_nascita, referente_id, note, consenso_privacy_il").eq("centro_id", currentCentro.id);
+    clientiDati = {};
+    if(!error) (data || []).forEach(r => { clientiDati[r.membro_id] = r; });
+  }
+  renderClienti();
+}
+
+function filtraClienti(){
+  clientiFiltro.q = (document.getElementById("clienti-cerca")?.value || "").trim().toLowerCase();
+  clientiFiltro.ruolo = document.getElementById("clienti-ruolo")?.value || "";
+  renderClienti();
+}
+
+function renderClienti(){
+  const body = document.getElementById("clienti-table-body"); if(!body) return;
+  const tutti = clientiElenco();
+  const q = clientiFiltro.q;
+  const lista = tutti.filter(m => {
+    const d = clientiDati[m.id] || {};
+    if(clientiFiltro.ruolo && m.ruolo !== clientiFiltro.ruolo) return false;
+    if(!q) return true;
+    return (m.nome_visualizzato || "").toLowerCase().includes(q) || (d.telefono || "").replace(/\s/g, "").includes(q.replace(/\s/g, "")) || (d.email || "").includes(q);
+  }).sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it"));
+  document.getElementById("clienti-count").textContent = tutti.length;
+  document.getElementById("clienti-empty").style.display = tutti.length ? "none" : "block";
+  body.innerHTML = lista.map(m => {
+    const d = clientiDati[m.id] || {}, eta = etaDi(d.data_nascita);
+    const contatti = [d.telefono ? `<a href="tel:${escapeHtml(d.telefono.replace(/\s/g, ""))}">${escapeHtml(d.telefono)}</a>` : "", d.email ? `<a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a>` : ""].filter(Boolean).join("<br>");
+    return `<tr>
+      <td>${escapeHtml(m.nome_visualizzato || "Cliente")}${m.user_id ? ' <span class="badge-pill badge-green" title="Usa l\'app Equo">app</span>' : ""}${d.consenso_privacy_il ? "" : ' <span class="badge-pill badge-gray" title="Consenso privacy non registrato">senza consenso</span>'}</td>
+      <td>${escapeHtml(RUOLO_LABELS[m.ruolo] || m.ruolo)}</td>
+      <td style="font-size:13px">${contatti || '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${eta == null ? '<span style="color:var(--muted)">—</span>' : eta + " anni" + (eta < 18 ? ' <span class="badge-pill badge-yellow">minore</span>' : "")}${d.referente_id ? `<div style="color:var(--muted);font-size:12px">ref. ${escapeHtml(nomeCliente(d.referente_id))}</div>` : ""}</td>
+      <td style="text-align:right;white-space:nowrap">
+        ${m.user_id ? `<button class="btn btn-ghost btn-sm" onclick="chattaConMembro('${m.id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
+        <button class="btn btn-ghost btn-sm" onclick="openClienteForm('${m.id}')" title="Scheda cliente"><i class="fa-solid fa-pen"></i></button></td></tr>`;
+  }).join("");
+}
+
+function clienteNascitaCambiata(){
+  const eta = etaDi(document.getElementById("cli-nascita").value);
+  document.getElementById("cli-ref-obbl").style.display = eta != null && eta < 18 ? "inline" : "none";
+}
+
+async function clienteCollegati(id){
+  const box = document.getElementById("cli-collegati");
+  if(!id){ box.style.display = "none"; return; }
+  try{
+    await Promise.all([
+      (typeof lezioniList !== "undefined" && lezioniList.length) || typeof loadLezioni !== "function" ? null : loadLezioni(),
+      (typeof pacchettiList !== "undefined" && pacchettiList.length) || typeof loadPacchetti !== "function" ? null : loadPacchetti(),
+      (typeof cavalliList !== "undefined" && cavalliList.length) || typeof loadCavalli !== "function" ? null : loadCavalli(),
+    ]);
+  }catch(_){}
+  const oggi = isoLoc(new Date());
+  const lez = (typeof lezioniList !== "undefined" ? lezioniList : []).filter(l => l.allievo_id === id);
+  const prossime = lez.filter(l => l.data >= oggi && l.stato !== "annullata").length;
+  const pac = (typeof pacchettiList !== "undefined" ? pacchettiList : []).filter(p => p.membro_id === id);
+  const cav = (typeof cavalliList !== "undefined" ? cavalliList : []).filter(c => c.proprietario_membro_id === id);
+  box.innerHTML = `<i class="fa-solid fa-link"></i> ${lez.length} lezion${lez.length === 1 ? "e" : "i"} (${prossime} in programma) · ${pac.length} pacchett${pac.length === 1 ? "o" : "i"}${cav.length ? " · cavall" + (cav.length === 1 ? "o" : "i") + ": " + cav.map(c => escapeHtml(c.nome)).join(", ") : ""}`;
+  box.style.display = "block";
+}
+
+function openClienteForm(id, daPacchetto){
+  if(!puoVedereClienti()){ showToast("Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti."); return; }
+  const m = id ? (teamList || []).find(x => x.id === id) : null;
+  const d = (m && clientiDati[m.id]) || {};
+  editingClienteId = m ? m.id : null;
+  clienteDaPacchetto = !!daPacchetto;
+  document.getElementById("cliente-error").style.display = "none";
+  document.getElementById("modal-cliente-title").textContent = m ? "Scheda cliente" : "Nuovo cliente";
+  document.getElementById("cli-nome").value = m?.nome_visualizzato || "";
+  document.getElementById("cli-ruolo").value = m && RUOLI_CLIENTE.includes(m.ruolo) ? m.ruolo : "allievo";
+  document.getElementById("cli-telefono").value = d.telefono || "";
+  document.getElementById("cli-email").value = d.email || "";
+  document.getElementById("cli-nascita").value = d.data_nascita || "";
+  document.getElementById("cli-note").value = d.note || "";
+  document.getElementById("cli-consenso").checked = !!d.consenso_privacy_il;
+  document.getElementById("cli-consenso-data").textContent = d.consenso_privacy_il ? "(registrato il " + formatDate(d.consenso_privacy_il) + ")" : "";
+  // referente: un altro cliente maggiorenne (o senza data di nascita)
+  const adulti = clientiElenco().filter(x => x.id !== editingClienteId && !((etaDi(clientiDati[x.id]?.data_nascita) ?? 99) < 18))
+    .sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it"));
+  document.getElementById("cli-referente").innerHTML = `<option value="">— nessuno —</option>` + adulti.map(x => `<option value="${x.id}">${escapeHtml(x.nome_visualizzato || "Cliente")}</option>`).join("");
+  document.getElementById("cli-referente").value = d.referente_id || "";
+  clienteNascitaCambiata();
+  clienteCollegati(editingClienteId);
+  openModal("modal-cliente");
+}
+
+const CLIENTE_ERRORI = {
+  MINORE_SENZA_REFERENTE: "È minorenne: scegli il genitore o referente (se non c'è ancora, crealo prima come cliente).",
+  NOME_MANCANTE: "Scrivi nome e cognome.",
+  NON_AUTORIZZATO: "Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti.",
+  NON_E_UN_CLIENTE: "Questa persona fa parte dello staff: si modifica dal riquadro Team.",
+  scuderia_clienti_dati_email_check: "L'email non sembra valida.",
+};
+
+async function saveCliente(){
+  const errBox = document.getElementById("cliente-error"); errBox.style.display = "none";
+  const v = {
+    nome: document.getElementById("cli-nome").value.trim(), ruolo: document.getElementById("cli-ruolo").value,
+    telefono: document.getElementById("cli-telefono").value.trim(), email: document.getElementById("cli-email").value.trim().toLowerCase(),
+    nascita: document.getElementById("cli-nascita").value || null, referente: document.getElementById("cli-referente").value || null,
+    note: document.getElementById("cli-note").value.trim(), consenso: document.getElementById("cli-consenso").checked,
+  };
+  const errore = (k) => { errBox.textContent = CLIENTE_ERRORI[k] || k; errBox.style.display = "block"; };
+  if(!v.nome) return errore("NOME_MANCANTE");
+  if(v.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) return errore("scuderia_clienti_dati_email_check");
+  const eta = etaDi(v.nascita);
+  if(eta != null && eta < 18 && !v.referente) return errore("MINORE_SENZA_REFERENTE");
+  let id = editingClienteId;
+  try{
+    if(DEMO_MODE){
+      if(!id){ id = "m" + (demoIdCounter++ + 500); demoState.membri.push({ id, user_id: null, ruolo: v.ruolo, nome_visualizzato: v.nome, livello: "1", permessi: {} }); }
+      else { const m = demoState.membri.find(x => x.id === id); if(m){ m.nome_visualizzato = v.nome; m.ruolo = v.ruolo; } }
+      const prima = demoState.clientiDati[id]?.consenso_privacy_il;
+      demoState.clientiDati[id] = { membro_id: id, telefono: v.telefono || null, email: v.email || null, data_nascita: v.nascita, referente_id: v.referente, note: v.note || null, consenso_privacy_il: v.consenso ? (prima || isoLoc(new Date())) : null };
+      teamList = demoState.membri;
+    } else {
+      const { data, error } = await sb.rpc("salva_cliente", { p_centro: currentCentro.id, p_membro: id, p_ruolo: v.ruolo, p_nome: v.nome,
+        p_telefono: v.telefono || null, p_email: v.email || null, p_data_nascita: v.nascita, p_referente: v.referente, p_note: v.note || null, p_consenso: v.consenso });
+      if(error) throw error;
+      id = data;
+      await loadTeam();
+    }
+  }catch(err){
+    const msg = err?.message || "";
+    const k = Object.keys(CLIENTE_ERRORI).find(x => msg.includes(x));
+    return errore(k || (/salva_cliente|schema cache/.test(msg) ? "Manca un aggiornamento del database (SQL 37): avvisa l'assistenza." : msg || "Errore nel salvataggio."));
+  }
+  renderTeam();
+  await caricaClienti();
+  closeModal("modal-cliente");
+  showToast(editingClienteId ? "Cliente aggiornato." : "Cliente aggiunto.");
+  if(clienteDaPacchetto && typeof pacchettoScegliCliente === "function") pacchettoScegliCliente(id);
+  clienteDaPacchetto = false;
+}
+
+
+// aprendo la sezione si ricaricano i dati (team compreso: un cliente può essersi collegato con l'app)
+quandoApriSezione(function(k){ if(k === "clienti") loadTeam().then(caricaClienti); });
 /* ---------- MODALS ---------- */
 /* =====================================================================
    PACCHETTI EQUO SCUDERIA (START / ADVANCE / PREMIUM) — lucchetti e limiti lato app.
@@ -13111,21 +13598,21 @@ const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€29/mese �
 // moduli del menu legati a una funzione del pacchetto
 const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
-  pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet","Cruscotto scadenze e rinnovi"] },
+  pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet, con disdetta senza perdere la lezione","Cruscotto scadenze e rinnovi"] },
   magazzino: { titolo:"Magazzino", icon:"fa-boxes-stacked", da:"advance", punti:["Scorte con semaforo per categoria","Carichi, scarichi e inventario in un tocco","Consumi delle ultime 8 settimane"] },
   statistiche: { titolo:"Statistiche", icon:"fa-chart-line", da:"advance", punti:["Incassi e lezioni degli ultimi 12 mesi","Clienti a rischio con messaggio pronto","Carnet in esaurimento da rinnovare","In PREMIUM: indice di salute, margine per cavallo, radar della concorrenza"] },
   statistiche_complete: { titolo:"Statistiche complete", icon:"fa-chart-line", da:"premium", punti:["Indice di salute del centro 0-100","Margine per cavallo in pensione","Benessere e carico dei cavalli","Mappa di occupazione e simulatore","Radar di Merlino sulla concorrenza della zona"] },
-  store: { titolo:"Store", icon:"fa-store", da:"premium", punti:["Vendita online di lezioni, pacchetti e prodotti"] },
-  sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["Fatture elettroniche conformi SDI","Add-on in ADVANCE, inclusa in PREMIUM"] },
+  store: { titolo:"Store", icon:"fa-store", da:"premium", punti:["In arrivo: vendita online di lezioni, pacchetti e prodotti"] },
+  sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["In arrivo: fatture elettroniche conformi SDI"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
   groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
   agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia","Ermes: magazzino e logistica","In PREMIUM uno dei due è incluso"] },
 };
 const PK_CONFRONTO = [
-  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Professionisti esterni", "3", "9", "illimitati"],
+  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Maniscalchi collegati", "1", "3", "illimitati"],
   ["Lezioni & Prenotazioni", "base (1+1)", "✓ (3+3)", "✓"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
   ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
-  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "—", "add-on", "✓"],
+  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
   ["Supporto prioritario", "—", "—", "✓"],
 ];
 
@@ -13216,7 +13703,7 @@ function renderIlTuoPacchetto(){
     <ul class="pk-funz">
       ${f(p.pacchetti, "Pacchetti & Abbonamenti")}${f(p.promemoria_auto, "Promemoria automatici")}${f(p.magazzino, "Magazzino" + (p.magazzino && !p.magazzino_avanzato ? " (base)" : ""))}
       ${f(p.statistiche, "Statistiche" + (p.statistiche && !p.statistiche_complete ? " (base)" : ""))}${f(p.radar, "Radar di Merlino")}${f(p.livelli, "Livelli del team")}
-      ${f(p.athena_proattiva, "Athena completa" + (p.athena_proattiva ? "" : " (hai Athena basic)"))}${f(p.sdi, "Fatturazione SDI")}${f(p.supporto_prioritario, "Supporto prioritario")}
+      ${f(p.athena_proattiva, "Athena completa" + (p.athena_proattiva ? "" : " (hai Athena basic)"))}${f(p.sdi, "Fatturazione SDI (in arrivo)")}${f(p.supporto_prioritario, "Supporto prioritario")}
       ${f((p.agenti || []).length > 1, "Agenti add-on" + ((p.agenti || []).length > 1 ? ": " + p.agenti.filter(a => a !== "athena").map(a => a[0].toUpperCase() + a.slice(1)).join(", ") : ""))}
     </ul>
     ${p.sbloccato || p.pacchetto === "enterprise" ? "" : `
@@ -13852,6 +14339,7 @@ const LEGAL_CONTENT = {
       <li>Dati account: nome, email, password (Supabase Auth)</li>
       <li>Dati del centro: nome, indirizzo, telefono, membri del team, dati societari/pagamento se inseriti</li>
       <li>Dati dei clienti del centro: proprietari, cavalli, lezioni, pacchetti, comunicazioni interne</li>
+      <li>Contatti dei clienti inseriti dal centro: telefono, email, data di nascita, genitore o referente per i minori, data del consenso. Li vedono solo l'amministratore del centro e lo staff di livello 2 e 3</li>
       <li>Dati tecnici e cookie (vedi tab Cookie)</li>
     </ul>
     <h3>Perché li trattiamo</h3>
@@ -14442,12 +14930,12 @@ function aggiornaDataOraScud(){
 </script>
 <script id="sc-pill-js">
 (function(){
- var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["pacchetti","fa-ticket","Pacchetti"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
+ var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["pacchetti","fa-ticket","Pacchetti"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
  window.scPiu=function(forza){
   var m=document.getElementById("sc-menu"),v=document.getElementById("sc-velo"),b=document.getElementById("sc-piu");
   var apri=typeof forza==="boolean"?forza:!m.classList.contains("aperto");
   if(apri){
-   m.innerHTML=VOCI.filter(function(x){return typeof scModuloOk!=="function"||["store","fatturazione"].indexOf(x[0])>=0||scModuloOk(x[0]);}).map(function(x){
+   m.innerHTML=VOCI.filter(function(x){return x[0]!=="clienti"||(typeof puoVedereClienti==="function"&&puoVedereClienti());}).filter(function(x){return typeof scModuloOk!=="function"||["store","fatturazione"].indexOf(x[0])>=0||scModuloOk(x[0]);}).map(function(x){
     return '<button onclick="scPiu(false);showModule(\''+x[0]+'\')"><i class="fa-solid '+x[1]+'"></i>'+x[2]+(x[3]?'<small>'+x[3]+'</small>':'')+'</button>';}).join("");
   }
   m.classList.toggle("aperto",apri);v.classList.toggle("aperto",apri);b.classList.toggle("aperto",apri);

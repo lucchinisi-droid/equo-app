@@ -1532,6 +1532,9 @@ body.fab-via .ai-fab{opacity:0;transform:scale(.7);pointer-events:none}
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
   z-index:70;align-items:flex-end;justify-content:center;overscroll-behavior:contain}
 .ai-sheet-overlay.active{display:flex}
+/* 3/11/2026: Sì/No con parole (es. «Usa questo cliente» / «È un'altra persona»): un tasto sotto l'altro */
+#eq-pop-sino.parole .az-riga{flex-direction:column}
+#eq-pop-sino.parole .az-riga button{text-transform:none;font-size:14.5px;line-height:1.3}
 /* chat AI: a tutta pagina sul telefono, altezza sulla parte visibile (tastiera iOS compresa, --ai-vh via visualViewport) */
 .ai-sheet{background:var(--bg);width:100%;max-width:none;
   height:var(--ai-vh, 100dvh);
@@ -5374,8 +5377,8 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
       <h3 id="sino-tit"></h3>
       <p class="piccolo" id="sino-testo"></p>
       <div class="az-riga">
-        <button class="btn-equo-ok" onclick="rispondiSiNo(true)">SÌ</button>
-        <button class="btn-equo-cambia" onclick="rispondiSiNo(false)">NO</button>
+        <button class="btn-equo-ok" id="sino-si" onclick="rispondiSiNo(true)">SÌ</button>
+        <button class="btn-equo-cambia" id="sino-no" onclick="rispondiSiNo(false)">NO</button>
       </div>
     </div>
   </div>
@@ -6136,7 +6139,8 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-prezzi" onclick="if(event.target===this)rispondiPrezzi(false)">
+<!-- 3/11/2026 (Simone): niente X e niente tocco fuori: si sceglie «Salva con prezzo» o «Salva senza prezzo» -->
+<div class="modal-overlay" id="modal-prezzi" data-senza-x>
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="prezzi-tit">Manca il prezzo</div>
@@ -14901,7 +14905,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function agDescrizioneTipoPro(i) {
 		const t = agDescrizioneTipo(i);
 		if (i.ferri_nuovi === false) return t + " · rimessa";
-		if (i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri$/, "$1 ferri nuovi");
+		if (i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri\b/, "$1 ferri nuovi");
 		return t;
 	}
 	function agDescrizioneTipo(i) {
@@ -14911,6 +14915,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const extra = [];
 		if (i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
 		if (i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
+		const corr = testoFerroIntervento(i);
+		if (corr) extra.push(corr);
 		return [t, ...extra].join(" · ");
 	}
 	function agGiornoLavoro(iso) {
@@ -17805,7 +17811,11 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (!lista.length) return { crea: true };
 		const x = lista[0], altri = lista.length - 1;
 		const stesso = usaEsistente && x.tipo === "mio" && !x.archiviato && x.id && clienteId && x.cliente_id === clienteId;
-		if (await chiediSiNo(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È un altro cavallo? «Sì» crea una scheda nuova; «No» ${stesso ? "usa quello che c'è già" : usaEsistente ? "si ferma, così scegli quello che c'è già" : "apre quello che c'è già"}: niente doppioni.`)) return { crea: true };
+		const tieni = stesso ? `Usa ${x.nome} di ${x.cliente}` : "È lo stesso cavallo";
+		if (!await chiediSiNo(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È lo stesso cavallo o un altro con lo stesso nome?`, {
+			si: tieni,
+			no: "È un altro cavallo: scheda nuova"
+		})) return { crea: true };
 		if (stesso) return { usa: {
 			id: x.id,
 			nome: x.nome
@@ -17813,7 +17823,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return { stop: x };
 	}
 	function testoGiaPresente(x) {
-		return x.tipo === "proprietario" ? `${x.nome} è già su Equo con ${x.cliente}: sceglilo dall'elenco dei cavalli di quel cliente.` : x.archiviato ? `${x.nome} è tra gli archiviati di «${x.cliente}»: ripristinalo da «Modifica».` : `${x.nome} c'è già sotto «${x.cliente}»: usa quel cliente (oppure rispondi «Sì» se è un altro cavallo).`;
+		return x.tipo === "proprietario" ? `${x.nome} è già su Equo con ${x.cliente}: sceglilo dall'elenco dei cavalli di quel cliente.` : x.archiviato ? `${x.nome} è tra gli archiviati di «${x.cliente}»: ripristinalo da «Modifica».` : `${x.nome} c'è già sotto «${x.cliente}»: scegli «${x.cliente}» come cliente (oppure, se è un altro cavallo, salva di nuovo e scegli «È un altro cavallo»).`;
 	}
 	async function creaCavalloUnico(campi, opz = {}) {
 		const nome = String(campi?.nome || "").trim(), chip = campi?.microchip ? String(campi.microchip).trim() : null;
@@ -17849,6 +17859,27 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (!nome) return { error: { message: "Scrivi il nome del cliente." } };
 		const email = c.email ? String(c.email).trim().toLowerCase() : "";
 		const tipo_cliente = c.tipo_cliente || onbTipoDaNome(nome);
+		if (c.chiediDoppione !== false) {
+			const gia = (await DB.listClientiMascalcia()).find((x) => !x.archiviato_il && onbNorm(x.nome) === onbNorm(nome));
+			if (gia) {
+				const cav = (cavalliMieiLista || []).filter((v) => v.cliente_mascalcia_id === gia.id && !v.archiviato_il).map((v) => v.nome);
+				const quali = cav.length ? (cav.length === 1 ? "1 cavallo: " : cav.length + " cavalli: ") + cav.slice(0, 4).join(", ") + (cav.length > 4 ? "…" : "") : gia.nome_cavallo ? "cavalli: " + gia.nome_cavallo : "";
+				if (await chiediSiNo(`${gia.nome} c'è già tra i tuoi clienti`, (quali ? quali.charAt(0).toUpperCase() + quali.slice(1) + ". " : "") + "È la stessa persona o un altro cliente con lo stesso nome?", {
+					si: "Usa questo cliente",
+					no: "È un'altra persona"
+				})) {
+					const nomiG = nomiCavalliDaTesto(c.cavalli || "");
+					const saltaG = nomiG.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomiG) : [];
+					const restanoG = nomiG.filter((n) => !saltaG.some((x) => x.toLowerCase() === n.toLowerCase()));
+					return {
+						data: gia,
+						cavalli: restanoG.length ? await creaCavalliDaTesto(gia.id, restanoG.join(", ")) : [],
+						saltati: saltaG,
+						riusato: true
+					};
+				}
+			}
+		}
 		const nomi = nomiCavalliDaTesto(c.cavalli || "");
 		const salta = nomi.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomi) : [];
 		const restano = nomi.filter((n) => !salta.some((x) => x.toLowerCase() === n.toLowerCase()));
@@ -18477,11 +18508,15 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		return !!document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto");
 	}
 	var sinoResolve = null;
-	function chiediSiNo(titolo, testo) {
+	function chiediSiNo(titolo, testo, etichette) {
 		return new Promise((resolve) => {
 			sinoResolve = resolve;
 			document.getElementById("sino-tit").textContent = titolo;
 			document.getElementById("sino-testo").textContent = testo || "";
+			const bSi = document.getElementById("sino-si"), bNo = document.getElementById("sino-no");
+			if (bSi) bSi.textContent = etichette?.si || "SÌ";
+			if (bNo) bNo.textContent = etichette?.no || "NO";
+			document.getElementById("eq-pop-sino").classList.toggle("parole", !!etichette);
 			document.getElementById("eq-pop-sino").classList.add("attivo");
 		});
 	}
@@ -18565,7 +18600,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				});
 				if (clienteError || !nuovoCliente) return errore("Errore nel creare il cliente: " + (clienteError?.message || ""));
 				cliente_mascalcia_id = nuovoCliente.id;
-				clienteCreatoOra = true;
+				clienteCreatoOra = !nuovoCliente.riusato;
 			}
 			const righe = [];
 			for (const k of scelti) {
@@ -18890,11 +18925,12 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		"Soletta",
 		"Alluminio",
 		"Pianella",
-		"Banda larga in punta",
+		"Binda larga in punta",
 		"Ferro asimmetrico"
 	];
+	var detNorm = (l) => (l || []).map((x) => /^banda larga in punta$/i.test(String(x)) ? "Binda larga in punta" : x);
 	function testoDettagliFerro(det, detp, note) {
-		const l = (a) => (a || []).map((x) => String(x).toLowerCase()).join(", ");
+		const l = (a) => detNorm(a).map((x) => String(x).toLowerCase()).join(", ");
 		return [(detp || []).length ? [det && det.length ? "davanti: " + l(det) : "", "dietro: " + l(detp)].filter(Boolean).join("; ") : l(det), (note || "").trim()].filter(Boolean).join(" · ");
 	}
 	function testoTipoFerro(ft, ftp, note, det, detp) {
@@ -18929,8 +18965,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			idx: n >= 0 ? n : -1,
 			ft: cv.ferro_tipo || "standard",
 			ftp: cv.ferro_tipo_post || null,
-			det: (cv.ferro_dettagli || []).slice(),
-			detp: (cv.ferro_dettagli_post || []).slice(),
+			det: detNorm(cv.ferro_dettagli),
+			detp: detNorm(cv.ferro_dettagli_post),
 			int: intervalloCavallo(cv),
 			intEff: intervalloEffettivo({
 				...cv,
@@ -19411,7 +19447,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const btn = document.getElementById("cliente-save-btn");
 		btn.disabled = true;
 		try {
-			const { error, data: nuovo } = await creaClienteUnico({
+			const { error, data: nuovo, riusato } = await creaClienteUnico({
 				nome,
 				tipo_cliente,
 				telefono,
@@ -19443,7 +19479,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				if (el) el.value = "";
 			});
 			closeModal("modal-add-cliente");
-			showToast("Cliente salvato" + msgCollegamento);
+			showToast((riusato ? "Hai già questo cliente: ho usato quello" : "Cliente salvato") + msgCollegamento);
 			await loadClientiMascalcia();
 		} finally {
 			btn.disabled = false;
@@ -24170,6 +24206,25 @@ Object.assign(DB, {
       sb.from("terapie_somministrazioni").select("id, piano_id, voce_id, previsto_il, fatto_il, fatto_da").in("piano_id", ids).order("previsto_il").limit(5000)]);
     return unisci(piani, rv.data || [], rs.data || []);
   },
+  // diario del cavallo in scuderia (SQL 36): attività segnate dal groom o dal gestionale, solo per il proprietario
+  async diarioScuderia(horseId, giorni = 7){
+    if(!horseId) return null;
+    if(DEMO_MODE){
+      const primo = (typeof horses !== "undefined" ? horses : [])[0];
+      if(!primo || primo.id !== horseId) return null;
+      const oggi = isoLocale(new Date()), ieri = isoLocale(new Date(Date.now() - 86400000));
+      return { scuderia: "Centro Ippico Demo", oggi, attiva: true,
+        mostra: ["pasto_mattina", "pasto_sera", "fieno", "paddock", "lavorato", "farmaco", "box_pulito"],
+        voci: [
+          { giorno: oggi, tipo: "pasto_mattina", ora: "07:10", da: "Rahim" }, { giorno: oggi, tipo: "fieno", ora: "07:15", da: "Rahim" },
+          { giorno: oggi, tipo: "paddock", ora: "10:30", da: "Ion" }, { giorno: oggi, tipo: "farmaco", ora: "12:00", da: "Rahim" },
+          { giorno: ieri, tipo: "pasto_mattina", ora: "07:05", da: "Rahim" }, { giorno: ieri, tipo: "lavorato", ora: "16:00", da: "Ion" },
+          { giorno: ieri, tipo: "box_pulito", ora: "17:20", da: "Ion" }, { giorno: ieri, tipo: "pasto_sera", ora: "18:30", da: "Rahim" } ] };
+    }
+    const { data, error } = await sb.rpc("mio_diario_scuderia", { p_horse: horseId, p_giorni: giorni });
+    if(error){ if(!/mio_diario_scuderia|schema cache|does not exist/i.test(error.message || "")) console.warn("diario scuderia:", error.message); return null; }
+    return data || null;
+  },
   async terapiaFatto(id, fatto = true){
     if(DEMO_MODE){ const s = this._ter().somm.find(x => x.id === id); if(s){ s.fatto_il = fatto ? new Date().toISOString() : null; s.fatto_da = fatto ? currentUser.id : null; } return { data: !!s, error: null }; }
     const { data, error } = await sb.rpc("equo_terapia_fatto", { p_id: id, p_fatto: !!fatto });
@@ -24744,7 +24799,7 @@ Object.assign(DB, {
     if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => i.stato === "fatto" && (i.cliente_mascalcia_id === clienteId || i.luogo_cliente_id === clienteId)
         && (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a))
       .map(i => ({ ...i, cavalli_clienti_mascalcia: { nome: (demoState.cavalliClientiMascalcia || []).find(c => c.id === i.cavallo_cliente_id)?.nome || null } }));
-    let q = sb.from("interventi_mascalcia").select("id, data_intervento, tipo_ferratura, tipo_altro, importo, stato_pagamento, cliente_mascalcia_id, luogo_cliente_id, cavallo_cliente_id, horse_id, quantita_ferri, ferro_tipo, cavalli_clienti_mascalcia(nome)")
+    let q = sb.from("interventi_mascalcia").select("id, data_intervento, tipo_ferratura, tipo_altro, importo, stato_pagamento, cliente_mascalcia_id, luogo_cliente_id, cavallo_cliente_id, horse_id, quantita_ferri, ferro_tipo, ferro_note, cavalli_clienti_mascalcia(nome)")
       .eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`);
     if(da) q = q.gte("data_intervento", da);
     if(a) q = q.lte("data_intervento", a);
@@ -26694,11 +26749,14 @@ function openModal(id){
   if(!el) return;
   // 27/10/2026: ogni finestra ha la X in alto a destra (aggiunta qui se nel suo HTML manca)
   const box = el.querySelector(":scope > .modal");
-  if(box && !box.querySelector(":scope > .modal-close-x")){
+  // data-senza-x: finestre dove bisogna scegliere uno dei tasti (es. «Manca il prezzo», 3/11/2026)
+  if(box && !el.hasAttribute("data-senza-x") && !box.querySelector(":scope > .modal-close-x")){
     const x = document.createElement("button");
     x.type = "button"; x.className = "modal-close-x"; x.setAttribute("aria-label", "Chiudi");
     x.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-    x.onclick = () => closeModal(id);
+    // 3/11/2026: la X fa quello che fa il tocco fuori dalla finestra (es. «Manca il prezzo» → salva senza prezzo):
+    // prima chiudeva e basta, e un salvataggio che aspettava la risposta restava bloccato (appuntamenti del veterinario non salvati)
+    x.onclick = () => { if(el.getAttribute("onclick")) el.click(); else closeModal(id); };
     box.insertBefore(x, box.firstChild);
   }
   el.classList.add("active");
@@ -34273,6 +34331,149 @@ const mlSigla = k => String(k || "").toUpperCase();
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", terAggancia, { once: true });
 	else terAggancia();
+	// equo-app-src/src/ruoli/proprietario/moduli/105-diario-scuderia.js
+	var DIA_ICONE = {
+		pasto_mattina: [
+			"Pasto del mattino",
+			"fa-bowl-food",
+			"#b7862b"
+		],
+		pasto_sera: [
+			"Pasto della sera",
+			"fa-bowl-rice",
+			"#8a5a2b"
+		],
+		fieno: [
+			"Fieno",
+			"fa-wheat-awn",
+			"#9a7b2f"
+		],
+		acqua: [
+			"Acqua",
+			"fa-droplet",
+			"#2f79b7"
+		],
+		paddock: [
+			"Paddock",
+			"fa-tree",
+			"#3f7a45"
+		],
+		lavorato: [
+			"Lavorato",
+			"fa-horse",
+			"#1d4a35"
+		],
+		farmaco: [
+			"Farmaco o terapia",
+			"fa-pills",
+			"#c0473d"
+		],
+		box_pulito: [
+			"Box pulito",
+			"fa-broom",
+			"#6b4fa0"
+		],
+		integratore: [
+			"Integratore",
+			"fa-capsules",
+			"#5d8f4e"
+		],
+		coperta: [
+			"Coperta",
+			"fa-rug",
+			"#7a6a55"
+		],
+		zoccoli: [
+			"Zoccoli puliti",
+			"fa-shoe-prints",
+			"#5f6b73"
+		],
+		grooming: [
+			"Governato",
+			"fa-brush",
+			"#b0567a"
+		]
+	};
+	var DIA = {
+		horse: null,
+		dati: null,
+		giorno: null
+	};
+	var diaEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	function diaEtichetta(g, oggi) {
+		if (g === oggi) return "Oggi";
+		if (g === isoLocale(/* @__PURE__ */ new Date((/* @__PURE__ */ new Date(oggi + "T12:00")).getTime() - 864e5))) return "Ieri";
+		return (/* @__PURE__ */ new Date(g + "T12:00")).toLocaleDateString("it-IT", {
+			weekday: "short",
+			day: "numeric"
+		});
+	}
+	function diaBox() {
+		const vista = document.getElementById("cavalli-detail-view");
+		if (!vista) return null;
+		let box = document.getElementById("horse-diario-scuderia");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "horse-diario-scuderia";
+			const dove = document.getElementById("horse-dove");
+			if (dove && dove.parentNode) dove.parentNode.insertBefore(box, dove.nextSibling);
+			else vista.appendChild(box);
+		}
+		return box;
+	}
+	async function diaRenderCavallo(horseId) {
+		const id = horseId || currentHorseId;
+		const box = diaBox();
+		if (!box) return;
+		box.innerHTML = "";
+		const d = await DB.diarioScuderia(id);
+		if (id !== currentHorseId || !d) return;
+		DIA.horse = id;
+		DIA.dati = d;
+		DIA.giorno = d.oggi;
+		diaDisegna();
+	}
+	function diaDisegna() {
+		const box = diaBox();
+		const d = DIA.dati;
+		if (!box || !d) return;
+		const testa = `<div class="ter-tit">🐴 In scuderia · ${diaEsc(d.scuderia)}</div>`;
+		if (!d.attiva) {
+			box.innerHTML = `<div class="card ter-card" style="margin-bottom:14px">${testa}<div class="muted ter-vuoto">La tua scuderia non segna ancora su Equo le attività di ogni giorno. Quando inizierà, qui vedrai pasti, paddock e terapie con l'ora.</div></div>`;
+			return;
+		}
+		const giorni = [];
+		for (let i = 0; i < 7; i++) giorni.push(isoLocale(/* @__PURE__ */ new Date((/* @__PURE__ */ new Date(d.oggi + "T12:00")).getTime() - i * 864e5)));
+		const conVoci = new Set((d.voci || []).map((v) => v.giorno));
+		const voci = (d.voci || []).filter((v) => v.giorno === DIA.giorno).sort((a, b) => String(a.ora).localeCompare(String(b.ora)));
+		const chip = (g) => `<button type="button" onclick="diaGiorno('${g}')" style="flex:0 0 auto;border:1px solid var(--border,#ddd);border-radius:999px;padding:5px 11px;font-size:12.5px;background:${g === DIA.giorno ? "var(--verde,#1d4a35)" : "transparent"};color:${g === DIA.giorno ? "#fff" : "inherit"};opacity:${conVoci.has(g) || g === DIA.giorno ? 1 : .55}">${diaEsc(diaEtichetta(g, d.oggi))}</button>`;
+		const riga = (v) => {
+			const ic = DIA_ICONE[v.tipo] || [
+				v.tipo,
+				"fa-circle-check",
+				"#777"
+			];
+			return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border,#eee)"><span style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:${ic[2]}1f;color:${ic[2]}"><i class="fa-solid ${ic[1]}"></i></span><span style="flex:1"><b>${diaEsc(ic[0])}</b>${v.da ? `<small class="muted" style="display:block">da ${diaEsc(v.da)}</small>` : ""}</span><span style="font-variant-numeric:tabular-nums">${diaEsc(v.ora || "")}</span></div>`;
+		};
+		box.innerHTML = `<div class="card ter-card" style="margin-bottom:14px">${testa}
+    <div style="display:flex;gap:6px;overflow-x:auto;padding:6px 0 8px;scrollbar-width:none">${giorni.map(chip).join("")}</div>
+    ${voci.length ? voci.map(riga).join("") : `<div class="muted ter-vuoto">${DIA.giorno === d.oggi ? "Oggi ancora nessuna attività segnata." : "Nessuna attività segnata quel giorno."}</div>`}</div>`;
+	}
+	function diaGiorno(g) {
+		DIA.giorno = g;
+		diaDisegna();
+	}
+	function diaAggancia() {
+		try {
+			estendiDopo("openHorseDetail", function(id) {
+				diaRenderCavallo(id);
+			});
+		} catch (err) {
+			console.error("diario scuderia:", err);
+		}
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", diaAggancia, { once: true });
+	else diaAggancia();
 	// equo-app-src/src/ruoli/proprietario/moduli/index.js
 	Object.assign(window, {
 		terCarica,
@@ -34280,6 +34481,9 @@ const mlSigla = k => String(k || "").toUpperCase();
 		terRenderCavallo,
 		terFatto,
 		TER,
+		diaRenderCavallo,
+		diaGiorno,
+		DIA,
 		onbCollegati,
 		onbNonSonoIo,
 		onbVaiAiProposti,

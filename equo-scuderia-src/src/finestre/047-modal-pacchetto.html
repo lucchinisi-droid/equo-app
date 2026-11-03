@@ -1,11 +1,12 @@
 <div class="modal-overlay" id="modal-pacchetto" onclick="closeOut(event,'modal-pacchetto')">
   <div class="modal">
     <div class="modal-title"><span id="modal-pacchetto-title">Nuovo pacchetto</span> <span class="x" onclick="closeModal('modal-pacchetto')">✕</span></div>
-    <div class="field"><label>Cliente</label><input class="input" id="pac-cliente" placeholder="Nome allievo / proprietario"></div>
-    <div class="field">
-      <label>Collega a un membro del team (opzionale, per Chatta)</label>
-      <select class="input" id="pac-membro"><option value="">— nessuno (solo testo libero) —</option></select>
+    <div class="field"><label>Cliente</label>
+      <div style="display:flex;gap:8px"><select class="input" id="pac-membro" onchange="pacchettoClienteCambiato()" style="flex:1"><option value="">— scegli il cliente —</option></select>
+        <button type="button" class="btn btn-outline btn-sm" id="pac-nuovo-cliente" onclick="openClienteForm(null, true)" title="Nuovo cliente"><i class="fa-solid fa-user-plus"></i></button></div>
+      <div id="pac-da-collegare" style="display:none;font-size:12.5px;margin-top:5px;color:#8a6a12">Questo pacchetto è intestato solo a un nome scritto a mano («<b id="pac-nome-vecchio"></b>»): scegli il cliente giusto, o crealo con il tasto accanto.</div>
     </div>
+    <div class="field"><label>Nome sul pacchetto</label><input class="input" id="pac-cliente" placeholder="Si compila da solo con il nome del cliente"></div>
     <div class="field">
       <label>Tipo</label>
       <select class="input" id="pac-tipo" onchange="toggleTipoPacchetto()">
@@ -20,6 +21,11 @@
       <div class="field"><label>Lezioni totali</label><input class="input" id="pac-unita-totali" type="number" min="1" placeholder="Es. 10"></div>
       <div class="field"><label>Lezioni usate</label><input class="input" id="pac-unita-usate" type="number" min="0" value="0"></div>
     </div>
+    <div class="grid grid-2" id="pac-correzione" style="display:none">
+      <div class="field"><label>Correggi le lezioni usate (±)</label><input class="input" id="pac-corr-q" type="number" step="1" placeholder="Es. -1 per ridarne una"></div>
+      <div class="field"><label>Motivo della correzione</label><input class="input" id="pac-corr-nota" maxlength="200" placeholder="Es. lezione regalata"></div>
+    </div>
+    <div id="pac-storico" style="display:none;font-size:13px;margin:-4px 0 12px"></div>
     <div class="grid grid-2">
       <div class="field"><label>Data inizio</label><input class="input" id="pac-inizio" type="date"></div>
       <div class="field"><label>Scadenza</label><input class="input" id="pac-scadenza" type="date"></div>

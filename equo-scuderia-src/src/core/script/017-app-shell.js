@@ -19,6 +19,7 @@ function enterAppShell(){
   document.getElementById("user-avatar-mobile").textContent = initial;
 
   renderTeam();
+  caricaClienti();
   renderPlaceholderModules();
   applySavedSidebarState();
   applySavedTheme();

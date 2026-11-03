@@ -10,6 +10,7 @@ const LEGAL_CONTENT = {
       <li>Dati account: nome, email, password (Supabase Auth)</li>
       <li>Dati del centro: nome, indirizzo, telefono, membri del team, dati societari/pagamento se inseriti</li>
       <li>Dati dei clienti del centro: proprietari, cavalli, lezioni, pacchetti, comunicazioni interne</li>
+      <li>Contatti dei clienti inseriti dal centro: telefono, email, data di nascita, genitore o referente per i minori, data del consenso. Li vedono solo l'amministratore del centro e lo staff di livello 2 e 3</li>
       <li>Dati tecnici e cookie (vedi tab Cookie)</li>
     </ul>
     <h3>Perché li trattiamo</h3>

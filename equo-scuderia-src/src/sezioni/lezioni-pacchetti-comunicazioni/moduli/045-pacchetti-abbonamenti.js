@@ -14,8 +14,13 @@ async function refreshPacchettiModule(){
 function populatePacchettoMembroSelect(){
   const sel = document.getElementById("pac-membro");
   if(!sel) return;
-  sel.innerHTML = `<option value="">— nessuno (solo testo libero) —</option>` +
-    teamList.map(m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])} (${RUOLO_LABELS[m.ruolo] || m.ruolo})</option>`).join("");
+  const opt = m => `<option value="${m.id}">${escapeHtml(m.nome_visualizzato || RUOLO_LABELS[m.ruolo])} (${RUOLO_LABELS[m.ruolo] || m.ruolo})</option>`;
+  const ord = (a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it");
+  const clienti = teamList.filter(m => ["allievo", "proprietario"].includes(m.ruolo)).sort(ord);
+  const staff = teamList.filter(m => !["allievo", "proprietario"].includes(m.ruolo)).sort(ord);
+  sel.innerHTML = `<option value="">— scegli il cliente —</option>`
+    + (clienti.length ? `<optgroup label="Clienti">${clienti.map(opt).join("")}</optgroup>` : "")
+    + (staff.length ? `<optgroup label="Staff">${staff.map(opt).join("")}</optgroup>` : "");
 }
 
 async function loadPacchetti(){
@@ -79,7 +84,7 @@ function renderPacchetti(){
       : (p.prezzo ? `€ ${Number(p.prezzo).toFixed(2)}` : "—");
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${escapeHtml(p.cliente)}</td>
+      <td>${escapeHtml(p.cliente)}${p.membro_id ? "" : ' <span class="badge-pill badge-yellow" title="Apri il pacchetto e scegli il cliente">da collegare</span>'}</td>
       <td>${TIPO_PACCHETTO_LABELS[p.tipo] || p.tipo}</td>
       <td>${dettaglio}</td>
       <td>${p.data_scadenza ? formatDate(p.data_scadenza) : "—"}</td>
@@ -109,6 +114,11 @@ function openPacchettoForm(id){
   document.getElementById("pacchetto-error").style.display = "none";
   document.getElementById("modal-pacchetto-title").textContent = editingPacchettoId ? "Modifica pacchetto" : "Nuovo pacchetto";
   populatePacchettoMembroSelect();
+  const btnNuovo = document.getElementById("pac-nuovo-cliente");
+  if(btnNuovo) btnNuovo.style.display = typeof puoVedereClienti === "function" && puoVedereClienti() ? "" : "none";
+  const pv = editingPacchettoId ? pacchettiList.find(x => x.id === editingPacchettoId) : null;
+  document.getElementById("pac-da-collegare").style.display = pv && !pv.membro_id ? "block" : "none";
+  document.getElementById("pac-nome-vecchio").textContent = pv?.cliente || "";
   if(editingPacchettoId){
     const p = pacchettiList.find(x => x.id === editingPacchettoId);
     document.getElementById("pac-cliente").value = p?.cliente || "";
@@ -134,15 +144,42 @@ function openPacchettoForm(id){
     document.getElementById("pac-note").value = "";
   }
   toggleTipoPacchetto();
+  pacchettoMostraCrediti(editingPacchettoId ? pacchettiList.find(x => x.id === editingPacchettoId) : null);
   openModal("modal-pacchetto");
 }
 
+/* ---- crediti del carnet (SQL 40): le lezioni usate le conta il database; a mano solo correzioni con motivo ---- */
+const MOTIVO_CREDITO = { lezione: "Lezione", disdetta_tardiva: "Disdetta tardiva", restituito: "Restituita", correzione: "Correzione", iniziale: "Già usate all'inizio" };
+async function pacchettoMostraCrediti(p){
+  const esistente = !!(p && p.tipo === "carnet");
+  document.getElementById("pac-unita-usate").disabled = esistente;
+  document.getElementById("pac-correzione").style.display = esistente ? "grid" : "none";
+  document.getElementById("pac-corr-q").value = ""; document.getElementById("pac-corr-nota").value = "";
+  const box = document.getElementById("pac-storico"); box.style.display = "none"; box.innerHTML = "";
+  if(!esistente) return;
+  let mov = [];
+  if(DEMO_MODE) mov = (demoState.movimenti || []).filter(m => m.pacchetto_id === p.id);
+  else { const { data, error } = await sb.from("scuderia_crediti_movimenti").select("quantita, motivo, nota, creato_il").eq("pacchetto_id", p.id).order("creato_il", { ascending: false }).limit(30); if(!error) mov = data || []; }
+  mov = [...mov].sort((a, b) => String(b.creato_il).localeCompare(String(a.creato_il)));
+  if(!mov.length) return;
+  box.innerHTML = `<div style="font-weight:600;margin-bottom:4px">Movimenti del carnet</div>` + mov.map(m => `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+    <span style="width:44px;color:var(--muted)">${escapeHtml(formatDate(String(m.creato_il).slice(0, 10)).slice(0, 5))}</span>
+    <span style="flex:1">${escapeHtml(MOTIVO_CREDITO[m.motivo] || m.motivo)}${m.nota ? ` <span style="color:var(--muted)">· ${escapeHtml(m.nota)}</span>` : ""}</span>
+    <b style="color:${m.quantita > 0 ? "var(--text)" : "#2c5228"}">${m.quantita > 0 ? "−" + m.quantita : "+" + Math.abs(m.quantita)}</b></div>`).join("");
+  box.style.display = "block";
+}
+
 async function savePacchetto(){
-  const cliente = document.getElementById("pac-cliente").value.trim();
-  const tipo = document.getElementById("pac-tipo").value;
+  const membroScelto = document.getElementById("pac-membro").value;
   const errBox = document.getElementById("pacchetto-error");
   errBox.style.display = "none";
-  if(!cliente){ errBox.textContent = "Inserisci il nome del cliente."; errBox.style.display = "block"; return; }
+  if(!membroScelto){ errBox.textContent = "Scegli il cliente dall'elenco (se non c'è, crealo con il tasto accanto)."; errBox.style.display = "block"; return; }
+  if(!document.getElementById("pac-cliente").value.trim()) document.getElementById("pac-cliente").value = (teamList.find(m => m.id === membroScelto)?.nome_visualizzato || "");
+  const cliente = document.getElementById("pac-cliente").value.trim() || "Cliente";
+  const tipo = document.getElementById("pac-tipo").value;
+  const corrQ = parseInt(document.getElementById("pac-corr-q").value, 10) || 0;
+  const corrNota = document.getElementById("pac-corr-nota").value.trim();
+  if(editingPacchettoId && corrQ && !corrNota){ errBox.textContent = "Scrivi il motivo della correzione."; errBox.style.display = "block"; return; }
 
   const payload = {
     cliente, tipo,
@@ -155,18 +192,24 @@ async function savePacchetto(){
     note: document.getElementById("pac-note").value.trim() || null,
     cavallo_id: tipo === "carnet" ? null : (document.getElementById("pac-cavallo").value || null),
   };
+  // su un carnet esistente le lezioni usate le conta il database: si cambiano solo con una correzione
+  const pv = editingPacchettoId ? pacchettiList.find(x => x.id === editingPacchettoId) : null;
+  if(pv && pv.tipo === "carnet" && tipo === "carnet") delete payload.unita_usate;
 
   try{
     if(DEMO_MODE){
       if(editingPacchettoId){
         const idx = demoState.pacchetti.findIndex(p => p.id === editingPacchettoId);
         if(idx >= 0) demoState.pacchetti[idx] = { ...demoState.pacchetti[idx], ...payload };
+        if(idx >= 0 && corrQ){ const p = demoState.pacchetti[idx]; p.unita_usate = Math.max((p.unita_usate || 0) + corrQ, 0);
+          (demoState.movimenti = demoState.movimenti || []).push({ id: "mv" + (demoIdCounter++), pacchetto_id: p.id, quantita: corrQ, motivo: "correzione", nota: corrNota, creato_il: new Date().toISOString() }); }
       } else {
         demoState.pacchetti.push({ id:"p" + (demoIdCounter++ + 300), centro_id: demoState.centro.id, ...payload });
       }
     } else if(editingPacchettoId){
       const { error } = await sb.from("scuderia_pacchetti").update(payload).eq("id", editingPacchettoId);
       if(error) throw error;
+      if(corrQ){ const r = await sb.rpc("correggi_crediti", { p_pacchetto: editingPacchettoId, p_quantita: corrQ, p_nota: corrNota }); if(r.error) throw r.error; }
     } else {
       const { error } = await sb.from("scuderia_pacchetti").insert({ centro_id: currentCentro.id, ...payload });
       if(error) throw error;
@@ -177,9 +220,24 @@ async function savePacchetto(){
     closeModal("modal-pacchetto");
     showToast("Pacchetto salvato.");
   } catch(err){
-    errBox.textContent = err.message || "Errore nel salvataggio.";
+    errBox.textContent = /PACCHETTO_SENZA_CLIENTE/.test(err.message || "") ? "Scegli il cliente dall'elenco." : (err.message || "Errore nel salvataggio.");
     errBox.style.display = "block";
   }
+}
+
+// il nome sul pacchetto segue il cliente scelto (se non è stato scritto a mano qualcosa di diverso)
+let pacNomeAuto = "";
+function pacchettoClienteCambiato(){
+  const nome = teamList.find(m => m.id === document.getElementById("pac-membro").value)?.nome_visualizzato || "";
+  const campo = document.getElementById("pac-cliente");
+  if(!campo.value.trim() || campo.value.trim() === pacNomeAuto || document.getElementById("pac-da-collegare").style.display === "block") campo.value = nome;
+  pacNomeAuto = nome;
+}
+// dopo «Nuovo cliente» aperto dal pacchetto: si torna qui con il cliente già scelto
+function pacchettoScegliCliente(id){
+  populatePacchettoMembroSelect();
+  document.getElementById("pac-membro").value = id;
+  pacchettoClienteCambiato();
 }
 
 function askDeletePacchetto(id){ pacchettoToDelete = id; openModal("modal-delete-pacchetto"); }
@@ -200,4 +258,4 @@ async function confirmDeletePacchetto(){
 }
 
 
-export { askDeletePacchetto, confirmDeletePacchetto, loadPacchetti, openPacchettoForm, refreshPacchettiModule, savePacchetto, statusPacchetto, toggleTipoPacchetto };
+export { pacchettoMostraCrediti, askDeletePacchetto, confirmDeletePacchetto, loadPacchetti, openPacchettoForm, refreshPacchettiModule, savePacchetto, statusPacchetto, toggleTipoPacchetto, pacchettoClienteCambiato, pacchettoScegliCliente };

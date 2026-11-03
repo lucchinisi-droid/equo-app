@@ -22,7 +22,7 @@ function boxModalitaStalla(on){
   const ICONE_TIP = { "fa-pen":"Modifica", "fa-trash":"Elimina", "fa-file-pdf":"Scheda PDF", "fa-print":"Stampa", "fa-download":"Scarica", "fa-paper-plane":"Invia",
     "fa-xmark":"Chiudi", "fa-rotate-left":"Nuova chat", "fa-copy":"Copia", "fa-plus":"Aggiungi", "fa-arrows-rotate":"Aggiorna", "fa-chevron-left":"Riduci o espandi il menu",
     "fa-bars":"Apri il menu", "fa-paperclip":"Allega foto o PDF", "fa-eye":"Vedi", "fa-lock":"Non incluso nel tuo pacchetto: tocca per saperne di più" };
-  const MODULI_TIP = { home:"Panoramica del centro, accesso rapido e promemoria", centro:"Dati del centro, team, codice invito e il tuo pacchetto",
+  const MODULI_TIP = { clienti:"Allievi, genitori e proprietari con contatti e referenti", home:"Panoramica del centro, accesso rapido e promemoria", centro:"Dati del centro, team, codice invito e il tuo pacchetto",
     cavalli:"Anagrafica cavalli, scadenzario sanitario e Box / Stalla", lezioni:"Calendario delle lezioni e prenotazioni", pacchetti:"Carnet, abbonamenti e pensioni",
     comunicazioni:"Messaggi al team e chat con i clienti", magazzino:"Scorte, movimenti, riordini e fornitori", statistiche:"Incassi, clienti a rischio, margini e radar di Merlino",
     professionisti:"Maniscalchi collegati: chat e appuntamenti", groom:"App Equo Groom per il personale di stalla: QR, PIN e icone del giorno", store:"Vendita online (in arrivo)", fatturazione:"Fatture elettroniche SDI (in arrivo)", ai:"Athena, Merlino e gli altri agenti" };

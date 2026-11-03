@@ -9,21 +9,21 @@ const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€29/mese �
 // moduli del menu legati a una funzione del pacchetto
 const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
-  pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet","Cruscotto scadenze e rinnovi"] },
+  pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet, con disdetta senza perdere la lezione","Cruscotto scadenze e rinnovi"] },
   magazzino: { titolo:"Magazzino", icon:"fa-boxes-stacked", da:"advance", punti:["Scorte con semaforo per categoria","Carichi, scarichi e inventario in un tocco","Consumi delle ultime 8 settimane"] },
   statistiche: { titolo:"Statistiche", icon:"fa-chart-line", da:"advance", punti:["Incassi e lezioni degli ultimi 12 mesi","Clienti a rischio con messaggio pronto","Carnet in esaurimento da rinnovare","In PREMIUM: indice di salute, margine per cavallo, radar della concorrenza"] },
   statistiche_complete: { titolo:"Statistiche complete", icon:"fa-chart-line", da:"premium", punti:["Indice di salute del centro 0-100","Margine per cavallo in pensione","Benessere e carico dei cavalli","Mappa di occupazione e simulatore","Radar di Merlino sulla concorrenza della zona"] },
-  store: { titolo:"Store", icon:"fa-store", da:"premium", punti:["Vendita online di lezioni, pacchetti e prodotti"] },
-  sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["Fatture elettroniche conformi SDI","Add-on in ADVANCE, inclusa in PREMIUM"] },
+  store: { titolo:"Store", icon:"fa-store", da:"premium", punti:["In arrivo: vendita online di lezioni, pacchetti e prodotti"] },
+  sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["In arrivo: fatture elettroniche conformi SDI"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
   groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
   agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia","Ermes: magazzino e logistica","In PREMIUM uno dei due è incluso"] },
 };
 const PK_CONFRONTO = [
-  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Professionisti esterni", "3", "9", "illimitati"],
+  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Maniscalchi collegati", "1", "3", "illimitati"],
   ["Lezioni & Prenotazioni", "base (1+1)", "✓ (3+3)", "✓"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
   ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
-  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "—", "add-on", "✓"],
+  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
   ["Supporto prioritario", "—", "—", "✓"],
 ];
 
@@ -114,7 +114,7 @@ function renderIlTuoPacchetto(){
     <ul class="pk-funz">
       ${f(p.pacchetti, "Pacchetti & Abbonamenti")}${f(p.promemoria_auto, "Promemoria automatici")}${f(p.magazzino, "Magazzino" + (p.magazzino && !p.magazzino_avanzato ? " (base)" : ""))}
       ${f(p.statistiche, "Statistiche" + (p.statistiche && !p.statistiche_complete ? " (base)" : ""))}${f(p.radar, "Radar di Merlino")}${f(p.livelli, "Livelli del team")}
-      ${f(p.athena_proattiva, "Athena completa" + (p.athena_proattiva ? "" : " (hai Athena basic)"))}${f(p.sdi, "Fatturazione SDI")}${f(p.supporto_prioritario, "Supporto prioritario")}
+      ${f(p.athena_proattiva, "Athena completa" + (p.athena_proattiva ? "" : " (hai Athena basic)"))}${f(p.sdi, "Fatturazione SDI (in arrivo)")}${f(p.supporto_prioritario, "Supporto prioritario")}
       ${f((p.agenti || []).length > 1, "Agenti add-on" + ((p.agenti || []).length > 1 ? ": " + p.agenti.filter(a => a !== "athena").map(a => a[0].toUpperCase() + a.slice(1)).join(", ") : ""))}
     </ul>
     ${p.sbloccato || p.pacchetto === "enterprise" ? "" : `
