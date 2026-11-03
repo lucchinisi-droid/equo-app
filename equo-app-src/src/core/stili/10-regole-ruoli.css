@@ -6,16 +6,16 @@
    unisci.cjs si ferma con un errore se ne trova. */
 
 /* maniscalco (Home nuova: #hm) */
-body.home-man #page-pro-home > :not(#hm){display:none!important}
+body.home-man #page-pro-home > :not(#hm):not(.push-invito){display:none!important}
 body.home-man #page-pro-home > #hm{display:block!important}
 
 /* istruttore / trainer (#tr-home) */
-body.pl-istr #page-pro-home > :not(#tr-home){display:none!important}
+body.pl-istr #page-pro-home > :not(#tr-home):not(.push-invito){display:none!important}
 body.pl-istr #page-pro-home > #tr-home{display:block!important}
 
 /* veterinario (Home nuova: #vh, 29/10/2026) */
-body.pl-vet #page-pro-home > :not(#vh){display:none!important}
+body.pl-vet #page-pro-home > :not(#vh):not(.push-invito){display:none!important}
 body.pl-vet #page-pro-home > #vh{display:block!important}
 
 /* altri professionisti con la Home a widget */
-body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :not(.wh-keep):not(.wh){display:none!important}
+body.vista-widget:not(.home-man):not(.pl-istr):not(.pl-vet) #page-pro-home > :not(.wh-keep):not(.wh):not(.push-invito){display:none!important}

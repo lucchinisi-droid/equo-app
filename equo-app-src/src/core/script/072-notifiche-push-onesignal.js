@@ -18,6 +18,7 @@ async function collegaOneSignal(){
 }
 
 function aggiornaBannerPush(){
+  pushInvitoPro();   // 3/11/2026: anche l'invito dei professionisti (Home e Messaggi)
   const banner = document.getElementById("push-permission-banner");
   if(!banner) return;
   try{
@@ -25,6 +26,35 @@ function aggiornaBannerPush(){
     banner.style.display = giaConcesso ? "none" : "flex";
   } catch(err){ /* SDK non ancora pronto: banner resta nascosto, si aggiorna al prossimo giro */ }
 }
+
+/* ---------- 3/11/2026: INVITO AD ATTIVARE LE NOTIFICHE anche per i professionisti ----------
+   Su iPhone il permesso si chiede solo dopo un tocco: prima c'era il tasto solo nella chat del proprietario,
+   così maniscalchi e veterinari non potevano attivarle. Riquadro in cima a Home e Messaggi, finché il permesso non c'è;
+   «Più tardi» lo nasconde per 3 giorni. Niente riquadro se il telefono non supporta le notifiche (es. iPhone senza app installata). */
+const PUSH_INVITO_PAGINE = ["pro-home", "pro-inbox"], PUSH_INVITO_RIMANDA = "equo-push-invito";
+function pushSupportata(){ try{ return typeof OneSignal !== "undefined" && !!OneSignal.Notifications && OneSignal.Notifications.isPushSupported?.() !== false; }catch(_){ return false; } }
+function pushConcessa(){ try{ return typeof OneSignal !== "undefined" && !!OneSignal.Notifications?.permission; }catch(_){ return false; } }
+function pushInvitoRimandato(){ try{ return Date.now() - Number(localStorage.getItem(PUSH_INVITO_RIMANDA) || 0) < 3 * 86400000; }catch(_){ return false; } }
+function pushInvitoPro(pagina){
+  const pro = !DEMO_MODE && currentUser && PRO_ROLES.includes(currentUser.vistaAttiva || currentUser.ruolo);
+  const mostra = pro && pushSupportata() && !pushConcessa() && !pushInvitoRimandato();
+  PUSH_INVITO_PAGINE.forEach(pg => {
+    const box = document.getElementById("page-" + pg); if(!box) return;
+    let b = box.querySelector(":scope > .push-invito");
+    if(!mostra){ if(b) b.remove(); return; }
+    if(pagina && pagina !== pg && !b) return;   // si crea quando si apre la pagina
+    if(!b){
+      const agente = typeof nomeAgenteAi === "function" ? nomeAgenteAi() : "";
+      b = document.createElement("div"); b.className = "push-invito"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Notifiche");
+      b.innerHTML = `<span class="pi-ic"><i class="fa-solid fa-bell"></i></span>
+        <span class="pi-t"><b>Attiva le notifiche</b><span>Ti arrivano i messaggi dei clienti${agente ? " e gli avvisi di " + escapeHtml(agente) : ""}, anche a telefono chiuso.</span></span>
+        <span class="pi-az"><button type="button" class="pi-si" onclick="attivaNotifichePush()">Attiva</button><button type="button" class="pi-no" onclick="pushInvitoRimanda()">Più tardi</button></span>`;
+      box.prepend(b);
+    }
+  });
+}
+function pushInvitoRimanda(){ try{ localStorage.setItem(PUSH_INVITO_RIMANDA, String(Date.now())); }catch(_){} pushInvitoPro(); }
+quandoApriPagina(pg => { if(PUSH_INVITO_PAGINE.includes(pg)) pushInvitoPro(pg); });
 
 async function attivaNotifichePush(){
   try{

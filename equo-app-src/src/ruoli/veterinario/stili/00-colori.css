@@ -21,6 +21,8 @@
 :where(body.pl-vet) .btn-primary{background:#1D2D50;border:2px solid #7FD1C9}
 :where(body.pl-vet) .btn-danger{background:rgba(169,68,59,.15);border:1px solid rgba(169,68,59,.3)}
 :where(body.pl-vet) .auth-error{background:rgba(169,68,59,.1);border:1px solid rgba(169,68,59,.3)}
+/* core/stili/base-04-onboarding-bivio-ruolo.css */
+:where(body.pl-vet) .cand-codice-cons.manca{background:rgba(169,68,59,.08)}
 /* core/stili/base-05-app-shell.css */
 :where(body.pl-vet) .topbar-avatar{color:#1A2236}
 :where(body.pl-vet) .badge-accent{background:rgba(127,209,201,.18)}
