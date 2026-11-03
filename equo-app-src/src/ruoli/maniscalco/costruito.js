@@ -11357,11 +11357,12 @@
 		"Soletta",
 		"Alluminio",
 		"Pianella",
-		"Banda larga in punta",
+		"Binda larga in punta",
 		"Ferro asimmetrico"
 	];
+	var detNorm = (l) => (l || []).map((x) => /^banda larga in punta$/i.test(String(x)) ? "Binda larga in punta" : x);
 	function testoDettagliFerro(det, detp, note) {
-		const l = (a) => (a || []).map((x) => String(x).toLowerCase()).join(", ");
+		const l = (a) => detNorm(a).map((x) => String(x).toLowerCase()).join(", ");
 		return [(detp || []).length ? [det && det.length ? "davanti: " + l(det) : "", "dietro: " + l(detp)].filter(Boolean).join("; ") : l(det), (note || "").trim()].filter(Boolean).join(" · ");
 	}
 	function testoTipoFerro(ft, ftp, note, det, detp) {
@@ -11396,8 +11397,8 @@
 			idx: n >= 0 ? n : -1,
 			ft: cv.ferro_tipo || "standard",
 			ftp: cv.ferro_tipo_post || null,
-			det: (cv.ferro_dettagli || []).slice(),
-			detp: (cv.ferro_dettagli_post || []).slice(),
+			det: detNorm(cv.ferro_dettagli),
+			detp: detNorm(cv.ferro_dettagli_post),
 			int: intervalloCavallo(cv),
 			intEff: intervalloEffettivo({
 				...cv,

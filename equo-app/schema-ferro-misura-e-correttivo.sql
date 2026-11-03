@@ -12,7 +12,7 @@ begin
 end
 $c$;
 
--- 2) dettagli del correttivo (pad, soletta, alluminio, pianella, banda larga in punta, ferro asimmetrico)
+-- 2) dettagli del correttivo (pad, soletta, alluminio, pianella, binda larga in punta, ferro asimmetrico)
 --    ferro_dettagli = davanti (o unico); ferro_dettagli_post = dietro (solo Completa con 4 ferri)
 alter table public.cavalli_clienti_mascalcia add column if not exists ferro_dettagli text[];
 alter table public.cavalli_clienti_mascalcia add column if not exists ferro_dettagli_post text[];

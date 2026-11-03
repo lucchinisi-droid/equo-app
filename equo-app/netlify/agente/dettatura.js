@@ -4,7 +4,9 @@ const { MODELLO } = require("./configurazione");
 const { oggiISO } = require("./aiuti");
 const { ISTRUZIONI_DETTATURA_FERRATURA, ISTRUZIONI_DETTATURA_REFERTO } = require("./istruzioni-dettatura");
 
-const DETTAGLI_CORRETTIVO = ["Pad", "Soletta", "Alluminio", "Pianella", "Banda larga in punta", "Ferro asimmetrico"];
+const DETTAGLI_CORRETTIVO = ["Pad", "Soletta", "Alluminio", "Pianella", "Binda larga in punta", "Ferro asimmetrico"];
+// 03/11/2026: «binda» è il termine giusto; se il modello scrive ancora «banda» si accetta lo stesso
+const detNome = (x) => String(x).toLowerCase().replace(/^banda larga/, "binda larga");
 const testo = (v, max) => (typeof v === "string" ? v.replace(/\r/g, "").trim().slice(0, max) : "");
 
 // il modello a volte avvolge il JSON in ```: si prende il primo oggetto completo
@@ -29,7 +31,7 @@ function pulisciFerratura(j) {
   if (["completa", "mezza", "pareggio"].includes(s.lavoro)) scheda.lavoro = s.lavoro;
   if (["standard", "correttivo"].includes(s.ferro_tipo)) scheda.ferro_tipo = s.ferro_tipo;
   if (["standard", "correttivo"].includes(s.ferro_tipo_post)) scheda.ferro_tipo_post = s.ferro_tipo_post;
-  const det = (l) => (Array.isArray(l) ? DETTAGLI_CORRETTIVO.filter((d) => l.some((x) => String(x).toLowerCase() === d.toLowerCase())) : []);
+  const det = (l) => (Array.isArray(l) ? DETTAGLI_CORRETTIVO.filter((d) => l.some((x) => detNome(x) === d.toLowerCase())) : []);
   if (det(s.dettagli).length) scheda.dettagli = det(s.dettagli);
   if (det(s.dettagli_post).length) scheda.dettagli_post = det(s.dettagli_post);
   if (s.misura != null && String(s.misura).trim()) scheda.misura = String(s.misura).trim().slice(0, 10);

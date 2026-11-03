@@ -18,10 +18,12 @@ const LAVORO_CAV = {
 function lavoroCav(cv){ return cv && LAVORO_CAV[cv.ferratura_tipo] ? cv.ferratura_tipo : "completa"; }
 function tipoDaScheda(cv){ return LAVORO_CAV[lavoroCav(cv)].tipo; }
 // dettagli del correttivo (24/10/2026, richiesta di Francesco Bizzarri): si scelgono a tocchi, le note restano per il resto
-const DETTAGLI_CORRETTIVO = ["Pad", "Soletta", "Alluminio", "Pianella", "Banda larga in punta", "Ferro asimmetrico"];
+const DETTAGLI_CORRETTIVO = ["Pad", "Soletta", "Alluminio", "Pianella", "Binda larga in punta", "Ferro asimmetrico"];
+// 03/11/2026: il termine giusto è «binda» (non «banda»): le schede salvate con la parola vecchia si leggono come quella nuova
+const detNorm = l => (l || []).map(x => /^banda larga in punta$/i.test(String(x)) ? "Binda larga in punta" : x);
 // stesso testo della funzione equo_testo_ferro_dettagli del database: «pad, soletta · note» / «davanti: pad; dietro: alluminio»
 function testoDettagliFerro(det, detp, note){
-  const l = a => (a || []).map(x => String(x).toLowerCase()).join(", ");
+  const l = a => detNorm(a).map(x => String(x).toLowerCase()).join(", ");
   const d = (detp || []).length ? [det && det.length ? "davanti: " + l(det) : "", "dietro: " + l(detp)].filter(Boolean).join("; ") : l(det);
   return [d, (note || "").trim()].filter(Boolean).join(" · ");
 }
@@ -52,7 +54,7 @@ function apriSchedaFerratura(cv, clienteId, dopo, extra){
   // senza misura salvata si parte dalla misura che il maniscalco usa di solito
   ferStato = { cv, clienteId, dopo, lavoro: lavoroCav(cv), s: cv.ferro_numero ? (cv.ferro_sistema || "italiana") : misuraPredefinita(), idx: n >= 0 ? n : -1,
     ft: cv.ferro_tipo || "standard", ftp: cv.ferro_tipo_post || null,
-    det: (cv.ferro_dettagli || []).slice(), detp: (cv.ferro_dettagli_post || []).slice(),
+    det: detNorm(cv.ferro_dettagli), detp: detNorm(cv.ferro_dettagli_post),
     int: intervalloCavallo(cv), intEff: intervalloEffettivo({ ...cv, intervallo_giorni: null }, clienteId || currentClienteId, schedaStoricoCavallo) };
   document.getElementById("fer-prezzo").value = cv.prezzo_ferratura != null && cv.prezzo_ferratura !== "" ? Number(cv.prezzo_ferratura) : "";
   document.getElementById("fer-titolo").textContent = (cv.nome || "Cavallo") + " · Ferratura";
