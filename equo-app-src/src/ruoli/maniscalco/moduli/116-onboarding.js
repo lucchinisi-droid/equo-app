@@ -3,6 +3,7 @@ import { clientiAttivi } from "./032-richiamo-prossimo-intervento-sempre-in-g.js
 import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { creaCavalliDaTesto, nomiCavalliDaTesto, openClienteDetail, openEditCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { chiediSiNo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
+import { cavalliMieiLista } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { condividiInvitoCliente } from "./108-invito-qr.js";
 /* ---------- ONBOARDING PREDITTIVO (27/10/2026, casi Sara/Francesco e Simone/Riccardo) ----------
@@ -79,9 +80,13 @@ async function verificaNuovoCavallo(nome, chip, clienteId, usaEsistente){
   if(!lista.length) return { crea: true };
   const x = lista[0], altri = lista.length - 1;
   const stesso = usaEsistente && x.tipo === "mio" && !x.archiviato && x.id && clienteId && x.cliente_id === clienteId;
-  const ok = await chiediSiNo(`${x.nome} ${onbDove(x)}`,
-    `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È un altro cavallo? «Sì» crea una scheda nuova; «No» ${stesso ? "usa quello che c'è già" : usaEsistente ? "si ferma, così scegli quello che c'è già" : "apre quello che c'è già"}: niente doppioni.`);
-  if(ok) return { crea: true };
+  // 3/11/2026 (caso Riccardo): con «Sì/No» si rispondeva «Sì, è lui» e nasceva un doppione. Ora i tasti dicono cosa fanno:
+  // il primo (principale) tiene il cavallo che c'è già, il secondo crea una scheda nuova.
+  const tieni = stesso ? `Usa ${x.nome} di ${x.cliente}` : "È lo stesso cavallo";
+  const usa = await chiediSiNo(`${x.nome} ${onbDove(x)}`,
+    `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È lo stesso cavallo o un altro con lo stesso nome?`,
+    { si: tieni, no: "È un altro cavallo: scheda nuova" });
+  if(!usa) return { crea: true };
   if(stesso) return { usa: { id: x.id, nome: x.nome } };
   return { stop: x };
 }
@@ -89,7 +94,7 @@ async function verificaNuovoCavallo(nome, chip, clienteId, usaEsistente){
 function testoGiaPresente(x){
   return x.tipo === "proprietario" ? `${x.nome} è già su Equo con ${x.cliente}: sceglilo dall'elenco dei cavalli di quel cliente.`
     : x.archiviato ? `${x.nome} è tra gli archiviati di «${x.cliente}»: ripristinalo da «Modifica».`
-    : `${x.nome} c'è già sotto «${x.cliente}»: usa quel cliente (oppure rispondi «Sì» se è un altro cavallo).`;
+    : `${x.nome} c'è già sotto «${x.cliente}»: scegli «${x.cliente}» come cliente (oppure, se è un altro cavallo, salva di nuovo e scegli «È un altro cavallo»).`;
 }
 async function onbControllaDoppione(nome, chip){
   const v = await verificaNuovoCavallo(nome, chip, null, false);
@@ -117,6 +122,24 @@ async function creaClienteUnico(c){
   if(!nome) return { error: { message: "Scrivi il nome del cliente." } };
   const email = c.email ? String(c.email).trim().toLowerCase() : "";
   const tipo_cliente = c.tipo_cliente || onbTipoDaNome(nome);
+  // 3/11/2026: stesso nome di un cliente che c'è già (non archiviato) → si chiede prima di farne un doppione
+  if(c.chiediDoppione !== false){
+    const gia = (await DB.listClientiMascalcia()).find(x => !x.archiviato_il && onbNorm(x.nome) === onbNorm(nome));
+    if(gia){
+      const cav = (cavalliMieiLista || []).filter(v => v.cliente_mascalcia_id === gia.id && !v.archiviato_il).map(v => v.nome);
+      const quali = cav.length ? (cav.length === 1 ? "1 cavallo: " : cav.length + " cavalli: ") + cav.slice(0, 4).join(", ") + (cav.length > 4 ? "…" : "") : (gia.nome_cavallo ? "cavalli: " + gia.nome_cavallo : "");
+      const usa = await chiediSiNo(`${gia.nome} c'è già tra i tuoi clienti`, (quali ? quali.charAt(0).toUpperCase() + quali.slice(1) + ". " : "") + "È la stessa persona o un altro cliente con lo stesso nome?",
+        { si: "Usa questo cliente", no: "È un'altra persona" });
+      if(usa){
+        // cliente che c'è già: si aggiungono solo i cavalli nuovi (quelli presenti li ferma la domanda sui cavalli)
+        const nomiG = nomiCavalliDaTesto(c.cavalli || "");
+        const saltaG = nomiG.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomiG) : [];
+        const restanoG = nomiG.filter(n => !saltaG.some(x => x.toLowerCase() === n.toLowerCase()));
+        const cavalliG = restanoG.length ? await creaCavalliDaTesto(gia.id, restanoG.join(", ")) : [];
+        return { data: gia, cavalli: cavalliG, saltati: saltaG, riusato: true };
+      }
+    }
+  }
   const nomi = nomiCavalliDaTesto(c.cavalli || "");
   const salta = nomi.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomi) : [];
   const restano = nomi.filter(n => !salta.some(x => x.toLowerCase() === n.toLowerCase()));

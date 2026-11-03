@@ -163,7 +163,7 @@ async function createClienteMascalcia(){
   btn.disabled = true;
   try {
     // 28/10/2026: strada unica per i clienti nuovi (cavalli già presenti, email, indirizzo) · 116-onboarding.js
-    const { error, data: nuovo } = await creaClienteUnico({ nome, tipo_cliente, telefono, note, email, indirizzo: document.getElementById("cliente-indirizzo")?.value.trim(), cavalli: nome_cavallo });
+    const { error, data: nuovo, riusato } = await creaClienteUnico({ nome, tipo_cliente, telefono, note, email, indirizzo: document.getElementById("cliente-indirizzo")?.value.trim(), cavalli: nome_cavallo });
     if(error || !nuovo){ errBox.textContent = "Errore: " + (error?.message || "salvataggio non riuscito"); errBox.style.display = "block"; return; }
     let msgCollegamento = "";
     if(codiceEquo){
@@ -172,7 +172,7 @@ async function createClienteMascalcia(){
     }
     ["cliente-nome", "cliente-cavallo", "cliente-telefono", "cliente-email", "cliente-indirizzo", "cliente-note", "cliente-codice-equo"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
     closeModal("modal-add-cliente");
-    showToast("Cliente salvato" + msgCollegamento);
+    showToast((riusato ? "Hai già questo cliente: ho usato quello" : "Cliente salvato") + msgCollegamento);
     await loadClientiMascalcia();
   } finally {
     btn.disabled = false;

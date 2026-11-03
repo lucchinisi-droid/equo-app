@@ -69,3 +69,6 @@
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
   z-index:70;align-items:flex-end;justify-content:center;overscroll-behavior:contain}
 .ai-sheet-overlay.active{display:flex}
+/* 3/11/2026: Sì/No con parole (es. «Usa questo cliente» / «È un'altra persona»): un tasto sotto l'altro */
+#eq-pop-sino.parole .az-riga{flex-direction:column}
+#eq-pop-sino.parole .az-riga button{text-transform:none;font-size:14.5px;line-height:1.3}

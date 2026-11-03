@@ -10274,7 +10274,11 @@
 		if (!lista.length) return { crea: true };
 		const x = lista[0], altri = lista.length - 1;
 		const stesso = usaEsistente && x.tipo === "mio" && !x.archiviato && x.id && clienteId && x.cliente_id === clienteId;
-		if (await chiediSiNo(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È un altro cavallo? «Sì» crea una scheda nuova; «No» ${stesso ? "usa quello che c'è già" : usaEsistente ? "si ferma, così scegli quello che c'è già" : "apre quello che c'è già"}: niente doppioni.`)) return { crea: true };
+		const tieni = stesso ? `Usa ${x.nome} di ${x.cliente}` : "È lo stesso cavallo";
+		if (!await chiediSiNo(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È lo stesso cavallo o un altro con lo stesso nome?`, {
+			si: tieni,
+			no: "È un altro cavallo: scheda nuova"
+		})) return { crea: true };
 		if (stesso) return { usa: {
 			id: x.id,
 			nome: x.nome
@@ -10282,7 +10286,7 @@
 		return { stop: x };
 	}
 	function testoGiaPresente(x) {
-		return x.tipo === "proprietario" ? `${x.nome} è già su Equo con ${x.cliente}: sceglilo dall'elenco dei cavalli di quel cliente.` : x.archiviato ? `${x.nome} è tra gli archiviati di «${x.cliente}»: ripristinalo da «Modifica».` : `${x.nome} c'è già sotto «${x.cliente}»: usa quel cliente (oppure rispondi «Sì» se è un altro cavallo).`;
+		return x.tipo === "proprietario" ? `${x.nome} è già su Equo con ${x.cliente}: sceglilo dall'elenco dei cavalli di quel cliente.` : x.archiviato ? `${x.nome} è tra gli archiviati di «${x.cliente}»: ripristinalo da «Modifica».` : `${x.nome} c'è già sotto «${x.cliente}»: scegli «${x.cliente}» come cliente (oppure, se è un altro cavallo, salva di nuovo e scegli «È un altro cavallo»).`;
 	}
 	async function creaCavalloUnico(campi, opz = {}) {
 		const nome = String(campi?.nome || "").trim(), chip = campi?.microchip ? String(campi.microchip).trim() : null;
@@ -10318,6 +10322,27 @@
 		if (!nome) return { error: { message: "Scrivi il nome del cliente." } };
 		const email = c.email ? String(c.email).trim().toLowerCase() : "";
 		const tipo_cliente = c.tipo_cliente || onbTipoDaNome(nome);
+		if (c.chiediDoppione !== false) {
+			const gia = (await DB.listClientiMascalcia()).find((x) => !x.archiviato_il && onbNorm(x.nome) === onbNorm(nome));
+			if (gia) {
+				const cav = (cavalliMieiLista || []).filter((v) => v.cliente_mascalcia_id === gia.id && !v.archiviato_il).map((v) => v.nome);
+				const quali = cav.length ? (cav.length === 1 ? "1 cavallo: " : cav.length + " cavalli: ") + cav.slice(0, 4).join(", ") + (cav.length > 4 ? "…" : "") : gia.nome_cavallo ? "cavalli: " + gia.nome_cavallo : "";
+				if (await chiediSiNo(`${gia.nome} c'è già tra i tuoi clienti`, (quali ? quali.charAt(0).toUpperCase() + quali.slice(1) + ". " : "") + "È la stessa persona o un altro cliente con lo stesso nome?", {
+					si: "Usa questo cliente",
+					no: "È un'altra persona"
+				})) {
+					const nomiG = nomiCavalliDaTesto(c.cavalli || "");
+					const saltaG = nomiG.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomiG) : [];
+					const restanoG = nomiG.filter((n) => !saltaG.some((x) => x.toLowerCase() === n.toLowerCase()));
+					return {
+						data: gia,
+						cavalli: restanoG.length ? await creaCavalliDaTesto(gia.id, restanoG.join(", ")) : [],
+						saltati: saltaG,
+						riusato: true
+					};
+				}
+			}
+		}
 		const nomi = nomiCavalliDaTesto(c.cavalli || "");
 		const salta = nomi.length && c.chiediCavalli !== false ? await onbNomiGiaPresenti(nomi) : [];
 		const restano = nomi.filter((n) => !salta.some((x) => x.toLowerCase() === n.toLowerCase()));
@@ -10946,11 +10971,15 @@
 		return !!document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto");
 	}
 	var sinoResolve = null;
-	function chiediSiNo(titolo, testo) {
+	function chiediSiNo(titolo, testo, etichette) {
 		return new Promise((resolve) => {
 			sinoResolve = resolve;
 			document.getElementById("sino-tit").textContent = titolo;
 			document.getElementById("sino-testo").textContent = testo || "";
+			const bSi = document.getElementById("sino-si"), bNo = document.getElementById("sino-no");
+			if (bSi) bSi.textContent = etichette?.si || "SÌ";
+			if (bNo) bNo.textContent = etichette?.no || "NO";
+			document.getElementById("eq-pop-sino").classList.toggle("parole", !!etichette);
 			document.getElementById("eq-pop-sino").classList.add("attivo");
 		});
 	}
@@ -11034,7 +11063,7 @@
 				});
 				if (clienteError || !nuovoCliente) return errore("Errore nel creare il cliente: " + (clienteError?.message || ""));
 				cliente_mascalcia_id = nuovoCliente.id;
-				clienteCreatoOra = true;
+				clienteCreatoOra = !nuovoCliente.riusato;
 			}
 			const righe = [];
 			for (const k of scelti) {
@@ -11881,7 +11910,7 @@
 		const btn = document.getElementById("cliente-save-btn");
 		btn.disabled = true;
 		try {
-			const { error, data: nuovo } = await creaClienteUnico({
+			const { error, data: nuovo, riusato } = await creaClienteUnico({
 				nome,
 				tipo_cliente,
 				telefono,
@@ -11913,7 +11942,7 @@
 				if (el) el.value = "";
 			});
 			closeModal("modal-add-cliente");
-			showToast("Cliente salvato" + msgCollegamento);
+			showToast((riusato ? "Hai già questo cliente: ho usato quello" : "Cliente salvato") + msgCollegamento);
 			await loadClientiMascalcia();
 		} finally {
 			btn.disabled = false;

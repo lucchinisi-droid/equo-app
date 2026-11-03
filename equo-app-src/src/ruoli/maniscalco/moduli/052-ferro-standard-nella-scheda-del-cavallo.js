@@ -429,11 +429,16 @@ function lavoroFattoAttivo(){ return !!document.getElementById("modal-add-interv
 
 /* Pop-up Sì / No (stile Equo) — restituisce true/false */
 let sinoResolve = null;
-function chiediSiNo(titolo, testo){
+// 3/11/2026: tasti con parole chiare quando «Sì/No» si presta a equivoci: chiediSiNo(titolo, testo, { si: "Usa questo cliente", no: "È un'altra persona" })
+function chiediSiNo(titolo, testo, etichette){
   return new Promise(resolve => {
     sinoResolve = resolve;
     document.getElementById("sino-tit").textContent = titolo;
     document.getElementById("sino-testo").textContent = testo || "";
+    const bSi = document.getElementById("sino-si"), bNo = document.getElementById("sino-no");
+    if(bSi) bSi.textContent = etichette?.si || "SÌ";
+    if(bNo) bNo.textContent = etichette?.no || "NO";
+    document.getElementById("eq-pop-sino").classList.toggle("parole", !!etichette);
     document.getElementById("eq-pop-sino").classList.add("attivo");
   });
 }
@@ -516,7 +521,7 @@ async function salvaInterventoMascalcia(){
       const { error: clienteError, data: nuovoCliente } = await creaClienteUnico({ nome, tipo_cliente, email: emailNuovo, nome_cavallo: nuovoCavalloNome });
       if(clienteError || !nuovoCliente) return errore("Errore nel creare il cliente: " + (clienteError?.message || ""));
       cliente_mascalcia_id = nuovoCliente.id;
-      clienteCreatoOra = true;
+      clienteCreatoOra = !nuovoCliente.riusato;   // 3/11/2026: un cliente che c'era già non si toglie mai se il salvataggio non va
     }
 
     // cavalli: nuovo / esistenti (manuali o "su Equo")
