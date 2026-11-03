@@ -10535,6 +10535,10 @@
 	function renderFerroRighe() {
 		const box = document.getElementById("intervento-scheda-righe");
 		if (!box) return;
+		if (eVeterinario()) {
+			box.innerHTML = "";
+			return;
+		}
 		box.innerHTML = cavalliSceltiIntervento().filter((k) => k && k !== "__nuovo_cavallo__").map((k) => {
 			const cv = cavalliClienteCorrente.find((c) => c.key === k);
 			if (!cv) return "";
@@ -12082,9 +12086,9 @@
 			x.razza ? escapeHtml(x.razza) : "",
 			x.microchip ? "chip " + escapeHtml(x.microchip) : "",
 			x.presso ? "📍 presso " + escapeHtml(x.presso) : "",
-			x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
+			x.ferro_numero && !eVeterinario() ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
 		].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" && !x.horse_id && !x.scuderia_cavallo_id ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0">${eVeterinario() ? "" : `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>`}${x.tipo === "manuale" && !x.horse_id && !x.scuderia_cavallo_id ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">

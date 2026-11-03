@@ -41,6 +41,7 @@ function nomeCavalloKey(k){
 function renderFerroRighe(){
   const box = document.getElementById("intervento-scheda-righe");
   if(!box) return;
+  if(eVeterinario()){ box.innerHTML = ""; return; }   // 3/11/2026: il veterinario non ha la scheda Ferratura del cavallo
   const scelti = cavalliSceltiIntervento().filter(k => k && k !== "__nuovo_cavallo__");
   box.innerHTML = scelti.map(k => {
     const cv = cavalliClienteCorrente.find(c => c.key === k);
