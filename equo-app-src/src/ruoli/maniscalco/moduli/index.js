@@ -13,7 +13,7 @@ import { apriGiro, apriListaHome, apriRichiamo, apriScadenzaCavallo, confermaGir
 import { isPremium } from "./042-incassi-pro.js";
 import { incApri, renderIncassi, renderIncassiSaldati, sceltaMesiIncassi, sceltaPeriodoIncassi, sceltaVistaIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { renderIncassiCompleta } from "./048-vista-completa-premium-previsionale-clie.js";
-import { aggiungiPrezziMancanti, rispondiPrezzi, segnaSaldatoIncassi } from "./049-prezzo-mancante-promemoria-salvando-un-a.js";
+import { aggiungiPrezziMancanti, rispondiPrezzi, segnaSaldatoIncassi, incTuttoSaldato } from "./049-prezzo-mancante-promemoria-salvando-un-a.js";
 import { apriSpostaCavalloPro, apriSpostaCavalloProprietario, caricaUbicazioni, clienteDiId, confermaSposta, luogoDi, luogoEvento, luogoProprietario, navigaLuogo, renderDoveStaProprietario, spAggiorna, spCerca, spostamentoHtml, ubicDi, wgNavigaEvento } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { aggiornaGiaFatto, aggiungiGiorniIso, isoLocale, onMisuraSistemaChange, selezionaMisura } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { aggiornaQuando, avvisaClienteAppuntamento, chiediSiNo, chiudiEditorFerro, eliminaInterventoInModifica, modificaFerraturaDaIntervento, nuovoCavalloLavoro, onCavalliMultiChange, onInterventoClienteChange, openInterventoModal, quandoIntervento, rispondiSiNo, salvaInterventoMascalcia, sceltaModoIntervento, sceltaStraordinario, sceltaZoccolo, selezionaQuantita, siglaFerro, testoPrimaModifica, toggleInterventoNuovoCavallo, toggleInterventoTipoFields } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
@@ -332,6 +332,7 @@ Object.assign(window, {
   scollegaStrutturaCorrente,
   segnaFattoAgenda,
   segnaSaldatoIncassi,
+  incTuttoSaldato,
   selezionaMisura,
   selezionaQuantita,
   sendFarrierChatMessage,

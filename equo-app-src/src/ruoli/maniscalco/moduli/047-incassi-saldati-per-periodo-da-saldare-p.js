@@ -16,6 +16,10 @@ import { pagCarica, pagHtmlLavoro, pagPagato, pagResiduo, pagVociIncasso } from 
 /* -> stato-condiviso.js */
 let incMesi = (() => { try { return Number(localStorage.getItem("equo-inc-mesi")) || 6; } catch(e){ return 6; } })();
 /* -> stato-condiviso.js */
+// 3/11/2026 (segnalazione di un maniscalco): dopo «Saldato» le scuderie restano dov'erano, non si riordinano sotto il dito.
+// Si riordinano per importo solo quando si riapre la pagina o si cambia periodo.
+let incOrdine = null;
+function incTieniOrdine(){ incOrdine = [...document.querySelectorAll("#incassi-da-saldare-list .inc-gruppo")].map(g => g.dataset.cli); }
 const INC_PERIODI = [["oggi", "Oggi", false], ["settimana", "Settimana", true], ["mese", "Mese", false], ["anno", "Anno", true], ["date", "Scegli date…", true]];
 function euroTondo(n){ return formatEuro(n); }   // 28/10/2026: formato unico
 function giornoPagamento(i){ return i._giorno ? i._giorno : i.saldato_il ? isoLocale(new Date(i.saldato_il)) : (i.data_intervento || ""); }
@@ -86,6 +90,8 @@ async function renderIncassi(){
   const perCli = new Map();
   fattiNonSaldati.forEach(i => { const k = i.cliente_mascalcia_id || "?"; if(!perCli.has(k)) perCli.set(k, { id: k, nome: i.clienti_mascalcia?.nome || "Cliente", righe: [] }); perCli.get(k).righe.push(i); });
   const gruppiDs = [...perCli.values()].map(g => ({ ...g, tot: incSommaResidui(g.righe), righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)) })).sort((a, b) => b.tot - a.tot);
+  { const ord = incOrdine; incOrdine = null;
+    if(ord){ const pos = g => { const i = ord.indexOf(String(g.id)); return i < 0 ? Infinity : i; }; gruppiDs.sort((a, b) => pos(a) - pos(b) || b.tot - a.tot); } }
   const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
   const cDs = document.getElementById("inc-cassa-dasaldare");
   cDs.classList.toggle("aperta", incAperta === "dasaldare");
@@ -94,7 +100,9 @@ async function renderIncassi(){
     <span class="d">${fattiNonSaldati.length ? `${fattiNonSaldati.length} ${fattiNonSaldati.length === 1 ? "lavoro già fatto" : "lavori già fatti"} · ${gruppiDs.length} ${gruppiDs.length === 1 ? "cliente" : "clienti"} · il più vecchio da ${piuVecchio} ${piuVecchio === 1 ? "giorno" : "giorni"}` : "Tutto incassato 👍"}</span>`;
   document.getElementById("inc-det-dasaldare").hidden = incAperta !== "dasaldare";
   document.getElementById("incassi-da-saldare-list").innerHTML = !gruppiDs.length ? '<div class="muted" style="font-size:13px">Nessun pagamento in sospeso.</div>'
-    : gruppiDs.map(g => `<div class="inc-gruppo"><span>${escapeHtml(g.nome)}</span><span style="display:flex;align-items:center;gap:10px">${euroTondo(g.tot)}${g.id && g.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button>` : ""}</span></div>` + g.righe.map(i => {
+    : gruppiDs.map(g => `<div class="inc-gruppo" data-cli="${escapeHtml(String(g.id))}"><span>${escapeHtml(g.nome)}</span><span style="display:flex;align-items:center;gap:10px">${euroTondo(g.tot)}${g.id && g.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button>` : ""}</span></div>`
+      + (g.righe.length > 1 && g.id && g.id !== "?" ? `<div class="inc-gruppo-az"><button type="button" class="inc-tutto" onclick="incTuttoSaldato('${escapeHtml(String(g.id))}', this)">Tutto saldato · ${g.righe.length} lavori</button></div>` : "")
+      + g.righe.map(i => {
         const gg = giorniTra(i.data_intervento, oggiIso);
         return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
           <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
@@ -222,4 +230,4 @@ function sceltaMesiIncassi(n){
 }
 
 
-export { euroTondo, incApri, incMesi, incSomma, renderIncassi, renderIncassiSaldati, sceltaMesiIncassi, sceltaPeriodoIncassi, sceltaVistaIncassi };
+export { euroTondo, incApri, incMesi, incTieniOrdine, incSomma, renderIncassi, renderIncassiSaldati, sceltaMesiIncassi, sceltaPeriodoIncassi, sceltaVistaIncassi };

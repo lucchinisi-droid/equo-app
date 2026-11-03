@@ -74,3 +74,7 @@
 :where(body:not(.pl-owner)) .pag-storico span{flex:1;min-width:0;color:var(--muted)}
 :where(body:not(.pl-owner)) .pag-storico button{border:0;background:none;color:var(--muted);font-size:14px;padding:2px 4px;cursor:pointer}
 .inc-voce .tag.acc{color:var(--accent)}
+/* 3/11/2026: «Tutto saldato» sotto il nome del cliente o della scuderia */
+.inc-gruppo-az{display:flex;justify-content:flex-end;padding:0 0 4px}
+.inc-tutto{border:1px solid var(--border);background:transparent;color:var(--accent);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.inc-tutto:disabled{opacity:.5}

@@ -1,5 +1,7 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
+import { renderIncassi, incTieniOrdine, euroTondo } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
+import { pagResiduo } from "./113-pagamenti-a-rate.js";
+import { chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { INC_ORIZZONTE } from "./048-vista-completa-premium-previsionale-clie.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
@@ -75,9 +77,30 @@ async function segnaSaldatoIncassi(id, btn){
   const i = incTutti.find(x => x.id === id);
   if(i && DEMO_MODE) i.saldato_il = new Date().toISOString();
   showToast("Segnato come saldato");
+  incTieniOrdine();   // la scuderia resta al suo posto
+  await renderIncassi();
+}
+// 3/11/2026: «Tutto saldato» per un cliente o una scuderia, con conferma (prima si segnava un cavallo alla volta)
+async function incTuttoSaldato(clienteId, btn){
+  const righe = (incTutti || []).filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato" && String(i.cliente_mascalcia_id || "?") === String(clienteId));
+  if(!righe.length) return;
+  const nome = righe[0].clienti_mascalcia?.nome || "questo cliente";
+  const tot = righe.reduce((s, i) => s + (Number(i.importo) > 0 ? pagResiduo(i) : 0), 0);
+  const ok = await chiediConferma(`Segno saldati i ${righe.length} lavori di ${nome}${tot > 0 ? " (" + euroTondo(tot) + ")" : ""}? Escono da «Da incassare» e vanno negli incassi di oggi.`);
+  if(!ok) return;
+  if(btn) btn.disabled = true;
+  let fatti = 0, errore = null;
+  for(const i of righe){
+    const { error } = await DB.updateInterventoMascalcia(i.id, { stato_pagamento: "saldato" });
+    if(error){ errore = error; break; }
+    if(DEMO_MODE) i.saldato_il = new Date().toISOString();
+    fatti++;
+  }
+  showToast(errore ? `Segnati ${fatti} su ${righe.length}. Errore: ${errore.message}` : `${nome}: tutto saldato`);
+  incTieniOrdine();
   await renderIncassi();
 }
 
 
 
-export { aggiungiPrezziMancanti, chiediPrezzi, promemoriaPrezzoAttivo, rispondiPrezzi, segnaSaldatoIncassi };
+export { aggiungiPrezziMancanti, chiediPrezzi, promemoriaPrezzoAttivo, rispondiPrezzi, segnaSaldatoIncassi, incTuttoSaldato };

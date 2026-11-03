@@ -4768,6 +4768,10 @@
 			return 6;
 		}
 	})();
+	var incOrdine = null;
+	function incTieniOrdine() {
+		incOrdine = [...document.querySelectorAll("#incassi-da-saldare-list .inc-gruppo")].map((g) => g.dataset.cli);
+	}
 	var INC_PERIODI = [
 		[
 			"oggi",
@@ -4915,6 +4919,17 @@
 			tot: incSommaResidui(g.righe),
 			righe: g.righe.sort((a, b) => a.data_intervento.localeCompare(b.data_intervento))
 		})).sort((a, b) => b.tot - a.tot);
+		{
+			const ord = incOrdine;
+			incOrdine = null;
+			if (ord) {
+				const pos = (g) => {
+					const i = ord.indexOf(String(g.id));
+					return i < 0 ? Infinity : i;
+				};
+				gruppiDs.sort((a, b) => pos(a) - pos(b) || b.tot - a.tot);
+			}
+		}
 		const piuVecchio = fattiNonSaldati.reduce((m, i) => Math.max(m, giorniTra(i.data_intervento, oggiIso)), 0);
 		const cDs = document.getElementById("inc-cassa-dasaldare");
 		cDs.classList.toggle("aperta", incAperta === "dasaldare");
@@ -4922,7 +4937,7 @@
 		cDs.innerHTML = `<span class="l"><span>Da incassare</span><span>${incAperta === "dasaldare" ? "⌃" : "⌄"}</span></span><span class="v">${euroTondo(daIncassare)}</span>
     <span class="d">${fattiNonSaldati.length ? `${fattiNonSaldati.length} ${fattiNonSaldati.length === 1 ? "lavoro già fatto" : "lavori già fatti"} · ${gruppiDs.length} ${gruppiDs.length === 1 ? "cliente" : "clienti"} · il più vecchio da ${piuVecchio} ${piuVecchio === 1 ? "giorno" : "giorni"}` : "Tutto incassato 👍"}</span>`;
 		document.getElementById("inc-det-dasaldare").hidden = incAperta !== "dasaldare";
-		document.getElementById("incassi-da-saldare-list").innerHTML = !gruppiDs.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun pagamento in sospeso.</div>" : gruppiDs.map((g) => `<div class="inc-gruppo"><span>${escapeHtml(g.nome)}</span><span style="display:flex;align-items:center;gap:10px">${euroTondo(g.tot)}${g.id && g.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button>` : ""}</span></div>` + g.righe.map((i) => {
+		document.getElementById("incassi-da-saldare-list").innerHTML = !gruppiDs.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun pagamento in sospeso.</div>" : gruppiDs.map((g) => `<div class="inc-gruppo" data-cli="${escapeHtml(String(g.id))}"><span>${escapeHtml(g.nome)}</span><span style="display:flex;align-items:center;gap:10px">${euroTondo(g.tot)}${g.id && g.id !== "?" ? `<button type="button" class="btn btn-outline btn-sm" onclick="apriNuovoConto('${g.id}')">Fai il conto</button>` : ""}</span></div>` + (g.righe.length > 1 && g.id && g.id !== "?" ? `<div class="inc-gruppo-az"><button type="button" class="inc-tutto" onclick="incTuttoSaldato('${escapeHtml(String(g.id))}', this)">Tutto saldato · ${g.righe.length} lavori</button></div>` : "") + g.righe.map((i) => {
 			const gg = giorniTra(i.data_intervento, oggiIso);
 			return `<div class="inc-voce" data-cerca="${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || "")}">
           <div class="c"><b>${escapeHtml([i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · "))}</b>
@@ -10038,6 +10053,28 @@
 		const i = incTutti.find((x) => x.id === id);
 		if (i && DEMO_MODE) i.saldato_il = (/* @__PURE__ */ new Date()).toISOString();
 		showToast("Segnato come saldato");
+		incTieniOrdine();
+		await renderIncassi$1();
+	}
+	async function incTuttoSaldato(clienteId, btn) {
+		const righe = (incTutti || []).filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato" && String(i.cliente_mascalcia_id || "?") === String(clienteId));
+		if (!righe.length) return;
+		const nome = righe[0].clienti_mascalcia?.nome || "questo cliente";
+		const tot = righe.reduce((s, i) => s + (Number(i.importo) > 0 ? pagResiduo(i) : 0), 0);
+		if (!await chiediConferma(`Segno saldati i ${righe.length} lavori di ${nome}${tot > 0 ? " (" + euroTondo(tot) + ")" : ""}? Escono da «Da incassare» e vanno negli incassi di oggi.`)) return;
+		if (btn) btn.disabled = true;
+		let fatti = 0, errore = null;
+		for (const i of righe) {
+			const { error } = await DB.updateInterventoMascalcia(i.id, { stato_pagamento: "saldato" });
+			if (error) {
+				errore = error;
+				break;
+			}
+			if (DEMO_MODE) i.saldato_il = (/* @__PURE__ */ new Date()).toISOString();
+			fatti++;
+		}
+		showToast(errore ? `Segnati ${fatti} su ${righe.length}. Errore: ${errore.message}` : `${nome}: tutto saldato`);
+		incTieniOrdine();
 		await renderIncassi$1();
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/087-2-scelta-del-cliente-nell-appuntamento.js
@@ -15897,6 +15934,7 @@
 		scollegaStrutturaCorrente,
 		segnaFattoAgenda,
 		segnaSaldatoIncassi,
+		incTuttoSaldato,
 		selezionaMisura,
 		selezionaQuantita,
 		sendFarrierChatMessage,
