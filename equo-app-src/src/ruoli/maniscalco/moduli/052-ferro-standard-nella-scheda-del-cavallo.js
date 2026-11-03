@@ -284,7 +284,7 @@ async function onInterventoClienteChange(){
     lcRender(multi, cavalliClienteCorrente.map(c => ({ key: c.key, id: c.id, horse_id: c.horse_id, tipo: c.tipo, nome: c.nome, proprietario: c.proprietarioId ? c.proprietarioNome : "",
         info: [c.tipo === "equo" ? "su Equo" : "", c.presso ? "📍 " + c.presso : ""].filter(Boolean).join(" · ") })),
       { chk: "int-cav-chk", preset: presetCavalli, cambio: "onCavalliMultiChange", coda, ancora: () => document.getElementById("intervento-cliente-select").value === clienteId })
-      .then(ok => { if(ok) toggleInterventoNuovoCavallo(); });
+      .then(ok => { if(ok){ toggleInterventoNuovoCavallo(); if(typeof vaaDopoCliente === "function") vaaDopoCliente(); } });
   } else multi.innerHTML = coda;
   // in modifica: il ferro salvato nell'appuntamento, se diverso dallo standard, resta «usato in questo appuntamento»
   if(inMod && mRif && interventoInModifica.numero_ferro){
@@ -292,6 +292,7 @@ async function onInterventoClienteChange(){
     if(!ferroUguale(usato, ferroStd(mRif))) ferroOverride[mRif.key] = usato;
   }
   toggleInterventoNuovoCavallo();
+  if(typeof vaaDopoCliente === "function") vaaDopoCliente();   // veterinario: cavalli ora o a fine visita (visita aperta, 3/11/2026)
 }
 // scelto dalla ricerca (cavallo · cliente): lo spunta / lo seleziona
 function selezionaCavalloIntervento(nome){

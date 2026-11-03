@@ -3185,6 +3185,10 @@
 	}
 	async function segnaFatto(e, opz = {}) {
 		if (!e) return { ok: false };
+		if (typeof vaaFatto === "function" && typeof eVeterinario === "function" && eVeterinario() && !e.cavallo_cliente_id && !e.horse_id) {
+			if (opz.prima) opz.prima();
+			return vaaFatto(e);
+		}
 		const anticipo = await fattoInAnticipo(e);
 		if (anticipo === null) return { ok: false };
 		if (opz.prima) opz.prima();
@@ -10765,7 +10769,10 @@
 			coda,
 			ancora: () => document.getElementById("intervento-cliente-select").value === clienteId
 		}).then((ok) => {
-			if (ok) toggleInterventoNuovoCavallo();
+			if (ok) {
+				toggleInterventoNuovoCavallo();
+				if (typeof vaaDopoCliente === "function") vaaDopoCliente();
+			}
 		});
 		else multi.innerHTML = coda;
 		if (inMod && mRif && interventoInModifica.numero_ferro) {
@@ -10777,6 +10784,7 @@
 			if (!ferroUguale(usato, ferroStd(mRif))) ferroOverride[mRif.key] = usato;
 		}
 		toggleInterventoNuovoCavallo();
+		if (typeof vaaDopoCliente === "function") vaaDopoCliente();
 	}
 	function selezionaCavalloIntervento(nome) {
 		const k = cercaNorm(nome);

@@ -19,14 +19,24 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
 
   await pg.evaluate(() => { showPage("pro-home"); renderHomeVet(); }); await attesa(800);
   const h = await pg.evaluate(() => { const box = document.getElementById("vh"); const kids = [...box.children].map(x => x.className.split(" ")[0]);
-    return { ordine: kids, righe: [...box.querySelectorAll(".vh-righe .hm-riga .tx b")].map(x => x.textContent), sotto: [...box.querySelectorAll(".vh-righe .hm-riga .tx span")].map(x => x.textContent),
+    return { ordine: kids, righe: [...box.querySelectorAll(".vh-righe .hm-riga .tx b")].map(x => x.textContent), sotto: [...box.querySelectorAll(".vh-righe .hm-riga .tx > span")].map(x => x.textContent),
       icone: [...box.querySelectorAll(".vh-righe .hm-riga .ic svg")].length, emoji: /[\u{1F300}-\u{1FAFF}]/u.test(box.querySelector(".vh-righe").textContent),
       aiuto: box.querySelector(".vh-aiuto b")?.textContent, bt: box.querySelector(".vh-aiuto-bt")?.textContent }; });
   const iTit = h.ordine.indexOf("vh-tit"), iRighe = h.ordine.indexOf("hm-righe"), iAiuto = h.ordine.indexOf("vh-aiuto");
-  ok(iTit >= 0 && iRighe > iTit && iAiuto > iRighe && h.righe.join("|") === "Cavalli|Clienti|Scuderie|Incassi" && h.icone === 4 && !h.emoji
-    && /cavall/.test(h.sotto[0]) && /propriet/.test(h.sotto[1]) && /scuder/.test(h.sotto[2]) && h.aiuto === "Segnalaci un problema o un consiglio" && h.bt === "Scrivici",
-    "Home: Prossime visite, poi Cavalli · Clienti · Scuderie · Incassi con le icone della Home, poi Segnalaci " + JSON.stringify(h));
+  // 3/11/2026: dopo le prossime visite, il tasto Tiffany «Nuovo appuntamento» è il primo delle righe, poi Cavalli · Clienti · Scuderie · Incassi
+  ok(iTit >= 0 && iRighe > iTit && iAiuto > iRighe && h.righe.join("|") === "Nuovo appuntamento|Cavalli|Clienti|Scuderie|Incassi" && h.icone === 5 && !h.emoji
+    && /cavall/.test(h.sotto[1]) && /propriet/.test(h.sotto[2]) && /scuder/.test(h.sotto[3]) && h.aiuto === "Segnalaci un problema o un consiglio" && h.bt === "Scrivici",
+    "Home: Prossime visite, tasto Nuovo appuntamento, poi Cavalli · Clienti · Scuderie · Incassi con le icone della Home, poi Segnalaci " + JSON.stringify(h));
 
+  // tasto Nuovo appuntamento: Tiffany con bordo e testo blu notte, apre il nuovo appuntamento
+  const pv = await pg.evaluate(() => { const r = document.querySelector("#vh .hm-riga.r-vis"); const cs = getComputedStyle(r);
+    return { bg: cs.backgroundColor, bordo: cs.borderTopColor, tit: getComputedStyle(r.querySelector(".tx b")).color, sotto: r.querySelector(".tx > span").textContent.trim() }; });
+  await pg.evaluate(() => document.querySelector("#vh .hm-riga.r-vis").click()); await attesa(600);
+  const modale = await pg.evaluate(() => document.getElementById("modal-add-intervento")?.classList.contains("active"));
+  await pg.evaluate(() => { try{ closeModal("modal-add-intervento"); }catch(_){} });
+  ok(pv.bg === "rgb(127, 209, 201)" && pv.bordo === "rgb(29, 45, 80)" && pv.tit === "rgb(29, 45, 80)" && pv.sotto === "Inserisci un nuovo appuntamento" && modale,
+    "Nuovo appuntamento: tasto Tiffany con bordo e testo blu notte, apre il nuovo appuntamento " + JSON.stringify({ pv, modale }));
+  await pg.evaluate(() => { showPage("pro-home"); renderHomeVet(); }); await attesa(300);
   // righe: Cavalli → elenco dei cavalli; Scuderie → filtro scuderie
   await pg.evaluate(() => vhVai("cavalli")); await attesa(700);
   const cav = await pg.evaluate(() => ({ pagina: document.querySelector(".page-content.active")?.id, tab: document.querySelector("#cli-cartelle button.on")?.textContent, righe: document.querySelectorAll("#clienti-list .vt-cli").length, primo: document.querySelector("#clienti-list .vt-cli b")?.textContent }));

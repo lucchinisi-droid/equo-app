@@ -471,3 +471,38 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 /* 3/11/2026: i messaggi «miei» (chat e Galeno) hanno lo sfondo blu notte: testo Tiffany, leggibile */
 :where(body.pl-vet) .mchat-bubble.out,:where(body.pl-vet) .mchat-bubble.out .mchat-bubble-text,:where(body.pl-vet) .mchat-bubble.out .mchat-bubble-time,
 :where(body.pl-vet) .mchat-bubble.out a,:where(body.pl-vet) .chat-bubble.user,:where(body.pl-vet) .chat-bubble.user a{color:var(--vt-tif)!important}
+/* 3/11/2026: tasto «Nuovo appuntamento» Tiffany, bordo e testo blu notte, icona bianca */
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis{background:var(--vt-tif);border:2px solid var(--vt-notte);color:var(--vt-notte)}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .ic{background:var(--vt-notte);color:#FFFFFF}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx b,:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx span,
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx span strong,:where(body.pl-vet) .vh-righe .hm-riga.r-vis .fr{color:var(--vt-notte)}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .num{background:#FFFFFF;color:var(--vt-notte);font-weight:800;font-size:13px;border-radius:999px;padding:4px 10px;margin-right:4px;white-space:nowrap}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx .urgv{color:#FFFFFF;background:var(--vt-urg);border-radius:6px;padding:0 5px;font-weight:700;margin-right:3px}
+/* tema scuro: titoli e icone delle righe Cavalli · Clienti · Scuderie · Incassi leggibili sul blu notte */
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-righe .hm-riga:not(.r-vis) .tx b{color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-righe .hm-riga:not(.r-vis) .ic{color:#7FD1C9}
+/* 3/11/2026: visita aperta (14-visita-aperta.js) */
+:where(body.pl-vet) .vt-b.oro{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vaa-seg{display:flex;background:var(--vt-chip);border-radius:12px;padding:3px;gap:3px;margin:2px 0 8px}
+:where(body.pl-vet) .vaa-seg button{flex:1;border:0;background:none;border-radius:9px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--vt-testo2);cursor:pointer}
+:where(body.pl-vet) .vaa-seg button.on{background:#FFFFFF;color:var(--vt-notte);box-shadow:0 1px 3px rgba(29,45,80,.12)}
+:where(body.pl-vet) .vaa-nota{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin:4px 0 8px}
+:where(body.pl-vet) .vaa-sotto-tit{color:var(--vt-testo2);font-size:13px;margin:-6px 0 10px}
+:where(body.pl-vet) .vaa-lab{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--vt-testo2);margin:14px 2px 6px}
+:where(body.pl-vet) .vaa-sotto{font-size:12px;font-weight:700;color:var(--vt-testo2);margin:8px 2px 4px}
+:where(body.pl-vet) .vaa-lista{max-height:42vh;overflow-y:auto}
+:where(body.pl-vet) .vaa-cav{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid var(--vt-bordo)}
+:where(body.pl-vet) .vaa-cav label:first-child{flex:1;min-width:0;display:flex;align-items:center;gap:10px;cursor:pointer}
+:where(body.pl-vet) .vaa-cav input[type=checkbox]{width:22px;height:22px;accent-color:var(--vt-notte);flex:none}
+:where(body.pl-vet) .vaa-cav .n{display:flex;flex-direction:column;min-width:0}
+:where(body.pl-vet) .vaa-cav .n small{color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vaa-prezzo{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--vt-notte)}
+:where(body.pl-vet) .vaa-prezzo input{width:76px;border:1px solid var(--vt-bordo);border-radius:10px;padding:7px 8px;font:inherit;font-size:15px;background:#FFFFFF;color:var(--vt-testo)}
+:where(body.pl-vet) .vaa-prezzo.base{gap:8px;flex-wrap:wrap}.vaa-prezzo.base small{font-weight:500;color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vaa-nuovi{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+:where(body.pl-vet) .vaa-nuovi > span{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+:where(body.pl-vet) .vaa-due{display:flex;gap:8px;margin-top:8px}.vaa-due .input{flex:1;min-width:0}
+:where(body.pl-vet) .vaa-tot{display:flex;justify-content:space-between;font-weight:800;font-size:15px;color:var(--vt-notte);padding:14px 2px 8px}
+:where(body.pl-vet) .vaa-ok,:where(body.pl-vet) .vaa-dopo{width:100%;margin-top:8px}
+:where(body.pl-vet) .vaa-banner{width:100%;text-align:left;background:var(--vt-oro-chiaro);border:1.5px solid var(--vt-oro);border-radius:14px;padding:11px 12px;margin:12px 0 4px;font:inherit;font-size:13px;line-height:1.4;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vaa-banner b{display:block;color:var(--vt-oro-testo);font-size:14px}

@@ -19,6 +19,7 @@ const VH_IC = {
 function vhEtichetta(e){
   const t = e.tipo_ferratura;
   if(t === "urgenza") return { cls: "urg", txt: "Urgente" };
+  const ap = typeof vaaEtichetta === "function" ? vaaEtichetta(e) : null; if(ap) return ap;   // visita aperta: cavalli a fine visita (14)
   if(t === "vaccino") return { cls: "oro", txt: "Vaccino" };
   if(t === "mtc") return { cls: "tif", txt: "MTC" };
   if(t === "fisio") return { cls: "tif", txt: "Fisio" };
@@ -85,6 +86,7 @@ function renderHomeVet(){
         <button onclick="hmScadenze()"><b>${ric}</b><span>${ric === 1 ? "richiamo" : "richiami"}</span></button>
       </div>
     </div>
+    ${typeof vaaBannerHtml === "function" ? vaaBannerHtml(app) : ""}
     <div class="vh-cerchi">
       <button onclick="hmPortami()"><span class="c">${VH_IC.portami}</span>Portami da</button>
       <button onclick="vhDetta()"><span class="c">${VH_IC.detta}</span>Detta</button>
@@ -98,9 +100,9 @@ function renderHomeVet(){
         <span class="o">${altroGiorno ? `<small>${escapeHtml(hpGiornoEtichetta(e.data_intervento))}</small>` : ""}${vhOra(e)}</span>
         <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
         <span class="vh-et ${et.cls}">${et.txt}</span></button>`; }).join("")
-      : `<div class="vh-vuoto">Nessuna visita in agenda. <button onclick="openInterventoModal(null)">Aggiungine una</button></div>`}
+      : `<div class="vh-vuoto">Nessuna visita in agenda.</div>`}
     ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
-    ${vhRigheHtml()}
+    ${vhRigheHtml(vhNuovoHtml())}
     <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
       <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
   // chilometri del giro di oggi: stessa stima della Giornata dell'officina (una volta al giorno)
@@ -114,7 +116,15 @@ function renderHomeVet(){
 // righe come nella Home del maniscalco (2/11/2026, mockup approvato da Simone): Cavalli · Clienti · Scuderie · Incassi.
 // Le icone sono quelle della Home del maniscalco (pagina 008, nascosta per il veterinario): si riusano da lì, non si copiano.
 function vhIcona(cls){ return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || ""; }
-function vhRigheHtml(){
+// 3/11/2026 (Simone, dal mockup): tasto «Nuovo appuntamento» come Cavalli · Clienti, Tiffany con bordo e testo blu notte,
+// subito sotto le prossime visite; apre il nuovo appuntamento.
+const VH_CAL = '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg>';
+function vhNuovoHtml(){
+  return `<button class="hm-riga r-vis" onclick="openInterventoModal(null)"><span class="ic">${VH_CAL}</span>
+    <span class="tx"><b>Nuovo appuntamento</b><span>Inserisci un nuovo appuntamento</span></span>
+    <span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
+}
+function vhRigheHtml(prima){
   const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
   const nCav = typeof cavalliCartella === "function" ? cavalliCartella().length : 0;
   const str = c => typeof isStruttura === "function" && isStruttura(c);
@@ -124,7 +134,7 @@ function vhRigheHtml(){
   const inc = `${escapeHtml(mese)} <strong>${euro(wgPro?.incassatoMese)}</strong>` + (wgPro?.daIncassareMese ? ` · da incassare <strong>${euro(wgPro.daIncassareMese)}</strong>` : "");
   const riga = (cls, az, t, sotto, extra) => `<button class="hm-riga ${cls}${extra ? " " + extra : ""}" onclick="${az}"><span class="ic">${vhIcona(cls)}</span>
     <span class="tx"><b>${t}</b><span>${sotto}</span></span><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
-  return `<div class="hm-righe vh-righe">
+  return `<div class="hm-righe vh-righe">${prima || ""}
     ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
     ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
     ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}

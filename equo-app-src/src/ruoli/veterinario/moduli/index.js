@@ -19,6 +19,9 @@ import { mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, 
   mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, mpDente, mpDenteVicino, mpZonaScegli, mpZonaSegno, mpNotaOggetto,
   mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET } from "./13-mappe.js";
 
+import { VAA, vaaDopoCliente, vaaModo, vaaEtichetta, vaaAperto, vaaFatto, vaaSpunta, vaaPrezzo, vaaPrezzoBase, vaaNuovi, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva,
+  vaaDaCompletare, vaaBannerHtml, vaaCompleta } from "./14-visita-aperta.js";
+
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
 Object.assign(window, {
   renderHomeVet,
@@ -47,5 +50,7 @@ Object.assign(window, {
   mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET,
   vcSezioniHtml, vcCarica, vcDisegna, vcApriVisita, vcScegli, vcFile, vcImposta, vcAnnulla, vcSalva, vcNomeLive, VC,
   vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
-  vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB
+  vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB,
+  VAA, vaaDopoCliente, vaaModo, vaaEtichetta, vaaAperto, vaaFatto, vaaSpunta, vaaPrezzo, vaaPrezzoBase, vaaNuovi, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva,
+  vaaDaCompletare, vaaBannerHtml, vaaCompleta
 });
