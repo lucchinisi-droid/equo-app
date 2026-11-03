@@ -42,7 +42,7 @@ function aggiornaSwitchHomeBase(){
   const sp = document.getElementById("promemoria-switch");
   if(sp) sp.checked = currentUser?.promemoriaPagamenti !== false;
   const rv = document.getElementById("menu-vista-man-row");
-  if(rv) rv.style.display = pro ? "" : "none";
+  if(rv) rv.style.display = "none";   // 3/11/2026: niente più Semplice/Completa nel menu
   const sv = document.getElementById("vista-man-switch");
   if(sv) sv.checked = vistaCompleta();
   // misura dei ferri preferita: solo maniscalco

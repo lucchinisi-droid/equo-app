@@ -4,7 +4,9 @@ import { aggiornaSwitchHome } from "./096-vista-applica-cambia-salva.js";
 /* ---------- VERSIONE SEMPLICE / COMPLETA dell'app maniscalco (profiles.vista_maniscalco) ----------
    Semplice: pochi tasti, un tocco e hai fatto. Completa: in più statistiche degli incassi, ferri nuovi usati,
    interventi straordinari, ferro davanti/dietro. Si sceglie al primo accesso e si cambia dal menu; i dati sono gli stessi. */
-function vistaCompleta(){ return !!(currentUser && currentUser.vistaMan === "completa"); }
+// 3/11/2026 (Simone): niente più scelta generale Semplice/Completa (né al primo accesso né nel menu): da quando le Home
+// sono una per professione non aveva più senso. Tutto è sempre acceso; le scelte restano dentro le sezioni (es. Incassi · Statistiche).
+function vistaCompleta(){ return true; }
 function applicaVistaManiscalco(){
   document.body.classList.toggle("vm-completa", vistaCompleta());
   document.body.classList.toggle("vm-semplice", !vistaCompleta());
@@ -25,6 +27,7 @@ async function cambiaVistaManiscalco(v, daScelta){
 // primo accesso (maniscalco, scelta mai fatta): un riquadro con le due versioni
 let vistaManScelta = "semplice";
 function mostraSceltaVistaManiscalco(){
+  return;   // 3/11/2026: la finestra «Come vuoi usare Equo?» non si mostra più
   if(DEMO_MODE || !currentUser || currentUser.vistaMan || vistaAi() !== "professionista") return;
   if(document.getElementById("eq-pop-vista")?.classList.contains("attivo")) return;
   sceltaVistaMan("semplice");

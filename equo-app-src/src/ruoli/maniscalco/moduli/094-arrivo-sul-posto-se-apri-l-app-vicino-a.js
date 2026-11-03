@@ -90,7 +90,6 @@ function hmAltro(){
     ${v(HM_IC.cal, "Agenda", "showPage('pro-agenda')")}
     ${v(HM_IC.inbox, "Messaggi", "hmMessaggi()")}
     ${v(HM_IC.qr, "Il mio codice e QR", "openCodicePersonaleModal()")}
-    ${v(HM_IC.slider, vistaCompleta() ? "Passa alla Semplice" : "Passa alla Completa", "cambiaVistaManiscalco(vistaCompleta() ? 'semplice' : 'completa')")}
     ${v(HM_IC.aiuto, "Aiuto", "apriTicketAssistenza()")}
     ${v(HM_IC.menu, "Menu e impostazioni", "openMenu()")}
   </div>`);

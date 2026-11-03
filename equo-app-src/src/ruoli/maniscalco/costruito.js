@@ -3298,7 +3298,7 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/097-versione-semplice-completa-dell-app-mani.js
 	function vistaCompleta() {
-		return !!(currentUser && currentUser.vistaMan === "completa");
+		return true;
 	}
 	function applicaVistaManiscalco() {
 		document.body.classList.toggle("vm-completa", vistaCompleta());
@@ -3318,12 +3318,7 @@
 		showToast(currentUser.vistaMan === "completa" ? "Versione Completa attiva" : "Versione Semplice attiva" + (daScelta ? "" : ": la Completa la riaccendi dal menu"));
 	}
 	var vistaManScelta = "semplice";
-	function mostraSceltaVistaManiscalco() {
-		if (DEMO_MODE || !currentUser || currentUser.vistaMan || vistaAi() !== "professionista") return;
-		if (document.getElementById("eq-pop-vista")?.classList.contains("attivo")) return;
-		sceltaVistaMan("semplice");
-		document.getElementById("eq-pop-vista").classList.add("attivo");
-	}
+	function mostraSceltaVistaManiscalco() {}
 	function sceltaVistaMan(v) {
 		vistaManScelta = v;
 		document.querySelectorAll("#eq-pop-vista .vm-opz").forEach((b) => b.classList.toggle("on", b.dataset.v === v));
@@ -3548,7 +3543,6 @@
     ${v(HM_IC.cal, "Agenda", "showPage('pro-agenda')")}
     ${v(HM_IC.inbox, "Messaggi", "hmMessaggi()")}
     ${v(HM_IC.qr, "Il mio codice e QR", "openCodicePersonaleModal()")}
-    ${v(HM_IC.slider, vistaCompleta() ? "Passa alla Semplice" : "Passa alla Completa", "cambiaVistaManiscalco(vistaCompleta() ? 'semplice' : 'completa')")}
     ${v(HM_IC.aiuto, "Aiuto", "apriTicketAssistenza()")}
     ${v(HM_IC.menu, "Menu e impostazioni", "openMenu()")}
   </div>`);
@@ -3803,7 +3797,7 @@
 		const sp = document.getElementById("promemoria-switch");
 		if (sp) sp.checked = currentUser?.promemoriaPagamenti !== false;
 		const rv = document.getElementById("menu-vista-man-row");
-		if (rv) rv.style.display = pro ? "" : "none";
+		if (rv) rv.style.display = "none";
 		const sv = document.getElementById("vista-man-switch");
 		if (sv) sv.checked = vistaCompleta();
 		const rm = document.getElementById("menu-misura-row");
