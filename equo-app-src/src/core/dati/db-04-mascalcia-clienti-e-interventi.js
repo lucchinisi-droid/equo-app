@@ -240,7 +240,7 @@ Object.assign(DB, {
     if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => i.stato === "fatto" && (i.cliente_mascalcia_id === clienteId || i.luogo_cliente_id === clienteId)
         && (!da || i.data_intervento >= da) && (!a || i.data_intervento <= a))
       .map(i => ({ ...i, cavalli_clienti_mascalcia: { nome: (demoState.cavalliClientiMascalcia || []).find(c => c.id === i.cavallo_cliente_id)?.nome || null } }));
-    let q = sb.from("interventi_mascalcia").select("id, data_intervento, tipo_ferratura, tipo_altro, importo, stato_pagamento, cliente_mascalcia_id, luogo_cliente_id, cavallo_cliente_id, horse_id, quantita_ferri, ferro_tipo, cavalli_clienti_mascalcia(nome)")
+    let q = sb.from("interventi_mascalcia").select("id, data_intervento, tipo_ferratura, tipo_altro, importo, stato_pagamento, cliente_mascalcia_id, luogo_cliente_id, cavallo_cliente_id, horse_id, quantita_ferri, ferro_tipo, ferro_note, cavalli_clienti_mascalcia(nome)")
       .eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`);
     if(da) q = q.gte("data_intervento", da);
     if(a) q = q.lte("data_intervento", a);

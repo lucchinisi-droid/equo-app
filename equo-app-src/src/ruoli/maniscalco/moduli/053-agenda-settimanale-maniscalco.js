@@ -5,6 +5,7 @@ import { renderRichiestePendenti } from "./054-richieste-di-appuntamento-step-5d
 import { agDisegnaGriglia } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { pmCaricaSettimana } from "./111-promemoria-personali.js";
 import { agAttivaSwipe } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
+import { testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 /* ---------- AGENDA SETTIMANALE (maniscalco) ---------- */
 const AG_GIORNI = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
 const AG_MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
@@ -38,7 +39,7 @@ function agNomeCavalloTesto(i){ return agNomeCavallo(i) || "Cavallo non indicato
 function agDescrizioneTipoPro(i){
   const t = agDescrizioneTipo(i);
   if(i.ferri_nuovi === false) return t + " · rimessa";
-  if(i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri$/, "$1 ferri nuovi");
+  if(i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri\b/, "$1 ferri nuovi");
   return t;
 }
 function agDescrizioneTipo(i){
@@ -48,6 +49,9 @@ function agDescrizioneTipo(i){
   const extra = [];
   if(i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
   if(i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
+  // 03/11/2026: anche il ferro correttivo (davanti/dietro, pad, binda larga…), se il lavoro lo ha
+  const corr = testoFerroIntervento(i);
+  if(corr) extra.push(corr);
   return [t, ...extra].join(" · ");
 }
 

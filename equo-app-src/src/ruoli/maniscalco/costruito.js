@@ -7368,7 +7368,7 @@
 	function agDescrizioneTipoPro(i) {
 		const t = agDescrizioneTipo(i);
 		if (i.ferri_nuovi === false) return t + " · rimessa";
-		if (i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri$/, "$1 ferri nuovi");
+		if (i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri\b/, "$1 ferri nuovi");
 		return t;
 	}
 	function agDescrizioneTipo(i) {
@@ -7378,6 +7378,8 @@
 		const extra = [];
 		if (i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
 		if (i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
+		const corr = testoFerroIntervento(i);
+		if (corr) extra.push(corr);
 		return [t, ...extra].join(" · ");
 	}
 	function agGiornoLavoro(iso) {
