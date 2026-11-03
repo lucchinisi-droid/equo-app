@@ -105,16 +105,26 @@ async function vrApri(){
   document.getElementById("vs-piede").innerHTML = '<button class="vs-btn" onclick="vsMostraScheda()">Torna alla scheda</button><button class="vs-btn" onclick="vrCondividi()">Condividi</button>';
   vrScorri();
 }
+// 3/11/2026 (Simone: «il tasto non funziona»): oltre a scorrere, un tocco chiede conferma e invia; il gesto interrotto
+// dal telefono (pointercancel) riporta il cursore all'inizio invece di lasciarlo a metà.
 function vrScorri(){
   const s = document.getElementById("vr-scorri"), m = document.getElementById("vr-man"); if(!s || !m) return;
-  let x0 = null;
-  s.addEventListener("pointerdown", e => { x0 = e.clientX; m.style.transition = "none"; try{ s.setPointerCapture(e.pointerId); }catch(_){} });
-  s.addEventListener("pointermove", e => { if(x0 === null) return; m.style.left = Math.max(5, Math.min(s.clientWidth - 53, 5 + e.clientX - x0)) + "px"; });
-  s.addEventListener("pointerup", e => {
+  let x0 = null, maxDx = 0;
+  const torna = () => { m.style.transition = ""; m.style.left = "5px"; x0 = null; };
+  s.addEventListener("pointerdown", e => { x0 = e.clientX; maxDx = 0; m.style.transition = "none"; try{ s.setPointerCapture(e.pointerId); }catch(_){} });
+  s.addEventListener("pointermove", e => { if(x0 === null) return; maxDx = Math.max(maxDx, Math.abs(e.clientX - x0)); m.style.left = Math.max(5, Math.min(s.clientWidth - 53, 5 + e.clientX - x0)) + "px"; });
+  s.addEventListener("pointercancel", torna);
+  s.addEventListener("pointerup", async e => {
     if(x0 === null) return; m.style.transition = "";
-    const fatto = e.clientX - x0 > s.clientWidth * 0.6; x0 = null;
-    if(fatto){ m.style.left = (s.clientWidth - 53) + "px"; vrInvia(); } else m.style.left = "5px";
+    const dx = e.clientX - x0, fatto = dx > s.clientWidth * 0.5, tocco = maxDx < 10 && Math.abs(dx) < 10; x0 = null;
+    if(fatto){ m.style.left = (s.clientWidth - 53) + "px"; return vrInvia(); }
+    m.style.left = "5px";
+    if(tocco && typeof chiediSiNo === "function" && await chiediSiNo("Firmi e invii il referto?", vrTestoConferma(), { si: "Firma e invia", no: "Annulla" })) vrInvia();
   });
+}
+function vrTestoConferma(){
+  const n = (VR.dest || []).filter(x => x.on && x.suEquo).map(x => x.nome);
+  return n.length ? "Lo ricevono in chat: " + n.join(", ") + "." : "Nessuno lo riceve in chat: resta nella cartella del cavallo. Per mandarlo fuori da Equo usa «Condividi».";
 }
 
 /* ---- PDF (colori del mockup C: blu notte e Tiffany) ---- */

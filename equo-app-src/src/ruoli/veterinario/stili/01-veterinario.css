@@ -468,3 +468,6 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 .mp-gr{margin-top:6px}.mp-gr>span{display:block;font-size:12px;font-weight:700;color:var(--vt-testo2);margin:0 2px 4px}
 .mp-denti .mp-z,.mp-lingua .mp-z{cursor:pointer}
 .mp-denti-c .mp-svg{max-height:78vh}
+/* 3/11/2026: i messaggi «miei» (chat e Galeno) hanno lo sfondo blu notte: testo Tiffany, leggibile */
+:where(body.pl-vet) .mchat-bubble.out,:where(body.pl-vet) .mchat-bubble.out .mchat-bubble-text,:where(body.pl-vet) .mchat-bubble.out .mchat-bubble-time,
+:where(body.pl-vet) .mchat-bubble.out a,:where(body.pl-vet) .chat-bubble.user,:where(body.pl-vet) .chat-bubble.user a{color:var(--vt-tif)!important}

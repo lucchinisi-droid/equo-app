@@ -143,7 +143,7 @@ async function pagina(b){
     await pg.evaluate(() => openHorseDetail(window.__h)); await attesa(800);
     const cav = await pg.evaluate(() => ({ tit: document.querySelector("#horse-terapia .ter-tit")?.textContent, voce: document.querySelector("#horse-terapia .ter-voce b")?.textContent,
       att: document.querySelector("#horse-terapia .ter-attesa b")?.textContent, nota: document.querySelector("#horse-terapia .ter-nota")?.textContent || "", dopoDove: document.getElementById("horse-dove")?.nextElementSibling?.id }));
-    ok(cav.tit === "💊 Terapia in corso" && cav.voce === "Fenilbutazone · 1 bustina · bocca" && cav.att === "10 maggio 2027" && /«Fatto»/.test(cav.nota) && cav.dopoDove === "horse-terapia",
+    ok(cav.tit === "💊 Terapia in corso" && cav.voce === "Fenilbutazone · 1 bustina · bocca" && cav.att === "10 maggio 2027" && /«Fatto»/.test(cav.nota) && ["horse-terapia", "horse-diario-scuderia"].includes(cav.dopoDove),   // 3/11: sotto «dove sta» può esserci prima il diario della scuderia
       "Scheda del cavallo: terapia in corso, attesa DPA " + JSON.stringify(cav));
     ok(!err.length, "Proprietario: nessun errore JavaScript " + JSON.stringify(err));
     await pg.context().close();

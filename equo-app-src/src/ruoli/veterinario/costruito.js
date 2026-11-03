@@ -2460,9 +2460,15 @@
 	function vrScorri() {
 		const s = document.getElementById("vr-scorri"), m = document.getElementById("vr-man");
 		if (!s || !m) return;
-		let x0 = null;
+		let x0 = null, maxDx = 0;
+		const torna = () => {
+			m.style.transition = "";
+			m.style.left = "5px";
+			x0 = null;
+		};
 		s.addEventListener("pointerdown", (e) => {
 			x0 = e.clientX;
+			maxDx = 0;
 			m.style.transition = "none";
 			try {
 				s.setPointerCapture(e.pointerId);
@@ -2470,18 +2476,29 @@
 		});
 		s.addEventListener("pointermove", (e) => {
 			if (x0 === null) return;
+			maxDx = Math.max(maxDx, Math.abs(e.clientX - x0));
 			m.style.left = Math.max(5, Math.min(s.clientWidth - 53, 5 + e.clientX - x0)) + "px";
 		});
-		s.addEventListener("pointerup", (e) => {
+		s.addEventListener("pointercancel", torna);
+		s.addEventListener("pointerup", async (e) => {
 			if (x0 === null) return;
 			m.style.transition = "";
-			const fatto = e.clientX - x0 > s.clientWidth * .6;
+			const dx = e.clientX - x0, fatto = dx > s.clientWidth * .5, tocco = maxDx < 10 && Math.abs(dx) < 10;
 			x0 = null;
 			if (fatto) {
 				m.style.left = s.clientWidth - 53 + "px";
-				vrInvia();
-			} else m.style.left = "5px";
+				return vrInvia();
+			}
+			m.style.left = "5px";
+			if (tocco && typeof chiediSiNo === "function" && await chiediSiNo("Firmi e invii il referto?", vrTestoConferma(), {
+				si: "Firma e invia",
+				no: "Annulla"
+			})) vrInvia();
 		});
+	}
+	function vrTestoConferma() {
+		const n = (VR.dest || []).filter((x) => x.on && x.suEquo).map((x) => x.nome);
+		return n.length ? "Lo ricevono in chat: " + n.join(", ") + "." : "Nessuno lo riceve in chat: resta nella cartella del cavallo. Per mandarlo fuori da Equo usa «Condividi».";
 	}
 	async function vrCreaPdf() {
 		const doc = new (await (caricaJsPdf()))({
