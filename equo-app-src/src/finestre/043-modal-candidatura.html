@@ -11,6 +11,11 @@
           <input class="input" id="cand-codice" maxlength="40" autocapitalize="characters" autocomplete="off" placeholder="es. GALENO26" onkeydown="if(event.key==='Enter')attivaCodiceProva()">
           <button class="btn btn-primary" id="cand-codice-btn" onclick="attivaCodiceProva()">Entra</button>
         </div>
+        <!-- 3/11/2026: Termini e Privacy anche qui, per chi non ha spuntato la casella nella schermata prima (caso Riccardo) -->
+        <label class="cand-codice-cons" id="cand-codice-cons" style="display:none">
+          <input type="checkbox" id="cand-codice-consenso">
+          <span>Dichiaro di avere almeno 14 anni e accetto i <a href="#" onclick="event.preventDefault();openLegalPage('termini')">Termini di Servizio</a> e l'<a href="#" onclick="event.preventDefault();openLegalPage('privacy')">Informativa Privacy</a>.</span>
+        </label>
         <div class="auth-error" id="cand-codice-error" style="display:none"></div>
         <button type="button" class="cand-codice-chiedi" onclick="chiediCodiceProva()">Non hai il codice? Chiedicelo via email</button>
         <div class="cand-codice-o">oppure lasciaci i tuoi contatti</div>

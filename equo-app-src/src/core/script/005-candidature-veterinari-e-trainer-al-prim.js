@@ -12,6 +12,11 @@ function apriCandidatura(professione, origine){
   aggiornaCandidatura();
   ["cand-telefono","cand-citta","cand-provincia","cand-spec","cand-msg","cand-codice"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
   { const e = document.getElementById("cand-codice-error"); if(e) e.style.display = "none"; }
+  // 3/11/2026: Termini e Privacy nella finestra del codice, se non sono già accettati (spuntata se l'ha fatto nella schermata prima)
+  { const cons = document.getElementById("cand-codice-cons"), ck = document.getElementById("cand-codice-consenso");
+    const gia = !!currentUser?.consensoTerminiPrivacy;
+    if(cons){ cons.style.display = gia ? "none" : "flex"; cons.classList.remove("manca"); }
+    if(ck) ck.checked = !gia && !!document.getElementById("onb-consent")?.checked; }
   document.getElementById("cand-nome").value = currentUser?.fullName || "";
   document.getElementById("cand-email").value = currentUser?.email || "";
   // al primo accesso, se ha già accettato termini e privacy nella schermata, la casella è già spuntata
@@ -57,7 +62,7 @@ const CODICE_PROVA_ERRORI = {
   codice_esaurito: "Questo codice è già stato usato: chiedicene uno nuovo.",
   altra_professione: "Il tuo account ha già un'altra professione: per casi particolari scrivici.",
   profilo_struttura: "Il profilo struttura non si combina con altri profili.",
-  consenso: "Prima accetta i Termini e l'Informativa Privacy: chiudi questa finestra, spunta la casella nella schermata e riprova.",
+  consenso: "Spunta la casella qui sopra (Termini e Informativa Privacy) e tocca di nuovo «Entra».",
   non_autenticato: "Accedi di nuovo e riprova."
 };
 async function attivaCodiceProva(){
@@ -66,12 +71,18 @@ async function attivaCodiceProva(){
   err.style.display = "none";
   const codice = (inp.value || "").replace(/\s/g, "").toUpperCase();
   if(codice.length < 4) return errore("Scrivi il codice che ti abbiamo mandato.");
-  const consenso = !!document.getElementById("onb-consent")?.checked || !!currentUser?.consensoTerminiPrivacy;
+  const consenso = !!document.getElementById("onb-consent")?.checked || !!document.getElementById("cand-codice-consenso")?.checked || !!currentUser?.consensoTerminiPrivacy;
+  if(!consenso){
+    document.getElementById("cand-codice-cons")?.classList.add("manca");
+    return errore("Spunta la casella qui sopra (Termini e Informativa Privacy) e tocca di nuovo «Entra».");
+  }
   let res = { ok: true, campo: candOrigine === "app_primo_accesso" ? "ruolo" : "ruolo_secondario" };
   btn.disabled = true;
   if(!DEMO_MODE){
-    const { data, error } = await sb.rpc("equo_attiva_codice_prova", { p_codice: codice, p_consenso: consenso });
-    res = error ? { ok: false, errore: "rete", msg: error.message } : data;
+    const prova = async c => { const { data, error } = await sb.rpc("equo_attiva_codice_prova", { p_codice: c, p_consenso: consenso }); return error ? { ok: false, errore: "rete", msg: error.message } : data; };
+    res = await prova(codice);
+    // zero al posto della O (GALEN026): si riprova con la lettera
+    if(res && !res.ok && res.errore === "codice_non_valido" && codice.includes("0")) res = await prova(codice.replace(/0/g, "O"));
   }
   btn.disabled = false;
   if(!res || !res.ok){
