@@ -20,9 +20,11 @@ function cercaClienteIntervento(){
       const parole = cercaParole(inp.value);
       if(!parole.length){ lista.classList.remove("aperta"); lista.innerHTML = ""; return; }
       const righe = [];
+      // 3/11/2026: veterinario, «Scegli cavallo» → si cercano solo i cavalli (ruoli/veterinario/moduli/14-visita-aperta.js)
+      const soloCavalli = window.intCercaSolo === "cavallo";
       clientiAttivi().forEach(c => {
         const cavalli = nomiCavalliCliente(c);
-        if(cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({ c, cav: null, p: cercaNorm(c.nome).startsWith(parole[0]) ? 0 : 1 });
+        if(!soloCavalli && cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({ c, cav: null, p: cercaNorm(c.nome).startsWith(parole[0]) ? 0 : 1 });
         cavalli.forEach(n => { if(cercaCorrisponde(parole, n + " " + c.nome)) righe.push({ c, cav: n, p: cercaNorm(n).startsWith(parole[0]) ? 0 : 2 }); });
       });
       const unici = []; const visti = new Set();
@@ -30,7 +32,7 @@ function cercaClienteIntervento(){
       lista.innerHTML = unici.slice(0, 10).map(r => r.cav
         ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>`
         : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Scuderia" : "Cliente"}</small></button>`).join("")
-        || `<div class="rz-vuoto">Nessun cliente con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
+        || `<div class="rz-vuoto">Nessun ${soloCavalli ? "cavallo" : "cliente"} con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
       lista.classList.add("aperta");
     };
     inp.addEventListener("input", mostra);
@@ -61,7 +63,7 @@ function cercaClienteIntervento(){
   inp.value = "";
   document.getElementById("int-cerca-lista").classList.remove("aperta");
   // solo per i nuovi appuntamenti e quando i clienti sono tanti
-  wrap.style.display = !sel.disabled && clientiAttivi().length >= CERCA_MIN ? "block" : "none";
+  wrap.style.display = !sel.disabled && (clientiAttivi().length >= CERCA_MIN || window.intCercaSolo === "cavallo") ? "block" : "none";
 }
 
 

@@ -8,7 +8,8 @@ function vetEtichettaGruppo(ev, luogo){
   const nCav = new Set((ev || []).map(e => e.cavallo_cliente_id || e.horse_id || e.id)).size;
   if(tipi.has("urgenza")) return { cls: "vt-urg", html: '<span class="vt-b urg">Urgente</span>' };
   // visita aperta (14): i cavalli si segnano a fine visita
-  if(typeof vaaAperto === "function" && (ev || []).some(vaaAperto)) return { cls: "", html: '<span class="vt-b oro">aperto · cavalli da segnare</span>' };
+  const nAp = typeof vaaAperto === "function" ? (ev || []).filter(vaaAperto).length : 0;
+  if(nAp) return { cls: "", html: `<span class="vt-b oro">aperto · ${nAp === 1 ? "1 cavallo" : nAp + " cavalli"} da segnare</span>` };
   const mf = [tipi.has("mtc") ? "MTC" : "", tipi.has("fisio") ? "Fisio" : ""].filter(Boolean);
   if(mf.length) return { cls: "", html: `<span class="vt-b tif">${mf.join(" · ")}</span>` };
   // paga la scuderia: la visita è della struttura (cliente «struttura») e non del proprietario del cavallo

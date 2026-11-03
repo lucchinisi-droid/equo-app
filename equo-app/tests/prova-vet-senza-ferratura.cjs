@@ -15,7 +15,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
     await pg.evaluate(() => startDemo()); await pg.waitForTimeout(600);
     await pg.evaluate(async r => { currentUser.ruolo = r; await enterApp(r); }, ruolo); await pg.waitForTimeout(3000);
     // nuovo appuntamento con un cliente che ha cavalli
-    await pg.evaluate(() => openInterventoModal(null)); await pg.waitForTimeout(700);
+    await pg.evaluate(() => (typeof vapVia === "function" && eVeterinario() ? (VAP.via = "cliente", Promise.resolve(openInterventoModal(null)).finally(() => { VAP.via = null; })) : openInterventoModal(null))); await pg.waitForTimeout(700);
     const cli = await pg.evaluate(() => { const s = document.getElementById("intervento-cliente-select"); const o = [...s.options].find(x => x.value && !x.value.startsWith("__") && demoState.cavalliClientiMascalcia.some(v => v.cliente_mascalcia_id === x.value));
       s.value = o.value; s.dispatchEvent(new Event("change")); return o.value; }); await pg.waitForTimeout(800);
     await pg.evaluate(() => { const c = document.querySelector("#intervento-cavalli-multi .int-cav-chk"); if(c && !c.checked){ c.checked = true; c.dispatchEvent(new Event("change", { bubbles: true })); } if(typeof renderFerroRighe === "function") renderFerroRighe(); }); await pg.waitForTimeout(400);

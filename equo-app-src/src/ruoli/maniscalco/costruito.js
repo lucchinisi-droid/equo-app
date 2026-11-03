@@ -10098,9 +10098,10 @@
 					return;
 				}
 				const righe = [];
+				const soloCavalli = window.intCercaSolo === "cavallo";
 				clientiAttivi().forEach((c) => {
 					const cavalli = nomiCavalliCliente(c);
-					if (cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({
+					if (!soloCavalli && cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({
 						c,
 						cav: null,
 						p: cercaNorm(c.nome).startsWith(parole[0]) ? 0 : 1
@@ -10122,7 +10123,7 @@
 						unici.push(r);
 					}
 				});
-				lista.innerHTML = unici.slice(0, 10).map((r) => r.cav ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>` : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Scuderia" : "Cliente"}</small></button>`).join("") || `<div class="rz-vuoto">Nessun cliente con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
+				lista.innerHTML = unici.slice(0, 10).map((r) => r.cav ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>` : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Scuderia" : "Cliente"}</small></button>`).join("") || `<div class="rz-vuoto">Nessun ${soloCavalli ? "cavallo" : "cliente"} con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
 				lista.classList.add("aperta");
 			};
 			inp.addEventListener("input", mostra);
@@ -10153,7 +10154,7 @@
 		const inp = document.getElementById("int-cerca-input");
 		inp.value = "";
 		document.getElementById("int-cerca-lista").classList.remove("aperta");
-		wrap.style.display = !sel.disabled && clientiAttivi().length >= CERCA_MIN ? "block" : "none";
+		wrap.style.display = !sel.disabled && (clientiAttivi().length >= CERCA_MIN || window.intCercaSolo === "cavallo") ? "block" : "none";
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/116-onboarding.js
 	var ONB_STRUTTURA = /^(scuderia|scuderie|centro|circolo|maneggio|asd|a\.s\.d\.?|ssd|s\.s\.d\.?|allevamento|club|tenuta|azienda agricola|agriturismo|ranch|associazione|equitazione|horse|team|pony club)\b|\b(asd|a\.s\.d\.?|ssd|srl|s\.r\.l\.|ranch|club|equestre|ippico|ippica)$/i;
@@ -10588,6 +10589,7 @@
 		if (g) g.style.display = interventoInModifica && interventoInModifica.stato === "fatto" ? "block" : "none";
 	}
 	async function openInterventoModal(clienteId, intervento, preset) {
+		if (typeof vapScelta === "function" && vapScelta(clienteId, intervento, preset)) return;
 		interventoInModifica = intervento || null;
 		interventoPreset = intervento ? null : preset || null;
 		const inModifica = !!interventoInModifica;
@@ -10684,6 +10686,7 @@
 		openModal("modal-add-intervento");
 		await onInterventoClienteChange();
 		toggleInterventoTipoFields();
+		if (typeof vapDopoApertura === "function") vapDopoApertura();
 	}
 	async function onInterventoClienteChange() {
 		const clienteId = document.getElementById("intervento-cliente-select").value;
@@ -10769,10 +10772,7 @@
 			coda,
 			ancora: () => document.getElementById("intervento-cliente-select").value === clienteId
 		}).then((ok) => {
-			if (ok) {
-				toggleInterventoNuovoCavallo();
-				if (typeof vaaDopoCliente === "function") vaaDopoCliente();
-			}
+			if (ok) toggleInterventoNuovoCavallo();
 		});
 		else multi.innerHTML = coda;
 		if (inMod && mRif && interventoInModifica.numero_ferro) {
@@ -10784,7 +10784,6 @@
 			if (!ferroUguale(usato, ferroStd(mRif))) ferroOverride[mRif.key] = usato;
 		}
 		toggleInterventoNuovoCavallo();
-		if (typeof vaaDopoCliente === "function") vaaDopoCliente();
 	}
 	function selezionaCavalloIntervento(nome) {
 		const k = cercaNorm(nome);

@@ -506,3 +506,61 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .vaa-ok,:where(body.pl-vet) .vaa-dopo{width:100%;margin-top:8px}
 :where(body.pl-vet) .vaa-banner{width:100%;text-align:left;background:var(--vt-oro-chiaro);border:1.5px solid var(--vt-oro);border-radius:14px;padding:11px 12px;margin:12px 0 4px;font:inherit;font-size:13px;line-height:1.4;color:var(--vt-testo);cursor:pointer}
 :where(body.pl-vet) .vaa-banner b{display:block;color:var(--vt-oro-testo);font-size:14px}
+
+/* 3/11/2026 sera · Home: il banner «Il giro di oggi» si tocca e apre «Le visite inserite» (01-home) */
+:where(body.pl-vet) .vh-giro{cursor:pointer}
+:where(body.pl-vet) .vh-giornata span{font-size:17px;margin-left:3px;line-height:1}
+:where(body.pl-vet) .vh-righe + .vh-galeno{margin-top:12px}
+:where(body.pl-vet) .vh-visite-sotto{color:var(--vt-testo2);font-size:13px;margin:-6px 0 6px}
+:where(body.pl-vet) .vh-visite-g{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--vt-testo2);margin:14px 2px 8px}
+:where(body.pl-vet) .vh-visite-agenda{width:100%;margin-top:14px}
+
+/* 3/11/2026 sera · Nuovo appuntamento a tre strade e appuntamento aperto (14-visita-aperta) */
+:where(body.pl-vet) .vap-sotto{color:var(--vt-testo2);font-size:13.5px;margin:-6px 0 12px}
+:where(body.pl-vet) .vap-op{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:var(--vt-sup);border:1.5px solid var(--vt-bordo);border-radius:18px;padding:13px 12px;margin-bottom:10px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vap-op .ic{width:46px;height:46px;flex:none;border-radius:50%;background:var(--vt-tif-chiaro);color:var(--vt-tif-testo);display:grid;place-items:center}
+:where(body.pl-vet) .vap-op .ic svg{width:22px;height:22px}
+:where(body.pl-vet) .vap-op .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vap-op .tx b{font-size:15.5px;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-op .tx small{font-size:12.5px;line-height:1.35;color:var(--vt-testo2);margin-top:2px}
+:where(body.pl-vet) .vap-op .fr svg{width:20px;height:20px;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-op.ap{background:var(--vt-tif);border:2px solid var(--vt-notte)}
+:where(body.pl-vet) .vap-op.ap .ic{background:var(--vt-notte);color:#FFFFFF}
+:where(body.pl-vet) .vap-op.ap .tx small{color:var(--vt-notte)}
+:where(body.pl-vet) .vap-dove-scelto{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:var(--vt-sup);border:1.5px solid var(--vt-tif);border-radius:14px;padding:11px 12px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vap-dove-scelto span{font-size:12px;color:var(--vt-tif-testo);font-weight:700;text-align:right}
+:where(body.pl-vet) .vap-dove-lista{display:flex;flex-direction:column;gap:6px;margin-top:6px;max-height:34vh;overflow-y:auto}
+:where(body.pl-vet) .vap-dove-lista button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:var(--vt-sup);border:1px solid var(--vt-bordo);border-radius:12px;padding:9px 12px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vap-dove-lista small{color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vap-dove-lista .nuovo b{color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vap-step{display:flex;align-items:center;gap:12px}
+:where(body.pl-vet) .vap-step button{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--vt-bordo);background:var(--vt-sup);font:inherit;font-size:22px;font-weight:700;color:var(--vt-notte);cursor:pointer}
+:where(body.pl-vet) .vap-step button:disabled{opacity:.4}
+:where(body.pl-vet) .vap-step b{font-family:'Fraunces',serif;font-size:30px;min-width:32px;text-align:center;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-step small{color:var(--vt-testo2);font-size:12px;line-height:1.3}
+:where(body.pl-vet) .vap-slots{display:flex;flex-direction:column;gap:7px}
+:where(body.pl-vet) .vap-slot{background:var(--vt-sup);border:1.5px solid var(--vt-bordo);border-radius:14px;padding:9px 11px}
+:where(body.pl-vet) .vap-slot b{font-size:13.5px;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-slot .vs-chips{margin-top:6px}
+:where(body.pl-vet) .vs-chip.posto{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo);border:1px dashed var(--vt-oro)}
+:where(body.pl-vet) .vs-chip.posto.on{background:var(--vt-oro);color:#FFFFFF;border-style:solid}
+:where(body.pl-vet) .vap-sug{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+:where(body.pl-vet) .vap-sug button{display:inline-flex;flex-direction:column;align-items:flex-start;background:var(--vt-tif-chiaro);border:1px solid var(--vt-tif);color:var(--vt-tif-testo);border-radius:12px;padding:5px 10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+:where(body.pl-vet) .vap-sug small{font-weight:500;font-size:11px}
+:where(body.pl-vet) .vap-piccolo{color:var(--vt-testo2);font-size:12px;margin:6px 2px 0}
+:where(body.pl-vet) .vap-ok{color:var(--vt-tif-testo);font-size:12.5px;font-weight:700;margin:6px 2px 0}
+:where(body.pl-vet) .vap-vacc{margin-top:8px}
+:where(body.pl-vet) .vap-motivo{margin-top:8px}
+:where(body.pl-vet) .vap-altro{width:100%;margin-top:8px}
+:where(body.pl-vet) .vaa-nota.oro{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo);margin-top:12px}
+:where(body.pl-vet) .vap-doc{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--vt-bordo)}
+:where(body.pl-vet) .vap-doc > span:not(.vap-doc-ic){flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vap-doc small{color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vap-doc input[type=checkbox]{width:22px;height:22px;accent-color:var(--vt-notte);flex:none}
+:where(body.pl-vet) .vap-doc.fuori{opacity:.75}
+:where(body.pl-vet) .vap-mini{background:var(--vt-chip);border:0;border-radius:10px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;color:var(--vt-notte);cursor:pointer}
+:where(:root:not([data-theme="light"])) body.pl-vet .vap-op .tx b,:where(:root:not([data-theme="light"])) body.pl-vet .vap-step b,:where(:root:not([data-theme="light"])) body.pl-vet .vap-slot b{color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet .vap-op.ap .tx b,:where(:root:not([data-theme="light"])) body.pl-vet .vap-op.ap .tx small{color:#1D2D50}
+:where(:root:not([data-theme="light"])) body.pl-vet .vap-step button,:where(:root:not([data-theme="light"])) body.pl-vet .vap-dove-scelto b{color:#FFFFFF}
+:where(body.pl-vet) .vap-doc-ic{width:22px;height:22px;flex:none;display:grid;place-items:center}
+:where(body.pl-vet) .vap-doc-ic svg{width:20px;height:20px;fill:none;stroke:var(--vt-tif-scuro);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

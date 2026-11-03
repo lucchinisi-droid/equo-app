@@ -30,6 +30,7 @@ function vhEtichetta(e){
 // «Nerone · colica lieve»: cavallo e motivo (senza motivo, il tipo di visita)
 function vhTitolo(e){
   const cav = agNomeCavallo(e);
+  if(!cav && typeof vaaAperto === "function" && vaaAperto(e)) return `<b>Cavallo da segnare</b> · ${escapeHtml(typeof vapNomeLavoro === "function" ? vapNomeLavoro(e) : TIPO_FERRATURA_LABELS[e.tipo_ferratura] || "Visita")}`;
   const motivo = (e.tipo_altro || "").trim() || TIPO_FERRATURA_LABELS[e.tipo_ferratura] || "Visita";
   return cav ? `<b>${escapeHtml(cav)}</b> · ${escapeHtml(motivo)}` : `<b>${escapeHtml(motivo)}</b>`;
 }
@@ -61,9 +62,6 @@ function renderHomeVet(){
   if(typeof ptCaricaInCorso === "function" && !PT.inCorso && !PT.promessa) ptCaricaInCorso().then(() => { if(document.getElementById("vh")) renderHomeVet(); });
   const prima = diOggi.map(vhOra).filter(o => o !== "—").sort()[0];
   const km = vhKm.giorno === oggi && vhKm.km ? `${vhKm.km} km` : "";
-  // prossime visite: prima l'urgenza, poi in ordine di orario; da adesso in avanti (quelle di oggi già passate restano finché non sono fatte)
-  const prossime = app.filter(e => e.data_intervento >= oggi)
-    .sort((a, b) => (a.data_intervento + vhOra(a)).localeCompare(b.data_intervento + vhOra(b))).slice(0, 3);
   const nome = (currentUser?.nome || currentUser?.full_name || "").split(" ")[0];
   const data = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   const nMsg = wgPro?.unread || 0, inRitardo = (hpRichiamiLista || []).filter(r => r.giorni < 0).length;
@@ -73,17 +71,17 @@ function renderHomeVet(){
 
   box.innerHTML = `
     <div class="vh-saluto">${escapeHtml(testoSaluto())}${nome ? " " + escapeHtml(nome) : ""} · ${escapeHtml(data)}</div>
-    <div class="vh-giro">
+    <div class="vh-giro" role="button" tabindex="0" aria-label="Vedi le visite inserite" onclick="vhVisite(event)" onkeydown="if(event.key==='Enter')vhVisite(event)">
       <div class="vh-giro-et">Il giro di oggi</div>
       <div class="vh-giro-riga">
         <div><div class="vh-giro-n">${diOggi.length} ${diOggi.length === 1 ? "visita" : "visite"}</div>
           <div class="vh-giro-s">${[km, prima ? "prima alle " + prima : diOggi.length ? "" : "nessuna visita in agenda"].filter(Boolean).join(" · ")}</div></div>
-        <button class="vh-giornata" onclick="vhGiornata()">Giornata</button>
+        <button class="vh-giornata" onclick="event.stopPropagation();vhVisite()">Vedi visite <span aria-hidden="true">›</span></button>
       </div>
       <div class="vh-giro-num">
-        <button onclick="vhGiornata()"><b>${urg}</b><span>${urg === 1 ? "urgenza" : "urgenze"}</span></button>
-        <button onclick="ptElenco()"><b>${ter.n}</b><span>${ter.n === 1 ? "terapia" : "terapie"}${ter.saltate ? ` · <em class="vh-saltate">${ter.saltate} ${ter.saltate === 1 ? "saltata" : "saltate"}</em>` : ""}</span></button>
-        <button onclick="hmScadenze()"><b>${ric}</b><span>${ric === 1 ? "richiamo" : "richiami"}</span></button>
+        <button onclick="event.stopPropagation();vhGiornata()"><b>${urg}</b><span>${urg === 1 ? "urgenza" : "urgenze"}</span></button>
+        <button onclick="event.stopPropagation();ptElenco()"><b>${ter.n}</b><span>${ter.n === 1 ? "terapia" : "terapie"}${ter.saltate ? ` · <em class="vh-saltate">${ter.saltate} ${ter.saltate === 1 ? "saltata" : "saltate"}</em>` : ""}</span></button>
+        <button onclick="event.stopPropagation();hmScadenze()"><b>${ric}</b><span>${ric === 1 ? "richiamo" : "richiami"}</span></button>
       </div>
     </div>
     ${typeof vaaBannerHtml === "function" ? vaaBannerHtml(app) : ""}
@@ -94,15 +92,8 @@ function renderHomeVet(){
       <button class="solo-incassi" onclick="hmDaIncassare()"><span class="c">${VH_IC.euro}</span>Da incassare</button>
       <button onclick="hmAltro()"><span class="c">${VH_IC.altro}</span>Altro</button>
     </div>
-    <div class="vh-tit">Prossime visite</div>
-    ${prossime.length ? prossime.map(e => { const et = vhEtichetta(e); const altroGiorno = e.data_intervento !== oggi;
-      return `<button class="vh-visita${et.cls === "urg" ? " urg" : ""}" onclick="apriAzioniEvento('${e.id}')">
-        <span class="o">${altroGiorno ? `<small>${escapeHtml(hpGiornoEtichetta(e.data_intervento))}</small>` : ""}${vhOra(e)}</span>
-        <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
-        <span class="vh-et ${et.cls}">${et.txt}</span></button>`; }).join("")
-      : `<div class="vh-vuoto">Nessuna visita in agenda.</div>`}
-    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
     ${vhRigheHtml(vhNuovoHtml())}
+    ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
     <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
       <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
   // chilometri del giro di oggi: stessa stima della Giornata dell'officina (una volta al giorno)
@@ -113,11 +104,42 @@ function renderHomeVet(){
   void adesso;
 }
 
+// 3/11/2026 sera (Simone, mockup approvato): niente lista «Prossime visite» in Home; il banner «Il giro di oggi» si tocca
+// e apre «Le visite inserite»: tutte le visite da fare in agenda, divise per giorno; un tocco apre la visita.
+function vhRigaVisita(e){
+  const et = vhEtichetta(e);
+  return `<button class="vh-visita${et.cls === "urg" ? " urg" : ""}" onclick="closeModal('modal-vh-visite');apriAzioniEvento('${e.id}')">
+    <span class="o">${vhOra(e)}</span>
+    <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
+    <span class="vh-et ${et.cls}">${et.txt}</span></button>`;
+}
+function vhVisite(ev){
+  if(ev && ev.target && ev.target.closest && ev.target.closest(".vh-giro-num button")) return;
+  const oggi = isoLocale(new Date());
+  const app = (hpAppuntamenti || []).filter(vhDaFare).filter(e => e.data_intervento >= oggi || e.data_intervento === oggi)
+    .sort((a, b) => (a.data_intervento + vhOra(a)).localeCompare(b.data_intervento + vhOra(b)));
+  const gruppi = [];
+  app.forEach(e => { let g = gruppi.find(x => x.d === e.data_intervento); if(!g){ g = { d: e.data_intervento, l: [] }; gruppi.push(g); } g.l.push(e); });
+  let ov = document.getElementById("modal-vh-visite");
+  if(!ov){
+    ov = document.createElement("div"); ov.className = "modal-overlay"; ov.id = "modal-vh-visite";
+    ov.onclick = ev2 => { if(ev2.target === ov) closeModal("modal-vh-visite"); };
+    ov.innerHTML = '<div class="modal vh-visite-modal" role="dialog" aria-modal="true" aria-labelledby="vh-visite-tit"><div class="modal-handle"></div><div id="vh-visite-corpo"></div></div>';
+    document.body.appendChild(ov);
+  }
+  document.getElementById("vh-visite-corpo").innerHTML = `<div class="modal-title" id="vh-visite-tit">Le visite inserite</div>
+    <div class="vh-visite-sotto">${app.length ? `${app.length} in agenda · tocca una visita per aprirla` : "Nessuna visita in agenda."}</div>
+    ${gruppi.map(g => `<div class="vh-visite-g">${g.d === oggi ? "Oggi" : escapeHtml(hpGiornoEtichetta(g.d))} · ${g.l.length}</div>
+      <div class="vh-visite-l">${g.l.map(vhRigaVisita).join("")}</div>`).join("")}
+    <button class="btn btn-primary vh-visite-agenda" onclick="closeModal('modal-vh-visite');vhGiornata()">Apri l'agenda</button>`;
+  openModal("modal-vh-visite");
+}
+
 // righe come nella Home del maniscalco (2/11/2026, mockup approvato da Simone): Cavalli · Clienti · Scuderie · Incassi.
 // Le icone sono quelle della Home del maniscalco (pagina 008, nascosta per il veterinario): si riusano da lì, non si copiano.
 function vhIcona(cls){ return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || ""; }
 // 3/11/2026 (Simone, dal mockup): tasto «Nuovo appuntamento» come Cavalli · Clienti, Tiffany con bordo e testo blu notte,
-// subito sotto le prossime visite; apre il nuovo appuntamento.
+// primo dei tasti (sopra Cavalli); apre il nuovo appuntamento (le tre strade, 14-visita-aperta).
 const VH_CAL = '<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg>';
 function vhNuovoHtml(){
   return `<button class="hm-riga r-vis" onclick="openInterventoModal(null)"><span class="ic">${VH_CAL}</span>
@@ -152,4 +174,4 @@ function vhMeteo(){ const m = document.getElementById("hm-meteo"); if(m) m.click
 quandoApriPagina(function(p){ if(p === "pro-home") renderHomeVet(); });
 quandoAggiornaBarra(function(){ if(document.body.classList.contains("pl-vet") && !document.getElementById("vh")) renderHomeVet(); });
 
-export { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml };
+export { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml, vhVisite };

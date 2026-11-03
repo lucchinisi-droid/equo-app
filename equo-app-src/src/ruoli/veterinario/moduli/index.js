@@ -1,6 +1,6 @@
 // Ingresso dei moduli del veterinario (29/10/2026). Il veterinario è un ruolo dentro la stessa app:
 // stesse tabelle, stessi sistemi del maniscalco (agenda, «Fatto», conti, chat, collegamenti). Qui solo ciò che è suo.
-import { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml } from "./01-home.js";
+import { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml, vhVisite } from "./01-home.js";
 import { vdPrepara } from "./02-demo.js";
 import { vetEtichettaGruppo, vetTestiAgenda } from "./03-agenda.js";
 import { vetRenderClienti, vetFiltroClienti, vetVaiLettera } from "./04-clienti.js";
@@ -19,8 +19,9 @@ import { mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, 
   mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, mpDente, mpDenteVicino, mpZonaScegli, mpZonaSegno, mpNotaOggetto,
   mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET } from "./13-mappe.js";
 
-import { VAA, vaaDopoCliente, vaaModo, vaaEtichetta, vaaAperto, vaaFatto, vaaSpunta, vaaPrezzo, vaaPrezzoBase, vaaNuovi, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva,
-  vaaDaCompletare, vaaBannerHtml, vaaCompleta } from "./14-visita-aperta.js";
+import { VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
+  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro,
+  vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta } from "./14-visita-aperta.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
 Object.assign(window, {
@@ -28,7 +29,7 @@ Object.assign(window, {
   vhGiornata,
   vhDetta,
   vhMeteo,
-  vhVai, vhRigheHtml,
+  vhVai, vhRigheHtml, vhVisite,
   vdPrepara,
   vetEtichettaGruppo,
   vetTestiAgenda,
@@ -51,6 +52,7 @@ Object.assign(window, {
   vcSezioniHtml, vcCarica, vcDisegna, vcApriVisita, vcScegli, vcFile, vcImposta, vcAnnulla, vcSalva, vcNomeLive, VC,
   vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB,
-  VAA, vaaDopoCliente, vaaModo, vaaEtichetta, vaaAperto, vaaFatto, vaaSpunta, vaaPrezzo, vaaPrezzoBase, vaaNuovi, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva,
-  vaaDaCompletare, vaaBannerHtml, vaaCompleta
+  VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
+  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro,
+  vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta
 });

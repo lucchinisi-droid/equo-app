@@ -36,7 +36,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   ok(await nCli() === n0 + 1, "«È un'altra persona» (anche scritto in maiuscolo): crea il cliente nuovo");
 
   /* ---- nuovo appuntamento: cliente nuovo con un cavallo che c'è già ---- */
-  await pg.evaluate(() => { try{ localStorage.setItem("equo-no-promemoria-prezzo", "1"); }catch(_){} closeModal("modal-add-cliente"); openInterventoModal(null); }); await attesa(800);
+  await pg.evaluate(() => { try{ localStorage.setItem("equo-no-promemoria-prezzo", "1"); }catch(_){} closeModal("modal-add-cliente"); (typeof vapVia === "function" && eVeterinario() ? (VAP.via = "cliente", Promise.resolve(openInterventoModal(null)).finally(() => { VAP.via = null; })) : openInterventoModal(null)); }); await attesa(800);
   await pg.evaluate(() => { const s = document.getElementById("intervento-cliente-select"); s.value = "__nuovo__"; s.dispatchEvent(new Event("change")); }); await attesa(300);
   await pg.fill("#intervento-nuovo-cliente-nome", "Persona Nuova"); await pg.fill("#intervento-nuovo-cavallo-nome", esistente.cav);
   await pg.evaluate(() => { document.getElementById("intervento-data").value = isoLocale(new Date(Date.now() + 864e5)); const t = document.getElementById("intervento-tipo-altro"); if(t && !t.value) t.value = "controllo"; });
@@ -54,7 +54,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   await pg.click("#sino-no"); await attesa(1200);
   ok(await pg.evaluate(() => demoState.interventiMascalcia.length) === nInt + 1, "«È un altro cavallo: scheda nuova»: appuntamento salvato");
   // appuntamento con «+ Nuovo cliente» che ha il nome di un cliente che c'è già: «Usa questo cliente» → appuntamento sul cliente esistente, nessun cliente in più
-  await pg.evaluate(() => openInterventoModal(null)); await attesa(800);
+  await pg.evaluate(() => (typeof vapVia === "function" && eVeterinario() ? (VAP.via = "cliente", Promise.resolve(openInterventoModal(null)).finally(() => { VAP.via = null; })) : openInterventoModal(null))); await attesa(800);
   await pg.evaluate(() => { const s = document.getElementById("intervento-cliente-select"); s.value = "__nuovo__"; s.dispatchEvent(new Event("change")); }); await attesa(300);
   await pg.fill("#intervento-nuovo-cliente-nome", esistente.nome); await pg.fill("#intervento-nuovo-cavallo-nome", "Cavallo Mai Visto");
   await pg.evaluate(() => { document.getElementById("intervento-data").value = isoLocale(new Date(Date.now() + 2 * 864e5)); const t = document.getElementById("intervento-tipo-altro"); if(t && !t.value) t.value = "controllo"; });

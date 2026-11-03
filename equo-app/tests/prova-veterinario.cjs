@@ -15,9 +15,12 @@ const SUPABASE = process.env.SUPABASE_UMD || path.join(path.dirname(require.reso
   await pg.evaluate(() => startDemo()); await pg.waitForTimeout(600);
   await pg.evaluate(async () => { currentUser.ruolo = "veterinario"; await enterApp("veterinario"); }); await pg.waitForTimeout(3500);
   const male = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + m); if(!c) male.push(m); };
-  const home = await pg.evaluate(() => ({ vh: !!document.querySelector("#vh .vh-giro"), visite: document.querySelectorAll("#vh .vh-visita").length, urg: !!document.querySelector("#vh .vh-visita.urg") }));
-  ok(home.vh && home.visite === 3 && home.urg, "Home: giro di oggi, 3 prossime visite, urgenza in rosa " + JSON.stringify(home));
-  await pg.evaluate(() => openInterventoModal(null)); await pg.waitForTimeout(800);
+  // 3/11/2026 sera: le visite non sono più in Home, si aprono dal banner «Il giro di oggi» («Le visite inserite»)
+  const home = await pg.evaluate(async () => { const vh = !!document.querySelector("#vh .vh-giro"); const inHome = document.querySelectorAll("#vh .vh-visita").length;
+    vhVisite(); await new Promise(r => setTimeout(r, 300));
+    const r = { vh, inHome, visite: document.querySelectorAll("#modal-vh-visite .vh-visita").length, urg: !!document.querySelector("#modal-vh-visite .vh-visita.urg") }; closeModal("modal-vh-visite"); return r; });
+  ok(home.vh && home.inHome === 0 && home.visite >= 3 && home.urg, "Home: giro di oggi; le visite (urgenza in rosa) in «Le visite inserite» " + JSON.stringify(home));
+  await pg.evaluate(() => (typeof vapVia === "function" && eVeterinario() ? (VAP.via = "cliente", Promise.resolve(openInterventoModal(null)).finally(() => { VAP.via = null; })) : openInterventoModal(null))); await pg.waitForTimeout(800);
   const modal = await pg.evaluate(() => ({ tipi: [...document.querySelectorAll("#intervento-tipo option")].map(o => o.value).join(","),
     motivo: getComputedStyle(document.getElementById("intervento-tipo-altro-group")).display !== "none",
     lab: document.querySelector("#intervento-tipo-altro-group .input-label").textContent }));

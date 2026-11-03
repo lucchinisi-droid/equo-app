@@ -1,93 +1,130 @@
-// Prova della VISITA APERTA del veterinario (3/11/2026, richiesta di Riccardo, mockup approvato da Simone):
-// appuntamento senza cavalli («Li segno a fine visita»), etichetta «aperto», «Fatto» → «Quali cavalli hai visto?»
-// (spunte, cavalli scritti a mano che diventano cavalli del cliente, vaccini con lotto per tutti, prezzo per cavallo modificabile),
-// «Più tardi» → «da completare» in Home.
+// Prova del NUOVO APPUNTAMENTO A TRE STRADE e dell'APPUNTAMENTO APERTO del veterinario (3/11/2026 sera, mockup approvato da Simone):
+// «Da dove parti?» (Scegli cavallo · Scegli cliente · Appuntamento aperto); «Scegli cavallo» cerca solo i cavalli;
+// appuntamento aperto: dove, quando, quanti cavalli (previsione), un lavoro per cavallo con il suo tipo o «sul posto»;
+// «Fatto» su un lavoro: «Chi era il cavallo?» (suggeriti, microchip, vaccino con lotto ricordato, costo), «Salva e vai al lavoro N»;
+// chiuso l'ultimo: documenti (certificati di vaccinazione, riepilogo e conto) e invio in chat; «Più tardi» resta da completare in Home.
 const path = require("path"); const { chromium } = require("playwright");
 const APP = path.resolve(__dirname, "..", "index.html");
 const SUPA = process.env.SUPABASE_UMD || path.join(path.dirname(require.resolve("@supabase/supabase-js/package.json")), "dist", "umd", "supabase.js");
+let JSPDF = null; try{ JSPDF = path.join(path.dirname(require.resolve("jspdf/package.json")), "dist", "jspdf.umd.min.js"); }catch(_){}
 const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + m); if(!c) problemi.push(m); };
 (async () => {
   const b = await chromium.launch({ args: ["--allow-file-access-from-files"] });
   const pg = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
   const err = []; pg.on("pageerror", e => err.push(String(e.message)));
   await pg.route("**/*", r => { const u = r.request().url(); if(u.includes("supabase-js")) return r.fulfill({ path: SUPA, contentType: "application/javascript" });
+    if(u.includes("jspdf") && JSPDF) return r.fulfill({ path: JSPDF, contentType: "application/javascript" });
     if(u.startsWith("file://") || u.startsWith("data:")) return r.continue(); return r.abort(); });
   await pg.goto("file://" + APP); await pg.waitForTimeout(1200);
   await pg.evaluate(() => startDemo()); await pg.waitForTimeout(600);
-  await pg.evaluate(async () => { currentUser.ruolo = "veterinario"; await enterApp("veterinario"); try{ localStorage.setItem("equo-no-promemoria-prezzo", "1"); localStorage.removeItem("equo-vaa-dopo"); }catch(_){} }); await pg.waitForTimeout(3000);
+  await pg.evaluate(async () => { currentUser.ruolo = "veterinario"; await enterApp("veterinario"); try{ localStorage.setItem("equo-no-promemoria-prezzo", "1"); }catch(_){} }); await pg.waitForTimeout(3500);
   const attesa = ms => pg.waitForTimeout(ms);
-  const scuderia = await pg.evaluate(() => { const c = demoState.clientiMascalcia.find(x => x.tipo_cliente === "struttura" && demoState.cavalliClientiMascalcia.filter(v => v.cliente_mascalcia_id === x.id).length >= 2); return { id: c.id, nome: c.nome }; });
-  const privato = await pg.evaluate(() => demoState.clientiMascalcia.find(x => x.tipo_cliente !== "struttura" && demoState.cavalliClientiMascalcia.some(v => v.cliente_mascalcia_id === x.id))?.id);
-  const scegli = async id => { await pg.evaluate(id => { const s = document.getElementById("intervento-cliente-select"); s.value = id; s.dispatchEvent(new Event("change")); }, id); await attesa(900); };
-  const seg = () => pg.evaluate(() => ({ c: [...document.querySelectorAll("#vaa-seg button")].map(x => x.textContent + (x.classList.contains("on") ? "*" : "")).join("|"),
-    lista: getComputedStyle(document.getElementById("intervento-cavalli-multi")).display, spunte: document.querySelectorAll("#intervento-cavalli-multi .int-cav-chk:checked").length }));
+  const attivo = id => pg.evaluate(i => !!document.getElementById(i)?.classList.contains("active"), id);
 
-  /* 1. nuovo appuntamento con una scuderia: parte da «a fine visita» */
-  await pg.evaluate(() => openInterventoModal(null)); await attesa(700);
-  await scegli(scuderia.id);
-  const s1 = await seg();
-  ok(s1.c === "Li segno a fine visita*|Li scelgo ora" && s1.lista === "none" && s1.spunte === 0, "Scuderia: «Li segno a fine visita» già scelto, elenco nascosto " + JSON.stringify(s1));
-  await pg.evaluate(() => vaaModo("ora")); await attesa(200);
-  const s1b = await seg();
-  await pg.evaluate(() => vaaModo("fine")); await attesa(200);
-  ok(s1b.c === "Li segno a fine visita|Li scelgo ora*" && s1b.lista === "block", "«Li scelgo ora» mostra l'elenco " + JSON.stringify(s1b));
-  await pg.evaluate(() => { document.getElementById("intervento-data").value = isoLocale(new Date()); document.getElementById("intervento-ora").value = "09:30";
-    const t = document.getElementById("intervento-tipo"); t.value = "vaccino"; t.dispatchEvent(new Event("change")); const a = document.getElementById("intervento-tipo-altro"); if(a) a.value = ""; }); await attesa(200);
-  const n0 = await pg.evaluate(() => demoState.interventiMascalcia.length);
-  await pg.evaluate(() => document.getElementById("intervento-save-btn").click()); await attesa(1500);
-  const app = await pg.evaluate(n => { const e = demoState.interventiMascalcia[n]; return e && { id: e.id, cav: e.cavallo_cliente_id, horse: e.horse_id, tipo: e.tipo_ferratura, cli: e.cliente_mascalcia_id }; }, n0);
-  ok(app && !app.cav && !app.horse && app.tipo === "vaccino" && app.cli === scuderia.id, "Salvato senza cavalli " + JSON.stringify(app));
-  const et = await pg.evaluate(id => vaaEtichetta(demoState.interventiMascalcia.find(x => x.id === id)), app.id);
-  const gr = await pg.evaluate(id => vetEtichettaGruppo([demoState.interventiMascalcia.find(x => x.id === id)], {}).html, app.id);
-  ok(et.txt === "aperto" && /aperto · cavalli da segnare/.test(gr), "Etichetta «aperto» in Home e in Agenda " + JSON.stringify({ et, gr }));
-
-  /* 2. privato con cavalli: parte da «Li scelgo ora» */
-  await pg.evaluate(() => openInterventoModal(null)); await attesa(700);
-  await scegli(privato);
-  const s2 = await seg();
-  ok(s2.c === "Li segno a fine visita|Li scelgo ora*" && s2.lista === "block", "Privato: «Li scelgo ora» " + JSON.stringify(s2));
+  // 1. «Da dove parti?»
+  await pg.evaluate(() => openInterventoModal(null)); await attesa(500);
+  const scelta = await pg.evaluate(() => ({ aperta: document.getElementById("modal-vap")?.classList.contains("active"), app: document.getElementById("modal-add-intervento").classList.contains("active"),
+    op: [...document.querySelectorAll("#modal-vap .vap-op b")].map(x => x.textContent), ap: !!document.querySelector("#modal-vap .vap-op.ap small")?.textContent.includes("cavalli li segni sul posto") }));
+  ok(scelta.aperta && !scelta.app && scelta.op.join("|") === "Scegli cavallo|Scegli cliente|Appuntamento aperto" && scelta.ap, "Nuovo appuntamento: prima «Da dove parti?» con le tre strade " + JSON.stringify(scelta));
+  // con un cliente già scelto (dalla sua scheda) si va dritti alla scheda
+  await pg.evaluate(() => { closeModal("modal-vap"); openInterventoModal("vc-sr"); }); await attesa(800);
+  ok(await attivo("modal-add-intervento") && !(await attivo("modal-vap")), "dal cliente: dritti alla scheda");
   await pg.evaluate(() => closeModal("modal-add-intervento"));
 
-  /* 3. «Fatto» → quali cavalli hai visto */
-  const p = pg.evaluate(id => segnaFatto(demoState.interventiMascalcia.find(x => x.id === id)).then(r => { window.__esito = r; }), app.id);
-  await attesa(1000);
-  const f0 = await pg.evaluate(() => ({ aperto: document.getElementById("modal-vaa")?.classList.contains("active"), x: !!document.querySelector("#modal-vaa .modal-close-x"),
-    tit: document.getElementById("vaa-tit")?.textContent, cav: [...document.querySelectorAll("#vaa-corpo .vaa-cav b")].map(x => x.textContent),
-    vacc: [...document.querySelectorAll("#vaa-corpo .vs-chip.on")].map(x => x.textContent), salva: document.querySelector("#vaa-corpo .vaa-ok").disabled }));
-  ok(f0.aperto && !f0.x && f0.tit === "Quali cavalli hai visto?" && f0.cav.length >= 2 && f0.vacc.join("|") === "Influenza|Tetano|tra 1 anno" && f0.salva,
-    "«Fatto»: si apre «Quali cavalli hai visto?» con i cavalli della scuderia, influenza e tetano già scelti, Salva spento senza cavalli " + JSON.stringify(f0));
-  const ids = await pg.evaluate(() => VAA.cavalli.slice(0, 2).map(c => c.id));
-  await pg.evaluate(ids => { vaaSpunta(ids[0], true); vaaSpunta(ids[1], true); }, ids); await attesa(200);
-  await pg.fill("#vaa-prezzo-base", "45"); await attesa(200);
-  await pg.fill(`#vaa-corpo [oninput*="'${ids[1]}'"]`, "60"); await attesa(100);
-  await pg.fill("#vaa-nuovi", "Puledro Nuovo"); await attesa(200);
-  await pg.fill("#vaa-lotto", "AB1234"); await pg.fill("#vaa-lotto-scad", "06/2027");
-  const tot = await pg.evaluate(() => document.querySelector("#vaa-corpo .vaa-tot").textContent.replace(/\s+/g, " ").trim());
-  const nCav0 = await pg.evaluate(() => demoState.cavalliClientiMascalcia.length);
-  await pg.evaluate(() => vaaSalva()); await attesa(1500); await p;
-  const r = await pg.evaluate(({ id, n0, scu }) => { const l = demoState.interventiMascalcia; const e = l.find(x => x.id === id); const nuovi = l.slice(n0 + 1);
-    const nuovoCav = demoState.cavalliClientiMascalcia.slice(-1)[0];
-    return { esito: window.__esito, e: { stato: e.stato, cav: e.cavallo_cliente_id, imp: e.importo, descr: e.tipo_altro, pross: e.prossima_scadenza, data: e.data_intervento },
-      altri: nuovi.map(x => ({ cav: x.cavallo_cliente_id, imp: x.importo, stato: x.stato, cli: x.cliente_mascalcia_id === scu })), nuovoCav: { nome: nuovoCav.nome, cli: nuovoCav.cliente_mascalcia_id === scu },
-      modale: document.getElementById("modal-vaa").classList.contains("active") }; }, { id: app.id, n0, scu: scuderia.id });
-  const unAnno = await pg.evaluate(() => aggiungiGiorniIso(isoLocale(new Date()), 365));
-  ok(tot.replace(/\s/g, "") === "3cavalli€150" && r.esito?.ok && r.e.stato === "fatto" && r.e.cav === ids[0] && r.e.imp === 45 && r.e.descr === "Vaccino influenza + tetano · lotto AB1234 (scad. 06/2027)" && r.e.pross === unAnno
-    && r.altri.length === 2 && r.altri[0].cav === ids[1] && r.altri[0].imp === 60 && r.altri[1].imp === 45 && r.altri.every(x => x.stato === "fatto" && x.cli)
-    && r.nuovoCav.nome === "Puledro Nuovo" && r.nuovoCav.cli && (await pg.evaluate(() => demoState.cavalliClientiMascalcia.length)) === nCav0 + 1 && !r.modale,
-    "Salva: un lavoro per cavallo (primo sull'appuntamento), prezzo per cavallo, cavallo scritto a mano creato nel cliente, richiamo tra un anno " + JSON.stringify({ tot, r }));
+  // 2. Scegli cavallo: si cercano solo i cavalli, scelto il cavallo si compila il cliente
+  await pg.evaluate(() => { openInterventoModal(null); }); await attesa(300);
+  await pg.evaluate(() => vapVia("cavallo")); await attesa(900);
+  await pg.fill("#int-cerca-input", "Ve"); await attesa(300);
+  const cav = await pg.evaluate(() => ({ ph: document.getElementById("int-cerca-input").placeholder, lab: document.querySelector("#intervento-cliente-group .input-label").textContent,
+    righe: [...document.querySelectorAll("#int-cerca-lista button small")].map(x => x.textContent) }));
+  await pg.evaluate(() => document.querySelector("#int-cerca-lista button[data-cav]").click()); await attesa(900);
+  const dopo = await pg.evaluate(() => ({ cli: document.getElementById("intervento-cliente-select").value, spunta: [...document.querySelectorAll("#intervento-cavalli-multi .int-cav-chk:checked")].length, seg: !!document.getElementById("vaa-seg") }));
+  ok(cav.ph === "Cerca il cavallo…" && cav.lab === "Cavallo" && cav.righe.length > 0 && cav.righe.every(x => x === "Cavallo") && dopo.cli && dopo.spunta === 1 && !dopo.seg,
+    "Scegli cavallo: solo cavalli nella ricerca, poi cliente e cavallo compilati " + JSON.stringify({ cav, dopo }));
+  await pg.evaluate(() => closeModal("modal-add-intervento"));
+  // Scegli cliente: la scheda di sempre (niente più «Li segno a fine visita»)
+  await pg.evaluate(() => { openInterventoModal(null); }); await attesa(300);
+  await pg.evaluate(() => vapVia("cliente")); await attesa(900);
+  const cli = await pg.evaluate(() => ({ ph: document.getElementById("int-cerca-input")?.placeholder, lab: document.querySelector("#intervento-cliente-group .input-label").textContent, solo: window.intCercaSolo }));
+  await pg.evaluate(() => { const s = document.getElementById("intervento-cliente-select"); s.value = "vc-sr"; s.dispatchEvent(new Event("change")); }); await attesa(900);
+  ok(cli.lab === "Cliente" && !cli.solo && !(await pg.evaluate(() => !!document.getElementById("vaa-seg"))), "Scegli cliente: la scheda di sempre " + JSON.stringify(cli));
+  await pg.evaluate(() => closeModal("modal-add-intervento"));
 
-  /* 4. «Più tardi» e «da completare» in Home */
-  const id2 = await pg.evaluate(scu => { const ieri = isoLocale(new Date(Date.now() - 864e5));
-    demoState.interventiMascalcia.push({ id: "aperta-ieri", cliente_mascalcia_id: scu, cavallo_cliente_id: null, horse_id: null, tipo_ferratura: "visita", tipo_altro: "controllo", data_intervento: ieri, ora: "10:00", stato: "programmato", stato_pagamento: "da_saldare" });
-    VAA.passate = null; return "aperta-ieri"; }, scuderia.id);
-  await pg.evaluate(() => { showPage("pro-home"); renderHomeVet(); }); await attesa(800);
-  await pg.evaluate(() => renderHomeVet()); await attesa(300);
-  const ban = await pg.evaluate(() => document.querySelector("#vh .vaa-banner")?.textContent.replace(/\s+/g, " ").trim());
-  await pg.evaluate(() => document.querySelector("#vh .vaa-banner").click()); await attesa(900);
-  const apre = await pg.evaluate(() => ({ aperto: document.getElementById("modal-vaa").classList.contains("active"), id: VAA.e?.id }));
-  await pg.evaluate(() => vaaDopo()); await attesa(400);
-  ok(/^1 visita da completare/.test(ban || "") && /segna quali cavalli hai visto/.test(ban) && apre.aperto && apre.id === id2 && !(await pg.evaluate(() => document.getElementById("modal-vaa").classList.contains("active"))),
-    "Home: «1 visita da completare» apre «Quali cavalli hai visto?», «Più tardi» la lascia aperta " + JSON.stringify({ ban, apre }));
+  // 3. Appuntamento aperto: previsione, lavori, appuntamenti creati
+  await pg.evaluate(() => { const o = isoLocale(new Date(Date.now() - 40 * 864e5));
+    ["vv-ne", "vv-ve"].forEach((c, i) => demoState.interventiMascalcia.push({ id: "prev-" + i, cliente_mascalcia_id: "vc-sr", cavallo_cliente_id: c, tipo_ferratura: "vaccino", tipo_altro: "Vaccino influenza", data_intervento: o, stato: "fatto", importo: 50, prossima_scadenza: isoLocale(new Date(Date.now() + 10 * 864e5)) }));
+    openInterventoModal(null); }); await attesa(300);
+  await pg.evaluate(() => vapVia("aperto")); await attesa(400);
+  await pg.evaluate(() => vapDove("vc-sr")); await attesa(900);
+  const prev = await pg.evaluate(() => ({ n: VAP.a.n, slot: VAP.a.slot.join(","), testo: document.getElementById("vap-prev")?.textContent || "", lavori: document.querySelectorAll("#modal-vap-aperto .vap-slot").length }));
+  ok(prev.n === 2 && prev.slot === "vaccino,vaccino" && /ultima volta qui/.test(prev.testo) && /richiamo in scadenza/.test(prev.testo) && prev.lavori === 2,
+    "Aperto: previsione dall'ultima volta e dai richiami (2 vaccini) " + JSON.stringify(prev));
+  await pg.evaluate(() => { vapQuanti(1); }); await attesa(100);
+  await pg.evaluate(() => { vapTipoSlot(2, "posto"); vapQuando("domani"); document.getElementById("vap-ora").value = "09:00"; VAP.a.ora = "09:00"; }); await attesa(100);
+  const bt = await pg.evaluate(() => document.getElementById("vap-crea").textContent);
+  await pg.evaluate(() => vapCrea()); await attesa(900);
+  const domani = await pg.evaluate(() => aggiungiGiorniIso(isoLocale(new Date()), 1));
+  const creati = await pg.evaluate(d => demoState.interventiMascalcia.filter(e => e.cliente_mascalcia_id === "vc-sr" && e.data_intervento === d && !e.cavallo_cliente_id)
+    .map(e => ({ id: e.id, t: e.tipo_ferratura, a: e.tipo_altro, o: e.ora, s: e.stato })), domani);
+  ok(bt === "Crea 3 appuntamenti" && creati.length === 3 && creati.map(x => x.t + "@" + x.o).join(",") === "vaccino@09:00,vaccino@09:15,visita@09:30" && creati[2].a === "Da decidere sul posto" && creati.every(x => x.s === "programmato")
+    && !(await attivo("modal-vap-aperto")), "Aperto: 3 appuntamenti normali senza cavallo, orari distanziati, il terzo «da decidere» " + JSON.stringify({ bt, creati }));
+  const et = await pg.evaluate(d => vetEtichettaGruppo(demoState.interventiMascalcia.filter(e => e.cliente_mascalcia_id === "vc-sr" && e.data_intervento === d), { scuderia: true }).html, domani);
+  ok(/aperto · 3 cavalli da segnare/.test(et), "Agenda: etichetta «aperto · 3 cavalli da segnare» " + et);
+
+  // 4. «Fatto» sul primo lavoro: chi era il cavallo?
+  await pg.evaluate(() => { const v = demoState.cavalliClientiMascalcia.find(c => c.id === "vv-ve"); if(v) v.microchip = "380260000999888"; });
+  await pg.evaluate(id => { segnaFatto(demoState.interventiMascalcia.find(e => e.id === id)); return 1; }, creati[0].id); await attesa(400);
+  await pg.evaluate(() => { const s = document.getElementById("eq-pop-sino"); if(s && s.classList.contains("active") || document.getElementById("sino-si")?.offsetParent) rispondiSiNo(true); }); await attesa(900);
+  const f1 = await pg.evaluate(() => ({ aperto: document.getElementById("modal-vaa")?.classList.contains("active"), tit: document.querySelector("#modal-vaa .modal-title")?.textContent, sotto: document.querySelector("#modal-vaa .vaa-sotto-tit")?.textContent,
+    sug: [...document.querySelectorAll("#modal-vaa .vap-sug button")].map(x => x.firstChild.textContent), bt: document.querySelector("#modal-vaa .vaa-ok")?.textContent }));
+  ok(f1.aperto && f1.tit === "Chi era il cavallo?" && /^Lavoro 1 di 3 · Vaccino/.test(f1.sotto) && f1.sug.includes("Nerone") && f1.sug.includes("Vento") && f1.bt === "Salva e vai al lavoro 2 ›",
+    "Fatto: «Chi era il cavallo?» con i cavalli del posto " + JSON.stringify(f1));
+  // microchip: riconosce il cavallo
+  await pg.evaluate(() => vapChip("380 260 000 999 888")); await attesa(200);
+  const mc = await pg.evaluate(() => ({ scelto: VAP.c.scelto?.nome, esito: document.querySelector("#modal-vaa .vap-ok")?.textContent || "" }));
+  ok(mc.scelto === "Vento" && /Trovato tra i tuoi cavalli/.test(mc.esito), "Microchip: riconosce il cavallo " + JSON.stringify(mc));
+  await pg.evaluate(() => { VAP.c.lotto = "AB1234"; VAP.c.lottoScad = "06/2027"; VAP.c.prezzo = "45"; vaaSalva(); return 1; }); await attesa(1200);
+  const s1 = await pg.evaluate(id => demoState.interventiMascalcia.find(e => e.id === id), creati[0].id);
+  const f2 = await pg.evaluate(() => ({ sotto: document.querySelector("#modal-vaa .vaa-sotto-tit")?.textContent, lotto: document.getElementById("vaa-lotto")?.value, sug: [...document.querySelectorAll("#modal-vaa .vap-sug button")].map(x => x.firstChild.textContent) }));
+  ok(s1.stato === "fatto" && s1.cavallo_cliente_id === "vv-ve" && /lotto AB1234 \(scad\. 06\/2027\)/.test(s1.tipo_altro) && s1.importo === 45 && s1.prossima_scadenza === (await pg.evaluate(d => aggiungiGiorniIso(d, 365), s1.data_intervento)),
+    "Lavoro 1 salvato: cavallo, vaccino con lotto, costo, richiamo a 1 anno " + JSON.stringify(s1));
+  ok(/^Lavoro 2 di 3/.test(f2.sotto || "") && f2.lotto === "AB1234" && !f2.sug.includes("Vento"), "Si passa al lavoro 2: lotto ricordato, Vento non più proposto " + JSON.stringify(f2));
+  // lavoro 2: cavallo nuovo con microchip
+  await pg.evaluate(() => { vapNome("Puledro Nuovo"); vapChip("380260000123456"); VAP.c.prezzo = "60"; }); await attesa(200);
+  const nuovoTxt = await pg.evaluate(() => document.querySelector("#modal-vaa .vap-piccolo")?.textContent || "");
+  await pg.evaluate(() => { vaaSalva(); return 1; }); await attesa(1200);
+  const pn = await pg.evaluate(() => demoState.cavalliClientiMascalcia.find(c => c.nome === "Puledro Nuovo"));
+  const s2 = await pg.evaluate(id => demoState.interventiMascalcia.find(e => e.id === id), creati[1].id);
+  ok(/Cavallo nuovo/.test(nuovoTxt) && pn && pn.cliente_mascalcia_id === "vc-sr" && pn.microchip === "380260000123456" && s2.cavallo_cliente_id === pn.id && s2.importo === 60,
+    "Lavoro 2: cavallo nuovo del cliente con microchip " + JSON.stringify({ nuovoTxt, pn, s2 }));
+  // lavoro 3: da decidere → serve il tipo; poi visita
+  const f3 = await pg.evaluate(() => ({ sotto: document.querySelector("#modal-vaa .vaa-sotto-tit")?.textContent, bt: document.querySelector("#modal-vaa .vaa-ok")?.textContent, on: document.querySelectorAll("#modal-vaa .vs-chips .vs-chip.on").length }));
+  await pg.evaluate(() => { vapScegliCavallo("vv-ne"); vaaSalva(); return 1; }); await attesa(300);
+  const errTipo = await pg.evaluate(() => document.getElementById("vaa-err")?.textContent || "");
+  await pg.evaluate(() => vapTipo("visita")); await attesa(300);
+  await pg.evaluate(() => { VAP.c.motivo = "controllo"; VAP.c.prezzo = "70"; vaaSalva(); return 1; }); await attesa(1500);
+  ok(/^Lavoro 3 di 3 · da decidere/.test(f3.sotto || "") && f3.bt === "Salva e chiudi la visita" && f3.on === 0 && /Scegli cosa hai fatto/.test(errTipo), "Lavoro 3 «da decidere»: chiede cosa hai fatto " + JSON.stringify({ f3, errTipo }));
+
+  // 5. documenti
+  const doc = await pg.evaluate(() => ({ aperto: document.getElementById("modal-vap-doc")?.classList.contains("active"), sotto: document.querySelector("#modal-vap-doc .vaa-sotto-tit")?.textContent,
+    voci: [...document.querySelectorAll("#modal-vap-doc .vap-doc b")].map(x => x.textContent), tot: document.querySelector("#modal-vap-doc .vaa-tot span:last-child")?.textContent }));
+  ok(doc.aperto && /^3 cavalli/.test(doc.sotto) && doc.voci.includes("Certificati di vaccinazione") && doc.voci.includes("Riepilogo e conto") && doc.voci.includes("Referto · Nerone") && doc.voci.includes("Allevamento San Rocco") && /175/.test(doc.tot),
+    "Visita chiusa: documenti da inviare, a chi, totale " + JSON.stringify(doc));
+  const prima = await pg.evaluate(() => ({ m: demoState.messaggiMascalcia.length, d: (demoState.documenti || []).length }));
+  await pg.evaluate(() => { vapInvia(); return 1; }); await attesa(3000);
+  const inv = await pg.evaluate(p => ({ msg: demoState.messaggiMascalcia.slice(p.m).map(m => m.cliente_mascalcia_id + ":" + m.tipo + ":" + (m.testo || "").slice(0, 40)),
+    doc: (demoState.documenti || []).slice(p.d).map(d => d.categoria + ":" + d.cavallo_cliente_id), ok: document.querySelector("#modal-vap-doc .vr-ok b")?.textContent }), prima);
+  ok(inv.doc.length === 2 && inv.doc.every(x => x.startsWith("vaccino:")) && inv.msg.filter(x => /:documento:Certificato di vaccinazione/.test(x)).length === 2 && inv.msg.some(x => /^vc-sr:testo:Riepilogo della visita/.test(x)) && inv.ok === "Documenti inviati",
+    "Invio: 2 certificati nello spazio privato e in chat, riepilogo e conto in chat " + JSON.stringify(inv));
+  await pg.evaluate(() => closeModal("modal-vap-doc"));
+
+  // 6. «Più tardi»: resta aperto e da completare in Home
+  await pg.evaluate(async () => { const { data } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: "vc-sr", tipo_ferratura: "vaccino", tipo_altro: null, data_intervento: isoLocale(new Date()), ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
+    window.__pt = data.id; segnaFatto(data); }); await attesa(900);
+  await pg.evaluate(() => vaaDopo()); await attesa(500);
+  const ban = await pg.evaluate(() => { showPage("pro-home"); hpAppuntamenti = [...(hpAppuntamenti || []), demoState.interventiMascalcia.find(e => e.id === window.__pt)]; renderHomeVet(); return document.querySelector("#vh .vaa-banner")?.textContent.replace(/\s+/g, " ") || ""; });
+  ok(/1 lavoro da completare/.test(ban) && /chi era il cavallo/.test(ban), "Più tardi: «da completare» in Home " + ban);
+
   ok(!err.length, "nessun errore JavaScript " + JSON.stringify(err));
   await b.close();
   if(problemi.length){ console.error("\nPROVA VISITA APERTA: " + problemi.length + " problemi"); process.exit(1); }

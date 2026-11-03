@@ -1,5 +1,6 @@
 // Prova della HOME DEL VETERINARIO (2/11/2026, mockup approvato da Simone) e di Galeno:
-// Prossime visite prima delle righe Cavalli · Clienti · Scuderie · Incassi (icone della Home del maniscalco), «Segnalaci» con il ticket,
+// 3/11/2026 sera: niente lista «Prossime visite»; il banner «Il giro di oggi» apre «Le visite inserite»; righe Nuovo appuntamento · Cavalli ·
+// Clienti · Scuderie · Incassi (icone della Home del maniscalco), «Segnalaci» con il ticket,
 // «Detta» (Home e +) senza mai «Galeno presto disponibile», Galeno nella barra apre la chat.
 const path = require("path"); const { chromium } = require("playwright");
 const APP = path.resolve(__dirname, "..", "index.html");
@@ -22,20 +23,37 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
     return { ordine: kids, righe: [...box.querySelectorAll(".vh-righe .hm-riga .tx b")].map(x => x.textContent), sotto: [...box.querySelectorAll(".vh-righe .hm-riga .tx > span")].map(x => x.textContent),
       icone: [...box.querySelectorAll(".vh-righe .hm-riga .ic svg")].length, emoji: /[\u{1F300}-\u{1FAFF}]/u.test(box.querySelector(".vh-righe").textContent),
       aiuto: box.querySelector(".vh-aiuto b")?.textContent, bt: box.querySelector(".vh-aiuto-bt")?.textContent }; });
-  const iTit = h.ordine.indexOf("vh-tit"), iRighe = h.ordine.indexOf("hm-righe"), iAiuto = h.ordine.indexOf("vh-aiuto");
-  // 3/11/2026: dopo le prossime visite, il tasto Tiffany «Nuovo appuntamento» è il primo delle righe, poi Cavalli · Clienti · Scuderie · Incassi
-  ok(iTit >= 0 && iRighe > iTit && iAiuto > iRighe && h.righe.join("|") === "Nuovo appuntamento|Cavalli|Clienti|Scuderie|Incassi" && h.icone === 5 && !h.emoji
+  const iGiro = h.ordine.indexOf("vh-giro"), iRighe = h.ordine.indexOf("hm-righe"), iAiuto = h.ordine.indexOf("vh-aiuto");
+  // 3/11/2026 sera: niente «Prossime visite»; sotto i cerchi il tasto Tiffany «Nuovo appuntamento», poi Cavalli · Clienti · Scuderie · Incassi
+  ok(h.ordine.indexOf("vh-tit") < 0 && h.ordine.indexOf("vh-visita") < 0 && iGiro >= 0 && iRighe > iGiro && iAiuto > iRighe && h.righe.join("|") === "Nuovo appuntamento|Cavalli|Clienti|Scuderie|Incassi" && h.icone === 5 && !h.emoji
     && /cavall/.test(h.sotto[1]) && /propriet/.test(h.sotto[2]) && /scuder/.test(h.sotto[3]) && h.aiuto === "Segnalaci un problema o un consiglio" && h.bt === "Scrivici",
-    "Home: Prossime visite, tasto Nuovo appuntamento, poi Cavalli · Clienti · Scuderie · Incassi con le icone della Home, poi Segnalaci " + JSON.stringify(h));
+    "Home: niente lista, tasto Nuovo appuntamento, poi Cavalli · Clienti · Scuderie · Incassi con le icone della Home, poi Segnalaci " + JSON.stringify(h));
 
   // tasto Nuovo appuntamento: Tiffany con bordo e testo blu notte, apre il nuovo appuntamento
   const pv = await pg.evaluate(() => { const r = document.querySelector("#vh .hm-riga.r-vis"); const cs = getComputedStyle(r);
     return { bg: cs.backgroundColor, bordo: cs.borderTopColor, tit: getComputedStyle(r.querySelector(".tx b")).color, sotto: r.querySelector(".tx > span").textContent.trim() }; });
   await pg.evaluate(() => document.querySelector("#vh .hm-riga.r-vis").click()); await attesa(600);
-  const modale = await pg.evaluate(() => document.getElementById("modal-add-intervento")?.classList.contains("active"));
-  await pg.evaluate(() => { try{ closeModal("modal-add-intervento"); }catch(_){} });
+  // apre «Da dove parti?» (tre strade)
+  const modale = await pg.evaluate(() => document.getElementById("modal-vap")?.classList.contains("active") && [...document.querySelectorAll("#modal-vap .vap-op b")].map(x => x.textContent).join("|") === "Scegli cavallo|Scegli cliente|Appuntamento aperto");
+  await pg.evaluate(() => { try{ closeModal("modal-vap"); }catch(_){} });
   ok(pv.bg === "rgb(127, 209, 201)" && pv.bordo === "rgb(29, 45, 80)" && pv.tit === "rgb(29, 45, 80)" && pv.sotto === "Inserisci un nuovo appuntamento" && modale,
     "Nuovo appuntamento: tasto Tiffany con bordo e testo blu notte, apre il nuovo appuntamento " + JSON.stringify({ pv, modale }));
+  await pg.evaluate(() => { showPage("pro-home"); renderHomeVet(); }); await attesa(300);
+  // banner «Il giro di oggi»: «Vedi visite ›» e un tocco sul banner aprono «Le visite inserite» (tutte, divise per giorno); i riquadri restano loro
+  const gv = await pg.evaluate(async () => {
+    const bt = document.querySelector("#vh .vh-giornata").textContent.replace(/\s+/g, " ").trim();
+    document.querySelector("#vh .vh-giro-n").click(); await new Promise(r => setTimeout(r, 400));
+    const aperto = document.getElementById("modal-vh-visite")?.classList.contains("active");
+    const gruppi = [...document.querySelectorAll("#modal-vh-visite .vh-visite-g")].map(x => x.textContent);
+    const n = document.querySelectorAll("#modal-vh-visite .vh-visita").length;
+    const daFare = (hpAppuntamenti || []).filter(e => !["annullato", "rifiutato", "fatto"].includes(e.stato) && e.data_intervento >= isoLocale(new Date())).length;
+    closeModal("modal-vh-visite");
+    document.querySelector("#vh .vh-giro-num button:last-child").click(); await new Promise(r => setTimeout(r, 300));
+    const riq = !document.getElementById("modal-vh-visite").classList.contains("active");
+    document.querySelectorAll(".modal-overlay.active").forEach(m => m.classList.remove("active"));
+    return { bt, aperto, gruppi, n, daFare, riq }; });
+  ok(gv.bt === "Vedi visite ›" && gv.aperto && /^Oggi/.test(gv.gruppi[0] || "") && gv.gruppi.length >= 2 && gv.n === gv.daFare && gv.riq,
+    "Banner «Il giro di oggi»: «Vedi visite ›» apre «Le visite inserite» per giorno; i riquadri no " + JSON.stringify(gv));
   await pg.evaluate(() => { showPage("pro-home"); renderHomeVet(); }); await attesa(300);
   // righe: Cavalli → elenco dei cavalli; Scuderie → filtro scuderie
   await pg.evaluate(() => vhVai("cavalli")); await attesa(700);

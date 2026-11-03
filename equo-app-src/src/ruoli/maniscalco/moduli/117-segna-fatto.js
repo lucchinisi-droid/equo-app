@@ -35,7 +35,7 @@ async function datiDalRiquadro(e, anticipo){
 
 async function segnaFatto(e, opz = {}){
   if(!e) return { ok: false };
-  // veterinario, visita aperta (senza cavalli): «Quali cavalli hai visto?» (ruoli/veterinario/moduli/14-visita-aperta.js)
+  // veterinario, appuntamento aperto (senza cavallo): «Chi era il cavallo?» (ruoli/veterinario/moduli/14-visita-aperta.js)
   if(typeof vaaFatto === "function" && typeof eVeterinario === "function" && eVeterinario() && !e.cavallo_cliente_id && !e.horse_id){ if(opz.prima) opz.prima(); return vaaFatto(e); }
   const anticipo = await fattoInAnticipo(e);
   if(anticipo === null) return { ok: false };
