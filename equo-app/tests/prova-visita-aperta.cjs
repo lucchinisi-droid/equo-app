@@ -83,6 +83,15 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   await pg.evaluate(() => vapChip("380 260 000 999 888")); await attesa(200);
   const mc = await pg.evaluate(() => ({ scelto: VAP.c.scelto?.nome, esito: document.querySelector("#modal-vaa .vap-ok")?.textContent || "" }));
   ok(mc.scelto === "Vento" && /Trovato tra i tuoi cavalli/.test(mc.esito), "Microchip: riconosce il cavallo " + JSON.stringify(mc));
+  // «+ Un altro cavallo qui»: due tocchi veloci = un solo lavoro, conferma nel foglio, «Togli» lo toglie
+  const nPrima = await pg.evaluate(() => demoState.interventiMascalcia.length);
+  await pg.evaluate(() => { vapAggiungiLavoro(); vapAggiungiLavoro(); return 1; }); await attesa(500);
+  const ag = await pg.evaluate(n => ({ nuovi: demoState.interventiMascalcia.length - n, nota: document.querySelector("#modal-vaa .vap-aggiunto")?.textContent.replace(/\s+/g, " ").trim() || "",
+    sotto: document.querySelector("#modal-vaa .vaa-sotto-tit")?.textContent }), nPrima);
+  await pg.evaluate(() => { vapTogliAggiunto(); return 1; }); await attesa(500);
+  const tg = await pg.evaluate(n => ({ nuovi: demoState.interventiMascalcia.length - n, nota: !!document.querySelector("#modal-vaa .vap-aggiunto"), sotto: document.querySelector("#modal-vaa .vaa-sotto-tit")?.textContent }), nPrima);
+  ok(ag.nuovi === 1 && /Aggiunto 1 lavoro: lo compili dopo questo/.test(ag.nota) && /di 4/.test(ag.sotto) && tg.nuovi === 0 && !tg.nota && /di 3/.test(tg.sotto),
+    "«+ Un altro cavallo qui»: niente doppioni, conferma nel foglio, «Togli» " + JSON.stringify({ ag, tg }));
   await pg.evaluate(() => { VAP.c.lotto = "AB1234"; VAP.c.lottoScad = "06/2027"; VAP.c.prezzo = "45"; vaaSalva(); return 1; }); await attesa(1200);
   const s1 = await pg.evaluate(id => demoState.interventiMascalcia.find(e => e.id === id), creati[0].id);
   const f2 = await pg.evaluate(() => ({ sotto: document.querySelector("#modal-vaa .vaa-sotto-tit")?.textContent, lotto: document.getElementById("vaa-lotto")?.value, sug: [...document.querySelectorAll("#modal-vaa .vap-sug button")].map(x => x.firstChild.textContent) }));

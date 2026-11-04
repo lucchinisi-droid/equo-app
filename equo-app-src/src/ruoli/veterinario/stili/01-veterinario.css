@@ -564,3 +564,4 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(:root:not([data-theme="light"])) body.pl-vet .vap-step button,:where(:root:not([data-theme="light"])) body.pl-vet .vap-dove-scelto b{color:#FFFFFF}
 :where(body.pl-vet) .vap-doc-ic{width:22px;height:22px;flex:none;display:grid;place-items:center}
 :where(body.pl-vet) .vap-doc-ic svg{width:20px;height:20px;fill:none;stroke:var(--vt-tif-scuro);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:where(body.pl-vet) .vap-aggiunto{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;margin-top:12px}

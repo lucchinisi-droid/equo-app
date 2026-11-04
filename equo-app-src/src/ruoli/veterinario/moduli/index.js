@@ -20,7 +20,7 @@ import { mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, 
   mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET } from "./13-mappe.js";
 
 import { VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
-  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro,
+  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
   vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta } from "./14-visita-aperta.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
@@ -53,6 +53,6 @@ Object.assign(window, {
   vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB,
   VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
-  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro,
+  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
   vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta
 });

@@ -299,7 +299,8 @@ function vapDisegnaChiusura(){
       <small>${c.prezzo ? "proposto dall'ultima volta: lo cambi se serve" : ""}</small></label>
     <div class="auth-error" id="vaa-err" style="display:none"></div>
     <button class="btn btn-primary vaa-ok" onclick="vaaSalva()">${prossimo ? `Salva e vai al lavoro ${k + 1} ›` : "Salva e chiudi la visita"}</button>
-    <button class="btn btn-outline vap-altro" onclick="vapAggiungiLavoro()">+ Un altro cavallo qui</button>
+    ${(c.aggiunti || []).length ? `<div class="vaa-nota vap-aggiunto" role="status"><span>✓ ${c.aggiunti.length === 1 ? "Aggiunto 1 lavoro" : "Aggiunti " + c.aggiunti.length + " lavori"}: ${c.aggiunti.length === 1 ? "lo compili" : "li compili"} dopo questo.</span><button type="button" class="vap-mini" onclick="vapTogliAggiunto()">Togli</button></div>` : ""}
+    <button class="btn btn-outline vap-altro" id="vap-altro" onclick="vapAggiungiLavoro()" ${VAP.occupato ? "disabled" : ""}>+ Un altro cavallo qui</button>
     <button class="btn btn-outline vaa-dopo" onclick="vaaDopo()">Più tardi</button>
     <div class="vaa-nota oro">Se esci senza nome, il lavoro resta «aperto» e te lo ricordo in Home.</div>`;
 }
@@ -400,14 +401,32 @@ async function vaaSalva(){
   } finally { if(btn) btn.disabled = false; }
 }
 // «+ Un altro cavallo qui»: un lavoro in più, stesso posto e giorno
+// 4/11/2026 (Simone: «il tasto sembra non funzionare ma crea duplicati»): il tasto si blocca mentre salva e nel foglio
+// compare «✓ Aggiunto 1 lavoro: lo compili dopo questo» con «Togli» (prima c'era solo un avviso nascosto dietro il foglio).
 async function vapAggiungiLavoro(){
+  if(VAP.occupato) return;
   const c = VAP.c, e = c.e;
-  const { data, error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: c.cid, tipo_ferratura: c.tipo || e.tipo_ferratura || "visita", tipo_altro: c.tipo ? null : VAP_DECIDERE,
-    data_intervento: e.data_intervento || c.giorno, ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
-  if(error || !data) return showToast("Errore: " + (error?.message || "riprova"));
-  c.lavori.push(data);
-  showToast(`Aggiunto il lavoro ${c.lavori.length}`);
-  vapDisegnaChiusura();
+  VAP.occupato = true; const bt = document.getElementById("vap-altro"); if(bt) bt.disabled = true;
+  try{
+    const { data, error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: c.cid, tipo_ferratura: c.tipo || e.tipo_ferratura || "visita", tipo_altro: c.tipo ? null : VAP_DECIDERE,
+      data_intervento: e.data_intervento || c.giorno, ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
+    if(error || !data) return showToast("Errore: " + (error?.message || "riprova"));
+    c.lavori.push(data); (c.aggiunti = c.aggiunti || []).push(data.id);
+  } finally { VAP.occupato = false; }
+  vapRidisegna();
+  vaaAggiorna();
+}
+// «Togli»: l'ultimo lavoro aggiunto per sbaglio (ancora vuoto)
+async function vapTogliAggiunto(){
+  if(VAP.occupato) return;
+  const c = VAP.c, id = (c.aggiunti || []).slice(-1)[0]; if(!id) return;
+  VAP.occupato = true;
+  try{
+    const { error } = await DB.deleteInterventoMascalcia(id);
+    if(error) return showToast("Errore: " + error.message);
+    c.aggiunti = c.aggiunti.filter(x => x !== id); c.lavori = c.lavori.filter(x => x.id !== id);
+  } finally { VAP.occupato = false; }
+  vapRidisegna();
   vaaAggiorna();
 }
 
@@ -451,6 +470,7 @@ function vapApriScheda(id){
   if(typeof vsApriDaEvento === "function") vsApriDaEvento(e.id, e); else if(typeof apriAzioniEvento === "function") apriAzioniEvento(id);
 }
 async function vapAltroDopoChiusa(){
+  if(VAP.occupato) return; VAP.occupato = true; setTimeout(() => { VAP.occupato = false; }, 1500);
   const d = VAP.d;
   const { data, error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: d.cid, tipo_ferratura: "visita", tipo_altro: VAP_DECIDERE, data_intervento: d.giorno, ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
   if(error || !data) return showToast("Errore: " + (error?.message || "riprova"));
@@ -578,5 +598,5 @@ function vaaCompleta(id){
 }
 
 export { VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
-  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro,
+  vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
   vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta };
