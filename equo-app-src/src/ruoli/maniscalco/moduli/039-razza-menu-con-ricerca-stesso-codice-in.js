@@ -22,7 +22,12 @@ function razzaTrova(testo){
 }
 function razzaCerca(testo){
   const n = razzaNorm(testo);
-  if(!n) return RAZZE_EQUO.filter(r => r.italiana).slice(0, 8);
+  // campo vuoto: tutto l'elenco, prima le razze più diffuse e poi le altre in ordine alfabetico (si scorre)
+  if(!n){
+    const pos = r => RAZZE_DIFFUSE.indexOf(r.sigla);
+    return RAZZE_EQUO.filter(r => !RAZZE_FISSE.includes(r.nome))
+      .sort((a, b) => ((pos(a) < 0) - (pos(b) < 0)) || (pos(a) - pos(b)) || a.nome.localeCompare(b.nome, "it"));
+  }
   const parole = String(testo).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter(Boolean);
   const punteggio = r => {
     const nome = razzaNorm(r.nome), w = r.nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/);
@@ -34,7 +39,7 @@ function razzaCerca(testo){
     return 9;
   };
   return RAZZE_EQUO.map((r, i) => ({ r, p: punteggio(r), i })).filter(x => x.p < 9)
-    .sort((a, b) => a.p - b.p || (RAZZE_DIFFUSE.indexOf(a.r.sigla) < 0) - (RAZZE_DIFFUSE.indexOf(b.r.sigla) < 0) || (b.r.italiana - a.r.italiana) || a.i - b.i).slice(0, 8).map(x => x.r);
+    .sort((a, b) => a.p - b.p || (RAZZE_DIFFUSE.indexOf(a.r.sigla) < 0) - (RAZZE_DIFFUSE.indexOf(b.r.sigla) < 0) || (b.r.italiana - a.r.italiana) || a.i - b.i).slice(0, 40).map(x => x.r);
 }
 // trasforma un <input> in campo razza con suggerimenti
 function razzaCampo(id){

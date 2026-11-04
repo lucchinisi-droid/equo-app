@@ -8,6 +8,7 @@ import { agDataPerFissare, agDescrizioneTipoPro, agGiornoLavoro, agNomeCavallo, 
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agDisegnaGriglia, agendaCompleta, apriPropostaStruttura, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
+import { pagChiediModo, pagSaldaConModo } from "./113-pagamenti-a-rate.js";
 /* ---------- AGENDA SEMPLICE | AGENDA COMPLETA (26/10/2026) ----------
    Interruttore in alto nella pagina Agenda (scelta salvata sul telefono, si parte da Semplice).
    Completa = 4 schede: Appuntamenti (la settimana, senza scadenze) · Da programmare (scadenze scadute e dei prossimi 30 giorni,
@@ -230,9 +231,12 @@ function agDisegnaSaldare(){
 }
 function agDsApri(id){ agDsAperto = agDsAperto === id ? null : id; agDisegnaSaldare(); }
 async function agDsSaldato(id, btn){
-  btn.disabled = true;
-  const { error } = await DB.updateInterventoMascalcia(id, { stato_pagamento: "saldato" });
-  if(error){ btn.disabled = false; showToast("Errore: " + error.message); return; }
+  const i = (agDati.saldare || []).find(x => x.id === id);
+  const modo = await pagChiediModo("Come ha pagato?", [agNomeCavallo(i || {}), i && i.importo != null ? euroTondo(i.importo) : ""].filter(Boolean).join(" · "));
+  if(!modo) return;
+  if(btn) btn.disabled = true;
+  const { error } = await pagSaldaConModo(i || id, modo);
+  if(error){ if(btn) btn.disabled = false; showToast("Errore: " + error.message); return; }
   showToast("Segnato come saldato");
   agDati.saldare = agDati.saldare.filter(i => i.id !== id);
   agAggiornaSchede();

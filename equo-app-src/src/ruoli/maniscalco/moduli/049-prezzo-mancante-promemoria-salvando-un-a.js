@@ -1,6 +1,6 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { renderIncassi, incTieniOrdine, euroTondo } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
-import { pagResiduo } from "./113-pagamenti-a-rate.js";
+import { pagResiduo, pagChiediModo, pagSaldaConModo } from "./113-pagamenti-a-rate.js";
 import { chiediConferma } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { INC_ORIZZONTE } from "./048-vista-completa-premium-previsionale-clie.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
@@ -70,11 +70,15 @@ async function aggiungiPrezziMancanti(){
   await renderIncassi();
 }
 
+// 4/11/2026: prima di segnare saldato chiede come ha pagato (appunto: contanti, bonifico, POS, assegno, altro)
 async function segnaSaldatoIncassi(id, btn){
-  btn.disabled = true;
-  const { error } = await DB.updateInterventoMascalcia(id, { stato_pagamento: "saldato" });
-  if(error){ btn.disabled = false; showToast("Errore: " + error.message); return; }
   const i = incTutti.find(x => x.id === id);
+  const resto = i && Number(i.importo) > 0 ? pagResiduo(i) : 0;
+  const modo = await pagChiediModo("Come ha pagato?", [i?.clienti_mascalcia?.nome, i?.cavalli_clienti_mascalcia?.nome, resto > 0 ? euroTondo(resto) : ""].filter(Boolean).join(" · "));
+  if(!modo) return;
+  if(btn) btn.disabled = true;
+  const { error } = await pagSaldaConModo(i || id, modo);
+  if(error){ if(btn) btn.disabled = false; showToast("Errore: " + error.message); return; }
   if(i && DEMO_MODE) i.saldato_il = new Date().toISOString();
   showToast("Segnato come saldato");
   incTieniOrdine();   // la scuderia resta al suo posto
@@ -86,12 +90,13 @@ async function incTuttoSaldato(clienteId, btn){
   if(!righe.length) return;
   const nome = righe[0].clienti_mascalcia?.nome || "questo cliente";
   const tot = righe.reduce((s, i) => s + (Number(i.importo) > 0 ? pagResiduo(i) : 0), 0);
-  const ok = await chiediConferma(`Segno saldati i ${righe.length} lavori di ${nome}${tot > 0 ? " (" + euroTondo(tot) + ")" : ""}? Escono da «Da incassare» e vanno negli incassi di oggi.`);
-  if(!ok) return;
+  // la scelta del metodo fa anche da conferma
+  const modo = await pagChiediModo(`Tutto saldato · ${nome}`, `${righe.length} lavori${tot > 0 ? " · " + euroTondo(tot) : ""}: escono da «Da incassare» e vanno negli incassi di oggi. Come ha pagato?`);
+  if(!modo) return;
   if(btn) btn.disabled = true;
   let fatti = 0, errore = null;
   for(const i of righe){
-    const { error } = await DB.updateInterventoMascalcia(i.id, { stato_pagamento: "saldato" });
+    const { error } = await pagSaldaConModo(i, modo);
     if(error){ errore = error; break; }
     if(DEMO_MODE) i.saldato_il = new Date().toISOString();
     fatti++;

@@ -1053,6 +1053,15 @@
 			s: "Scansione dei punti diagnostici (reattività 0–3)",
 			tab: "mtc"
 		},
+		{
+			k: "aree_reattive",
+			e: "Aree reattive",
+			t: "mappa",
+			modo: "aree",
+			scala: true,
+			s: "Aree reattive (0–3)",
+			tab: "mtc"
+		},
 		...PUNTI_DIAGNOSTICI.map(([p, n]) => ({
 			k: "scan_" + p,
 			e: p + " · " + n,
@@ -1209,27 +1218,24 @@
 		{
 			k: "punti",
 			e: "Punti trattati",
-			t: "multi",
-			o: [
-				"GV20",
-				"BL18",
-				"BL23",
-				"BL25",
-				"GB21",
-				"GB34",
-				"ST36",
-				"SP6",
-				"LI4",
-				"KID1"
-			],
+			t: "punti",
 			s: "Agopuntura",
 			tab: "tratt"
 		},
 		{
 			k: "punti_altri",
-			e: "Altri punti",
+			e: "Note sui punti",
 			t: "riga",
 			s: "Agopuntura",
+			tab: "tratt",
+			ph: "es. BL23 bilaterale, 10 min"
+		},
+		{
+			k: "aree_trattate",
+			e: "Aree trattate",
+			t: "mappa",
+			modo: "aree",
+			s: "Aree trattate",
 			tab: "tratt"
 		},
 		{
@@ -1479,7 +1485,10 @@
 		["mappa_arti", "Arti · tendini"],
 		["mappa_zoccoli", "Zoccoli · suola"],
 		["mappa_denti", "Dentatura"],
-		["mappa_lingua", "Lingua per zone"]
+		["mappa_lingua", "Lingua per zone"],
+		["mappa_aree", "Aree del cavallo"],
+		["mappa_aree3", "Aree del cavallo · reattività 0–3"],
+		["punti", "Punti di agopuntura"]
 	];
 	var NOME_TIPO = Object.fromEntries(TIPI_CAMPO);
 	NOME_TIPO.mappa = "Mappa del cavallo";
@@ -1495,9 +1504,14 @@
 			disegno: "zoccoli"
 		},
 		mappa_denti: { modo: "denti" },
-		mappa_lingua: { modo: "zone" }
+		mappa_lingua: { modo: "zone" },
+		mappa_aree: { modo: "aree" },
+		mappa_aree3: {
+			modo: "aree",
+			scala: true
+		}
 	};
-	var vsNomeTipo = (c) => c.t === "mappa" ? NOME_TIPO[Object.keys(TIPO_MAPPA).find((t) => TIPO_MAPPA[t].modo === c.modo && (TIPO_MAPPA[t].disegno || "") === (c.disegno || "")) || "mappa_segni"] : NOME_TIPO[c.t === "scala" && c.max === 3 ? "scala3" : c.t] || c.t;
+	var vsNomeTipo = (c) => c.t === "mappa" ? NOME_TIPO[Object.keys(TIPO_MAPPA).find((t) => TIPO_MAPPA[t].modo === c.modo && (TIPO_MAPPA[t].disegno || "") === (c.disegno || "") && !!TIPO_MAPPA[t].scala === !!c.scala) || "mappa_segni"] : NOME_TIPO[c.t === "scala" && c.max === 3 ? "scala3" : c.t] || c.t;
 	var vsEsc = (s) => escapeHtml(s == null ? "" : String(s));
 	var vsSqlMancante = (e) => /visite_pro|modelli_visita|does not exist|schema cache/i.test(e?.message || "");
 	var VsDB = {
@@ -1652,6 +1666,7 @@
 		if (typeof vdReset === "function") vdReset();
 		if (typeof ptReset === "function") ptReset();
 		if (typeof mpReset === "function") mpReset();
+		if (typeof vpReset === "function") vpReset();
 		vsFoglio().classList.add("aperto");
 		document.body.classList.add("vs-aperto");
 		document.getElementById("vs-corpo").innerHTML = "<div class=\"vs-vuoto\">Carico la scheda…</div>";
@@ -1773,6 +1788,7 @@
 				return `<div class="${cls} pieno vs-scala-r"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-scala">${Array.from({ length: max + 1 }, (_, i) => `<button type="button" class="${i === n && val != null ? "on" : ""}${c.rosso && i >= Math.ceil(max / 2) ? " alto" : ""}" aria-pressed="${i === n && val != null}"${dis} onclick="vsScegli('${c.k}', ${i})">${i}</button>`).join("")}</div></div>`;
 			}
 			case "mappa": return typeof mpCampoHtml === "function" ? mpCampoHtml(c, val, sola) : "";
+			case "punti": return typeof vpCampoHtml === "function" ? vpCampoHtml(c, val, sola) : "";
 			case "sino": return `<div class="${cls} pieno"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-chips">${chip("Sì", val === true, `vsScegli('${c.k}', true)`)}${chip("No", val === false, `vsScegli('${c.k}', false)`)}</div></div>`;
 			default: return `<div class="${cls}">${lab}<input id="${id}" value="${vsEsc(val || "")}" placeholder="${vsEsc(c.ph || "")}"${dis} oninput="vsCambia('${c.k}', this.value)"></div>`;
 		}
@@ -4294,8 +4310,82 @@
 			"de",
 			"Dentatura",
 			{ d: "denti" }
+		]] },
+		aree: { viste: [[
+			"sx",
+			"Sinistra",
+			{
+				d: "sx",
+				t: "lato sinistro"
+			}
+		], [
+			"dx",
+			"Destra",
+			{
+				d: "sx",
+				spec: true,
+				t: "lato destro"
+			}
 		]] }
 	};
+	var MP_AREE = [
+		[
+			"testa",
+			"Testa",
+			"95,70 215,40 290,180 300,300 250,330 175,350 100,330"
+		],
+		[
+			"collo",
+			"Collo",
+			"250,90 330,110 560,250 590,300 520,400 420,450 380,360 300,300 290,180"
+		],
+		[
+			"garrese",
+			"Garrese",
+			"560,250 700,290 705,350 590,350 590,300"
+		],
+		[
+			"spalla",
+			"Spalla",
+			"420,450 520,400 590,350 600,450 590,600 440,600 410,520"
+		],
+		[
+			"dorso",
+			"Dorso",
+			"705,295 960,305 960,380 705,370"
+		],
+		[
+			"lombi",
+			"Lombi",
+			"960,305 1080,310 1085,390 960,390"
+		],
+		[
+			"groppa",
+			"Groppa",
+			"1080,310 1180,330 1215,400 1230,460 1085,440"
+		],
+		[
+			"torace",
+			"Torace e costato",
+			"600,370 960,385 960,560 900,610 600,615"
+		],
+		[
+			"coscia",
+			"Coscia",
+			"1085,440 1230,460 1225,600 1190,700 1040,670 1000,560 1030,470"
+		],
+		[
+			"arto_ant",
+			"Arto anteriore",
+			"440,600 600,600 630,1030 420,1030"
+		],
+		[
+			"arto_post",
+			"Arto posteriore",
+			"960,600 1040,670 1190,700 1230,1030 940,1030"
+		]
+	];
+	var mpAreeVal = (v) => v && typeof v === "object" && !Array.isArray(v) ? v : {};
 	var MP_LAT = {
 		da: 200,
 		fino: 760,
@@ -4564,7 +4654,7 @@
 		modo: "segni"
 	};
 	var mpDisegno = (c) => c.modo === "denti" ? "denti" : c.modo === "zone" ? "lingua" : MP_SET[c.disegno] ? c.disegno : "cavallo";
-	var mpSet = (c) => MP_SET[mpDisegno(c)];
+	var mpSet = (c) => c.modo === "aree" ? MP_SET.aree : MP_SET[mpDisegno(c)];
 	var mpTipi = (c) => mpSet(c).tipi || MP_SET.cavallo.tipi;
 	var mpTipo1 = (c, t) => mpTipi(c).find((x) => x[0] === t) || mpTipi(c)[mpTipi(c).length - 1];
 	var mpVistaDi = (c, v) => mpSet(c).viste.find((x) => x[0] === v) || mpSet(c).viste[0];
@@ -4581,7 +4671,7 @@
 		attesaNome: null,
 		cerca: ""
 	};
-	var mpOggetto = (c) => c.modo === "denti" || c.modo === "zone";
+	var mpOggetto = (c) => c.modo === "denti" || c.modo === "zone" || c.modo === "aree";
 	var mpVal = (k) => {
 		const v = VS.visita?.dati?.[k];
 		return Array.isArray(v) ? v : [];
@@ -4704,6 +4794,23 @@
 			}).join("") + `<text x="${MP_LINGUA.lato_dx.x - 120}" y="1430" font-size="28" font-weight="700" fill="${GRIGIO}" font-family="Helvetica,Arial,sans-serif" pointer-events="none">DX</text>
         <text x="${MP_LINGUA.lato_sx.x + 80}" y="1430" font-size="28" font-weight="700" fill="${GRIGIO}" font-family="Helvetica,Arial,sans-serif" pointer-events="none">SX</text>`;
 		}
+		if (c.modo === "aree") {
+			const d = mpAreeVal(val), lato = vista === "dx" ? "dx" : "sx";
+			const pol = MP_AREE.map(([id, , pts]) => {
+				const v = Number(d[id + "|" + lato]) || 0;
+				return `<polygon class="mp-z" data-z="${id}" points="${pts}" fill="${!v ? "#FFFFFF" : c.scala ? MP_GRADI[Math.min(3, v)] : "#7FD1C9"}" fill-opacity="${v ? .55 : .01}" stroke="${GRIGIO}" stroke-width="2" stroke-opacity=".35" stroke-dasharray="10 8"/>`;
+			}).join("");
+			const nomi = MP_AREE.filter(([id]) => Number(d[id + "|" + lato]) > 0).map(([id, n, pts]) => {
+				const p = pts.split(" ").map((x) => x.split(",").map(Number));
+				const x = p.reduce((s, q) => s + q[0], 0) / p.length, y = p.reduce((s, q) => s + q[1], 0) / p.length, v = Number(d[id + "|" + lato]);
+				return {
+					x: o.spec ? 2 * cx + cw - x : x,
+					y,
+					t: n + (c.scala ? " " + v : "")
+				};
+			});
+			sopra = (o.spec ? `<g transform="translate(${2 * cx + cw},0) scale(-1,1)">${pol}</g>` : pol) + nomi.map((z) => scritta(z.x, z.y, z.t)).join("");
+		}
 		if (!mpOggetto(c)) {
 			const r = Math.round(Math.max(cw, ch) * .017);
 			segni = (Array.isArray(val) ? val : []).filter((p) => p.v === vista).map((p) => {
@@ -4735,6 +4842,7 @@
 		const c = mpCampo(k);
 		if (c.modo === "denti") return mpInternoDenti(k, sola);
 		if (c.modo === "zone") return mpInternoZone(k, sola);
+		if (c.modo === "aree") return mpInternoAree(k, sola);
 		const st = mpStato(k), l = mpVal(k), punti = c.modo === "punti", set = mpSet(c);
 		const conta = (v) => l.filter((p) => p.v === v).length;
 		const chip = (on, az, t, stile) => `<button type="button" class="vs-chip${on ? " on" : ""}" aria-pressed="${!!on}"${sola ? " disabled" : ""} onclick="${az}"${stile ? ` style="${stile}"` : ""}>${t}</button>`;
@@ -4897,6 +5005,30 @@
 	function mpOggettoSvuota(k) {
 		const st = mpStato(k), d = { ...mpObj(k) };
 		delete d[st.sel];
+		vsCambia(k, d);
+		mpRidisegna(k);
+	}
+	function mpInternoAree(k, sola) {
+		const c = mpCampo(k), st = mpStato(k), d = mpObj(k), lato = st.vista === "dx" ? "dx" : "sx", set = mpSet(c);
+		const conta = (v) => MP_AREE.filter(([id]) => Number(d[id + "|" + v]) > 0).length;
+		const viste = `<div class="mp-viste" role="tablist">${set.viste.map(([v, n]) => `<button type="button" role="tab" aria-selected="${st.vista === v}" class="${st.vista === v ? "on" : ""}" onclick="mpVista(${mpJs(k)}, '${v}')">${n}${conta(v) ? ` <b>${conta(v)}</b>` : ""}</button>`).join("")}</div>`;
+		const aiuto = sola ? "" : `<div class="mp-aiuto">${c.scala ? "Tocca un'area: ogni tocco aumenta la reattività 1 · 2 · 3, poi si spegne." : "Tocca le aree sul cavallo o nell'elenco: un tocco segna, un altro toglie."}</div>`;
+		const leg = c.scala ? `<div class="mp-leg">${[
+			1,
+			2,
+			3
+		].map((g) => `<span><i style="background:${MP_GRADI[g]}"></i>${MP_NOMI_GRADO[g]}</span>`).join("")}</div>` : "";
+		const chips = `<div class="vs-chips mp-aree">${MP_AREE.map(([id, n]) => {
+			const v = Number(d[id + "|" + lato]) || 0;
+			return `<button type="button" class="vs-chip${v ? " on" : ""}" aria-pressed="${!!v}"${sola ? " disabled" : ""} onclick="mpAreaTocca(${mpJs(k)}, '${id}')">${mpEsc(n)}${c.scala && v ? " · " + v : ""}</button>`;
+		}).join("")}</div>`;
+		return `${viste}${aiuto}<div class="mp-box${st.zoom ? " zoom" : ""}">${mpSvg(k)}</div>${leg}${chips}`;
+	}
+	function mpAreaTocca(k, id) {
+		const c = mpCampo(k), st = mpStato(k), chiave = id + "|" + (st.vista === "dx" ? "dx" : "sx"), d = { ...mpObj(k) };
+		const v = Number(d[chiave]) || 0, dopo = c.scala ? (v + 1) % 4 : v ? 0 : 1;
+		if (dopo) d[chiave] = dopo;
+		else delete d[chiave];
 		vsCambia(k, d);
 		mpRidisegna(k);
 	}
@@ -5133,6 +5265,7 @@
 					});
 					z = best;
 				}
+				if (z && c.modo === "aree") return mpAreaTocca(k, z);
 				if (z) {
 					mpStato(k).sel = z;
 					mpRidisegna(k);
@@ -5204,6 +5337,22 @@
 			const r = Object.keys(d).filter((n) => MP_DENTI[n] && (d[n].s?.length || d[n].nota)).sort().map((n) => n + " " + mpTestoDente(d[n]));
 			return r.length ? r.join("; ") : null;
 		}
+		if (c.modo === "aree") {
+			const d = mpAreeVal(v), r = [];
+			MP_AREE.forEach(([id, n]) => {
+				const s = Number(d[id + "|sx"]) || 0, x = Number(d[id + "|dx"]) || 0;
+				if (!s && !x) return;
+				if (c.scala) r.push(...[[s, "sx"], [x, "dx"]].filter((q) => q[0]).map(([g, l]) => ({
+					t: `${n} ${l} ${g}/3`,
+					g
+				})));
+				else r.push({
+					t: n + (s && x ? " (sx e dx)" : s ? " (sx)" : " (dx)"),
+					g: 0
+				});
+			});
+			return r.length ? r.sort((a, b) => b.g - a.g).map((q) => q.t).join(", ") : null;
+		}
 		if (c.modo === "zone") {
 			const d = v && typeof v === "object" && !Array.isArray(v) ? v : {};
 			const r = MP_ZONE.filter(([z]) => mpZonaPiena(d[z])).map(([z, n, org]) => `${n} (${org.replace(" / ", "/")}): ${mpTestoZona(d[z])}`);
@@ -5251,7 +5400,7 @@
 		for (const c of (VS.campi || []).filter((x) => x.t === "mappa")) {
 			const v = d[c.k];
 			if (mpTesto$1(c, v) == null && !(Array.isArray(v) && v.length)) continue;
-			const viste = mpOggetto(c) ? [mpSet(c).viste[0][0]] : mpSet(c).viste.map((x) => x[0]).filter((vi) => v.some((p) => p.v === vi));
+			const viste = c.modo === "aree" ? mpSet(c).viste.map((x) => x[0]).filter((vi) => Object.keys(mpAreeVal(v)).some((key) => key.endsWith("|" + vi) && Number(v[key]) > 0)) : mpOggetto(c) ? [mpSet(c).viste[0][0]] : mpSet(c).viste.map((x) => x[0]).filter((vi) => v.some((p) => p.v === vi));
 			for (const vi of viste) {
 				const g = mpGeo(c, vi), url = await mpSvgInImmagine(mpDisegnoSvg(c, v, vi, {
 					pdf: true,
@@ -5262,11 +5411,169 @@
 					url,
 					w: g.cw,
 					h: g.ch,
-					grande: mpOggetto(c)
+					grande: mpOggetto(c) && c.modo !== "aree"
 				});
 			}
 		}
 		return out;
+	}
+	// equo-app-src/src/ruoli/veterinario/moduli/15-punti.js
+	var VP_MERIDIANI = [
+		["LU", 11],
+		["LI", 20],
+		["ST", 45],
+		["SP", 21],
+		["HT", 9],
+		["SI", 19],
+		["BL", 67],
+		["KID", 27],
+		["PC", 9],
+		["TH", 23],
+		["GB", 44],
+		["LIV", 14],
+		["GV", 28],
+		["CV", 24]
+	];
+	var VP_CLASSICI = [
+		"Bai-hui",
+		"Wei-jian",
+		"Wei-gen",
+		"Er-jian",
+		"Tai-yang",
+		"Shan-gen",
+		"Long-hui",
+		"Da-feng-men",
+		"Jiu-wei",
+		"Hou-hai",
+		"Jiang-ya",
+		"Qian-chan-wan"
+	];
+	var VP = {};
+	var vpEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var vpJs = (s) => vpEsc(JSON.stringify(s));
+	var vpStato = (k) => VP[k] = VP[k] || {
+		mer: "BL",
+		cerca: ""
+	};
+	var vpVal = (k) => {
+		const v = VS.visita?.dati?.[k];
+		return Array.isArray(v) ? v : [];
+	};
+	var vpPuntiDi = (m) => m === "Classici" ? VP_CLASSICI : Array.from({ length: (VP_MERIDIANI.find((x) => x[0] === m) || [m, 0])[1] }, (_, i) => m + (i + 1));
+	var vpTutti = () => [...VP_MERIDIANI.flatMap(([m]) => vpPuntiDi(m)), ...VP_CLASSICI];
+	var vpNorm = (s) => String(s || "").trim().replace(/\s+/g, " ");
+	var vpChiaveUso = () => "equo-mtc-punti-uso-" + (currentUser?.id || "x");
+	function vpUso() {
+		try {
+			return JSON.parse(localStorage.getItem(vpChiaveUso()) || "{}") || {};
+		} catch (_) {
+			return {};
+		}
+	}
+	function vpContaUso(p) {
+		try {
+			const u = vpUso();
+			u[p] = (u[p] || 0) + 1;
+			localStorage.setItem(vpChiaveUso(), JSON.stringify(u));
+		} catch (_) {}
+	}
+	function vpPiuUsati() {
+		return Object.entries(vpUso()).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x) => x[0]);
+	}
+	function vpUltimi(k) {
+		for (const pr of VS.precedenti || []) {
+			const l = pr.dati && Array.isArray(pr.dati[k]) ? pr.dati[k] : [];
+			if (l.length) return l;
+		}
+		return [];
+	}
+	function vpCampoHtml$1(c, val, sola) {
+		return `<div class="vs-campo pieno vp" id="vp-${vpEsc(c.k)}"><span class="vs-lab">${vpEsc(c.e)}</span><div class="vp-dentro">${vpInterno(c.k, sola)}</div></div>`;
+	}
+	function vpInterno(k, sola) {
+		const st = vpStato(k), sel = vpVal(k), q = vpNorm(st.cerca), ql = q.toLowerCase();
+		const scelti = sel.length ? `<div class="vp-scelti">${sel.map((p) => `<button type="button" class="vp-p on"${sola ? " disabled" : ""} onclick="vpTocca(${vpJs(k)}, ${vpJs(p)})" aria-label="Togli ${vpEsc(p)}">${vpEsc(p)}${sola ? "" : " <i>×</i>"}</button>`).join("")}</div>` : `<div class="vp-vuoto">${sola ? "Nessun punto segnato." : "Nessun punto ancora: tocca i punti qui sotto."}</div>`;
+		if (sola) return scelti;
+		const ultimi = vpUltimi(k), usati = vpPiuUsati().filter((p) => !sel.includes(p));
+		const griglia = (l, cls) => `<div class="vp-griglia${cls ? " " + cls : ""}">${l.map((p) => `<button type="button" class="vp-p${sel.includes(p) ? " on" : ""}" aria-pressed="${sel.includes(p)}" onclick="vpTocca(${vpJs(k)}, ${vpJs(p)})">${vpEsc(p)}</button>`).join("")}</div>`;
+		const trovati = ql ? vpTutti().filter((p) => p.toLowerCase().replace("-", "").startsWith(ql.replace("-", "").replace(/\s/g, "")) || p.toLowerCase().includes(ql)).slice(0, 30) : [];
+		const nuovo = q && !vpTutti().some((p) => p.toLowerCase() === ql) && !sel.some((p) => p.toLowerCase() === ql);
+		return `${scelti}
+    <div class="vp-az">${ultimi.length ? `<button type="button" onclick="vpComeUltima(${vpJs(k)})">↺ Come l'ultima volta <small>${ultimi.length}</small></button>` : ""}
+      ${usati.length ? `<button type="button" class="${st.usati ? "on" : ""}" onclick="vpUsati(${vpJs(k)})">★ I miei più usati</button>` : ""}</div>
+    ${st.usati && usati.length ? griglia(usati, "usati") : ""}
+    <input class="vp-cerca" id="vp-cerca-${vpEsc(k)}" type="search" autocomplete="off" autocapitalize="characters" placeholder="Cerca o scrivi a mano: BL2, ST36, Bai-hui…" value="${vpEsc(st.cerca)}"
+      oninput="vpCerca(${vpJs(k)}, this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();vpAggiungiScritto(${vpJs(k)})}">
+    ${q ? `${trovati.length ? griglia(trovati) : ""}${nuovo ? `<button type="button" class="vp-nuovo" onclick="vpAggiungiScritto(${vpJs(k)})">+ Aggiungi «${vpEsc(q)}»</button>` : ""}` : `<div class="vp-mer" role="tablist">${[...VP_MERIDIANI.map((x) => x[0]), "Classici"].map((m) => {
+			const n = sel.filter((p) => vpPuntiDi(m).includes(p)).length;
+			return `<button type="button" role="tab" aria-selected="${st.mer === m}" class="${st.mer === m ? "on" : ""}" onclick="vpMeridiano(${vpJs(k)}, ${vpJs(m)})">${m}${n ? ` <b>${n}</b>` : ""}</button>`;
+		}).join("")}</div>
+         ${griglia(vpPuntiDi(st.mer))}`}`;
+	}
+	function vpRidisegna(k, fuoco) {
+		const box = document.querySelector(`#vp-${CSS.escape(k)} .vp-dentro`);
+		if (!box) return;
+		box.innerHTML = vpInterno(k, false);
+		if (fuoco) {
+			const i = document.getElementById("vp-cerca-" + k);
+			if (i) {
+				i.focus();
+				try {
+					i.setSelectionRange(i.value.length, i.value.length);
+				} catch (_) {}
+			}
+		}
+	}
+	function vpTocca(k, p) {
+		const l = vpVal(k).slice(), i = l.indexOf(p);
+		if (i >= 0) l.splice(i, 1);
+		else {
+			l.push(p);
+			vpContaUso(p);
+		}
+		vsCambia(k, l);
+		vpRidisegna(k);
+	}
+	function vpCerca(k, v) {
+		vpStato(k).cerca = v;
+		vpRidisegna(k, true);
+	}
+	function vpAggiungiScritto(k) {
+		const st = vpStato(k), q = vpNorm(st.cerca).slice(0, 30);
+		if (!q) return;
+		const comp = (x) => x.toLowerCase().replace(/[\s-]+/g, "");
+		const nome = vpTutti().find((p) => comp(p) === comp(q)) || (/^[a-z]+\s*\d+$/i.test(q) ? q.toUpperCase().replace(/\s+/g, "") : q);
+		const l = vpVal(k).slice();
+		if (!l.some((p) => p.toLowerCase() === nome.toLowerCase())) {
+			l.push(nome);
+			vpContaUso(nome);
+			vsCambia(k, l);
+		}
+		st.cerca = "";
+		vpRidisegna(k, true);
+	}
+	function vpMeridiano(k, m) {
+		const st = vpStato(k);
+		st.mer = m;
+		st.usati = false;
+		vpRidisegna(k);
+	}
+	function vpUsati(k) {
+		const st = vpStato(k);
+		st.usati = !st.usati;
+		vpRidisegna(k);
+	}
+	function vpComeUltima(k) {
+		const l = vpVal(k).slice();
+		vpUltimi(k).forEach((p) => {
+			if (!l.includes(p)) l.push(p);
+		});
+		vsCambia(k, l);
+		vpRidisegna(k);
+		showToast("Ripresi i punti dell'ultima visita: togli quelli che oggi non hai fatto");
+	}
+	function vpReset$1() {
+		Object.keys(VP).forEach((k) => delete VP[k]);
 	}
 	// equo-app-src/src/ruoli/veterinario/moduli/14-visita-aperta.js
 	var VAP = {
@@ -6500,6 +6807,20 @@
 		vsDemoPrepara,
 		VS,
 		VsDB,
+		VP,
+		VP_MERIDIANI,
+		VP_CLASSICI,
+		vpCampoHtml: vpCampoHtml$1,
+		vpInterno,
+		vpTocca,
+		vpCerca,
+		vpAggiungiScritto,
+		vpMeridiano,
+		vpUsati,
+		vpComeUltima,
+		vpReset: vpReset$1,
+		mpAreaTocca,
+		MP_AREE,
 		VAA,
 		VAP,
 		VAP_DECIDERE,

@@ -1,5 +1,5 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { agNomeCavalloSicuro, giorniRichiamoSuggeriti, giorniTra, loadClientiMascalcia, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, richiamoPerFatto } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
+import { agNomeCavalloSicuro, giorniRichiamoSuggeriti, giorniTra, loadClientiMascalcia, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, prendiModoScelto, richiamoPerFatto } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStruttura, isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { LAVORO_CAV, apriSchedaFerratura, descrFerraturaCavallo, tipoDaScheda } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 import { cavalliQuiStanno, iniziale, loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
@@ -14,6 +14,7 @@ import { apriPropostaStruttura } from "./055-appuntamenti-con-strutture-equo-scu
 import { cercaClienteIntervento } from "./087-2-scelta-del-cliente-nell-appuntamento.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { lcRender, lcTogli } from "./118-lista-cavalli-scadenze.js";
+import { pagSaldaConModo } from "./113-pagamenti-a-rate.js";
 import { creaCavalloUnico, creaClienteUnico, onbEmail, onbResetTipoAppuntamento, verificaNuovoCavallo, testoGiaPresente } from "./116-onboarding.js";
 /* ---------- FERRO (standard nella scheda del cavallo) E QUANTITÀ (rotella 1-4) ---------- */
 let ferroOverride = {};      // chiave cavallo → { s, n, origine } ferro diverso solo per questo appuntamento
@@ -569,7 +570,8 @@ async function salvaInterventoMascalcia(){
     const diventaFatto = stato === "fatto" && statoPrec !== "fatto";
 
     // diventa FATTO ora → un solo riquadro per tutti i cavalli: giorni del richiamo, importo di ogni cavallo, pagamento
-    let scadenzaComune = null, importi = null, ferriScelti = null;
+    let scadenzaComune = null, importi = null, ferriScelti = null, modoSaldato = null;
+    const daSaldareConModo = [];   // 4/11/2026: lavori «Saldato» con il metodo: il pagamento si registra dopo il salvataggio
     if(diventaFatto){
       const r0 = righe[0] || {};
       const rFerri = righe.filter(r => conFerri(r.tipo));
@@ -580,6 +582,7 @@ async function salvaInterventoMascalcia(){
         cavalli: righe.map(r => ({ nome: r.nome || "Intervento", cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, importo: interventoInModifica ? interventoInModifica.importo : null })) });
       if(TIPO_FERRATURA_INTERVALLI[tipo_ferratura]) scadenzaComune = ps;
       statoPagamento = prendiPagamentoScelto() || statoPagamento;
+      modoSaldato = statoPagamento === "saldato" && prendiModoScelto();
       importi = prendiImportiScelti();
       ferriScelti = prendiFerriScelti();
     }
@@ -627,14 +630,19 @@ async function salvaInterventoMascalcia(){
       const ferri_nuovi = !fr ? null : ferriScelti ? ferriScelti.nuovi : (interventoInModifica ? interventoInModifica.ferri_nuovi ?? null : null);
       const payload = { cavallo_cliente_id: r.cavallo_cliente_id, horse_id: r.horse_id, tipo_ferratura: tipoRiga, tipo_altro: tipoRiga === "altro" || eVeterinario() ? tipo_altro : null,
         misura_sistema: fr ? r.misura_sistema : null, numero_ferro: fr ? r.numero_ferro : null, quantita_ferri: quantitaRiga, ferri_nuovi,
-        data_intervento, ora, stato, prossima_scadenza, importo, stato_pagamento: statoPagamento, note,
+        data_intervento, ora, stato, prossima_scadenza, importo,
+        stato_pagamento: modoSaldato && Number(importo) > 0 && interventoInModifica?.stato_pagamento !== "saldato" ? (interventoInModifica?.stato_pagamento || "da_saldare") : statoPagamento, note,
         ...(typeof ofCampiAiutanteIntervento === "function" ? ofCampiAiutanteIntervento(interventoInModifica) : {}) };
-      const { error } = interventoInModifica
+      const ris = interventoInModifica
         ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload)
         : await DB.insertInterventoMascalcia({ cliente_mascalcia_id: r.cliente || cliente_mascalcia_id, ...payload });
+      const { error } = ris;
       if(error) return errore("Errore: " + error.message + (salvati ? ` (salvati ${salvati} su ${righe.length})` : ""));
       salvati++;
+      const idRiga = interventoInModifica ? interventoInModifica.id : ris.data?.id;
+      if(modoSaldato && idRiga && payload.stato_pagamento !== "saldato") daSaldareConModo.push({ id: idRiga, importo });
     }
+    for(const x of daSaldareConModo){ const rr = await pagSaldaConModo(x, modoSaldato); if(rr.error) showToast("Salvato, ma il pagamento non è registrato: " + rr.error.message); }
 
     closeModal("modal-add-intervento");
     const nomeCv = nomiCavalli;

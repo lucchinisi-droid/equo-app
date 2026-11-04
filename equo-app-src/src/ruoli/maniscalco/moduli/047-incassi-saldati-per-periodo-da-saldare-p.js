@@ -8,7 +8,7 @@ import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { wgRidisegna } from "./096-vista-applica-cambia-salva.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
 import { caricaContiAperti } from "./058-scheda-cliente-pulsante-elenco-dei-conti.js";
-import { pagCarica, pagHtmlLavoro, pagPagato, pagResiduo, pagVociIncasso } from "./113-pagamenti-a-rate.js";
+import { pagCarica, pagHtmlLavoro, pagPagato, pagResiduo, pagVociIncasso, pagNomeModo } from "./113-pagamenti-a-rate.js";
 /* ---------- INCASSI: Saldati (per periodo), Da saldare, Previsti ----------
    Saldati: conta il giorno del pagamento (saldato_il); per i saldati di prima del 9/10/2026 il giorno del lavoro.
    Piano Free: Oggi e Mese corrente; Settimana, Anno e date a scelta sono Premium. */
@@ -199,7 +199,7 @@ function renderIncassiSaldati(){
   const vis = incElencoTutto ? lista : lista.slice(0, 30);
   document.getElementById("inc-elenco").innerHTML = !lista.length ? '<div class="muted" style="font-size:13px">Nessun lavoro saldato nel periodo.</div>'
     : vis.map(i => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i._giorno || i.saldato_il ? " · " + (i._tranche ? "pagamento" : i._resto ? "saldo" : "pagato") + " " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i._giorno || i.saldato_il ? " · " + (i._tranche ? "pagamento" : i._resto ? "saldo" : "pagato") + " " + formatDataBreve(giornoPagamento(i)) : ""}${i._tranche?.modo ? " · " + escapeHtml(pagNomeModo(i._tranche.modo)) : ""}</span></div>
         <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("")
       + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
 }

@@ -78,3 +78,13 @@
 .inc-gruppo-az{display:flex;justify-content:flex-end;padding:0 0 4px}
 .inc-tutto{border:1px solid var(--border);background:transparent;color:var(--accent);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
 .inc-tutto:disabled{opacity:.5}
+
+/* 4/11/2026 · «Come ha pagato?»: metodo di pagamento sul «Saldato» veloce e nel riquadro del «Fatto» (113, 032) */
+.pag-modo-sotto{color:var(--muted);font-size:13px;line-height:1.45;margin:-4px 0 12px}
+.pag-modo-lista{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pag-modo-bt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border:1.5px solid var(--border);background:var(--card);color:var(--text);border-radius:14px;padding:10px;font:inherit;font-size:15px;cursor:pointer}
+.pag-modo-bt.ult{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.pag-modo-bt small{font-size:11px;font-weight:600;color:var(--muted)}
+.pag-modo-annulla{width:100%;margin-top:12px}
+.ric-pag-modi{margin:10px 0 2px}
+.ric-pag-modi > span{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}

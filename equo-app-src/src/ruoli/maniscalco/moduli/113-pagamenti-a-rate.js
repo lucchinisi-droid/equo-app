@@ -327,4 +327,55 @@ function pagDemoRegistra(t, importo, data, modo, nota){
   return { data: { ok: true, saldato: tutto }, error: null };
 }
 
+/* ---------- «SALDATO» CON IL METODO DI PAGAMENTO (4/11/2026, Simone) ----------
+   Solo un appunto per ricordarsi come ha pagato il cliente (contanti, bonifico, POS, assegno, altro).
+   Il «Saldato» veloce (Incassi, Tutto saldato, Agenda · Da saldare, riquadro del «Fatto») chiede il metodo e registra
+   tutto quello che resta come UN pagamento in incassi_tranche (stessa funzione di «Registra pagamento»): il metodo
+   si vede nei pagamenti ricevuti e nell'elenco dei saldati. Senza importo resta il vecchio «saldato» senza metodo.
+   L'ultimo metodo usato si ripropone (solo su questo telefono). */
+const PAG_MODO_MEM = "equo-pag-modo";
+function pagModoUltimo(){ try{ const m = localStorage.getItem(PAG_MODO_MEM); return PAG_MODI.some(x => x[0] === m) ? m : "contanti"; }catch(_){ return "contanti"; } }
+function pagModoRicorda(m){ try{ if(m) localStorage.setItem(PAG_MODO_MEM, m); }catch(_){} }
+function pagNomeModo(k){ return nomeModo(k); }
+// chip dei metodi (riquadro del «Fatto»)
+function pagModiHtml(scelto, onclick){
+  return PAG_MODI.map(([k, n]) => `<button type="button" class="pag-chip${scelto === k ? " on" : ""}" aria-pressed="${scelto === k}" onclick="${onclick}('${k}')">${n}</button>`).join("");
+}
+let pagModoRisolvi = null;
+// «Come ha pagato?»: un tocco sul metodo = saldato; null = annullato
+function pagChiediModo(titolo, sotto){
+  if(pagModoRisolvi){ const f = pagModoRisolvi; pagModoRisolvi = null; f(null); }
+  let ov = document.getElementById("modal-pag-modo");
+  if(!ov){
+    ov = document.createElement("div"); ov.className = "modal-overlay"; ov.id = "modal-pag-modo"; ov.setAttribute("data-senza-x", "");
+    ov.onclick = ev => { if(ev.target === ov) pagModoScegli(null); };
+    ov.innerHTML = '<div class="modal pag-modo-modal" role="dialog" aria-modal="true" aria-labelledby="pag-modo-tit"><div class="modal-handle"></div><div id="pag-modo-corpo"></div></div>';
+    document.body.appendChild(ov);
+  }
+  const ult = pagModoUltimo();
+  document.getElementById("pag-modo-corpo").innerHTML = `<div class="modal-title" id="pag-modo-tit">${escapeHtml(titolo || "Come ha pagato?")}</div>
+    ${sotto ? `<div class="pag-modo-sotto">${escapeHtml(sotto)}</div>` : ""}
+    <div class="pag-modo-lista">${PAG_MODI.map(([k, n]) => `<button type="button" class="pag-modo-bt${k === ult ? " ult" : ""}" onclick="pagModoScegli('${k}')"><b>${n}</b>${k === ult ? "<small>ultimo usato</small>" : ""}</button>`).join("")}</div>
+    <button type="button" class="btn btn-outline pag-modo-annulla" onclick="pagModoScegli(null)">Annulla</button>`;
+  openModal("modal-pag-modo");
+  return new Promise(res => { pagModoRisolvi = res; });
+}
+function pagModoScegli(m){ closeModal("modal-pag-modo"); const f = pagModoRisolvi; pagModoRisolvi = null; if(m) pagModoRicorda(m); if(f) f(m || null); }
+// segna saldato un lavoro con il metodo: registra quello che resta come un pagamento (o il vecchio «saldato» se non c'è importo)
+async function pagSaldaConModo(i, modo){
+  if(typeof i === "string") i = (typeof incTutti !== "undefined" && (incTutti || []).find(x => x.id === i)) || await pagLeggiIntervento(i);
+  if(!i) return { error: { message: "Lavoro non trovato" } };
+  await pagCarica();
+  const resto = r2((Number(i.importo) || 0) - pagPagato(i.id));
+  if(modo && Number(i.importo) > 0 && resto > 0.005){
+    const { error } = await PagDB.registra({ tipo: "lavoro", id: i.id }, resto, oggiIso(), modo, null);
+    if(!error) pagModoRicorda(modo);
+    return { error };
+  }
+  const { error } = await DB.updateInterventoMascalcia(i.id, { stato_pagamento: "saldato" });
+  if(!error && DEMO_MODE){ const d = (demoState.interventiMascalcia || []).find(x => x.id === i.id); if(d) d.saldato_il = new Date().toISOString(); }
+  return { error };
+}
+
+export { pagModoUltimo, pagModoRicorda, pagNomeModo, pagModiHtml, pagChiediModo, pagModoScegli, pagSaldaConModo };
 export { pagApri, pagApriRate, pagCarica, pagElimina, pagHtmlConto, pagHtmlLavoro, pagImporto, pagNumeroRate, pagPagato, pagPagatoConto, pagRegistra, pagRender, pagResiduo, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate, pagVociIncasso };

@@ -3152,6 +3152,1031 @@
 		showToast(msg);
 		tcRenderHome();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/057-pdf-appuntamento-invio-in-chat-maniscalc.js
+	var jsPdfPromise = null;
+	function caricaJsPdf() {
+		if (window.jspdf?.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+		if (!jsPdfPromise) jsPdfPromise = new Promise((resolve, reject) => {
+			const sc = document.createElement("script");
+			sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+			sc.onload = () => window.jspdf?.jsPDF ? resolve(window.jspdf.jsPDF) : reject(/* @__PURE__ */ new Error("jsPDF non disponibile"));
+			sc.onerror = () => {
+				jsPdfPromise = null;
+				reject(/* @__PURE__ */ new Error("impossibile scaricare la libreria PDF (sei offline?)"));
+			};
+			document.head.appendChild(sc);
+		});
+		return jsPdfPromise;
+	}
+	function pdfNomeFile(e) {
+		const pulisci = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+		return [
+			"Equo",
+			pulisci(e.clienti_mascalcia?.nome),
+			pulisci(agNomeCavallo(e)),
+			e.data_intervento
+		].filter(Boolean).join("_") + ".pdf";
+	}
+	function testoRiepilogoEvento(e) {
+		const [y, m, d] = e.data_intervento.split("-").map(Number);
+		const quando = `${AG_GIORNI[(new Date(y, m - 1, d).getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " ore " + String(e.ora).slice(0, 5) : ""}`;
+		const cav = agNomeCavallo(e);
+		const parti = [(e.stato === "fatto" ? "Intervento del " : "Appuntamento: ") + quando, (cav ? cav + " — " : "") + agDescrizioneTipo(e)];
+		if (e.importo != null) parti.push(contoEuro(e.importo) + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
+		if (e.aiutante_nome) parti.push(e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `con l'aiutante ${e.aiutante_nome}`);
+		return parti.join(" · ");
+	}
+	async function creaPdfEvento(e) {
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const W = 210, M = 18;
+		const verde = [
+			20,
+			49,
+			42
+		], oro = [
+			201,
+			143,
+			46
+		], grigio = [
+			95,
+			111,
+			103
+		];
+		doc.setFillColor(...verde);
+		doc.rect(0, 0, W, 32, "F");
+		doc.setTextColor(255, 255, 255);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(22);
+		doc.text("Equo", M, 20);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.text("Prenditi cura del tuo cavallo", M, 26);
+		doc.setFontSize(10);
+		doc.text((/* @__PURE__ */ new Date()).toLocaleDateString("it-IT"), 192, 20, { align: "right" });
+		doc.setFillColor(...oro);
+		doc.rect(0, 32, W, 1.5, "F");
+		let y = 48;
+		doc.setTextColor(...verde);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(17);
+		doc.text(e.stato === "fatto" ? "Riepilogo intervento" : "Conferma appuntamento", M, y);
+		if (agNomeCavallo(e)) {
+			y += 9;
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(20);
+			doc.setTextColor(...oro);
+			doc.text(agNomeCavallo(e), M, y);
+		}
+		y += 6;
+		const professionista = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "";
+		if (professionista) {
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...grigio);
+			doc.text(etichettaPro() + ": " + professionista + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y + 2);
+			y += 6;
+		}
+		y += 6;
+		const [yy, mm, dd] = e.data_intervento.split("-").map(Number);
+		const dataTxt = `${[
+			"Lunedì",
+			"Martedì",
+			"Mercoledì",
+			"Giovedì",
+			"Venerdì",
+			"Sabato",
+			"Domenica"
+		][(new Date(yy, mm - 1, dd).getDay() + 6) % 7]} ${dd} ${AG_MESI_LUNGHI[mm - 1]} ${yy}`;
+		let tipoTxt = TIPO_FERRATURA_LABELS[e.tipo_ferratura] || e.tipo_ferratura || "";
+		if (e.tipo_ferratura === "altro" && e.tipo_altro) tipoTxt = "Altro — " + e.tipo_altro;
+		let misuraTxt = "";
+		if (e.numero_ferro) {
+			const sis = e.misura_sistema || "italiana";
+			const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(misuraNorm(e.numero_ferro)) : -1;
+			misuraTxt = misuraNorm(e.numero_ferro) + " (" + {
+				italiana: "italiana",
+				olandese: "olandese",
+				tedesca: "tedesca"
+			}[sis] + ")";
+			if (idx >= 0) misuraTxt += " — italiana " + MISURE_FERRO.italiana[idx] + " · olandese " + MISURE_FERRO.olandese[idx] + " · tedesca " + MISURE_FERRO.tedesca[idx];
+		}
+		const righe = [
+			["Cavallo", agNomeCavallo(e) || "—"],
+			["Cliente", e.clienti_mascalcia?.nome || "—"],
+			["Data", dataTxt],
+			["Ora", e.ora ? String(e.ora).slice(0, 5) : "—"],
+			["Tipo intervento", tipoTxt],
+			misuraTxt ? ["Misura ferro", misuraTxt] : null,
+			e.quantita_ferri ? ["Quantità ferri", String(e.quantita_ferri)] : null,
+			["Importo", e.importo != null ? contoEuro(e.importo) : "—"],
+			["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
+			["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
+			e.aiutante_nome ? ["Aiutante", e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `Con l'aiutante ${e.aiutante_nome}`] : null,
+			e.prossima_scadenza && e.stato === "fatto" ? ["Prossimo intervento consigliato", (/* @__PURE__ */ new Date(e.prossima_scadenza + "T00:00")).toLocaleDateString("it-IT")] : null,
+			e.note ? ["Note", e.note] : null
+		].filter(Boolean);
+		doc.setFontSize(11);
+		righe.forEach(([k, v], idx) => {
+			const valore = doc.splitTextToSize(String(v), 112);
+			const h = Math.max(9, valore.length * 5.2 + 3.8);
+			if (idx % 2 === 0) {
+				doc.setFillColor(248, 246, 240);
+				doc.rect(M, y - 5.6, 174, h, "F");
+			}
+			doc.setFont("helvetica", "bold");
+			doc.setTextColor(...grigio);
+			doc.text(k, 21, y);
+			doc.setFont("helvetica", "normal");
+			doc.setTextColor(...verde);
+			doc.text(valore, 80, y);
+			y += h;
+		});
+		if (e.stato_pagamento !== "saldato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
+			y += 8;
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...verde);
+			doc.text("Dati per il pagamento", M, y);
+			y += 7;
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...grigio);
+			if (currentUser.datiPagamentoNome) {
+				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoIban) {
+				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
+				y += 6;
+			}
+			if (currentUser.datiPagamentoPaypal) {
+				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
+				y += 6;
+			}
+		}
+		const piede = () => {
+			doc.setDrawColor(227, 221, 204);
+			doc.setLineWidth(.2);
+			doc.line(M, 280, 192, 280);
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(8.5);
+			doc.setTextColor(...grigio);
+			doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
+		};
+		y = riquadroInvitoPdf(doc, (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === e.cliente_mascalcia_id), y + 4, W, M, () => {
+			piede();
+			doc.addPage();
+			return 22;
+		});
+		piede();
+		const nome = pdfNomeFile(e);
+		return {
+			blob: doc.output("blob"),
+			nome
+		};
+	}
+	async function generaPdfEvento(e) {
+		closeModal("modal-azioni-evento");
+		showToast("Creo il PDF…");
+		try {
+			const { blob, nome } = await creaPdfEvento(e);
+			const file = new File([blob], nome, { type: "application/pdf" });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
+				await navigator.share({
+					files: [file],
+					title: nome
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = nome;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 3e4);
+		} catch (err) {
+			console.error("generaPdfEvento:", err);
+			showToast("Impossibile creare il PDF: " + (err?.message || err));
+		}
+	}
+	async function inviaEventoInChat(e) {
+		closeModal("modal-azioni-evento");
+		await openChatThread(e.cliente_mascalcia_id);
+		document.getElementById("mchat-input").value = testoRiepilogoEvento(e);
+		chatAllegatoEvento = e;
+		document.getElementById("mchat-allegato-nome").textContent = pdfNomeFile(e);
+		document.getElementById("mchat-allegato").classList.add("active");
+	}
+	function rimuoviAllegatoChat() {
+		chatAllegatoEvento = null;
+		const el = document.getElementById("mchat-allegato");
+		if (el) el.classList.remove("active");
+	}
+	var contoCodice = (c) => "C-" + c.anno + "-" + String(c.numero).padStart(3, "0");
+	var contoLavori = (n) => n + (n === 1 ? " lavoro" : " lavori");
+	var contoEuro = (n) => formatEuro(n, { decimali: true });
+	var contoData = (iso) => {
+		const [y, m, d] = String(iso).slice(0, 10).split("-");
+		return `${d}/${m}/${y}`;
+	};
+	var ContoDB = {
+		async lavoriLiberi(clienteId) {
+			let righe, usati = /* @__PURE__ */ new Set();
+			if (DEMO_MODE) {
+				righe = demoState.interventiMascalcia.filter((i) => i.cliente_mascalcia_id === clienteId || i.luogo_cliente_id === clienteId).map((i) => ({
+					...i,
+					cavalli_clienti_mascalcia: demoState.cavalliClientiMascalcia.find((x) => x.id === i.cavallo_cliente_id) ? { nome: demoState.cavalliClientiMascalcia.find((x) => x.id === i.cavallo_cliente_id).nome } : null
+				}));
+				(demoState.conti || []).filter((c) => c.stato !== "annullato").forEach((c) => c.righe.forEach((r) => usati.add(r.intervento_id)));
+			} else {
+				const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome)").eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`).order("data_intervento", { ascending: true });
+				if (error) {
+					console.error("lavoriLiberi:", error);
+					return [];
+				}
+				righe = data || [];
+				const ids = righe.map((r) => r.id);
+				if (ids.length) ((await sb.from("conti_mascalcia_righe").select("intervento_id, conti_mascalcia!inner(stato)").in("intervento_id", ids).neq("conti_mascalcia.stato", "annullato")).data || []).forEach((r) => usati.add(r.intervento_id));
+			}
+			return righe.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0 && !usati.has(i.id));
+		},
+		async crea(clienteId, modo, da, a, righe) {
+			if (DEMO_MODE) {
+				demoState.conti = demoState.conti || [];
+				const anno = (/* @__PURE__ */ new Date()).getFullYear();
+				const numero = demoState.conti.filter((c) => c.anno === anno).length + 1;
+				const c = {
+					id: "dc-" + Date.now().toString(36) + numero,
+					cliente_mascalcia_id: clienteId,
+					anno,
+					numero,
+					modo,
+					periodo_da: da,
+					periodo_a: a,
+					stato: "da_incassare",
+					creato_il: (/* @__PURE__ */ new Date()).toISOString(),
+					righe: righe.map((r) => {
+						const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
+						return {
+							...r,
+							data_intervento: i.data_intervento,
+							importo: Number(i.importo)
+						};
+					})
+				};
+				c.totale = c.righe.reduce((s, r) => s + r.importo, 0);
+				c.n_lavori = c.righe.length;
+				demoState.conti.push(c);
+				return {
+					data: {
+						id: c.id,
+						anno,
+						numero,
+						totale: c.totale,
+						n_lavori: c.n_lavori
+					},
+					error: null
+				};
+			}
+			const { data, error } = await sb.rpc("equo_crea_conto", {
+				p_cliente: clienteId,
+				p_modo: modo,
+				p_da: da || null,
+				p_a: a || null,
+				p_righe: righe
+			});
+			if (error) console.error("equo_crea_conto:", error);
+			return {
+				data,
+				error
+			};
+		},
+		async lista(clienteId) {
+			if (DEMO_MODE) return (demoState.conti || []).filter((c) => c.cliente_mascalcia_id === clienteId).sort((a, b) => b.creato_il.localeCompare(a.creato_il));
+			const { data, error } = await sb.from("conti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).eq("cliente_mascalcia_id", clienteId).order("creato_il", { ascending: false }).limit(30);
+			if (error) {
+				console.error("lista conti:", error);
+				return [];
+			}
+			return data || [];
+		},
+		async aperti(clienteId) {
+			if (DEMO_MODE) return (demoState.conti || []).filter((c) => c.stato === "da_incassare" && (!clienteId || c.cliente_mascalcia_id === clienteId)).sort((a, b) => a.creato_il.localeCompare(b.creato_il));
+			let q = sb.from("conti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).eq("stato", "da_incassare");
+			if (clienteId) q = q.eq("cliente_mascalcia_id", clienteId);
+			const { data, error } = await q.order("creato_il", { ascending: true }).limit(100);
+			if (error) {
+				console.error("conti aperti:", error);
+				return [];
+			}
+			return data || [];
+		},
+		async completo(id) {
+			if (DEMO_MODE) return (demoState.conti || []).find((c) => c.id === id) || null;
+			const [c, r] = await Promise.all([sb.from("conti_mascalcia").select("*").eq("id", id).single(), sb.from("conti_mascalcia_righe").select("*").eq("conto_id", id).order("proprietario_nome").order("data_intervento")]);
+			if (c.error || !c.data) return null;
+			return {
+				...c.data,
+				righe: r.data || []
+			};
+		},
+		async pagato(id) {
+			if (DEMO_MODE) {
+				const c = demoState.conti.find((x) => x.id === id);
+				c.stato = "pagato";
+				c.pagato_il = (/* @__PURE__ */ new Date()).toISOString();
+				c.righe.forEach((r) => {
+					const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
+					if (i) {
+						i.stato_pagamento = "saldato";
+						i.saldato_il = c.pagato_il;
+					}
+				});
+				return { error: null };
+			}
+			const { error } = await sb.rpc("equo_conto_pagato", { p_conto: id });
+			if (error) console.error("equo_conto_pagato:", error);
+			return { error };
+		},
+		async annulla(id) {
+			if (DEMO_MODE) {
+				const c = demoState.conti.find((x) => x.id === id);
+				c.stato = "annullato";
+				c.annullato_il = (/* @__PURE__ */ new Date()).toISOString();
+				return { error: null };
+			}
+			const { error } = await sb.rpc("equo_conto_annulla", { p_conto: id });
+			if (error) console.error("equo_conto_annulla:", error);
+			return { error };
+		}
+	};
+	// equo-app-src/src/ruoli/maniscalco/moduli/058-scheda-cliente-pulsante-elenco-dei-conti.js
+	async function caricaContiCliente(clienteId) {
+		const box = document.getElementById("cliente-conti-box");
+		if (!box) return;
+		if (incassiNascosti()) {
+			box.innerHTML = "";
+			return;
+		}
+		const [lista] = await Promise.all([ContoDB.lista(clienteId), pagCarica()]);
+		if (currentClienteId !== clienteId) return;
+		const badge = (s, id) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : pagPagatoConto(id) > 0 ? "<span class=\"badge\" style=\"color:var(--accent)\">Acconto</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
+		box.innerHTML = `<div class="card" style="margin:14px 0">
+    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
+      <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
+    ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map((c) => `
+      <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
+        <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
+        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato, c.id)}</div></div>
+      </div>`).join("") : ""}
+  </div>`;
+	}
+	function htmlContiAperti(lista, conCliente) {
+		if (!lista || !lista.length) return "";
+		const tot = lista.reduce((t, c) => t + Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)), 0);
+		return `<div class="conti-aperti">
+    <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
+    ${lista.map((c) => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
+      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId$1(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small>${pagHtmlConto(c)}</span>
+      <span class="e">${contoEuro(Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)))}<small>Apri</small></span></button>`).join("")}
+  </div>`;
+	}
+	async function caricaContiAperti(boxId) {
+		const box = document.getElementById(boxId);
+		if (!box) return;
+		if (incassiNascosti()) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = htmlContiAperti(await ContoDB.aperti(), true);
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/113-pagamenti-a-rate.js
+	var PAG_MODI = [
+		["contanti", "Contanti"],
+		["bonifico", "Bonifico"],
+		["pos", "POS"],
+		["assegno", "Assegno"],
+		["altro", "Altro"]
+	];
+	var pagTranche = [];
+	var pagRate = [];
+	var pag = null;
+	var r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+	var pagEuro = (n) => formatEuro(n);
+	var oggiIso$1 = () => isoLocale(/* @__PURE__ */ new Date());
+	var nomeModo = (k) => (PAG_MODI.find((m) => m[0] === k) || [k, k])[1];
+	async function pagCarica() {
+		if (DEMO_MODE) {
+			demoState.tranche = demoState.tranche || [];
+			demoState.rate = demoState.rate || [];
+			pagTranche = demoState.tranche;
+			pagRate = demoState.rate;
+			return;
+		}
+		if (!currentUser) return;
+		const [t, r] = await Promise.all([sb.from("incassi_tranche").select("*").eq("professionista_id", currentUser.id).order("pagato_il", { ascending: true }).limit(5e3), sb.from("incassi_rate").select("*").eq("professionista_id", currentUser.id).order("n", { ascending: true }).limit(2e3)]);
+		if (t.error && !/does not exist|schema cache/i.test(t.error.message || "")) console.warn("incassi_tranche:", t.error.message);
+		pagTranche = t.error ? [] : t.data || [];
+		pagRate = r.error ? [] : r.data || [];
+	}
+	function pagTrancheDi(interventoId) {
+		return pagTranche.filter((t) => t.intervento_id === interventoId);
+	}
+	function pagPagato(interventoId) {
+		return r2(pagTrancheDi(interventoId).reduce((s, t) => s + Number(t.importo), 0));
+	}
+	function pagResiduo(i) {
+		return Math.max(0, r2((Number(i?.importo) || 0) - pagPagato(i?.id)));
+	}
+	function pagPagatoConto(contoId) {
+		return r2(pagTranche.filter((t) => t.conto_id === contoId).reduce((s, t) => s + Number(t.importo), 0));
+	}
+	function pagRateDi(interventoId, contoId) {
+		return pagRate.filter((r) => interventoId ? r.intervento_id === interventoId : r.conto_id === contoId).sort((a, b) => a.n - b.n);
+	}
+	function pagPiano(rate, pagato) {
+		if (!rate || !rate.length) return null;
+		let cum = 0, pagate = 0, prossima = null;
+		for (const r of rate) {
+			cum = r2(cum + Number(r.importo));
+			if (cum <= pagato + .005) pagate++;
+			else if (!prossima) prossima = {
+				n: r.n,
+				importo: r2(cum - pagato),
+				scadenza: r.scadenza
+			};
+		}
+		return {
+			rate: rate.length,
+			pagate,
+			prossima
+		};
+	}
+	function pagPianoIntervento(i) {
+		return pagPiano(pagRateDi(i.id), pagPagato(i.id));
+	}
+	function pagPianoConto(c) {
+		return pagPiano(pagRateDi(null, c.id), pagPagatoConto(c.id));
+	}
+	function pagVociIncasso(lista) {
+		const perInt = /* @__PURE__ */ new Map();
+		pagTranche.forEach((t) => {
+			if (!perInt.has(t.intervento_id)) perInt.set(t.intervento_id, []);
+			perInt.get(t.intervento_id).push(t);
+		});
+		const out = [];
+		(lista || []).forEach((i) => {
+			const tr = perInt.get(i.id) || [];
+			tr.forEach((t) => out.push({
+				...i,
+				importo: Number(t.importo),
+				_giorno: t.pagato_il,
+				_tranche: t
+			}));
+			if (i.stato === "fatto" && i.stato_pagamento === "saldato") {
+				if (!tr.length) out.push(i);
+				else {
+					const resto = r2((Number(i.importo) || 0) - tr.reduce((s, t) => s + Number(t.importo), 0));
+					if (resto > .005) out.push({
+						...i,
+						importo: resto,
+						_resto: true
+					});
+				}
+			}
+		});
+		return out;
+	}
+	function pagHtmlLavoro(i) {
+		const pagato = pagPagato(i.id), tot = Number(i.importo) || 0, piano = pagPianoIntervento(i);
+		let h = `<button type="button" class="pag-link" onclick="pagApri('${i.id}')">${pagato > 0 || piano ? "Pagamenti e rate" : "Acconto o rate"} ›</button>`;
+		if (pagato > 0 && tot > 0) h += `<span class="pag-barra" role="progressbar" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${pagato}"><i style="width:${Math.min(100, pagato / tot * 100).toFixed(1)}%"></i></span>
+    <span class="pag-nota">Acconto: pagati ${pagEuro(pagato)} di ${pagEuro(tot)}${piano ? ` · ${piano.pagate} ${piano.pagate === 1 ? "rata" : "rate"} su ${piano.rate}` : ""}</span>`;
+		else if (piano) h += `<span class="pag-nota">${piano.rate} rate · nessuna ancora pagata</span>`;
+		if (piano?.prossima) h += pagHtmlProssima(piano.prossima, `'${i.id}', null`);
+		return h;
+	}
+	function pagHtmlProssima(p, args) {
+		const oggi = oggiIso$1();
+		if (p.scadenza < oggi) {
+			const gg = Math.round((/* @__PURE__ */ new Date(oggi + "T12:00") - /* @__PURE__ */ new Date(p.scadenza + "T12:00")) / 864e5);
+			return `<span class="pag-scaduta"><span>Rata ${p.n} scaduta da ${gg} ${gg === 1 ? "giorno" : "giorni"} · ${pagEuro(p.importo)}</span><button type="button" onclick="pagSollecita(${args}, this)">Promemoria</button></span>`;
+		}
+		return `<span class="pag-nota">Prossima rata: ${pagEuro(p.importo)} entro il ${formatDataBreve(p.scadenza)}</span>`;
+	}
+	function pagHtmlConto(c) {
+		const pagato = pagPagatoConto(c.id), piano = pagPianoConto(c);
+		if (!(pagato > 0) && !piano) return "";
+		const tot = Number(c.totale) || 0;
+		return `<small class="pag-conto">${pagato > 0 ? `Pagati ${pagEuro(pagato)} di ${pagEuro(tot)}` : ""}${pagato > 0 && piano ? " · " : ""}${piano ? `${piano.pagate} rate su ${piano.rate}${piano.prossima ? " · prossima " + formatDataBreve(piano.prossima.scadenza) : ""}` : ""}</small>`;
+	}
+	async function pagApri(interventoId, contoId) {
+		await pagCarica();
+		let t;
+		if (contoId) {
+			const c = await ContoDB.completo(contoId);
+			if (!c) {
+				showToast("Conto non trovato");
+				return;
+			}
+			const pagato = pagPagatoConto(c.id);
+			t = {
+				tipo: "conto",
+				id: c.id,
+				titolo: "Conto " + contoCodice(c),
+				sotto: (clientiMascalcia.find((x) => x.id === c.cliente_mascalcia_id)?.nome || "") + " · " + c.n_lavori + (c.n_lavori === 1 ? " lavoro" : " lavori"),
+				totale: Number(c.totale) || 0,
+				pagato,
+				residuo: Math.max(0, r2((Number(c.totale) || 0) - pagato)),
+				aperto: c.stato === "da_incassare",
+				storico: pagStorico(pagTranche.filter((x) => x.conto_id === c.id)),
+				rate: pagRateDi(null, c.id)
+			};
+		} else {
+			const i = (incTutti || []).find((x) => x.id === interventoId) || await pagLeggiIntervento(interventoId);
+			if (!i) {
+				showToast("Lavoro non trovato");
+				return;
+			}
+			if (!(Number(i.importo) > 0)) {
+				showToast("Scrivi prima l'importo del lavoro");
+				return;
+			}
+			const pagato = pagPagato(i.id);
+			t = {
+				tipo: "lavoro",
+				id: i.id,
+				titolo: [i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · ") || "Lavoro",
+				sotto: (i.clienti_mascalcia?.nome || clientiMascalcia.find((x) => x.id === i.cliente_mascalcia_id)?.nome || "") + " · " + formatDataBreve(i.data_intervento),
+				totale: Number(i.importo),
+				pagato,
+				residuo: pagResiduo(i),
+				aperto: i.stato_pagamento !== "saldato",
+				storico: pagStorico(pagTrancheDi(i.id)),
+				rate: pagRateDi(i.id)
+			};
+		}
+		const piano = pagPiano(t.rate, t.pagato);
+		pag = {
+			t,
+			importo: piano?.prossima ? Math.min(piano.prossima.importo, t.residuo) : t.residuo,
+			data: oggiIso$1(),
+			modo: "contanti",
+			nota: "",
+			rateAperte: false,
+			nRate: 2,
+			righe: null
+		};
+		pagRender();
+		openModal("modal-pagamento");
+	}
+	async function pagLeggiIntervento(id) {
+		if (DEMO_MODE) return (demoState.interventiMascalcia || []).find((x) => x.id === id) || null;
+		const { data } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)").eq("id", id).maybeSingle();
+		return data || null;
+	}
+	function pagStorico(lista) {
+		const g = /* @__PURE__ */ new Map();
+		lista.forEach((x) => {
+			const k = x.gruppo || x.id;
+			if (!g.has(k)) g.set(k, {
+				gruppo: k,
+				importo: 0,
+				pagato_il: x.pagato_il,
+				modo: x.modo,
+				nota: x.nota
+			});
+			g.get(k).importo = r2(g.get(k).importo + Number(x.importo));
+		});
+		return [...g.values()].sort((a, b) => a.pagato_il.localeCompare(b.pagato_il));
+	}
+	function pagDividi(totale, n, primaData) {
+		const base = Math.floor(totale / n * 100) / 100, righe = [];
+		for (let k = 0; k < n; k++) righe.push({
+			importo: k === n - 1 ? r2(totale - base * (n - 1)) : base,
+			scadenza: pagMesiDopo(primaData, k)
+		});
+		return righe;
+	}
+	function pagMesiDopo(iso, n) {
+		const d = /* @__PURE__ */ new Date(iso + "T12:00");
+		const g = d.getDate();
+		d.setDate(1);
+		d.setMonth(d.getMonth() + n);
+		d.setDate(Math.min(g, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+		return isoLocale(d);
+	}
+	function pagRestoDopo() {
+		return Math.max(0, r2(pag.t.residuo - (Number(pag.importo) || 0)));
+	}
+	function pagRender() {
+		const t = pag.t, el = document.getElementById("pag-corpo");
+		document.getElementById("pag-titolo").textContent = t.titolo;
+		const piano = pagPiano(t.rate, t.pagato);
+		const chip = (on, onclick, testo) => `<button type="button" class="pag-chip${on ? " on" : ""}" onclick="${onclick}">${testo}</button>`;
+		let h = `<div class="pag-testa"><span>${escapeHtml(t.sotto)}</span><b>Totale ${pagEuro(t.totale)}</b></div>`;
+		if (t.pagato > 0) h += `<div class="pag-testa"><span>Già pagati ${pagEuro(t.pagato)}</span><b>Restano ${pagEuro(t.residuo)}</b></div>
+    <span class="pag-barra"><i style="width:${Math.min(100, t.pagato / (t.totale || 1) * 100).toFixed(1)}%"></i></span>`;
+		if (t.aperto && t.residuo > 0) {
+			h += `<div class="input-group"><label class="input-label" for="pag-importo">Importo ricevuto</label>
+        <input class="input pag-imp" id="pag-importo" type="number" inputmode="decimal" min="0" step="0.01" value="${pag.importo}" oninput="pagImporto(this.value)">
+        <div class="pag-chips">${chip(false, `pagImporto(${t.residuo}, true)`, "Tutto · " + pagEuro(t.residuo))}${piano?.prossima && piano.prossima.importo < t.residuo ? chip(false, `pagImporto(${piano.prossima.importo}, true)`, `Rata ${piano.prossima.n} · ${pagEuro(piano.prossima.importo)}`) : ""}${chip(false, `pagImporto(${r2(t.residuo / 2)}, true)`, "Metà")}</div></div>
+      <div class="input-row-2">
+        <div class="input-group"><label class="input-label" for="pag-data">Giorno del pagamento</label><input class="input" id="pag-data" type="date" value="${pag.data}" max="${oggiIso$1()}" onchange="pagSet('data',this.value)"></div>
+        <div class="input-group"><label class="input-label" for="pag-nota">Nota</label><input class="input" id="pag-nota" maxlength="200" placeholder="facoltativa" value="${escapeHtml(pag.nota)}" oninput="pagSet('nota',this.value)"></div>
+      </div>
+      <div class="input-group"><span class="input-label">Modalità</span><div class="pag-chips">${PAG_MODI.map(([k, n]) => chip(pag.modo === k, `pagSet('modo','${k}',true)`, n)).join("")}</div></div>`;
+			h += `<div class="pag-blocco"><div class="pag-blocco-t"><b>Rate</b><span>facoltative, non vincolanti</span></div>`;
+			if (!pag.rateAperte) h += piano ? `<div class="pag-rate">${t.rate.map((r, k) => `<div class="${k < piano.pagate ? "ok" : ""}"><span>${k < piano.pagate ? "✓ " : ""}Rata ${r.n} · ${formatDataBreve(r.scadenza)}</span><b>${pagEuro(r.importo)}</b></div>`).join("")}</div>
+          <div class="pag-azioni-l"><button type="button" class="pag-link" onclick="pagApriRate()">Cambia le rate</button><button type="button" class="pag-link" onclick="pagTogliRate()">Togli le rate</button></div>` : `<p class="pag-p">Puoi dividere quello che resta in più rate con le loro scadenze: le vedi in Incassi e ricevi l'avviso se una scade.</p>
+          <button type="button" class="btn btn-outline btn-sm" onclick="pagApriRate()">Dividi in rate</button>`;
+			else {
+				const resto = pagRestoDopo(), somma = r2(pag.righe.reduce((s, r) => s + (Number(r.importo) || 0), 0));
+				const giaDopo = r2(t.pagato + (Number(pag.importo) || 0));
+				h += `<p class="pag-p">${giaDopo > 0 ? `Quello già pagato (${pagEuro(giaDopo)}${Number(pag.importo) > 0 ? ", compreso questo pagamento" : ""}) conta come prima rata. ` : ""}Dividi i <b>${pagEuro(resto)}</b> che restano:</p>
+        <div class="input-group"><label class="input-label" for="pag-n">Numero di rate</label><select class="input" id="pag-n" onchange="pagNumeroRate(this.value)">${[
+					1,
+					2,
+					3,
+					4,
+					5,
+					6
+				].map((n) => `<option value="${n}"${n === pag.nRate ? " selected" : ""}>${n}</option>`).join("")}</select></div>
+        <div class="pag-righe">${pag.righe.map((r, k) => `<div class="pag-riga"><span>${k + 1}ª</span>
+          <input class="input" aria-label="Importo rata ${k + 1}" type="number" step="0.01" min="0" value="${r.importo}" oninput="pagRiga(${k},'importo',this.value)">
+          <input class="input" aria-label="Scadenza rata ${k + 1}" type="date" value="${r.scadenza}" onchange="pagRiga(${k},'scadenza',this.value)"></div>`).join("")}</div>
+        <div class="pag-somma ${Math.abs(somma - resto) < .01 ? "ok" : "no"}" id="pag-somma">${pagTestoSomma(somma, resto)}</div>
+        <div class="pag-azioni-l"><button type="button" class="pag-link" onclick="pagNumeroRate()">Ricalcola</button><button type="button" class="pag-link" onclick="pagSet('rateAperte',false,true)">Lascia stare le rate</button></div>`;
+			}
+			h += `</div>
+      <button type="button" class="btn btn-primary" id="pag-registra" style="width:100%;margin-top:12px" onclick="pagRegistra()">${pagTestoRegistra()}</button>
+      ${pag.rateAperte ? `<button type="button" class="btn btn-outline" style="width:100%;margin-top:8px" onclick="pagSalvaSoloRate()">Salva solo le rate, senza pagamento</button>` : ""}`;
+		} else h += `<p class="pag-p" style="margin-top:10px">${t.aperto ? "Niente da incassare." : "Già saldato."}</p>`;
+		if (t.storico.length) h += `<div class="pag-sez">Pagamenti ricevuti</div><div class="pag-storico">${t.storico.map((s) => `<div><span>${formatDataBreve(s.pagato_il)} · ${escapeHtml(nomeModo(s.modo))}${s.nota ? " · " + escapeHtml(s.nota) : ""}</span><b>${pagEuro(s.importo)}</b>
+      <button type="button" aria-label="Elimina questo pagamento" title="Elimina questo pagamento" onclick="pagElimina('${s.gruppo}')">✕</button></div>`).join("")}</div>`;
+		el.innerHTML = h;
+	}
+	function pagTestoSomma(somma, resto) {
+		return Math.abs(somma - resto) < .01 ? `Somma delle rate: ${pagEuro(somma)} ✓` : `Somma delle rate ${pagEuro(somma)} su ${pagEuro(resto)} che restano`;
+	}
+	function pagTestoRegistra() {
+		const v = Number(pag.importo) || 0;
+		if (v <= 0) return pag.rateAperte ? "Salva le rate" : "Scrivi l'importo ricevuto";
+		return v >= pag.t.residuo - .005 ? `Registra ${pagEuro(v)} · saldato` : `Registra ${pagEuro(v)}`;
+	}
+	function pagSet(campo, v, ridisegna) {
+		pag[campo] = v;
+		if (ridisegna) pagRender();
+	}
+	function pagImporto(v, ridisegna) {
+		pag.importo = r2(Math.max(0, Number(String(v).replace(",", ".")) || 0));
+		if (ridisegna || pag.rateAperte) {
+			if (pag.rateAperte) pag.righe = pagDividi(pagRestoDopo(), pag.nRate, pagMesiDopo(pag.data, 1));
+			pagRender();
+			return;
+		}
+		const b = document.getElementById("pag-registra");
+		if (b) b.textContent = pagTestoRegistra();
+	}
+	function pagApriRate() {
+		const resto = pagRestoDopo();
+		if (resto <= 0) {
+			showToast("Con questo pagamento il lavoro è saldato: non restano rate da fare");
+			return;
+		}
+		pag.rateAperte = true;
+		pag.nRate = pag.nRate || 2;
+		pag.righe = pagDividi(resto, pag.nRate, pagMesiDopo(pag.data, 1));
+		pagRender();
+	}
+	function pagNumeroRate(n) {
+		pag.nRate = Math.max(1, Math.min(6, Number(n ?? pag.nRate) || 2));
+		pag.righe = pagDividi(pagRestoDopo(), pag.nRate, pag.righe?.[0]?.scadenza || pagMesiDopo(pag.data, 1));
+		pagRender();
+	}
+	function pagRiga(k, campo, v) {
+		pag.righe[k][campo] = campo === "importo" ? r2(Number(String(v).replace(",", ".")) || 0) : v;
+		if (campo === "scadenza") return;
+		const resto = pagRestoDopo(), somma = r2(pag.righe.reduce((s, r) => s + (Number(r.importo) || 0), 0)), el = document.getElementById("pag-somma");
+		if (el) {
+			el.textContent = pagTestoSomma(somma, resto);
+			el.className = "pag-somma " + (Math.abs(somma - resto) < .01 ? "ok" : "no");
+		}
+	}
+	function pagPianoDaSalvare(conPagamento) {
+		const gia = r2(pag.t.pagato + (conPagamento ? Number(pag.importo) || 0 : 0));
+		const righe = pag.righe.filter((r) => Number(r.importo) > 0 && r.scadenza).map((r) => ({
+			importo: r2(r.importo),
+			scadenza: r.scadenza
+		}));
+		return (gia > 0 ? [{
+			importo: gia,
+			scadenza: conPagamento && Number(pag.importo) > 0 ? pag.data : pag.t.storico[pag.t.storico.length - 1]?.pagato_il || oggiIso$1()
+		}] : []).concat(righe);
+	}
+	async function pagRegistra() {
+		const v = r2(pag.importo);
+		if (v <= 0 && !pag.rateAperte) {
+			showToast("Scrivi l'importo ricevuto");
+			return;
+		}
+		if (v > pag.t.residuo + .005) {
+			showToast(`L'importo supera quanto resta (${pagEuro(pag.t.residuo)})`);
+			return;
+		}
+		if (pag.data > oggiIso$1()) {
+			showToast("Il giorno del pagamento è nel futuro");
+			return;
+		}
+		const b = document.getElementById("pag-registra");
+		if (b) b.disabled = true;
+		try {
+			if (pag.rateAperte) {
+				const e = await PagDB.salvaRate(pag.t, pagPianoDaSalvare(v > 0));
+				if (e) throw e;
+			}
+			let saldato = false;
+			if (v > 0) {
+				const { data, error } = await PagDB.registra(pag.t, v, pag.data, pag.modo, pag.nota);
+				if (error) throw error;
+				saldato = !!data?.saldato;
+			}
+			closeModal("modal-pagamento");
+			showToast(v <= 0 ? "Rate salvate" : saldato ? "Pagamento registrato: saldato" : `Registrati ${pagEuro(v)} · restano ${pagEuro(r2(pag.t.residuo - v))}`);
+			await pagDopo();
+		} catch (e) {
+			if (b) b.disabled = false;
+			showToast(pagErrore(e));
+		}
+	}
+	async function pagSalvaSoloRate() {
+		const e = await PagDB.salvaRate(pag.t, pagPianoDaSalvare(false));
+		if (e) {
+			showToast(pagErrore(e));
+			return;
+		}
+		closeModal("modal-pagamento");
+		showToast("Rate salvate");
+		await pagDopo();
+	}
+	async function pagTogliRate() {
+		if (!await chiediSiNo("Togliere le rate?", "I pagamenti già registrati restano; spariscono solo le scadenze.")) return;
+		const e = await PagDB.salvaRate(pag.t, []);
+		if (e) {
+			showToast(pagErrore(e));
+			return;
+		}
+		showToast("Rate tolte");
+		await pagCarica();
+		pag.t.rate = [];
+		pagRender();
+		pagDopo();
+	}
+	async function pagElimina(gruppo) {
+		if (!await chiediSiNo("Eliminare questo pagamento?", "Usalo solo se l'hai registrato per sbaglio: l'importo torna da incassare.")) return;
+		const e = await PagDB.elimina(gruppo);
+		if (e) {
+			showToast(pagErrore(e));
+			return;
+		}
+		closeModal("modal-pagamento");
+		showToast("Pagamento eliminato");
+		await pagDopo();
+	}
+	async function pagSollecita(interventoId, contoId, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await PagDB.sollecita(interventoId, contoId);
+		if (error) {
+			if (btn) btn.disabled = false;
+			showToast(pagErrore(error));
+			return;
+		}
+		showToast(data?.ok ? "Promemoria mandato in chat al cliente" : "Il cliente non è su Equo: ricordaglielo tu (WhatsApp o telefono)");
+	}
+	function pagErrore(e) {
+		const m = String(e?.message || e || "");
+		if (/equo_registra_pagamento|equo_salva_rate|incassi_tranche|could not find the function/i.test(m)) return "Manca un aggiornamento del database: avvisa l'assistenza Equo.";
+		return m ? m.replace(/^.*?ERROR:\s*/, "") : "Non riuscito, riprova.";
+	}
+	async function pagDopo() {
+		await pagCarica();
+		if (typeof renderIncassi$1 === "function") await renderIncassi$1();
+		if (currentClienteId) {
+			caricaContiCliente(currentClienteId);
+			loadClienteInterventi(currentClienteId);
+		}
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	var PagDB = {
+		async registra(t, importo, data, modo, nota) {
+			if (DEMO_MODE) return pagDemoRegistra(t, importo, data, modo, nota);
+			const { data: d, error } = await sb.rpc("equo_registra_pagamento", {
+				p_intervento: t.tipo === "lavoro" ? t.id : null,
+				p_conto: t.tipo === "conto" ? t.id : null,
+				p_importo: importo,
+				p_data: data,
+				p_modo: modo,
+				p_nota: nota || null
+			});
+			if (error) console.error("equo_registra_pagamento:", error);
+			return {
+				data: d,
+				error
+			};
+		},
+		async salvaRate(t, rate) {
+			if (DEMO_MODE) {
+				demoState.rate = (demoState.rate || []).filter((r) => t.tipo === "lavoro" ? r.intervento_id !== t.id : r.conto_id !== t.id);
+				rate.forEach((r, k) => demoState.rate.push({
+					id: "dr-" + Date.now().toString(36) + k,
+					intervento_id: t.tipo === "lavoro" ? t.id : null,
+					conto_id: t.tipo === "conto" ? t.id : null,
+					n: k + 1,
+					importo: r.importo,
+					scadenza: r.scadenza
+				}));
+				return null;
+			}
+			const { error } = await sb.rpc("equo_salva_rate", {
+				p_intervento: t.tipo === "lavoro" ? t.id : null,
+				p_conto: t.tipo === "conto" ? t.id : null,
+				p_rate: rate
+			});
+			if (error) console.error("equo_salva_rate:", error);
+			return error || null;
+		},
+		async elimina(gruppo) {
+			if (DEMO_MODE) {
+				const via = demoState.tranche.filter((x) => x.gruppo === gruppo);
+				demoState.tranche = demoState.tranche.filter((x) => x.gruppo !== gruppo);
+				via.forEach((x) => {
+					const i = demoState.interventiMascalcia.find((y) => y.id === x.intervento_id);
+					if (i && i.stato_pagamento === "saldato") {
+						i.stato_pagamento = "da_saldare";
+						i.saldato_il = null;
+					}
+				});
+				return null;
+			}
+			const { error } = await sb.rpc("equo_elimina_pagamento", { p_gruppo: gruppo });
+			if (error) console.error("equo_elimina_pagamento:", error);
+			return error || null;
+		},
+		async sollecita(interventoId, contoId) {
+			if (DEMO_MODE) return {
+				data: { ok: true },
+				error: null
+			};
+			return await sb.rpc("equo_sollecita_rata", {
+				p_intervento: interventoId || null,
+				p_conto: contoId || null
+			});
+		}
+	};
+	function pagDemoRegistra(t, importo, data, modo, nota) {
+		const gruppo = "dg-" + Date.now().toString(36);
+		const salda = (i) => {
+			i.stato_pagamento = "saldato";
+			i.saldato_il = (/* @__PURE__ */ new Date(data + "T12:00")).toISOString();
+		};
+		if (t.tipo === "lavoro") {
+			const i = demoState.interventiMascalcia.find((x) => x.id === t.id);
+			demoState.tranche.push({
+				id: gruppo,
+				gruppo,
+				intervento_id: t.id,
+				conto_id: null,
+				importo,
+				pagato_il: data,
+				modo,
+				nota
+			});
+			const ok = pagPagato(t.id) + importo >= Number(i.importo) - .005;
+			if (ok) salda(i);
+			return {
+				data: {
+					ok: true,
+					saldato: ok
+				},
+				error: null
+			};
+		}
+		const c = (demoState.conti || []).find((x) => x.id === t.id);
+		let resto = importo;
+		(c?.righe || []).slice().sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)).forEach((r) => {
+			const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
+			if (!i || i.stato_pagamento === "saldato" || resto <= .005) return;
+			const manca = r2(Number(r.importo) - pagPagato(i.id)), q = Math.min(manca, resto);
+			if (q <= 0) return;
+			demoState.tranche.push({
+				id: gruppo + r.intervento_id,
+				gruppo,
+				intervento_id: i.id,
+				conto_id: c.id,
+				importo: q,
+				pagato_il: data,
+				modo,
+				nota
+			});
+			resto = r2(resto - q);
+			if (q >= manca - .005) salda(i);
+		});
+		const tutto = (c?.righe || []).every((r) => demoState.interventiMascalcia.find((x) => x.id === r.intervento_id)?.stato_pagamento === "saldato");
+		if (tutto && c) {
+			c.stato = "pagato";
+			c.pagato_il = (/* @__PURE__ */ new Date(data + "T12:00")).toISOString();
+		}
+		return {
+			data: {
+				ok: true,
+				saldato: tutto
+			},
+			error: null
+		};
+	}
+	var PAG_MODO_MEM = "equo-pag-modo";
+	function pagModoUltimo() {
+		try {
+			const m = localStorage.getItem(PAG_MODO_MEM);
+			return PAG_MODI.some((x) => x[0] === m) ? m : "contanti";
+		} catch (_) {
+			return "contanti";
+		}
+	}
+	function pagModoRicorda(m) {
+		try {
+			if (m) localStorage.setItem(PAG_MODO_MEM, m);
+		} catch (_) {}
+	}
+	function pagNomeModo(k) {
+		return nomeModo(k);
+	}
+	function pagModiHtml(scelto, onclick) {
+		return PAG_MODI.map(([k, n]) => `<button type="button" class="pag-chip${scelto === k ? " on" : ""}" aria-pressed="${scelto === k}" onclick="${onclick}('${k}')">${n}</button>`).join("");
+	}
+	var pagModoRisolvi = null;
+	function pagChiediModo(titolo, sotto) {
+		if (pagModoRisolvi) {
+			const f = pagModoRisolvi;
+			pagModoRisolvi = null;
+			f(null);
+		}
+		let ov = document.getElementById("modal-pag-modo");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay";
+			ov.id = "modal-pag-modo";
+			ov.setAttribute("data-senza-x", "");
+			ov.onclick = (ev) => {
+				if (ev.target === ov) pagModoScegli(null);
+			};
+			ov.innerHTML = "<div class=\"modal pag-modo-modal\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"pag-modo-tit\"><div class=\"modal-handle\"></div><div id=\"pag-modo-corpo\"></div></div>";
+			document.body.appendChild(ov);
+		}
+		const ult = pagModoUltimo();
+		document.getElementById("pag-modo-corpo").innerHTML = `<div class="modal-title" id="pag-modo-tit">${escapeHtml(titolo || "Come ha pagato?")}</div>
+    ${sotto ? `<div class="pag-modo-sotto">${escapeHtml(sotto)}</div>` : ""}
+    <div class="pag-modo-lista">${PAG_MODI.map(([k, n]) => `<button type="button" class="pag-modo-bt${k === ult ? " ult" : ""}" onclick="pagModoScegli('${k}')"><b>${n}</b>${k === ult ? "<small>ultimo usato</small>" : ""}</button>`).join("")}</div>
+    <button type="button" class="btn btn-outline pag-modo-annulla" onclick="pagModoScegli(null)">Annulla</button>`;
+		openModal("modal-pag-modo");
+		return new Promise((res) => {
+			pagModoRisolvi = res;
+		});
+	}
+	function pagModoScegli(m) {
+		closeModal("modal-pag-modo");
+		const f = pagModoRisolvi;
+		pagModoRisolvi = null;
+		if (m) pagModoRicorda(m);
+		if (f) f(m || null);
+	}
+	async function pagSaldaConModo(i, modo) {
+		if (typeof i === "string") i = typeof incTutti !== "undefined" && (incTutti || []).find((x) => x.id === i) || await pagLeggiIntervento(i);
+		if (!i) return { error: { message: "Lavoro non trovato" } };
+		await pagCarica();
+		const resto = r2((Number(i.importo) || 0) - pagPagato(i.id));
+		if (modo && Number(i.importo) > 0 && resto > .005) {
+			const { error } = await PagDB.registra({
+				tipo: "lavoro",
+				id: i.id
+			}, resto, oggiIso$1(), modo, null);
+			if (!error) pagModoRicorda(modo);
+			return { error };
+		}
+		const { error } = await DB.updateInterventoMascalcia(i.id, { stato_pagamento: "saldato" });
+		if (!error && DEMO_MODE) {
+			const d = (demoState.interventiMascalcia || []).find((x) => x.id === i.id);
+			if (d) d.saldato_il = (/* @__PURE__ */ new Date()).toISOString();
+		}
+		return { error };
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/117-segna-fatto.js
 	async function fattoInAnticipo(e) {
 		const oggi = isoLocale(/* @__PURE__ */ new Date());
@@ -3181,6 +4206,11 @@
 			upd.ferri_nuovi = fs.nuovi;
 			if (fs.nuovi) upd.quantita_ferri = fs.n;
 		}
+		const modo = prendiModoScelto();
+		if (pag === "saldato" && modo && Number(upd.importo ?? e.importo) > 0 && e.stato_pagamento !== "saldato") {
+			delete upd.stato_pagamento;
+			upd._modo = modo;
+		}
 		return upd;
 	}
 	async function segnaFatto(e, opz = {}) {
@@ -3193,6 +4223,8 @@
 		if (anticipo === null) return { ok: false };
 		if (opz.prima) opz.prima();
 		const upd = await datiDalRiquadro(e, anticipo);
+		const modo = upd._modo;
+		delete upd._modo;
 		const { error } = await DB.updateInterventoMascalcia(e.id, upd);
 		if (error) {
 			showToast("Errore: " + error.message);
@@ -3200,6 +4232,14 @@
 				ok: false,
 				error
 			};
+		}
+		if (modo) {
+			const r = await pagSaldaConModo({
+				...e,
+				...upd
+			}, modo);
+			if (r.error) showToast("Fatto, ma il pagamento non è registrato: " + r.error.message);
+			else upd.stato_pagamento = "saldato";
 		}
 		showToast("Segnato come fatto");
 		await renderAgendaSettimana$1();
@@ -3809,955 +4849,6 @@
 		const sm = document.getElementById("misura-pref-select");
 		if (sm) sm.value = currentUser?.ferroSistema || "";
 	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/057-pdf-appuntamento-invio-in-chat-maniscalc.js
-	var jsPdfPromise = null;
-	function caricaJsPdf() {
-		if (window.jspdf?.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
-		if (!jsPdfPromise) jsPdfPromise = new Promise((resolve, reject) => {
-			const sc = document.createElement("script");
-			sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
-			sc.onload = () => window.jspdf?.jsPDF ? resolve(window.jspdf.jsPDF) : reject(/* @__PURE__ */ new Error("jsPDF non disponibile"));
-			sc.onerror = () => {
-				jsPdfPromise = null;
-				reject(/* @__PURE__ */ new Error("impossibile scaricare la libreria PDF (sei offline?)"));
-			};
-			document.head.appendChild(sc);
-		});
-		return jsPdfPromise;
-	}
-	function pdfNomeFile(e) {
-		const pulisci = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
-		return [
-			"Equo",
-			pulisci(e.clienti_mascalcia?.nome),
-			pulisci(agNomeCavallo(e)),
-			e.data_intervento
-		].filter(Boolean).join("_") + ".pdf";
-	}
-	function testoRiepilogoEvento(e) {
-		const [y, m, d] = e.data_intervento.split("-").map(Number);
-		const quando = `${AG_GIORNI[(new Date(y, m - 1, d).getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " ore " + String(e.ora).slice(0, 5) : ""}`;
-		const cav = agNomeCavallo(e);
-		const parti = [(e.stato === "fatto" ? "Intervento del " : "Appuntamento: ") + quando, (cav ? cav + " — " : "") + agDescrizioneTipo(e)];
-		if (e.importo != null) parti.push(contoEuro(e.importo) + (e.stato_pagamento === "saldato" ? " (saldato)" : " (da saldare)"));
-		if (e.aiutante_nome) parti.push(e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `con l'aiutante ${e.aiutante_nome}`);
-		return parti.join(" · ");
-	}
-	async function creaPdfEvento(e) {
-		const doc = new (await (caricaJsPdf()))({
-			unit: "mm",
-			format: "a4"
-		});
-		const W = 210, M = 18;
-		const verde = [
-			20,
-			49,
-			42
-		], oro = [
-			201,
-			143,
-			46
-		], grigio = [
-			95,
-			111,
-			103
-		];
-		doc.setFillColor(...verde);
-		doc.rect(0, 0, W, 32, "F");
-		doc.setTextColor(255, 255, 255);
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(22);
-		doc.text("Equo", M, 20);
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(10);
-		doc.text("Prenditi cura del tuo cavallo", M, 26);
-		doc.setFontSize(10);
-		doc.text((/* @__PURE__ */ new Date()).toLocaleDateString("it-IT"), 192, 20, { align: "right" });
-		doc.setFillColor(...oro);
-		doc.rect(0, 32, W, 1.5, "F");
-		let y = 48;
-		doc.setTextColor(...verde);
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(17);
-		doc.text(e.stato === "fatto" ? "Riepilogo intervento" : "Conferma appuntamento", M, y);
-		if (agNomeCavallo(e)) {
-			y += 9;
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(20);
-			doc.setTextColor(...oro);
-			doc.text(agNomeCavallo(e), M, y);
-		}
-		y += 6;
-		const professionista = currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "";
-		if (professionista) {
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10.5);
-			doc.setTextColor(...grigio);
-			doc.text(etichettaPro() + ": " + professionista + (currentUser?.certificazioneStato === "verificato" ? "  ·  Equo Certified" : ""), M, y + 2);
-			y += 6;
-		}
-		y += 6;
-		const [yy, mm, dd] = e.data_intervento.split("-").map(Number);
-		const dataTxt = `${[
-			"Lunedì",
-			"Martedì",
-			"Mercoledì",
-			"Giovedì",
-			"Venerdì",
-			"Sabato",
-			"Domenica"
-		][(new Date(yy, mm - 1, dd).getDay() + 6) % 7]} ${dd} ${AG_MESI_LUNGHI[mm - 1]} ${yy}`;
-		let tipoTxt = TIPO_FERRATURA_LABELS[e.tipo_ferratura] || e.tipo_ferratura || "";
-		if (e.tipo_ferratura === "altro" && e.tipo_altro) tipoTxt = "Altro — " + e.tipo_altro;
-		let misuraTxt = "";
-		if (e.numero_ferro) {
-			const sis = e.misura_sistema || "italiana";
-			const idx = MISURE_FERRO[sis] ? MISURE_FERRO[sis].indexOf(misuraNorm(e.numero_ferro)) : -1;
-			misuraTxt = misuraNorm(e.numero_ferro) + " (" + {
-				italiana: "italiana",
-				olandese: "olandese",
-				tedesca: "tedesca"
-			}[sis] + ")";
-			if (idx >= 0) misuraTxt += " — italiana " + MISURE_FERRO.italiana[idx] + " · olandese " + MISURE_FERRO.olandese[idx] + " · tedesca " + MISURE_FERRO.tedesca[idx];
-		}
-		const righe = [
-			["Cavallo", agNomeCavallo(e) || "—"],
-			["Cliente", e.clienti_mascalcia?.nome || "—"],
-			["Data", dataTxt],
-			["Ora", e.ora ? String(e.ora).slice(0, 5) : "—"],
-			["Tipo intervento", tipoTxt],
-			misuraTxt ? ["Misura ferro", misuraTxt] : null,
-			e.quantita_ferri ? ["Quantità ferri", String(e.quantita_ferri)] : null,
-			["Importo", e.importo != null ? contoEuro(e.importo) : "—"],
-			["Pagamento", e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare"],
-			["Stato", e.stato === "fatto" ? "Eseguito" : "Programmato"],
-			e.aiutante_nome ? ["Aiutante", e.stato === "fatto" ? `Intervento eseguito con l'aiutante ${e.aiutante_nome}` : `Con l'aiutante ${e.aiutante_nome}`] : null,
-			e.prossima_scadenza && e.stato === "fatto" ? ["Prossimo intervento consigliato", (/* @__PURE__ */ new Date(e.prossima_scadenza + "T00:00")).toLocaleDateString("it-IT")] : null,
-			e.note ? ["Note", e.note] : null
-		].filter(Boolean);
-		doc.setFontSize(11);
-		righe.forEach(([k, v], idx) => {
-			const valore = doc.splitTextToSize(String(v), 112);
-			const h = Math.max(9, valore.length * 5.2 + 3.8);
-			if (idx % 2 === 0) {
-				doc.setFillColor(248, 246, 240);
-				doc.rect(M, y - 5.6, 174, h, "F");
-			}
-			doc.setFont("helvetica", "bold");
-			doc.setTextColor(...grigio);
-			doc.text(k, 21, y);
-			doc.setFont("helvetica", "normal");
-			doc.setTextColor(...verde);
-			doc.text(valore, 80, y);
-			y += h;
-		});
-		if (e.stato_pagamento !== "saldato" && (currentUser?.datiPagamentoIban || currentUser?.datiPagamentoPaypal)) {
-			y += 8;
-			doc.setFont("helvetica", "bold");
-			doc.setFontSize(12);
-			doc.setTextColor(...verde);
-			doc.text("Dati per il pagamento", M, y);
-			y += 7;
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10.5);
-			doc.setTextColor(...grigio);
-			if (currentUser.datiPagamentoNome) {
-				doc.text("Intestatario: " + currentUser.datiPagamentoNome, M, y);
-				y += 6;
-			}
-			if (currentUser.datiPagamentoIban) {
-				doc.text("IBAN: " + currentUser.datiPagamentoIban, M, y);
-				y += 6;
-			}
-			if (currentUser.datiPagamentoPaypal) {
-				doc.text("PayPal: " + currentUser.datiPagamentoPaypal, M, y);
-				y += 6;
-			}
-		}
-		const piede = () => {
-			doc.setDrawColor(227, 221, 204);
-			doc.setLineWidth(.2);
-			doc.line(M, 280, 192, 280);
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(8.5);
-			doc.setTextColor(...grigio);
-			doc.text("Documento generato con Equo — equohub.com. Non ha valore fiscale.", M, 285);
-		};
-		y = riquadroInvitoPdf(doc, (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === e.cliente_mascalcia_id), y + 4, W, M, () => {
-			piede();
-			doc.addPage();
-			return 22;
-		});
-		piede();
-		const nome = pdfNomeFile(e);
-		return {
-			blob: doc.output("blob"),
-			nome
-		};
-	}
-	async function generaPdfEvento(e) {
-		closeModal("modal-azioni-evento");
-		showToast("Creo il PDF…");
-		try {
-			const { blob, nome } = await creaPdfEvento(e);
-			const file = new File([blob], nome, { type: "application/pdf" });
-			if (navigator.canShare && navigator.canShare({ files: [file] })) try {
-				await navigator.share({
-					files: [file],
-					title: nome
-				});
-				return;
-			} catch (err) {
-				if (err?.name === "AbortError") return;
-			}
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = nome;
-			document.body.appendChild(a);
-			a.click();
-			a.remove();
-			setTimeout(() => URL.revokeObjectURL(url), 3e4);
-		} catch (err) {
-			console.error("generaPdfEvento:", err);
-			showToast("Impossibile creare il PDF: " + (err?.message || err));
-		}
-	}
-	async function inviaEventoInChat(e) {
-		closeModal("modal-azioni-evento");
-		await openChatThread(e.cliente_mascalcia_id);
-		document.getElementById("mchat-input").value = testoRiepilogoEvento(e);
-		chatAllegatoEvento = e;
-		document.getElementById("mchat-allegato-nome").textContent = pdfNomeFile(e);
-		document.getElementById("mchat-allegato").classList.add("active");
-	}
-	function rimuoviAllegatoChat() {
-		chatAllegatoEvento = null;
-		const el = document.getElementById("mchat-allegato");
-		if (el) el.classList.remove("active");
-	}
-	var contoCodice = (c) => "C-" + c.anno + "-" + String(c.numero).padStart(3, "0");
-	var contoLavori = (n) => n + (n === 1 ? " lavoro" : " lavori");
-	var contoEuro = (n) => formatEuro(n, { decimali: true });
-	var contoData = (iso) => {
-		const [y, m, d] = String(iso).slice(0, 10).split("-");
-		return `${d}/${m}/${y}`;
-	};
-	var ContoDB = {
-		async lavoriLiberi(clienteId) {
-			let righe, usati = /* @__PURE__ */ new Set();
-			if (DEMO_MODE) {
-				righe = demoState.interventiMascalcia.filter((i) => i.cliente_mascalcia_id === clienteId || i.luogo_cliente_id === clienteId).map((i) => ({
-					...i,
-					cavalli_clienti_mascalcia: demoState.cavalliClientiMascalcia.find((x) => x.id === i.cavallo_cliente_id) ? { nome: demoState.cavalliClientiMascalcia.find((x) => x.id === i.cavallo_cliente_id).nome } : null
-				}));
-				(demoState.conti || []).filter((c) => c.stato !== "annullato").forEach((c) => c.righe.forEach((r) => usati.add(r.intervento_id)));
-			} else {
-				const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome)").eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`).order("data_intervento", { ascending: true });
-				if (error) {
-					console.error("lavoriLiberi:", error);
-					return [];
-				}
-				righe = data || [];
-				const ids = righe.map((r) => r.id);
-				if (ids.length) ((await sb.from("conti_mascalcia_righe").select("intervento_id, conti_mascalcia!inner(stato)").in("intervento_id", ids).neq("conti_mascalcia.stato", "annullato")).data || []).forEach((r) => usati.add(r.intervento_id));
-			}
-			return righe.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0 && !usati.has(i.id));
-		},
-		async crea(clienteId, modo, da, a, righe) {
-			if (DEMO_MODE) {
-				demoState.conti = demoState.conti || [];
-				const anno = (/* @__PURE__ */ new Date()).getFullYear();
-				const numero = demoState.conti.filter((c) => c.anno === anno).length + 1;
-				const c = {
-					id: "dc-" + Date.now().toString(36) + numero,
-					cliente_mascalcia_id: clienteId,
-					anno,
-					numero,
-					modo,
-					periodo_da: da,
-					periodo_a: a,
-					stato: "da_incassare",
-					creato_il: (/* @__PURE__ */ new Date()).toISOString(),
-					righe: righe.map((r) => {
-						const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
-						return {
-							...r,
-							data_intervento: i.data_intervento,
-							importo: Number(i.importo)
-						};
-					})
-				};
-				c.totale = c.righe.reduce((s, r) => s + r.importo, 0);
-				c.n_lavori = c.righe.length;
-				demoState.conti.push(c);
-				return {
-					data: {
-						id: c.id,
-						anno,
-						numero,
-						totale: c.totale,
-						n_lavori: c.n_lavori
-					},
-					error: null
-				};
-			}
-			const { data, error } = await sb.rpc("equo_crea_conto", {
-				p_cliente: clienteId,
-				p_modo: modo,
-				p_da: da || null,
-				p_a: a || null,
-				p_righe: righe
-			});
-			if (error) console.error("equo_crea_conto:", error);
-			return {
-				data,
-				error
-			};
-		},
-		async lista(clienteId) {
-			if (DEMO_MODE) return (demoState.conti || []).filter((c) => c.cliente_mascalcia_id === clienteId).sort((a, b) => b.creato_il.localeCompare(a.creato_il));
-			const { data, error } = await sb.from("conti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).eq("cliente_mascalcia_id", clienteId).order("creato_il", { ascending: false }).limit(30);
-			if (error) {
-				console.error("lista conti:", error);
-				return [];
-			}
-			return data || [];
-		},
-		async aperti(clienteId) {
-			if (DEMO_MODE) return (demoState.conti || []).filter((c) => c.stato === "da_incassare" && (!clienteId || c.cliente_mascalcia_id === clienteId)).sort((a, b) => a.creato_il.localeCompare(b.creato_il));
-			let q = sb.from("conti_mascalcia").select("*").eq("maniscalco_id", currentUser.id).eq("stato", "da_incassare");
-			if (clienteId) q = q.eq("cliente_mascalcia_id", clienteId);
-			const { data, error } = await q.order("creato_il", { ascending: true }).limit(100);
-			if (error) {
-				console.error("conti aperti:", error);
-				return [];
-			}
-			return data || [];
-		},
-		async completo(id) {
-			if (DEMO_MODE) return (demoState.conti || []).find((c) => c.id === id) || null;
-			const [c, r] = await Promise.all([sb.from("conti_mascalcia").select("*").eq("id", id).single(), sb.from("conti_mascalcia_righe").select("*").eq("conto_id", id).order("proprietario_nome").order("data_intervento")]);
-			if (c.error || !c.data) return null;
-			return {
-				...c.data,
-				righe: r.data || []
-			};
-		},
-		async pagato(id) {
-			if (DEMO_MODE) {
-				const c = demoState.conti.find((x) => x.id === id);
-				c.stato = "pagato";
-				c.pagato_il = (/* @__PURE__ */ new Date()).toISOString();
-				c.righe.forEach((r) => {
-					const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
-					if (i) {
-						i.stato_pagamento = "saldato";
-						i.saldato_il = c.pagato_il;
-					}
-				});
-				return { error: null };
-			}
-			const { error } = await sb.rpc("equo_conto_pagato", { p_conto: id });
-			if (error) console.error("equo_conto_pagato:", error);
-			return { error };
-		},
-		async annulla(id) {
-			if (DEMO_MODE) {
-				const c = demoState.conti.find((x) => x.id === id);
-				c.stato = "annullato";
-				c.annullato_il = (/* @__PURE__ */ new Date()).toISOString();
-				return { error: null };
-			}
-			const { error } = await sb.rpc("equo_conto_annulla", { p_conto: id });
-			if (error) console.error("equo_conto_annulla:", error);
-			return { error };
-		}
-	};
-	// equo-app-src/src/ruoli/maniscalco/moduli/113-pagamenti-a-rate.js
-	var PAG_MODI = [
-		["contanti", "Contanti"],
-		["bonifico", "Bonifico"],
-		["pos", "POS"],
-		["assegno", "Assegno"],
-		["altro", "Altro"]
-	];
-	var pagTranche = [];
-	var pagRate = [];
-	var pag = null;
-	var r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
-	var pagEuro = (n) => formatEuro(n);
-	var oggiIso$1 = () => isoLocale(/* @__PURE__ */ new Date());
-	var nomeModo = (k) => (PAG_MODI.find((m) => m[0] === k) || [k, k])[1];
-	async function pagCarica() {
-		if (DEMO_MODE) {
-			demoState.tranche = demoState.tranche || [];
-			demoState.rate = demoState.rate || [];
-			pagTranche = demoState.tranche;
-			pagRate = demoState.rate;
-			return;
-		}
-		if (!currentUser) return;
-		const [t, r] = await Promise.all([sb.from("incassi_tranche").select("*").eq("professionista_id", currentUser.id).order("pagato_il", { ascending: true }).limit(5e3), sb.from("incassi_rate").select("*").eq("professionista_id", currentUser.id).order("n", { ascending: true }).limit(2e3)]);
-		if (t.error && !/does not exist|schema cache/i.test(t.error.message || "")) console.warn("incassi_tranche:", t.error.message);
-		pagTranche = t.error ? [] : t.data || [];
-		pagRate = r.error ? [] : r.data || [];
-	}
-	function pagTrancheDi(interventoId) {
-		return pagTranche.filter((t) => t.intervento_id === interventoId);
-	}
-	function pagPagato(interventoId) {
-		return r2(pagTrancheDi(interventoId).reduce((s, t) => s + Number(t.importo), 0));
-	}
-	function pagResiduo(i) {
-		return Math.max(0, r2((Number(i?.importo) || 0) - pagPagato(i?.id)));
-	}
-	function pagPagatoConto(contoId) {
-		return r2(pagTranche.filter((t) => t.conto_id === contoId).reduce((s, t) => s + Number(t.importo), 0));
-	}
-	function pagRateDi(interventoId, contoId) {
-		return pagRate.filter((r) => interventoId ? r.intervento_id === interventoId : r.conto_id === contoId).sort((a, b) => a.n - b.n);
-	}
-	function pagPiano(rate, pagato) {
-		if (!rate || !rate.length) return null;
-		let cum = 0, pagate = 0, prossima = null;
-		for (const r of rate) {
-			cum = r2(cum + Number(r.importo));
-			if (cum <= pagato + .005) pagate++;
-			else if (!prossima) prossima = {
-				n: r.n,
-				importo: r2(cum - pagato),
-				scadenza: r.scadenza
-			};
-		}
-		return {
-			rate: rate.length,
-			pagate,
-			prossima
-		};
-	}
-	function pagPianoIntervento(i) {
-		return pagPiano(pagRateDi(i.id), pagPagato(i.id));
-	}
-	function pagPianoConto(c) {
-		return pagPiano(pagRateDi(null, c.id), pagPagatoConto(c.id));
-	}
-	function pagVociIncasso(lista) {
-		const perInt = /* @__PURE__ */ new Map();
-		pagTranche.forEach((t) => {
-			if (!perInt.has(t.intervento_id)) perInt.set(t.intervento_id, []);
-			perInt.get(t.intervento_id).push(t);
-		});
-		const out = [];
-		(lista || []).forEach((i) => {
-			const tr = perInt.get(i.id) || [];
-			tr.forEach((t) => out.push({
-				...i,
-				importo: Number(t.importo),
-				_giorno: t.pagato_il,
-				_tranche: t
-			}));
-			if (i.stato === "fatto" && i.stato_pagamento === "saldato") {
-				if (!tr.length) out.push(i);
-				else {
-					const resto = r2((Number(i.importo) || 0) - tr.reduce((s, t) => s + Number(t.importo), 0));
-					if (resto > .005) out.push({
-						...i,
-						importo: resto,
-						_resto: true
-					});
-				}
-			}
-		});
-		return out;
-	}
-	function pagHtmlLavoro(i) {
-		const pagato = pagPagato(i.id), tot = Number(i.importo) || 0, piano = pagPianoIntervento(i);
-		let h = `<button type="button" class="pag-link" onclick="pagApri('${i.id}')">${pagato > 0 || piano ? "Pagamenti e rate" : "Acconto o rate"} ›</button>`;
-		if (pagato > 0 && tot > 0) h += `<span class="pag-barra" role="progressbar" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${pagato}"><i style="width:${Math.min(100, pagato / tot * 100).toFixed(1)}%"></i></span>
-    <span class="pag-nota">Acconto: pagati ${pagEuro(pagato)} di ${pagEuro(tot)}${piano ? ` · ${piano.pagate} ${piano.pagate === 1 ? "rata" : "rate"} su ${piano.rate}` : ""}</span>`;
-		else if (piano) h += `<span class="pag-nota">${piano.rate} rate · nessuna ancora pagata</span>`;
-		if (piano?.prossima) h += pagHtmlProssima(piano.prossima, `'${i.id}', null`);
-		return h;
-	}
-	function pagHtmlProssima(p, args) {
-		const oggi = oggiIso$1();
-		if (p.scadenza < oggi) {
-			const gg = Math.round((/* @__PURE__ */ new Date(oggi + "T12:00") - /* @__PURE__ */ new Date(p.scadenza + "T12:00")) / 864e5);
-			return `<span class="pag-scaduta"><span>Rata ${p.n} scaduta da ${gg} ${gg === 1 ? "giorno" : "giorni"} · ${pagEuro(p.importo)}</span><button type="button" onclick="pagSollecita(${args}, this)">Promemoria</button></span>`;
-		}
-		return `<span class="pag-nota">Prossima rata: ${pagEuro(p.importo)} entro il ${formatDataBreve(p.scadenza)}</span>`;
-	}
-	function pagHtmlConto(c) {
-		const pagato = pagPagatoConto(c.id), piano = pagPianoConto(c);
-		if (!(pagato > 0) && !piano) return "";
-		const tot = Number(c.totale) || 0;
-		return `<small class="pag-conto">${pagato > 0 ? `Pagati ${pagEuro(pagato)} di ${pagEuro(tot)}` : ""}${pagato > 0 && piano ? " · " : ""}${piano ? `${piano.pagate} rate su ${piano.rate}${piano.prossima ? " · prossima " + formatDataBreve(piano.prossima.scadenza) : ""}` : ""}</small>`;
-	}
-	async function pagApri(interventoId, contoId) {
-		await pagCarica();
-		let t;
-		if (contoId) {
-			const c = await ContoDB.completo(contoId);
-			if (!c) {
-				showToast("Conto non trovato");
-				return;
-			}
-			const pagato = pagPagatoConto(c.id);
-			t = {
-				tipo: "conto",
-				id: c.id,
-				titolo: "Conto " + contoCodice(c),
-				sotto: (clientiMascalcia.find((x) => x.id === c.cliente_mascalcia_id)?.nome || "") + " · " + c.n_lavori + (c.n_lavori === 1 ? " lavoro" : " lavori"),
-				totale: Number(c.totale) || 0,
-				pagato,
-				residuo: Math.max(0, r2((Number(c.totale) || 0) - pagato)),
-				aperto: c.stato === "da_incassare",
-				storico: pagStorico(pagTranche.filter((x) => x.conto_id === c.id)),
-				rate: pagRateDi(null, c.id)
-			};
-		} else {
-			const i = (incTutti || []).find((x) => x.id === interventoId) || await pagLeggiIntervento(interventoId);
-			if (!i) {
-				showToast("Lavoro non trovato");
-				return;
-			}
-			if (!(Number(i.importo) > 0)) {
-				showToast("Scrivi prima l'importo del lavoro");
-				return;
-			}
-			const pagato = pagPagato(i.id);
-			t = {
-				tipo: "lavoro",
-				id: i.id,
-				titolo: [i.cavalli_clienti_mascalcia?.nome, TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura].filter(Boolean).join(" · ") || "Lavoro",
-				sotto: (i.clienti_mascalcia?.nome || clientiMascalcia.find((x) => x.id === i.cliente_mascalcia_id)?.nome || "") + " · " + formatDataBreve(i.data_intervento),
-				totale: Number(i.importo),
-				pagato,
-				residuo: pagResiduo(i),
-				aperto: i.stato_pagamento !== "saldato",
-				storico: pagStorico(pagTrancheDi(i.id)),
-				rate: pagRateDi(i.id)
-			};
-		}
-		const piano = pagPiano(t.rate, t.pagato);
-		pag = {
-			t,
-			importo: piano?.prossima ? Math.min(piano.prossima.importo, t.residuo) : t.residuo,
-			data: oggiIso$1(),
-			modo: "contanti",
-			nota: "",
-			rateAperte: false,
-			nRate: 2,
-			righe: null
-		};
-		pagRender();
-		openModal("modal-pagamento");
-	}
-	async function pagLeggiIntervento(id) {
-		if (DEMO_MODE) return (demoState.interventiMascalcia || []).find((x) => x.id === id) || null;
-		const { data } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)").eq("id", id).maybeSingle();
-		return data || null;
-	}
-	function pagStorico(lista) {
-		const g = /* @__PURE__ */ new Map();
-		lista.forEach((x) => {
-			const k = x.gruppo || x.id;
-			if (!g.has(k)) g.set(k, {
-				gruppo: k,
-				importo: 0,
-				pagato_il: x.pagato_il,
-				modo: x.modo,
-				nota: x.nota
-			});
-			g.get(k).importo = r2(g.get(k).importo + Number(x.importo));
-		});
-		return [...g.values()].sort((a, b) => a.pagato_il.localeCompare(b.pagato_il));
-	}
-	function pagDividi(totale, n, primaData) {
-		const base = Math.floor(totale / n * 100) / 100, righe = [];
-		for (let k = 0; k < n; k++) righe.push({
-			importo: k === n - 1 ? r2(totale - base * (n - 1)) : base,
-			scadenza: pagMesiDopo(primaData, k)
-		});
-		return righe;
-	}
-	function pagMesiDopo(iso, n) {
-		const d = /* @__PURE__ */ new Date(iso + "T12:00");
-		const g = d.getDate();
-		d.setDate(1);
-		d.setMonth(d.getMonth() + n);
-		d.setDate(Math.min(g, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
-		return isoLocale(d);
-	}
-	function pagRestoDopo() {
-		return Math.max(0, r2(pag.t.residuo - (Number(pag.importo) || 0)));
-	}
-	function pagRender() {
-		const t = pag.t, el = document.getElementById("pag-corpo");
-		document.getElementById("pag-titolo").textContent = t.titolo;
-		const piano = pagPiano(t.rate, t.pagato);
-		const chip = (on, onclick, testo) => `<button type="button" class="pag-chip${on ? " on" : ""}" onclick="${onclick}">${testo}</button>`;
-		let h = `<div class="pag-testa"><span>${escapeHtml(t.sotto)}</span><b>Totale ${pagEuro(t.totale)}</b></div>`;
-		if (t.pagato > 0) h += `<div class="pag-testa"><span>Già pagati ${pagEuro(t.pagato)}</span><b>Restano ${pagEuro(t.residuo)}</b></div>
-    <span class="pag-barra"><i style="width:${Math.min(100, t.pagato / (t.totale || 1) * 100).toFixed(1)}%"></i></span>`;
-		if (t.aperto && t.residuo > 0) {
-			h += `<div class="input-group"><label class="input-label" for="pag-importo">Importo ricevuto</label>
-        <input class="input pag-imp" id="pag-importo" type="number" inputmode="decimal" min="0" step="0.01" value="${pag.importo}" oninput="pagImporto(this.value)">
-        <div class="pag-chips">${chip(false, `pagImporto(${t.residuo}, true)`, "Tutto · " + pagEuro(t.residuo))}${piano?.prossima && piano.prossima.importo < t.residuo ? chip(false, `pagImporto(${piano.prossima.importo}, true)`, `Rata ${piano.prossima.n} · ${pagEuro(piano.prossima.importo)}`) : ""}${chip(false, `pagImporto(${r2(t.residuo / 2)}, true)`, "Metà")}</div></div>
-      <div class="input-row-2">
-        <div class="input-group"><label class="input-label" for="pag-data">Giorno del pagamento</label><input class="input" id="pag-data" type="date" value="${pag.data}" max="${oggiIso$1()}" onchange="pagSet('data',this.value)"></div>
-        <div class="input-group"><label class="input-label" for="pag-nota">Nota</label><input class="input" id="pag-nota" maxlength="200" placeholder="facoltativa" value="${escapeHtml(pag.nota)}" oninput="pagSet('nota',this.value)"></div>
-      </div>
-      <div class="input-group"><span class="input-label">Modalità</span><div class="pag-chips">${PAG_MODI.map(([k, n]) => chip(pag.modo === k, `pagSet('modo','${k}',true)`, n)).join("")}</div></div>`;
-			h += `<div class="pag-blocco"><div class="pag-blocco-t"><b>Rate</b><span>facoltative, non vincolanti</span></div>`;
-			if (!pag.rateAperte) h += piano ? `<div class="pag-rate">${t.rate.map((r, k) => `<div class="${k < piano.pagate ? "ok" : ""}"><span>${k < piano.pagate ? "✓ " : ""}Rata ${r.n} · ${formatDataBreve(r.scadenza)}</span><b>${pagEuro(r.importo)}</b></div>`).join("")}</div>
-          <div class="pag-azioni-l"><button type="button" class="pag-link" onclick="pagApriRate()">Cambia le rate</button><button type="button" class="pag-link" onclick="pagTogliRate()">Togli le rate</button></div>` : `<p class="pag-p">Puoi dividere quello che resta in più rate con le loro scadenze: le vedi in Incassi e ricevi l'avviso se una scade.</p>
-          <button type="button" class="btn btn-outline btn-sm" onclick="pagApriRate()">Dividi in rate</button>`;
-			else {
-				const resto = pagRestoDopo(), somma = r2(pag.righe.reduce((s, r) => s + (Number(r.importo) || 0), 0));
-				const giaDopo = r2(t.pagato + (Number(pag.importo) || 0));
-				h += `<p class="pag-p">${giaDopo > 0 ? `Quello già pagato (${pagEuro(giaDopo)}${Number(pag.importo) > 0 ? ", compreso questo pagamento" : ""}) conta come prima rata. ` : ""}Dividi i <b>${pagEuro(resto)}</b> che restano:</p>
-        <div class="input-group"><label class="input-label" for="pag-n">Numero di rate</label><select class="input" id="pag-n" onchange="pagNumeroRate(this.value)">${[
-					1,
-					2,
-					3,
-					4,
-					5,
-					6
-				].map((n) => `<option value="${n}"${n === pag.nRate ? " selected" : ""}>${n}</option>`).join("")}</select></div>
-        <div class="pag-righe">${pag.righe.map((r, k) => `<div class="pag-riga"><span>${k + 1}ª</span>
-          <input class="input" aria-label="Importo rata ${k + 1}" type="number" step="0.01" min="0" value="${r.importo}" oninput="pagRiga(${k},'importo',this.value)">
-          <input class="input" aria-label="Scadenza rata ${k + 1}" type="date" value="${r.scadenza}" onchange="pagRiga(${k},'scadenza',this.value)"></div>`).join("")}</div>
-        <div class="pag-somma ${Math.abs(somma - resto) < .01 ? "ok" : "no"}" id="pag-somma">${pagTestoSomma(somma, resto)}</div>
-        <div class="pag-azioni-l"><button type="button" class="pag-link" onclick="pagNumeroRate()">Ricalcola</button><button type="button" class="pag-link" onclick="pagSet('rateAperte',false,true)">Lascia stare le rate</button></div>`;
-			}
-			h += `</div>
-      <button type="button" class="btn btn-primary" id="pag-registra" style="width:100%;margin-top:12px" onclick="pagRegistra()">${pagTestoRegistra()}</button>
-      ${pag.rateAperte ? `<button type="button" class="btn btn-outline" style="width:100%;margin-top:8px" onclick="pagSalvaSoloRate()">Salva solo le rate, senza pagamento</button>` : ""}`;
-		} else h += `<p class="pag-p" style="margin-top:10px">${t.aperto ? "Niente da incassare." : "Già saldato."}</p>`;
-		if (t.storico.length) h += `<div class="pag-sez">Pagamenti ricevuti</div><div class="pag-storico">${t.storico.map((s) => `<div><span>${formatDataBreve(s.pagato_il)} · ${escapeHtml(nomeModo(s.modo))}${s.nota ? " · " + escapeHtml(s.nota) : ""}</span><b>${pagEuro(s.importo)}</b>
-      <button type="button" aria-label="Elimina questo pagamento" title="Elimina questo pagamento" onclick="pagElimina('${s.gruppo}')">✕</button></div>`).join("")}</div>`;
-		el.innerHTML = h;
-	}
-	function pagTestoSomma(somma, resto) {
-		return Math.abs(somma - resto) < .01 ? `Somma delle rate: ${pagEuro(somma)} ✓` : `Somma delle rate ${pagEuro(somma)} su ${pagEuro(resto)} che restano`;
-	}
-	function pagTestoRegistra() {
-		const v = Number(pag.importo) || 0;
-		if (v <= 0) return pag.rateAperte ? "Salva le rate" : "Scrivi l'importo ricevuto";
-		return v >= pag.t.residuo - .005 ? `Registra ${pagEuro(v)} · saldato` : `Registra ${pagEuro(v)}`;
-	}
-	function pagSet(campo, v, ridisegna) {
-		pag[campo] = v;
-		if (ridisegna) pagRender();
-	}
-	function pagImporto(v, ridisegna) {
-		pag.importo = r2(Math.max(0, Number(String(v).replace(",", ".")) || 0));
-		if (ridisegna || pag.rateAperte) {
-			if (pag.rateAperte) pag.righe = pagDividi(pagRestoDopo(), pag.nRate, pagMesiDopo(pag.data, 1));
-			pagRender();
-			return;
-		}
-		const b = document.getElementById("pag-registra");
-		if (b) b.textContent = pagTestoRegistra();
-	}
-	function pagApriRate() {
-		const resto = pagRestoDopo();
-		if (resto <= 0) {
-			showToast("Con questo pagamento il lavoro è saldato: non restano rate da fare");
-			return;
-		}
-		pag.rateAperte = true;
-		pag.nRate = pag.nRate || 2;
-		pag.righe = pagDividi(resto, pag.nRate, pagMesiDopo(pag.data, 1));
-		pagRender();
-	}
-	function pagNumeroRate(n) {
-		pag.nRate = Math.max(1, Math.min(6, Number(n ?? pag.nRate) || 2));
-		pag.righe = pagDividi(pagRestoDopo(), pag.nRate, pag.righe?.[0]?.scadenza || pagMesiDopo(pag.data, 1));
-		pagRender();
-	}
-	function pagRiga(k, campo, v) {
-		pag.righe[k][campo] = campo === "importo" ? r2(Number(String(v).replace(",", ".")) || 0) : v;
-		if (campo === "scadenza") return;
-		const resto = pagRestoDopo(), somma = r2(pag.righe.reduce((s, r) => s + (Number(r.importo) || 0), 0)), el = document.getElementById("pag-somma");
-		if (el) {
-			el.textContent = pagTestoSomma(somma, resto);
-			el.className = "pag-somma " + (Math.abs(somma - resto) < .01 ? "ok" : "no");
-		}
-	}
-	function pagPianoDaSalvare(conPagamento) {
-		const gia = r2(pag.t.pagato + (conPagamento ? Number(pag.importo) || 0 : 0));
-		const righe = pag.righe.filter((r) => Number(r.importo) > 0 && r.scadenza).map((r) => ({
-			importo: r2(r.importo),
-			scadenza: r.scadenza
-		}));
-		return (gia > 0 ? [{
-			importo: gia,
-			scadenza: conPagamento && Number(pag.importo) > 0 ? pag.data : pag.t.storico[pag.t.storico.length - 1]?.pagato_il || oggiIso$1()
-		}] : []).concat(righe);
-	}
-	async function pagRegistra() {
-		const v = r2(pag.importo);
-		if (v <= 0 && !pag.rateAperte) {
-			showToast("Scrivi l'importo ricevuto");
-			return;
-		}
-		if (v > pag.t.residuo + .005) {
-			showToast(`L'importo supera quanto resta (${pagEuro(pag.t.residuo)})`);
-			return;
-		}
-		if (pag.data > oggiIso$1()) {
-			showToast("Il giorno del pagamento è nel futuro");
-			return;
-		}
-		const b = document.getElementById("pag-registra");
-		if (b) b.disabled = true;
-		try {
-			if (pag.rateAperte) {
-				const e = await PagDB.salvaRate(pag.t, pagPianoDaSalvare(v > 0));
-				if (e) throw e;
-			}
-			let saldato = false;
-			if (v > 0) {
-				const { data, error } = await PagDB.registra(pag.t, v, pag.data, pag.modo, pag.nota);
-				if (error) throw error;
-				saldato = !!data?.saldato;
-			}
-			closeModal("modal-pagamento");
-			showToast(v <= 0 ? "Rate salvate" : saldato ? "Pagamento registrato: saldato" : `Registrati ${pagEuro(v)} · restano ${pagEuro(r2(pag.t.residuo - v))}`);
-			await pagDopo();
-		} catch (e) {
-			if (b) b.disabled = false;
-			showToast(pagErrore(e));
-		}
-	}
-	async function pagSalvaSoloRate() {
-		const e = await PagDB.salvaRate(pag.t, pagPianoDaSalvare(false));
-		if (e) {
-			showToast(pagErrore(e));
-			return;
-		}
-		closeModal("modal-pagamento");
-		showToast("Rate salvate");
-		await pagDopo();
-	}
-	async function pagTogliRate() {
-		if (!await chiediSiNo("Togliere le rate?", "I pagamenti già registrati restano; spariscono solo le scadenze.")) return;
-		const e = await PagDB.salvaRate(pag.t, []);
-		if (e) {
-			showToast(pagErrore(e));
-			return;
-		}
-		showToast("Rate tolte");
-		await pagCarica();
-		pag.t.rate = [];
-		pagRender();
-		pagDopo();
-	}
-	async function pagElimina(gruppo) {
-		if (!await chiediSiNo("Eliminare questo pagamento?", "Usalo solo se l'hai registrato per sbaglio: l'importo torna da incassare.")) return;
-		const e = await PagDB.elimina(gruppo);
-		if (e) {
-			showToast(pagErrore(e));
-			return;
-		}
-		closeModal("modal-pagamento");
-		showToast("Pagamento eliminato");
-		await pagDopo();
-	}
-	async function pagSollecita(interventoId, contoId, btn) {
-		if (btn) btn.disabled = true;
-		const { data, error } = await PagDB.sollecita(interventoId, contoId);
-		if (error) {
-			if (btn) btn.disabled = false;
-			showToast(pagErrore(error));
-			return;
-		}
-		showToast(data?.ok ? "Promemoria mandato in chat al cliente" : "Il cliente non è su Equo: ricordaglielo tu (WhatsApp o telefono)");
-	}
-	function pagErrore(e) {
-		const m = String(e?.message || e || "");
-		if (/equo_registra_pagamento|equo_salva_rate|incassi_tranche|could not find the function/i.test(m)) return "Manca un aggiornamento del database: avvisa l'assistenza Equo.";
-		return m ? m.replace(/^.*?ERROR:\s*/, "") : "Non riuscito, riprova.";
-	}
-	async function pagDopo() {
-		await pagCarica();
-		if (typeof renderIncassi$1 === "function") await renderIncassi$1();
-		if (currentClienteId) {
-			caricaContiCliente(currentClienteId);
-			loadClienteInterventi(currentClienteId);
-		}
-		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
-	}
-	var PagDB = {
-		async registra(t, importo, data, modo, nota) {
-			if (DEMO_MODE) return pagDemoRegistra(t, importo, data, modo, nota);
-			const { data: d, error } = await sb.rpc("equo_registra_pagamento", {
-				p_intervento: t.tipo === "lavoro" ? t.id : null,
-				p_conto: t.tipo === "conto" ? t.id : null,
-				p_importo: importo,
-				p_data: data,
-				p_modo: modo,
-				p_nota: nota || null
-			});
-			if (error) console.error("equo_registra_pagamento:", error);
-			return {
-				data: d,
-				error
-			};
-		},
-		async salvaRate(t, rate) {
-			if (DEMO_MODE) {
-				demoState.rate = (demoState.rate || []).filter((r) => t.tipo === "lavoro" ? r.intervento_id !== t.id : r.conto_id !== t.id);
-				rate.forEach((r, k) => demoState.rate.push({
-					id: "dr-" + Date.now().toString(36) + k,
-					intervento_id: t.tipo === "lavoro" ? t.id : null,
-					conto_id: t.tipo === "conto" ? t.id : null,
-					n: k + 1,
-					importo: r.importo,
-					scadenza: r.scadenza
-				}));
-				return null;
-			}
-			const { error } = await sb.rpc("equo_salva_rate", {
-				p_intervento: t.tipo === "lavoro" ? t.id : null,
-				p_conto: t.tipo === "conto" ? t.id : null,
-				p_rate: rate
-			});
-			if (error) console.error("equo_salva_rate:", error);
-			return error || null;
-		},
-		async elimina(gruppo) {
-			if (DEMO_MODE) {
-				const via = demoState.tranche.filter((x) => x.gruppo === gruppo);
-				demoState.tranche = demoState.tranche.filter((x) => x.gruppo !== gruppo);
-				via.forEach((x) => {
-					const i = demoState.interventiMascalcia.find((y) => y.id === x.intervento_id);
-					if (i && i.stato_pagamento === "saldato") {
-						i.stato_pagamento = "da_saldare";
-						i.saldato_il = null;
-					}
-				});
-				return null;
-			}
-			const { error } = await sb.rpc("equo_elimina_pagamento", { p_gruppo: gruppo });
-			if (error) console.error("equo_elimina_pagamento:", error);
-			return error || null;
-		},
-		async sollecita(interventoId, contoId) {
-			if (DEMO_MODE) return {
-				data: { ok: true },
-				error: null
-			};
-			return await sb.rpc("equo_sollecita_rata", {
-				p_intervento: interventoId || null,
-				p_conto: contoId || null
-			});
-		}
-	};
-	function pagDemoRegistra(t, importo, data, modo, nota) {
-		const gruppo = "dg-" + Date.now().toString(36);
-		const salda = (i) => {
-			i.stato_pagamento = "saldato";
-			i.saldato_il = (/* @__PURE__ */ new Date(data + "T12:00")).toISOString();
-		};
-		if (t.tipo === "lavoro") {
-			const i = demoState.interventiMascalcia.find((x) => x.id === t.id);
-			demoState.tranche.push({
-				id: gruppo,
-				gruppo,
-				intervento_id: t.id,
-				conto_id: null,
-				importo,
-				pagato_il: data,
-				modo,
-				nota
-			});
-			const ok = pagPagato(t.id) + importo >= Number(i.importo) - .005;
-			if (ok) salda(i);
-			return {
-				data: {
-					ok: true,
-					saldato: ok
-				},
-				error: null
-			};
-		}
-		const c = (demoState.conti || []).find((x) => x.id === t.id);
-		let resto = importo;
-		(c?.righe || []).slice().sort((a, b) => a.data_intervento.localeCompare(b.data_intervento)).forEach((r) => {
-			const i = demoState.interventiMascalcia.find((x) => x.id === r.intervento_id);
-			if (!i || i.stato_pagamento === "saldato" || resto <= .005) return;
-			const manca = r2(Number(r.importo) - pagPagato(i.id)), q = Math.min(manca, resto);
-			if (q <= 0) return;
-			demoState.tranche.push({
-				id: gruppo + r.intervento_id,
-				gruppo,
-				intervento_id: i.id,
-				conto_id: c.id,
-				importo: q,
-				pagato_il: data,
-				modo,
-				nota
-			});
-			resto = r2(resto - q);
-			if (q >= manca - .005) salda(i);
-		});
-		const tutto = (c?.righe || []).every((r) => demoState.interventiMascalcia.find((x) => x.id === r.intervento_id)?.stato_pagamento === "saldato");
-		if (tutto && c) {
-			c.stato = "pagato";
-			c.pagato_il = (/* @__PURE__ */ new Date(data + "T12:00")).toISOString();
-		}
-		return {
-			data: {
-				ok: true,
-				saldato: tutto
-			},
-			error: null
-		};
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/058-scheda-cliente-pulsante-elenco-dei-conti.js
-	async function caricaContiCliente(clienteId) {
-		const box = document.getElementById("cliente-conti-box");
-		if (!box) return;
-		if (incassiNascosti()) {
-			box.innerHTML = "";
-			return;
-		}
-		const [lista] = await Promise.all([ContoDB.lista(clienteId), pagCarica()]);
-		if (currentClienteId !== clienteId) return;
-		const badge = (s, id) => s === "pagato" ? "<span class=\"badge badge-green\">Pagato</span>" : s === "annullato" ? "<span class=\"badge\" style=\"opacity:.7\">Annullato</span>" : pagPagatoConto(id) > 0 ? "<span class=\"badge\" style=\"color:var(--accent)\">Acconto</span>" : "<span class=\"badge badge-red\">Da incassare</span>";
-		box.innerHTML = `<div class="card" style="margin:14px 0">
-    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="apriNuovoConto('${clienteId}')">Fai il conto</button>
-      <button class="btn btn-outline" style="flex:1" onclick="apriResoconto('${clienteId}')"><span class="fa-icon"><i class="fa-solid fa-file-pdf"></i></span> Resoconto PDF</button></div>
-    ${lista.length ? `<div class="clienti-sez-title" style="margin:14px 0 6px">CONTI FATTI</div>` + lista.map((c) => `
-      <div onclick="apriInvioConto('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
-        <div style="flex:1;min-width:0"><b>${contoCodice(c)}</b><div class="muted" style="font-size:12px">${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</div></div>
-        <div style="text-align:right"><b>${contoEuro(c.totale)}</b><div style="margin-top:2px">${badge(c.stato, c.id)}</div></div>
-      </div>`).join("") : ""}
-  </div>`;
-	}
-	function htmlContiAperti(lista, conCliente) {
-		if (!lista || !lista.length) return "";
-		const tot = lista.reduce((t, c) => t + Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)), 0);
-		return `<div class="conti-aperti">
-    <div class="conti-aperti-t"><b>Conti mandati, da incassare</b><span>${lista.length} · ${contoEuro(tot)}</span></div>
-    ${lista.map((c) => `<button type="button" class="conti-aperti-r" onclick="apriInvioConto('${c.id}')">
-      <span class="c"><b>${contoCodice(c)}${conCliente ? " · " + escapeHtml(clienteDiId$1(c.cliente_mascalcia_id)?.nome || "Cliente") : ""}</b><small>${contoData(c.creato_il)} · ${contoLavori(c.n_lavori)}</small>${pagHtmlConto(c)}</span>
-      <span class="e">${contoEuro(Math.max(0, (Number(c.totale) || 0) - pagPagatoConto(c.id)))}<small>Apri</small></span></button>`).join("")}
-  </div>`;
-	}
-	async function caricaContiAperti(boxId) {
-		const box = document.getElementById(boxId);
-		if (!box) return;
-		if (incassiNascosti()) {
-			box.innerHTML = "";
-			return;
-		}
-		box.innerHTML = htmlContiAperti(await ContoDB.aperti(), true);
-	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/047-incassi-saldati-per-periodo-da-saldare-p.js
 	var incMesi = (() => {
 		try {
@@ -5027,7 +5118,7 @@
 		document.getElementById("inc-elenco-n").textContent = lista.length ? String(lista.length) : "";
 		const vis = incElencoTutto ? lista : lista.slice(0, 30);
 		document.getElementById("inc-elenco").innerHTML = !lista.length ? "<div class=\"muted\" style=\"font-size:13px\">Nessun lavoro saldato nel periodo.</div>" : vis.map((i) => `<div class="inc-voce"><div class="c"><b>${escapeHtml(i.clienti_mascalcia?.nome || "")}${i.cavalli_clienti_mascalcia?.nome ? " · " + escapeHtml(i.cavalli_clienti_mascalcia.nome) : ""}</b>
-        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i._giorno || i.saldato_il ? " · " + (i._tranche ? "pagamento" : i._resto ? "saldo" : "pagato") + " " + formatDataBreve(giornoPagamento(i)) : ""}</span></div>
+        <span>${escapeHtml(TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura)} · lavoro ${formatDataBreve(i.data_intervento)}${i._giorno || i.saldato_il ? " · " + (i._tranche ? "pagamento" : i._resto ? "saldo" : "pagato") + " " + formatDataBreve(giornoPagamento(i)) : ""}${i._tranche?.modo ? " · " + escapeHtml(pagNomeModo(i._tranche.modo)) : ""}</span></div>
         <span class="imp">${i.importo != null ? euroTondo(i.importo) : "—"}</span></div>`).join("") + (lista.length > vis.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="incElencoTutto=true;renderIncassiSaldati()">Mostra tutti (${lista.length})</button>` : "");
 	}
 	function sceltaPeriodoIncassi(k) {
@@ -8930,7 +9021,10 @@
 	}
 	function razzaCerca(testo) {
 		const n = razzaNorm(testo);
-		if (!n) return RAZZE_EQUO.filter((r) => r.italiana).slice(0, 8);
+		if (!n) {
+			const pos = (r) => RAZZE_DIFFUSE.indexOf(r.sigla);
+			return RAZZE_EQUO.filter((r) => !RAZZE_FISSE.includes(r.nome)).sort((a, b) => (pos(a) < 0) - (pos(b) < 0) || pos(a) - pos(b) || a.nome.localeCompare(b.nome, "it"));
+		}
 		const parole = String(testo).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter(Boolean);
 		const punteggio = (r) => {
 			const nome = razzaNorm(r.nome), w = r.nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/);
@@ -8945,7 +9039,7 @@
 			r,
 			p: punteggio(r),
 			i
-		})).filter((x) => x.p < 9).sort((a, b) => a.p - b.p || (RAZZE_DIFFUSE.indexOf(a.r.sigla) < 0) - (RAZZE_DIFFUSE.indexOf(b.r.sigla) < 0) || b.r.italiana - a.r.italiana || a.i - b.i).slice(0, 8).map((x) => x.r);
+		})).filter((x) => x.p < 9).sort((a, b) => a.p - b.p || (RAZZE_DIFFUSE.indexOf(a.r.sigla) < 0) - (RAZZE_DIFFUSE.indexOf(b.r.sigla) < 0) || b.r.italiana - a.r.italiana || a.i - b.i).slice(0, 40).map((x) => x.r);
 	}
 	function razzaCampo(id) {
 		const inp = document.getElementById(id);
@@ -10043,14 +10137,21 @@
 		await renderIncassi$1();
 	}
 	async function segnaSaldatoIncassi(id, btn) {
-		btn.disabled = true;
-		const { error } = await DB.updateInterventoMascalcia(id, { stato_pagamento: "saldato" });
+		const i = incTutti.find((x) => x.id === id);
+		const resto = i && Number(i.importo) > 0 ? pagResiduo(i) : 0;
+		const modo = await pagChiediModo("Come ha pagato?", [
+			i?.clienti_mascalcia?.nome,
+			i?.cavalli_clienti_mascalcia?.nome,
+			resto > 0 ? euroTondo(resto) : ""
+		].filter(Boolean).join(" · "));
+		if (!modo) return;
+		if (btn) btn.disabled = true;
+		const { error } = await pagSaldaConModo(i || id, modo);
 		if (error) {
-			btn.disabled = false;
+			if (btn) btn.disabled = false;
 			showToast("Errore: " + error.message);
 			return;
 		}
-		const i = incTutti.find((x) => x.id === id);
 		if (i && DEMO_MODE) i.saldato_il = (/* @__PURE__ */ new Date()).toISOString();
 		showToast("Segnato come saldato");
 		incTieniOrdine();
@@ -10061,11 +10162,12 @@
 		if (!righe.length) return;
 		const nome = righe[0].clienti_mascalcia?.nome || "questo cliente";
 		const tot = righe.reduce((s, i) => s + (Number(i.importo) > 0 ? pagResiduo(i) : 0), 0);
-		if (!await chiediConferma(`Segno saldati i ${righe.length} lavori di ${nome}${tot > 0 ? " (" + euroTondo(tot) + ")" : ""}? Escono da «Da incassare» e vanno negli incassi di oggi.`)) return;
+		const modo = await pagChiediModo(`Tutto saldato · ${nome}`, `${righe.length} lavori${tot > 0 ? " · " + euroTondo(tot) : ""}: escono da «Da incassare» e vanno negli incassi di oggi. Come ha pagato?`);
+		if (!modo) return;
 		if (btn) btn.disabled = true;
 		let fatti = 0, errore = null;
 		for (const i of righe) {
-			const { error } = await DB.updateInterventoMascalcia(i.id, { stato_pagamento: "saldato" });
+			const { error } = await pagSaldaConModo(i, modo);
 			if (error) {
 				errore = error;
 				break;
@@ -11118,7 +11220,8 @@
 			const eraRichiesta = !diGruppo && STATI_NON_CONFERMATI.includes(statoPrec);
 			const stato = diGruppo ? statoPrec : eraRichiesta ? data_intervento >= isoLocale(/* @__PURE__ */ new Date()) ? "programmato" : "fatto" : futuro ? "programmato" : statoPrec || "fatto";
 			const diventaFatto = stato === "fatto" && statoPrec !== "fatto";
-			let scadenzaComune = null, importi = null, ferriScelti = null;
+			let scadenzaComune = null, importi = null, ferriScelti = null, modoSaldato = null;
+			const daSaldareConModo = [];
 			if (diventaFatto) {
 				const r0 = righe[0] || {};
 				const rFerri = righe.filter((r) => conFerri(r.tipo));
@@ -11147,6 +11250,7 @@
 				});
 				if (TIPO_FERRATURA_INTERVALLI[tipo_ferratura]) scadenzaComune = ps;
 				statoPagamento = prendiPagamentoScelto() || statoPagamento;
+				modoSaldato = statoPagamento === "saldato" && prendiModoScelto();
 				importi = prendiImportiScelti();
 				ferriScelti = prendiFerriScelti();
 			}
@@ -11202,16 +11306,26 @@
 					stato,
 					prossima_scadenza,
 					importo,
-					stato_pagamento: statoPagamento,
+					stato_pagamento: modoSaldato && Number(importo) > 0 && interventoInModifica?.stato_pagamento !== "saldato" ? interventoInModifica?.stato_pagamento || "da_saldare" : statoPagamento,
 					note,
 					...typeof ofCampiAiutanteIntervento === "function" ? ofCampiAiutanteIntervento(interventoInModifica) : {}
 				};
-				const { error } = interventoInModifica ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload) : await DB.insertInterventoMascalcia({
+				const ris = interventoInModifica ? await DB.updateInterventoMascalcia(interventoInModifica.id, payload) : await DB.insertInterventoMascalcia({
 					cliente_mascalcia_id: r.cliente || cliente_mascalcia_id,
 					...payload
 				});
+				const { error } = ris;
 				if (error) return errore("Errore: " + error.message + (salvati ? ` (salvati ${salvati} su ${righe.length})` : ""));
 				salvati++;
+				const idRiga = interventoInModifica ? interventoInModifica.id : ris.data?.id;
+				if (modoSaldato && idRiga && payload.stato_pagamento !== "saldato") daSaldareConModo.push({
+					id: idRiga,
+					importo
+				});
+			}
+			for (const x of daSaldareConModo) {
+				const rr = await pagSaldaConModo(x, modoSaldato);
+				if (rr.error) showToast("Salvato, ma il pagamento non è registrato: " + rr.error.message);
 			}
 			closeModal("modal-add-intervento");
 			const nomeCv = nomiCavalli;
@@ -12581,6 +12695,7 @@
 			richiamoTotale();
 			document.getElementById("ric-pag-imp").textContent = "Pagamento";
 			if (conPag) richiamoPagamento(pagamento === "saldato" ? "saldato" : "da_saldare");
+			else richiamoModiRender();
 			document.getElementById("ric-passo1").style.display = "block";
 			document.getElementById("ric-passo2").style.display = "none";
 			document.getElementById("ric-passo3").style.display = "none";
@@ -12661,6 +12776,33 @@
 	function richiamoPagamento(v) {
 		if (richiamoStato) richiamoStato.pagamento = v;
 		document.querySelectorAll("#ric-pag .ric-pag-scelte button").forEach((b) => b.classList.toggle("on", b.dataset.p === v));
+		richiamoModiRender();
+	}
+	function richiamoModiRender() {
+		const pagBox = document.getElementById("ric-pag");
+		if (!pagBox) return;
+		let mr = document.getElementById("ric-pag-modi");
+		if (!mr) {
+			mr = document.createElement("div");
+			mr.id = "ric-pag-modi";
+			mr.className = "ric-pag-modi solo-incassi";
+			pagBox.after(mr);
+		}
+		const r = richiamoStato, vedi = !!(r && r.pagamento === "saldato" && pagBox.style.display !== "none");
+		mr.style.display = vedi ? "" : "none";
+		if (!vedi) return;
+		if (!r.modo) r.modo = pagModoUltimo();
+		mr.innerHTML = `<span>Come ha pagato?</span><div class="pag-chips">${pagModiHtml(r.modo, "richiamoModo")}</div>`;
+	}
+	function richiamoModo(m) {
+		if (richiamoStato) richiamoStato.modo = m;
+		richiamoModiRender();
+	}
+	var richiamoModoScelto = null;
+	function prendiModoScelto() {
+		const v = richiamoModoScelto;
+		richiamoModoScelto = null;
+		return v;
 	}
 	var richiamoPagamentoScelto = null;
 	function prendiPagamentoScelto() {
@@ -12732,6 +12874,7 @@
 		}
 		richiamoStato = null;
 		richiamoPagamentoScelto = r.pagamento !== void 0 && !incassiNascosti() ? r.pagamento || null : null;
+		richiamoModoScelto = richiamoPagamentoScelto === "saldato" ? r.modo || null : null;
 		richiamoImportiScelti = r.pagamento !== void 0 && !incassiNascosti() ? [...document.querySelectorAll("#ric-importi .ric-imp")].map((x) => x.value === "" || isNaN(Number(x.value)) ? null : Math.round(Number(x.value) * 100) / 100) : null;
 		richiamoFerriScelti = r.ferri ? {
 			nuovi: !!document.getElementById("ric-ferri-chk").checked,
@@ -12745,6 +12888,7 @@
 	async function richiamoPerFatto(e) {
 		const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
 		richiamoPagamentoScelto = null;
+		richiamoModoScelto = null;
 		richiamoImportiScelti = null;
 		richiamoFerriScelti = null;
 		richiamoComePrimaScelto = null;
@@ -14930,10 +15074,13 @@
 		agDisegnaSaldare();
 	}
 	async function agDsSaldato(id, btn) {
-		btn.disabled = true;
-		const { error } = await DB.updateInterventoMascalcia(id, { stato_pagamento: "saldato" });
+		const i = (agDati.saldare || []).find((x) => x.id === id);
+		const modo = await pagChiediModo("Come ha pagato?", [agNomeCavallo(i || {}), i && i.importo != null ? euroTondo(i.importo) : ""].filter(Boolean).join(" · "));
+		if (!modo) return;
+		if (btn) btn.disabled = true;
+		const { error } = await pagSaldaConModo(i || id, modo);
 		if (error) {
-			btn.disabled = false;
+			if (btn) btn.disabled = false;
 			showToast("Errore: " + error.message);
 			return;
 		}
@@ -15730,6 +15877,9 @@
 		tcScegliKm,
 		tcTornaACasa,
 		pagApri,
+		pagModoScegli,
+		pagChiediModo,
+		pagSaldaConModo,
 		pagApriRate,
 		pagElimina,
 		pagImporto,
@@ -15943,6 +16093,7 @@
 		richiamoFerriRender,
 		richiamoMostraAzioni,
 		richiamoPagamento,
+		richiamoModo,
 		richiamoRimanda,
 		richiamoRuotaScroll,
 		richiamoTotale,

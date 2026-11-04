@@ -1,11 +1,12 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
-import { giorniRichiamoSuggeriti, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, richiamoPerFatto } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
+import { giorniRichiamoSuggeriti, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, prendiModoScelto, richiamoPerFatto } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
 import { aggiungiGiorniIso, isoLocale } from "./051-modal-appuntamento-maniscalco-nuovo-modi.js";
 import { avvisaClienteAppuntamento, chiediSiNo, clienteCollegatoEquo } from "./052-ferro-standard-nella-scheda-del-cavallo.js";
 import { renderAgendaSettimana } from "./053-agenda-settimanale-maniscalco.js";
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
+import { pagSaldaConModo } from "./113-pagamenti-a-rate.js";
 /* ---------- «FATTO»: UNA SOLA REGOLA (28/10/2026, punto 3 dell'unificazione) ----------
    segnaFatto(e): Agenda (tasto Fatto), finestra dell'appuntamento, Giro della zona, Agenda completa.
      · appuntamento futuro: «L'hai già fatto oggi?» con il Sì/No di Equo (prima era la finestrella del telefono);
@@ -30,6 +31,9 @@ async function datiDalRiquadro(e, anticipo){
   const pag = prendiPagamentoScelto(); if(pag) upd.stato_pagamento = pag;
   const imp = prendiImportiScelti(); if(imp) upd.importo = imp[0];
   const fs = prendiFerriScelti(); if(fs){ upd.ferri_nuovi = fs.nuovi; if(fs.nuovi) upd.quantita_ferri = fs.n; }
+  // 4/11/2026: «Saldato» con il metodo → dopo il salvataggio si registra il pagamento (pagSaldaConModo, 113)
+  const modo = prendiModoScelto();
+  if(pag === "saldato" && modo && Number(upd.importo ?? e.importo) > 0 && e.stato_pagamento !== "saldato"){ delete upd.stato_pagamento; upd._modo = modo; }
   return upd;
 }
 
@@ -41,8 +45,10 @@ async function segnaFatto(e, opz = {}){
   if(anticipo === null) return { ok: false };
   if(opz.prima) opz.prima();
   const upd = await datiDalRiquadro(e, anticipo);
+  const modo = upd._modo; delete upd._modo;
   const { error } = await DB.updateInterventoMascalcia(e.id, upd);
   if(error){ showToast("Errore: " + error.message); return { ok: false, error }; }
+  if(modo){ const r = await pagSaldaConModo({ ...e, ...upd }, modo); if(r.error) showToast("Fatto, ma il pagamento non è registrato: " + r.error.message); else upd.stato_pagamento = "saldato"; }
   showToast("Segnato come fatto");
   await renderAgendaSettimana();
   await renderIncassi();

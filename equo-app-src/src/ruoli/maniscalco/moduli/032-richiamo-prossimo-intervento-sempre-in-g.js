@@ -8,6 +8,7 @@ import { caricaCavalliMiei } from "./086-indice-dei-cavalli-dei-clienti-professi
 import { intervalloStruttura } from "./102-scadenze-della-struttura.js";
 import { intervalloCavallo, prezzoCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 import { vistaCompleta } from "./097-versione-semplice-completa-dell-app-mani.js";
+import { pagModoUltimo, pagModiHtml } from "./113-pagamenti-a-rate.js";
 /* ---------- RICHIAMO (prossimo intervento) — sempre in GIORNI ----------
    Quando il maniscalco segna FATTO una ferratura/mezza ferratura/pareggio si apre il pop-up
    "Inserisco il prossimo intervento tra N giorni" → OK oppure CAMBIA (ruota 1-60 giorni).
@@ -121,6 +122,7 @@ function chiediRichiamo({ tipo, tipo_altro, data_intervento, cavallo, giorni, da
     richiamoTotale();
     document.getElementById("ric-pag-imp").textContent = "Pagamento";
     if(conPag) richiamoPagamento(pagamento === "saldato" ? "saldato" : "da_saldare");
+    else richiamoModiRender();
     document.getElementById("ric-passo1").style.display = "block";
     document.getElementById("ric-passo2").style.display = "none";
     document.getElementById("ric-passo3").style.display = "none";
@@ -187,7 +189,22 @@ const TIPO_INTERVENTO_LABEL_APP = { ferratura: "Ferratura", mezza_ferratura: "Me
 function richiamoPagamento(v){
   if(richiamoStato) richiamoStato.pagamento = v;
   document.querySelectorAll("#ric-pag .ric-pag-scelte button").forEach(b => b.classList.toggle("on", b.dataset.p === v));
+  richiamoModiRender();
 }
+// 4/11/2026: con «Saldato» si sceglie anche come ha pagato (appunto), proposto l'ultimo usato
+function richiamoModiRender(){
+  const pagBox = document.getElementById("ric-pag"); if(!pagBox) return;
+  let mr = document.getElementById("ric-pag-modi");
+  if(!mr){ mr = document.createElement("div"); mr.id = "ric-pag-modi"; mr.className = "ric-pag-modi solo-incassi"; pagBox.after(mr); }
+  const r = richiamoStato, vedi = !!(r && r.pagamento === "saldato" && pagBox.style.display !== "none");
+  mr.style.display = vedi ? "" : "none";
+  if(!vedi) return;
+  if(!r.modo) r.modo = pagModoUltimo();
+  mr.innerHTML = `<span>Come ha pagato?</span><div class="pag-chips">${pagModiHtml(r.modo, "richiamoModo")}</div>`;
+}
+function richiamoModo(m){ if(richiamoStato) richiamoStato.modo = m; richiamoModiRender(); }
+let richiamoModoScelto = null;
+function prendiModoScelto(){ const v = richiamoModoScelto; richiamoModoScelto = null; return v; }
 // scelta fatta nel pop-up (letta una volta sola da chi ha chiesto il richiamo)
 let richiamoPagamentoScelto = null;
 function prendiPagamentoScelto(){ const v = richiamoPagamentoScelto; richiamoPagamentoScelto = null; return v; }
@@ -242,6 +259,7 @@ function richiamoConferma(confermatoPoco){
   }
   richiamoStato = null;
   richiamoPagamentoScelto = r.pagamento !== undefined && !incassiNascosti() ? (r.pagamento || null) : null;
+  richiamoModoScelto = richiamoPagamentoScelto === "saldato" ? (r.modo || null) : null;
   richiamoImportiScelti = r.pagamento !== undefined && !incassiNascosti()
     ? [...document.querySelectorAll("#ric-importi .ric-imp")].map(x => x.value === "" || isNaN(Number(x.value)) ? null : Math.round(Number(x.value) * 100) / 100)
     : null;
@@ -255,7 +273,7 @@ let richiamoComePrimaScelto = null;
 // l'importo di ogni cavallo e il pagamento; restituisce la data del richiamo (gli importi con prendiImportiScelti)
 async function richiamoPerFatto(e){
   const s = await giorniRichiamoSuggeriti(e.tipo_ferratura, e.cavallo_cliente_id, e.horse_id, e.id, e.cliente_mascalcia_id);
-  richiamoPagamentoScelto = null; richiamoImportiScelti = null; richiamoFerriScelti = null; richiamoComePrimaScelto = null;
+  richiamoPagamentoScelto = null; richiamoModoScelto = null; richiamoImportiScelti = null; richiamoFerriScelti = null; richiamoComePrimaScelto = null;
   const conFerri = e.tipo_ferratura === "ferratura" || e.tipo_ferratura === "mezza_ferratura";
   const ferri = e.ferri !== undefined ? e.ferri : conFerri
     ? { q: Number(e.quantita_ferri) || (e.tipo_ferratura === "mezza_ferratura" ? 2 : 4), nome: e.cavallo || agNomeCavalloSicuro(e) || null, nuovi: e.ferri_nuovi } : null;
@@ -283,4 +301,4 @@ async function loadClientiMascalcia(){
 
 function clientiAttivi(){ return (clientiMascalcia || []).filter(c => !c.archiviato_il); }
 
-export { agNomeCavalloSicuro, caricaRichiamiPredefiniti, intervalloPredefinito, clientiAttivi, giorniRichiamoSuggeriti, giorniTra, importiSuggeriti, loadClientiMascalcia, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, richiamoCambia, richiamoConferma, richiamoFerriN, richiamoFerriRender, richiamoPagamento, richiamoPerFatto, richiamoRuotaScroll, richiamoTotale, richiamoVaiA, salvaRichiamiPredefiniti };
+export { agNomeCavalloSicuro, caricaRichiamiPredefiniti, intervalloPredefinito, clientiAttivi, giorniRichiamoSuggeriti, giorniTra, importiSuggeriti, loadClientiMascalcia, prendiFerriScelti, prendiImportiScelti, prendiPagamentoScelto, prendiModoScelto, richiamoModo, richiamoModiRender, richiamoCambia, richiamoConferma, richiamoFerriN, richiamoFerriRender, richiamoPagamento, richiamoPerFatto, richiamoRuotaScroll, richiamoTotale, richiamoVaiA, salvaRichiamiPredefiniti };

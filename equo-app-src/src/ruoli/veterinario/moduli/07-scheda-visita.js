@@ -55,6 +55,8 @@ const CAMPI_MTC = [
   { k: "polso_q", e: "Qualità del polso", t: "multi", o: ["Scivoloso", "A corda", "Sottile", "Irregolare"], s: "Polso", tab: "mtc" },
   // 2/11/2026: i punti si segnano sul disegno del cavallo, dove li trova il veterinario (13-mappe.js)
   { k: "mappa_mtc", e: "Punti sul cavallo", t: "mappa", modo: "punti", s: "Scansione dei punti diagnostici (reattività 0–3)", tab: "mtc" },
+  // 4/11/2026 (Laura): aree macroscopiche del cavallo, più aree insieme; ogni tocco aumenta la reattività 1 · 2 · 3 (13-mappe.js)
+  { k: "aree_reattive", e: "Aree reattive", t: "mappa", modo: "aree", scala: true, s: "Aree reattive (0–3)", tab: "mtc" },
   // vecchia scansione a elenco: si vede solo nelle visite che la usavano già
   ...PUNTI_DIAGNOSTICI.map(([p, n]) => ({ k: "scan_" + p, e: p + " · " + n, t: "scala", max: 3, s: "Scansione dei punti diagnostici (reattività 0–3)", tab: "mtc", rosso: true, vecchio: true, se: d => d["scan_" + p] != null })),
   { k: "pr_yy", e: "Yin / Yang", t: "scelta", o: ["Yin", "Yang"], s: "Otto principi e sindrome", tab: "mtc" },
@@ -72,8 +74,10 @@ const CAMPI_MTC = [
   { k: "tecnica", e: "Tecnica", t: "multi", o: ["Ago secco", "Elettroagopuntura", "Acquapuntura", "Moxa", "Laserpuntura", "Tui-na"], s: "Agopuntura", tab: "tratt" },
   { k: "hz", e: "Frequenza (Hz)", t: "numero", s: "Agopuntura", tab: "tratt", mezzo: true, se: d => (d.tecnica || []).includes("Elettroagopuntura") },
   { k: "minuti", e: "Durata (min)", t: "numero", s: "Agopuntura", tab: "tratt", mezzo: true, se: d => (d.tecnica || []).includes("Elettroagopuntura") },
-  { k: "punti", e: "Punti trattati", t: "multi", o: ["GV20", "BL18", "BL23", "BL25", "GB21", "GB34", "ST36", "SP6", "LI4", "KID1"], s: "Agopuntura", tab: "tratt" },
-  { k: "punti_altri", e: "Altri punti", t: "riga", s: "Agopuntura", tab: "tratt" },
+  // 4/11/2026 (Laura): elenco completo dei punti per meridiano, un clic segna e un clic toglie, anche scritti a mano (15-punti.js)
+  { k: "punti", e: "Punti trattati", t: "punti", s: "Agopuntura", tab: "tratt" },
+  { k: "punti_altri", e: "Note sui punti", t: "riga", s: "Agopuntura", tab: "tratt", ph: "es. BL23 bilaterale, 10 min" },
+  { k: "aree_trattate", e: "Aree trattate", t: "mappa", modo: "aree", s: "Aree trattate", tab: "tratt" },
   { k: "fito", e: "Fitoterapia / formula", t: "riga", s: "Agopuntura", tab: "tratt", ph: "es. formula e durata" },
   { k: "alimenti", e: "Consigli alimentari (MTC)", t: "riga", s: "Agopuntura", tab: "tratt", ph: "es. alimenti tiepidi, meno concentrati" },
   { k: "fisio_t", e: "Tecniche di fisioterapia", t: "multi", o: ["Massaggio", "Stretching passivo", "Mobilizzazioni", "Linfodrenaggio", "Laser", "TENS", "Ultrasuoni", "Magnetoterapia", "Kinesio taping"], s: "Fisioterapia", tab: "tratt" },
@@ -106,13 +110,15 @@ const ESEMPI_MODELLI = [
 ];
 const TIPI_CAMPO = [["riga", "Testo breve"], ["testo", "Testo lungo"], ["numero", "Numero"], ["scelta", "Scelta"], ["multi", "Scelta multipla"],
   ["scala", "Scala 0–5"], ["scala3", "Scala 0–3"], ["sino", "Sì / No"], ["data", "Data"], ["mappa_segni", "Mappa del cavallo · segni"], ["mappa_punti", "Mappa del cavallo · punti"],
-  ["mappa_arti", "Arti · tendini"], ["mappa_zoccoli", "Zoccoli · suola"], ["mappa_denti", "Dentatura"], ["mappa_lingua", "Lingua per zone"]];
+  ["mappa_arti", "Arti · tendini"], ["mappa_zoccoli", "Zoccoli · suola"], ["mappa_denti", "Dentatura"], ["mappa_lingua", "Lingua per zone"],
+  ["mappa_aree", "Aree del cavallo"], ["mappa_aree3", "Aree del cavallo · reattività 0–3"], ["punti", "Punti di agopuntura"]];
 const NOME_TIPO = Object.fromEntries(TIPI_CAMPO);
 NOME_TIPO.mappa = "Mappa del cavallo";
 // tipo «mappa_…» dell'editor ⇄ campo { t: "mappa", modo, disegno }
 const TIPO_MAPPA = { mappa_segni: { modo: "segni" }, mappa_punti: { modo: "punti" }, mappa_arti: { modo: "segni", disegno: "arto" },
-  mappa_zoccoli: { modo: "segni", disegno: "zoccoli" }, mappa_denti: { modo: "denti" }, mappa_lingua: { modo: "zone" } };
-const vsNomeTipo = c => c.t === "mappa" ? NOME_TIPO[Object.keys(TIPO_MAPPA).find(t => TIPO_MAPPA[t].modo === c.modo && (TIPO_MAPPA[t].disegno || "") === (c.disegno || "")) || "mappa_segni"]
+  mappa_zoccoli: { modo: "segni", disegno: "zoccoli" }, mappa_denti: { modo: "denti" }, mappa_lingua: { modo: "zone" },
+  mappa_aree: { modo: "aree" }, mappa_aree3: { modo: "aree", scala: true } };
+const vsNomeTipo = c => c.t === "mappa" ? NOME_TIPO[Object.keys(TIPO_MAPPA).find(t => TIPO_MAPPA[t].modo === c.modo && (TIPO_MAPPA[t].disegno || "") === (c.disegno || "") && !!TIPO_MAPPA[t].scala === !!c.scala) || "mappa_segni"]
   : NOME_TIPO[c.t === "scala" && c.max === 3 ? "scala3" : c.t] || c.t;
 
 /* ===================== DATI ===================== */
@@ -195,7 +201,7 @@ async function vsApriDaEvento(id, evento){
     || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find(x => x.id === id);
   if(!e) return showToast("Visita non trovata");
   try{ closeModal("modal-azioni-evento"); }catch(_){}
-  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset(); if(typeof vdReset === "function") vdReset(); if(typeof ptReset === "function") ptReset(); if(typeof mpReset === "function") mpReset();
+  VS.e = e; VS.precedenti = []; vsDemoPrepara(); if(typeof vaReset === "function") vaReset(); if(typeof vdReset === "function") vdReset(); if(typeof ptReset === "function") ptReset(); if(typeof mpReset === "function") mpReset(); if(typeof vpReset === "function") vpReset();
   vsFoglio().classList.add("aperto"); document.body.classList.add("vs-aperto");
   document.getElementById("vs-corpo").innerHTML = '<div class="vs-vuoto">Carico la scheda…</div>';
   document.getElementById("vs-piede").innerHTML = "";
@@ -290,6 +296,7 @@ function vsCampoHtml(c, val, sola){
     case "scala": { const max = c.max || 5, n = Number(val) || 0;
       return `<div class="${cls} pieno vs-scala-r"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-scala">${Array.from({ length: max + 1 }, (_, i) => `<button type="button" class="${i === n && val != null ? "on" : ""}${c.rosso && i >= Math.ceil(max / 2) ? " alto" : ""}" aria-pressed="${i === n && val != null}"${dis} onclick="vsScegli('${c.k}', ${i})">${i}</button>`).join("")}</div></div>`; }
     case "mappa": return typeof mpCampoHtml === "function" ? mpCampoHtml(c, val, sola) : "";
+    case "punti": return typeof vpCampoHtml === "function" ? vpCampoHtml(c, val, sola) : "";
     case "sino": return `<div class="${cls} pieno"><span class="vs-lab">${vsEsc(c.e)}</span><div class="vs-chips">${chip("Sì", val === true, `vsScegli('${c.k}', true)`)}${chip("No", val === false, `vsScegli('${c.k}', false)`)}</div></div>`;
     default: return `<div class="${cls}">${lab}<input id="${id}" value="${vsEsc(val || "")}" placeholder="${vsEsc(c.ph || "")}"${dis} oninput="vsCambia('${c.k}', this.value)"></div>`;
   }

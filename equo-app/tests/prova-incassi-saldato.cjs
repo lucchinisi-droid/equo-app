@@ -34,6 +34,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   for(let k = 0; k < Math.min(n - 1, 4); k++){
     await pg.evaluate(id => { const g = [...document.querySelectorAll("#incassi-da-saldare-list .inc-gruppo")].find(x => x.dataset.cli === id);
       let el = g.nextElementSibling; while(el && !el.classList.contains("inc-voce")) el = el.nextElementSibling; el.querySelector(".inc-saldato").click(); }, primo.id);
+    await attesa(300); await pg.evaluate(() => pagModoScegli("contanti"));   // 4/11/2026: «Come ha pagato?»
     await attesa(500);
   }
   const g1 = await stato();
@@ -44,15 +45,15 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   if(conPiu){
     // prima «No»: non cambia niente
     await pg.evaluate(id => { document.querySelector(`#incassi-da-saldare-list .inc-gruppo[data-cli="${id}"] + .inc-gruppo-az .inc-tutto`).click(); }, conPiu.id); await attesa(300);
-    const domanda = await pg.evaluate(() => document.getElementById("eq-pop-sino")?.textContent.replace(/\s+/g, " ").trim());
-    await pg.evaluate(() => rispondiSiNo(false)); await attesa(500);
+    const domanda = await pg.evaluate(() => document.getElementById("modal-pag-modo")?.textContent.replace(/\s+/g, " ").trim());
+    await pg.evaluate(() => pagModoScegli(null)); await attesa(500);
     const ancora = (await stato()).some(g => g.id === conPiu.id);
     await pg.evaluate(id => { document.querySelector(`#incassi-da-saldare-list .inc-gruppo[data-cli="${id}"] + .inc-gruppo-az .inc-tutto`).click(); }, conPiu.id); await attesa(300);
-    await pg.evaluate(() => rispondiSiNo(true)); await attesa(900);
+    await pg.evaluate(() => pagModoScegli("pos")); await attesa(900);
     const g2 = await stato();
     const rimasti = await pg.evaluate(id => (incTutti || []).filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato" && String(i.cliente_mascalcia_id || "?") === id).length, conPiu.id);
-    ok(/Segno saldati i \d+ lavori di/.test(domanda || "") && ancora && !g2.some(g => g.id === conPiu.id) && rimasti === 0
-      && g2.map(g => g.id).join() === g1.filter(g => g.id !== conPiu.id).map(g => g.id).join(), "«Tutto saldato»: chiede conferma, con No non cambia, con Sì il cliente esce da Da incassare e gli altri restano in ordine " + JSON.stringify({ domanda, g2: g2.map(g => g.nome) }));
+    ok(/Tutto saldato · .*Come ha pagato\?/.test(domanda || "") && ancora && !g2.some(g => g.id === conPiu.id) && rimasti === 0
+      && g2.map(g => g.id).join() === g1.filter(g => g.id !== conPiu.id).map(g => g.id).join(), "«Tutto saldato»: chiede come ha pagato, con Annulla non cambia, con POS il cliente esce da Da incassare e gli altri restano in ordine " + JSON.stringify({ domanda, g2: g2.map(g => g.nome) }));
   }
   // riaprendo la pagina si riordina per importo
   await pg.evaluate(async () => { await renderIncassi(); }); await attesa(500);

@@ -36,8 +36,25 @@ const MP_SET = {
       ["ps", "PSx", { d: "zoccoli", crop: [795, 130, 615, 830], t: "PSx" }], ["pd", "PDx", { d: "zoccoli", crop: [795, 130, 615, 830], spec: true, t: "PDx" }]],
     tipi: [["ascesso", "Ascesso", URG], ["contusione", "Contusione", ORO], ["fessura", "Fessura", TIFS], ["altro", "Altro", GRIGIO]] },
   lingua: { viste: [["li", "Lingua", { d: "lingua" }]] },
-  denti: { viste: [["de", "Dentatura", { d: "denti" }]] }
+  denti: { viste: [["de", "Dentatura", { d: "denti" }]] },
+  // 4/11/2026 (Laura): aree macroscopiche, vista laterale; destra = sinistra specchiata
+  aree: { viste: [["sx", "Sinistra", { d: "sx", t: "lato sinistro" }], ["dx", "Destra", { d: "sx", spec: true, t: "lato destro" }]] }
 };
+// aree del cavallo sulla sagoma di sinistra (coordinate del disegno 1448 × 1086), PROVVISORIE: si rifanno sui disegni anatomici di Laura
+const MP_AREE = [
+  ["testa", "Testa", "95,70 215,40 290,180 300,300 250,330 175,350 100,330"],
+  ["collo", "Collo", "250,90 330,110 560,250 590,300 520,400 420,450 380,360 300,300 290,180"],
+  ["garrese", "Garrese", "560,250 700,290 705,350 590,350 590,300"],
+  ["spalla", "Spalla", "420,450 520,400 590,350 600,450 590,600 440,600 410,520"],
+  ["dorso", "Dorso", "705,295 960,305 960,380 705,370"],
+  ["lombi", "Lombi", "960,305 1080,310 1085,390 960,390"],
+  ["groppa", "Groppa", "1080,310 1180,330 1215,400 1230,460 1085,440"],
+  ["torace", "Torace e costato", "600,370 960,385 960,560 900,610 600,615"],
+  ["coscia", "Coscia", "1085,440 1230,460 1225,600 1190,700 1040,670 1000,560 1030,470"],
+  ["arto_ant", "Arto anteriore", "440,600 600,600 630,1030 420,1030"],
+  ["arto_post", "Arto posteriore", "960,600 1040,670 1190,700 1230,1030 940,1030"]
+];
+const mpAreeVal = v => v && typeof v === "object" && !Array.isArray(v) ? v : {};
 // asse della vista laterale degli arti (specchiata per il lato destro) e confine con la vista palmare/plantare
 const MP_LAT = { da: 200, fino: 760, asse: 470 };   // da: oltre, nella vista specchiata, finirebbe un pezzo della palmare
 // zone dei tendini (ecografia) per altezza, sulla vista palmare/plantare: [nome, y da, y a]
@@ -74,14 +91,14 @@ const MP_PUNTI = [["GV20", "Bai-hui"], ["BL13", "Shu Polmone"], ["BL14", "Shu Pe
 const MP = {};           // stato per campo: { vista, tipo, sel, zoom, attesaNome, cerca }
 const mpCampo = k => (VS.campi || []).find(c => c.k === k) || { k, modo: "segni" };
 const mpDisegno = c => c.modo === "denti" ? "denti" : c.modo === "zone" ? "lingua" : (MP_SET[c.disegno] ? c.disegno : "cavallo");
-const mpSet = c => MP_SET[mpDisegno(c)];
+const mpSet = c => c.modo === "aree" ? MP_SET.aree : MP_SET[mpDisegno(c)];
 const mpTipi = c => mpSet(c).tipi || MP_SET.cavallo.tipi;
 const mpTipo1 = (c, t) => mpTipi(c).find(x => x[0] === t) || mpTipi(c)[mpTipi(c).length - 1];
 const mpVistaDi = (c, v) => mpSet(c).viste.find(x => x[0] === v) || mpSet(c).viste[0];
 const mpNomeVista = (c, v) => mpVistaDi(c, v)[1];
 const mpTestoVista = (c, v) => { const x = mpVistaDi(c, v); return x[2].t || x[1].toLowerCase(); };
 const mpStato = k => (MP[k] = MP[k] || { vista: mpSet(mpCampo(k)).viste[0][0], tipo: mpTipi(mpCampo(k))[0][0], sel: null, zoom: false, attesaNome: null, cerca: "" });
-const mpOggetto = c => c.modo === "denti" || c.modo === "zone";
+const mpOggetto = c => c.modo === "denti" || c.modo === "zone" || c.modo === "aree";
 const mpVal = k => { const v = VS.visita?.dati?.[k]; return Array.isArray(v) ? v : []; };
 const mpObj = k => { const v = VS.visita?.dati?.[k]; return v && typeof v === "object" && !Array.isArray(v) ? v : {}; };
 const mpId = () => "m" + Math.random().toString(36).slice(2, 9);
@@ -161,6 +178,16 @@ function mpDisegnoSvg(c, val, vista, opz = {}){
       + `<text x="${MP_LINGUA.lato_dx.x - 120}" y="1430" font-size="28" font-weight="700" fill="${GRIGIO}" font-family="Helvetica,Arial,sans-serif" pointer-events="none">DX</text>
         <text x="${MP_LINGUA.lato_sx.x + 80}" y="1430" font-size="28" font-weight="700" fill="${GRIGIO}" font-family="Helvetica,Arial,sans-serif" pointer-events="none">SX</text>`;
   }
+  if(c.modo === "aree"){
+    const d = mpAreeVal(val), lato = vista === "dx" ? "dx" : "sx";
+    const pol = MP_AREE.map(([id, , pts]) => { const v = Number(d[id + "|" + lato]) || 0;
+      const col = !v ? "#FFFFFF" : c.scala ? MP_GRADI[Math.min(3, v)] : "#7FD1C9";
+      return `<polygon class="mp-z" data-z="${id}" points="${pts}" fill="${col}" fill-opacity="${v ? 0.55 : 0.01}" stroke="${GRIGIO}" stroke-width="2" stroke-opacity=".35" stroke-dasharray="10 8"/>`; }).join("");
+    const nomi = MP_AREE.filter(([id]) => Number(d[id + "|" + lato]) > 0).map(([id, n, pts]) => { const p = pts.split(" ").map(x => x.split(",").map(Number));
+      const x = p.reduce((s, q) => s + q[0], 0) / p.length, y = p.reduce((s, q) => s + q[1], 0) / p.length, v = Number(d[id + "|" + lato]);
+      return { x: o.spec ? 2 * cx + cw - x : x, y, t: n + (c.scala ? " " + v : "") }; });
+    sopra = (o.spec ? `<g transform="translate(${2 * cx + cw},0) scale(-1,1)">${pol}</g>` : pol) + nomi.map(z => scritta(z.x, z.y, z.t)).join("");
+  }
   if(!mpOggetto(c)){
     const r = Math.round(Math.max(cw, ch) * 0.017);
     segni = (Array.isArray(val) ? val : []).filter(p => p.v === vista).map(p => {
@@ -192,6 +219,7 @@ function mpInterno(k, sola){
   const c = mpCampo(k);
   if(c.modo === "denti") return mpInternoDenti(k, sola);
   if(c.modo === "zone") return mpInternoZone(k, sola);
+  if(c.modo === "aree") return mpInternoAree(k, sola);
   const st = mpStato(k), l = mpVal(k), punti = c.modo === "punti", set = mpSet(c);
   const conta = v => l.filter(p => p.v === v).length;
   const chip = (on, az, t, stile) => `<button type="button" class="vs-chip${on ? " on" : ""}" aria-pressed="${!!on}"${sola ? " disabled" : ""} onclick="${az}"${stile ? ` style="${stile}"` : ""}>${t}</button>`;
@@ -311,6 +339,23 @@ function mpZonaSegno(k, o){ mpZonaAggiorna(k, v => { const s = new Set(v.segni |
 // comuni a denti e lingua
 function mpNotaOggetto(k, t){ mpZonaAggiorna(k, v => { v.nota = String(t).slice(0, 140); }); }
 function mpOggettoSvuota(k){ const st = mpStato(k), d = { ...mpObj(k) }; delete d[st.sel]; vsCambia(k, d); mpRidisegna(k); }
+// aree del cavallo (4/11/2026, Laura): tocchi l'area sul disegno o nell'elenco; più aree insieme, nessuna finestra
+function mpInternoAree(k, sola){
+  const c = mpCampo(k), st = mpStato(k), d = mpObj(k), lato = st.vista === "dx" ? "dx" : "sx", set = mpSet(c);
+  const conta = v => MP_AREE.filter(([id]) => Number(d[id + "|" + v]) > 0).length;
+  const viste = `<div class="mp-viste" role="tablist">${set.viste.map(([v, n]) => `<button type="button" role="tab" aria-selected="${st.vista === v}" class="${st.vista === v ? "on" : ""}" onclick="mpVista(${mpJs(k)}, '${v}')">${n}${conta(v) ? ` <b>${conta(v)}</b>` : ""}</button>`).join("")}</div>`;
+  const aiuto = sola ? "" : `<div class="mp-aiuto">${c.scala ? "Tocca un'area: ogni tocco aumenta la reattività 1 · 2 · 3, poi si spegne." : "Tocca le aree sul cavallo o nell'elenco: un tocco segna, un altro toglie."}</div>`;
+  const leg = c.scala ? `<div class="mp-leg">${[1, 2, 3].map(g => `<span><i style="background:${MP_GRADI[g]}"></i>${MP_NOMI_GRADO[g]}</span>`).join("")}</div>` : "";
+  const chips = `<div class="vs-chips mp-aree">${MP_AREE.map(([id, n]) => { const v = Number(d[id + "|" + lato]) || 0;
+    return `<button type="button" class="vs-chip${v ? " on" : ""}" aria-pressed="${!!v}"${sola ? " disabled" : ""} onclick="mpAreaTocca(${mpJs(k)}, '${id}')">${mpEsc(n)}${c.scala && v ? " · " + v : ""}</button>`; }).join("")}</div>`;
+  return `${viste}${aiuto}<div class="mp-box${st.zoom ? " zoom" : ""}">${mpSvg(k)}</div>${leg}${chips}`;
+}
+function mpAreaTocca(k, id){
+  const c = mpCampo(k), st = mpStato(k), chiave = id + "|" + (st.vista === "dx" ? "dx" : "sx"), d = { ...mpObj(k) };
+  const v = Number(d[chiave]) || 0, dopo = c.scala ? (v + 1) % 4 : (v ? 0 : 1);
+  if(dopo) d[chiave] = dopo; else delete d[chiave];
+  vsCambia(k, d); mpRidisegna(k);
+}
 function mpSelezionaZona(k, z){ const st = mpStato(k); st.sel = st.sel === z ? null : z; mpRidisegna(k); }
 
 /* ---------------- azioni ---------------- */
@@ -392,6 +437,7 @@ function mpAttiva(k){
       let z = ev.target.closest?.("[data-z]")?.dataset.z;
       if(!z && c.modo === "denti"){ const p = pos(ev); let best = null, dmin = 60;
         Object.entries(MP_DENTI).forEach(([n, t]) => { const d = Math.hypot(t.x - p.sx, t.y - p.sy); if(d < dmin){ dmin = d; best = n; } }); z = best; }
+      if(z && c.modo === "aree") return mpAreaTocca(k, z);
       if(z){ mpStato(k).sel = z; mpRidisegna(k); }
     });
     return;
@@ -430,6 +476,13 @@ function mpTesto(c, v){
     const r = Object.keys(d).filter(n => MP_DENTI[n] && (d[n].s?.length || d[n].nota)).sort().map(n => n + " " + mpTestoDente(d[n]));
     return r.length ? r.join("; ") : null;
   }
+  if(c.modo === "aree"){
+    const d = mpAreeVal(v), r = [];
+    MP_AREE.forEach(([id, n]) => { const s = Number(d[id + "|sx"]) || 0, x = Number(d[id + "|dx"]) || 0; if(!s && !x) return;
+      if(c.scala) r.push(...[[s, "sx"], [x, "dx"]].filter(q => q[0]).map(([g, l]) => ({ t: `${n} ${l} ${g}/3`, g })));
+      else r.push({ t: n + (s && x ? " (sx e dx)" : s ? " (sx)" : " (dx)"), g: 0 }); });
+    return r.length ? r.sort((a, b) => b.g - a.g).map(q => q.t).join(", ") : null;
+  }
   if(c.modo === "zone"){
     const d = v && typeof v === "object" && !Array.isArray(v) ? v : {};
     const r = MP_ZONE.filter(([z]) => mpZonaPiena(d[z])).map(([z, n, org]) => `${n} (${org.replace(" / ", "/")}): ${mpTestoZona(d[z])}`);
@@ -462,15 +515,16 @@ async function mpImmaginiPdf(){
   for(const c of (VS.campi || []).filter(x => x.t === "mappa")){
     const v = d[c.k];
     if(mpTesto(c, v) == null && !(Array.isArray(v) && v.length)) continue;
-    const viste = mpOggetto(c) ? [mpSet(c).viste[0][0]] : mpSet(c).viste.map(x => x[0]).filter(vi => v.some(p => p.v === vi));
+    const viste = c.modo === "aree" ? mpSet(c).viste.map(x => x[0]).filter(vi => Object.keys(mpAreeVal(v)).some(key => key.endsWith("|" + vi) && Number(v[key]) > 0))
+      : mpOggetto(c) ? [mpSet(c).viste[0][0]] : mpSet(c).viste.map(x => x[0]).filter(vi => v.some(p => p.v === vi));
     for(const vi of viste){
       const g = mpGeo(c, vi), url = await mpSvgInImmagine(mpDisegnoSvg(c, v, vi, { pdf: true, uid: "pdf" + c.k + vi }), g.cw, g.ch);
-      if(url) out.push({ titolo: c.e + (mpSet(c).viste.length > 1 ? " · " + mpNomeVista(c, vi) : ""), url, w: g.cw, h: g.ch, grande: mpOggetto(c) });
+      if(url) out.push({ titolo: c.e + (mpSet(c).viste.length > 1 ? " · " + mpNomeVista(c, vi) : ""), url, w: g.cw, h: g.ch, grande: mpOggetto(c) && c.modo !== "aree" });
     }
   }
   return out;
 }
 
-export { mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, mpTesto, mpVista, mpTipo, mpZoom, mpElencoNomi, mpCerca, mpSeleziona, mpChiudi,
+export { mpAreaTocca, MP_AREE, mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mpAttivaTutte, mpReset, mpTesto, mpVista, mpTipo, mpZoom, mpElencoNomi, mpCerca, mpSeleziona, mpChiudi,
   mpNome, mpNomePrima, mpRinomina, mpGrado, mpTogli, mpCambiaTipo, mpNota, mpFoto, mpNuovo, mpDente, mpDenteVicino, mpZonaScegli, mpZonaSegno, mpNotaOggetto,
   mpOggettoSvuota, mpSelezionaZona, mpImmaginiPdf, mpDisegnoSvg, mpNomeDente, MP, MP_PUNTI, MP_DENTI, MP_SET };

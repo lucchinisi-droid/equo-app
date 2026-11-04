@@ -19,7 +19,7 @@ console.log("A1 Incassi:", await pg.evaluate(()=>[...document.querySelectorAll("
 await pg.evaluate(async()=>{await apriNuovoConto("dc-t");});await pg.waitForTimeout(1200);
 await pg.evaluate(()=>creaContoDaScelte());await pg.waitForTimeout(1200);
 await pg.evaluate(()=>{document.querySelectorAll(".modal-overlay.active").forEach(m=>m.classList.remove("active"))});
-await pg.evaluate(async()=>{await segnaSaldatoIncassi("it1",document.createElement("button"));});await pg.waitForTimeout(800);
+await pg.evaluate(async()=>{setTimeout(()=>pagModoScegli("contanti"),300);await segnaSaldatoIncassi("it1",document.createElement("button"));});   // 4/11/2026: chiede come ha pagatoawait pg.waitForTimeout(800);
 console.log("B conto dopo «Saldato» da Incassi:", await pg.evaluate(()=>JSON.stringify((demoState.conti||[]).map(c=>[c.numero,c.stato])) + " · lavoro " + demoState.interventiMascalcia.find(i=>i.id==="it1").stato_pagamento));
 // C) nuovo cavallo dentro un appuntamento con nome già esistente
 const prima=await pg.evaluate(()=>demoState.cavalliClientiMascalcia.filter(x=>x.nome.toLowerCase()==="klaus").length);

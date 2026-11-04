@@ -565,3 +565,26 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .vap-doc-ic{width:22px;height:22px;flex:none;display:grid;place-items:center}
 :where(body.pl-vet) .vap-doc-ic svg{width:20px;height:20px;fill:none;stroke:var(--vt-tif-scuro);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 :where(body.pl-vet) .vap-aggiunto{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;margin-top:12px}
+
+/* 4/11/2026 · Punti trattati (15-punti) e aree del cavallo (13-mappe, modo «aree»), richieste di Laura */
+.vp-scelti{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.vp-vuoto{font-size:13px;color:var(--vt-testo2);margin:4px 0 8px}
+.vp-p{border:1.5px solid var(--vt-bordo);background:var(--vt-sup);color:var(--vt-testo);border-radius:10px;padding:7px 0;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;min-width:0}
+.vp-scelti .vp-p{border-radius:999px;padding:6px 11px}
+.vp-p.on{background:var(--vt-notte);border-color:var(--vt-notte);color:#FFFFFF}
+.vp-p i{font-style:normal;opacity:.7;margin-left:4px}
+.vp-az{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.vp-az button{flex:1 1 140px;border:1.5px solid var(--vt-bordo);background:var(--vt-sup);color:var(--vt-notte);border-radius:12px;padding:9px 10px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.vp-az button.on{background:var(--vt-tif-chiaro);border-color:var(--vt-tif)}
+.vp-az small{font-weight:600;color:var(--vt-testo2)}
+.vp-cerca{width:100%;border:1.5px solid var(--vt-bordo);border-radius:12px;padding:10px 12px;font:inherit;font-size:15px;background:var(--vt-sup);color:var(--vt-testo)}
+.vp-mer{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin:8px 0 2px;padding-bottom:2px}
+.vp-mer button{flex:0 0 auto;border:0;background:var(--vt-chip);color:var(--vt-notte);border-radius:10px;padding:7px 9px;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
+.vp-mer button.on{background:var(--vt-tif);color:var(--vt-notte)}
+.vp-mer button b{font-size:11px;background:var(--vt-notte);color:#FFFFFF;border-radius:999px;padding:0 5px;margin-left:2px}
+.vp-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:5px;margin-top:8px;max-height:260px;overflow-y:auto}
+.vp-griglia.usati{max-height:none;margin-bottom:6px}
+.vp-nuovo{margin-top:8px;border:1.5px dashed var(--vt-tif-scuro);background:var(--vt-sup);color:var(--vt-tif-testo);border-radius:12px;padding:9px 12px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer;width:100%}
+.mp-leg{display:flex;gap:12px;font-size:12px;color:var(--vt-testo2);margin:6px 2px}
+.mp-leg i{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:5px;vertical-align:-2px}
+.mp-aree{margin-top:8px}
