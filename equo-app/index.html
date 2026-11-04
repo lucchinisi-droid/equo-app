@@ -4565,6 +4565,102 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 .mp-gr{margin-top:6px}.mp-gr>span{display:block;font-size:12px;font-weight:700;color:var(--vt-testo2);margin:0 2px 4px}
 .mp-denti .mp-z,.mp-lingua .mp-z{cursor:pointer}
 .mp-denti-c .mp-svg{max-height:78vh}
+/* 3/11/2026: i messaggi «miei» (chat e Galeno) hanno lo sfondo blu notte: testo Tiffany, leggibile */
+:where(body.pl-vet) .mchat-bubble.out,:where(body.pl-vet) .mchat-bubble.out .mchat-bubble-text,:where(body.pl-vet) .mchat-bubble.out .mchat-bubble-time,
+:where(body.pl-vet) .mchat-bubble.out a,:where(body.pl-vet) .chat-bubble.user,:where(body.pl-vet) .chat-bubble.user a{color:var(--vt-tif)!important}
+/* 3/11/2026: tasto «Nuovo appuntamento» Tiffany, bordo e testo blu notte, icona bianca */
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis{background:var(--vt-tif);border:2px solid var(--vt-notte);color:var(--vt-notte)}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .ic{background:var(--vt-notte);color:#FFFFFF}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx b,:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx span,
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx span strong,:where(body.pl-vet) .vh-righe .hm-riga.r-vis .fr{color:var(--vt-notte)}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .num{background:#FFFFFF;color:var(--vt-notte);font-weight:800;font-size:13px;border-radius:999px;padding:4px 10px;margin-right:4px;white-space:nowrap}
+:where(body.pl-vet) .vh-righe .hm-riga.r-vis .tx .urgv{color:#FFFFFF;background:var(--vt-urg);border-radius:6px;padding:0 5px;font-weight:700;margin-right:3px}
+/* tema scuro: titoli e icone delle righe Cavalli · Clienti · Scuderie · Incassi leggibili sul blu notte */
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-righe .hm-riga:not(.r-vis) .tx b{color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet .vh-righe .hm-riga:not(.r-vis) .ic{color:#7FD1C9}
+/* 3/11/2026: visita aperta (14-visita-aperta.js) */
+:where(body.pl-vet) .vt-b.oro{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vaa-seg{display:flex;background:var(--vt-chip);border-radius:12px;padding:3px;gap:3px;margin:2px 0 8px}
+:where(body.pl-vet) .vaa-seg button{flex:1;border:0;background:none;border-radius:9px;padding:9px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--vt-testo2);cursor:pointer}
+:where(body.pl-vet) .vaa-seg button.on{background:#FFFFFF;color:var(--vt-notte);box-shadow:0 1px 3px rgba(29,45,80,.12)}
+:where(body.pl-vet) .vaa-nota{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin:4px 0 8px}
+:where(body.pl-vet) .vaa-sotto-tit{color:var(--vt-testo2);font-size:13px;margin:-6px 0 10px}
+:where(body.pl-vet) .vaa-lab{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--vt-testo2);margin:14px 2px 6px}
+:where(body.pl-vet) .vaa-sotto{font-size:12px;font-weight:700;color:var(--vt-testo2);margin:8px 2px 4px}
+:where(body.pl-vet) .vaa-lista{max-height:42vh;overflow-y:auto}
+:where(body.pl-vet) .vaa-cav{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid var(--vt-bordo)}
+:where(body.pl-vet) .vaa-cav label:first-child{flex:1;min-width:0;display:flex;align-items:center;gap:10px;cursor:pointer}
+:where(body.pl-vet) .vaa-cav input[type=checkbox]{width:22px;height:22px;accent-color:var(--vt-notte);flex:none}
+:where(body.pl-vet) .vaa-cav .n{display:flex;flex-direction:column;min-width:0}
+:where(body.pl-vet) .vaa-cav .n small{color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vaa-prezzo{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--vt-notte)}
+:where(body.pl-vet) .vaa-prezzo input{width:76px;border:1px solid var(--vt-bordo);border-radius:10px;padding:7px 8px;font:inherit;font-size:15px;background:#FFFFFF;color:var(--vt-testo)}
+:where(body.pl-vet) .vaa-prezzo.base{gap:8px;flex-wrap:wrap}.vaa-prezzo.base small{font-weight:500;color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vaa-nuovi{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+:where(body.pl-vet) .vaa-nuovi > span{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+:where(body.pl-vet) .vaa-due{display:flex;gap:8px;margin-top:8px}.vaa-due .input{flex:1;min-width:0}
+:where(body.pl-vet) .vaa-tot{display:flex;justify-content:space-between;font-weight:800;font-size:15px;color:var(--vt-notte);padding:14px 2px 8px}
+:where(body.pl-vet) .vaa-ok,:where(body.pl-vet) .vaa-dopo{width:100%;margin-top:8px}
+:where(body.pl-vet) .vaa-banner{width:100%;text-align:left;background:var(--vt-oro-chiaro);border:1.5px solid var(--vt-oro);border-radius:14px;padding:11px 12px;margin:12px 0 4px;font:inherit;font-size:13px;line-height:1.4;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vaa-banner b{display:block;color:var(--vt-oro-testo);font-size:14px}
+
+/* 3/11/2026 sera · Home: il banner «Il giro di oggi» si tocca e apre «Le visite inserite» (01-home) */
+:where(body.pl-vet) .vh-giro{cursor:pointer}
+:where(body.pl-vet) .vh-giornata span{font-size:17px;margin-left:3px;line-height:1}
+:where(body.pl-vet) .vh-righe + .vh-galeno{margin-top:12px}
+:where(body.pl-vet) .vh-visite-sotto{color:var(--vt-testo2);font-size:13px;margin:-6px 0 6px}
+:where(body.pl-vet) .vh-visite-g{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--vt-testo2);margin:14px 2px 8px}
+:where(body.pl-vet) .vh-visite-agenda{width:100%;margin-top:14px}
+
+/* 3/11/2026 sera · Nuovo appuntamento a tre strade e appuntamento aperto (14-visita-aperta) */
+:where(body.pl-vet) .vap-sotto{color:var(--vt-testo2);font-size:13.5px;margin:-6px 0 12px}
+:where(body.pl-vet) .vap-op{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:var(--vt-sup);border:1.5px solid var(--vt-bordo);border-radius:18px;padding:13px 12px;margin-bottom:10px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vap-op .ic{width:46px;height:46px;flex:none;border-radius:50%;background:var(--vt-tif-chiaro);color:var(--vt-tif-testo);display:grid;place-items:center}
+:where(body.pl-vet) .vap-op .ic svg{width:22px;height:22px}
+:where(body.pl-vet) .vap-op .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vap-op .tx b{font-size:15.5px;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-op .tx small{font-size:12.5px;line-height:1.35;color:var(--vt-testo2);margin-top:2px}
+:where(body.pl-vet) .vap-op .fr svg{width:20px;height:20px;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-op.ap{background:var(--vt-tif);border:2px solid var(--vt-notte)}
+:where(body.pl-vet) .vap-op.ap .ic{background:var(--vt-notte);color:#FFFFFF}
+:where(body.pl-vet) .vap-op.ap .tx small{color:var(--vt-notte)}
+:where(body.pl-vet) .vap-dove-scelto{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:var(--vt-sup);border:1.5px solid var(--vt-tif);border-radius:14px;padding:11px 12px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vap-dove-scelto span{font-size:12px;color:var(--vt-tif-testo);font-weight:700;text-align:right}
+:where(body.pl-vet) .vap-dove-lista{display:flex;flex-direction:column;gap:6px;margin-top:6px;max-height:34vh;overflow-y:auto}
+:where(body.pl-vet) .vap-dove-lista button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:var(--vt-sup);border:1px solid var(--vt-bordo);border-radius:12px;padding:9px 12px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vap-dove-lista small{color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vap-dove-lista .nuovo b{color:var(--vt-tif-testo)}
+:where(body.pl-vet) .vap-step{display:flex;align-items:center;gap:12px}
+:where(body.pl-vet) .vap-step button{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--vt-bordo);background:var(--vt-sup);font:inherit;font-size:22px;font-weight:700;color:var(--vt-notte);cursor:pointer}
+:where(body.pl-vet) .vap-step button:disabled{opacity:.4}
+:where(body.pl-vet) .vap-step b{font-family:'Fraunces',serif;font-size:30px;min-width:32px;text-align:center;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-step small{color:var(--vt-testo2);font-size:12px;line-height:1.3}
+:where(body.pl-vet) .vap-slots{display:flex;flex-direction:column;gap:7px}
+:where(body.pl-vet) .vap-slot{background:var(--vt-sup);border:1.5px solid var(--vt-bordo);border-radius:14px;padding:9px 11px}
+:where(body.pl-vet) .vap-slot b{font-size:13.5px;color:var(--vt-notte)}
+:where(body.pl-vet) .vap-slot .vs-chips{margin-top:6px}
+:where(body.pl-vet) .vs-chip.posto{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo);border:1px dashed var(--vt-oro)}
+:where(body.pl-vet) .vs-chip.posto.on{background:var(--vt-oro);color:#FFFFFF;border-style:solid}
+:where(body.pl-vet) .vap-sug{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+:where(body.pl-vet) .vap-sug button{display:inline-flex;flex-direction:column;align-items:flex-start;background:var(--vt-tif-chiaro);border:1px solid var(--vt-tif);color:var(--vt-tif-testo);border-radius:12px;padding:5px 10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+:where(body.pl-vet) .vap-sug small{font-weight:500;font-size:11px}
+:where(body.pl-vet) .vap-piccolo{color:var(--vt-testo2);font-size:12px;margin:6px 2px 0}
+:where(body.pl-vet) .vap-ok{color:var(--vt-tif-testo);font-size:12.5px;font-weight:700;margin:6px 2px 0}
+:where(body.pl-vet) .vap-vacc{margin-top:8px}
+:where(body.pl-vet) .vap-motivo{margin-top:8px}
+:where(body.pl-vet) .vap-altro{width:100%;margin-top:8px}
+:where(body.pl-vet) .vaa-nota.oro{background:var(--vt-oro-chiaro);color:var(--vt-oro-testo);margin-top:12px}
+:where(body.pl-vet) .vap-doc{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--vt-bordo)}
+:where(body.pl-vet) .vap-doc > span:not(.vap-doc-ic){flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vap-doc small{color:var(--vt-testo2);font-size:12px}
+:where(body.pl-vet) .vap-doc input[type=checkbox]{width:22px;height:22px;accent-color:var(--vt-notte);flex:none}
+:where(body.pl-vet) .vap-doc.fuori{opacity:.75}
+:where(body.pl-vet) .vap-mini{background:var(--vt-chip);border:0;border-radius:10px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;color:var(--vt-notte);cursor:pointer}
+:where(:root:not([data-theme="light"])) body.pl-vet .vap-op .tx b,:where(:root:not([data-theme="light"])) body.pl-vet .vap-step b,:where(:root:not([data-theme="light"])) body.pl-vet .vap-slot b{color:#FFFFFF}
+:where(:root:not([data-theme="light"])) body.pl-vet .vap-op.ap .tx b,:where(:root:not([data-theme="light"])) body.pl-vet .vap-op.ap .tx small{color:#1D2D50}
+:where(:root:not([data-theme="light"])) body.pl-vet .vap-step button,:where(:root:not([data-theme="light"])) body.pl-vet .vap-dove-scelto b{color:#FFFFFF}
+:where(body.pl-vet) .vap-doc-ic{width:22px;height:22px;flex:none;display:grid;place-items:center}
+:where(body.pl-vet) .vap-doc-ic svg{width:20px;height:20px;fill:none;stroke:var(--vt-tif-scuro);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -6376,17 +6472,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
     <button class="btn btn-outline btn-sm" id="btn-add-secondary-role" style="width:100%;margin-top:8px;display:none"></button>
     <button class="link-altro-profilo" onclick="openRichiestaProfilo()">Hai bisogno di aggiungere un altro profilo? <u>Clicca qui</u></button>
 
-    <div class="menu-section-label" id="menu-home-label">Versione</div>
-    <div class="menu-row" id="menu-vista-man-row" style="display:none;margin-top:8px">
-      <div class="menu-row-label">
-        <span class="fa-icon"><i class="fa-solid fa-sliders"></i></span>
-        <span>Versione Completa<br><small class="muted" style="font-size:11px">Spenta: versione Semplice, pochi tasti grandi. I dati restano gli stessi</small></span>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="vista-man-switch" onchange="cambiaVistaManiscalco(this.checked ? 'completa' : 'semplice')">
-        <span class="switch-track"><span class="switch-thumb"></span></span>
-      </label>
-    </div>
+    <!-- 3/11/2026: tolta la scelta Semplice/Completa (Versione) dal menu del profilo -->
     <div class="menu-row" id="menu-misura-row" style="display:none;margin-top:8px">
       <div class="menu-row-label">
         <span class="fa-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><use href="#i-ferro"/></svg></span>
@@ -10722,6 +10808,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	async function segnaFatto(e, opz = {}) {
 		if (!e) return { ok: false };
+		if (typeof vaaFatto === "function" && typeof eVeterinario === "function" && eVeterinario() && !e.cavallo_cliente_id && !e.horse_id) {
+			if (opz.prima) opz.prima();
+			return vaaFatto(e);
+		}
 		const anticipo = await fattoInAnticipo(e);
 		if (anticipo === null) return { ok: false };
 		if (opz.prima) opz.prima();
@@ -10835,7 +10925,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/097-versione-semplice-completa-dell-app-mani.js
 	function vistaCompleta() {
-		return !!(currentUser && currentUser.vistaMan === "completa");
+		return true;
 	}
 	function applicaVistaManiscalco() {
 		document.body.classList.toggle("vm-completa", vistaCompleta());
@@ -10855,12 +10945,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		showToast(currentUser.vistaMan === "completa" ? "Versione Completa attiva" : "Versione Semplice attiva" + (daScelta ? "" : ": la Completa la riaccendi dal menu"));
 	}
 	var vistaManScelta = "semplice";
-	function mostraSceltaVistaManiscalco() {
-		if (DEMO_MODE || !currentUser || currentUser.vistaMan || vistaAi() !== "professionista") return;
-		if (document.getElementById("eq-pop-vista")?.classList.contains("attivo")) return;
-		sceltaVistaMan("semplice");
-		document.getElementById("eq-pop-vista").classList.add("attivo");
-	}
+	function mostraSceltaVistaManiscalco() {}
 	function sceltaVistaMan(v) {
 		vistaManScelta = v;
 		document.querySelectorAll("#eq-pop-vista .vm-opz").forEach((b) => b.classList.toggle("on", b.dataset.v === v));
@@ -11085,7 +11170,6 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
     ${v(HM_IC.cal, "Agenda", "showPage('pro-agenda')")}
     ${v(HM_IC.inbox, "Messaggi", "hmMessaggi()")}
     ${v(HM_IC.qr, "Il mio codice e QR", "openCodicePersonaleModal()")}
-    ${v(HM_IC.slider, vistaCompleta() ? "Passa alla Semplice" : "Passa alla Completa", "cambiaVistaManiscalco(vistaCompleta() ? 'semplice' : 'completa')")}
     ${v(HM_IC.aiuto, "Aiuto", "apriTicketAssistenza()")}
     ${v(HM_IC.menu, "Menu e impostazioni", "openMenu()")}
   </div>`);
@@ -11340,7 +11424,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const sp = document.getElementById("promemoria-switch");
 		if (sp) sp.checked = currentUser?.promemoriaPagamenti !== false;
 		const rv = document.getElementById("menu-vista-man-row");
-		if (rv) rv.style.display = pro ? "" : "none";
+		if (rv) rv.style.display = "none";
 		const sv = document.getElementById("vista-man-switch");
 		if (sv) sv.checked = vistaCompleta();
 		const rm = document.getElementById("menu-misura-row");
@@ -17637,9 +17721,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 					return;
 				}
 				const righe = [];
+				const soloCavalli = window.intCercaSolo === "cavallo";
 				clientiAttivi().forEach((c) => {
 					const cavalli = nomiCavalliCliente(c);
-					if (cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({
+					if (!soloCavalli && cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({
 						c,
 						cav: null,
 						p: cercaNorm(c.nome).startsWith(parole[0]) ? 0 : 1
@@ -17661,7 +17746,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 						unici.push(r);
 					}
 				});
-				lista.innerHTML = unici.slice(0, 10).map((r) => r.cav ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>` : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Scuderia" : "Cliente"}</small></button>`).join("") || `<div class="rz-vuoto">Nessun cliente con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
+				lista.innerHTML = unici.slice(0, 10).map((r) => r.cav ? `<button type="button" data-id="${escapeHtml(r.c.id)}" data-cav="${escapeHtml(r.cav)}"><span><b>${escapeHtml(r.cav)}</b> <span class="muted">· ${escapeHtml(r.c.nome)}</span></span><small>Cavallo</small></button>` : `<button type="button" data-id="${escapeHtml(r.c.id)}"><span><b>${escapeHtml(r.c.nome)}</b></span><small>${isStruttura(r.c) ? "Scuderia" : "Cliente"}</small></button>`).join("") || `<div class="rz-vuoto">Nessun ${soloCavalli ? "cavallo" : "cliente"} con «${escapeHtml(inp.value.trim())}»</div><button type="button" data-nuovo="1"><span>+ Nuovo cliente</span></button>`;
 				lista.classList.add("aperta");
 			};
 			inp.addEventListener("input", mostra);
@@ -17692,7 +17777,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const inp = document.getElementById("int-cerca-input");
 		inp.value = "";
 		document.getElementById("int-cerca-lista").classList.remove("aperta");
-		wrap.style.display = !sel.disabled && clientiAttivi().length >= CERCA_MIN ? "block" : "none";
+		wrap.style.display = !sel.disabled && (clientiAttivi().length >= CERCA_MIN || window.intCercaSolo === "cavallo") ? "block" : "none";
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/116-onboarding.js
 	var ONB_STRUTTURA = /^(scuderia|scuderie|centro|circolo|maneggio|asd|a\.s\.d\.?|ssd|s\.s\.d\.?|allevamento|club|tenuta|azienda agricola|agriturismo|ranch|associazione|equitazione|horse|team|pony club)\b|\b(asd|a\.s\.d\.?|ssd|srl|s\.r\.l\.|ranch|club|equestre|ippico|ippica)$/i;
@@ -18078,6 +18163,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	function renderFerroRighe() {
 		const box = document.getElementById("intervento-scheda-righe");
 		if (!box) return;
+		if (eVeterinario()) {
+			box.innerHTML = "";
+			return;
+		}
 		box.innerHTML = cavalliSceltiIntervento().filter((k) => k && k !== "__nuovo_cavallo__").map((k) => {
 			const cv = cavalliClienteCorrente.find((c) => c.key === k);
 			if (!cv) return "";
@@ -18123,6 +18212,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		if (g) g.style.display = interventoInModifica && interventoInModifica.stato === "fatto" ? "block" : "none";
 	}
 	async function openInterventoModal(clienteId, intervento, preset) {
+		if (typeof vapScelta === "function" && vapScelta(clienteId, intervento, preset)) return;
 		interventoInModifica = intervento || null;
 		interventoPreset = intervento ? null : preset || null;
 		const inModifica = !!interventoInModifica;
@@ -18219,6 +18309,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		openModal("modal-add-intervento");
 		await onInterventoClienteChange();
 		toggleInterventoTipoFields();
+		if (typeof vapDopoApertura === "function") vapDopoApertura();
 	}
 	async function onInterventoClienteChange() {
 		const clienteId = document.getElementById("intervento-cliente-select").value;
@@ -19625,9 +19716,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			x.razza ? escapeHtml(x.razza) : "",
 			x.microchip ? "chip " + escapeHtml(x.microchip) : "",
 			x.presso ? "📍 presso " + escapeHtml(x.presso) : "",
-			x.ferro_numero ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
+			x.ferro_numero && !eVeterinario() ? "ferro " + escapeHtml(siglaFerro(x.ferro_sistema, x.ferro_numero)) : ""
 		].filter(Boolean).join(" · ")}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>${x.tipo === "manuale" && !x.horse_id && !x.scuderia_cavallo_id ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0">${eVeterinario() ? "" : `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriFerroCavallo('${x.key}')" aria-label="Ferro standard">${x.ferro_numero ? "Ferro" : "+ Ferro"}</button>`}${x.tipo === "manuale" && !x.horse_id && !x.scuderia_cavallo_id ? `<button class="btn btn-outline btn-sm btn-variazione" onclick="apriRazzaCavallo('${x.id}')" aria-label="Razza">${x.razza ? "Razza" : "+ Razza"}</button>` : ""}${tastoLascia(x)}</div>
     </div>
     <div class="rz-riga" id="rz-riga-${x.id}" style="display:none">
       <input class="input" id="rz-cv-${x.id}" placeholder="Scrivi per cercare la razza">
@@ -24228,6 +24319,17 @@ Object.assign(DB, {
   async terapiaFatto(id, fatto = true){
     if(DEMO_MODE){ const s = this._ter().somm.find(x => x.id === id); if(s){ s.fatto_il = fatto ? new Date().toISOString() : null; s.fatto_da = fatto ? currentUser.id : null; } return { data: !!s, error: null }; }
     const { data, error } = await sb.rpc("equo_terapia_fatto", { p_id: id, p_fatto: !!fatto });
+    return { data, error };
+  },
+  // proposte di un professionista della scuderia per i miei cavalli (SQL 43): accetto o rifiuto
+  async proposteProfessionisti(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.rpc("mie_proposte_professionisti");
+    if(error){ if(!/mie_proposte_professionisti|does not exist|schema cache/i.test(error.message || "")) console.warn("proposte professionisti:", error.message); return []; }
+    return data || [];
+  },
+  async rispondiPropostaProfessionista(id, accetta){
+    const { data, error } = await sb.rpc("rispondi_proposta_professionista", { p_id: id, p_accetta: !!accetta });
     return { data, error };
   }
 });
@@ -33311,7 +33413,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		].filter(Boolean).join(" · ");
 		const azioni = futura && l.stato !== "annullata" && l.stato !== "completata" ? `
     <div style="display:flex;gap:8px;margin-top:10px">
-      ${l.stato === "prenotata" ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
+      ${l.stato === "prenotata" && l.conferma_app !== false ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
       <button class="btn btn-outline btn-sm btn-variazione" style="flex:1" onclick="modificaLezioneScuderia('${l.id}')">Modifica</button>
     </div>` : "";
 		return `
@@ -34474,6 +34576,64 @@ const mlSigla = k => String(k || "").toUpperCase();
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", diaAggancia, { once: true });
 	else diaAggancia();
+	// equo-app-src/src/ruoli/proprietario/moduli/106-proposte-professionisti.js
+	var ppEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var PP = {
+		lista: [],
+		il: 0
+	};
+	async function ppCarica(forza) {
+		if (!forza && PP.il && Date.now() - PP.il < 6e4) return PP.lista;
+		PP.lista = await DB.proposteProfessionisti().catch(() => []);
+		PP.il = Date.now();
+		return PP.lista;
+	}
+	async function ppRenderHome() {
+		const home = document.getElementById("page-home");
+		if (!home || !currentUser) return;
+		let box = document.getElementById("home-proposte-pro");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "home-proposte-pro";
+			const dopo = document.getElementById("home-oggi");
+			if (dopo && dopo.parentNode) dopo.parentNode.insertBefore(box, dopo.nextSibling);
+			else home.prepend(box);
+		}
+		const lista = await ppCarica();
+		if (!lista.length) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = `<div class="card ter-card"><div class="ter-tit">🐴 Professionisti da confermare</div>
+    ${lista.map((p) => `<div class="ter-piano" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="flex:1 1 180px;min-width:0;font-size:13.5px;line-height:1.45"><b>${ppEsc(p.scuderia)}</b> propone <b>${ppEsc(p.professionista)}</b> come ${ppEsc(p.professione)} di <b>${ppEsc(p.cavallo)}</b>.
+        <div class="muted" style="font-size:12px">Se accetti, vede il cavallo nella sua app e registra i lavori.</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button type="button" class="btn btn-outline btn-sm" onclick="ppRispondi('${p.id}', false, this)">Rifiuta</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="ppRispondi('${p.id}', true, this)">Accetta</button></div></div>`).join("")}</div>`;
+	}
+	async function ppRispondi(id, accetta, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await DB.rispondiPropostaProfessionista(id, accetta);
+		if (error || !data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast(data && data.errore || "Non salvato: riprova");
+		}
+		showToast(accetta ? "Confermato: la scuderia riceve il tuo sì" : "Rifiutato: la scuderia riceve il tuo no");
+		await ppCarica(true);
+		ppRenderHome();
+	}
+	function ppAggancia() {
+		try {
+			estendiDopo("renderHome", function() {
+				ppRenderHome();
+			});
+		} catch (err) {
+			console.error("proposte professionisti:", err);
+		}
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ppAggancia, { once: true });
+	else ppAggancia();
 	// equo-app-src/src/ruoli/proprietario/moduli/index.js
 	Object.assign(window, {
 		terCarica,
@@ -34484,6 +34644,10 @@ const mlSigla = k => String(k || "").toUpperCase();
 		diaRenderCavallo,
 		diaGiorno,
 		DIA,
+		ppCarica,
+		ppRenderHome,
+		ppRispondi,
+		PP,
 		onbCollegati,
 		onbNonSonoIo,
 		onbVaiAiProposti,
@@ -38526,6 +38690,8 @@ plAggiorna();
 			cls: "urg",
 			txt: "Urgente"
 		};
+		const ap = typeof vaaEtichetta === "function" ? vaaEtichetta(e) : null;
+		if (ap) return ap;
 		if (t === "vaccino") return {
 			cls: "oro",
 			txt: "Vaccino"
@@ -38553,6 +38719,7 @@ plAggiorna();
 	}
 	function vhTitolo(e) {
 		const cav = agNomeCavallo(e);
+		if (!cav && typeof vaaAperto === "function" && vaaAperto(e)) return `<b>Cavallo da segnare</b> · ${escapeHtml(typeof vapNomeLavoro === "function" ? vapNomeLavoro(e) : TIPO_FERRATURA_LABELS[e.tipo_ferratura] || "Visita")}`;
 		const motivo = (e.tipo_altro || "").trim() || TIPO_FERRATURA_LABELS[e.tipo_ferratura] || "Visita";
 		return cav ? `<b>${escapeHtml(cav)}</b> · ${escapeHtml(motivo)}` : `<b>${escapeHtml(motivo)}</b>`;
 	}
@@ -38608,7 +38775,6 @@ plAggiorna();
 		});
 		const prima = diOggi.map(vhOra).filter((o) => o !== "—").sort()[0];
 		const km = vhKm.giorno === oggi && vhKm.km ? `${vhKm.km} km` : "";
-		const prossime = app.filter((e) => e.data_intervento >= oggi).sort((a, b) => (a.data_intervento + vhOra(a)).localeCompare(b.data_intervento + vhOra(b))).slice(0, 3);
 		const nome = (currentUser?.nome || currentUser?.full_name || "").split(" ")[0];
 		const data = (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", {
 			weekday: "long",
@@ -38628,19 +38794,20 @@ plAggiorna();
 		} : null;
 		box.innerHTML = `
     <div class="vh-saluto">${escapeHtml(testoSaluto())}${nome ? " " + escapeHtml(nome) : ""} · ${escapeHtml(data)}</div>
-    <div class="vh-giro">
+    <div class="vh-giro" role="button" tabindex="0" aria-label="Vedi le visite inserite" onclick="vhVisite(event)" onkeydown="if(event.key==='Enter')vhVisite(event)">
       <div class="vh-giro-et">Il giro di oggi</div>
       <div class="vh-giro-riga">
         <div><div class="vh-giro-n">${diOggi.length} ${diOggi.length === 1 ? "visita" : "visite"}</div>
           <div class="vh-giro-s">${[km, prima ? "prima alle " + prima : diOggi.length ? "" : "nessuna visita in agenda"].filter(Boolean).join(" · ")}</div></div>
-        <button class="vh-giornata" onclick="vhGiornata()">Giornata</button>
+        <button class="vh-giornata" onclick="event.stopPropagation();vhVisite()">Vedi visite <span aria-hidden="true">›</span></button>
       </div>
       <div class="vh-giro-num">
-        <button onclick="vhGiornata()"><b>${urg}</b><span>${urg === 1 ? "urgenza" : "urgenze"}</span></button>
-        <button onclick="ptElenco()"><b>${ter.n}</b><span>${ter.n === 1 ? "terapia" : "terapie"}${ter.saltate ? ` · <em class="vh-saltate">${ter.saltate} ${ter.saltate === 1 ? "saltata" : "saltate"}</em>` : ""}</span></button>
-        <button onclick="hmScadenze()"><b>${ric}</b><span>${ric === 1 ? "richiamo" : "richiami"}</span></button>
+        <button onclick="event.stopPropagation();vhGiornata()"><b>${urg}</b><span>${urg === 1 ? "urgenza" : "urgenze"}</span></button>
+        <button onclick="event.stopPropagation();ptElenco()"><b>${ter.n}</b><span>${ter.n === 1 ? "terapia" : "terapie"}${ter.saltate ? ` · <em class="vh-saltate">${ter.saltate} ${ter.saltate === 1 ? "saltata" : "saltate"}</em>` : ""}</span></button>
+        <button onclick="event.stopPropagation();hmScadenze()"><b>${ric}</b><span>${ric === 1 ? "richiamo" : "richiami"}</span></button>
       </div>
     </div>
+    ${typeof vaaBannerHtml === "function" ? vaaBannerHtml(app) : ""}
     <div class="vh-cerchi">
       <button onclick="hmPortami()"><span class="c">${VH_IC.portami}</span>Portami da</button>
       <button onclick="vhDetta()"><span class="c">${VH_IC.detta}</span>Detta</button>
@@ -38648,17 +38815,8 @@ plAggiorna();
       <button class="solo-incassi" onclick="hmDaIncassare()"><span class="c">${VH_IC.euro}</span>Da incassare</button>
       <button onclick="hmAltro()"><span class="c">${VH_IC.altro}</span>Altro</button>
     </div>
-    <div class="vh-tit">Prossime visite</div>
-    ${prossime.length ? prossime.map((e) => {
-			const et = vhEtichetta(e);
-			const altroGiorno = e.data_intervento !== oggi;
-			return `<button class="vh-visita${et.cls === "urg" ? " urg" : ""}" onclick="apriAzioniEvento('${e.id}')">
-        <span class="o">${altroGiorno ? `<small>${escapeHtml(hpGiornoEtichetta(e.data_intervento))}</small>` : ""}${vhOra(e)}</span>
-        <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
-        <span class="vh-et ${et.cls}">${et.txt}</span></button>`;
-		}).join("") : `<div class="vh-vuoto">Nessuna visita in agenda. <button onclick="openInterventoModal(null)">Aggiungine una</button></div>`}
+    ${vhRigheHtml(vhNuovoHtml())}
     ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
-    ${vhRigheHtml()}
     <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
       <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
 		if (diOggi.length && vhKm.giorno !== oggi && typeof ofStimaKm === "function") {
@@ -38674,10 +38832,57 @@ plAggiorna();
 			}).catch(() => {});
 		}
 	}
+	function vhRigaVisita(e) {
+		const et = vhEtichetta(e);
+		return `<button class="vh-visita${et.cls === "urg" ? " urg" : ""}" onclick="closeModal('modal-vh-visite');apriAzioniEvento('${e.id}')">
+    <span class="o">${vhOra(e)}</span>
+    <span class="c"><span class="t">${vhTitolo(e)}</span><span class="l">${escapeHtml(vhLuogo(e))}</span></span>
+    <span class="vh-et ${et.cls}">${et.txt}</span></button>`;
+	}
+	function vhVisite(ev) {
+		if (ev && ev.target && ev.target.closest && ev.target.closest(".vh-giro-num button")) return;
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		const app = (hpAppuntamenti || []).filter(vhDaFare).filter((e) => e.data_intervento >= oggi || e.data_intervento === oggi).sort((a, b) => (a.data_intervento + vhOra(a)).localeCompare(b.data_intervento + vhOra(b)));
+		const gruppi = [];
+		app.forEach((e) => {
+			let g = gruppi.find((x) => x.d === e.data_intervento);
+			if (!g) {
+				g = {
+					d: e.data_intervento,
+					l: []
+				};
+				gruppi.push(g);
+			}
+			g.l.push(e);
+		});
+		let ov = document.getElementById("modal-vh-visite");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay";
+			ov.id = "modal-vh-visite";
+			ov.onclick = (ev2) => {
+				if (ev2.target === ov) closeModal("modal-vh-visite");
+			};
+			ov.innerHTML = "<div class=\"modal vh-visite-modal\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"vh-visite-tit\"><div class=\"modal-handle\"></div><div id=\"vh-visite-corpo\"></div></div>";
+			document.body.appendChild(ov);
+		}
+		document.getElementById("vh-visite-corpo").innerHTML = `<div class="modal-title" id="vh-visite-tit">Le visite inserite</div>
+    <div class="vh-visite-sotto">${app.length ? `${app.length} in agenda · tocca una visita per aprirla` : "Nessuna visita in agenda."}</div>
+    ${gruppi.map((g) => `<div class="vh-visite-g">${g.d === oggi ? "Oggi" : escapeHtml(hpGiornoEtichetta(g.d))} · ${g.l.length}</div>
+      <div class="vh-visite-l">${g.l.map(vhRigaVisita).join("")}</div>`).join("")}
+    <button class="btn btn-primary vh-visite-agenda" onclick="closeModal('modal-vh-visite');vhGiornata()">Apri l'agenda</button>`;
+		openModal("modal-vh-visite");
+	}
 	function vhIcona(cls) {
 		return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || "";
 	}
-	function vhRigheHtml() {
+	var VH_CAL = "<svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"3\"/><path d=\"M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5\"/></svg>";
+	function vhNuovoHtml() {
+		return `<button class="hm-riga r-vis" onclick="openInterventoModal(null)"><span class="ic">${VH_CAL}</span>
+    <span class="tx"><b>Nuovo appuntamento</b><span>Inserisci un nuovo appuntamento</span></span>
+    <span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
+	}
+	function vhRigheHtml(prima) {
 		const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
 		const nCav = typeof cavalliCartella === "function" ? cavalliCartella().length : 0;
 		const str = (c) => typeof isStruttura === "function" && isStruttura(c);
@@ -38687,7 +38892,7 @@ plAggiorna();
 		const inc = `${escapeHtml(mese)} <strong>${euro(wgPro?.incassatoMese)}</strong>` + (wgPro?.daIncassareMese ? ` · da incassare <strong>${euro(wgPro.daIncassareMese)}</strong>` : "");
 		const riga = (cls, az, t, sotto, extra) => `<button class="hm-riga ${cls}${extra ? " " + extra : ""}" onclick="${az}"><span class="ic">${vhIcona(cls)}</span>
     <span class="tx"><b>${t}</b><span>${sotto}</span></span><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
-		return `<div class="hm-righe vh-righe">
+		return `<div class="hm-righe vh-righe">${prima || ""}
     ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
     ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
     ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}
@@ -38915,6 +39120,11 @@ plAggiorna();
 		if (tipi.has("urgenza")) return {
 			cls: "vt-urg",
 			html: "<span class=\"vt-b urg\">Urgente</span>"
+		};
+		const nAp = typeof vaaAperto === "function" ? (ev || []).filter(vaaAperto).length : 0;
+		if (nAp) return {
+			cls: "",
+			html: `<span class="vt-b oro">aperto · ${nAp === 1 ? "1 cavallo" : nAp + " cavalli"} da segnare</span>`
 		};
 		const mf = [tipi.has("mtc") ? "MTC" : "", tipi.has("fisio") ? "Fisio" : ""].filter(Boolean);
 		if (mf.length) return {
@@ -40101,7 +40311,7 @@ plAggiorna();
 		}
 	};
 	var vsNomeCliente = (e) => e?.clienti_mascalcia?.nome || (typeof clienteDiId === "function" ? clienteDiId(e?.cliente_mascalcia_id)?.nome : "") || "";
-	async function vsApriDaEvento(id, evento) {
+	async function vsApriDaEvento$1(id, evento) {
 		const e = evento || typeof agEventiCache !== "undefined" && agEventiCache[id] || (hpAppuntamenti || []).find((x) => x.id === id) || (typeof schedaStoricoCavallo !== "undefined" ? schedaStoricoCavallo : []).find((x) => x.id === id);
 		if (!e) return showToast("Visita non trovata");
 		try {
@@ -40446,7 +40656,7 @@ plAggiorna();
 				b = document.createElement("button");
 				b.id = "azioni-evento-scheda";
 				b.className = "btn btn-primary vs-azione";
-				b.onclick = () => vsApriDaEvento(vsEventoAzioni);
+				b.onclick = () => vsApriDaEvento$1(vsEventoAzioni);
 				box.insertBefore(b, box.firstChild);
 			}
 			const vet = typeof eVeterinario === "function" && eVeterinario();
@@ -40968,9 +41178,15 @@ plAggiorna();
 	function vrScorri() {
 		const s = document.getElementById("vr-scorri"), m = document.getElementById("vr-man");
 		if (!s || !m) return;
-		let x0 = null;
+		let x0 = null, maxDx = 0;
+		const torna = () => {
+			m.style.transition = "";
+			m.style.left = "5px";
+			x0 = null;
+		};
 		s.addEventListener("pointerdown", (e) => {
 			x0 = e.clientX;
+			maxDx = 0;
 			m.style.transition = "none";
 			try {
 				s.setPointerCapture(e.pointerId);
@@ -40978,18 +41194,29 @@ plAggiorna();
 		});
 		s.addEventListener("pointermove", (e) => {
 			if (x0 === null) return;
+			maxDx = Math.max(maxDx, Math.abs(e.clientX - x0));
 			m.style.left = Math.max(5, Math.min(s.clientWidth - 53, 5 + e.clientX - x0)) + "px";
 		});
-		s.addEventListener("pointerup", (e) => {
+		s.addEventListener("pointercancel", torna);
+		s.addEventListener("pointerup", async (e) => {
 			if (x0 === null) return;
 			m.style.transition = "";
-			const fatto = e.clientX - x0 > s.clientWidth * .6;
+			const dx = e.clientX - x0, fatto = dx > s.clientWidth * .5, tocco = maxDx < 10 && Math.abs(dx) < 10;
 			x0 = null;
 			if (fatto) {
 				m.style.left = s.clientWidth - 53 + "px";
-				vrInvia();
-			} else m.style.left = "5px";
+				return vrInvia();
+			}
+			m.style.left = "5px";
+			if (tocco && typeof chiediSiNo === "function" && await chiediSiNo("Firmi e invii il referto?", vrTestoConferma(), {
+				si: "Firma e invia",
+				no: "Annulla"
+			})) vrInvia();
 		});
+	}
+	function vrTestoConferma() {
+		const n = (VR.dest || []).filter((x) => x.on && x.suEquo).map((x) => x.nome);
+		return n.length ? "Lo ricevono in chat: " + n.join(", ") + "." : "Nessuno lo riceve in chat: resta nella cartella del cavallo. Per mandarlo fuori da Equo usa «Condividi».";
 	}
 	async function vrCreaPdf() {
 		const doc = new (await (caricaJsPdf()))({
@@ -41520,7 +41747,7 @@ plAggiorna();
 		});
 	}
 	async function vdApriDaEvento(id, evento) {
-		await vsApriDaEvento(id, evento);
+		await vsApriDaEvento$1(id, evento);
 		if (VS.schermo === "scheda") vdDetta();
 		else if (VS.schermo === "scelta") {
 			VD.attesa = true;
@@ -42019,7 +42246,7 @@ plAggiorna();
 		}
 	}
 	function ptApriVisita(id) {
-		vsApriDaEvento(id);
+		vsApriDaEvento$1(id);
 	}
 	// equo-app-src/src/ruoli/veterinario/moduli/12-scheda-cavallo.js
 	var vcEsc = (s) => escapeHtml(s == null ? "" : String(s));
@@ -42104,7 +42331,7 @@ plAggiorna();
 		box.innerHTML = terapie + dpa + `<div class="vc-h">Visite precedenti</div>` + visite;
 	}
 	function vcApriVisita(id) {
-		vsApriDaEvento(id);
+		vsApriDaEvento$1(id);
 	}
 	function vcDisegnaDocumenti() {
 		const box = document.querySelector("#vc-documenti .vc-corpo");
@@ -43713,6 +43940,1058 @@ plAggiorna();
 		}
 		return out;
 	}
+	// equo-app-src/src/ruoli/veterinario/moduli/14-visita-aperta.js
+	var VAP = {
+		via: null,
+		a: null,
+		c: null,
+		fatti: {},
+		passate: null,
+		caricando: false,
+		risolvi: null,
+		vacc: null
+	};
+	var VAA = VAP;
+	var vaaEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var VAA_VACCINI = [
+		"Influenza",
+		"Tetano",
+		"EHV (rinopolmonite)",
+		"West Nile"
+	];
+	var VAA_RIMANDATE = "equo-vaa-dopo";
+	var VAP_DECIDERE = "Da decidere sul posto";
+	var VAP_TIPI = [
+		"vaccino",
+		"visita",
+		"terapia",
+		"fisio",
+		"mtc",
+		"altro"
+	];
+	var VAP_DURATA = {
+		vaccino: 15,
+		visita: 30,
+		terapia: 30,
+		fisio: 45,
+		mtc: 45,
+		urgenza: 45,
+		altro: 30,
+		posto: 20
+	};
+	var VAP_PLURALE = {
+		vaccino: "vaccini",
+		visita: "visite",
+		terapia: "terapie",
+		fisio: "sedute di fisioterapia",
+		mtc: "sedute MTC",
+		urgenza: "urgenze",
+		altro: "lavori"
+	};
+	var vaaVet = () => typeof eVeterinario === "function" && eVeterinario();
+	var vaaAperto$1 = (e) => !!e && !e.cavallo_cliente_id && !e.horse_id && e.stato !== "fatto" && !["annullato", "rifiutato"].includes(e.stato);
+	var vapDaDecidere = (e) => !e || (e.tipo_altro || "") === "Da decidere sul posto";
+	var vapEtTipo = (t) => TIPO_FERRATURA_LABELS?.[t] || "Visita";
+	var vapNomeCliente = (id) => (typeof clienteDiId === "function" ? clienteDiId(id)?.nome : "") || "Cliente";
+	var vapSuEquo = (c) => !!(c && (c.cliente_user_id || c.centro_id));
+	var vapOggi = () => isoLocale(/* @__PURE__ */ new Date());
+	function vapNomeLavoro$1(e) {
+		return vapDaDecidere(e) ? "da decidere" : vapEtTipo(e.tipo_ferratura);
+	}
+	function vaaEtichetta$1(e) {
+		return vaaAperto$1(e) ? {
+			cls: "oro",
+			txt: "aperto"
+		} : null;
+	}
+	function vapScelta(clienteId, intervento, preset) {
+		if (VAP.via) {
+			window.intCercaSolo = VAP.via === "cavallo" ? "cavallo" : null;
+			return false;
+		}
+		window.intCercaSolo = null;
+		if (!vaaVet() || clienteId || intervento || preset) return false;
+		vapApriScelta();
+		return true;
+	}
+	function vapIcona(cls) {
+		return document.querySelector("#hm .hm-riga." + cls + " .ic")?.innerHTML || "";
+	}
+	var VAP_IC_APERTO = "<svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><path d=\"M17.5 14v7M14 17.5h7\"/></svg>";
+	function vapFoglio(id, cls, conX) {
+		let ov = document.getElementById(id);
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay";
+			ov.id = id;
+			if (!conX) ov.setAttribute("data-senza-x", "");
+			else ov.onclick = (ev) => {
+				if (ev.target === ov) closeModal(id);
+			};
+			ov.innerHTML = `<div class="modal ${cls}" role="dialog" aria-modal="true" aria-labelledby="${id}-tit"><div class="modal-handle"></div><div id="${id}-corpo"></div></div>`;
+			document.body.appendChild(ov);
+		}
+		return document.getElementById(id + "-corpo");
+	}
+	function vapApriScelta() {
+		const box = vapFoglio("modal-vap", "vap-modal", true);
+		const fr = "<span class=\"fr\"><svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg></span>";
+		box.innerHTML = `<div class="modal-title" id="modal-vap-tit">Nuovo appuntamento</div><div class="vap-sotto">Da dove parti?</div>
+    <button type="button" class="vap-op" onclick="vapVia('cavallo')"><span class="ic">${vapIcona("r-cav")}</span><span class="tx"><b>Scegli cavallo</b><small>Cerchi il cavallo: proprietario e posto si compilano da soli.</small></span>${fr}</button>
+    <button type="button" class="vap-op" onclick="vapVia('cliente')"><span class="ic">${vapIcona("r-cli")}</span><span class="tx"><b>Scegli cliente</b><small>Proprietario o scuderia, poi scegli i suoi cavalli.</small></span>${fr}</button>
+    <button type="button" class="vap-op ap" onclick="vapVia('aperto')"><span class="ic">${VAP_IC_APERTO}</span><span class="tx"><b>Appuntamento aperto</b><small>Vai in un posto e non sai ancora quali cavalli vedrai. Prepari quanti lavori servono, i cavalli li segni sul posto.</small></span>${fr}</button>`;
+		openModal("modal-vap");
+	}
+	function vapVia(v) {
+		closeModal("modal-vap");
+		if (v === "aperto") return vapApriAperto();
+		VAP.via = v;
+		Promise.resolve(openInterventoModal(null)).finally(() => {
+			VAP.via = null;
+		});
+	}
+	function vapDopoApertura() {
+		const m = document.getElementById("modal-add-intervento");
+		if (!m) return;
+		const cav = vaaVet() && window.intCercaSolo === "cavallo";
+		m.classList.toggle("via-cavallo", cav);
+		const inp = document.getElementById("int-cerca-input");
+		if (inp) {
+			inp.placeholder = cav ? "Cerca il cavallo…" : "Cerca cliente o cavallo…";
+			inp.setAttribute("aria-label", inp.placeholder.replace("…", ""));
+		}
+		const lab = document.querySelector("#intervento-cliente-group .input-label");
+		if (lab) lab.textContent = cav ? "Cavallo" : "Cliente";
+		if (cav && inp) setTimeout(() => {
+			try {
+				inp.focus();
+			} catch (_) {}
+		}, 250);
+	}
+	function vapAddMin(ora, min) {
+		if (!ora) return null;
+		const [h, m] = String(ora).split(":").map(Number), t = h * 60 + m + min;
+		return String(Math.floor(t / 60) % 24).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
+	}
+	function vapApriAperto() {
+		const mezz = /* @__PURE__ */ new Date(Math.ceil(((/* @__PURE__ */ new Date()).getTime() + 9e5) / 18e5) * 18e5);
+		const oraProposta = isoLocale(mezz) === vapOggi() ? mezz.toTimeString().slice(0, 5) : "";
+		VAP.a = {
+			cid: "",
+			nuovo: "",
+			cerca: "",
+			quando: "oggi",
+			data: vapOggi(),
+			ora: oraProposta,
+			n: 1,
+			slot: ["posto"],
+			prev: null,
+			err: ""
+		};
+		vapFoglio("modal-vap-aperto", "vap-modal", true);
+		vapDisegnaAperto();
+		openModal("modal-vap-aperto");
+	}
+	function vapClientiPerDove(testo) {
+		const p = typeof cercaParole === "function" ? cercaParole(testo) : String(testo || "").toLowerCase().split(/\s+/).filter(Boolean);
+		return (typeof clientiAttivi === "function" ? clientiAttivi() : []).filter((c) => !p.length || (typeof cercaCorrisponde === "function" ? cercaCorrisponde(p, c.nome) : c.nome.toLowerCase().includes(p.join(" ")))).sort((a, b) => isStruttura(b) - isStruttura(a) || a.nome.localeCompare(b.nome, "it", { sensitivity: "base" })).slice(0, 8);
+	}
+	function vapDisegnaAperto() {
+		const box = document.getElementById("modal-vap-aperto-corpo");
+		if (!box) return;
+		const a = VAP.a, nomeDove = a.cid ? vapNomeCliente(a.cid) : a.nuovo;
+		const doveLista = nomeDove ? [] : vapClientiPerDove(a.cerca);
+		const chip = (i, t, testo) => `<button type="button" class="vs-chip${a.slot[i] === t ? " on" : ""}${t === "posto" ? " posto" : ""}" aria-pressed="${a.slot[i] === t}" onclick="vapTipoSlot(${i}, '${t}')">${testo}</button>`;
+		box.innerHTML = `<div class="modal-title" id="modal-vap-aperto-tit">Appuntamento aperto</div><div class="vap-sotto">I cavalli li segni sul posto.</div>
+    <div class="vaa-lab">Dove</div>
+    ${nomeDove ? `<button type="button" class="vap-dove-scelto" onclick="vapCambiaDove()"><b>${vaaEsc(nomeDove)}</b><span>${a.cid ? isStruttura(clienteDiId(a.cid)) ? "Scuderia" : "Proprietario" : "Cliente nuovo"} · cambia</span></button>` : `<input class="input" id="vap-dove" type="search" autocomplete="off" placeholder="Proprietario o struttura" value="${vaaEsc(a.cerca)}" oninput="vapCercaDove(this.value)">
+         <div class="vap-dove-lista">${doveLista.map((c) => `<button type="button" onclick="vapDove('${c.id}')"><b>${vaaEsc(c.nome)}</b><small>${isStruttura(c) ? "Scuderia" : "Proprietario"}</small></button>`).join("")}
+         ${a.cerca.trim() ? `<button type="button" class="nuovo" onclick="vapDoveNuovo()"><b>+ Nuovo: «${vaaEsc(a.cerca.trim())}»</b><small>Cliente nuovo</small></button>` : ""}</div>`}
+    <div class="vaa-lab">Quando</div>
+    <div class="vaa-seg" role="tablist">${[
+			["oggi", "Oggi"],
+			["domani", "Domani"],
+			["scegli", "Scegli giorno"]
+		].map(([k, t]) => `<button type="button" role="tab" aria-selected="${a.quando === k}" class="${a.quando === k ? "on" : ""}" onclick="vapQuando('${k}')">${t}</button>`).join("")}</div>
+    <div class="vaa-due">${a.quando === "scegli" ? `<input class="input" type="date" id="vap-data" value="${a.data}" min="${vapOggi()}" onchange="VAP.a.data = this.value">` : ""}
+      <input class="input" type="time" id="vap-ora" value="${vaaEsc(a.ora)}" onchange="VAP.a.ora = this.value" aria-label="Ora"></div>
+    <div class="vaa-lab">Quanti cavalli?</div>
+    <div class="vap-step"><button type="button" onclick="vapQuanti(-1)" aria-label="Uno in meno" ${a.n <= 1 ? "disabled" : ""}>−</button><b id="vap-n">${a.n}</b>
+      <button type="button" onclick="vapQuanti(1)" aria-label="Uno in più" ${a.n >= 30 ? "disabled" : ""}>+</button><small>Se non lo sai lascia 1: ne aggiungi sul posto.</small></div>
+    <div class="vaa-lab">Lavori · il tipo puoi sceglierlo ora o sul posto</div>
+    <div class="vap-slots">${a.slot.map((t, i) => `<div class="vap-slot"><b>Lavoro ${i + 1}</b><div class="vs-chips">${chip(i, "vaccino", "Vaccino")}${chip(i, "visita", "Visita")}${chip(i, "terapia", "Terapia")}${chip(i, "fisio", "Fisio")}${chip(i, "mtc", "MTC")}${chip(i, "posto", "sul posto")}</div></div>`).join("")}</div>
+    ${a.prev && a.prev.testo ? `<div class="vaa-nota" id="vap-prev">${a.prev.testo}</div>` : ""}
+    <div class="auth-error" id="vap-err" style="${a.err ? "" : "display:none"}">${vaaEsc(a.err)}</div>
+    <button class="btn btn-primary vaa-ok" id="vap-crea" onclick="vapCrea()">Crea ${a.n === 1 ? "l'appuntamento" : a.n + " appuntamenti"}</button>`;
+	}
+	function vapCercaDove(v) {
+		VAP.a.cerca = v;
+		vapDisegnaAperto();
+		const inp = document.getElementById("vap-dove");
+		if (inp) {
+			inp.focus();
+			try {
+				inp.setSelectionRange(inp.value.length, inp.value.length);
+			} catch (_) {}
+		}
+	}
+	function vapCambiaDove() {
+		VAP.a.cid = "";
+		VAP.a.nuovo = "";
+		VAP.a.prev = null;
+		vapCercaDove("");
+	}
+	async function vapDove(id) {
+		VAP.a.cid = id;
+		VAP.a.nuovo = "";
+		VAP.a.cerca = "";
+		VAP.a.err = "";
+		vapDisegnaAperto();
+		await vapPrevedi(id);
+	}
+	function vapDoveNuovo() {
+		VAP.a.nuovo = VAP.a.cerca.trim();
+		VAP.a.cid = "";
+		VAP.a.cerca = "";
+		VAP.a.prev = null;
+		vapDisegnaAperto();
+	}
+	function vapQuando(k) {
+		const a = VAP.a;
+		a.quando = k;
+		if (k === "oggi") a.data = vapOggi();
+		if (k === "domani") {
+			a.data = aggiungiGiorniIso(vapOggi(), 1);
+			if (!a.oraToccata) a.ora = "09:00";
+		}
+		if (k === "scegli" && a.data <= vapOggi()) a.data = aggiungiGiorniIso(vapOggi(), 1);
+		vapDisegnaAperto();
+	}
+	function vapQuanti(d) {
+		const a = VAP.a, n = Math.max(1, Math.min(30, a.n + d));
+		while (a.slot.length < n) a.slot.push(a.prev?.tipo || "posto");
+		a.slot.length = n;
+		a.n = n;
+		vapDisegnaAperto();
+	}
+	function vapTipoSlot(i, t) {
+		VAP.a.slot[i] = t;
+		vapDisegnaAperto();
+	}
+	async function vapTutti() {
+		try {
+			return DEMO_MODE ? demoState.interventiMascalcia || [] : await DB.listInterventiMascalciaTutti() || [];
+		} catch (_) {
+			return [];
+		}
+	}
+	var vapMese = (d) => (/* @__PURE__ */ new Date(d + "T12:00")).toLocaleDateString("it-IT", {
+		month: "short",
+		year: "numeric"
+	}).replace(".", "");
+	async function vapPrevedi(cid) {
+		const tutti = await vapTutti();
+		if (!VAP.a || VAP.a.cid !== cid) return;
+		const fatti = tutti.filter((i) => i.stato === "fatto" && i.cliente_mascalcia_id === cid && i.data_intervento);
+		const ultimo = fatti.reduce((m, i) => i.data_intervento > m ? i.data_intervento : m, "");
+		const delGiorno = fatti.filter((i) => i.data_intervento === ultimo);
+		const conta = {};
+		delGiorno.forEach((i) => {
+			conta[i.tipo_ferratura] = (conta[i.tipo_ferratura] || 0) + 1;
+		});
+		const tipoUlt = Object.keys(conta).sort((a, b) => conta[b] - conta[a])[0] || null;
+		const cav = await vaaCavalliDelCliente(cid), ids = new Set(cav.map((c) => c.id));
+		const limite = aggiungiGiorniIso(vapOggi(), 30), ultVacc = {};
+		tutti.filter((i) => i.stato === "fatto" && ids.has(i.cavallo_cliente_id) && vaaVaccino(i)).forEach((i) => {
+			if (!ultVacc[i.cavallo_cliente_id] || i.data_intervento > ultVacc[i.cavallo_cliente_id].data_intervento) ultVacc[i.cavallo_cliente_id] = i;
+		});
+		const inScad = Object.values(ultVacc).filter((i) => i.prossima_scadenza && i.prossima_scadenza <= limite).length;
+		const tipo = inScad ? "vaccino" : VAP_TIPI.includes(tipoUlt) ? tipoUlt : null;
+		const n = Math.max(delGiorno.length, inScad);
+		const parti = [];
+		if (delGiorno.length) parti.push(`l'ultima volta qui hai fatto <b>${delGiorno.length === 1 ? "1 " + vapEtTipo(tipoUlt).toLowerCase() : delGiorno.length + " " + (VAP_PLURALE[tipoUlt] || "lavori")}</b> (${vapMese(ultimo)})`);
+		if (inScad) parti.push(`<b>${inScad} ${inScad === 1 ? "cavallo ha" : "cavalli hanno"}</b> il richiamo in scadenza`);
+		const testo = parti.length ? `Previsione: ${parti.join(", e ")}. Ho proposto ${n > 1 ? n + " lavori" : "1 lavoro"}${tipo ? " «" + vapEtTipo(tipo) + "»" : ""}.` : "";
+		VAP.a.prev = {
+			n,
+			tipo,
+			testo
+		};
+		if (n > 0) {
+			VAP.a.n = Math.min(30, n);
+			VAP.a.slot = Array.from({ length: VAP.a.n }, () => tipo || "posto");
+		}
+		vapDisegnaAperto();
+	}
+	async function vapCrea() {
+		const a = VAP.a, btn = document.getElementById("vap-crea");
+		const errore = (t) => {
+			a.err = t;
+			const el = document.getElementById("vap-err");
+			if (el) {
+				el.textContent = t;
+				el.style.display = "block";
+			}
+		};
+		a.ora = document.getElementById("vap-ora")?.value || a.ora;
+		if (a.quando === "scegli") a.data = document.getElementById("vap-data")?.value || a.data;
+		if (!a.cid && !a.nuovo) return errore("Scegli dove vai: proprietario o struttura.");
+		if (!a.data) return errore("Scegli il giorno.");
+		if (btn) btn.disabled = true;
+		try {
+			let cid = a.cid;
+			if (!cid) {
+				const r = await creaClienteUnico({
+					nome: a.nuovo,
+					chiediCavalli: false
+				});
+				if (r.error || !r.data) return errore("Non sono riuscito a salvare il cliente: " + (r.error?.message || "riprova"));
+				cid = r.data.id;
+				if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia().catch(() => {});
+			}
+			let ora = a.ora || null;
+			const creati = [];
+			for (const t of a.slot) {
+				const tipo = t === "posto" ? "visita" : t;
+				const { data, error } = await DB.insertInterventoMascalcia({
+					cliente_mascalcia_id: cid,
+					tipo_ferratura: tipo,
+					tipo_altro: t === "posto" ? VAP_DECIDERE : null,
+					data_intervento: a.data,
+					ora,
+					stato: "programmato",
+					stato_pagamento: "da_saldare"
+				});
+				if (error) return errore("Errore: " + error.message);
+				creati.push(data);
+				ora = vapAddMin(ora, VAP_DURATA[t] || 20);
+			}
+			if (creati[0] && typeof avvisaNuovoSeCollegato === "function") try {
+				await avvisaNuovoSeCollegato(creati[0]);
+			} catch (_) {}
+			closeModal("modal-vap-aperto");
+			showToast(creati.length === 1 ? "Appuntamento aperto creato" : `Creati ${creati.length} appuntamenti aperti`);
+			await vaaAggiorna();
+		} finally {
+			if (btn) btn.disabled = false;
+		}
+	}
+	async function vaaCavalliDelCliente(cid) {
+		const l = [];
+		const add = (c, extra) => {
+			if (!c || !c.id || l.some((x) => x.id === c.id)) return;
+			l.push({
+				id: c.id,
+				nome: c.nome || "Cavallo",
+				horse_id: c.horse_id || null,
+				microchip: c.microchip || "",
+				cliente_mascalcia_id: c.cliente_mascalcia_id || cid,
+				...extra
+			});
+		};
+		try {
+			(await DB.listCavalliCliente(cid)).forEach((c) => {
+				if (c.id) add(c, {});
+			});
+		} catch (_) {}
+		(typeof cavalliCartella === "function" ? cavalliCartella() : []).filter((c) => c.ubicazione_cliente_id === cid && c.cliente_mascalcia_id !== cid).forEach((c) => add(c, { di: vapNomeCliente(c.cliente_mascalcia_id) }));
+		return l.sort((a, b) => a.nome.localeCompare(b.nome, "it", { sensitivity: "base" }));
+	}
+	var vaaVaccino = (e) => e.tipo_ferratura === "vaccino" || /vaccin/i.test(e.tipo_altro || "");
+	var vapChiave = (cid, d) => cid + "|" + d;
+	var vapNormChip = (s) => String(s || "").replace(/[^0-9a-z]/gi, "").toUpperCase();
+	async function vapLavoriDelGiorno(cid, giorno) {
+		let l = [];
+		if (DEMO_MODE) l = demoState.interventiMascalcia || [];
+		else try {
+			l = await DB.listInterventiPeriodo(giorno, giorno) || [];
+		} catch (_) {
+			l = [];
+		}
+		const hp = typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti || [] : [];
+		return [...l, ...hp].filter((e, i, a) => a.findIndex((x) => x.id === e.id) === i).filter((e) => e.cliente_mascalcia_id === cid && e.data_intervento === giorno && !["annullato", "rifiutato"].includes(e.stato)).sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
+	}
+	async function vapPrezzoPrevisto(cid, tipo, e) {
+		if (Number(e?.importo) > 0) return String(e.importo);
+		const tutti = (await vapTutti()).filter((i) => i.stato === "fatto" && i.tipo_ferratura === tipo && Number(i.importo) > 0).sort((a, b) => String(b.data_intervento).localeCompare(String(a.data_intervento)));
+		const qui = tutti.find((i) => i.cliente_mascalcia_id === cid) || tutti[0];
+		return qui ? String(qui.importo) : "";
+	}
+	function vapVaccMemoria() {
+		if (VAP.vacc) return VAP.vacc;
+		try {
+			const m = JSON.parse(localStorage.getItem("equo-vap-vacc") || "null");
+			if (m && m.giorno === vapOggi()) return VAP.vacc = m;
+		} catch (_) {}
+		return {
+			fatto: ["Influenza", "Tetano"],
+			lotto: "",
+			lottoScad: "",
+			richiamo: 365
+		};
+	}
+	async function vaaFatto(e) {
+		if (VAP.risolvi) {
+			VAP.risolvi({ ok: false });
+			VAP.risolvi = null;
+		}
+		const giorno = e.data_intervento && e.data_intervento <= vapOggi() ? e.data_intervento : vapOggi();
+		const cid = e.cliente_mascalcia_id;
+		const chiusi = VAP.fatti[vapChiave(cid, giorno)] || [];
+		const giorni = [.../* @__PURE__ */ new Set([e.data_intervento || giorno, giorno])];
+		const tutti = [];
+		for (const g of giorni) (await vapLavoriDelGiorno(cid, g)).forEach((x) => {
+			if (!tutti.some((y) => y.id === x.id)) tutti.push(x);
+		});
+		const lavori = [...chiusi.map((id) => tutti.find((x) => x.id === id)).filter(Boolean), ...tutti.filter((x) => !chiusi.includes(x.id) && (x.id === e.id || vaaAperto$1(x))).sort((p, q) => String(p.ora || "99").localeCompare(String(q.ora || "99")))];
+		const cav = await vaaCavalliDelCliente(cid);
+		const giaVisti = new Set(tutti.filter((x) => x.stato === "fatto" && x.cavallo_cliente_id && x.data_intervento === giorno).map((x) => x.cavallo_cliente_id));
+		const tipo = vapDaDecidere(e) ? null : e.tipo_ferratura;
+		const v = vapVaccMemoria();
+		VAP.c = {
+			e,
+			giorno,
+			cid,
+			lavori,
+			cavalli: cav,
+			giaVisti,
+			nome: "",
+			scelto: null,
+			chip: "",
+			chipEsito: "",
+			tipo,
+			motivo: vapDaDecidere(e) || vaaVaccino(e) ? "" : e.tipo_altro || "",
+			fatto: v.fatto.slice(),
+			lotto: v.lotto,
+			lottoScad: v.lottoScad,
+			richiamo: v.richiamo,
+			prezzo: tipo ? await vapPrezzoPrevisto(cid, tipo, e) : Number(e.importo) > 0 ? String(e.importo) : ""
+		};
+		vapFoglio("modal-vaa", "vaa-modal", false);
+		vapDisegnaChiusura();
+		openModal("modal-vaa");
+		return new Promise((res) => {
+			VAP.risolvi = res;
+		});
+	}
+	function vapNumeri() {
+		const c = VAP.c, idx = c.lavori.findIndex((x) => x.id === c.e.id);
+		return {
+			k: (idx >= 0 ? idx : c.lavori.length) + 1,
+			n: Math.max(c.lavori.length, idx + 1),
+			prossimo: c.lavori.find((x) => x.id !== c.e.id && vaaAperto$1(x)) || null
+		};
+	}
+	function vapSuggeriti() {
+		const c = VAP.c, q = (typeof cercaNorm === "function" ? cercaNorm(c.nome) : c.nome.toLowerCase()).trim();
+		return c.cavalli.filter((x) => !c.giaVisti.has(x.id) && (!q || (typeof cercaNorm === "function" ? cercaNorm(x.nome) : x.nome.toLowerCase()).includes(q))).slice(0, 6);
+	}
+	function vapDisegnaChiusura() {
+		const box = document.getElementById("modal-vaa-corpo");
+		if (!box) return;
+		const c = VAP.c;
+		c.e;
+		const { k, n, prossimo } = vapNumeri(), vacc = c.tipo === "vaccino";
+		const sug = c.scelto ? [] : vapSuggeriti();
+		const tipi = VAP_TIPI.map((t) => `<button type="button" class="vs-chip${c.tipo === t ? " on" : ""}" aria-pressed="${c.tipo === t}" onclick="vapTipo('${t}')">${vaaEsc(vapEtTipo(t))}</button>`).join("");
+		box.innerHTML = `<div class="modal-title" id="modal-vaa-tit">Chi era il cavallo?</div>
+    <div class="vaa-sotto-tit">Lavoro ${k} di ${n} · ${vaaEsc(c.tipo ? vapEtTipo(c.tipo) : "da decidere")} · ${vaaEsc(vapNomeCliente(c.cid))}</div>
+    <div class="vaa-lab">Nome del cavallo</div>
+    ${c.scelto ? `<button type="button" class="vap-dove-scelto" onclick="vapTogliCavallo()"><b>${vaaEsc(c.scelto.nome)}</b><span>${c.scelto.di ? "di " + vaaEsc(c.scelto.di) + " · " : ""}${c.scelto.microchip ? "chip " + vaaEsc(c.scelto.microchip) + " · " : ""}cambia</span></button>` : `<input class="input" id="vap-nome" autocomplete="off" placeholder="Scrivi il nome" value="${vaaEsc(c.nome)}" oninput="vapNome(this.value)">
+         ${sug.length ? `<div class="vap-sug">${sug.map((x) => `<button type="button" onclick="vapScegliCavallo('${x.id}')">${vaaEsc(x.nome)}${x.di ? `<small>di ${vaaEsc(x.di)}</small>` : ""}</button>`).join("")}</div>
+           <div class="vap-piccolo">${c.nome ? "Cavalli di questo posto con questo nome." : "Prima i cavalli di questo posto non ancora visti oggi."}</div>` : c.nome.trim() ? `<div class="vap-piccolo">Cavallo nuovo: diventa di ${vaaEsc(vapNomeCliente(c.cid))}, con il codice provvisorio di Equo.</div>` : ""}`}
+    <div class="vaa-lab">Microchip</div>
+    <input class="input" id="vap-chip" inputmode="numeric" autocomplete="off" placeholder="15 cifre (se lo leggi)" value="${vaaEsc(c.chip)}" oninput="vapChip(this.value)">
+    ${c.chipEsito ? `<div class="vap-ok">${c.chipEsito}</div>` : ""}
+    <div class="vaa-lab">Cosa hai fatto</div>
+    <div class="vs-chips">${tipi}</div>
+    ${vacc ? `<div class="vs-chips vap-vacc">${VAA_VACCINI.map((v) => `<button type="button" class="vs-chip${c.fatto.includes(v) ? " on" : ""}" aria-pressed="${c.fatto.includes(v)}" onclick="vaaVacc('${v}')">${v}</button>`).join("")}</div>
+       <div class="vaa-due"><input class="input" id="vaa-lotto" placeholder="Lotto" value="${vaaEsc(c.lotto)}" oninput="VAP.c.lotto = this.value"><input class="input" id="vaa-lotto-scad" placeholder="Scadenza lotto (es. 06/2027)" value="${vaaEsc(c.lottoScad)}" oninput="VAP.c.lottoScad = this.value"></div>
+       <div class="vaa-sotto">Richiamo</div><div class="vs-chips">${[[182, "tra 6 mesi"], [365, "tra 1 anno"]].map(([g, t]) => `<button type="button" class="vs-chip${c.richiamo === g ? " on" : ""}" onclick="vaaRichiamo(${g})">${t}</button>`).join("")}</div>` : c.tipo ? `<input class="input vap-motivo" id="vaa-testo" placeholder="In breve (es. controllo, ecografia tendine)" value="${vaaEsc(c.motivo)}" oninput="VAP.c.motivo = this.value">` : ""}
+    <div class="vaa-lab">Costo</div>
+    <label class="vaa-prezzo base">€<input type="number" min="0" step="1" inputmode="decimal" id="vaa-prezzo-base" value="${vaaEsc(c.prezzo)}" oninput="VAP.c.prezzo = this.value">
+      <small>${c.prezzo ? "proposto dall'ultima volta: lo cambi se serve" : ""}</small></label>
+    <div class="auth-error" id="vaa-err" style="display:none"></div>
+    <button class="btn btn-primary vaa-ok" onclick="vaaSalva()">${prossimo ? `Salva e vai al lavoro ${k + 1} ›` : "Salva e chiudi la visita"}</button>
+    <button class="btn btn-outline vap-altro" onclick="vapAggiungiLavoro()">+ Un altro cavallo qui</button>
+    <button class="btn btn-outline vaa-dopo" onclick="vaaDopo()">Più tardi</button>
+    <div class="vaa-nota oro">Se esci senza nome, il lavoro resta «aperto» e te lo ricordo in Home.</div>`;
+	}
+	function vapRidisegna(idFuoco) {
+		const a = document.activeElement, id = idFuoco || a && a.id || null, pos = a && "selectionStart" in a ? a.selectionStart : null;
+		vapDisegnaChiusura();
+		const el = id ? document.getElementById(id) : null;
+		if (el) {
+			el.focus();
+			try {
+				if (pos != null) el.setSelectionRange(pos, pos);
+			} catch (_) {}
+		}
+	}
+	function vapNome(v) {
+		VAP.c.nome = v;
+		vapRidisegna("vap-nome");
+	}
+	async function vapScegliCavallo(id) {
+		const c = VAP.c, x = c.cavalli.find((y) => y.id === id);
+		if (!x) return;
+		c.scelto = x;
+		c.nome = x.nome;
+		if (x.microchip && !c.chip) c.chip = x.microchip;
+		c.chipEsito = "";
+		vapDisegnaChiusura();
+	}
+	function vapTogliCavallo() {
+		const c = VAP.c;
+		c.scelto = null;
+		c.chipEsito = "";
+		vapRidisegna("vap-nome");
+	}
+	function vapChip(v) {
+		const c = VAP.c;
+		c.chip = v;
+		const k = vapNormChip(v);
+		let esito = "";
+		if (k.length >= 10) {
+			const t = [...c.cavalli, ...typeof cavalliCartella === "function" ? cavalliCartella() : []].find((x) => x.microchip && vapNormChip(x.microchip) === k);
+			if (t) {
+				const di = t.cliente_mascalcia_id && t.cliente_mascalcia_id !== c.cid ? vapNomeCliente(t.cliente_mascalcia_id) : "";
+				c.scelto = {
+					id: t.id,
+					nome: t.nome,
+					horse_id: t.horse_id || null,
+					microchip: t.microchip,
+					cliente_mascalcia_id: t.cliente_mascalcia_id,
+					di: t.di || di
+				};
+				c.nome = t.nome;
+				esito = `✓ Trovato tra i tuoi cavalli: <b>${vaaEsc(t.nome)}</b>${c.scelto.di ? ", di " + vaaEsc(c.scelto.di) + ". Lo collego a lui" : ""}.`;
+			}
+		}
+		c.chipEsito = esito;
+		vapRidisegna("vap-chip");
+	}
+	async function vapTipo(t) {
+		const c = VAP.c;
+		c.tipo = t;
+		if (!c.prezzo || c.prezzoAuto) {
+			c.prezzo = await vapPrezzoPrevisto(c.cid, t, null);
+			c.prezzoAuto = true;
+		}
+		vapDisegnaChiusura();
+	}
+	function vaaVacc(v) {
+		const c = VAP.c;
+		c.fatto = c.fatto.includes(v) ? c.fatto.filter((x) => x !== v) : VAA_VACCINI.filter((x) => x === v || c.fatto.includes(x));
+		vapDisegnaChiusura();
+	}
+	function vaaRichiamo(g) {
+		VAP.c.richiamo = g;
+		vapDisegnaChiusura();
+	}
+	function vaaChiudi(r) {
+		closeModal("modal-vaa");
+		const f = VAP.risolvi;
+		VAP.risolvi = null;
+		if (f) f(r);
+	}
+	function vaaDopo() {
+		try {
+			const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]");
+			if (VAP.c?.e && !l.includes(VAP.c.e.id)) l.push(VAP.c.e.id);
+			localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l.slice(-50)));
+		} catch (_) {}
+		vaaChiudi({
+			ok: false,
+			rimandata: true
+		});
+		vaaAggiorna();
+	}
+	function vaaDescrizione() {
+		const c = VAP.c;
+		if (c.tipo === "vaccino") return ["Vaccino " + c.fatto.map((x) => x.split(" ")[0].toLowerCase()).join(" + "), c.lotto.trim() ? "lotto " + c.lotto.trim() + (c.lottoScad.trim() ? " (scad. " + c.lottoScad.trim() + ")" : "") : ""].filter(Boolean).join(" · ").slice(0, 200);
+		return String(c.motivo || "").trim().slice(0, 200) || null;
+	}
+	async function vaaSalva() {
+		const c = VAP.c, e = c.e, err = document.getElementById("vaa-err"), btn = document.querySelector("#modal-vaa-corpo .vaa-ok");
+		const errore = (t) => {
+			if (err) {
+				err.textContent = t;
+				err.style.display = "block";
+			}
+		};
+		if (err) err.style.display = "none";
+		const nome = (c.scelto?.nome || c.nome || "").trim();
+		if (!nome) return errore("Scrivi il nome del cavallo (o scegline uno).");
+		if (!c.tipo) return errore("Scegli cosa hai fatto.");
+		if (c.tipo === "vaccino" && !c.fatto.length) return errore("Scegli almeno un vaccino.");
+		if (btn) btn.disabled = true;
+		try {
+			const chip = vapNormChip(c.chip) ? c.chip.replace(/\s+/g, "").trim().toUpperCase() : null;
+			let cav = c.scelto;
+			if (!cav) {
+				const n = typeof cercaNorm === "function" ? cercaNorm(nome) : nome.toLowerCase();
+				cav = c.cavalli.find((x) => (typeof cercaNorm === "function" ? cercaNorm(x.nome) : x.nome.toLowerCase()) === n) || null;
+			}
+			if (!cav) {
+				const { data, error } = await DB.insertCavalloCliente({
+					cliente_mascalcia_id: c.cid,
+					nome,
+					microchip: chip
+				});
+				if (error || !data) return errore("Non sono riuscito a salvare il cavallo: " + (error?.message || "riprova"));
+				cav = {
+					id: data.id,
+					nome: data.nome,
+					horse_id: data.horse_id || null,
+					microchip: data.microchip,
+					cliente_mascalcia_id: c.cid,
+					nuovo: true
+				};
+				if (chip && !DEMO_MODE) try {
+					await sb.rpc("sync_microchip_link", { p_microchip: chip });
+				} catch (_) {}
+			} else if (chip && !cav.microchip) {
+				await DB.updateCavalloCliente(cav.id, { microchip: chip });
+				cav.microchip = chip;
+				if (!DEMO_MODE) try {
+					await sb.rpc("sync_microchip_link", { p_microchip: chip });
+				} catch (_) {}
+			}
+			const prezzo = c.prezzo === "" || c.prezzo == null || !(Number(c.prezzo) >= 0) ? null : Number(c.prezzo);
+			const prossima = c.tipo === "vaccino" ? aggiungiGiorniIso(c.giorno, c.richiamo) : null;
+			const upd = {
+				cavallo_cliente_id: cav.id,
+				horse_id: cav.horse_id || null,
+				tipo_ferratura: c.tipo,
+				tipo_altro: vaaDescrizione(),
+				importo: prezzo,
+				data_intervento: c.giorno,
+				stato: "fatto",
+				stato_pagamento: e.stato_pagamento || "da_saldare",
+				...prossima ? { prossima_scadenza: prossima } : {}
+			};
+			const { error } = await DB.updateInterventoMascalcia(e.id, upd);
+			if (error) return errore("Errore: " + error.message);
+			Object.assign(e, upd);
+			if (c.tipo === "vaccino") {
+				VAP.vacc = {
+					giorno: vapOggi(),
+					fatto: c.fatto,
+					lotto: c.lotto,
+					lottoScad: c.lottoScad,
+					richiamo: c.richiamo
+				};
+				try {
+					localStorage.setItem("equo-vap-vacc", JSON.stringify(VAP.vacc));
+				} catch (_) {}
+			}
+			try {
+				const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]").filter((x) => x !== e.id);
+				localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l));
+			} catch (_) {}
+			if (VAP.passate) VAP.passate = VAP.passate.filter((x) => x.id !== e.id);
+			const kk = vapChiave(c.cid, c.giorno);
+			(VAP.fatti[kk] = VAP.fatti[kk] || []).push(e.id);
+			const { prossimo } = vapNumeri();
+			showToast(`${cav.nome}: segnato`);
+			vaaChiudi({
+				ok: true,
+				cavalli: 1
+			});
+			if (cav.nuovo && typeof caricaCavalliMiei === "function") await caricaCavalliMiei().catch(() => {});
+			await vaaAggiorna();
+			if (prossimo) setTimeout(() => vaaFatto({ ...prossimo }), 250);
+			else setTimeout(() => vapDocumenti(c.cid, c.giorno), 250);
+		} finally {
+			if (btn) btn.disabled = false;
+		}
+	}
+	async function vapAggiungiLavoro() {
+		const c = VAP.c, e = c.e;
+		const { data, error } = await DB.insertInterventoMascalcia({
+			cliente_mascalcia_id: c.cid,
+			tipo_ferratura: c.tipo || e.tipo_ferratura || "visita",
+			tipo_altro: c.tipo ? null : VAP_DECIDERE,
+			data_intervento: e.data_intervento || c.giorno,
+			ora: null,
+			stato: "programmato",
+			stato_pagamento: "da_saldare"
+		});
+		if (error || !data) return showToast("Errore: " + (error?.message || "riprova"));
+		c.lavori.push(data);
+		showToast(`Aggiunto il lavoro ${c.lavori.length}`);
+		vapDisegnaChiusura();
+		vaaAggiorna();
+	}
+	async function vapDocumenti(cid, giorno) {
+		const chiusi = VAP.fatti[vapChiave(cid, giorno)] || [];
+		const lavori = (await vapLavoriDelGiorno(cid, giorno)).filter((x) => x.stato === "fatto" && x.cavallo_cliente_id && (!chiusi.length || chiusi.includes(x.id)));
+		if (!lavori.length) return;
+		const cart = typeof cavalliCartella === "function" ? cavalliCartella() : [];
+		const cavDi = (id) => cart.find((x) => x.id === id) || (DEMO_MODE ? (demoState.cavalliClientiMascalcia || []).find((x) => x.id === id) : null) || {};
+		const righe = lavori.map((l) => {
+			const cv = cavDi(l.cavallo_cliente_id);
+			return {
+				l,
+				cav: {
+					id: l.cavallo_cliente_id,
+					horse_id: l.horse_id,
+					nome: cv.nome || "Cavallo",
+					microchip: cv.microchip || "",
+					codice: cv.codice_equo || "",
+					propId: cv.cliente_mascalcia_id || cid
+				}
+			};
+		});
+		const pagante = clienteDiId(cid);
+		const dest = [{
+			cliente: pagante,
+			cosa: "conto e documenti dei suoi cavalli",
+			conto: true
+		}];
+		righe.forEach((r) => {
+			if (r.cav.propId !== cid && !dest.some((d) => d.cliente?.id === r.cav.propId)) {
+				const p = clienteDiId(r.cav.propId);
+				if (p) dest.push({
+					cliente: p,
+					cosa: "il certificato del suo cavallo",
+					conto: false
+				});
+			}
+		});
+		dest.forEach((d) => {
+			d.suEquo = vapSuEquo(d.cliente);
+			d.on = d.suEquo;
+		});
+		const vacc = righe.filter((r) => vaaVaccino(r.l)), visite = righe.filter((r) => !vaaVaccino(r.l));
+		const tot = righe.reduce((s, r) => s + (Number(r.l.importo) > 0 ? Number(r.l.importo) : 0), 0);
+		VAP.d = {
+			cid,
+			giorno,
+			righe,
+			vacc,
+			visite,
+			dest,
+			tot,
+			conto: true,
+			cert: true
+		};
+		const box = vapFoglio("modal-vap-doc", "vap-modal", true);
+		const dt = (/* @__PURE__ */ new Date(giorno + "T12:00")).toLocaleDateString("it-IT");
+		box.innerHTML = `<div class="modal-title" id="modal-vap-doc-tit">Visita chiusa</div>
+    <div class="vaa-sotto-tit">${righe.length} ${righe.length === 1 ? "cavallo" : "cavalli"} · ${vaaEsc(pagante?.nome || "")} · ${dt}</div>
+    <div class="vaa-lab">Da inviare</div>
+    ${vacc.length ? `<label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.cert = this.checked"><span><b>Certificati di vaccinazione</b><small>${vacc.length} ${vacc.length === 1 ? "cavallo" : "cavalli"} · uno per cavallo, con lotto: ${vaaEsc(vacc.map((r) => r.cav.nome).join(", "))}</small></span></label>` : ""}
+    <label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.conto = this.checked"><span><b>Riepilogo e conto</b><small>a ${vaaEsc(pagante?.nome || "chi paga")}, con tutti i lavori</small></span></label>
+    ${visite.map((r) => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    <div class="vaa-lab">A chi</div>
+    ${dest.map((d, i) => `<label class="vap-doc${d.suEquo ? "" : " fuori"}"><input type="checkbox" ${d.on ? "checked" : ""} ${d.suEquo ? "" : "disabled"} onchange="VAP.d.dest[${i}].on = this.checked">
+      <span><b>${vaaEsc(d.cliente?.nome || "")}</b><small>${vaaEsc(d.cosa)} · ${d.suEquo ? "in chat su Equo" : "non è su Equo: usa «Condividi»"}</small></span></label>`).join("")}
+    <div class="vaa-tot"><span>Totale</span><span>${tot > 0 ? formatEuro(tot) : "—"}</span></div>
+    <div class="auth-error" id="vap-doc-err" style="display:none"></div>
+    <button class="btn btn-primary vaa-ok" id="vap-invia" onclick="vapInvia()">Invia i documenti</button>
+    <button class="btn btn-outline vaa-dopo" onclick="vapCondividi()">Condividi i PDF</button>
+    <button class="btn btn-outline vap-altro" onclick="vapAltroDopoChiusa()">+ C'è un altro cavallo</button>`;
+		openModal("modal-vap-doc");
+	}
+	function vapApriScheda(id) {
+		const e = (VAP.d?.righe || []).find((r) => r.l.id === id)?.l;
+		if (!e) return;
+		closeModal("modal-vap-doc");
+		if (typeof vsApriDaEvento === "function") vsApriDaEvento(e.id, e);
+		else if (typeof apriAzioniEvento === "function") apriAzioniEvento(id);
+	}
+	async function vapAltroDopoChiusa() {
+		const d = VAP.d;
+		const { data, error } = await DB.insertInterventoMascalcia({
+			cliente_mascalcia_id: d.cid,
+			tipo_ferratura: "visita",
+			tipo_altro: VAP_DECIDERE,
+			data_intervento: d.giorno,
+			ora: null,
+			stato: "programmato",
+			stato_pagamento: "da_saldare"
+		});
+		if (error || !data) return showToast("Errore: " + (error?.message || "riprova"));
+		closeModal("modal-vap-doc");
+		await vaaAggiorna();
+		vaaFatto(data);
+	}
+	function vapNomePro() {
+		return currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "Veterinario";
+	}
+	async function vapPdf(tipo, righe) {
+		const doc = new (await (caricaJsPdf()))({
+			unit: "mm",
+			format: "a4"
+		});
+		const M = 18, W = 210, notte = [
+			29,
+			45,
+			80
+		], tif = [
+			127,
+			209,
+			201
+		], grigio = [
+			103,
+			112,
+			134
+		], testo = [
+			26,
+			34,
+			54
+		];
+		const d = VAP.d, dt = (/* @__PURE__ */ new Date(d.giorno + "T12:00")).toLocaleDateString("it-IT"), pagante = clienteDiId(d.cid);
+		doc.setFillColor(...notte);
+		doc.rect(0, 0, W, 30, "F");
+		doc.setTextColor(255, 255, 255);
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(17);
+		doc.text(tipo === "cert" ? "Certificato di vaccinazione" : "Riepilogo della visita", M, 15);
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(10);
+		doc.setTextColor(...tif);
+		doc.text(`${vapNomePro()} · ${dt}`, M, 23);
+		let y = 42;
+		doc.setTextColor(...testo);
+		const riga = (k, v) => {
+			if (!v) return;
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(9.5);
+			doc.setTextColor(...grigio);
+			doc.text(k, M, y);
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(10.5);
+			doc.setTextColor(...testo);
+			const t = doc.splitTextToSize(String(v), 122);
+			doc.text(t, 70, y);
+			y += 6.5 * t.length;
+		};
+		if (tipo === "cert") {
+			const r = righe[0], prop = clienteDiId(r.cav.propId);
+			riga("Cavallo", r.cav.nome);
+			riga("Microchip", r.cav.microchip);
+			riga("Codice Equo", r.cav.codice);
+			riga("Proprietario", prop?.nome);
+			riga("Dove", pagante && pagante.id !== prop?.id ? pagante.nome : "");
+			riga("Data", dt);
+			y += 3;
+			doc.setDrawColor(...tif);
+			doc.line(M, y, 192, y);
+			y += 8;
+			riga("Vaccinazione", r.l.tipo_altro || "Vaccino");
+			riga("Prossimo richiamo", r.l.prossima_scadenza ? (/* @__PURE__ */ new Date(r.l.prossima_scadenza + "T12:00")).toLocaleDateString("it-IT") : "");
+		} else {
+			riga("Cliente", pagante?.nome);
+			riga("Data", dt);
+			y += 4;
+			righe.forEach((r) => {
+				if (y > 270) {
+					doc.addPage();
+					y = 20;
+				}
+				doc.setFont("helvetica", "bold");
+				doc.setFontSize(11);
+				doc.setTextColor(...notte);
+				doc.text(r.cav.nome, M, y);
+				doc.text(Number(r.l.importo) > 0 ? "€ " + Number(r.l.importo).toFixed(2).replace(".", ",") : "—", 192, y, { align: "right" });
+				y += 5;
+				doc.setFont("helvetica", "normal");
+				doc.setFontSize(9.5);
+				doc.setTextColor(...grigio);
+				const t = doc.splitTextToSize([vapEtTipo(r.l.tipo_ferratura), r.l.tipo_altro && r.l.tipo_altro !== "Da decidere sul posto" ? r.l.tipo_altro : ""].filter(Boolean).join(" · ") + (r.cav.microchip ? " · chip " + r.cav.microchip : ""), 174);
+				doc.text(t, M, y);
+				y += 5 * t.length + 3;
+			});
+			doc.setDrawColor(...tif);
+			doc.line(M, y, 192, y);
+			y += 7;
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(12);
+			doc.setTextColor(...notte);
+			doc.text("Totale", M, y);
+			doc.text(d.tot > 0 ? "€ " + d.tot.toFixed(2).replace(".", ",") : "—", 192, y, { align: "right" });
+		}
+		const nome = (tipo === "cert" ? "Vaccino " + righe[0].cav.nome : "Riepilogo " + (pagante?.nome || "visita")) + " " + d.giorno + ".pdf";
+		return {
+			blob: doc.output("blob"),
+			nome
+		};
+	}
+	async function vapCondividi() {
+		try {
+			const d = VAP.d, files = [];
+			if (d.cert) for (const r of d.vacc) {
+				const p = await vapPdf("cert", [r]);
+				files.push(new File([p.blob], p.nome, { type: "application/pdf" }));
+			}
+			if (d.conto) {
+				const p = await vapPdf("conto", d.righe);
+				files.push(new File([p.blob], p.nome, { type: "application/pdf" }));
+			}
+			if (!files.length) return showToast("Scegli almeno un documento");
+			if (navigator.canShare && navigator.canShare({ files })) try {
+				await navigator.share({
+					files,
+					title: "Documenti della visita"
+				});
+				return;
+			} catch (err) {
+				if (err?.name === "AbortError") return;
+			}
+			for (const f of files) {
+				const url = URL.createObjectURL(f), a = document.createElement("a");
+				a.href = url;
+				a.download = f.name;
+				document.body.appendChild(a);
+				a.click();
+				a.remove();
+				setTimeout(() => URL.revokeObjectURL(url), 3e4);
+			}
+		} catch (err) {
+			console.error("vap condividi:", err);
+			showToast("Impossibile creare i PDF: " + (err?.message || err));
+		}
+	}
+	async function vapInvia() {
+		const d = VAP.d, btn = document.getElementById("vap-invia"), err = document.getElementById("vap-doc-err");
+		const scelti = d.dest.filter((x) => x.on && x.suEquo);
+		if (!scelti.length) {
+			if (err) {
+				err.textContent = "Nessun destinatario su Equo: usa «Condividi i PDF».";
+				err.style.display = "block";
+			}
+			return;
+		}
+		if (btn) btn.disabled = true;
+		const avvisi = [], inviati = /* @__PURE__ */ new Set(), dt = (/* @__PURE__ */ new Date(d.giorno + "T12:00")).toLocaleDateString("it-IT");
+		const accesso = (c) => c.centro_id && !c.cliente_user_id ? {
+			centro_id: c.centro_id,
+			motivo: "chat"
+		} : {
+			user_id: c.cliente_user_id,
+			motivo: "chat"
+		};
+		try {
+			showToast("Preparo e invio i documenti…");
+			if (d.cert) for (const r of d.vacc) {
+				const { blob } = await vapPdf("cert", [r]);
+				const { id, error, numero } = await DB.caricaDocumentoPrivato({
+					blob,
+					mime: "application/pdf",
+					categoria: "vaccino",
+					cavallo_nome: r.cav.nome,
+					data_documento: d.giorno,
+					cavallo_cliente_id: r.cav.id,
+					horse_id: r.cav.horse_id || null,
+					autore_ruolo: "veterinario",
+					sanitario_obbligatorio: true
+				});
+				if (!id) {
+					avvisi.push(r.cav.nome + ": certificato non salvato (" + (error?.message || "errore") + ")");
+					continue;
+				}
+				const nomeFile = DB.nomeFileDocumento({
+					mime: "application/pdf",
+					data_documento: d.giorno,
+					categoria: "vaccino",
+					numero
+				}, r.cav.nome);
+				for (const x of scelti.filter((x) => x.cliente.id === r.cav.propId || x.conto)) {
+					const acc = await DB.condividiDocumento(id, accesso(x.cliente));
+					if (!acc?.ok) {
+						avvisi.push(r.cav.nome + " → " + x.cliente.nome + (String(acc?.errore || "").startsWith("decide_proprietario") ? ": lo vedrà se il proprietario lo condivide" : ": non condiviso"));
+						continue;
+					}
+					const { error: em } = await DB.insertMessaggioMascalcia({
+						cliente_mascalcia_id: x.cliente.id,
+						tipo: "documento",
+						testo: "Certificato di vaccinazione di " + r.cav.nome + " (" + dt + ")",
+						file_url: "equo-doc:" + id,
+						file_nome: nomeFile
+					});
+					if (em) avvisi.push(x.cliente.nome + ": messaggio non inviato");
+					else inviati.add(x.cliente.nome);
+				}
+			}
+			const pag = scelti.find((x) => x.conto);
+			if (d.conto && pag) {
+				const testo = `Riepilogo della visita del ${dt}:\n` + d.righe.map((r) => `· ${r.cav.nome}: ${r.l.tipo_altro || vapEtTipo(r.l.tipo_ferratura)}${Number(r.l.importo) > 0 ? " — " + formatEuro(Number(r.l.importo)) : ""}`).join("\n") + (d.tot > 0 ? `\nTotale ${formatEuro(d.tot)}` : "");
+				const { error: em } = await DB.insertMessaggioMascalcia({
+					cliente_mascalcia_id: pag.cliente.id,
+					tipo: "testo",
+					testo
+				});
+				if (em) avvisi.push(pag.cliente.nome + ": riepilogo non inviato");
+				else inviati.add(pag.cliente.nome);
+			}
+			const box = document.getElementById("modal-vap-doc-corpo");
+			if (box) box.innerHTML = `<div class="vr-ok"><span class="vr-spunta">✓</span><b>Documenti ${inviati.size ? "inviati" : "salvati"}</b>
+      <span>${inviati.size ? "In chat a " + vaaEsc([...inviati].join(", ")) + "." : "Sono nella cartella dei cavalli."}</span></div>
+      ${avvisi.length ? `<div class="vs-nota">${avvisi.map(vaaEsc).join("<br>")}</div>` : ""}
+      <button class="btn btn-primary vaa-ok" onclick="closeModal('modal-vap-doc')">Chiudi</button>`;
+		} catch (e2) {
+			console.error("vap invia:", e2);
+			if (err) {
+				err.textContent = "Impossibile inviare: " + (e2?.message || e2);
+				err.style.display = "block";
+			}
+		} finally {
+			if (btn) btn.disabled = false;
+		}
+	}
+	async function vaaAggiorna() {
+		for (const f of [
+			"renderAgendaSettimana",
+			"renderIncassi",
+			"renderProDeadlines"
+		]) if (typeof window[f] === "function") try {
+			await window[f]();
+		} catch (_) {}
+		if (document.getElementById("vh") && typeof renderHomeVet === "function") try {
+			renderHomeVet();
+		} catch (_) {}
+	}
+	function vaaCaricaPassate() {
+		if (VAP.passate || VAP.caricando || typeof DB?.listInterventiPeriodo !== "function") return;
+		VAP.caricando = true;
+		const oggi = vapOggi(), da = isoLocale(/* @__PURE__ */ new Date(Date.now() - 5184e6));
+		DB.listInterventiPeriodo(da, oggi).then((l) => {
+			VAP.passate = (l || []).filter(vaaAperto$1);
+			VAP.caricando = false;
+			if (VAP.passate.length && document.getElementById("vh") && typeof renderHomeVet === "function") renderHomeVet();
+		}).catch(() => {
+			VAP.caricando = false;
+			VAP.passate = [];
+		});
+	}
+	function vaaDaCompletare(eventi) {
+		const oggi = vapOggi();
+		let rim = [];
+		try {
+			rim = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]");
+		} catch (_) {}
+		vaaCaricaPassate();
+		return [...VAP.passate || [], ...eventi || []].filter((e, i, a) => a.findIndex((x) => x.id === e.id) === i).filter((e) => vaaAperto$1(e) && e.data_intervento && (e.data_intervento < oggi || e.data_intervento === oggi && rim.includes(e.id)));
+	}
+	function vaaBannerHtml$1(eventi) {
+		const l = vaaDaCompletare(eventi);
+		if (!l.length) return "";
+		const e = l[0], nome = vapNomeCliente(e.cliente_mascalcia_id) || e.clienti_mascalcia?.nome || "Cliente";
+		return `<button class="vaa-banner" onclick="vaaCompleta('${e.id}')"><b>${l.length === 1 ? "1 lavoro da completare" : l.length + " lavori da completare"}</b>
+    <span>${vaaEsc(nome)} · ${vaaEsc(vapNomeLavoro$1(e))}: segna chi era il cavallo, così il conto e i libretti sono giusti. <u>Completa</u></span></button>`;
+	}
+	function vaaCompleta(id) {
+		const hp = typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti || [] : [];
+		const e = [
+			...VAP.passate || [],
+			...hp,
+			...DEMO_MODE ? demoState.interventiMascalcia || [] : []
+		].find((x) => x.id === id);
+		if (e) vaaFatto(e);
+	}
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
 		renderHomeVet: renderHomeVet$1,
@@ -43721,6 +45000,7 @@ plAggiorna();
 		vhMeteo,
 		vhVai,
 		vhRigheHtml,
+		vhVisite,
 		vdPrepara,
 		vetEtichettaGruppo,
 		vetTestiAgenda,
@@ -43841,7 +45121,7 @@ plAggiorna();
 		vcSalva,
 		vcNomeLive,
 		VC,
-		vsApriDaEvento,
+		vsApriDaEvento: vsApriDaEvento$1,
 		vsMostraScelta,
 		vsMostraMiei,
 		vsNuova,
@@ -43861,7 +45141,45 @@ plAggiorna();
 		vsSalvaModello,
 		vsDemoPrepara,
 		VS,
-		VsDB
+		VsDB,
+		VAA,
+		VAP,
+		VAP_DECIDERE,
+		vapScelta,
+		vapVia,
+		vapDopoApertura,
+		vapApriAperto,
+		vapCercaDove,
+		vapCambiaDove,
+		vapDove,
+		vapDoveNuovo,
+		vapQuando,
+		vapQuanti,
+		vapTipoSlot,
+		vapCrea,
+		vapPrevedi,
+		vaaEtichetta: vaaEtichetta$1,
+		vaaAperto: vaaAperto$1,
+		vapNomeLavoro: vapNomeLavoro$1,
+		vaaFatto,
+		vapNome,
+		vapScegliCavallo,
+		vapTogliCavallo,
+		vapChip,
+		vapTipo,
+		vaaVacc,
+		vaaRichiamo,
+		vaaDopo,
+		vaaSalva,
+		vapAggiungiLavoro,
+		vapDocumenti,
+		vapApriScheda,
+		vapAltroDopoChiusa,
+		vapInvia,
+		vapCondividi,
+		vaaDaCompletare,
+		vaaBannerHtml: vaaBannerHtml$1,
+		vaaCompleta
 	});
 })();
 

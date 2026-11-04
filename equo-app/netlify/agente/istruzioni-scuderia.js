@@ -2,6 +2,7 @@
 const { ISTRUZIONI_ARES } = require("./istruzioni-ares");
 const { ISTRUZIONI_HAMMER } = require("./istruzioni-hammer");
 const { REGOLA_GUIDA_BASIC, REGOLA_METEO, REGOLE_COMUNI } = require("./istruzioni-proprietario");
+const { ISTRUZIONI_GALENO } = require("./istruzioni-galeno");
 
 const ISTRUZIONI_ATHENA = `Sei **Athena**, l'agente AI di Equo Scuderia: la segreteria digitale del centro ippico. Parli con chi lavora nel centro (amministratore, segreteria, istruttori, staff di scuderia), in italiano.
 Sei la SEGRETARIA del centro: conosci gli iscritti (allievi, proprietari, clienti), i cavalli presenti (anagrafica, box, proprietario), il personale e i livelli di accesso, e le procedure del gestionale per la gestione del centro (Home, Il tuo Centro e staff, Cavalli e box, Lezioni, Pacchetti e carnet, Chat con clienti e team, Professionisti, Statistiche, Pacchetto e assistenza), che spieghi passo per passo con esempi chiari.
@@ -51,7 +52,12 @@ const CONTESTO_AGENTE_SCUDERIA = (nome, materia) => `
 - Se il centro è un'emergenza sanitaria (sintomi, colica, zoppia improvvisa) la prima frase è "Chiama subito il veterinario".`;
 const ISTRUZIONI_HAMMER_SCUD = ISTRUZIONI_HAMMER.replace("Parli con un MANISCALCO professionista, in italiano.", "Parli con lo staff di un centro ippico, in italiano.")
   + CONTESTO_AGENTE_SCUDERIA("Hammer", "mascalcia, pareggio, ferri, piede equino e andature");
+const ISTRUZIONI_GALENO_SCUD = ISTRUZIONI_GALENO.replace("Sei **Galeno**, l'agente AI di Equo per i VETERINARI equini. Parli con un medico veterinario professionista, in italiano.", "Sei **Galeno**, l'agente AI di Equo per la salute dei cavalli. Parli con lo staff di un centro ippico, in italiano.")
+  .replace("Lo affianchi come un collega preparato", "Lo aiuti come un consulente preparato")
+  + CONTESTO_AGENTE_SCUDERIA("Galeno", "salute, prevenzione, vaccini, sverminazione, scadenze sanitarie e primo orientamento")
+  + `
+- Qui NON parli con un veterinario: non fai diagnosi, non indichi farmaci né dosi e non sostituisci la visita. Per terapie e dosaggi decide il veterinario del cavallo; nei casi dubbi la risposta è «sentite il vostro veterinario».`;
 const ISTRUZIONI_ARES_SCUD = ISTRUZIONI_ARES.replace("Parli con un istruttore professionista, in italiano.", "Parli con lo staff di un centro ippico, in italiano.")
   + CONTESTO_AGENTE_SCUDERIA("Ares", "didattica, allenamento, programmi di lavoro e lezioni per allievi e cavalli");
 
-module.exports = { ISTRUZIONI_ARES_SCUD, ISTRUZIONI_ATHENA, ISTRUZIONI_ATHENA_BASIC, ISTRUZIONI_HAMMER_SCUD };
+module.exports = { ISTRUZIONI_ARES_SCUD, ISTRUZIONI_ATHENA, ISTRUZIONI_ATHENA_BASIC, ISTRUZIONI_GALENO_SCUD, ISTRUZIONI_HAMMER_SCUD };

@@ -1,0 +1,20 @@
+<div class="modal-overlay" id="modal-scheda-pro" onclick="closeOut(event,'modal-scheda-pro')">
+  <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span class="pro-avatar" id="scheda-pro-avatar" style="width:34px;height:34px;font-size:15px"><i class="fa-solid fa-user"></i></span><span id="scheda-pro-nome" style="overflow:hidden;text-overflow:ellipsis">Professionista</span></span> <span class="x" onclick="chiudiSchedaProfessionista()">✕</span></div>
+    <div id="scheda-pro-sotto" style="color:var(--muted);font-size:12.5px;margin:-6px 0 12px"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="schedaProApri('chat')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
+      <button class="btn btn-outline btn-sm" onclick="schedaProApri('appuntamenti')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
+    </div>
+    <div class="pro-tabs" style="margin-bottom:12px">
+      <button class="pro-tab scheda-pro-tab active" data-tab="lavori" onclick="schedaProTab('lavori')"><i class="fa-solid fa-hammer"></i> Lavori</button>
+      <button class="pro-tab scheda-pro-tab" data-tab="cavalli" onclick="schedaProTab('cavalli')"><i class="fa-solid fa-horse-head"></i> Cavalli</button>
+      <button class="pro-tab scheda-pro-tab" data-tab="documenti" onclick="schedaProTab('documenti')"><i class="fa-solid fa-paperclip"></i> Documenti</button>
+    </div>
+    <div id="scheda-pro-lavori"></div>
+    <div id="scheda-pro-cavalli" style="display:none"></div>
+    <div id="scheda-pro-documenti" style="display:none"></div>
+    <input type="file" id="scheda-pro-file" accept="image/*,video/*,application/pdf,.pdf" style="display:none" onchange="inviaDocumentoSchedaPro(event)">
+  </div>
+</div>
+

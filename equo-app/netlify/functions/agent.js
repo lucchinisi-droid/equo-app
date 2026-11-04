@@ -28,8 +28,8 @@ const { ISTRUZIONI_GALENO } = require("../agente/istruzioni-galeno");
 const { ISTRUZIONI_CASO, ISTRUZIONI_FOTO_GUIDATA, ISTRUZIONI_HAMMER } = require("../agente/istruzioni-hammer");
 const { ISTRUZIONI_MERLINO } = require("../agente/istruzioni-merlino");
 const { ISTRUZIONI, ISTRUZIONI_PEGASUS } = require("../agente/istruzioni-proprietario");
-const { ISTRUZIONI_ARES_SCUD, ISTRUZIONI_ATHENA, ISTRUZIONI_ATHENA_BASIC, ISTRUZIONI_HAMMER_SCUD } = require("../agente/istruzioni-scuderia");
-const { STRUMENTI, STRUMENTI_ARES, STRUMENTI_ARES_SCUD, STRUMENTI_ATHENA, STRUMENTI_ATHENA_BASIC, STRUMENTI_GALENO, STRUMENTI_GESTIONE, STRUMENTI_HAMMER, STRUMENTI_HAMMER_SCUD, STRUMENTI_MERLINO } = require("../agente/strumenti");
+const { ISTRUZIONI_ARES_SCUD, ISTRUZIONI_ATHENA, ISTRUZIONI_ATHENA_BASIC, ISTRUZIONI_GALENO_SCUD, ISTRUZIONI_HAMMER_SCUD } = require("../agente/istruzioni-scuderia");
+const { STRUMENTI, STRUMENTI_ARES, STRUMENTI_ARES_SCUD, STRUMENTI_ATHENA, STRUMENTI_ATHENA_BASIC, STRUMENTI_GALENO, STRUMENTI_GALENO_SCUD, STRUMENTI_GESTIONE, STRUMENTI_HAMMER, STRUMENTI_HAMMER_SCUD, STRUMENTI_MERLINO } = require("../agente/strumenti");
 const ORIGINI_OK = ["https://scuderia.equohub.com", "https://app.equohub.com"];
 let corsOrigine = "https://app.equohub.com";
 const intestazioniCors = () => ({ "Access-Control-Allow-Origin": corsOrigine, "Vary": "Origin",
@@ -131,9 +131,9 @@ exports.handler = async (event) => {
   // Merlino (numeri, incassi, strategia): solo titolare, amministratori e livelli 2-3
   if (merlino && !(centro.owner_id === user.id || membro.ruolo === "admin" || ["admin", "2", "3"].includes(String(membro.livello)))) return risposta(403, { error: "Merlino è riservato al titolare e ai responsabili del centro (livello 2 o 3)" });
   // Hammer e Ares (add-on del centro): stessi agenti dell'app, sui cavalli del centro
-  const agScud = scud && ["hammer", "ares"].includes(body.agente) ? body.agente : null;
+  const agScud = scud && ["hammer", "ares", "galeno"].includes(body.agente) ? body.agente : null;
   if (agScud && !(limitiCentro.agenti || []).includes(agScud)) prova = await provaAgente(admin, centro.id, agScud);
-  if (agScud && !(limitiCentro.agenti || []).includes(agScud) && !prova) return risposta(403, { error: `${agScud === "hammer" ? "Hammer" : "Ares"} non è attivo per questo centro`, bloccato: true });
+  if (agScud && !(limitiCentro.agenti || []).includes(agScud) && !prova) return risposta(403, { error: `${({ hammer: "Hammer", ares: "Ares", galeno: "Galeno" })[agScud]} non è attivo per questo centro`, bloccato: true });
   const athena = scud && !merlino && !agScud;
   const athenaBasic = athena && limitiCentro.athena_proattiva === false;
   // il Premium da proprietario non vale nella vista professionista (Hammer & co.): lì serve il Premium professionista
@@ -277,9 +277,9 @@ exports.handler = async (event) => {
 
   const contestoConversazione = [...(storia || []).slice(0, 6).reverse().map((m) => ({ ruolo: m.ruolo, testo: String(m.contenuto || "").slice(0, 600) })),
     { ruolo: "user", testo: (messaggio || "(allegato)").slice(0, 600) }];
-  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer || agScud === "hammer" ? "maniscalco" : ares || agScud === "ares" ? "istruttore" : galeno ? "veterinario" : "proprietario",
+  const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer || agScud === "hammer" ? "maniscalco" : ares || agScud === "ares" ? "istruttore" : galeno || agScud === "galeno" ? "veterinario" : "proprietario",
     guida: scud ? "scuderia" : ares ? "istruttore" : galeno ? "veterinario" : vista === "professionista" ? "maniscalco" : "proprietario",
-    strumenti: merlino ? STRUMENTI_MERLINO : agScud === "hammer" ? STRUMENTI_HAMMER_SCUD : agScud === "ares" ? STRUMENTI_ARES_SCUD : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
+    strumenti: merlino ? STRUMENTI_MERLINO : agScud === "hammer" ? STRUMENTI_HAMMER_SCUD : agScud === "ares" ? STRUMENTI_ARES_SCUD : agScud === "galeno" ? STRUMENTI_GALENO_SCUD : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
     centroId: centro?.id || null, agente, vista, contestoConversazione };
   // ultima posizione nota del telefono (solo per il meteo, arrotondata a ~1 km dall'app)
   if (body.posizione && Number.isFinite(Number(body.posizione.lat)) && Number.isFinite(Number(body.posizione.lon)))
@@ -303,7 +303,7 @@ exports.handler = async (event) => {
           model: MODELLO,
           max_tokens: allegati.length ? 2000 : (hammer || merlino || ares || galeno || agScud ? 1600 : 1200),
           system: [
-            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : galeno ? ISTRUZIONI_GALENO : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : agScud === "galeno" ? ISTRUZIONI_GALENO_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : galeno ? ISTRUZIONI_GALENO : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
           tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : galeno ? STRUMENTI_GALENO : STRUMENTI,

@@ -267,6 +267,17 @@ Object.assign(DB, {
     if(DEMO_MODE){ const s = this._ter().somm.find(x => x.id === id); if(s){ s.fatto_il = fatto ? new Date().toISOString() : null; s.fatto_da = fatto ? currentUser.id : null; } return { data: !!s, error: null }; }
     const { data, error } = await sb.rpc("equo_terapia_fatto", { p_id: id, p_fatto: !!fatto });
     return { data, error };
+  },
+  // proposte di un professionista della scuderia per i miei cavalli (SQL 43): accetto o rifiuto
+  async proposteProfessionisti(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.rpc("mie_proposte_professionisti");
+    if(error){ if(!/mie_proposte_professionisti|does not exist|schema cache/i.test(error.message || "")) console.warn("proposte professionisti:", error.message); return []; }
+    return data || [];
+  },
+  async rispondiPropostaProfessionista(id, accetta){
+    const { data, error } = await sb.rpc("rispondi_proposta_professionista", { p_id: id, p_accetta: !!accetta });
+    return { data, error };
   }
 });
 // stato di una somministrazione: fatta · saltata (12 ore dopo l'orario senza conferma) · da fare

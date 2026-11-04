@@ -2494,7 +2494,7 @@
 		].filter(Boolean).join(" · ");
 		const azioni = futura && l.stato !== "annullata" && l.stato !== "completata" ? `
     <div style="display:flex;gap:8px;margin-top:10px">
-      ${l.stato === "prenotata" ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
+      ${l.stato === "prenotata" && l.conferma_app !== false ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
       <button class="btn btn-outline btn-sm btn-variazione" style="flex:1" onclick="modificaLezioneScuderia('${l.id}')">Modifica</button>
     </div>` : "";
 		return `
@@ -3657,6 +3657,64 @@
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", diaAggancia, { once: true });
 	else diaAggancia();
+	// equo-app-src/src/ruoli/proprietario/moduli/106-proposte-professionisti.js
+	var ppEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var PP = {
+		lista: [],
+		il: 0
+	};
+	async function ppCarica(forza) {
+		if (!forza && PP.il && Date.now() - PP.il < 6e4) return PP.lista;
+		PP.lista = await DB.proposteProfessionisti().catch(() => []);
+		PP.il = Date.now();
+		return PP.lista;
+	}
+	async function ppRenderHome() {
+		const home = document.getElementById("page-home");
+		if (!home || !currentUser) return;
+		let box = document.getElementById("home-proposte-pro");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "home-proposte-pro";
+			const dopo = document.getElementById("home-oggi");
+			if (dopo && dopo.parentNode) dopo.parentNode.insertBefore(box, dopo.nextSibling);
+			else home.prepend(box);
+		}
+		const lista = await ppCarica();
+		if (!lista.length) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = `<div class="card ter-card"><div class="ter-tit">🐴 Professionisti da confermare</div>
+    ${lista.map((p) => `<div class="ter-piano" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="flex:1 1 180px;min-width:0;font-size:13.5px;line-height:1.45"><b>${ppEsc(p.scuderia)}</b> propone <b>${ppEsc(p.professionista)}</b> come ${ppEsc(p.professione)} di <b>${ppEsc(p.cavallo)}</b>.
+        <div class="muted" style="font-size:12px">Se accetti, vede il cavallo nella sua app e registra i lavori.</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button type="button" class="btn btn-outline btn-sm" onclick="ppRispondi('${p.id}', false, this)">Rifiuta</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="ppRispondi('${p.id}', true, this)">Accetta</button></div></div>`).join("")}</div>`;
+	}
+	async function ppRispondi(id, accetta, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await DB.rispondiPropostaProfessionista(id, accetta);
+		if (error || !data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast(data && data.errore || "Non salvato: riprova");
+		}
+		showToast(accetta ? "Confermato: la scuderia riceve il tuo sì" : "Rifiutato: la scuderia riceve il tuo no");
+		await ppCarica(true);
+		ppRenderHome();
+	}
+	function ppAggancia() {
+		try {
+			estendiDopo("renderHome", function() {
+				ppRenderHome();
+			});
+		} catch (err) {
+			console.error("proposte professionisti:", err);
+		}
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ppAggancia, { once: true });
+	else ppAggancia();
 	// equo-app-src/src/ruoli/proprietario/moduli/index.js
 	Object.assign(window, {
 		terCarica,
@@ -3667,6 +3725,10 @@
 		diaRenderCavallo,
 		diaGiorno,
 		DIA,
+		ppCarica,
+		ppRenderHome,
+		ppRispondi,
+		PP,
 		onbCollegati,
 		onbNonSonoIo,
 		onbVaiAiProposti,

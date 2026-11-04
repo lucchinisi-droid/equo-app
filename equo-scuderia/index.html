@@ -2846,19 +2846,23 @@ textarea.input{resize:vertical}
 
 <!-- MODAL: aggiungi maniscalco (codice professionista) -->
 <div class="modal-overlay" id="modal-aggiungi-pro" onclick="closeOut(event,'modal-aggiungi-pro')">
-  <div class="modal">
-    <div class="modal-title">Aggiungi maniscalco <span class="x" onclick="closeModal('modal-aggiungi-pro')">✕</span></div>
-    <div class="field">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-title"><span id="pro-aggiungi-titolo">Aggiungi maniscalco</span> <span class="x" onclick="closeModal('modal-aggiungi-pro')">✕</span></div>
+    <div class="field" id="pro-codice-wrap">
       <label>Codice professionista</label>
-      <input class="input" id="pro-codice-input" placeholder="Es. EQUOPRO0FKEM" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')inviaInvitoProfessionista()">
+      <input class="input" id="pro-codice-input" placeholder="Es. EQUOPRO0FKEM" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')confermaAggiungiProfessionista()">
       <p style="color:var(--muted);font-size:12px;margin-top:4px">Il maniscalco trova il suo codice in Equo App (menu profilo). Riceverà l'invito e dovrà accettarlo. Se nel suo profilo mancano P.IVA o codice fiscale te lo segnaliamo, ma puoi collegarlo lo stesso.</p>
     </div>
+    <div class="field">
+      <label>Quali cavalli segue? <span style="color:var(--muted);font-weight:400">(potrai cambiarli dalla sua scheda)</span></label>
+      <div id="pro-abbina-cavalli" style="max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:4px 10px"></div>
+      <p style="color:var(--muted);font-size:12px;margin-top:4px">Riceve nella sua app solo i cavalli scelti. Se un cavallo ha un proprietario su Equo, il proprietario riceve un messaggio e deve confermare.</p>
+    </div>
     <div class="auth-error" id="pro-codice-error"></div>
-    <button class="btn btn-primary btn-block" id="pro-codice-btn" onclick="inviaInvitoProfessionista()">Invia invito</button>
+    <button class="btn btn-primary btn-block" id="pro-codice-btn" onclick="confermaAggiungiProfessionista()">Invia invito</button>
   </div>
 </div>
 
-<!-- MODAL: conferma chiusura collegamento professionista -->
 <div class="modal-overlay" id="modal-scollega-pro" onclick="closeOut(event,'modal-scollega-pro')">
   <div class="modal">
     <div class="modal-title">Chiudi collegamento <span class="x" onclick="closeModal('modal-scollega-pro')">✕</span></div>
@@ -2929,6 +2933,26 @@ textarea.input{resize:vertical}
 </div>
 
 <!-- MODAL: chat interna con un membro -->
+<div class="modal-overlay" id="modal-scheda-pro" onclick="closeOut(event,'modal-scheda-pro')">
+  <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span class="pro-avatar" id="scheda-pro-avatar" style="width:34px;height:34px;font-size:15px"><i class="fa-solid fa-user"></i></span><span id="scheda-pro-nome" style="overflow:hidden;text-overflow:ellipsis">Professionista</span></span> <span class="x" onclick="chiudiSchedaProfessionista()">✕</span></div>
+    <div id="scheda-pro-sotto" style="color:var(--muted);font-size:12.5px;margin:-6px 0 12px"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="schedaProApri('chat')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
+      <button class="btn btn-outline btn-sm" onclick="schedaProApri('appuntamenti')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
+    </div>
+    <div class="pro-tabs" style="margin-bottom:12px">
+      <button class="pro-tab scheda-pro-tab active" data-tab="lavori" onclick="schedaProTab('lavori')"><i class="fa-solid fa-hammer"></i> Lavori</button>
+      <button class="pro-tab scheda-pro-tab" data-tab="cavalli" onclick="schedaProTab('cavalli')"><i class="fa-solid fa-horse-head"></i> Cavalli</button>
+      <button class="pro-tab scheda-pro-tab" data-tab="documenti" onclick="schedaProTab('documenti')"><i class="fa-solid fa-paperclip"></i> Documenti</button>
+    </div>
+    <div id="scheda-pro-lavori"></div>
+    <div id="scheda-pro-cavalli" style="display:none"></div>
+    <div id="scheda-pro-documenti" style="display:none"></div>
+    <input type="file" id="scheda-pro-file" accept="image/*,video/*,application/pdf,.pdf" style="display:none" onchange="inviaDocumentoSchedaPro(event)">
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-chat" onclick="closeOut(event,'modal-chat')">
   <div class="modal" style="max-width:420px;display:flex;flex-direction:column;max-height:82vh">
     <div class="modal-title"><span id="chat-membro-nome">Chat</span> <span class="x" onclick="closeChatModal()">✕</span></div>
@@ -8215,7 +8239,11 @@ function selezionaTabPro(tab){
 }
 
 async function loadProfessionisti(){
-  if(DEMO_MODE || !currentCentro){ professionistiList = []; return; }
+  if(DEMO_MODE){
+    professionistiList = [{ cliente_id: "demo-pro-1", categoria: "maniscalco", nome: "Marco Ferri", stato: "attivo", certificato: true, non_letti: 0, da_confermare: 0 }];
+    aggiornaBadgeProfessionisti(); return;
+  }
+  if(!currentCentro){ professionistiList = []; return; }
   const { data, error } = await sb.rpc("scuderia_lista_professionisti", { p_centro_id: currentCentro.id });
   if(error){ console.error("scuderia_lista_professionisti:", error); professionistiList = []; return; }
   professionistiList = data || [];
@@ -8270,7 +8298,7 @@ function renderProfessionistiList(){
         : '<span style="color:var(--muted);font-size:12px">Può accettare l\'amministratore o un membro di livello 2-3</span>';
     }
     return `
-      <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap${p.stato === "attivo" ? ";cursor:pointer" : ""}"${p.stato === "attivo" ? ` onclick="apriSchedaProfessionista('${p.cliente_id}')" title="Apri la scheda: cavalli, lavori e documenti"` : ""}>
         <div style="display:flex;align-items:center;gap:12px;min-width:0">
           <div class="pro-avatar">${avatar}</div>
           <div style="min-width:0">
@@ -8279,52 +8307,9 @@ function renderProfessionistiList(){
             ${p.stato === "attivo" && (p.prossimo || Number(p.da_confermare)) ? `<div style="font-size:12px;margin-top:2px">${Number(p.da_confermare) ? `<span style="color:var(--danger);font-weight:700">${p.da_confermare} da confermare</span>${p.prossimo ? " · " : ""}` : ""}${p.prossimo ? `Prossimo: ${escapeHtml(p.prossimo.tipo)} ${escapeHtml(dataAppIt(p.prossimo.data, p.prossimo.ora))}` : ""}</div>` : ""}
           </div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${azioni}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" onclick="event.stopPropagation()">${azioni}${p.stato === "attivo" ? `<button class="btn btn-ghost btn-sm" title="Apri la scheda" onclick="apriSchedaProfessionista('${p.cliente_id}')"><i class="fa-solid fa-chevron-right"></i></button>` : ""}</div>
       </div>`;
   }).join("");
-}
-
-function apriAggiungiProfessionista(){
-  document.getElementById("pro-codice-input").value = "";
-  document.getElementById("pro-codice-error").style.display = "none";
-  openModal("modal-aggiungi-pro");
-  setTimeout(() => document.getElementById("pro-codice-input").focus(), 50);
-}
-
-async function inviaInvitoProfessionista(){
-  const input = document.getElementById("pro-codice-input");
-  const err = document.getElementById("pro-codice-error");
-  const btn = document.getElementById("pro-codice-btn");
-  const codice = input.value.trim().toUpperCase();
-  err.style.display = "none";
-  if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
-  if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
-  btn.disabled = true;
-  const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice });
-  btn.disabled = false;
-  if(error || !data?.ok){
-    err.textContent = (data && data.errore) || "Non è stato possibile inviare l'invito. Riprova.";
-    err.style.display = "block";
-    return;
-  }
-  closeModal("modal-aggiungi-pro");
-  const avvisoPiva = data.senza_piva ? ` Attenzione: nel suo profilo mancano P.IVA o codice fiscale (gliel'abbiamo segnalato).` : "";
-  showToast((data.gia
-    ? (data.stato === "attivo" ? `${data.nome} è già collegato.` : `C'è già una richiesta in corso con ${data.nome}.`)
-    : `Invito inviato a ${data.nome}: riceverà una notifica per accettarlo.`) + avvisoPiva);
-  await refreshProfessionistiModule();
-}
-
-async function rispondiCollegamentoPro(clienteId, accetta, btn){
-  if(btn) btn.disabled = true;
-  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: clienteId, p_accetta: accetta });
-  if(error || !data?.ok){
-    showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
-    if(btn) btn.disabled = false;
-    return;
-  }
-  showToast(accetta ? "Maniscalco collegato: ora potete scrivervi e fissare gli appuntamenti." : "Richiesta rifiutata.");
-  await refreshProfessionistiModule();
 }
 
 function chiediScollegaProfessionista(clienteId){
@@ -8630,10 +8615,12 @@ async function nuovoAppuntamentoPro(){
   document.getElementById("app-pro-ora").value = "";
   document.getElementById("app-pro-note").value = "";
   document.getElementById("app-pro-error").style.display = "none";
-  if(!cavalliList.length) await loadCavalli();
-  document.getElementById("app-pro-cavalli").innerHTML = cavalliList.length
-    ? cavalliList.map(c => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;cursor:pointer"><input type="checkbox" class="app-pro-cav" value="${c.id}" style="width:17px;height:17px"> ${escapeHtml(c.nome)}</label>`).join("")
-    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo in scheda: l\'appuntamento sarà generico.</p>';
+  document.getElementById("app-pro-cavalli").innerHTML = '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Caricamento…</p>';
+  let abbinati = await cavalliAbbinatiPro(appProCliente);
+  if(abbinati === null){ if(!cavalliList.length) await loadCavalli(); abbinati = cavalliList; }
+  document.getElementById("app-pro-cavalli").innerHTML = abbinati.length
+    ? abbinati.map(c => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;cursor:pointer"><input type="checkbox" class="app-pro-cav" value="${c.id}" style="width:17px;height:17px"> ${escapeHtml(c.nome)}</label>`).join("")
+    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo abbinato a questo professionista: l\'appuntamento sarà generico. Abbina i cavalli dalla sua scheda.</p>';
   document.getElementById("app-pro-lista-view").style.display = "none";
   document.getElementById("app-pro-form-view").style.display = "block";
 }
@@ -8695,6 +8682,322 @@ async function azioneAppPro(gruppoId, azione, btn){
   await caricaAppuntamentiPro();
 }
 
+/* -- Cavalli abbinati e scheda del professionista (SQL 43) --
+   La scuderia sceglie quali cavalli abbinare quando invita il professionista o accetta la sua richiesta,
+   e li cambia dalla scheda. Se il cavallo ha un proprietario su Equo, l'abbinamento resta «in attesa»
+   finché il proprietario non conferma dall'App Equo. */
+let abbinaProModo = "invito";      // "invito" | "accetta"
+let abbinaProCliente = null;
+let schedaProCliente = null;
+let schedaProDati = null;
+
+const LAVORO_STATO = {
+  richiesto:   ["In attesa del professionista", "badge-gray"],
+  proposto:    ["Da confermare", "badge-yellow"],
+  programmato: ["In programma", "badge-green"],
+  fatto:       ["Fatto", "badge-green"],
+  annullato:   ["Annullato", "badge-red"],
+  rifiutato:   ["Non disponibile", "badge-gray"],
+};
+
+function euroPro(v){
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString("it-IT", { style: "currency", currency: "EUR" }) : "";
+}
+
+function dataBreveIt(iso){
+  if(!iso) return "";
+  const d = new Date(String(iso).length <= 10 ? iso + "T12:00:00" : iso);
+  return isNaN(d) ? "" : d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
+}
+
+async function cavalliPerAbbinamento(){
+  if(DEMO_MODE) return (demoState.cavalli || []).filter(c => !c.uscito_il).map((c, i) => ({ id: c.id, nome: c.nome, chiede_conferma: i % 3 === 2 }));
+  const { data, error } = await sb.rpc("scuderia_cavalli_per_abbinamento", { p_centro_id: currentCentro.id });
+  if(error){ console.error("scuderia_cavalli_per_abbinamento:", error); return []; }
+  return data || [];
+}
+
+function rigaCavalloAbbina(c, spuntato, chip){
+  return `<label style="display:flex;align-items:center;gap:9px;padding:6px 0;font-size:13.5px;cursor:pointer;border-bottom:1px solid var(--border)">
+    <input type="checkbox" class="abbina-pro-cav" value="${c.id}" ${spuntato ? "checked" : ""} style="width:17px;height:17px;flex-shrink:0">
+    <span style="flex:1;min-width:0">${escapeHtml(c.nome || "Cavallo")}</span>${chip || ""}</label>`;
+}
+
+const chipConferma = '<span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px;flex-shrink:0" title="Il cavallo ha un proprietario su Equo: dovrà confermare"><i class="fa-solid fa-user-check"></i> chiederà conferma al proprietario</span>';
+
+async function preparaListaAbbina(boxId){
+  const box = document.getElementById(boxId);
+  box.innerHTML = '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Caricamento…</p>';
+  const cavalli = await cavalliPerAbbinamento();
+  box.innerHTML = cavalli.length
+    ? `<div style="display:flex;justify-content:flex-end;gap:10px;font-size:12px;margin-bottom:2px">
+         <a href="#" onclick="event.preventDefault();document.querySelectorAll('#${boxId} .abbina-pro-cav').forEach(x=>x.checked=true)">Tutti</a>
+         <a href="#" onclick="event.preventDefault();document.querySelectorAll('#${boxId} .abbina-pro-cav').forEach(x=>x.checked=false)">Nessuno</a></div>`
+      + cavalli.map(c => rigaCavalloAbbina(c, false, c.chiede_conferma ? chipConferma : "")).join("")
+    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo in scheda: potrai abbinarli più avanti dalla scheda del professionista.</p>';
+}
+
+function cavalliSpuntati(boxId){
+  return Array.from(document.querySelectorAll(`#${boxId} .abbina-pro-cav:checked`)).map(el => el.value);
+}
+
+function apriAggiungiProfessionista(){
+  abbinaProModo = "invito"; abbinaProCliente = null;
+  document.getElementById("pro-aggiungi-titolo").textContent = "Aggiungi maniscalco";
+  document.getElementById("pro-codice-wrap").style.display = "";
+  document.getElementById("pro-codice-btn").textContent = "Invia invito";
+  document.getElementById("pro-codice-input").value = "";
+  document.getElementById("pro-codice-error").style.display = "none";
+  preparaListaAbbina("pro-abbina-cavalli");
+  openModal("modal-aggiungi-pro");
+  setTimeout(() => document.getElementById("pro-codice-input").focus(), 50);
+}
+
+function confermaAggiungiProfessionista(){
+  if(abbinaProModo === "accetta") return accettaCollegamentoConCavalli();
+  return inviaInvitoProfessionista();
+}
+
+async function inviaInvitoProfessionista(){
+  const input = document.getElementById("pro-codice-input");
+  const err = document.getElementById("pro-codice-error");
+  const btn = document.getElementById("pro-codice-btn");
+  const codice = input.value.trim().toUpperCase();
+  err.style.display = "none";
+  if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
+  if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
+  const cavalli = cavalliSpuntati("pro-abbina-cavalli");
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: cavalli });
+  btn.disabled = false;
+  if(error || !data?.ok){
+    err.textContent = (data && data.errore) || "Non è stato possibile inviare l'invito. Riprova.";
+    err.style.display = "block";
+    return;
+  }
+  closeModal("modal-aggiungi-pro");
+  const avvisoPiva = data.senza_piva ? ` Attenzione: nel suo profilo mancano P.IVA o codice fiscale (gliel'abbiamo segnalato).` : "";
+  const avvisoCav = !data.gia && cavalli.length ? ` Quando accetta riceve ${cavalli.length === 1 ? "il cavallo scelto" : "i " + cavalli.length + " cavalli scelti"}.` : "";
+  showToast((data.gia
+    ? (data.stato === "attivo" ? `${data.nome} è già collegato: i cavalli si cambiano dalla sua scheda.` : `C'è già una richiesta in corso con ${data.nome}.`)
+    : `Invito inviato a ${data.nome}: riceverà una notifica per accettarlo.`) + avvisoCav + avvisoPiva);
+  await refreshProfessionistiModule();
+}
+
+async function rispondiCollegamentoPro(clienteId, accetta, btn){
+  if(accetta){
+    // prima di accettare la scuderia sceglie quali cavalli abbinare
+    const p = professionistiList.find(x => x.cliente_id === clienteId);
+    abbinaProModo = "accetta"; abbinaProCliente = clienteId;
+    document.getElementById("pro-aggiungi-titolo").textContent = `Accetta ${p?.nome || "il professionista"}`;
+    document.getElementById("pro-codice-wrap").style.display = "none";
+    document.getElementById("pro-codice-btn").textContent = "Accetta e abbina i cavalli";
+    document.getElementById("pro-codice-error").style.display = "none";
+    preparaListaAbbina("pro-abbina-cavalli");
+    openModal("modal-aggiungi-pro");
+    return;
+  }
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: clienteId, p_accetta: false });
+  if(error || !data?.ok){
+    showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
+    if(btn) btn.disabled = false;
+    return;
+  }
+  showToast("Richiesta rifiutata.");
+  await refreshProfessionistiModule();
+}
+
+async function accettaCollegamentoConCavalli(){
+  const err = document.getElementById("pro-codice-error");
+  const btn = document.getElementById("pro-codice-btn");
+  err.style.display = "none";
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: abbinaProCliente, p_accetta: true, p_cavalli: cavalliSpuntati("pro-abbina-cavalli") });
+  btn.disabled = false;
+  if(error || !data?.ok){ err.textContent = (data && data.errore) || "Operazione non riuscita. Riprova."; err.style.display = "block"; return; }
+  closeModal("modal-aggiungi-pro");
+  showToast("Professionista collegato: riceve solo i cavalli scelti. Quelli con un proprietario su Equo aspettano la sua conferma.");
+  abbinaProCliente = null;
+  await refreshProfessionistiModule();
+}
+
+/* -- Scheda del professionista -- */
+function demoSchedaPro(){
+  const cav = (demoState.cavalli || []).filter(c => !c.uscito_il);
+  const stati = ["attivo", "da_confermare_proprietario", "attivo", null, "rifiutato"];
+  const oggi = new Date();
+  const giorno = n => { const d = new Date(oggi); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  return {
+    cavalli: cav.map((c, i) => ({ id: c.id, nome: c.nome, ha_proprietario: i % 5 !== 0, stato: stati[i % 5] })),
+    lavori: cav.slice(0, 3).flatMap((c, i) => [
+      { data: giorno(6 + i * 9), ora: "09:30", cavallo: c.nome, tipo: "Ferratura", stato: "fatto", ferro: "3", misura: "Mustad", quantita_ferri: 4, ferri_nuovi: true,
+        ferro_tipo: "Ferro in acciaio", note: "Zoccolo anteriore sinistro un po' secco: ingrassare.", aiutante: "Luca", importo: 110, pagamento: "saldato", saldato_il: giorno(4 + i * 9), prossima: giorno(-38 + i * 9) },
+      { data: giorno(52 + i * 7), ora: "11:00", cavallo: c.nome, tipo: "Pareggio", stato: "fatto", quantita_ferri: 0, importo: 45, pagamento: "da_saldare", prossima: giorno(10) }])
+      .sort((x, y) => y.data.localeCompare(x.data)),
+    documenti: [{ url: "#", nome: "Ricevuta ottobre.pdf", tipo: "documento", da: "professionista", il: giorno(4) },
+                { url: "#", nome: "Foto.jpg", tipo: "foto", da: "scuderia", il: giorno(12) }]
+  };
+}
+
+async function apriSchedaProfessionista(clienteId){
+  const p = professionistiList.find(x => x.cliente_id === clienteId);
+  if(!p || p.stato !== "attivo") return;
+  schedaProCliente = clienteId; schedaProDati = null;
+  document.getElementById("scheda-pro-nome").textContent = p.nome || "Professionista";
+  document.getElementById("scheda-pro-avatar").innerHTML = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : '<i class="fa-solid fa-user"></i>';
+  document.getElementById("scheda-pro-sotto").textContent = "Maniscalco collegato"
+    + (p.prossimo ? ` · prossimo: ${p.prossimo.tipo} ${dataAppIt(p.prossimo.data, p.prossimo.ora)}` : "");
+  ["lavori","cavalli","documenti"].forEach(t => document.getElementById("scheda-pro-" + t).innerHTML = '<p style="color:var(--muted);font-size:13px">Caricamento…</p>');
+  schedaProTab("lavori");
+  openModal("modal-scheda-pro");
+  await caricaSchedaPro();
+}
+
+function chiudiSchedaProfessionista(){
+  closeModal("modal-scheda-pro");
+  schedaProCliente = null; schedaProDati = null;
+}
+
+function schedaProTab(tab){
+  document.querySelectorAll(".scheda-pro-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  ["lavori","cavalli","documenti"].forEach(t => document.getElementById("scheda-pro-" + t).style.display = t === tab ? "block" : "none");
+}
+
+function schedaProApri(cosa){
+  const id = schedaProCliente;
+  if(!id) return;
+  closeModal("modal-scheda-pro");
+  if(cosa === "chat") apriChatProfessionista(id); else apriEventiProfessionista(id);
+}
+
+async function caricaSchedaPro(){
+  if(!schedaProCliente) return;
+  if(DEMO_MODE){ schedaProDati = demoSchedaPro(); }
+  else {
+    const { data, error } = await sb.rpc("scuderia_pro_scheda", { p_cliente_id: schedaProCliente });
+    if(error || !data || data.errore){
+      console.error("scuderia_pro_scheda:", error || data);
+      document.getElementById("scheda-pro-lavori").innerHTML = '<p style="color:var(--danger);font-size:13px">Non riesco a caricare la scheda. Riprova.</p>';
+      return;
+    }
+    schedaProDati = data;
+  }
+  renderSchedaProLavori(); renderSchedaProCavalli(); renderSchedaProDocumenti();
+}
+
+function renderSchedaProLavori(filtro){
+  const box = document.getElementById("scheda-pro-lavori");
+  const tutti = schedaProDati?.lavori || [];
+  if(!tutti.length){ box.innerHTML = '<p style="color:var(--muted);font-size:13px">Nessun lavoro ancora. I lavori che il professionista registra sui cavalli del centro compaiono qui con tutti i dettagli.</p>'; return; }
+  const nomi = [...new Set(tutti.map(l => l.cavallo).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const lista = filtro ? tutti.filter(l => l.cavallo === filtro) : tutti;
+  const fatti = lista.filter(l => l.stato === "fatto");
+  const totale = fatti.reduce((t, l) => t + (Number(l.importo) || 0), 0);
+  const daSaldare = fatti.filter(l => l.pagamento !== "saldato").reduce((t, l) => t + (Number(l.importo) || 0), 0);
+  const riga = (et, val) => val ? `<div><span style="color:var(--muted)">${et}:</span> ${val}</div>` : "";
+  box.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+      <select class="input" style="flex:1 1 180px;max-width:260px" onchange="renderSchedaProLavori(this.value)">
+        <option value="">Tutti i cavalli (${tutti.length} lavori)</option>
+        ${nomi.map(n => `<option value="${escapeHtml(n)}"${n === filtro ? " selected" : ""}>${escapeHtml(n)}</option>`).join("")}
+      </select>
+      <div style="font-size:12.5px;color:var(--muted)">${fatti.length} fatti${totale ? ` · ${euroPro(totale)}` : ""}${daSaldare ? ` · <b style="color:var(--danger)">${euroPro(daSaldare)} da saldare</b>` : ""}</div>
+    </div>` + lista.map(l => {
+    const [txt, cls] = LAVORO_STATO[l.stato] || [l.stato || "", "badge-gray"];
+    const ferri = [];
+    if(Number(l.quantita_ferri)) ferri.push(`${l.quantita_ferri} ${Number(l.quantita_ferri) === 1 ? "ferro" : "ferri"}`);
+    if(l.ferri_nuovi === true) ferri.push("nuovi"); else if(l.ferri_nuovi === false) ferri.push("riutilizzati");
+    if(l.ferro_tipo) ferri.push(escapeHtml(l.ferro_tipo));
+    if(l.ferro) ferri.push("n. " + escapeHtml(String(l.ferro)));
+    if(l.misura) ferri.push(escapeHtml(l.misura));
+    const pag = l.importo != null && l.importo !== ""
+      ? `${euroPro(l.importo)} · ${l.pagamento === "saldato" ? `<span style="color:#2f8a4e;font-weight:600">saldato${l.saldato_il ? " il " + dataBreveIt(l.saldato_il) : ""}</span>` : '<span style="color:var(--danger);font-weight:600">da saldare</span>'}` : "";
+    return `<div class="msg-item">
+      <div style="display:flex;justify-content:space-between;gap:6px 10px;align-items:flex-start;flex-wrap:wrap">
+        <div style="font-weight:700;font-size:14px;min-width:0;flex:1 1 200px">${escapeHtml(dataAppIt(l.data, l.ora))} · ${escapeHtml(l.tipo || "Lavoro")}${l.cavallo ? ` · <span style="font-weight:600">${escapeHtml(l.cavallo)}</span>` : ""}</div>
+        <span class="badge-pill ${cls}" style="flex-shrink:0;font-size:11px">${escapeHtml(txt)}</span>
+      </div>
+      <div style="font-size:12.5px;line-height:1.55;margin-top:4px">
+        ${riga("Ferri", ferri.join(" · "))}${riga("Note ferro", l.ferro_note ? escapeHtml(l.ferro_note) : "")}
+        ${riga("Note", l.note ? escapeHtml(l.note) : "")}${riga("Aiutante", l.aiutante ? escapeHtml(l.aiutante) : "")}
+        ${riga("Importo", pag)}${riga("Prossimo intervento", l.prossima ? dataBreveIt(l.prossima) : "")}
+      </div></div>`;
+  }).join("");
+}
+
+function renderSchedaProCavalli(){
+  const box = document.getElementById("scheda-pro-cavalli");
+  const cav = schedaProDati?.cavalli || [];
+  const puo = puoCollegareProfessionisti();
+  if(!cav.length){ box.innerHTML = '<p style="color:var(--muted);font-size:13px">Nessun cavallo in scheda.</p>'; return; }
+  const CHIP = {
+    attivo: '<span class="badge-pill badge-green" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">abbinato</span>',
+    da_confermare_proprietario: '<span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px;flex-shrink:0"><i class="fa-solid fa-hourglass-half"></i> in attesa del proprietario</span>',
+    rifiutato: '<span class="badge-pill badge-red" style="font-size:10.5px;padding:2px 8px;flex-shrink:0" title="Spunta di nuovo per richiedere la conferma">rifiutato dal proprietario</span>',
+  };
+  const n = cav.filter(c => c.stato === "attivo").length;
+  box.innerHTML = `<p style="color:var(--muted);font-size:12.5px;margin:0 0 8px">${n} ${n === 1 ? "cavallo abbinato" : "cavalli abbinati"}. Il professionista vede nella sua app solo questi.
+      ${puo ? "Se togli un cavallo, nella sua app finisce tra gli archiviati: i lavori fatti restano nello storico. I cavalli con un proprietario su Equo aspettano la sua conferma." : "Solo l'amministratore o un membro di livello 2-3 può cambiare i cavalli."}</p>
+    <div id="scheda-pro-cav-lista">` + cav.map(c => {
+      const chip = (CHIP[c.stato] || (c.ha_proprietario ? chipConferma : ""))
+        + (c.uscito ? ' <span class="badge-pill badge-gray" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">uscito dal centro</span>' : "");
+      return rigaCavalloAbbina(c, c.stato === "attivo" || c.stato === "da_confermare_proprietario", chip).replace('type="checkbox"', puo ? 'type="checkbox"' : 'type="checkbox" disabled');
+    }).join("") + `</div>
+    ${puo ? '<div class="auth-error" id="scheda-pro-cav-error"></div><button class="btn btn-primary btn-block" style="margin-top:12px" id="scheda-pro-cav-salva" onclick="salvaCavalliSchedaPro()">Salva i cavalli</button>' : ""}`;
+}
+
+async function salvaCavalliSchedaPro(){
+  const btn = document.getElementById("scheda-pro-cav-salva");
+  const err = document.getElementById("scheda-pro-cav-error");
+  err.style.display = "none";
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_pro_imposta_cavalli", { p_cliente_id: schedaProCliente, p_cavalli: cavalliSpuntati("scheda-pro-cav-lista") });
+  btn.disabled = false;
+  if(error || !data?.ok){ err.textContent = (data && data.errore) || "Salvataggio non riuscito. Riprova."; err.style.display = "block"; return; }
+  const parti = [];
+  if(data.attivi) parti.push(`${data.attivi} ${data.attivi === 1 ? "abbinato" : "abbinati"}`);
+  if(data.da_confermare) parti.push(`${data.da_confermare} in attesa del proprietario (gli abbiamo scritto)`);
+  if(data.tolti) parti.push(`${data.tolti} ${data.tolti === 1 ? "tolto" : "tolti"}`);
+  showToast(parti.length ? "Cavalli aggiornati: " + parti.join(", ") + "." : "Nessuna modifica.");
+  await caricaSchedaPro();
+}
+
+function renderSchedaProDocumenti(){
+  const box = document.getElementById("scheda-pro-documenti");
+  const docs = schedaProDati?.documenti || [];
+  const ICONA = { foto: "fa-image", video: "fa-video", documento: "fa-file-pdf", audio: "fa-microphone" };
+  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+      <p style="margin:0;color:var(--muted);font-size:12.5px">Ricevute, foto, video e PDF scambiati con il professionista.</p>
+      <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="document.getElementById('scheda-pro-file').click()"><i class="fa-solid fa-paperclip"></i> Invia</button></div>`
+    + (docs.length ? docs.map(d => `
+      <a class="msg-item" href="${escapeHtml(d.url || "#")}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
+        <i class="fa-solid ${ICONA[d.tipo] || "fa-file"}" style="font-size:18px;color:var(--muted);width:22px;text-align:center"></i>
+        <div style="min-width:0;flex:1"><div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(d.nome || "Allegato")}</div>
+          <div style="color:var(--muted);font-size:12px">${d.da === "professionista" ? "Dal professionista" : "Dalla scuderia"} · ${dataBreveIt(d.il)}</div></div>
+        <i class="fa-solid fa-arrow-up-right-from-square" style="color:var(--muted);font-size:12px"></i></a>`).join("")
+      : '<p style="color:var(--muted);font-size:13px">Nessun documento ancora.</p>');
+}
+
+async function inviaDocumentoSchedaPro(event){
+  if(!schedaProCliente) return;
+  if(DEMO_MODE){ event.target.value = ""; showToast("In demo l'invio non è disponibile."); return; }
+  const prima = chatProCorrente;
+  chatProCorrente = schedaProCliente;     // stesso invio della chat: il documento arriva anche in chat
+  try{ await inviaAllegatoPro(event); } finally { chatProCorrente = prima; }
+  await caricaSchedaPro();
+  schedaProTab("documenti");
+}
+
+/* l'appuntamento si propone solo per i cavalli abbinati al professionista */
+async function cavalliAbbinatiPro(clienteId){
+  if(DEMO_MODE) return demoSchedaPro().cavalli.filter(c => c.stato === "attivo");
+  const { data, error } = await sb.rpc("scuderia_pro_scheda", { p_cliente_id: clienteId });
+  if(error || !data || data.errore) return null;
+  return (data.cavalli || []).filter(c => c.stato === "attivo" && !c.uscito);
+}
 // Equo App · cavalli · STATO CONDIVISO: variabili che anche altre parti dell'app leggono o cambiano.
 // Script classico caricato PRIMA dei moduli cavalli e dello script principale: qui solo dati, nessuna funzione.
 // da 039-cavalli-salute.js
@@ -13469,7 +13772,8 @@ function renderClienti(){
     if(!q) return true;
     return (m.nome_visualizzato || "").toLowerCase().includes(q) || (d.telefono || "").replace(/\s/g, "").includes(q.replace(/\s/g, "")) || (d.email || "").includes(q);
   }).sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it"));
-  document.getElementById("clienti-count").textContent = tutti.length;
+  const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
+  document.getElementById("clienti-count").textContent = lim ? `${tutti.length} di ${lim}` : tutti.length;
   document.getElementById("clienti-empty").style.display = tutti.length ? "none" : "block";
   body.innerHTML = lista.map(m => {
     const d = clientiDati[m.id] || {}, eta = etaDi(d.data_nascita);
@@ -13511,6 +13815,8 @@ async function clienteCollegati(id){
 
 function openClienteForm(id, daPacchetto){
   if(!puoVedereClienti()){ showToast("Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti."); return; }
+  const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
+  if(!id && lim && clientiElenco().length >= lim){ showToast(`Hai raggiunto i ${lim} clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.`); return; }
   const m = id ? (teamList || []).find(x => x.id === id) : null;
   const d = (m && clientiDati[m.id]) || {};
   editingClienteId = m ? m.id : null;
@@ -13541,6 +13847,7 @@ const CLIENTE_ERRORI = {
   NON_AUTORIZZATO: "Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti.",
   NON_E_UN_CLIENTE: "Questa persona fa parte dello staff: si modifica dal riquadro Team.",
   scuderia_clienti_dati_email_check: "L'email non sembra valida.",
+  "clienti, il massimo": "Hai raggiunto il numero di clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.",
 };
 
 async function saveCliente(){
@@ -13594,7 +13901,7 @@ quandoApriSezione(function(k){ if(k === "clienti") loadTeam().then(caricaClienti
    ===================================================================== */
 let pianoCentro = null;
 const PK_NOMI = { start:"START", advance:"ADVANCE", premium:"PREMIUM", enterprise:"ENTERPRISE", completo:"COMPLETO" };
-const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€29/mese · €290/anno + IVA", premium:"€59/mese · €590/anno + IVA", enterprise:"su misura", completo:"sblocco totale" };
+const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€39/mese · €390/anno + IVA", premium:"€59/mese · €590/anno + IVA", enterprise:"su misura", completo:"sblocco totale" };
 // moduli del menu legati a una funzione del pacchetto
 const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
@@ -13606,13 +13913,13 @@ const FUNZIONI_INFO = {
   sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["In arrivo: fatture elettroniche conformi SDI"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
   groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
-  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia","Ermes: magazzino e logistica","In PREMIUM uno dei due è incluso"] },
+  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia (incluso in PREMIUM)","Hammer, Ares e Galeno: mascalcia, allenamento, salute","Tutti gli agenti insieme: 24 € + IVA al mese, 19 € in PREMIUM"] },
 };
 const PK_CONFRONTO = [
-  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Maniscalchi collegati", "1", "3", "illimitati"],
-  ["Lezioni & Prenotazioni", "base (1+1)", "✓ (3+3)", "✓"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
+  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Clienti", "20", "50", "200"], ["Maniscalchi collegati", "1", "3", "illimitati"], ["Veterinari collegati", "1", "3", "illimitati"],
+  ["Lezioni & Prenotazioni", "promemoria in chat (1 istruttore)", "con conferma dall'app (3)", "con conferma dall'app"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
   ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
-  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
+  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "Merlino incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
   ["Supporto prioritario", "—", "—", "✓"],
 ];
 
@@ -13761,13 +14068,13 @@ function statisticheDemo(){
 }
 
 /* =====================================================================
-   AGENTI AI (pagina) — Athena inclusa; Merlino / Ermes add-on (uno incluso in PREMIUM)
+   AGENTI AI (pagina) — Athena sempre inclusa; in PREMIUM anche Merlino; gli altri add-on (listino 3/11/2026)
    ===================================================================== */
 const AGENTI_INFO = [
   { key:"athena", nome:"Athena", ruolo:"Segreteria e guida del gestionale", icon:"svg:owl", cls:"athena-col", testo:"È la segretaria del centro: conosce iscritti, cavalli, staff e il gestionale e ti guida passo passo; ti dice cosa c'è da fare (lezioni, carnet, box)." },
   { key:"merlino", nome:"Merlino", ruolo:"Numeri, conti e strategia", icon:"fa-hat-wizard", cls:"merlino-av", testo:"Legge i numeri del centro, trova dove guadagni e dove perdi, sorveglia la concorrenza della zona con il radar settimanale." },
   { key:"ermes", nome:"Ermes", ruolo:"Magazzino e logistica", icon:"fa-truck-ramp-box", cls:"", testo:"Tiene d'occhio scorte, lotti e consumi e prepara le liste di riordino per i fornitori.", presto:true },
-  { key:"galeno", nome:"Galeno", ruolo:"Veterinario", icon:"fa-stethoscope", cls:"", testo:"Supporto sanitario: protocolli, scadenze, primo orientamento.", presto:true },
+  { key:"galeno", nome:"Galeno", ruolo:"Veterinario", icon:"fa-stethoscope", cls:"", testo:"Supporto sanitario: protocolli, scadenze, primo orientamento. Non sostituisce il veterinario del cavallo." },
   { key:"hammer", nome:"Hammer", ruolo:"Mascalcia", icon:"fa-hammer", cls:"", testo:"Il maniscalco esperto: pareggi, ferrature e piede equino, applicato ai cavalli del centro." },
   { key:"ares", nome:"Ares", ruolo:"Istruttore", icon:"fa-person-running", cls:"", testo:"L'istruttore: programmi di lavoro e lezioni per allievi e cavalli del centro." },
 ];
@@ -13776,7 +14083,7 @@ const AG_BUNDLE = { advance:24, premium:19 };                              // tu
 const AG_EXTRA_MSG = [{ n:200, p:7 }, { n:500, p:15 }];                    // messaggi extra condivisi, € al mese + IVA
 let proveAgenti;   // undefined = da caricare; null = non disponibile; altrimenti { merlino:{stato,...}, hammer, ares }
 async function caricaProveAgenti(){
-  if(DEMO_MODE){ proveAgenti = { merlino:{ stato:"disponibile" }, hammer:{ stato:"disponibile" }, ares:{ stato:"disponibile" } }; return; }
+  if(DEMO_MODE){ proveAgenti = { merlino:{ stato:"disponibile" }, hammer:{ stato:"disponibile" }, ares:{ stato:"disponibile" }, galeno:{ stato:"disponibile" } }; return; }
   try{
     const { data, error } = await sb.rpc("agenti_prove_stato", { p_centro: currentCentro.id });
     proveAgenti = !error && data && !data.errore ? data : null;
@@ -13791,12 +14098,11 @@ function renderModuloAgenti(){
   const prezzo = a => AG_PREZZI[a.key] ? `${AG_PREZZI[a.key]} € + IVA al mese` : "";
   const oraProva = d => new Date(d).toLocaleString("it-IT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
   const stato = a => {
-    if(attivi.includes(a.key) && !a.presto) return `<span class="stato" style="color:#3f7a45">● Attivo${a.key === "athena" && p.athena_proattiva === false ? " · basic" : ""}${a.key !== "athena" && p.agente_incluso === a.key ? " · incluso in PREMIUM" : ""}</span>`;
+    if(attivi.includes(a.key) && !a.presto) return `<span class="stato" style="color:#3f7a45">● Attivo${a.key === "athena" && p.athena_proattiva === false ? " · basic" : ""}${a.key !== "athena" && ((p.pacchetto === "premium" && a.key === "merlino") || p.agente_incluso === a.key) ? " · incluso in PREMIUM" : ""}</span>`;
     if(a.presto) return `<span class="stato" style="color:var(--muted)">${prezzo(a) ? "Add-on " + prezzo(a) + " · " : ""}In arrivo${attivi.includes(a.key) ? " · già sbloccato per te" : ""}</span>`;
     const pr = prova(a);
     if(pr?.stato === "attiva") return `<span class="stato" style="color:#3f7a45">● Prova gratuita · ${pr.rimasti} messaggi, fino al ${oraProva(pr.fine)}</span>`;
     if(p.pacchetto === "start") return `<span class="stato" style="color:var(--muted)"><i class="fa-solid fa-lock"></i> Da ADVANCE · ${prezzo(a)}</span>`;
-    if(p.pacchetto === "premium" && !p.agente_incluso) return `<span class="stato" style="color:#8a6516">Incluso a scelta in PREMIUM · altrimenti ${prezzo(a)}</span>`;
     return `<span class="stato" style="color:#8a6516">Add-on · ${prezzo(a)}</span>`;
   };
   const azione = a => {
@@ -13809,13 +14115,13 @@ function renderModuloAgenti(){
     else if(pr?.stato === "attesa") bottoni.push(`<span style="font-size:11.5px;color:var(--muted)">Prova dal ${oraProva(pr.dal)}</span>`);
     else if(pr?.stato === "usata") bottoni.push(`<span style="font-size:11.5px;color:var(--muted)">Prova già usata</span>`);
     bottoni.push(p.pacchetto === "start" ? `<button class="btn btn-outline btn-sm" onclick="apriUpsell('agenti')">Scopri</button>`
-      : `<button class="btn btn-outline btn-sm" onclick="richiediAgente('${a.key}')">${p.pacchetto === "premium" && !p.agente_incluso ? "Scegli questo agente" : "Richiedi l'attivazione"}</button>`);
+      : `<button class="btn btn-outline btn-sm" onclick="richiediAgente('${a.key}')">Richiedi l'attivazione</button>`);
     return `<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${bottoni.join("")}</span>`;
   };
   const bundle = p.pacchetto && p.pacchetto !== "start" && p.pacchetto !== "enterprise" ? `
     <div class="card" style="margin-top:16px"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div><div style="font-weight:800;font-size:16px">Tutti gli agenti insieme</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5">Merlino, Hammer, Ares e, appena escono, Ermes e Galeno: <b>${AG_BUNDLE[p.pacchetto] || 24} € + IVA al mese</b>${p.pacchetto === "premium" ? " (hai già un agente incluso)" : " (19 € per chi ha PREMIUM)"}. 300 messaggi al mese per ogni agente.</div></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5">Merlino, Hammer, Ares, Galeno e, appena esce, Ermes: <b>${AG_BUNDLE[p.pacchetto] || 24} € + IVA al mese</b>${p.pacchetto === "premium" ? " (prezzo PREMIUM: Merlino ce l'hai già)" : " (19 € per chi ha PREMIUM)"}. 300 messaggi al mese per ogni agente.</div></div>
       <button class="btn btn-outline btn-sm" onclick="richiediAgente('tutti')">Richiedi il pacchetto</button></div></div>
     <div class="card" style="margin-top:12px"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div><div style="font-weight:800;font-size:16px">Messaggi in più</div>
@@ -14162,10 +14468,12 @@ const AGENTI_CHAT = {
     chips:["Come sta andando il centro questo mese?","Quali cavalli mi fanno guadagnare di più?","Chi rischio di perdere e cosa gli scrivo?","Cosa fa la concorrenza della zona?","E se aumento la lezione di 2 €?"] },
   hammer: { nome:"Hammer", sub:"mascalcia: pareggio, ferri e piede equino", cls:"", placeholder:"Chiedi a Hammer di ferratura e piedi…",
     chips:["Che ferro consigli per un cavallo con i talloni bassi?","Ogni quanto va ricontrollato un pareggio?","Come riconosco i primi segni di laminite?","Quali cavalli del centro hanno note sui piedi?"] },
+  galeno: { nome:"Galeno", sub:"salute: prevenzione, scadenze e primo orientamento", cls:"", placeholder:"Chiedi a Galeno di salute e prevenzione…",
+    chips:["Quali vaccini sono obbligatori per un cavallo in scuderia?","Ogni quanto si fa la sverminazione?","Quali segnali di colica devo riconoscere subito?","Quali cavalli del centro hanno note sanitarie?"] },
   ares: { nome:"Ares", sub:"allenamento: programmi di lavoro e lezioni", cls:"", placeholder:"Chiedi ad Ares di allenamenti e lezioni…",
     chips:["Imposta una lezione di 45 minuti sul lavoro in piano","Come preparo un cavallo giovane al salto?","Esercizi per migliorare l'assetto di un principiante","Che programma consigli per un cavallo che riparte dopo una pausa?"] },
 };
-const AGENTI_IMG = { athena:"athena", merlino:"merlino", hammer:"hammer", ares:"ares" };
+const AGENTI_IMG = { athena:"athena", merlino:"merlino", hammer:"hammer", ares:"ares", galeno:"galeno" };
 function apriAthena(){ apriAgente("athena"); }
 async function apriAgente(key, domanda){
   Registro.pagina("agente-" + key);

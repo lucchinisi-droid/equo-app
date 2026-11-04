@@ -8,10 +8,12 @@ const AGENTI_CHAT = {
     chips:["Come sta andando il centro questo mese?","Quali cavalli mi fanno guadagnare di più?","Chi rischio di perdere e cosa gli scrivo?","Cosa fa la concorrenza della zona?","E se aumento la lezione di 2 €?"] },
   hammer: { nome:"Hammer", sub:"mascalcia: pareggio, ferri e piede equino", cls:"", placeholder:"Chiedi a Hammer di ferratura e piedi…",
     chips:["Che ferro consigli per un cavallo con i talloni bassi?","Ogni quanto va ricontrollato un pareggio?","Come riconosco i primi segni di laminite?","Quali cavalli del centro hanno note sui piedi?"] },
+  galeno: { nome:"Galeno", sub:"salute: prevenzione, scadenze e primo orientamento", cls:"", placeholder:"Chiedi a Galeno di salute e prevenzione…",
+    chips:["Quali vaccini sono obbligatori per un cavallo in scuderia?","Ogni quanto si fa la sverminazione?","Quali segnali di colica devo riconoscere subito?","Quali cavalli del centro hanno note sanitarie?"] },
   ares: { nome:"Ares", sub:"allenamento: programmi di lavoro e lezioni", cls:"", placeholder:"Chiedi ad Ares di allenamenti e lezioni…",
     chips:["Imposta una lezione di 45 minuti sul lavoro in piano","Come preparo un cavallo giovane al salto?","Esercizi per migliorare l'assetto di un principiante","Che programma consigli per un cavallo che riparte dopo una pausa?"] },
 };
-const AGENTI_IMG = { athena:"athena", merlino:"merlino", hammer:"hammer", ares:"ares" };
+const AGENTI_IMG = { athena:"athena", merlino:"merlino", hammer:"hammer", ares:"ares", galeno:"galeno" };
 function apriAthena(){ apriAgente("athena"); }
 async function apriAgente(key, domanda){
   Registro.pagina("agente-" + key);

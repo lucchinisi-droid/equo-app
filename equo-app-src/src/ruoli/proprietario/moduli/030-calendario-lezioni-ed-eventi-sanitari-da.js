@@ -98,7 +98,7 @@ function cardLezioneScuderia(l, futura){
   ].filter(Boolean).join(" · ");
   const azioni = futura && l.stato !== "annullata" && l.stato !== "completata" ? `
     <div style="display:flex;gap:8px;margin-top:10px">
-      ${l.stato === "prenotata" ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
+      ${l.stato === "prenotata" && l.conferma_app !== false ? `<button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="accettaLezioneScuderia('${l.id}', this)">Accetta</button>` : ""}
       <button class="btn btn-outline btn-sm btn-variazione" style="flex:1" onclick="modificaLezioneScuderia('${l.id}')">Modifica</button>
     </div>` : "";
   return `

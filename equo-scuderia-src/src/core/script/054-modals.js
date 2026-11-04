@@ -5,7 +5,7 @@
    ===================================================================== */
 let pianoCentro = null;
 const PK_NOMI = { start:"START", advance:"ADVANCE", premium:"PREMIUM", enterprise:"ENTERPRISE", completo:"COMPLETO" };
-const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€29/mese · €290/anno + IVA", premium:"€59/mese · €590/anno + IVA", enterprise:"su misura", completo:"sblocco totale" };
+const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€39/mese · €390/anno + IVA", premium:"€59/mese · €590/anno + IVA", enterprise:"su misura", completo:"sblocco totale" };
 // moduli del menu legati a una funzione del pacchetto
 const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
@@ -17,13 +17,13 @@ const FUNZIONI_INFO = {
   sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["In arrivo: fatture elettroniche conformi SDI"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
   groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
-  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia","Ermes: magazzino e logistica","In PREMIUM uno dei due è incluso"] },
+  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia (incluso in PREMIUM)","Hammer, Ares e Galeno: mascalcia, allenamento, salute","Tutti gli agenti insieme: 24 € + IVA al mese, 19 € in PREMIUM"] },
 };
 const PK_CONFRONTO = [
-  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Maniscalchi collegati", "1", "3", "illimitati"],
-  ["Lezioni & Prenotazioni", "base (1+1)", "✓ (3+3)", "✓"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
+  ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Clienti", "20", "50", "200"], ["Maniscalchi collegati", "1", "3", "illimitati"], ["Veterinari collegati", "1", "3", "illimitati"],
+  ["Lezioni & Prenotazioni", "promemoria in chat (1 istruttore)", "con conferma dall'app (3)", "con conferma dall'app"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
   ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
-  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "1 incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
+  ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "Merlino incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
   ["Supporto prioritario", "—", "—", "✓"],
 ];
 

@@ -21,7 +21,11 @@ function selezionaTabPro(tab){
 }
 
 async function loadProfessionisti(){
-  if(DEMO_MODE || !currentCentro){ professionistiList = []; return; }
+  if(DEMO_MODE){
+    professionistiList = [{ cliente_id: "demo-pro-1", categoria: "maniscalco", nome: "Marco Ferri", stato: "attivo", certificato: true, non_letti: 0, da_confermare: 0 }];
+    aggiornaBadgeProfessionisti(); return;
+  }
+  if(!currentCentro){ professionistiList = []; return; }
   const { data, error } = await sb.rpc("scuderia_lista_professionisti", { p_centro_id: currentCentro.id });
   if(error){ console.error("scuderia_lista_professionisti:", error); professionistiList = []; return; }
   professionistiList = data || [];
@@ -76,7 +80,7 @@ function renderProfessionistiList(){
         : '<span style="color:var(--muted);font-size:12px">Può accettare l\'amministratore o un membro di livello 2-3</span>';
     }
     return `
-      <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div class="msg-item" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap${p.stato === "attivo" ? ";cursor:pointer" : ""}"${p.stato === "attivo" ? ` onclick="apriSchedaProfessionista('${p.cliente_id}')" title="Apri la scheda: cavalli, lavori e documenti"` : ""}>
         <div style="display:flex;align-items:center;gap:12px;min-width:0">
           <div class="pro-avatar">${avatar}</div>
           <div style="min-width:0">
@@ -85,52 +89,9 @@ function renderProfessionistiList(){
             ${p.stato === "attivo" && (p.prossimo || Number(p.da_confermare)) ? `<div style="font-size:12px;margin-top:2px">${Number(p.da_confermare) ? `<span style="color:var(--danger);font-weight:700">${p.da_confermare} da confermare</span>${p.prossimo ? " · " : ""}` : ""}${p.prossimo ? `Prossimo: ${escapeHtml(p.prossimo.tipo)} ${escapeHtml(dataAppIt(p.prossimo.data, p.prossimo.ora))}` : ""}</div>` : ""}
           </div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${azioni}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" onclick="event.stopPropagation()">${azioni}${p.stato === "attivo" ? `<button class="btn btn-ghost btn-sm" title="Apri la scheda" onclick="apriSchedaProfessionista('${p.cliente_id}')"><i class="fa-solid fa-chevron-right"></i></button>` : ""}</div>
       </div>`;
   }).join("");
-}
-
-function apriAggiungiProfessionista(){
-  document.getElementById("pro-codice-input").value = "";
-  document.getElementById("pro-codice-error").style.display = "none";
-  openModal("modal-aggiungi-pro");
-  setTimeout(() => document.getElementById("pro-codice-input").focus(), 50);
-}
-
-async function inviaInvitoProfessionista(){
-  const input = document.getElementById("pro-codice-input");
-  const err = document.getElementById("pro-codice-error");
-  const btn = document.getElementById("pro-codice-btn");
-  const codice = input.value.trim().toUpperCase();
-  err.style.display = "none";
-  if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
-  if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
-  btn.disabled = true;
-  const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice });
-  btn.disabled = false;
-  if(error || !data?.ok){
-    err.textContent = (data && data.errore) || "Non è stato possibile inviare l'invito. Riprova.";
-    err.style.display = "block";
-    return;
-  }
-  closeModal("modal-aggiungi-pro");
-  const avvisoPiva = data.senza_piva ? ` Attenzione: nel suo profilo mancano P.IVA o codice fiscale (gliel'abbiamo segnalato).` : "";
-  showToast((data.gia
-    ? (data.stato === "attivo" ? `${data.nome} è già collegato.` : `C'è già una richiesta in corso con ${data.nome}.`)
-    : `Invito inviato a ${data.nome}: riceverà una notifica per accettarlo.`) + avvisoPiva);
-  await refreshProfessionistiModule();
-}
-
-async function rispondiCollegamentoPro(clienteId, accetta, btn){
-  if(btn) btn.disabled = true;
-  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: clienteId, p_accetta: accetta });
-  if(error || !data?.ok){
-    showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
-    if(btn) btn.disabled = false;
-    return;
-  }
-  showToast(accetta ? "Maniscalco collegato: ora potete scrivervi e fissare gli appuntamenti." : "Richiesta rifiutata.");
-  await refreshProfessionistiModule();
 }
 
 function chiediScollegaProfessionista(clienteId){
@@ -436,10 +397,12 @@ async function nuovoAppuntamentoPro(){
   document.getElementById("app-pro-ora").value = "";
   document.getElementById("app-pro-note").value = "";
   document.getElementById("app-pro-error").style.display = "none";
-  if(!cavalliList.length) await loadCavalli();
-  document.getElementById("app-pro-cavalli").innerHTML = cavalliList.length
-    ? cavalliList.map(c => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;cursor:pointer"><input type="checkbox" class="app-pro-cav" value="${c.id}" style="width:17px;height:17px"> ${escapeHtml(c.nome)}</label>`).join("")
-    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo in scheda: l\'appuntamento sarà generico.</p>';
+  document.getElementById("app-pro-cavalli").innerHTML = '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Caricamento…</p>';
+  let abbinati = await cavalliAbbinatiPro(appProCliente);
+  if(abbinati === null){ if(!cavalliList.length) await loadCavalli(); abbinati = cavalliList; }
+  document.getElementById("app-pro-cavalli").innerHTML = abbinati.length
+    ? abbinati.map(c => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;cursor:pointer"><input type="checkbox" class="app-pro-cav" value="${c.id}" style="width:17px;height:17px"> ${escapeHtml(c.nome)}</label>`).join("")
+    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo abbinato a questo professionista: l\'appuntamento sarà generico. Abbina i cavalli dalla sua scheda.</p>';
   document.getElementById("app-pro-lista-view").style.display = "none";
   document.getElementById("app-pro-form-view").style.display = "block";
 }
@@ -501,3 +464,319 @@ async function azioneAppPro(gruppoId, azione, btn){
   await caricaAppuntamentiPro();
 }
 
+/* -- Cavalli abbinati e scheda del professionista (SQL 43) --
+   La scuderia sceglie quali cavalli abbinare quando invita il professionista o accetta la sua richiesta,
+   e li cambia dalla scheda. Se il cavallo ha un proprietario su Equo, l'abbinamento resta «in attesa»
+   finché il proprietario non conferma dall'App Equo. */
+let abbinaProModo = "invito";      // "invito" | "accetta"
+let abbinaProCliente = null;
+let schedaProCliente = null;
+let schedaProDati = null;
+
+const LAVORO_STATO = {
+  richiesto:   ["In attesa del professionista", "badge-gray"],
+  proposto:    ["Da confermare", "badge-yellow"],
+  programmato: ["In programma", "badge-green"],
+  fatto:       ["Fatto", "badge-green"],
+  annullato:   ["Annullato", "badge-red"],
+  rifiutato:   ["Non disponibile", "badge-gray"],
+};
+
+function euroPro(v){
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString("it-IT", { style: "currency", currency: "EUR" }) : "";
+}
+
+function dataBreveIt(iso){
+  if(!iso) return "";
+  const d = new Date(String(iso).length <= 10 ? iso + "T12:00:00" : iso);
+  return isNaN(d) ? "" : d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
+}
+
+async function cavalliPerAbbinamento(){
+  if(DEMO_MODE) return (demoState.cavalli || []).filter(c => !c.uscito_il).map((c, i) => ({ id: c.id, nome: c.nome, chiede_conferma: i % 3 === 2 }));
+  const { data, error } = await sb.rpc("scuderia_cavalli_per_abbinamento", { p_centro_id: currentCentro.id });
+  if(error){ console.error("scuderia_cavalli_per_abbinamento:", error); return []; }
+  return data || [];
+}
+
+function rigaCavalloAbbina(c, spuntato, chip){
+  return `<label style="display:flex;align-items:center;gap:9px;padding:6px 0;font-size:13.5px;cursor:pointer;border-bottom:1px solid var(--border)">
+    <input type="checkbox" class="abbina-pro-cav" value="${c.id}" ${spuntato ? "checked" : ""} style="width:17px;height:17px;flex-shrink:0">
+    <span style="flex:1;min-width:0">${escapeHtml(c.nome || "Cavallo")}</span>${chip || ""}</label>`;
+}
+
+const chipConferma = '<span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px;flex-shrink:0" title="Il cavallo ha un proprietario su Equo: dovrà confermare"><i class="fa-solid fa-user-check"></i> chiederà conferma al proprietario</span>';
+
+async function preparaListaAbbina(boxId){
+  const box = document.getElementById(boxId);
+  box.innerHTML = '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Caricamento…</p>';
+  const cavalli = await cavalliPerAbbinamento();
+  box.innerHTML = cavalli.length
+    ? `<div style="display:flex;justify-content:flex-end;gap:10px;font-size:12px;margin-bottom:2px">
+         <a href="#" onclick="event.preventDefault();document.querySelectorAll('#${boxId} .abbina-pro-cav').forEach(x=>x.checked=true)">Tutti</a>
+         <a href="#" onclick="event.preventDefault();document.querySelectorAll('#${boxId} .abbina-pro-cav').forEach(x=>x.checked=false)">Nessuno</a></div>`
+      + cavalli.map(c => rigaCavalloAbbina(c, false, c.chiede_conferma ? chipConferma : "")).join("")
+    : '<p style="color:var(--muted);font-size:12.5px;margin:4px 0">Nessun cavallo in scheda: potrai abbinarli più avanti dalla scheda del professionista.</p>';
+}
+
+function cavalliSpuntati(boxId){
+  return Array.from(document.querySelectorAll(`#${boxId} .abbina-pro-cav:checked`)).map(el => el.value);
+}
+
+function apriAggiungiProfessionista(){
+  abbinaProModo = "invito"; abbinaProCliente = null;
+  document.getElementById("pro-aggiungi-titolo").textContent = "Aggiungi maniscalco";
+  document.getElementById("pro-codice-wrap").style.display = "";
+  document.getElementById("pro-codice-btn").textContent = "Invia invito";
+  document.getElementById("pro-codice-input").value = "";
+  document.getElementById("pro-codice-error").style.display = "none";
+  preparaListaAbbina("pro-abbina-cavalli");
+  openModal("modal-aggiungi-pro");
+  setTimeout(() => document.getElementById("pro-codice-input").focus(), 50);
+}
+
+function confermaAggiungiProfessionista(){
+  if(abbinaProModo === "accetta") return accettaCollegamentoConCavalli();
+  return inviaInvitoProfessionista();
+}
+
+async function inviaInvitoProfessionista(){
+  const input = document.getElementById("pro-codice-input");
+  const err = document.getElementById("pro-codice-error");
+  const btn = document.getElementById("pro-codice-btn");
+  const codice = input.value.trim().toUpperCase();
+  err.style.display = "none";
+  if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
+  if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
+  const cavalli = cavalliSpuntati("pro-abbina-cavalli");
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: cavalli });
+  btn.disabled = false;
+  if(error || !data?.ok){
+    err.textContent = (data && data.errore) || "Non è stato possibile inviare l'invito. Riprova.";
+    err.style.display = "block";
+    return;
+  }
+  closeModal("modal-aggiungi-pro");
+  const avvisoPiva = data.senza_piva ? ` Attenzione: nel suo profilo mancano P.IVA o codice fiscale (gliel'abbiamo segnalato).` : "";
+  const avvisoCav = !data.gia && cavalli.length ? ` Quando accetta riceve ${cavalli.length === 1 ? "il cavallo scelto" : "i " + cavalli.length + " cavalli scelti"}.` : "";
+  showToast((data.gia
+    ? (data.stato === "attivo" ? `${data.nome} è già collegato: i cavalli si cambiano dalla sua scheda.` : `C'è già una richiesta in corso con ${data.nome}.`)
+    : `Invito inviato a ${data.nome}: riceverà una notifica per accettarlo.`) + avvisoCav + avvisoPiva);
+  await refreshProfessionistiModule();
+}
+
+async function rispondiCollegamentoPro(clienteId, accetta, btn){
+  if(accetta){
+    // prima di accettare la scuderia sceglie quali cavalli abbinare
+    const p = professionistiList.find(x => x.cliente_id === clienteId);
+    abbinaProModo = "accetta"; abbinaProCliente = clienteId;
+    document.getElementById("pro-aggiungi-titolo").textContent = `Accetta ${p?.nome || "il professionista"}`;
+    document.getElementById("pro-codice-wrap").style.display = "none";
+    document.getElementById("pro-codice-btn").textContent = "Accetta e abbina i cavalli";
+    document.getElementById("pro-codice-error").style.display = "none";
+    preparaListaAbbina("pro-abbina-cavalli");
+    openModal("modal-aggiungi-pro");
+    return;
+  }
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: clienteId, p_accetta: false });
+  if(error || !data?.ok){
+    showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
+    if(btn) btn.disabled = false;
+    return;
+  }
+  showToast("Richiesta rifiutata.");
+  await refreshProfessionistiModule();
+}
+
+async function accettaCollegamentoConCavalli(){
+  const err = document.getElementById("pro-codice-error");
+  const btn = document.getElementById("pro-codice-btn");
+  err.style.display = "none";
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_rispondi_collegamento", { p_cliente_id: abbinaProCliente, p_accetta: true, p_cavalli: cavalliSpuntati("pro-abbina-cavalli") });
+  btn.disabled = false;
+  if(error || !data?.ok){ err.textContent = (data && data.errore) || "Operazione non riuscita. Riprova."; err.style.display = "block"; return; }
+  closeModal("modal-aggiungi-pro");
+  showToast("Professionista collegato: riceve solo i cavalli scelti. Quelli con un proprietario su Equo aspettano la sua conferma.");
+  abbinaProCliente = null;
+  await refreshProfessionistiModule();
+}
+
+/* -- Scheda del professionista -- */
+function demoSchedaPro(){
+  const cav = (demoState.cavalli || []).filter(c => !c.uscito_il);
+  const stati = ["attivo", "da_confermare_proprietario", "attivo", null, "rifiutato"];
+  const oggi = new Date();
+  const giorno = n => { const d = new Date(oggi); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  return {
+    cavalli: cav.map((c, i) => ({ id: c.id, nome: c.nome, ha_proprietario: i % 5 !== 0, stato: stati[i % 5] })),
+    lavori: cav.slice(0, 3).flatMap((c, i) => [
+      { data: giorno(6 + i * 9), ora: "09:30", cavallo: c.nome, tipo: "Ferratura", stato: "fatto", ferro: "3", misura: "Mustad", quantita_ferri: 4, ferri_nuovi: true,
+        ferro_tipo: "Ferro in acciaio", note: "Zoccolo anteriore sinistro un po' secco: ingrassare.", aiutante: "Luca", importo: 110, pagamento: "saldato", saldato_il: giorno(4 + i * 9), prossima: giorno(-38 + i * 9) },
+      { data: giorno(52 + i * 7), ora: "11:00", cavallo: c.nome, tipo: "Pareggio", stato: "fatto", quantita_ferri: 0, importo: 45, pagamento: "da_saldare", prossima: giorno(10) }])
+      .sort((x, y) => y.data.localeCompare(x.data)),
+    documenti: [{ url: "#", nome: "Ricevuta ottobre.pdf", tipo: "documento", da: "professionista", il: giorno(4) },
+                { url: "#", nome: "Foto.jpg", tipo: "foto", da: "scuderia", il: giorno(12) }]
+  };
+}
+
+async function apriSchedaProfessionista(clienteId){
+  const p = professionistiList.find(x => x.cliente_id === clienteId);
+  if(!p || p.stato !== "attivo") return;
+  schedaProCliente = clienteId; schedaProDati = null;
+  document.getElementById("scheda-pro-nome").textContent = p.nome || "Professionista";
+  document.getElementById("scheda-pro-avatar").innerHTML = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : '<i class="fa-solid fa-user"></i>';
+  document.getElementById("scheda-pro-sotto").textContent = "Maniscalco collegato"
+    + (p.prossimo ? ` · prossimo: ${p.prossimo.tipo} ${dataAppIt(p.prossimo.data, p.prossimo.ora)}` : "");
+  ["lavori","cavalli","documenti"].forEach(t => document.getElementById("scheda-pro-" + t).innerHTML = '<p style="color:var(--muted);font-size:13px">Caricamento…</p>');
+  schedaProTab("lavori");
+  openModal("modal-scheda-pro");
+  await caricaSchedaPro();
+}
+
+function chiudiSchedaProfessionista(){
+  closeModal("modal-scheda-pro");
+  schedaProCliente = null; schedaProDati = null;
+}
+
+function schedaProTab(tab){
+  document.querySelectorAll(".scheda-pro-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  ["lavori","cavalli","documenti"].forEach(t => document.getElementById("scheda-pro-" + t).style.display = t === tab ? "block" : "none");
+}
+
+function schedaProApri(cosa){
+  const id = schedaProCliente;
+  if(!id) return;
+  closeModal("modal-scheda-pro");
+  if(cosa === "chat") apriChatProfessionista(id); else apriEventiProfessionista(id);
+}
+
+async function caricaSchedaPro(){
+  if(!schedaProCliente) return;
+  if(DEMO_MODE){ schedaProDati = demoSchedaPro(); }
+  else {
+    const { data, error } = await sb.rpc("scuderia_pro_scheda", { p_cliente_id: schedaProCliente });
+    if(error || !data || data.errore){
+      console.error("scuderia_pro_scheda:", error || data);
+      document.getElementById("scheda-pro-lavori").innerHTML = '<p style="color:var(--danger);font-size:13px">Non riesco a caricare la scheda. Riprova.</p>';
+      return;
+    }
+    schedaProDati = data;
+  }
+  renderSchedaProLavori(); renderSchedaProCavalli(); renderSchedaProDocumenti();
+}
+
+function renderSchedaProLavori(filtro){
+  const box = document.getElementById("scheda-pro-lavori");
+  const tutti = schedaProDati?.lavori || [];
+  if(!tutti.length){ box.innerHTML = '<p style="color:var(--muted);font-size:13px">Nessun lavoro ancora. I lavori che il professionista registra sui cavalli del centro compaiono qui con tutti i dettagli.</p>'; return; }
+  const nomi = [...new Set(tutti.map(l => l.cavallo).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const lista = filtro ? tutti.filter(l => l.cavallo === filtro) : tutti;
+  const fatti = lista.filter(l => l.stato === "fatto");
+  const totale = fatti.reduce((t, l) => t + (Number(l.importo) || 0), 0);
+  const daSaldare = fatti.filter(l => l.pagamento !== "saldato").reduce((t, l) => t + (Number(l.importo) || 0), 0);
+  const riga = (et, val) => val ? `<div><span style="color:var(--muted)">${et}:</span> ${val}</div>` : "";
+  box.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+      <select class="input" style="flex:1 1 180px;max-width:260px" onchange="renderSchedaProLavori(this.value)">
+        <option value="">Tutti i cavalli (${tutti.length} lavori)</option>
+        ${nomi.map(n => `<option value="${escapeHtml(n)}"${n === filtro ? " selected" : ""}>${escapeHtml(n)}</option>`).join("")}
+      </select>
+      <div style="font-size:12.5px;color:var(--muted)">${fatti.length} fatti${totale ? ` · ${euroPro(totale)}` : ""}${daSaldare ? ` · <b style="color:var(--danger)">${euroPro(daSaldare)} da saldare</b>` : ""}</div>
+    </div>` + lista.map(l => {
+    const [txt, cls] = LAVORO_STATO[l.stato] || [l.stato || "", "badge-gray"];
+    const ferri = [];
+    if(Number(l.quantita_ferri)) ferri.push(`${l.quantita_ferri} ${Number(l.quantita_ferri) === 1 ? "ferro" : "ferri"}`);
+    if(l.ferri_nuovi === true) ferri.push("nuovi"); else if(l.ferri_nuovi === false) ferri.push("riutilizzati");
+    if(l.ferro_tipo) ferri.push(escapeHtml(l.ferro_tipo));
+    if(l.ferro) ferri.push("n. " + escapeHtml(String(l.ferro)));
+    if(l.misura) ferri.push(escapeHtml(l.misura));
+    const pag = l.importo != null && l.importo !== ""
+      ? `${euroPro(l.importo)} · ${l.pagamento === "saldato" ? `<span style="color:#2f8a4e;font-weight:600">saldato${l.saldato_il ? " il " + dataBreveIt(l.saldato_il) : ""}</span>` : '<span style="color:var(--danger);font-weight:600">da saldare</span>'}` : "";
+    return `<div class="msg-item">
+      <div style="display:flex;justify-content:space-between;gap:6px 10px;align-items:flex-start;flex-wrap:wrap">
+        <div style="font-weight:700;font-size:14px;min-width:0;flex:1 1 200px">${escapeHtml(dataAppIt(l.data, l.ora))} · ${escapeHtml(l.tipo || "Lavoro")}${l.cavallo ? ` · <span style="font-weight:600">${escapeHtml(l.cavallo)}</span>` : ""}</div>
+        <span class="badge-pill ${cls}" style="flex-shrink:0;font-size:11px">${escapeHtml(txt)}</span>
+      </div>
+      <div style="font-size:12.5px;line-height:1.55;margin-top:4px">
+        ${riga("Ferri", ferri.join(" · "))}${riga("Note ferro", l.ferro_note ? escapeHtml(l.ferro_note) : "")}
+        ${riga("Note", l.note ? escapeHtml(l.note) : "")}${riga("Aiutante", l.aiutante ? escapeHtml(l.aiutante) : "")}
+        ${riga("Importo", pag)}${riga("Prossimo intervento", l.prossima ? dataBreveIt(l.prossima) : "")}
+      </div></div>`;
+  }).join("");
+}
+
+function renderSchedaProCavalli(){
+  const box = document.getElementById("scheda-pro-cavalli");
+  const cav = schedaProDati?.cavalli || [];
+  const puo = puoCollegareProfessionisti();
+  if(!cav.length){ box.innerHTML = '<p style="color:var(--muted);font-size:13px">Nessun cavallo in scheda.</p>'; return; }
+  const CHIP = {
+    attivo: '<span class="badge-pill badge-green" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">abbinato</span>',
+    da_confermare_proprietario: '<span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px;flex-shrink:0"><i class="fa-solid fa-hourglass-half"></i> in attesa del proprietario</span>',
+    rifiutato: '<span class="badge-pill badge-red" style="font-size:10.5px;padding:2px 8px;flex-shrink:0" title="Spunta di nuovo per richiedere la conferma">rifiutato dal proprietario</span>',
+  };
+  const n = cav.filter(c => c.stato === "attivo").length;
+  box.innerHTML = `<p style="color:var(--muted);font-size:12.5px;margin:0 0 8px">${n} ${n === 1 ? "cavallo abbinato" : "cavalli abbinati"}. Il professionista vede nella sua app solo questi.
+      ${puo ? "Se togli un cavallo, nella sua app finisce tra gli archiviati: i lavori fatti restano nello storico. I cavalli con un proprietario su Equo aspettano la sua conferma." : "Solo l'amministratore o un membro di livello 2-3 può cambiare i cavalli."}</p>
+    <div id="scheda-pro-cav-lista">` + cav.map(c => {
+      const chip = (CHIP[c.stato] || (c.ha_proprietario ? chipConferma : ""))
+        + (c.uscito ? ' <span class="badge-pill badge-gray" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">uscito dal centro</span>' : "");
+      return rigaCavalloAbbina(c, c.stato === "attivo" || c.stato === "da_confermare_proprietario", chip).replace('type="checkbox"', puo ? 'type="checkbox"' : 'type="checkbox" disabled');
+    }).join("") + `</div>
+    ${puo ? '<div class="auth-error" id="scheda-pro-cav-error"></div><button class="btn btn-primary btn-block" style="margin-top:12px" id="scheda-pro-cav-salva" onclick="salvaCavalliSchedaPro()">Salva i cavalli</button>' : ""}`;
+}
+
+async function salvaCavalliSchedaPro(){
+  const btn = document.getElementById("scheda-pro-cav-salva");
+  const err = document.getElementById("scheda-pro-cav-error");
+  err.style.display = "none";
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_pro_imposta_cavalli", { p_cliente_id: schedaProCliente, p_cavalli: cavalliSpuntati("scheda-pro-cav-lista") });
+  btn.disabled = false;
+  if(error || !data?.ok){ err.textContent = (data && data.errore) || "Salvataggio non riuscito. Riprova."; err.style.display = "block"; return; }
+  const parti = [];
+  if(data.attivi) parti.push(`${data.attivi} ${data.attivi === 1 ? "abbinato" : "abbinati"}`);
+  if(data.da_confermare) parti.push(`${data.da_confermare} in attesa del proprietario (gli abbiamo scritto)`);
+  if(data.tolti) parti.push(`${data.tolti} ${data.tolti === 1 ? "tolto" : "tolti"}`);
+  showToast(parti.length ? "Cavalli aggiornati: " + parti.join(", ") + "." : "Nessuna modifica.");
+  await caricaSchedaPro();
+}
+
+function renderSchedaProDocumenti(){
+  const box = document.getElementById("scheda-pro-documenti");
+  const docs = schedaProDati?.documenti || [];
+  const ICONA = { foto: "fa-image", video: "fa-video", documento: "fa-file-pdf", audio: "fa-microphone" };
+  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+      <p style="margin:0;color:var(--muted);font-size:12.5px">Ricevute, foto, video e PDF scambiati con il professionista.</p>
+      <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="document.getElementById('scheda-pro-file').click()"><i class="fa-solid fa-paperclip"></i> Invia</button></div>`
+    + (docs.length ? docs.map(d => `
+      <a class="msg-item" href="${escapeHtml(d.url || "#")}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
+        <i class="fa-solid ${ICONA[d.tipo] || "fa-file"}" style="font-size:18px;color:var(--muted);width:22px;text-align:center"></i>
+        <div style="min-width:0;flex:1"><div style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(d.nome || "Allegato")}</div>
+          <div style="color:var(--muted);font-size:12px">${d.da === "professionista" ? "Dal professionista" : "Dalla scuderia"} · ${dataBreveIt(d.il)}</div></div>
+        <i class="fa-solid fa-arrow-up-right-from-square" style="color:var(--muted);font-size:12px"></i></a>`).join("")
+      : '<p style="color:var(--muted);font-size:13px">Nessun documento ancora.</p>');
+}
+
+async function inviaDocumentoSchedaPro(event){
+  if(!schedaProCliente) return;
+  if(DEMO_MODE){ event.target.value = ""; showToast("In demo l'invio non è disponibile."); return; }
+  const prima = chatProCorrente;
+  chatProCorrente = schedaProCliente;     // stesso invio della chat: il documento arriva anche in chat
+  try{ await inviaAllegatoPro(event); } finally { chatProCorrente = prima; }
+  await caricaSchedaPro();
+  schedaProTab("documenti");
+}
+
+/* l'appuntamento si propone solo per i cavalli abbinati al professionista */
+async function cavalliAbbinatiPro(clienteId){
+  if(DEMO_MODE) return demoSchedaPro().cavalli.filter(c => c.stato === "attivo");
+  const { data, error } = await sb.rpc("scuderia_pro_scheda", { p_cliente_id: clienteId });
+  if(error || !data || data.errore) return null;
+  return (data.cavalli || []).filter(c => c.stato === "attivo" && !c.uscito);
+}

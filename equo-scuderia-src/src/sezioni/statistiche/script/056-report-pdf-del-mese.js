@@ -43,13 +43,13 @@ function statisticheDemo(){
 }
 
 /* =====================================================================
-   AGENTI AI (pagina) — Athena inclusa; Merlino / Ermes add-on (uno incluso in PREMIUM)
+   AGENTI AI (pagina) — Athena sempre inclusa; in PREMIUM anche Merlino; gli altri add-on (listino 3/11/2026)
    ===================================================================== */
 const AGENTI_INFO = [
   { key:"athena", nome:"Athena", ruolo:"Segreteria e guida del gestionale", icon:"svg:owl", cls:"athena-col", testo:"È la segretaria del centro: conosce iscritti, cavalli, staff e il gestionale e ti guida passo passo; ti dice cosa c'è da fare (lezioni, carnet, box)." },
   { key:"merlino", nome:"Merlino", ruolo:"Numeri, conti e strategia", icon:"fa-hat-wizard", cls:"merlino-av", testo:"Legge i numeri del centro, trova dove guadagni e dove perdi, sorveglia la concorrenza della zona con il radar settimanale." },
   { key:"ermes", nome:"Ermes", ruolo:"Magazzino e logistica", icon:"fa-truck-ramp-box", cls:"", testo:"Tiene d'occhio scorte, lotti e consumi e prepara le liste di riordino per i fornitori.", presto:true },
-  { key:"galeno", nome:"Galeno", ruolo:"Veterinario", icon:"fa-stethoscope", cls:"", testo:"Supporto sanitario: protocolli, scadenze, primo orientamento.", presto:true },
+  { key:"galeno", nome:"Galeno", ruolo:"Veterinario", icon:"fa-stethoscope", cls:"", testo:"Supporto sanitario: protocolli, scadenze, primo orientamento. Non sostituisce il veterinario del cavallo." },
   { key:"hammer", nome:"Hammer", ruolo:"Mascalcia", icon:"fa-hammer", cls:"", testo:"Il maniscalco esperto: pareggi, ferrature e piede equino, applicato ai cavalli del centro." },
   { key:"ares", nome:"Ares", ruolo:"Istruttore", icon:"fa-person-running", cls:"", testo:"L'istruttore: programmi di lavoro e lezioni per allievi e cavalli del centro." },
 ];
@@ -58,7 +58,7 @@ const AG_BUNDLE = { advance:24, premium:19 };                              // tu
 const AG_EXTRA_MSG = [{ n:200, p:7 }, { n:500, p:15 }];                    // messaggi extra condivisi, € al mese + IVA
 let proveAgenti;   // undefined = da caricare; null = non disponibile; altrimenti { merlino:{stato,...}, hammer, ares }
 async function caricaProveAgenti(){
-  if(DEMO_MODE){ proveAgenti = { merlino:{ stato:"disponibile" }, hammer:{ stato:"disponibile" }, ares:{ stato:"disponibile" } }; return; }
+  if(DEMO_MODE){ proveAgenti = { merlino:{ stato:"disponibile" }, hammer:{ stato:"disponibile" }, ares:{ stato:"disponibile" }, galeno:{ stato:"disponibile" } }; return; }
   try{
     const { data, error } = await sb.rpc("agenti_prove_stato", { p_centro: currentCentro.id });
     proveAgenti = !error && data && !data.errore ? data : null;
@@ -73,12 +73,11 @@ function renderModuloAgenti(){
   const prezzo = a => AG_PREZZI[a.key] ? `${AG_PREZZI[a.key]} € + IVA al mese` : "";
   const oraProva = d => new Date(d).toLocaleString("it-IT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
   const stato = a => {
-    if(attivi.includes(a.key) && !a.presto) return `<span class="stato" style="color:#3f7a45">● Attivo${a.key === "athena" && p.athena_proattiva === false ? " · basic" : ""}${a.key !== "athena" && p.agente_incluso === a.key ? " · incluso in PREMIUM" : ""}</span>`;
+    if(attivi.includes(a.key) && !a.presto) return `<span class="stato" style="color:#3f7a45">● Attivo${a.key === "athena" && p.athena_proattiva === false ? " · basic" : ""}${a.key !== "athena" && ((p.pacchetto === "premium" && a.key === "merlino") || p.agente_incluso === a.key) ? " · incluso in PREMIUM" : ""}</span>`;
     if(a.presto) return `<span class="stato" style="color:var(--muted)">${prezzo(a) ? "Add-on " + prezzo(a) + " · " : ""}In arrivo${attivi.includes(a.key) ? " · già sbloccato per te" : ""}</span>`;
     const pr = prova(a);
     if(pr?.stato === "attiva") return `<span class="stato" style="color:#3f7a45">● Prova gratuita · ${pr.rimasti} messaggi, fino al ${oraProva(pr.fine)}</span>`;
     if(p.pacchetto === "start") return `<span class="stato" style="color:var(--muted)"><i class="fa-solid fa-lock"></i> Da ADVANCE · ${prezzo(a)}</span>`;
-    if(p.pacchetto === "premium" && !p.agente_incluso) return `<span class="stato" style="color:#8a6516">Incluso a scelta in PREMIUM · altrimenti ${prezzo(a)}</span>`;
     return `<span class="stato" style="color:#8a6516">Add-on · ${prezzo(a)}</span>`;
   };
   const azione = a => {
@@ -91,13 +90,13 @@ function renderModuloAgenti(){
     else if(pr?.stato === "attesa") bottoni.push(`<span style="font-size:11.5px;color:var(--muted)">Prova dal ${oraProva(pr.dal)}</span>`);
     else if(pr?.stato === "usata") bottoni.push(`<span style="font-size:11.5px;color:var(--muted)">Prova già usata</span>`);
     bottoni.push(p.pacchetto === "start" ? `<button class="btn btn-outline btn-sm" onclick="apriUpsell('agenti')">Scopri</button>`
-      : `<button class="btn btn-outline btn-sm" onclick="richiediAgente('${a.key}')">${p.pacchetto === "premium" && !p.agente_incluso ? "Scegli questo agente" : "Richiedi l'attivazione"}</button>`);
+      : `<button class="btn btn-outline btn-sm" onclick="richiediAgente('${a.key}')">Richiedi l'attivazione</button>`);
     return `<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${bottoni.join("")}</span>`;
   };
   const bundle = p.pacchetto && p.pacchetto !== "start" && p.pacchetto !== "enterprise" ? `
     <div class="card" style="margin-top:16px"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div><div style="font-weight:800;font-size:16px">Tutti gli agenti insieme</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5">Merlino, Hammer, Ares e, appena escono, Ermes e Galeno: <b>${AG_BUNDLE[p.pacchetto] || 24} € + IVA al mese</b>${p.pacchetto === "premium" ? " (hai già un agente incluso)" : " (19 € per chi ha PREMIUM)"}. 300 messaggi al mese per ogni agente.</div></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5">Merlino, Hammer, Ares, Galeno e, appena esce, Ermes: <b>${AG_BUNDLE[p.pacchetto] || 24} € + IVA al mese</b>${p.pacchetto === "premium" ? " (prezzo PREMIUM: Merlino ce l'hai già)" : " (19 € per chi ha PREMIUM)"}. 300 messaggi al mese per ogni agente.</div></div>
       <button class="btn btn-outline btn-sm" onclick="richiediAgente('tutti')">Richiedi il pacchetto</button></div></div>
     <div class="card" style="margin-top:12px"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
       <div><div style="font-weight:800;font-size:16px">Messaggi in più</div>

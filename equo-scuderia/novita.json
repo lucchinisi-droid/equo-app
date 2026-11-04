@@ -1,6 +1,7 @@
 {
   "titolo": "Le novità di questo aggiornamento",
   "voci": [
+    "Professionisti: quando inviti un maniscalco (o accetti la sua richiesta) scegli tu quali cavalli segue. Se un cavallo ha un proprietario su Equo, il proprietario riceve un messaggio e deve confermare. Tocca la scheda del maniscalco per aggiungere o togliere cavalli, vedere lo storico dei lavori con tutti i dettagli (ferri, note, importo, pagamento, prossimo intervento) e inviare ricevute, foto e PDF.",
     "Diario del cavallo per i proprietari: chi ha il cavallo da voi vede nella sua app Equo cosa è stato fatto oggi e negli ultimi 7 giorni (pasti, fieno, paddock, lavoro, farmaco, box pulito), con l’ora e chi l’ha segnato.",
     "Scegli tu cosa vedono: in Cavalli › Box › «Icone del giorno», o in Gestione Groom › «Cosa vede il proprietario», c’è la nuova colonna «Al proprietario».",
     "Pacchetti più chiari: Store e Fatturazione SDI sono indicati come «in arrivo», e il confronto dei pacchetti mostra i maniscalchi collegabili (1 in START, 3 in ADVANCE, senza limiti in PREMIUM).",
@@ -9,6 +10,8 @@
     "Gli allievi non occupano più i posti del team del tuo pacchetto: contano solo le persone dello staff.",
     "Carnet collegati alle lezioni: quando segni una lezione completata, si scala da sola dal carnet dell’allievo (o del genitore, per i minori). Se la lezione torna indietro, il credito si restituisce.",
     "Disdette: in «Lezioni & Prenotazioni» scegli fino a quante ore prima si può disdire senza perdere la lezione (di default 24). Una disdetta più tardi consuma la lezione.",
-    "Nel pacchetto vedi tutti i movimenti del carnet; le correzioni a mano chiedono un motivo. Quando restano 2 lezioni, o il carnet finisce, il cliente con l’app riceve un messaggio."
+    "Nel pacchetto vedi tutti i movimenti del carnet; le correzioni a mano chiedono un motivo. Quando restano 2 lezioni, o il carnet finisce, il cliente con l’app riceve un messaggio.",
+    "Nuovo listino: ADVANCE a 39 € al mese + IVA. Clienti fino a 20 in START, 50 in ADVANCE, 200 in PREMIUM; nella sezione Clienti vedi quanti ne hai e quanti ne restano.",
+    "Agenti AI: Galeno, l’agente per la salute dei cavalli, è disponibile (anche in prova gratuita per 1 giorno). In PREMIUM Merlino è incluso."
   ]
 }

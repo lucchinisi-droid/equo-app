@@ -52,7 +52,8 @@ function renderClienti(){
     if(!q) return true;
     return (m.nome_visualizzato || "").toLowerCase().includes(q) || (d.telefono || "").replace(/\s/g, "").includes(q.replace(/\s/g, "")) || (d.email || "").includes(q);
   }).sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it"));
-  document.getElementById("clienti-count").textContent = tutti.length;
+  const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
+  document.getElementById("clienti-count").textContent = lim ? `${tutti.length} di ${lim}` : tutti.length;
   document.getElementById("clienti-empty").style.display = tutti.length ? "none" : "block";
   body.innerHTML = lista.map(m => {
     const d = clientiDati[m.id] || {}, eta = etaDi(d.data_nascita);
@@ -94,6 +95,8 @@ async function clienteCollegati(id){
 
 function openClienteForm(id, daPacchetto){
   if(!puoVedereClienti()){ showToast("Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti."); return; }
+  const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
+  if(!id && lim && clientiElenco().length >= lim){ showToast(`Hai raggiunto i ${lim} clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.`); return; }
   const m = id ? (teamList || []).find(x => x.id === id) : null;
   const d = (m && clientiDati[m.id]) || {};
   editingClienteId = m ? m.id : null;
@@ -124,6 +127,7 @@ const CLIENTE_ERRORI = {
   NON_AUTORIZZATO: "Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti.",
   NON_E_UN_CLIENTE: "Questa persona fa parte dello staff: si modifica dal riquadro Team.",
   scuderia_clienti_dati_email_check: "L'email non sembra valida.",
+  "clienti, il massimo": "Hai raggiunto il numero di clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.",
 };
 
 async function saveCliente(){
