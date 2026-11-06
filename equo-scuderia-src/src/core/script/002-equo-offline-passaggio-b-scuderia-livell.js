@@ -49,7 +49,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { globa
 
 const RUOLO_LABELS = { admin:"Amministratore", istruttore:"Istruttore", veterinario:"Veterinario", maniscalco:"Maniscalco", allievo:"Allievo/Genitore", collaboratore:"Collaboratore", proprietario:"Proprietario", segretario:"Segretario", giardiniere:"Giardiniere", altro:"Altro" };
 const LIVELLO_LABELS = { "1":"Livello 1", "2":"Livello 2", "3":"Livello 3", admin:"Admin" };
-const PERMESSI_FLAGS = ["cavalli","eventi","lezioni","pacchetti","messaggi","contatti","fiscali"];
+const PERMESSI_FLAGS = ["cavalli","eventi","lezioni","pacchetti","incassi","messaggi","contatti","fiscali"];
 const CONTATTO_TIPO_LABELS = {
   istruttore_esterno:"Istruttore esterno", veterinario:"Veterinario", maniscalco:"Maniscalco",
   commercialista:"Commercialista", giardiniere:"Giardiniere / Manutenzione verde", manutenzione:"Manutenzione centro ippico",

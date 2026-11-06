@@ -422,6 +422,7 @@
       <td>${dettaglio}</td>
       <td>${p.data_scadenza ? formatDate(p.data_scadenza) : "—"}</td>
       <td><span class="badge-pill badge-${s}">${s === "red" ? "Scaduto" : s === "yellow" ? "In scadenza" : "Attivo"}</span></td>
+      <td class="pac-col-pag inc-pac-pag" data-pac-pag="${p.id}"></td>
       <td style="text-align:right;white-space:nowrap">
         ${p.membro_id ? `<button class="btn btn-ghost btn-sm" onclick="chattaConMembro('${p.membro_id}')" title="Chatta"><i class="fa-solid fa-comment-dots"></i></button>` : ""}
         ${memberCanUI("pacchetti") ? `<button class="btn btn-ghost btn-sm" onclick="openPacchettoForm('${p.id}')"><i class="fa-solid fa-pen"></i></button>` : ""}
@@ -429,6 +430,8 @@
       </td>`;
 			body.appendChild(tr);
 		});
+		if (typeof incassiDecoraPacchetti === "function") incassiDecoraPacchetti();
+		document.querySelectorAll(".pac-col-pag").forEach((el) => el.style.display = typeof puoGestireIncassi === "function" && puoGestireIncassi() ? "" : "none");
 	}
 	function toggleTipoPacchetto() {
 		const tipo = document.getElementById("pac-tipo").value;

@@ -278,6 +278,17 @@ Object.assign(DB, {
   async rispondiPropostaProfessionista(id, accetta){
     const { data, error } = await sb.rpc("rispondi_proposta_professionista", { p_id: id, p_accetta: !!accetta });
     return { data, error };
+  },
+  // conti della scuderia inviati a me (SQL 44)
+  async mieiConti(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.rpc("miei_conti");
+    if(error){ if(!/miei_conti|does not exist|schema cache/i.test(error.message || "")) console.warn("conti scuderia:", error.message); return []; }
+    return data || [];
+  },
+  async segnalaContoPagato(id, metodo){
+    const { data, error } = await sb.rpc("segnala_conto_pagato", { p_id: id, p_metodo: metodo || null });
+    return { data, error };
   }
 });
 // stato di una somministrazione: fatta · saltata (12 ore dopo l'orario senza conferma) · da fare

@@ -20,6 +20,7 @@ import { cambiaIncassi, renderWidgetOwner, wgApriAppMan, wgChattaAppuntamento, w
 import { terCarica, terRenderHome, terRenderCavallo, terFatto, TER } from "./104-terapie.js";
 import { diaRenderCavallo, diaGiorno, DIA } from "./105-diario-scuderia.js";
 import { ppCarica, ppRenderHome, ppRispondi, PP } from "./106-proposte-professionisti.js";
+import { ctCarica, ctRenderHome, ctApri, ctHoPagato, CT } from "./107-conti-scuderia.js";
 
 // API PUBBLICA (proprietario): le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione di questo ruolo, va aggiunta qui (il controllo automatico lo segnala).
@@ -27,6 +28,7 @@ Object.assign(window, {
   terCarica, terRenderHome, terRenderCavallo, terFatto, TER,
   diaRenderCavallo, diaGiorno, DIA,
   ppCarica, ppRenderHome, ppRispondi, PP,
+  ctCarica, ctRenderHome, ctApri, ctHoPagato, CT,
   onbCollegati,
   onbNonSonoIo,
   onbVaiAiProposti,

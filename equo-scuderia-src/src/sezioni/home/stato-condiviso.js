@@ -12,7 +12,7 @@ const oggiLocaleIso = () => { const d = new Date(); return d.getFullYear() + "-"
 let notaColoreSelezionato = "giallo";
 // da 053-drag-drop-post-it-mouse-e-touch.js
 const MODULE_TITLES = {
-  home:"Home", centro:"Il tuo Centro", clienti:"Clienti", cavalli:"Cavalli & Salute", lezioni:"Lezioni & Prenotazioni",
+  home:"Home", centro:"Il tuo Centro", clienti:"Clienti", cavalli:"Cavalli", incassi:"Incassi", lezioni:"Lezioni & Prenotazioni",
   pacchetti:"Pacchetti & Abbonamenti", comunicazioni:"Messaggi",
   professionisti:"Professionisti", groom:"Gestione Groom", magazzino:"Magazzino", statistiche:"Statistiche", store:"Store", fatturazione:"Fatturazione SDI", ai:"Agenti AI",
 };

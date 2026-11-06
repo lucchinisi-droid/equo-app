@@ -7,9 +7,11 @@ let pianoCentro = null;
 const PK_NOMI = { start:"START", advance:"ADVANCE", premium:"PREMIUM", enterprise:"ENTERPRISE", completo:"COMPLETO" };
 const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€39/mese · €390/anno + IVA", premium:"€59/mese · €590/anno + IVA", enterprise:"su misura", completo:"sblocco totale" };
 // moduli del menu legati a una funzione del pacchetto
-const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
+const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", incassi:"incassi", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
   pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet, con disdetta senza perdere la lezione","Cruscotto scadenze e rinnovi"] },
+  incassi: { titolo:"Incassi", icon:"fa-euro-sign", da:"advance", punti:["Chi deve pagare e da quanto, in un colpo d'occhio","Conti del mese con rette, pacchetti, lezioni ed extra, inviati nell'App Equo","Pagamenti anche a rate, contanti, bonifico o POS","Cassa separata per l'ASD: tesseramenti, certificati, gare e trasferte"] },
+  incassi_auto: { titolo:"Esportazione per il commercialista", icon:"fa-file-csv", da:"premium", punti:["Incassi del mese in un file per il commercialista","Solleciti e riepiloghi automatici"] },
   magazzino: { titolo:"Magazzino", icon:"fa-boxes-stacked", da:"advance", punti:["Scorte con semaforo per categoria","Carichi, scarichi e inventario in un tocco","Consumi delle ultime 8 settimane"] },
   statistiche: { titolo:"Statistiche", icon:"fa-chart-line", da:"advance", punti:["Incassi e lezioni degli ultimi 12 mesi","Clienti a rischio con messaggio pronto","Carnet in esaurimento da rinnovare","In PREMIUM: indice di salute, margine per cavallo, radar della concorrenza"] },
   statistiche_complete: { titolo:"Statistiche complete", icon:"fa-chart-line", da:"premium", punti:["Indice di salute del centro 0-100","Margine per cavallo in pensione","Benessere e carico dei cavalli","Mappa di occupazione e simulatore","Radar di Merlino sulla concorrenza della zona"] },
@@ -21,7 +23,7 @@ const FUNZIONI_INFO = {
 };
 const PK_CONFRONTO = [
   ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Clienti", "20", "50", "200"], ["Maniscalchi collegati", "1", "3", "illimitati"], ["Veterinari collegati", "1", "3", "illimitati"],
-  ["Lezioni & Prenotazioni", "promemoria in chat (1 istruttore)", "con conferma dall'app (3)", "con conferma dall'app"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"],
+  ["Lezioni & Prenotazioni", "promemoria in chat (1 istruttore)", "con conferma dall'app (3)", "con conferma dall'app"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"], ["Incassi, conti e ASD", "—", "✓", "✓ + esportazione"],
   ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
   ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "Merlino incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
   ["Supporto prioritario", "—", "—", "✓"],
@@ -30,7 +32,7 @@ const PK_CONFRONTO = [
 async function caricaPianoCentro(){
   if(DEMO_MODE){
     pianoCentro = { pacchetto:"premium", pacchetto_reale:"premium", sbloccato:false, agente_incluso:"merlino", agenti:["athena","merlino"],
-      cavalli:80, team:15, maniscalchi:null, athena_messaggi:500, merlino_messaggi:300, athena_proattiva:true, pacchetti:true, magazzino:true,
+      cavalli:80, team:15, maniscalchi:null, athena_messaggi:500, merlino_messaggi:300, athena_proattiva:true, pacchetti:true, incassi:true, incassi_auto:true, magazzino:true,
       magazzino_avanzato:true, statistiche:true, statistiche_complete:true, radar:true, store:true, sdi:true, livelli:true, hard_reset:true,
       agenti_acquistabili:true, supporto_prioritario:true, uso:{ cavalli:(demoState.cavalli||[]).length, team:3, maniscalchi:1, athena_messaggi:4, merlino_messaggi:2 } };
   } else if(currentCentro?.id){

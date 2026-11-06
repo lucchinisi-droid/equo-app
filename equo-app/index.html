@@ -24516,6 +24516,17 @@ Object.assign(DB, {
   async rispondiPropostaProfessionista(id, accetta){
     const { data, error } = await sb.rpc("rispondi_proposta_professionista", { p_id: id, p_accetta: !!accetta });
     return { data, error };
+  },
+  // conti della scuderia inviati a me (SQL 44)
+  async mieiConti(){
+    if(DEMO_MODE) return [];
+    const { data, error } = await sb.rpc("miei_conti");
+    if(error){ if(!/miei_conti|does not exist|schema cache/i.test(error.message || "")) console.warn("conti scuderia:", error.message); return []; }
+    return data || [];
+  },
+  async segnalaContoPagato(id, metodo){
+    const { data, error } = await sb.rpc("segnala_conto_pagato", { p_id: id, p_metodo: metodo || null });
+    return { data, error };
   }
 });
 // stato di una somministrazione: fatta · saltata (12 ore dopo l'orario senza conferma) · da fare
@@ -34819,6 +34830,88 @@ const mlSigla = k => String(k || "").toUpperCase();
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ppAggancia, { once: true });
 	else ppAggancia();
+	// equo-app-src/src/ruoli/proprietario/moduli/107-conti-scuderia.js
+	var ctEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var ctEuro = (n) => (Number(n) || 0).toLocaleString("it-IT", {
+		style: "currency",
+		currency: "EUR"
+	});
+	var ctMese = (iso) => {
+		return (/* @__PURE__ */ new Date(String(iso).slice(0, 10) + "T12:00:00")).toLocaleDateString("it-IT", {
+			month: "long",
+			year: "numeric"
+		});
+	};
+	var CT = {
+		lista: [],
+		il: 0,
+		aperto: null
+	};
+	async function ctCarica(forza) {
+		if (!forza && CT.il && Date.now() - CT.il < 6e4) return CT.lista;
+		CT.lista = await DB.mieiConti().catch(() => []);
+		CT.il = Date.now();
+		return CT.lista;
+	}
+	function ctDaMostrare() {
+		const limite = Date.now() - 3888e6;
+		return CT.lista.filter((c) => Number(c.residuo) > .004 || new Date(c.inviato_il || c.mese).getTime() > limite);
+	}
+	async function ctRenderHome() {
+		const home = document.getElementById("page-home");
+		if (!home || !currentUser) return;
+		let box = document.getElementById("home-conti-scuderia");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "home-conti-scuderia";
+			const dopo = document.getElementById("home-proposte-pro") || document.getElementById("home-oggi");
+			if (dopo && dopo.parentNode) dopo.parentNode.insertBefore(box, dopo.nextSibling);
+			else home.prepend(box);
+		}
+		await ctCarica();
+		const lista = ctDaMostrare();
+		if (!lista.length) {
+			box.innerHTML = "";
+			return;
+		}
+		box.innerHTML = `<div class="card ter-card"><div class="ter-tit">🧾 I tuoi conti</div>${lista.map((c) => {
+			const pagato = Number(c.residuo) <= .004, aperto = CT.aperto === c.id;
+			return `<div class="ter-piano">
+      <button type="button" style="all:unset;display:flex;align-items:center;gap:10px;width:100%;cursor:pointer" onclick="ctApri('${c.id}')">
+        <span style="flex:1;min-width:0;font-size:13.5px;line-height:1.4"><b>${ctEsc(c.emittente)}</b> · ${ctEsc(ctMese(c.mese))}
+          <span class="muted" style="display:block;font-size:12px">n. ${ctEsc(c.numero)} · ${pagato ? "pagato ✓" : Number(c.pagato) > 0 ? "pagati " + ctEuro(c.pagato) + ", mancano " + ctEuro(c.residuo) : "da pagare"}</span></span>
+        <b style="white-space:nowrap">${ctEuro(c.totale)}</b><span class="muted">${aperto ? "▴" : "▾"}</span></button>
+      ${aperto ? `<div style="margin-top:8px;font-size:13px">${(c.righe || []).map((r) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--border,#eee)">
+          <span>${ctEsc(r.descrizione)}${r.per ? `<small class="muted" style="display:block">per ${ctEsc(r.per)}</small>` : ""}</span><span style="white-space:nowrap">${ctEuro(r.importo)}</span></div>`).join("")}
+        ${!pagato ? `<button type="button" class="btn btn-primary btn-sm" style="margin-top:10px" onclick="ctHoPagato('${c.id}', this)">Ho già pagato</button>` : ""}
+        <div class="muted" style="font-size:11.5px;margin-top:8px">Riepilogo della scuderia: non è una fattura.</div></div>` : ""}
+    </div>`;
+		}).join("")}</div>`;
+	}
+	function ctApri(id) {
+		CT.aperto = CT.aperto === id ? null : id;
+		ctRenderHome();
+	}
+	async function ctHoPagato(id, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await DB.segnalaContoPagato(id);
+		if (error || !data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast(data && data.errore || "Non inviato: riprova");
+		}
+		showToast("Fatto: la scuderia riceve il messaggio e registra il pagamento");
+	}
+	function ctAggancia() {
+		try {
+			estendiDopo("renderHome", function() {
+				ctRenderHome();
+			});
+		} catch (err) {
+			console.error("conti scuderia:", err);
+		}
+	}
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ctAggancia, { once: true });
+	else ctAggancia();
 	// equo-app-src/src/ruoli/proprietario/moduli/index.js
 	Object.assign(window, {
 		terCarica,
@@ -34833,6 +34926,11 @@ const mlSigla = k => String(k || "").toUpperCase();
 		ppRenderHome,
 		ppRispondi,
 		PP,
+		ctCarica,
+		ctRenderHome,
+		ctApri,
+		ctHoPagato,
+		CT,
 		onbCollegati,
 		onbNonSonoIo,
 		onbVaiAiProposti,

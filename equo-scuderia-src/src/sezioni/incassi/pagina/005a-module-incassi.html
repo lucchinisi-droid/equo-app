@@ -1,0 +1,15 @@
+        <div class="module-page" id="module-incassi" style="display:none">
+          <div class="page-header">
+            <div>
+              <h1><span class="page-icon"><i class="fa-solid fa-euro-sign"></i></span> Incassi</h1>
+              <p>Rette, pacchetti, lezioni, extra e ASD: chi deve pagare, cosa è stato incassato, i conti del mese.</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <div class="inc-mese"><button class="btn btn-ghost btn-sm" onclick="incCambiaMese(-1)" title="Mese prima"><i class="fa-solid fa-chevron-left"></i></button><b id="inc-mese-label">—</b><button class="btn btn-ghost btn-sm" onclick="incCambiaMese(1)" title="Mese dopo"><i class="fa-solid fa-chevron-right"></i></button></div>
+              <button class="btn btn-primary" id="inc-btn-incassa" onclick="incApriPagamento()"><i class="fa-solid fa-plus"></i> Registra incasso</button>
+            </div>
+          </div>
+          <div class="inc-tabbar" id="inc-tabbar"></div>
+          <div id="inc-cassa-bar" class="inc-casse" style="display:none"></div>
+          <div id="inc-corpo"><p style="color:var(--muted)">Caricamento…</p></div>
+        </div>

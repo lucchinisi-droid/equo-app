@@ -1,6 +1,6 @@
 
 (function(){
- var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["pacchetti","fa-ticket","Pacchetti"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
+ var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["incassi","fa-euro-sign","Incassi"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
  window.scPiu=function(forza){
   var m=document.getElementById("sc-menu"),v=document.getElementById("sc-velo"),b=document.getElementById("sc-piu");
   var apri=typeof forza==="boolean"?forza:!m.classList.contains("aperto");
