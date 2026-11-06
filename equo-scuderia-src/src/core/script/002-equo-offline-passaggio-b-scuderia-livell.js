@@ -56,6 +56,7 @@ const CONTATTO_TIPO_LABELS = {
   fornitore:"Fornitore", altro:"Altro",
 };
 const COMING_SOON_COPY = {
+  ai: { icon:"fa-wand-magic-sparkles", titolo:"Agenti AI", testo:"In arrivo: gli agenti specializzati (Merlino, Hammer, Ares, Galeno, Ermes) per numeri, mascalcia, allenamento e salute. Athena, la tua segreteria, è già attiva: la trovi in alto nel menu." },
   store: { icon:"fa-store", titolo:"Store", testo:"In arrivo: venderai ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
   fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"In arrivo: genererai e invierai fatture elettroniche conformi SDI dai pacchetti e dalle lezioni registrate nel gestionale." },
 };

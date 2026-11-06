@@ -2136,7 +2136,7 @@ textarea.input{resize:vertical}
           <i class="fa-solid fa-file-invoice"></i> <span class="nav-label">Fatturazione SDI</span> <span class="badge">SOON</span>
         </button>
         <button class="nav-item" data-module="ai" onclick="showModule('ai')">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-label">Agenti AI</span>
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-label">Agenti AI</span> <span class="badge">SOON</span>
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -3775,6 +3775,7 @@ const CONTATTO_TIPO_LABELS = {
   fornitore:"Fornitore", altro:"Altro",
 };
 const COMING_SOON_COPY = {
+  ai: { icon:"fa-wand-magic-sparkles", titolo:"Agenti AI", testo:"In arrivo: gli agenti specializzati (Merlino, Hammer, Ares, Galeno, Ermes) per numeri, mascalcia, allenamento e salute. Athena, la tua segreteria, è già attiva: la trovi in alto nel menu." },
   store: { icon:"fa-store", titolo:"Store", testo:"In arrivo: venderai ai tuoi clienti prodotti e servizi del centro (lezioni, pacchetti, attrezzatura, mangimi) con pagamento online." },
   fatturazione: { icon:"fa-file-invoice", titolo:"Fatturazione elettronica SDI", testo:"In arrivo: genererai e invierai fatture elettroniche conformi SDI dai pacchetti e dalle lezioni registrate nel gestionale." },
 };
@@ -15043,7 +15044,7 @@ const FUNZIONI_INFO = {
   sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["In arrivo: fatture elettroniche conformi SDI"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
   groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
-  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia (incluso in PREMIUM)","Hammer, Ares e Galeno: mascalcia, allenamento, salute","Tutti gli agenti insieme: 24 € + IVA al mese, 19 € in PREMIUM"] },
+  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia (incluso in PREMIUM)","Hammer, Ares e Galeno: mascalcia, allenamento, salute","Prezzi in arrivo"] },
 };
 const PK_CONFRONTO = [
   ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Clienti", "20", "50", "200"], ["Maniscalchi collegati", "1", "3", "illimitati"], ["Veterinari collegati", "1", "3", "illimitati"],
@@ -16368,12 +16369,12 @@ function aggiornaDataOraScud(){
 </script>
 <script id="sc-pill-js">
 (function(){
- var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["incassi","fa-euro-sign","Incassi"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
+ var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["incassi","fa-euro-sign","Incassi"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI","SOON"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
  window.scPiu=function(forza){
   var m=document.getElementById("sc-menu"),v=document.getElementById("sc-velo"),b=document.getElementById("sc-piu");
   var apri=typeof forza==="boolean"?forza:!m.classList.contains("aperto");
   if(apri){
-   m.innerHTML=VOCI.filter(function(x){return x[0]!=="clienti"||(typeof puoVedereClienti==="function"&&puoVedereClienti());}).filter(function(x){return typeof scModuloOk!=="function"||["store","fatturazione"].indexOf(x[0])>=0||scModuloOk(x[0]);}).map(function(x){
+   m.innerHTML=VOCI.filter(function(x){return x[0]!=="clienti"||(typeof puoVedereClienti==="function"&&puoVedereClienti());}).filter(function(x){return typeof scModuloOk!=="function"||["store","fatturazione","ai"].indexOf(x[0])>=0||scModuloOk(x[0]);}).map(function(x){
     return '<button onclick="scPiu(false);showModule(\''+x[0]+'\')"><i class="fa-solid '+x[1]+'"></i>'+x[2]+(x[3]?'<small>'+x[3]+'</small>':'')+'</button>';}).join("");
   }
   m.classList.toggle("aperto",apri);v.classList.toggle("aperto",apri);b.classList.toggle("aperto",apri);
@@ -16395,6 +16396,7 @@ function aggiornaDataOraScud(){
  // pagina Agenti AI: icone nuove
  var oldR=window.renderModuloAgenti;
  window.renderModuloAgenti=function(){
+  return; // pagina Agenti AI in SOON (prezzi da rivedere): resta la pagina «in arrivo»
   oldR.apply(this,arguments);
   var img={athena:"athena",merlino:"merlino",ermes:"ermes",galeno:"galeno",hammer:"hammer",ares:"ares"};
   document.querySelectorAll("#module-ai .ag-card").forEach(function(c){

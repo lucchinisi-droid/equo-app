@@ -20,7 +20,7 @@ const FUNZIONI_INFO = {
   sdi: { titolo:"Fatturazione SDI", icon:"fa-file-invoice", da:"advance", punti:["In arrivo: fatture elettroniche conformi SDI"] },
   box: { titolo:"Box / Stalla", icon:"fa-warehouse", da:"advance", punti:["Box disegnati con semaforo: libero, occupato, in manutenzione","Stato del cavallo e icone del giorno (pasti, paddock, farmaco…)","ADVANCE fino a 20 box, PREMIUM fino a 100","Modalità stalla per tablet e display in scuderia"] },
   groom: { titolo:"App Equo Groom", icon:"fa-id-badge", da:"advance", punti:["Il personale di stalla segna le attività dal telefono","QR personale + PIN, senza account e senza email","7 lingue: italiano, inglese, rumeno, hindi, punjabi, bengalese, arabo","ADVANCE fino a 3 groom, PREMIUM fino a 10"] },
-  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia (incluso in PREMIUM)","Hammer, Ares e Galeno: mascalcia, allenamento, salute","Tutti gli agenti insieme: 24 € + IVA al mese, 19 € in PREMIUM"] },
+  agenti: { titolo:"Agenti AI add-on", icon:"fa-wand-magic-sparkles", da:"advance", punti:["Merlino: numeri, conti e strategia (incluso in PREMIUM)","Hammer, Ares e Galeno: mascalcia, allenamento, salute","Prezzi in arrivo"] },
 };
 const PK_CONFRONTO = [
   ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Clienti", "20", "50", "200"], ["Maniscalchi collegati", "1", "3", "illimitati"], ["Veterinari collegati", "1", "3", "illimitati"],

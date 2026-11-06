@@ -1,11 +1,11 @@
 
 (function(){
- var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["incassi","fa-euro-sign","Incassi"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
+ var VOCI=[["centro","fa-house-chimney","Il tuo Centro"],["clienti","fa-address-book","Clienti"],["incassi","fa-euro-sign","Incassi"],["magazzino","fa-boxes-stacked","Magazzino"],["statistiche","fa-chart-line","Statistiche"],["professionisti","fa-user-doctor","Professionisti"],["groom","fa-id-badge","Groom"],["ai","fa-wand-magic-sparkles","Agenti AI","SOON"],["store","fa-store","Store","SOON"],["fatturazione","fa-file-invoice","SDI","SOON"]];
  window.scPiu=function(forza){
   var m=document.getElementById("sc-menu"),v=document.getElementById("sc-velo"),b=document.getElementById("sc-piu");
   var apri=typeof forza==="boolean"?forza:!m.classList.contains("aperto");
   if(apri){
-   m.innerHTML=VOCI.filter(function(x){return x[0]!=="clienti"||(typeof puoVedereClienti==="function"&&puoVedereClienti());}).filter(function(x){return typeof scModuloOk!=="function"||["store","fatturazione"].indexOf(x[0])>=0||scModuloOk(x[0]);}).map(function(x){
+   m.innerHTML=VOCI.filter(function(x){return x[0]!=="clienti"||(typeof puoVedereClienti==="function"&&puoVedereClienti());}).filter(function(x){return typeof scModuloOk!=="function"||["store","fatturazione","ai"].indexOf(x[0])>=0||scModuloOk(x[0]);}).map(function(x){
     return '<button onclick="scPiu(false);showModule(\''+x[0]+'\')"><i class="fa-solid '+x[1]+'"></i>'+x[2]+(x[3]?'<small>'+x[3]+'</small>':'')+'</button>';}).join("");
   }
   m.classList.toggle("aperto",apri);v.classList.toggle("aperto",apri);b.classList.toggle("aperto",apri);
@@ -27,6 +27,7 @@
  // pagina Agenti AI: icone nuove
  var oldR=window.renderModuloAgenti;
  window.renderModuloAgenti=function(){
+  return; // pagina Agenti AI in SOON (prezzi da rivedere): resta la pagina «in arrivo»
   oldR.apply(this,arguments);
   var img={athena:"athena",merlino:"merlino",ermes:"ermes",galeno:"galeno",hammer:"hammer",ares:"ares"};
   document.querySelectorAll("#module-ai .ag-card").forEach(function(c){
