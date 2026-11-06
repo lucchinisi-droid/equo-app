@@ -14031,10 +14031,11 @@ async function incCarica(){
   if(!INC.dati.impostazioni.asd_attiva) INC.cassa = "scuderia";
 }
 async function incCaricaAsd(){
-  if(DEMO_MODE){ INC.asd = incDemoAsd(); return; }
+  if(DEMO_MODE){ INC.asd = incDemoAsd(); await incCaricaAsdFull(); return; }
   const { data, error } = await sb.rpc("asd_dati", { p_centro: currentCentro.id });
   if(error || !data || data.errore){ console.error("asd_dati:", error || data); INC.asd = { tesseramenti: [], certificati: [], gare: [] }; return; }
   INC.asd = data;
+  await incCaricaAsdFull();
 }
 async function incAggiorna(){ await incCarica(); if(INC.tab === "asd") await incCaricaAsd(); incRender(); }
 function incCambiaMese(d){
@@ -14045,8 +14046,7 @@ function incCambiaMese(d){
   incAggiorna();
 }
 function incTabbarHtml(attiva){
-  const asd = !!(INC.dati?.impostazioni?.asd_attiva) || DEMO_MODE;
-  return INC_TABS.filter(t => t[0] !== "asd" || asd)
+  return INC_TABS
     .map(t => `<button class="${t[0] === attiva ? "active" : ""}" onclick="incVai('${t[0]}')"><i class="fa-solid ${t[1]}"></i>${t[2]}</button>`).join("");
 }
 async function incVai(tab){
@@ -14158,7 +14158,8 @@ function incRenderPagamenti(){
     <div class="card">${lista.length ? lista.map(p => `<div class="inc-riga"><div class="t"><b>${escapeHtml(incNomeCliente(p.membro_id))}</b>
         <small>${incData(p.data)} · ${INC_METODI[p.metodo] || p.metodo} · ${escapeHtml(p.per || "")}${p.note ? " · " + escapeHtml(p.note) : ""}</small></div>
         <div class="n">${incEuro(p.importo)}</div>
-        <div class="a"><button class="btn btn-ghost btn-sm" title="Elimina" onclick="incEliminaPagamento('${p.id}', this)"><i class="fa-solid fa-trash"></i></button></div></div>`).join("")
+        <div class="a">${p.cassa === "asd" ? `<button class="btn btn-outline btn-sm" onclick="asdRicevuta('${p.id}', this)"><i class="fa-solid fa-receipt"></i> ${p.ricevuta ? escapeHtml(p.ricevuta) : "Ricevuta"}</button>` : ""}
+          ${p.ricevuta ? "" : `<button class="btn btn-ghost btn-sm" title="Elimina" onclick="incEliminaPagamento('${p.id}', this)"><i class="fa-solid fa-trash"></i></button>`}</div></div>`).join("")
       : '<div class="inc-vuoto">Nessun incasso registrato in questo mese.</div>'}</div>`;
 }
 
@@ -14204,9 +14205,20 @@ function incScadenzaChip(iso){
   return `<span class="inc-chip ok">fino al ${incData(iso)}</span>`;
 }
 function incRenderAsd(){
+  if(!INC.dati.impostazioni.asd_attiva) return `<div class="card" style="max-width:620px">
+      <div class="inc-sez" style="margin-top:0"><span><i class="fa-solid fa-medal"></i> Gestione ASD</span></div>
+      <p style="font-size:14px;line-height:1.55;margin:0 0 10px">Se il centro ha anche un'associazione sportiva dilettantistica, qui la gestisci con una <b>cassa separata</b> da quella della scuderia:</p>
+      <ul style="font-size:13.5px;line-height:1.7;margin:0 0 14px;padding-left:20px">
+        <li>certificati medici (agonistici e non) con le scadenze a semaforo;</li>
+        <li>tesseramenti FISE, ASI, CSEN… con numero, scadenza e quota;</li>
+        <li>gare: iscritti con cavallo, categoria, iscrizione e box;</li>
+        <li>spese di trasferta divise da sole fra gli iscritti;</li>
+        <li>quote e iscrizioni diventano addebiti dell'ASD, con conti e pagamenti separati.</li></ul>
+      <div class="field"><label>Nome dell'ASD</label><input class="input" id="inc-asd-nome-att" placeholder="Es. ASD Julius Cesar"></div>
+      <button class="btn btn-primary" onclick="incAttivaAsd(this)"><i class="fa-solid fa-check"></i> Attiva l'ASD</button></div>`;
   const a = INC.asd || { tesseramenti: [], certificati: [], gare: [] };
   const certScaduti = a.certificati.filter(c => new Date(c.scadenza + "T23:59:59") < new Date()).length;
-  return `<p class="inc-nota">Quote, iscrizioni e trasferte diventano addebiti della cassa «${escapeHtml(incCassaNome("asd"))}».${certScaduti ? ` <b style="color:var(--danger)">${certScaduti} certificati medici scaduti.</b>` : ""}</p>
+  return `<div class="inc-sez" style="margin-top:0">Gestione ASD Basic</div><p class="inc-nota">Quote, iscrizioni e trasferte diventano addebiti della cassa «${escapeHtml(incCassaNome("asd"))}».${certScaduti ? ` <b style="color:var(--danger)">${certScaduti} certificati medici scaduti.</b>` : ""}</p>
     <div class="inc-sez">Certificati medici <button class="btn btn-primary btn-sm" onclick="incApriCertificato()"><i class="fa-solid fa-plus"></i> Certificato</button></div>
     <div class="card">${a.certificati.length ? a.certificati.map(c => `<div class="inc-riga"><div class="t"><b>${escapeHtml(c.nome)}</b>
         <small>${c.tipo === "agonistico" ? "Agonistico" : "Non agonistico"}${c.medico ? " · " + escapeHtml(c.medico) : ""} ${incScadenzaChip(c.scadenza)}</small></div>
@@ -14232,7 +14244,21 @@ function incRenderAsd(){
         ${g.spese.length ? `<div style="font-size:12.5px;color:var(--muted);margin-top:8px">Trasferta: ${g.spese.map(s => `${escapeHtml(s.descrizione)} ${incEuro(s.importo)} <a href="#" onclick="event.preventDefault();incAsdElimina('scuderia_gare_spese','${s.id}', this)" title="Togli">✕</a>`).join(" · ")}
           = <b style="color:var(--text)">${incEuro(spese)}</b>${persone ? `, ${incEuro(spese / persone)} a testa (${persone} ${persone === 1 ? "persona" : "persone"})` : ""}</div>` : ""}
       </div>`;
-    }).join("") : '<div class="card inc-vuoto">Nessuna gara. Aggiungi la gara, poi gli iscritti con cavallo e quota; le spese di trasferta si dividono da sole fra gli iscritti.</div>'}`;
+    }).join("") : '<div class="card inc-vuoto">Nessuna gara. Aggiungi la gara, poi gli iscritti con cavallo e quota; le spese di trasferta si dividono da sole fra gli iscritti.</div>'}`
+    + incRenderAsdFull();
+}
+
+async function incAttivaAsd(btn){
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  const nome = incVal("inc-asd-nome-att");
+  if(!nome){ showToast("Scrivi il nome dell'ASD."); return; }
+  btn.disabled = true;
+  const s = INC.dati.impostazioni;
+  const r = await incRpc("incassi_impostazioni", { p_centro: currentCentro.id, p_asd_attiva: true, p_asd_nome: nome, p_lezioni_addebito: s.lezioni_addebito || "nessuno", p_cassa_lezioni: s.cassa_lezioni || "scuderia" });
+  btn.disabled = false;
+  if(r.errore){ showToast(r.errore); return; }
+  showToast("ASD attivata: ora ha la sua cassa.");
+  await incCarica(); await incCaricaAsd(); incRender();
 }
 
 /* ---------- finestra generica ---------- */
@@ -14693,6 +14719,308 @@ function incDemoAsd(){
       spese: [{ id: "ds1", descrizione: "Van e gasolio", importo: 140 }, { id: "ds2", descrizione: "Autostrada", importo: 22 }] }]
   };
 }
+
+/* ---------- Gestione ASD Full (PREMIUM · SQL 45) ----------
+   Dati dell'ASD, libro soci, quota associativa annuale, ricevute numerate dei pagamenti ASD,
+   uscite e rendiconto semplificato dell'anno, scadenzario. In ADVANCE si vede con il lucchetto. */
+const ASD_QUALIFICHE = { ordinario: "Socio ordinario", fondatore: "Socio fondatore", onorario: "Socio onorario", atleta: "Atleta", dirigente: "Dirigente", istruttore: "Istruttore / tecnico" };
+const ASD_USCITE = { affiliazione: "Affiliazione", tesseramenti: "Tesseramenti versati", gare: "Gare e iscrizioni", istruttori: "Istruttori e compensi sportivi", impianti: "Impianti e affitti",
+  attrezzature: "Attrezzature", assicurazione: "Assicurazione", utenze: "Utenze", trasferte: "Trasferte", altro: "Altro" };
+const ASD_ENTRATE = { quota: "Quote associative", tesseramento: "Tesseramenti", gara: "Iscrizioni alle gare", trasferta: "Rimborsi trasferte", lezione: "Corsi e lezioni",
+  pacchetto: "Corsi e lezioni (pacchetti)", manuale: "Altre entrate", retta: "Altre entrate" };
+const asdFullOk = () => DEMO_MODE || !pianoCentro || pianoCentro.asd_full !== false;
+const asdAnno = () => Number((INC.mese || incOggi()).slice(0, 4));
+
+async function incCaricaAsdFull(){
+  if(!asdFullOk()){ INC.full = null; return; }
+  if(DEMO_MODE){ INC.full = asdDemoFull(); return; }
+  const { data, error } = await sb.rpc("asd_full_dati", { p_centro: currentCentro.id, p_anno: asdAnno() });
+  if(error || !data || data.errore){ console.warn("asd_full_dati:", error || data); INC.full = null; return; }
+  INC.full = data;
+}
+
+function incRenderAsdFull(){
+  const premium = '<span class="inc-chip" style="background:#1d4a35;color:#fff">PREMIUM</span>';
+  if(!asdFullOk()) return `<div class="inc-sez" style="margin-top:26px">Gestione ASD Full ${premium}</div>
+    <div class="card"><p style="margin:0 0 8px;font-size:14px">Nel tuo pacchetto c'è la <b>Gestione ASD Basic</b>. Con PREMIUM hai anche:</p>
+      <ul style="font-size:13.5px;line-height:1.7;margin:0 0 12px;padding-left:20px"><li>libro soci con numero, qualifica, ammissione e cessazione (PDF);</li>
+        <li>quota associativa annuale per tutti i soci e chi deve ancora rinnovare;</li><li>ricevute numerate per i pagamenti dell'ASD;</li>
+        <li>uscite e rendiconto dell'anno (PDF e CSV);</li><li>scadenzario: affiliazione, tesseramenti, assemblea, RASD, assicurazione.</li></ul>
+      <button class="btn btn-primary btn-sm" onclick="apriUpsell('asd_full')"><i class="fa-solid fa-lock"></i> Passa a PREMIUM</button></div>`;
+  const f = INC.full;
+  if(!f) return '<div class="card inc-vuoto" style="margin-top:20px">Non riesco a caricare la Gestione ASD Full. Riprova tra poco.</div>';
+  const d = f.dati || {}, soci = f.soci || [], attivi = soci.filter(s => !s.cessato_il);
+  const annoSoc = d.mese_inizio > 1 ? `${d.anno_sociale}/${Number(d.anno_sociale) + 1}` : String(d.anno_sociale);
+  const nonPagate = attivi.filter(s => !s.quota || Number(s.quota.pagato) < Number(s.quota.importo)).length;
+  const quotaChip = s => !s.quota ? '<span class="inc-chip">quota non generata</span>' : incStatoChip(s.quota.importo, s.quota.pagato).replace("da pagare", "quota da pagare").replace(">pagato<", ">quota pagata<");
+  const certChip = s => s.certificato ? incScadenzaChip(s.certificato).replace("fino al", "cert. fino al").replace("scade il", "cert. scade il").replace("scaduto il", "cert. scaduto il") : '<span class="inc-chip no">senza certificato</span>';
+  const r = f.rendiconto || { entrate: {}, uscite: {} };
+  const entrate = {}; Object.entries(r.entrate || {}).forEach(([k, v]) => { const l = ASD_ENTRATE[k] || "Altre entrate"; entrate[l] = (entrate[l] || 0) + Number(v); });
+  const totE = Object.values(entrate).reduce((t, v) => t + v, 0), totU = Object.values(r.uscite || {}).reduce((t, v) => t + Number(v), 0);
+  const riga = (l, v) => `<div class="inc-riga" style="padding:7px 0"><div class="t">${escapeHtml(l)}</div><div class="n">${incEuro(v)}</div></div>`;
+  return `<div class="inc-sez" style="margin-top:26px">Gestione ASD Full ${premium}</div>
+    <div class="card">
+      <div class="inc-riga" style="padding-top:0"><div class="t"><b>${escapeHtml(d.nome || "ASD")}</b>
+        <small>${d.cf ? "C.F. " + escapeHtml(d.cf) : '<span style="color:var(--danger)">codice fiscale mancante</span>'}${d.rasd ? " · RASD " + escapeHtml(d.rasd) : ""}${d.affiliazioni ? " · " + escapeHtml(d.affiliazioni) : ""}${d.sede ? "<br>" + escapeHtml(d.sede) : ""}<br>
+        Quota associativa ${d.quota ? incEuro(d.quota) : "non impostata"} · anno sociale da ${INC_MESI[(d.mese_inizio || 1) - 1]}</small></div>
+        <div class="a"><button class="btn btn-outline btn-sm" onclick="asdApriDati()"><i class="fa-solid fa-pen"></i> Dati dell'ASD</button></div></div></div>
+
+    <div class="inc-sez">Libro soci · ${attivi.length} ${attivi.length === 1 ? "socio" : "soci"}
+      <span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="asdPdfLibroSoci()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-outline btn-sm" onclick="asdGeneraQuote(this)"><i class="fa-solid fa-wand-magic-sparkles"></i> Quote ${escapeHtml(annoSoc)}</button>
+        <button class="btn btn-primary btn-sm" onclick="asdApriSocio()"><i class="fa-solid fa-user-plus"></i> Socio</button></span></div>
+    ${attivi.length && nonPagate ? `<p class="inc-nota"><b style="color:var(--danger)">${nonPagate} ${nonPagate === 1 ? "socio deve" : "soci devono"} ancora pagare la quota ${escapeHtml(annoSoc)}.</b> «Quote ${escapeHtml(annoSoc)}» la addebita a chi non l'ha ancora.</p>` : ""}
+    <div class="card">${soci.length ? soci.map(s => `<div class="inc-riga"${s.cessato_il ? ' style="opacity:.55"' : ""}><div class="t"><b>n. ${s.numero} · ${escapeHtml(s.nome)}</b>
+        <small>${ASD_QUALIFICHE[s.qualifica] || s.qualifica} · ammesso il ${incData(s.ammesso_il)}${s.cessato_il ? ` · cessato il ${incData(s.cessato_il)}${s.motivo ? " (" + escapeHtml(s.motivo) + ")" : ""}` : ` ${quotaChip(s)} ${certChip(s)}`}</small></div>
+        <div class="a">${s.cessato_il ? "" : `<button class="btn btn-ghost btn-sm" onclick="asdCessaSocio('${s.id}')">Cessa</button>`}</div></div>`).join("")
+      : '<div class="inc-vuoto">Nessun socio nel libro. Aggiungi i soci dai clienti del centro: il numero si assegna da solo.</div>'}</div>
+
+    <div class="inc-sez">Rendiconto ${r.anno || asdAnno()}
+      <span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="asdPdfRendiconto()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-outline btn-sm" onclick="asdCsvRendiconto()"><i class="fa-solid fa-file-csv"></i> CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="asdApriUscita()"><i class="fa-solid fa-plus"></i> Uscita</button></span></div>
+    <div class="grid grid-2" style="gap:12px">
+      <div class="card"><div style="font-weight:800;margin-bottom:4px">Entrate incassate</div>${Object.entries(entrate).map(([l, v]) => riga(l, v)).join("") || '<div class="inc-vuoto">Nessuna.</div>'}
+        <div class="inc-riga" style="padding:8px 0 0"><div class="t"><b>Totale</b></div><div class="n">${incEuro(totE)}</div></div>
+        ${Number(r.da_incassare) > 0 ? `<p class="inc-nota" style="margin:6px 0 0">Ancora da incassare per l'anno: ${incEuro(r.da_incassare)}</p>` : ""}</div>
+      <div class="card"><div style="font-weight:800;margin-bottom:4px">Uscite</div>${Object.entries(r.uscite || {}).map(([k, v]) => riga(ASD_USCITE[k] || k, v)).join("") || '<div class="inc-vuoto">Nessuna.</div>'}
+        <div class="inc-riga" style="padding:8px 0 0"><div class="t"><b>Totale</b></div><div class="n">${incEuro(totU)}</div></div></div></div>
+    <div class="card" style="margin-top:12px"><div class="inc-riga" style="padding:0"><div class="t"><b>${totE - totU >= 0 ? "Avanzo" : "Disavanzo"} ${r.anno || asdAnno()}</b><small>rendiconto semplificato per cassa: quello ufficiale lo approva l'assemblea con il commercialista</small></div>
+      <div class="n" style="color:${totE - totU >= 0 ? "#2f8a4e" : "var(--danger)"}">${incEuro(totE - totU)}</div></div></div>
+    ${(f.uscite || []).length ? `<div class="card" style="margin-top:12px"><div style="font-weight:800;margin-bottom:4px">Uscite registrate</div>${f.uscite.map(u => `<div class="inc-riga"><div class="t"><b>${escapeHtml(u.descrizione)}</b>
+        <small>${incData(u.data)} · ${ASD_USCITE[u.categoria] || u.categoria} · ${INC_METODI[u.metodo] || u.metodo}</small></div><div class="n">${incEuro(u.importo)}</div>
+        <div class="a"><button class="btn btn-ghost btn-sm" title="Elimina" onclick="incAsdElimina('scuderia_asd_uscite','${u.id}', this)"><i class="fa-solid fa-trash"></i></button></div></div>`).join("")}</div>` : ""}
+    <p class="inc-nota" style="margin-top:8px">Le trasferte delle gare entrano da sole fra le uscite.</p>
+
+    <div class="inc-sez">Scadenzario
+      <span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="asdScadenzeTipiche(this)">Aggiungi le scadenze tipiche</button>
+        <button class="btn btn-primary btn-sm" onclick="asdApriScadenza()"><i class="fa-solid fa-plus"></i> Scadenza</button></span></div>
+    <div class="card">${(f.scadenze || []).length ? f.scadenze.map(x => `<div class="inc-riga"${x.fatto_il ? ' style="opacity:.55"' : ""}><div class="t"><b>${escapeHtml(x.titolo)}</b>
+        <small>${x.fatto_il ? "fatto il " + incData(x.fatto_il) : x.data ? incScadenzaChip(x.data) : '<span class="inc-chip parz">imposta la data</span>'}${x.note ? " · " + escapeHtml(x.note) : ""}</small></div>
+        <div class="a">${x.fatto_il ? "" : `<button class="btn btn-outline btn-sm" onclick="asdApriScadenza('${x.id}')">Data</button><button class="btn btn-primary btn-sm" onclick="asdScadenzaFatta('${x.id}', this)">Fatto</button>`}
+          <button class="btn btn-ghost btn-sm" title="Elimina" onclick="incAsdElimina('scuderia_asd_scadenze','${x.id}', this)"><i class="fa-solid fa-trash"></i></button></div></div>`).join("")
+      : '<div class="inc-vuoto">Nessuna scadenza. «Aggiungi le scadenze tipiche» mette quelle di ogni anno: tu inserisci le date.</div>'}</div>`;
+}
+
+function asdApriDati(){
+  const d = INC.full?.dati || {};
+  incFinestra("Dati dell'ASD", `
+    <div class="inc-form-2">
+      <div class="field"><label>Codice fiscale</label><input class="input" id="asd-d-cf" maxlength="16" value="${escapeHtml(d.cf || "")}" style="text-transform:uppercase"></div>
+      <div class="field"><label>Numero RASD</label><input class="input" id="asd-d-rasd" maxlength="40" value="${escapeHtml(d.rasd || "")}"></div></div>
+    <div class="field"><label>Sede legale</label><input class="input" id="asd-d-sede" maxlength="160" value="${escapeHtml(d.sede || "")}"></div>
+    <div class="field"><label>Affiliazioni</label><input class="input" id="asd-d-aff" maxlength="120" value="${escapeHtml(d.affiliazioni || "")}" placeholder="Es. FISE, CSEN"></div>
+    <div class="inc-form-2">
+      <div class="field"><label>Quota associativa annuale €</label><input class="input" id="asd-d-quota" inputmode="decimal" value="${d.quota != null ? String(d.quota).replace(".", ",") : ""}"></div>
+      <div class="field"><label>L'anno sociale inizia a</label><select class="input" id="asd-d-mese">${INC_MESI.map((m, i) => `<option value="${i + 1}"${(d.mese_inizio || 1) === i + 1 ? " selected" : ""}>${m}</option>`).join("")}</select></div></div>
+    <p class="inc-nota">Questi dati compaiono sulle ricevute e sul libro soci.</p>`,
+    "Salva", async () => {
+      const r = await incRpc("asd_salva_dati", { p_centro: currentCentro.id, p_cf: incVal("asd-d-cf"), p_sede: incVal("asd-d-sede"), p_rasd: incVal("asd-d-rasd"),
+        p_affiliazioni: incVal("asd-d-aff"), p_quota: incNum(incVal("asd-d-quota")), p_mese: Number(incVal("asd-d-mese")) || 1 });
+      return r.errore ? r : { toast: "Dati dell'ASD salvati." };
+    });
+}
+function asdApriSocio(){
+  const giaSoci = new Set((INC.full?.soci || []).map(s => s.membro_id));
+  const opz = (INC.dati?.clienti || []).filter(c => !giaSoci.has(c.id)).map(c => `<option value="${c.id}">${escapeHtml(c.nome || "")}</option>`).join("");
+  incFinestra("Nuovo socio", `
+    <div class="field"><label>Persona</label><select class="input" id="asd-s-membro"><option value="">— scegli —</option>${opz}</select>
+      <p class="inc-nota" style="margin-top:6px">Se non c'è, aggiungila prima nella sezione Clienti.</p></div>
+    <div class="inc-form-2">
+      <div class="field"><label>Qualifica</label><select class="input" id="asd-s-qual">${Object.entries(ASD_QUALIFICHE).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div>
+      <div class="field"><label>Ammesso il</label><input class="input" type="date" id="asd-s-amm" value="${incOggi()}"></div></div>`,
+    "Aggiungi al libro", async () => {
+      const r = { centro_id: currentCentro.id, membro_id: incVal("asd-s-membro"), qualifica: incVal("asd-s-qual"), ammesso_il: incVal("asd-s-amm") || incOggi() };
+      if(!r.membro_id) return { errore: "Scegli la persona." };
+      const { data, error } = await sb.from("scuderia_asd_soci").insert(r).select("numero").single();
+      return error ? { errore: /duplicate|unique/i.test(error.message) ? "È già nel libro soci." : error.message } : { toast: "Socio n. " + data.numero + " aggiunto al libro." };
+    });
+}
+function asdCessaSocio(id){
+  const s = (INC.full?.soci || []).find(x => x.id === id) || {};
+  incFinestra("Cessazione · n. " + s.numero + " " + (s.nome || ""), `
+    <div class="field"><label>Cessato il</label><input class="input" type="date" id="asd-c-data" value="${incOggi()}"></div>
+    <div class="field"><label>Motivo</label><select class="input" id="asd-c-mot"><option>Recesso</option><option>Mancato rinnovo della quota</option><option>Esclusione</option><option>Decesso</option><option>Altro</option></select></div>
+    <p class="inc-nota">Il socio resta nel libro con la data di cessazione: il libro soci non si cancella.</p>`,
+    "Registra", async () => {
+      const { error } = await sb.from("scuderia_asd_soci").update({ cessato_il: incVal("asd-c-data") || incOggi(), motivo_cessazione: incVal("asd-c-mot") }).eq("id", id);
+      return error ? { errore: error.message } : { toast: "Cessazione registrata." };
+    });
+}
+async function asdGeneraQuote(btn){
+  if(DEMO_MODE){ showToast("In demo le quote non si generano."); return; }
+  const d = INC.full?.dati || {};
+  if(!d.quota){ showToast("Imposta prima la quota associativa nei «Dati dell'ASD»."); asdApriDati(); return; }
+  btn.disabled = true;
+  const r = await incRpc("asd_genera_quote", { p_centro: currentCentro.id, p_anno: Number(d.anno_sociale) });
+  btn.disabled = false;
+  if(r.errore){ showToast(r.errore); return; }
+  showToast(r.quote ? `Quote ${r.anno}: ${r.quote} ${r.quote === 1 ? "addebitata" : "addebitate"} ai soci.` : `Le quote ${r.anno} erano già state addebitate a tutti i soci attivi.`);
+  incAggiorna();
+}
+function asdApriUscita(){
+  incFinestra("Uscita dell'ASD", `
+    <div class="field"><label>Descrizione</label><input class="input" id="asd-u-descr" maxlength="120" placeholder="Es. Affiliazione FISE 2027"></div>
+    <div class="inc-form-2">
+      <div class="field"><label>Importo €</label><input class="input" id="asd-u-imp" inputmode="decimal"></div>
+      <div class="field"><label>Data</label><input class="input" type="date" id="asd-u-data" value="${incOggi()}"></div>
+      <div class="field"><label>Categoria</label><select class="input" id="asd-u-cat">${Object.entries(ASD_USCITE).filter(([k]) => k !== "trasferte").map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div>
+      <div class="field"><label>Pagata con</label><select class="input" id="asd-u-met">${Object.entries(INC_METODI).map(([k, v]) => `<option value="${k}"${k === "bonifico" ? " selected" : ""}>${v}</option>`).join("")}</select></div></div>`,
+    "Registra", async () => {
+      const r = { centro_id: currentCentro.id, descrizione: incVal("asd-u-descr"), importo: incNum(incVal("asd-u-imp")), data: incVal("asd-u-data") || incOggi(), categoria: incVal("asd-u-cat"), metodo: incVal("asd-u-met") };
+      if(!r.descrizione) return { errore: "Scrivi la descrizione." };
+      if(!r.importo || r.importo <= 0) return { errore: "Scrivi l'importo." };
+      const { error } = await sb.from("scuderia_asd_uscite").insert(r);
+      return error ? { errore: error.message } : { toast: "Uscita registrata." };
+    });
+}
+function asdApriScadenza(id){
+  const x = id ? (INC.full?.scadenze || []).find(s => s.id === id) || {} : {};
+  incFinestra(id ? x.titolo : "Nuova scadenza", `
+    ${id ? "" : '<div class="field"><label>Cosa</label><input class="input" id="asd-x-tit" maxlength="120" placeholder="Es. Rinnovo affiliazione FISE"></div>'}
+    <div class="field"><label>Entro il</label><input class="input" type="date" id="asd-x-data" value="${x.data || ""}"></div>
+    <div class="field"><label>Nota <span style="text-transform:none;font-weight:400">(facoltativa)</span></label><input class="input" id="asd-x-note" maxlength="200" value="${escapeHtml(x.note || "")}"></div>`,
+    "Salva", async () => {
+      const r = { data: incVal("asd-x-data") || null, note: incVal("asd-x-note") || null };
+      let q;
+      if(id) q = sb.from("scuderia_asd_scadenze").update(r).eq("id", id);
+      else { r.titolo = incVal("asd-x-tit"); r.centro_id = currentCentro.id; if(!r.titolo) return { errore: "Scrivi la scadenza." }; q = sb.from("scuderia_asd_scadenze").insert(r); }
+      const { error } = await q;
+      return error ? { errore: error.message } : { toast: "Scadenza salvata." };
+    });
+}
+async function asdScadenzaFatta(id, btn){
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  btn.disabled = true;
+  const { error } = await sb.from("scuderia_asd_scadenze").update({ fatto_il: incOggi() }).eq("id", id);
+  btn.disabled = false;
+  if(error){ showToast(error.message); return; }
+  showToast("Segnata come fatta."); incAggiorna();
+}
+async function asdScadenzeTipiche(btn){
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  btn.disabled = true;
+  const r = await incRpc("asd_scadenze_tipiche", { p_centro: currentCentro.id });
+  btn.disabled = false;
+  showToast(r.errore || (r.aggiunte ? `Aggiunte ${r.aggiunte} scadenze: inserisci le date.` : "Erano già tutte in elenco."));
+  if(!r.errore) incAggiorna();
+}
+
+/* ricevuta di un pagamento della cassa ASD */
+async function asdRicevuta(pagamentoId, btn){
+  if(!asdFullOk()){ apriUpsell("asd_full"); return; }
+  let r;
+  if(DEMO_MODE){ const p = (INC.dati.pagamenti || []).find(x => x.id === pagamentoId) || {};
+    r = { ok: true, numero: "R-" + asdAnno() + "-001", data: p.data, importo: p.importo, metodo: p.metodo, causale: p.per, socio: incNomeCliente(p.membro_id), socio_numero: 1,
+          asd: { nome: INC.dati.impostazioni.asd_nome, cf: "90012345678", sede: "Via dei Cavalli 1, Roma", rasd: "123456" } }; }
+  else {
+    if(btn) btn.disabled = true;
+    r = await incRpc("asd_ricevuta", { p_pagamento: pagamentoId });
+    if(btn) btn.disabled = false;
+    if(r.errore){ showToast(r.errore); return; }
+  }
+  if(!window.jspdf){ showToast("Generatore PDF non disponibile, riprova."); return; }
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a5", orientation: "landscape" });
+  let y = 16;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(r.asd?.nome || "ASD", 12, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100);
+  const dati = [r.asd?.sede, r.asd?.cf ? "C.F. " + r.asd.cf : "", r.asd?.rasd ? "RASD n. " + r.asd.rasd : ""].filter(Boolean).join(" · ");
+  if(dati){ y += 5; doc.text(dati, 12, y); }
+  doc.setTextColor(0); y += 12;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(12.5); doc.text(`Ricevuta n. ${r.numero}`, 12, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.text(`del ${incData(r.data)}`, 198, y, { align: "right" });
+  y += 10;
+  const righe = [["Ricevuto da", (r.socio || "") + (r.socio_numero ? `  (socio n. ${r.socio_numero})` : "")], ["Importo", incEuro(r.importo)],
+    ["Causale", r.causale || ""], ["Pagato con", INC_METODI[r.metodo] || r.metodo || ""]];
+  righe.forEach(([k, v]) => { doc.setFont("helvetica", "bold"); doc.text(k, 12, y); doc.setFont("helvetica", "normal"); doc.text(doc.splitTextToSize(String(v), 140), 52, y); y += 8; });
+  y += 6; doc.text("Firma per l'associazione ____________________________", 12, y);
+  doc.setFontSize(7.5); doc.setTextColor(120);
+  doc.text("Se l'importo supera 77,47 € e non è pagato con strumento tracciabile, sull'originale va applicata la marca da bollo da 2 €. Verificare il regime con il commercialista.", 12, 140, { maxWidth: 186 });
+  doc.save(`Ricevuta_${r.numero}.pdf`);
+  if(!DEMO_MODE) incAggiorna();
+}
+
+/* PDF del libro soci */
+function asdPdfLibroSoci(){
+  const f = INC.full; if(!f) return;
+  if(!window.jspdf){ showToast("Generatore PDF non disponibile, riprova."); return; }
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+  let y = 16;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text("Libro soci · " + (f.dati?.nome || "ASD"), 12, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100);
+  y += 5; doc.text([f.dati?.cf ? "C.F. " + f.dati.cf : "", f.dati?.rasd ? "RASD n. " + f.dati.rasd : "", "aggiornato al " + incData(incOggi())].filter(Boolean).join(" · "), 12, y);
+  doc.setTextColor(0); y += 10;
+  const col = [12, 30, 115, 170, 205, 240];
+  const intest = ["N.", "Cognome e nome", "Qualifica", "Ammesso il", "Cessato il", "Motivo"];
+  doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); intest.forEach((t, i) => doc.text(t, col[i], y));
+  y += 2; doc.setDrawColor(190); doc.line(12, y, 285, y); y += 5; doc.setFont("helvetica", "normal");
+  (f.soci || []).forEach(s => {
+    [String(s.numero), s.nome || "", ASD_QUALIFICHE[s.qualifica] || s.qualifica, incData(s.ammesso_il), s.cessato_il ? incData(s.cessato_il) : "", s.motivo || ""]
+      .forEach((t, i) => doc.text(doc.splitTextToSize(t, (col[i + 1] || 285) - col[i] - 2)[0] || "", col[i], y));
+    y += 6.5;
+    if(y > 195){ doc.addPage(); y = 16; }
+  });
+  doc.save(`Libro_soci_${incOggi()}.pdf`);
+}
+
+/* rendiconto dell'anno: PDF e CSV */
+function asdVociRendiconto(){
+  const r = INC.full?.rendiconto || { entrate: {}, uscite: {} };
+  const e = {}; Object.entries(r.entrate || {}).forEach(([k, v]) => { const l = ASD_ENTRATE[k] || "Altre entrate"; e[l] = (e[l] || 0) + Number(v); });
+  const u = Object.entries(r.uscite || {}).map(([k, v]) => [ASD_USCITE[k] || k, Number(v)]);
+  return { anno: r.anno || asdAnno(), entrate: Object.entries(e), uscite: u, totE: Object.values(e).reduce((t, v) => t + v, 0), totU: u.reduce((t, x) => t + x[1], 0), daInc: Number(r.da_incassare) || 0 };
+}
+function asdPdfRendiconto(){
+  if(!window.jspdf){ showToast("Generatore PDF non disponibile, riprova."); return; }
+  const v = asdVociRendiconto(), d = INC.full?.dati || {};
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  let y = 18;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.text(`Rendiconto ${v.anno} · ${d.nome || "ASD"}`, 15, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100); y += 5;
+  doc.text([d.cf ? "C.F. " + d.cf : "", d.rasd ? "RASD n. " + d.rasd : "", "rendiconto semplificato per cassa"].filter(Boolean).join(" · "), 15, y);
+  doc.setTextColor(0); y += 12;
+  const blocco = (titolo, voci, tot) => {
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); doc.text(titolo, 15, y); y += 7; doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    if(!voci.length){ doc.text("—", 15, y); y += 6; }
+    voci.forEach(([l, n]) => { doc.text(l, 15, y); doc.text(incEuro(n), 195, y, { align: "right" }); y += 6; });
+    doc.line(15, y - 3, 195, y - 3); doc.setFont("helvetica", "bold"); doc.text("Totale", 15, y + 1); doc.text(incEuro(tot), 195, y + 1, { align: "right" }); y += 12;
+  };
+  doc.setDrawColor(200);
+  blocco("Entrate incassate", v.entrate, v.totE);
+  blocco("Uscite", v.uscite, v.totU);
+  doc.setFontSize(12); doc.text(v.totE - v.totU >= 0 ? "Avanzo" : "Disavanzo", 15, y); doc.text(incEuro(v.totE - v.totU), 195, y, { align: "right" });
+  if(v.daInc > 0){ y += 8; doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.text("Ancora da incassare per l'anno: " + incEuro(v.daInc), 15, y); }
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(120);
+  doc.text("Documento di lavoro generato con Equo Scuderia: il rendiconto ufficiale è quello approvato dall'assemblea, predisposto con il commercialista.", 15, 285, { maxWidth: 180 });
+  doc.save(`Rendiconto_${v.anno}.pdf`);
+}
+function asdCsvRendiconto(){
+  const v = asdVociRendiconto();
+  const righe = [["Tipo", "Voce", "Importo"]].concat(v.entrate.map(([l, n]) => ["Entrata", l, n]), v.uscite.map(([l, n]) => ["Uscita", l, n]),
+    [["", "Totale entrate", v.totE], ["", "Totale uscite", v.totU], ["", v.totE - v.totU >= 0 ? "Avanzo" : "Disavanzo", v.totE - v.totU]]);
+  const csv = "﻿" + righe.map(r => r.map(x => `"${typeof x === "number" ? x.toFixed(2).replace(".", ",") : String(x).replace(/"/g, '""')}"`).join(";")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = `Rendiconto_${v.anno}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+function asdDemoFull(){
+  const cl = (INC.dati?.clienti || []).filter(c => ["allievo", "proprietario"].includes(c.ruolo));
+  const tra = n => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  const anno = new Date().getMonth() >= 8 ? new Date().getFullYear() : new Date().getFullYear() - 1;
+  return {
+    dati: { nome: INC.dati?.impostazioni?.asd_nome || "ASD Demo", cf: "90012345678", sede: "Via dei Cavalli 1, Roma", rasd: "123456", affiliazioni: "FISE", quota: 50, mese_inizio: 9, anno_sociale: anno },
+    soci: cl.map((c, i) => ({ id: "ds" + i, membro_id: c.id, nome: c.nome, numero: i + 1, qualifica: i ? "atleta" : "fondatore", ammesso_il: "2024-09-15",
+      quota: { importo: 50, pagato: i ? 0 : 50 }, certificato: i ? tra(-5) : tra(18) })),
+    uscite: [{ id: "du1", data: tra(-40), descrizione: "Affiliazione FISE", categoria: "affiliazione", importo: 300, metodo: "bonifico" },
+             { id: "du2", data: tra(-12), descrizione: "Istruttore gare", categoria: "istruttori", importo: 250, metodo: "bonifico" }],
+    scadenze: [{ id: "dx1", titolo: "Rinnovo dell'affiliazione (federazione o ente di promozione)", data: tra(25) },
+               { id: "dx2", titolo: "Assemblea dei soci: approvazione del rendiconto", data: null },
+               { id: "dx3", titolo: "Rinnovo dell'assicurazione", data: tra(70) }],
+    rendiconto: { anno: new Date().getFullYear(), entrate: { quota: 450, tesseramento: 315, gara: 600 }, uscite: { affiliazione: 300, istruttori: 250, trasferte: 162 }, da_incassare: 150, incassato_cassa: 1365 }
+  };
+}
 /* ---------- MODALS ---------- */
 /* =====================================================================
    PACCHETTI EQUO SCUDERIA (START / ADVANCE / PREMIUM) — lucchetti e limiti lato app.
@@ -14705,7 +15033,8 @@ const PK_PREZZI = { start:"€9/mese · €89/anno + IVA", advance:"€39/mese �
 const MODULO_FUNZIONE = { groom:"groom", pacchetti:"pacchetti", incassi:"incassi", magazzino:"magazzino", statistiche:"statistiche", store:"store", fatturazione:"sdi" };
 const FUNZIONI_INFO = {
   pacchetti: { titolo:"Pacchetti & Abbonamenti", icon:"fa-ticket", da:"advance", punti:["Carnet a scalare, abbonamenti e pensioni","Scalo automatico delle lezioni dal carnet, con disdetta senza perdere la lezione","Cruscotto scadenze e rinnovi"] },
-  incassi: { titolo:"Incassi", icon:"fa-euro-sign", da:"advance", punti:["Chi deve pagare e da quanto, in un colpo d'occhio","Conti del mese con rette, pacchetti, lezioni ed extra, inviati nell'App Equo","Pagamenti anche a rate, contanti, bonifico o POS","Cassa separata per l'ASD: tesseramenti, certificati, gare e trasferte"] },
+  incassi: { titolo:"Incassi", icon:"fa-euro-sign", da:"advance", punti:["Chi deve pagare e da quanto, in un colpo d'occhio","Conti del mese con rette, pacchetti, lezioni ed extra, inviati nell'App Equo","Pagamenti anche a rate, contanti, bonifico o POS","Gestione ASD Basic: cassa separata, certificati medici, tesseramenti, gare e trasferte"] },
+  asd_full: { titolo:"Gestione ASD Full", icon:"fa-medal", da:"premium", punti:["Libro soci con numero, qualifica, ammissione e cessazione","Quota associativa annuale e chi deve rinnovare","Ricevute numerate per i pagamenti dell'ASD","Uscite e rendiconto dell'anno in PDF e CSV","Scadenzario: affiliazione, tesseramenti, assemblea, RASD, assicurazione"] },
   incassi_auto: { titolo:"Esportazione per il commercialista", icon:"fa-file-csv", da:"premium", punti:["Incassi del mese in un file per il commercialista","Solleciti e riepiloghi automatici"] },
   magazzino: { titolo:"Magazzino", icon:"fa-boxes-stacked", da:"advance", punti:["Scorte con semaforo per categoria","Carichi, scarichi e inventario in un tocco","Consumi delle ultime 8 settimane"] },
   statistiche: { titolo:"Statistiche", icon:"fa-chart-line", da:"advance", punti:["Incassi e lezioni degli ultimi 12 mesi","Clienti a rischio con messaggio pronto","Carnet in esaurimento da rinnovare","In PREMIUM: indice di salute, margine per cavallo, radar della concorrenza"] },
@@ -14718,7 +15047,7 @@ const FUNZIONI_INFO = {
 };
 const PK_CONFRONTO = [
   ["Cavalli", "10", "30", "80"], ["Team", "3", "6", "15"], ["Clienti", "20", "50", "200"], ["Maniscalchi collegati", "1", "3", "illimitati"], ["Veterinari collegati", "1", "3", "illimitati"],
-  ["Lezioni & Prenotazioni", "promemoria in chat (1 istruttore)", "con conferma dall'app (3)", "con conferma dall'app"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"], ["Incassi, conti e ASD", "—", "✓", "✓ + esportazione"],
+  ["Lezioni & Prenotazioni", "promemoria in chat (1 istruttore)", "con conferma dall'app (3)", "con conferma dall'app"], ["Pacchetti & Abbonamenti", "—", "✓", "✓"], ["Incassi e conti", "—", "✓", "✓ + esportazione"], ["Gestione ASD", "—", "Basic", "Full"],
   ["Promemoria automatici", "—", "✓", "✓"], ["Box / Stalla", "—", "20 box", "100 box"], ["App Groom", "—", "3 groom", "10 groom"], ["Magazzino", "—", "base", "avanzato"], ["Statistiche", "—", "base", "complete + radar"],
   ["Athena", "basic · 30 msg", "100 msg", "500 msg"], ["Agenti add-on", "—", "acquistabili", "Merlino incluso"], ["Fatturazione SDI", "in arrivo", "in arrivo", "in arrivo"],
   ["Supporto prioritario", "—", "—", "✓"],
@@ -14727,7 +15056,7 @@ const PK_CONFRONTO = [
 async function caricaPianoCentro(){
   if(DEMO_MODE){
     pianoCentro = { pacchetto:"premium", pacchetto_reale:"premium", sbloccato:false, agente_incluso:"merlino", agenti:["athena","merlino"],
-      cavalli:80, team:15, maniscalchi:null, athena_messaggi:500, merlino_messaggi:300, athena_proattiva:true, pacchetti:true, incassi:true, incassi_auto:true, magazzino:true,
+      cavalli:80, team:15, maniscalchi:null, athena_messaggi:500, merlino_messaggi:300, athena_proattiva:true, pacchetti:true, incassi:true, incassi_auto:true, asd_full:true, magazzino:true,
       magazzino_avanzato:true, statistiche:true, statistiche_complete:true, radar:true, store:true, sdi:true, livelli:true, hard_reset:true,
       agenti_acquistabili:true, supporto_prioritario:true, uso:{ cavalli:(demoState.cavalli||[]).length, team:3, maniscalchi:1, athena_messaggi:4, merlino_messaggi:2 } };
   } else if(currentCentro?.id){
