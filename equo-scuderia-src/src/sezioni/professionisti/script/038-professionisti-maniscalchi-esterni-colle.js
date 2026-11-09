@@ -787,3 +787,122 @@ async function cavalliAbbinatiPro(clienteId){
   if(error || !data || data.errore) return null;
   return (data.cavalli || []).filter(c => c.stato === "attivo" && !c.uscito);
 }
+
+/* -- Cavalli proposti dal professionista (9/11/2026 · SQL 47) --
+   Cavalli che il maniscalco ha nella struttura ma che non sono collegati a una scheda della scuderia.
+   Per ognuno Equo cerca il cavallo più simile (microchip, nome): la scuderia conferma, sceglie un altro cavallo,
+   lo aggiunge alla scuderia (anche oltre il limite del pacchetto: resta bloccato) o dice «non è nostro»
+   (nell'app del maniscalco resta «da verificare» per 30 giorni). */
+let proposteProList = [];
+
+async function caricaProposteProfessionisti(){
+  if(DEMO_MODE){
+    const cav = (demoState.cavalli || [])[1];
+    proposteProList = [{ riga_id: "dp1", cliente_id: "demo-pro-1", professionista: "Marco Ferri", nome: (cav?.nome || "Luna").slice(0, 4), lavori: 3, ultimo: null,
+                         candidato: cav ? { id: cav.id, nome: cav.nome, punti: 85 } : null },
+                       { riga_id: "dp2", cliente_id: "demo-pro-1", professionista: "Marco Ferri", nome: "Fede", lavori: 1, candidato: null }];
+    return proposteProList;
+  }
+  if(!currentCentro) return (proposteProList = []);
+  const { data, error } = await sb.rpc("scuderia_proposte_pro", { p_centro: currentCentro.id });
+  proposteProList = error ? [] : (data || []);
+  return proposteProList;
+}
+function proposteDi(clienteId){ return proposteProList.filter(p => p.cliente_id === clienteId); }
+
+function proposteProHtml(clienteId){
+  const lista = proposteDi(clienteId);
+  if(!lista.length) return "";
+  const puo = puoCollegareProfessionisti();
+  const opzCavalli = (sel) => (schedaProDati?.cavalli || []).filter(c => !c.uscito).map(c => `<option value="${c.id}"${c.id === sel ? " selected" : ""}>${escapeHtml(c.nome)}</option>`).join("");
+  return `<div style="border:1px solid rgba(232,176,75,.7);background:rgba(232,176,75,.12);border-radius:12px;padding:10px 12px;margin-bottom:14px">
+    <div style="font-weight:800;margin-bottom:4px">🐴 ${lista.length} ${lista.length === 1 ? "cavallo proposto" : "cavalli proposti"} dal professionista</div>
+    <p style="margin:0 0 8px;color:var(--muted);font-size:12.5px">Li ha nella sua app per questa struttura, ma non sono collegati a una vostra scheda. ${puo ? "Dite voi cosa sono." : "Decide l'amministratore o un membro di livello 2-3."}</p>
+    ${lista.map(p => {
+      const c = p.candidato, sicuro = c && c.punti >= 85;
+      return `<div style="padding:8px 0;border-top:1px solid rgba(232,176,75,.4)" id="prop-${p.riga_id}">
+        <div style="font-size:13.5px"><b>«${escapeHtml(p.nome)}»</b> <span style="color:var(--muted);font-size:12px">${p.lavori ? `${p.lavori} ${p.lavori === 1 ? "lavoro" : "lavori"}` : "nessun lavoro"}${p.microchip ? " · chip " + escapeHtml(p.microchip) : ""}</span></div>
+        <div style="font-size:12.5px;margin:2px 0 6px">${c ? `${sicuro ? "Probabilmente è" : "Forse è"} <b>${escapeHtml(c.nome)}</b>?` : "Non trovo un cavallo simile nella vostra scheda."}</div>
+        ${puo ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          ${c ? `<button class="btn btn-primary btn-sm" onclick="rispondiPropostaPro('${p.riga_id}','conferma','${c.id}',this)">Sì, è ${escapeHtml(c.nome)}</button>` : ""}
+          <select class="input" id="prop-sel-${p.riga_id}" style="width:auto;padding:6px 10px;font-size:13px"><option value="">${c ? "È un altro…" : "È un cavallo che avete…"}</option>${opzCavalli()}</select>
+          <button class="btn btn-outline btn-sm" onclick="rispondiPropostaPro('${p.riga_id}','conferma',document.getElementById('prop-sel-${p.riga_id}').value,this)">Collega</button>
+          <button class="btn btn-outline btn-sm" onclick="aggiungiPropostaPro('${p.riga_id}',this)"><i class="fa-solid fa-plus"></i> Aggiungi alla scuderia</button>
+          <button class="btn btn-ghost btn-sm" onclick="rispondiPropostaPro('${p.riga_id}','rifiuta',null,this)">Non è nostro</button></div>` : ""}
+      </div>`;
+    }).join("")}</div>`;
+}
+
+async function rispondiPropostaPro(riga, azione, scheda, btn, categoria){
+  if(azione === "conferma" && !scheda){ showToast("Scegli il cavallo dall'elenco."); return; }
+  if(azione === "rifiuta" && btn && btn.dataset.conferma !== "1"){ btn.dataset.conferma = "1"; btn.textContent = "Tocca ancora per confermare"; setTimeout(() => { if(btn){ btn.dataset.conferma = ""; btn.textContent = "Non è nostro"; } }, 3500); return; }
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc("scuderia_proposta_rispondi", { p_riga: riga, p_azione: azione, p_scheda: scheda || null, p_categoria: categoria || null });
+  if(btn) btn.disabled = false;
+  if(error || !data?.ok){ showToast((data && data.errore) || "Operazione non riuscita. Riprova."); return; }
+  showToast(azione === "rifiuta" ? "Segnato «non è nostro»: il professionista lo trova da verificare."
+    : data.oltre_limite ? "Cavallo aggiunto, ma è oltre il limite del vostro pacchetto: resta bloccato finché non passate al pacchetto superiore."
+    : azione === "aggiungi" ? "Cavallo aggiunto alla scuderia e collegato al professionista."
+    : (data.abb && data.abb.da_confermare ? "Collegato: il proprietario deve confermare il professionista." : "Collegato: lo storico dei lavori ora è sul vostro cavallo."));
+  await caricaProposteProfessionisti();
+  if(typeof cavalliList !== "undefined" && azione === "aggiungi" && typeof loadCavalli === "function") loadCavalli();
+  if(schedaProCliente) await caricaSchedaPro();
+  renderProfessionistiList(); aggiornaBadgeProfessionisti();
+}
+function aggiungiPropostaPro(riga, btn){
+  const box = btn.parentElement;
+  if(box.querySelector(".prop-cat")) return;
+  box.insertAdjacentHTML("beforeend", `<span class="prop-cat" style="display:inline-flex;gap:6px;align-items:center">
+    <select class="input" style="width:auto;padding:6px 10px;font-size:13px"><option value="pensione">In pensione</option><option value="proprieta">Di proprietà del centro</option><option value="soci">Di soci</option></select>
+    <button class="btn btn-primary btn-sm" onclick="rispondiPropostaPro('${riga}','aggiungi',null,this,this.previousElementSibling.value)">Aggiungi</button></span>`);
+}
+
+/* agganci: lista, badge, scheda (Cavalli), sezione Cavalli */
+(function(){
+  const vecchiaLoad = loadProfessionisti;
+  loadProfessionisti = async function(){ await vecchiaLoad.apply(this, arguments); await caricaProposteProfessionisti(); aggiornaBadgeProfessionisti(); };
+  const vecchioBadge = aggiornaBadgeProfessionisti;
+  aggiornaBadgeProfessionisti = function(){
+    vecchioBadge.apply(this, arguments);
+    const n = proposteProList.length;
+    if(!n) return;
+    const daConfermare = professionistiList.reduce((t, p) => t + (Number(p.da_confermare) || 0) + (p.stato === "da_confermare_struttura" ? 1 : 0), 0);
+    const nonLetti = professionistiList.reduce((t, p) => t + (Number(p.non_letti) || 0), 0);
+    impostaContatoreNav("pro-nav-badge", daConfermare + nonLetti + n, "rosso");
+  };
+  const vecchiaLista = renderProfessionistiList;
+  renderProfessionistiList = function(){
+    vecchiaLista.apply(this, arguments);
+    document.querySelectorAll("#pro-maniscalchi-list .msg-item[onclick*='apriSchedaProfessionista']").forEach(el => {
+      const id = (el.getAttribute("onclick").match(/'([^']+)'/) || [])[1];
+      const n = proposteDi(id).length;
+      if(n && !el.querySelector(".prop-badge")) el.querySelector(".who")?.parentElement?.parentElement?.insertAdjacentHTML("beforeend",
+        `<div class="prop-badge" style="font-size:12px;color:var(--danger);font-weight:700;margin-top:2px">🐴 ${n} ${n === 1 ? "cavallo proposto" : "cavalli proposti"} da sistemare</div>`);
+    });
+  };
+  const vecchiCavalli = renderSchedaProCavalli;
+  renderSchedaProCavalli = function(){
+    vecchiCavalli.apply(this, arguments);
+    const box = document.getElementById("scheda-pro-cavalli");
+    if(box && schedaProCliente) box.insertAdjacentHTML("afterbegin", proposteProHtml(schedaProCliente));
+  };
+  const vecchiaApri = apriSchedaProfessionista;
+  apriSchedaProfessionista = async function(id, tab){
+    await vecchiaApri.apply(this, arguments);
+    if(tab === "cavalli" || proposteDi(id).length) schedaProTab("cavalli");
+  };
+  const agganciaPropCavalli = () => quandoApriSezione(async key => {
+    if(key !== "cavalli") return;
+    await caricaProposteProfessionisti();
+    const mod = document.getElementById("cavalli-list-view") || document.getElementById("module-cavalli");
+    let b = document.getElementById("cav-proposte-banner");
+    if(!proposteProList.length){ if(b) b.remove(); return; }
+    if(!b){ b = document.createElement("div"); b.id = "cav-proposte-banner"; mod.insertBefore(b, mod.querySelector(".cavalli-sezione, #cavalli-sezioni") || mod.firstChild); }
+    const per = {}; proposteProList.forEach(p => { (per[p.cliente_id] = per[p.cliente_id] || { nome: p.professionista, n: 0 }).n++; });
+    b.innerHTML = Object.entries(per).map(([id, x]) => `<div class="card" style="border-color:rgba(232,176,75,.8);background:rgba(232,176,75,.10);margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px">
+      <div style="flex:1 1 220px;font-size:13.5px">🐴 <b>${escapeHtml(x.nome || "Il professionista")}</b> segue ${x.n} ${x.n === 1 ? "cavallo che non è collegato" : "cavalli che non sono collegati"} alla vostra scheda.</div>
+      <button class="btn btn-primary btn-sm" onclick="showModule('professionisti');setTimeout(()=>apriSchedaProfessionista('${id}','cavalli'),400)">Vediamoli</button></div>`).join("");
+  });
+  if(typeof quandoApriSezione === "function") agganciaPropCavalli(); else document.addEventListener("DOMContentLoaded", agganciaPropCavalli);
+})();

@@ -9,3 +9,7 @@
 .scad-tile .t .lbl{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
 .scad-tile .meta{font-size:12px;color:var(--muted);line-height:1.5}
 
+
+/* cavallo oltre il limite del pacchetto (9/11/2026): oscurato, al tocco la richiesta del pacchetto superiore */
+.cavallo-card.cavallo-bloccato{opacity:.45;filter:grayscale(.7);position:relative}
+.cavallo-card.cavallo-bloccato::after{content:"\f023";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:12px;bottom:10px;font-size:13px;color:var(--muted)}

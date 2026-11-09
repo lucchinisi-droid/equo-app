@@ -2866,7 +2866,7 @@
 			cavalliArrivi = demoState.arrivi || [];
 			return;
 		}
-		const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita";
+		const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita, oltre_limite";
 		const [att, usc, arr] = await Promise.all([
 			sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).is("uscito_il", null).order("nome", { ascending: true }),
 			sb.from("scuderia_cavalli").select("id, nome, razza, proprietario, codice_equo, uscito_il, uscito_verso").eq("centro_id", currentCentro.id).not("uscito_il", "is", null).order("uscito_il", { ascending: false }).limit(50),
@@ -3021,8 +3021,10 @@
 				const worst = worstStatus(c.id);
 				const sub = [c.razza, c.mantello].filter(Boolean).join(" · ") || "Dati non specificati";
 				const div = document.createElement("div");
-				div.className = "card cavallo-card";
-				div.onclick = () => openCavalloDetail(c.id);
+				const bloccato = !!c.oltre_limite && typeof pianoCentro !== "undefined" && pianoCentro && pianoCentro.cavalli != null && cavalliList.length > pianoCentro.cavalli;
+				div.className = "card cavallo-card" + (bloccato ? " cavallo-bloccato" : "");
+				div.onclick = () => bloccato ? apriUpsell("cavalli_oltre") : openCavalloDetail(c.id);
+				if (bloccato) div.title = "Oltre il limite del tuo pacchetto: tocca per chiedere il pacchetto superiore";
 				div.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
           ${c.foto_url ? `<div style="width:40px;height:40px;border-radius:8px;background-image:${cssUrl(c.foto_url)};background-size:cover;background-position:center;flex-shrink:0"></div>` : ""}

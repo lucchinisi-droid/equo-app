@@ -28,13 +28,19 @@ function badgeCollegamentoCliente(c){
 async function rispondiInvitoStruttura(clienteId, accetta, btn){
   if(window.event) window.event.stopPropagation();
   if(btn) btn.disabled = true;
-  const { data, error } = await sb.rpc("pro_rispondi_collegamento_struttura", { p_cliente_id: clienteId, p_accetta: accetta });
+  // accettando: se tra i clienti c'è già la stessa struttura, si uniscono le schede (SQL 47)
+  let unisci = null;
+  if(accetta && typeof window.proSceltaUnione === "function"){
+    unisci = await window.proSceltaUnione(clienteId);
+    if(unisci === false){ if(btn) btn.disabled = false; return; }
+  }
+  const { data, error } = await sb.rpc("pro_rispondi_collegamento_struttura", { p_cliente_id: clienteId, p_accetta: accetta, ...(unisci ? { p_unisci: unisci } : {}) });
   if(error || !data?.ok){
     showToast((data && data.errore) || "Operazione non riuscita. Riprova.");
     if(btn) btn.disabled = false;
     return;
   }
-  showToast(accetta ? "Scuderia collegata: trovi la chat in Messaggi → Scuderie." : "Invito rifiutato.");
+  showToast(accetta ? (data.unione && data.unione.ok ? `Scuderia collegata e schede unite: ${data.unione.uniti + data.unione.spostati} cavalli, ${data.unione.lavori} lavori.` : "Scuderia collegata: trovi la chat in Messaggi → Scuderie.") : "Invito rifiutato.");
   await loadClientiMascalcia();
 }
 
@@ -186,6 +192,8 @@ async function openClienteDetail(id){
   document.getElementById("clienti-list-view").style.display = "none";
   document.getElementById("clienti-detail-view").style.display = "block";
   document.getElementById("detail-cliente-nome").textContent = c.nome;
+  document.getElementById("pro-avvisi-struttura")?.remove();
+  if(c.centro_id && c.collegamento_stato === "attivo" && typeof window.proAvvisiStruttura === "function") setTimeout(() => window.proAvvisiStruttura(id), 0);
   document.getElementById("detail-cliente-info").innerHTML = `
     <div style="font-size:13.5px;line-height:1.8">
       ${c.archiviato_il ? `<div style="color:var(--muted)"><strong>Archiviato</strong> il ${new Date(c.archiviato_il).toLocaleDateString("it-IT")}: non compare nella lista né nelle scadenze.</div>` : ""}

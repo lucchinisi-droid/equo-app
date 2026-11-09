@@ -1,6 +1,108 @@
 
 // === GENERATO da equo-app-src/strumenti/costruisci-moduli.mjs: NON modificare qui, modificare ruoli/maniscalco/moduli/ ===
 (function() {
+	// equo-app-src/src/ruoli/maniscalco/moduli/120-strutture-unisci.js
+	var suEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	async function proSceltaUnione(clienteId) {
+		let simili = [];
+		try {
+			const { data } = await sb.rpc("pro_strutture_simili", { p_cliente_id: clienteId });
+			simili = data || [];
+		} catch (_) {
+			simili = [];
+		}
+		if (!simili.length) return null;
+		const c = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === clienteId) || {};
+		return new Promise((risolvi) => {
+			let ov = document.getElementById("modal-unisci-struttura");
+			if (!ov) {
+				ov = document.createElement("div");
+				ov.id = "modal-unisci-struttura";
+				ov.className = "modal-overlay";
+				document.body.appendChild(ov);
+			}
+			ov.innerHTML = `<div class="modal" style="max-width:440px">
+      <div class="modal-title">È la stessa struttura?</div>
+      <p style="font-size:13.5px;line-height:1.5;margin:0 0 10px">Hai già tra i clienti una struttura che sembra <b>${suEsc(c.nome || "questa")}</b>. Se è la stessa, unisco le schede: cavalli e lavori finiscono nel collegamento, senza doppioni.</p>
+      ${simili.map((s, i) => `<label style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
+        <input type="radio" name="su-scelta" value="${s.id}" ${i === 0 ? "checked" : ""} style="margin-top:3px">
+        <span><b>${suEsc(s.nome)}</b><br><small class="muted">${s.cavalli} cavalli · ${s.lavori} lavori · ${suEsc(s.motivo)}</small></span></label>`).join("")}
+      <label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
+        <input type="radio" name="su-scelta" value=""> <span>No, è una struttura nuova</span></label>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" class="btn btn-outline" style="flex:1" id="su-annulla">Annulla</button>
+        <button type="button" class="btn btn-primary" style="flex:1" id="su-ok">Accetta</button></div></div>`;
+			const chiudi = (v) => {
+				ov.classList.remove("active");
+				risolvi(v);
+			};
+			ov.querySelector("#su-annulla").onclick = () => chiudi(false);
+			ov.querySelector("#su-ok").onclick = () => chiudi(ov.querySelector("input[name=\"su-scelta\"]:checked")?.value || null);
+			ov.classList.add("active");
+		});
+	}
+	async function proAvvisiStruttura(clienteId) {
+		const info = document.getElementById("detail-cliente-info");
+		if (!info || DEMO_MODE) return;
+		let box = document.getElementById("pro-avvisi-struttura");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "pro-avvisi-struttura";
+			info.parentNode.insertBefore(box, info.nextSibling);
+		}
+		box.innerHTML = "";
+		const { data } = await sb.rpc("pro_struttura_avvisi", { p_cliente_id: clienteId });
+		if (!data || currentClienteId !== clienteId) return;
+		const parti = [];
+		(data.simili || []).forEach((s) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
+    <div style="font-size:13.5px">Hai anche <b>${suEsc(s.nome)}</b> tra i clienti (${s.cavalli} cavalli, ${s.lavori} lavori · ${suEsc(s.motivo)}): è la stessa struttura?</div>
+    <div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="btn btn-primary btn-sm" onclick="proUnisciStruttura('${clienteId}','${s.id}',this)">Sì, unisci</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="proNonUnire('${clienteId}','${s.id}',this)">No, è diversa</button></div></div>`));
+		(data.rifiutati || []).forEach((r) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
+    <div style="font-size:13.5px"><b>${suEsc(r.nome)}</b>: la struttura dice che non è suo. <span class="muted" style="font-size:12px">Da verificare</span></div>
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <button type="button" class="btn btn-outline btn-sm" onclick="proCavalloRifiutato('${r.id}','tieni',this)">È suo: riproponi</button>
+      <button type="button" class="btn btn-ghost btn-sm" ${r.eliminabile ? "" : "title=\"Si può eliminare 30 giorni dopo la risposta della struttura\""} onclick="proCavalloRifiutato('${r.id}','elimina',this)">Elimina</button></div></div>`));
+		if (Number(data.in_attesa) > 0) parti.push(`<div class="muted" style="padding:8px 0;border-top:1px solid var(--border);font-size:12.5px">⏳ ${data.in_attesa} ${Number(data.in_attesa) === 1 ? "cavallo è" : "cavalli sono"} in attesa che la struttura confermi che sono suoi.</div>`);
+		if (!parti.length) return;
+		box.innerHTML = `<div class="card" style="margin:10px 0;border-color:rgba(232,176,75,.7)"><div style="font-weight:800;margin-bottom:2px">Da sistemare con la struttura</div>${parti.join("")}</div>`;
+	}
+	async function proUnisciStruttura(collegato, vecchio, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await sb.rpc("pro_unisci_struttura", {
+			p_collegato: collegato,
+			p_vecchio: vecchio
+		});
+		if (error || !data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast("Unione non riuscita: riprova");
+		}
+		showToast(`Fatto: ${data.uniti} cavalli uniti, ${data.spostati} spostati, ${data.lavori} lavori nella struttura`);
+		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
+		if (typeof openClienteDetail === "function") openClienteDetail(collegato);
+	}
+	async function proNonUnire(collegato, vecchio, btn) {
+		if (btn) btn.disabled = true;
+		await sb.rpc("pro_non_unire", {
+			p_collegato: collegato,
+			p_vecchio: vecchio
+		});
+		proAvvisiStruttura(collegato);
+	}
+	async function proCavalloRifiutato(riga, azione, btn) {
+		if (btn) btn.disabled = true;
+		const { data } = await sb.rpc("pro_cavallo_rifiutato", {
+			p_riga: riga,
+			p_azione: azione
+		});
+		if (!data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast(data && data.errore || "Non riuscito: riprova");
+		}
+		showToast(data.fatto === "riproposto" ? "Riproposto alla struttura" : data.fatto === "archiviato" ? "Archiviato: lo storico dei lavori resta" : "Eliminato");
+		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
+		if (currentClienteId) proAvvisiStruttura(currentClienteId);
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/108-invito-qr.js
 	function linkInvito(codice) {
 		return "https://app.equohub.com/?invito=" + encodeURIComponent(String(codice || "").toUpperCase());
@@ -5473,7 +5575,7 @@
 			showToast("Hai nascosto gli incassi: mostrali dal menu (serve il PIN) per fare il conto.");
 			return;
 		}
-		if (!clienteDiId$1(clienteId)) await loadClientiMascalcia().catch(() => {});
+		if (!clienteDiId$1(clienteId)) await loadClientiMascalcia$1().catch(() => {});
 		const cli = clienteDiId$1(clienteId);
 		contoCtx = {
 			clienteId,
@@ -7019,7 +7121,7 @@
 		closeModal("modal-naviga");
 		if (!c) return;
 		showPage("pro-clienti");
-		openClienteDetail(c.id).then(() => {
+		openClienteDetail$1(c.id).then(() => {
 			if (typeof openEditCliente === "function") openEditCliente().then(() => document.getElementById("edit-cliente-indirizzo")?.focus());
 		});
 	}
@@ -7340,7 +7442,7 @@
 		const trovalo = c.vista === "maniscalco" && r.luogo !== "A casa" ? ` · lo trovi anche nella scheda di ${r.luogo}, sotto «Qui stanno»` : "";
 		showToast(`${c.nome}: ${r.luogo === "A casa" ? "a casa" : "ora sta a " + r.luogo}${r.arrivo ? " · la scuderia riceve la richiesta" : ""}${trovalo}`);
 		if (c.vista === "maniscalco") {
-			if (r.scuderia_cliente_id && !clienteDiId$1(r.scuderia_cliente_id)) await loadClientiMascalcia();
+			if (r.scuderia_cliente_id && !clienteDiId$1(r.scuderia_cliente_id)) await loadClientiMascalcia$1();
 			await caricaUbicazioni(true);
 			await caricaCavalliMiei();
 			if (typeof renderClientiList === "function") renderClientiList();
@@ -10367,7 +10469,7 @@
 		try {
 			showPage("pro-clienti");
 		} catch (e) {}
-		await openClienteDetail(x.cliente_id);
+		await openClienteDetail$1(x.cliente_id);
 		if (x.archiviato) showToast(`${x.nome} è archiviato: ripristinalo da «Modifica» → Cavalli archiviati.`);
 	}
 	async function verificaNuovoCavallo(nome, chip, clienteId, usaEsistente) {
@@ -11380,7 +11482,7 @@
 				showToast(righe.length > 1 ? `${righe.length} appuntamenti salvati: il cliente riceve l'avviso in chat` : "Appuntamento salvato: il cliente riceve l'avviso in chat");
 			} else showToast(interventoInModifica ? "Appuntamento aggiornato" : righe.length > 1 ? `${righe.length} ${stato === "programmato" ? "appuntamenti salvati" : "interventi registrati"} (uno per cavallo)` : stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato");
 			interventoInModifica = null;
-			if (clienteCreatoOra) await loadClientiMascalcia();
+			if (clienteCreatoOra) await loadClientiMascalcia$1();
 			await renderProDeadlines();
 			await renderIncassi$1();
 			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
@@ -11819,7 +11921,7 @@
 			if (!res.ok) {
 				errBox.textContent = "Dati salvati, ma " + messaggioErroreCollegaCliente(res).replace(/^./, (x) => x.toLowerCase());
 				errBox.style.display = "block";
-				await loadClientiMascalcia();
+				await loadClientiMascalcia$1();
 				return;
 			}
 			showToast("Collegato a Equo: gli è arrivato il tuo primo messaggio");
@@ -11827,8 +11929,8 @@
 		closeModal("modal-edit-cliente");
 		if (!codiceEquo) showToast("Cliente aggiornato");
 		const id = currentClienteId;
-		await loadClientiMascalcia();
-		await openClienteDetail(id);
+		await loadClientiMascalcia$1();
+		await openClienteDetail$1(id);
 	}
 	function closeClienteDetail() {
 		currentClienteId = null;
@@ -11857,17 +11959,26 @@
 	async function rispondiInvitoStruttura(clienteId, accetta, btn) {
 		if (window.event) window.event.stopPropagation();
 		if (btn) btn.disabled = true;
+		let unisci = null;
+		if (accetta && typeof window.proSceltaUnione === "function") {
+			unisci = await window.proSceltaUnione(clienteId);
+			if (unisci === false) {
+				if (btn) btn.disabled = false;
+				return;
+			}
+		}
 		const { data, error } = await sb.rpc("pro_rispondi_collegamento_struttura", {
 			p_cliente_id: clienteId,
-			p_accetta: accetta
+			p_accetta: accetta,
+			...unisci ? { p_unisci: unisci } : {}
 		});
 		if (error || !data?.ok) {
 			showToast(data && data.errore || "Operazione non riuscita. Riprova.");
 			if (btn) btn.disabled = false;
 			return;
 		}
-		showToast(accetta ? "Scuderia collegata: trovi la chat in Messaggi → Scuderie." : "Invito rifiutato.");
-		await loadClientiMascalcia();
+		showToast(accetta ? data.unione && data.unione.ok ? `Scuderia collegata e schede unite: ${data.unione.uniti + data.unione.spostati} cavalli, ${data.unione.lavori} lavori.` : "Scuderia collegata: trovi la chat in Messaggi → Scuderie." : "Invito rifiutato.");
+		await loadClientiMascalcia$1();
 	}
 	var collegaStrutturaClienteId = null;
 	function apriCollegaStruttura(clienteId) {
@@ -11903,8 +12014,8 @@
 		closeModal("modal-collega-struttura");
 		showToast(data.gia ? data.stato === "attivo" ? `Sei già collegato a ${data.nome}.` : `C'è già una richiesta in corso con ${data.nome}.` : `Richiesta inviata a ${data.nome}: la scuderia deve accettarla.`);
 		if (data.senza_piva && !data.gia) setTimeout(() => showToast("Consiglio: aggiungi la P.IVA in menu profilo → Dati per i pagamenti per avere il badge Equo Certified."), 3200);
-		await loadClientiMascalcia();
-		if (currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") openClienteDetail(currentClienteId);
+		await loadClientiMascalcia$1();
+		if (currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") openClienteDetail$1(currentClienteId);
 	}
 	function scollegaStrutturaCorrente() {
 		const c = clientiMascalcia.find((x) => x.id === currentClienteId);
@@ -11934,8 +12045,8 @@
 			}
 			closeModal("modal-scollega-struttura");
 			showToast("Collegamento chiuso. La scheda cliente resta tua.");
-			await loadClientiMascalcia();
-			openClienteDetail(c.id);
+			await loadClientiMascalcia$1();
+			openClienteDetail$1(c.id);
 		} finally {
 			ok.disabled = false;
 		}
@@ -12062,18 +12173,20 @@
 			});
 			closeModal("modal-add-cliente");
 			showToast((riusato ? "Hai già questo cliente: ho usato quello" : "Cliente salvato") + msgCollegamento);
-			await loadClientiMascalcia();
+			await loadClientiMascalcia$1();
 		} finally {
 			btn.disabled = false;
 		}
 	}
-	async function openClienteDetail(id) {
+	async function openClienteDetail$1(id) {
 		currentClienteId = id;
 		const c = clientiMascalcia.find((x) => x.id === id);
 		if (!c) return;
 		document.getElementById("clienti-list-view").style.display = "none";
 		document.getElementById("clienti-detail-view").style.display = "block";
 		document.getElementById("detail-cliente-nome").textContent = c.nome;
+		document.getElementById("pro-avvisi-struttura")?.remove();
+		if (c.centro_id && c.collegamento_stato === "attivo" && typeof window.proAvvisiStruttura === "function") setTimeout(() => window.proAvvisiStruttura(id), 0);
 		document.getElementById("detail-cliente-info").innerHTML = `
     <div style="font-size:13.5px;line-height:1.8">
       ${c.archiviato_il ? `<div style="color:var(--muted)"><strong>Archiviato</strong> il ${new Date(c.archiviato_il).toLocaleDateString("it-IT")}: non compare nella lista né nelle scadenze.</div>` : ""}
@@ -12440,7 +12553,7 @@
 	}
 	async function apriCavalloDaCartella(clienteId, cvId, horseId) {
 		if (!clienteId) return;
-		await openClienteDetail(clienteId);
+		await openClienteDetail$1(clienteId);
 		const cv = schedaCavalli.find((c) => cvId && c.id === cvId || horseId && c.horse_id === horseId);
 		if (!cv) return;
 		schedaDaCartella = true;
@@ -12531,9 +12644,9 @@
 			const cav = await DB.listCavalliCliente(clienteId);
 			await DB.updateClienteMascalcia(clienteId, { nome_cavallo: cav.map((x) => x.nome).join(", ") });
 			closeModal("modal-nuovo-cavallo");
-			await loadClientiMascalcia();
+			await loadClientiMascalcia$1();
 			if (document.getElementById("modal-edit-cliente")?.classList.contains("active")) await renderCavalliEditCliente();
-			if (currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") await openClienteDetail(currentClienteId);
+			if (currentClienteId && document.getElementById("clienti-detail-view")?.style.display === "block") await openClienteDetail$1(currentClienteId);
 		} finally {
 			btn.disabled = false;
 		}
@@ -12935,7 +13048,7 @@
 			return "";
 		}
 	}
-	async function loadClientiMascalcia() {
+	async function loadClientiMascalcia$1() {
 		const [cli] = await Promise.all([DB.listClientiMascalcia(), caricaCavalliMiei()]);
 		clientiMascalcia = cli;
 		renderClientiList();
@@ -13021,7 +13134,7 @@
 		}
 		const nomeDest = clientiMascalcia.find((x) => x.id === dest)?.nome || "l'altro cliente";
 		showToast(`${res.spostati === 1 ? "Cavallo spostato" : (res.spostati || ids.length) + " cavalli spostati"} in «${nomeDest}»`);
-		await loadClientiMascalcia();
+		await loadClientiMascalcia$1();
 		await deleteCurrentCliente();
 	}
 	async function confermaArchiviaCliente(btn) {
@@ -13053,7 +13166,7 @@
 		}
 		closeModal("modal-archivia-cliente");
 		closeClienteDetail();
-		await loadClientiMascalcia();
+		await loadClientiMascalcia$1();
 	}
 	async function ripristinaClienteCorrente() {
 		const id = currentClienteId;
@@ -13069,8 +13182,8 @@
 		}
 		closeModal("modal-edit-cliente");
 		showToast("Cliente ripristinato");
-		await loadClientiMascalcia();
-		await openClienteDetail(id);
+		await loadClientiMascalcia$1();
+		await openClienteDetail$1(id);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/074-abbinamento-cavalli-del-maniscalco-caval.js
 	var abbinaPendenti = [];
@@ -13531,12 +13644,12 @@
 			const res = await DB.cambiaProprietario(ids, dest, aperti);
 			if (!res || !res.ok) return errore(res?.errore || "Non riuscito, riprova.");
 			closeModal("modal-cambia-proprietario");
-			await loadClientiMascalcia();
+			await loadClientiMascalcia$1();
 			await caricaCavalliMiei().catch(() => {});
 			const nomeDest = clienteDiId$1(dest)?.nome || "nuovo proprietario";
 			showToast(`${res.spostati === 1 ? "1 cavallo" : res.spostati + " cavalli"} intestati a «${nomeDest}»` + (res.lavori ? ` · ${res.lavori === 1 ? "1 lavoro da saldare passato" : res.lavori + " lavori da saldare passati"}` : ""));
 			cpCtx = null;
-			await openClienteDetail(c.daId);
+			await openClienteDetail$1(c.daId);
 		} finally {
 			btn.disabled = false;
 		}
@@ -15836,13 +15949,18 @@
 		closeModal("modal-import-vecchia");
 		showToast("Fatto: i dati della vecchia app sono a posto");
 		try {
-			await loadClientiMascalcia();
+			await loadClientiMascalcia$1();
 			await renderIncassi$1();
 			await renderProDeadlines();
 		} catch (e) {}
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		proSceltaUnione,
+		proAvvisiStruttura,
+		proUnisciStruttura,
+		proNonUnire,
+		proCavalloRifiutato,
 		ferDetta,
 		ferDettaDaMenu,
 		ferDettaApri,
@@ -16032,7 +16150,7 @@
 		isStrutturaCollegata,
 		isoLocale,
 		loadClienteInterventi,
-		loadClientiMascalcia,
+		loadClientiMascalcia: loadClientiMascalcia$1,
 		luogoDi,
 		luogoEvento,
 		luogoProprietario,
@@ -16064,7 +16182,7 @@
 		onCavalliMultiChange,
 		onInterventoClienteChange,
 		onMisuraSistemaChange,
-		openClienteDetail,
+		openClienteDetail: openClienteDetail$1,
 		openEditCliente,
 		openFarrierChatThread,
 		openInterventoModal,

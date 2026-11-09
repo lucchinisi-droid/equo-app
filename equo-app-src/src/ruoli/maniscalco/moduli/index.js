@@ -1,5 +1,6 @@
 // Ingresso dei moduli del maniscalco: l'ordine e quello originale dei file.
 import "./031-mascalcia-clienti-interventi-del-profess.js";
+import { proSceltaUnione, proAvvisiStruttura, proUnisciStruttura, proNonUnire, proCavalloRifiutato } from "./120-strutture-unisci.js";
 import { caricaRichiamiPredefiniti, clientiAttivi, giorniRichiamoSuggeriti, giorniTra, importiSuggeriti, loadClientiMascalcia, richiamoCambia, richiamoConferma, richiamoFerriN, richiamoFerriRender, richiamoPagamento, richiamoModo, richiamoRuotaScroll, richiamoTotale, richiamoVaiA, salvaRichiamiPredefiniti } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { cavalliCartella, apriCavalloDaCartella, apriNuovoCavalloCartella, isStruttura, isStrutturaCollegata, ncavClienteCambiato, salvaNuovoCavalloCartella, sceltaCartellaClienti } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { aggiornaEtichetteNuovoCliente, apriCollegaStruttura, apriFerroCavallo, apriNuovoCliente, apriRazzaCavallo, confermaScollegaStruttura, creaCavalliDaTesto, createClienteMascalcia, inviaRichiestaStruttura, mostraLimiteClienti, openClienteDetail, openEditCliente, rispondiInvitoStruttura, salvaFerroCavallo, salvaRazzaCavallo, scollegaStrutturaCorrente, toggleQrCliente } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
@@ -64,6 +65,7 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  proSceltaUnione, proAvvisiStruttura, proUnisciStruttura, proNonUnire, proCavalloRifiutato,
   ferDetta, ferDettaDaMenu, ferDettaApri, fdApplicaScheda, fdContesto, fdDescriviScheda, FD, ferStatoAttuale,
   cavalliQuiStanno,
   cavalliCartella,
