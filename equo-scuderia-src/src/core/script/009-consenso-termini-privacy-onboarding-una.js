@@ -44,6 +44,8 @@ async function createCentro(){
     await loadTeam();
     enterAppShell();
     showToast("Centro creato! Sei l'amministratore.");
+    // 9/11/2026 (SQL 52): «Il tuo maniscalco usa già Equo?» subito dopo la creazione del centro
+    setTimeout(() => { if(typeof apriCodiceIscrizione === "function") apriCodiceIscrizione(); }, 900);
   } catch(err){
     errBox.textContent = err.message || "Errore nella creazione del centro.";
     errBox.style.display = "block";

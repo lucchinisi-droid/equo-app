@@ -5,17 +5,18 @@ const boxDrag = { timer: null, attivo: false, cav: null, da: null, x0: 0, y0: 0,
 function boxDragReset(){
   clearTimeout(boxDrag.timer);
   if(boxDrag.ghost) boxDrag.ghost.remove();
-  document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento").forEach(el => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
+  document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento, .pad-cav.in-trascinamento").forEach(el => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
   document.body.classList.remove("box-trascina");
   Object.assign(boxDrag, { timer: null, attivo: false, cav: null, da: null, ghost: null, target: null });
   window.__boxDrag = false;
 }
 document.addEventListener("pointerdown", e => {
-  const card = e.target.closest && e.target.closest(".box-card[data-cav]");
+  // anche i cavalli dentro un paddock (.pad-cav) si trascinano: verso un box, un altro paddock
+  const card = e.target.closest && e.target.closest(".pad-cav[data-cav], .box-card[data-cav]");
   if(!card || e.target.closest(".box-ic, .box-nota") || !boxPuoGestire() || boxBloccati()) return;
   if(e.pointerType === "mouse" && e.button !== 0) return;
   boxDragReset();
-  Object.assign(boxDrag, { cav: card.dataset.cav, da: card.dataset.box, x0: e.clientX, y0: e.clientY });
+  Object.assign(boxDrag, { cav: card.dataset.cav, da: card.dataset.box || "pad:" + card.dataset.pad, x0: e.clientX, y0: e.clientY });
   boxDrag.timer = setTimeout(() => {
     boxDrag.attivo = true; window.__boxDrag = true;
     document.getElementById("eq-tip")?.classList.remove("vis");
@@ -32,10 +33,14 @@ document.addEventListener("pointermove", e => {
   if(!boxDrag.cav) return;
   if(!boxDrag.attivo){ if(Math.hypot(e.clientX - boxDrag.x0, e.clientY - boxDrag.y0) > 8) boxDragReset(); return; }
   boxDrag.ghost.style.left = e.clientX + "px"; boxDrag.ghost.style.top = e.clientY + "px";
-  const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box]");
+  const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box], .pad-card[data-pad]");
   document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no").forEach(x => { if(x !== el) x.classList.remove("drop-ok", "drop-no"); });
-  boxDrag.target = el && el.dataset.box !== boxDrag.da ? el.dataset.box : null;
-  if(boxDrag.target){ const b = boxList.find(x => x.id === boxDrag.target); el.classList.add(b && !b.cavallo_id && !b.manutenzione ? "drop-ok" : "drop-no"); }
+  const dest = !el ? null : el.dataset.box || "pad:" + el.dataset.pad;
+  boxDrag.target = dest && dest !== boxDrag.da ? dest : null;
+  if(boxDrag.target){
+    if(boxDrag.target.startsWith("pad:")){ const p = (typeof paddockList !== "undefined" ? paddockList : []).find(x => x.id === boxDrag.target.slice(4)); el.classList.add(p && !p.manutenzione ? "drop-ok" : "drop-no"); }
+    else { const b = boxList.find(x => x.id === boxDrag.target); el.classList.add(b && (!b.cavallo_id || b.cavallo_id === boxDrag.cav) && !b.manutenzione ? "drop-ok" : "drop-no"); }
+  }
 });
 document.addEventListener("touchmove", e => { if(boxDrag.attivo) e.preventDefault(); }, { passive: false });
 document.addEventListener("pointerup", async () => {
@@ -44,7 +49,10 @@ document.addEventListener("pointerup", async () => {
   boxDragReset();
   if(!attivo) return;
   boxDrag.blocca = true; setTimeout(() => { boxDrag.blocca = false; }, 400);
-  if(target) await boxMuovi(cav, da, target);
+  if(!target) return;
+  if(target.startsWith("pad:")) await paddockMetti(cav, target.slice(4));          // nel paddock: se ha un box, resta suo (di giorno)
+  else if(da.startsWith("pad:")) await paddockVersoBox(cav, target);               // dal paddock a un box
+  else await boxMuovi(cav, da, target);
 });
 document.addEventListener("pointercancel", () => { if(!boxDrag.attivo) boxDragReset(); });
 document.addEventListener("click", e => { if(boxDrag.blocca && e.target.closest && e.target.closest(".box-card")){ e.preventDefault(); e.stopPropagation(); boxDrag.blocca = false; } }, true);

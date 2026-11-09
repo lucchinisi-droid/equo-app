@@ -54,6 +54,8 @@ async function chooseMainRole(ruolo){
     if(needsConsent) currentUser.consensoTerminiPrivacy = payload.consenso_termini_privacy;
     document.getElementById("screen-onboarding").classList.remove("active");
     await enterApp(ruolo);
+    // 9/11/2026 (SQL 52): «Il tuo maniscalco usa già Equo?» subito dopo la scelta del profilo
+    if(ruolo === "proprietario") setTimeout(() => { if(typeof chiediCodiceIscrizione === "function") chiediCodiceIscrizione(); }, 900);
   } catch(e){
     errBox.textContent = "Non sono riuscito a salvare la scelta, riprova.";
     errBox.style.display = "block";

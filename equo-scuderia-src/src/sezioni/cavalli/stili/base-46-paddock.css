@@ -1,0 +1,42 @@
+/* ---------- PADDOCK (9/11/2026 · SQL 49) ---------- */
+/* Opzione D: angoli tondi, verde pieno, griglia dei posti, cancello a sbarre */
+.box-card.pad-card{border-radius:24px;background:color-mix(in srgb,var(--surface) 80%,#5f8f4a);min-height:208px}
+.pd-testa{display:flex;align-items:center;gap:6px;padding:10px 10px 6px;min-width:0}
+.pd-tag{font-size:10px;font-weight:800;letter-spacing:.1em;padding:3px 9px;border-radius:99px;background:#2f5d33;color:#fff;flex-shrink:0}
+.pd-tag.over{background:var(--danger);letter-spacing:.04em}
+.pd-nome{font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-posti{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:2px 10px 6px;min-height:0}
+.pd-posto{border-radius:12px;background:color-mix(in srgb,var(--surface) 72%,transparent);display:flex;align-items:center;gap:6px;padding:3px 6px;min-width:0;min-height:30px;font-size:11.5px;font-weight:700;touch-action:none}
+.pd-posto .f{width:26px;height:26px;border-radius:50%;background:#8a6a45 center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;font-weight:800}
+.pd-posto .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.pd-posto{position:relative}
+.pd-posto .g{position:absolute;left:22px;top:1px;font-size:8.5px;font-weight:800;line-height:1.2;color:#5c3f06;background:#f3d98f;padding:0 4px;border-radius:99px;box-shadow:0 0 0 1.5px var(--surface)}
+.pd-posto.v{background:transparent;border:2px dashed color-mix(in srgb,#3f7a45 40%,transparent);justify-content:center;color:#3f7a45;font-size:11px;touch-action:auto}
+.pd-posto.x{background:color-mix(in srgb,var(--danger) 16%,var(--surface));border:2px solid var(--danger)}
+.pd-posto.x .f{background-color:var(--danger)}
+.pd-altri{justify-content:center;font-weight:800;color:var(--text)}
+.pd-icone{display:flex;align-items:center;gap:4px;padding:0 14px 6px}
+.pd-conta{margin-left:auto;font-size:11px;font-weight:800;color:#2f5d33}
+.pd-conta.over{color:var(--danger)}
+.pd-manut{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:13px;color:var(--muted);text-align:center;padding:0 10px}
+.pd-manut i{font-size:20px;color:#9a6b12}
+.pd-manut b{color:var(--text)}
+.pd-cancello{height:22px;margin:0 14px 10px;border-radius:4px;border:2px solid #6f8a5e;opacity:.7;flex-shrink:0;
+  background:repeating-linear-gradient(90deg,transparent 0 14px,#6f8a5e 14px 16px),linear-gradient(180deg,transparent 5px,#6f8a5e 5px 7px,transparent 7px 12px,#6f8a5e 12px 14px,transparent 14px)}
+.box-card.pad-card.rosso .pd-cancello{border-color:var(--danger)}
+.pd-posto.in-trascinamento,.pad-cav.in-trascinamento{opacity:.45}
+.box-sezione.stalla .box-card.pad-card{min-height:270px}
+.box-sezione.stalla .pd-posto{font-size:14px;min-height:40px}
+.box-sezione.stalla .pd-posto .f{width:34px;height:34px}
+.pad-sezione{margin-top:26px}
+.pad-avviso{padding:10px 14px;border-radius:12px;background:var(--danger-bg,#fbe9e7);color:var(--danger);font-size:13.5px;margin:0 0 12px}
+.pad-avviso a{color:inherit;font-weight:700}
+.pad-etichetta{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:4px 0 6px}
+.pad-riga-cap{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin-bottom:12px}
+.pad-riga{border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
+.pad-riga-testa{display:flex;align-items:center;gap:10px}
+.pad-riga-testa .f{width:40px;height:40px;border-radius:50%;background:var(--muted-bg) center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.pad-ic-cav{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pad-ic-cav .box-ic{width:28px;height:28px;font-size:13px;border-radius:8px;opacity:.55;background:var(--muted-bg)}
+.pad-ic-cav .box-ic.on{opacity:1;background:var(--ic-col,#3f7a45)}
+.bp-avviso.rosso{padding:8px 12px;border-radius:10px;background:var(--danger-bg,#fbe9e7);color:var(--danger);font-size:13px;font-weight:600;margin:0 0 10px}

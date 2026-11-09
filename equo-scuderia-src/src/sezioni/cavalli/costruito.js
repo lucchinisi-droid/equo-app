@@ -1858,6 +1858,9 @@
 			proprietario: document.getElementById("cav-proprietario").value.trim() || null,
 			note: document.getElementById("cav-note").value.trim() || null
 		};
+		const propScelto = document.getElementById("cav-proprietario").dataset.membroId || "";
+		if (propScelto && payload.proprietario) payload.proprietario_membro_id = propScelto;
+		const clientiPrima = new Set((typeof teamList !== "undefined" ? teamList : []).map((m) => m.id));
 		const vecchio = editingCavalloId ? cavalliList.find((x) => x.id === editingCavalloId) : null;
 		const sesso = document.getElementById("cav-sesso").value || null, attivita = document.getElementById("cav-attivita").value.trim().slice(0, 60) || null;
 		if (sesso || vecchio?.sesso) payload.sesso = sesso;
@@ -1910,7 +1913,15 @@
 			if (currentCavalloId) renderCavalloDetail();
 			else renderCavalliList();
 			closeModal("modal-cavallo");
-			showToast(editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto.");
+			let avvisoProv = "";
+			if (!DEMO_MODE && payload.proprietario && !propScelto) {
+				await loadTeam();
+				const cav = cavalliList.find((x) => x.id === savedCavalloId);
+				const nuovo = cav?.proprietario_membro_id && !clientiPrima.has(cav.proprietario_membro_id) ? teamList.find((m) => m.id === cav.proprietario_membro_id) : null;
+				if (nuovo?.provvisorio) avvisoProv = `Creata la scheda cliente provvisoria di ${nuovo.nome_visualizzato}: completala in Clienti.`;
+				if (typeof caricaClienti === "function") caricaClienti();
+			}
+			showToast(avvisoProv || (editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto."));
 			if (codiceProprietario) {
 				const esito = await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);
 				if (esito.ok) {
@@ -2631,6 +2642,8 @@
 			document.getElementById("cav-microchip").value = c?.microchip || "";
 			document.getElementById("cav-gruppo-sanguigno").value = c?.gruppo_sanguigno || "";
 			document.getElementById("cav-proprietario").value = c?.proprietario || "";
+			document.getElementById("cav-proprietario").dataset.membroId = "";
+			if (typeof propCavReset === "function") propCavReset();
 			document.getElementById("cav-codice-proprietario").value = "";
 			document.getElementById("cav-note").value = c?.note || "";
 			preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
@@ -2650,6 +2663,8 @@
 				"cav-codice-proprietario",
 				"cav-note"
 			].forEach((id) => document.getElementById(id).value = "");
+			document.getElementById("cav-proprietario").dataset.membroId = "";
+			if (typeof propCavReset === "function") propCavReset();
 			preview.innerHTML = "";
 		}
 		openModal("modal-cavallo");
@@ -2785,7 +2800,8 @@
 				stallone: "Stallone"
 			}[c.sesso] || null,
 			TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null,
-			c.proprietario ? "proprietario: " + c.proprietario : null
+			c.proprietario ? "proprietario: " + c.proprietario : null,
+			typeof doveViveCavallo === "function" ? doveViveCavallo(c.id) : null
 		].filter(Boolean).join(" · ");
 		document.getElementById("detail-cavallo-sub").textContent = sub || "Nessun dettaglio aggiuntivo";
 		const info = [
@@ -3041,9 +3057,12 @@
 	function openCavalloDetail(id) {
 		currentCavalloId = id;
 		document.getElementById("cavalli-list-view").style.display = "none";
+		const incView = document.getElementById("cavalli-incarichi-view");
+		if (incView) incView.style.display = "none";
 		document.getElementById("cavalli-detail-view").style.display = "block";
 		renderCavalloDetail();
 		caricaAllegatiScud(id);
+		if (typeof mncAlCavallo === "function") mncAlCavallo(id);
 	}
 	function closeCavalloDetail() {
 		currentCavalloId = null;
@@ -3241,7 +3260,7 @@
 	function boxDragReset() {
 		clearTimeout(boxDrag.timer);
 		if (boxDrag.ghost) boxDrag.ghost.remove();
-		document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento").forEach((el) => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
+		document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento, .pad-cav.in-trascinamento").forEach((el) => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
 		document.body.classList.remove("box-trascina");
 		Object.assign(boxDrag, {
 			timer: null,
@@ -3254,13 +3273,13 @@
 		window.__boxDrag = false;
 	}
 	document.addEventListener("pointerdown", (e) => {
-		const card = e.target.closest && e.target.closest(".box-card[data-cav]");
+		const card = e.target.closest && e.target.closest(".pad-cav[data-cav], .box-card[data-cav]");
 		if (!card || e.target.closest(".box-ic, .box-nota") || !boxPuoGestire() || boxBloccati()) return;
 		if (e.pointerType === "mouse" && e.button !== 0) return;
 		boxDragReset();
 		Object.assign(boxDrag, {
 			cav: card.dataset.cav,
-			da: card.dataset.box,
+			da: card.dataset.box || "pad:" + card.dataset.pad,
 			x0: e.clientX,
 			y0: e.clientY
 		});
@@ -3291,14 +3310,20 @@
 		}
 		boxDrag.ghost.style.left = e.clientX + "px";
 		boxDrag.ghost.style.top = e.clientY + "px";
-		const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box]");
+		const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box], .pad-card[data-pad]");
 		document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no").forEach((x) => {
 			if (x !== el) x.classList.remove("drop-ok", "drop-no");
 		});
-		boxDrag.target = el && el.dataset.box !== boxDrag.da ? el.dataset.box : null;
+		const dest = !el ? null : el.dataset.box || "pad:" + el.dataset.pad;
+		boxDrag.target = dest && dest !== boxDrag.da ? dest : null;
 		if (boxDrag.target) {
-			const b = boxList.find((x) => x.id === boxDrag.target);
-			el.classList.add(b && !b.cavallo_id && !b.manutenzione ? "drop-ok" : "drop-no");
+			if (boxDrag.target.startsWith("pad:")) {
+				const p = (typeof paddockList !== "undefined" ? paddockList : []).find((x) => x.id === boxDrag.target.slice(4));
+				el.classList.add(p && !p.manutenzione ? "drop-ok" : "drop-no");
+			} else {
+				const b = boxList.find((x) => x.id === boxDrag.target);
+				el.classList.add(b && (!b.cavallo_id || b.cavallo_id === boxDrag.cav) && !b.manutenzione ? "drop-ok" : "drop-no");
+			}
 		}
 	});
 	document.addEventListener("touchmove", (e) => {
@@ -3313,7 +3338,10 @@
 		setTimeout(() => {
 			boxDrag.blocca = false;
 		}, 400);
-		if (target) await boxMuovi(cav, da, target);
+		if (!target) return;
+		if (target.startsWith("pad:")) await paddockMetti(cav, target.slice(4));
+		else if (da.startsWith("pad:")) await paddockVersoBox(cav, target);
+		else await boxMuovi(cav, da, target);
 	});
 	document.addEventListener("pointercancel", () => {
 		if (!boxDrag.attivo) boxDragReset();

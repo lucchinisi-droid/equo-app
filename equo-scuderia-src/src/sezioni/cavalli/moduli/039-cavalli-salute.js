@@ -155,9 +155,11 @@ function renderCavalliList(){
 function openCavalloDetail(id){
   currentCavalloId = id;
   document.getElementById("cavalli-list-view").style.display = "none";
+  const incView = document.getElementById("cavalli-incarichi-view"); if(incView) incView.style.display = "none";
   document.getElementById("cavalli-detail-view").style.display = "block";
   renderCavalloDetail();
   caricaAllegatiScud(id);
+  if(typeof mncAlCavallo === "function") mncAlCavallo(id);   // riquadro «Maniscalco» (SQL 50)
 }
 
 function closeCavalloDetail(){

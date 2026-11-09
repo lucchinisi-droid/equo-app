@@ -9,7 +9,7 @@ import { loadLezioni } from "./029-lezioni-manuali-calendario-proprietario.js";
 import { accettaLezioneScuderia, createLezione, deleteLezioneCorrente, loadCalendarioScuderia, modificaLezioneScuderia, openAddLezioneModal } from "./030-calendario-lezioni-ed-eventi-sanitari-da.js";
 import { insertOwnerEmoji, loadOwnerChatList, loadStableChatSection, openStableChatThread, toggleOwnerEmojiPicker } from "./069-chat-proprietario-proprietario.js";
 import { copiaTestoDs, daSaldareVisto, renderDaSaldare, segnalaGiaPagato } from "./071-pagamenti-da-saldare-al-maniscalco-propr.js";
-import { apriDocumentoPrivato, bollaAllegato, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia } from "./073-chat-col-proprio-maniscalco-lato-proprie.js";
+import { apriDocumentoPrivato, bollaAllegato, chiediCodiceIscrizione, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia, saltaCodiceIscrizione } from "./073-chat-col-proprio-maniscalco-lato-proprie.js";
 import { annullaRichiestaAppuntamento, apriAppuntamentiManiscalco, inviaRichiestaAppuntamento, toggleRichiestaCampi, vistoModificaAppuntamento } from "./075-appuntamenti-col-maniscalco-lato-proprie.js";
 import { deleteExpenseFromModal, loadExpenses, loadExpensesSummary, openAddExpenseModal, openEditExpenseModal, saveExpense } from "./079-expenses.js";
 import { filterServices, focusServiceOnMap, loadServicesData, openServicesMap } from "./083-services-map.js";
@@ -47,6 +47,7 @@ Object.assign(window, {
   caricaConfermePro,
   cavalliUsabili,
   closeHorseDetail,
+  chiediCodiceIscrizione,
   collegaManiscalco,
   confermaCavalloPro,
   confermaDatiCavallo,
@@ -105,6 +106,7 @@ Object.assign(window, {
   openAddExpenseModal,
   openAddLezioneModal,
   openCollegaManiscalco,
+  saltaCodiceIscrizione,
   openEditEventModal,
   openEditExpenseModal,
   openHorseDetail,

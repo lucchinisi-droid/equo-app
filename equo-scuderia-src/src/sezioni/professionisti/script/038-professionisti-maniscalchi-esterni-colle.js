@@ -548,14 +548,71 @@ function confermaAggiungiProfessionista(){
   return inviaInvitoProfessionista();
 }
 
+// ── Codice invito del maniscalco (9/11/2026 · SQL 52) ───────────────────────────
+// Codice personale EQUOPRO… = invito classico (lui accetta). Codice invito EQUO… o link del QR della scheda della scuderia =
+// collegamento subito alla scheda che il maniscalco ha già, con i suoi cavalli da confermare (nessuna scheda doppia).
+function codiceDaTestoScud(t){
+  const s = String(t || "").trim();
+  const m = s.match(/[?&]invito=([^&#\s]+)/i);
+  return decodeURIComponent(m ? m[1] : s).replace(/[\s-]/g, "").toUpperCase();
+}
+const ePersonaleScud = c => /^EQUO(PRO|TRA|MED|OWN)/.test(c);
+async function usaCodiceInvitoScud(codice){
+  const { data, error } = await sb.rpc("scuderia_usa_codice_invito", { p_centro: currentCentro.id, p_codice: codice });
+  if(error) return { ok: false, errore: /scuderia_usa_codice_invito|schema cache/.test(error.message || "") ? "Manca un aggiornamento del database (SQL 52): avvisa l'assistenza." : (error.message || "Non riuscito, riprova.") };
+  if(!data?.ok) return { ok: false, errore: data?.errore || "Codice non valido." };
+  const nome = data.nome || "Il maniscalco";
+  return { ok: true, testo: data.gia ? (data.unita ? `${nome} era già collegato: abbiamo unito le schede, niente doppioni.` : `${nome} è già collegato alla scuderia.`)
+    : `Collegati con ${nome}!` + (Number(data.cavalli) ? ` Ha già inserito ${data.cavalli} cavalli: li trovi in Cavalli da confermare.` : "") };
+}
+function apriCodiceIscrizione(){
+  if(DEMO_MODE || !document.getElementById("modal-codice-iscrizione")) return;
+  document.getElementById("codice-iscr-input").value = "";
+  document.getElementById("codice-iscr-error").style.display = "none";
+  openModal("modal-codice-iscrizione");
+}
+function saltaCodiceIscrizione(){
+  closeModal("modal-codice-iscrizione");
+  showToast("Va bene! Se il tuo maniscalco usa Equo, lo colleghi quando vuoi da Professionisti.");
+}
+async function usaCodiceIscrizione(){
+  const err = document.getElementById("codice-iscr-error"), btn = document.getElementById("codice-iscr-btn");
+  const codice = codiceDaTestoScud(document.getElementById("codice-iscr-input").value);
+  err.style.display = "none";
+  if(!codice){ err.textContent = "Scrivi il codice del maniscalco."; err.style.display = "block"; return; }
+  btn.disabled = true;
+  let esito;
+  try{
+    if(ePersonaleScud(codice)){
+      const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: null });
+      esito = error || !data?.ok ? { ok: false, errore: data?.errore || "Non è stato possibile inviare l'invito. Riprova." }
+        : { ok: true, testo: data.gia ? `${data.nome} è già collegato o c'è già una richiesta in corso.` : `Invito inviato a ${data.nome}: appena accetta vi collegate e i cavalli che ha già inserito ti arrivano da confermare.` };
+    } else esito = await usaCodiceInvitoScud(codice);
+  } finally { btn.disabled = false; }
+  if(!esito.ok){ err.textContent = esito.errore; err.style.display = "block"; return; }
+  closeModal("modal-codice-iscrizione");
+  showToast(esito.testo);
+  if(typeof refreshProfessionistiModule === "function") refreshProfessionistiModule().catch(() => {});
+}
+
 async function inviaInvitoProfessionista(){
   const input = document.getElementById("pro-codice-input");
   const err = document.getElementById("pro-codice-error");
   const btn = document.getElementById("pro-codice-btn");
-  const codice = input.value.trim().toUpperCase();
+  const codice = codiceDaTestoScud(input.value);
   err.style.display = "none";
   if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
   if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
+  // codice invito o link del QR: collegamento immediato alla scheda che il maniscalco ha già (SQL 52)
+  if(!ePersonaleScud(codice)){
+    btn.disabled = true;
+    const esito = await usaCodiceInvitoScud(codice);
+    btn.disabled = false;
+    if(!esito.ok){ err.textContent = esito.errore; err.style.display = "block"; return; }
+    closeModal("modal-aggiungi-pro"); showToast(esito.testo);
+    await refreshProfessionistiModule();
+    return;
+  }
   const cavalli = cavalliSpuntati("pro-abbina-cavalli");
   btn.disabled = true;
   const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: cavalli });
@@ -725,14 +782,15 @@ function renderSchedaProCavalli(){
     attivo: '<span class="badge-pill badge-green" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">abbinato</span>',
     da_confermare_proprietario: '<span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px;flex-shrink:0"><i class="fa-solid fa-hourglass-half"></i> in attesa del proprietario</span>',
     rifiutato: '<span class="badge-pill badge-red" style="font-size:10.5px;padding:2px 8px;flex-shrink:0" title="Spunta di nuovo per richiedere la conferma">rifiutato dal proprietario</span>',
+    programmato: '<span class="badge-pill badge-gray" style="font-size:10.5px;padding:2px 8px;flex-shrink:0"><i class="fa-regular fa-calendar"></i> dalla data scelta</span>',
   };
   const n = cav.filter(c => c.stato === "attivo").length;
   box.innerHTML = `<p style="color:var(--muted);font-size:12.5px;margin:0 0 8px">${n} ${n === 1 ? "cavallo abbinato" : "cavalli abbinati"}. Il professionista vede nella sua app solo questi.
-      ${puo ? "Se togli un cavallo, nella sua app finisce tra gli archiviati: i lavori fatti restano nello storico. I cavalli con un proprietario su Equo aspettano la sua conferma." : "Solo l'amministratore o un membro di livello 2-3 può cambiare i cavalli."}</p>
+      ${puo ? "Se togli un cavallo, nella sua app finisce tra gli archiviati: i lavori fatti restano nello storico. I cavalli con un proprietario su Equo aspettano la sua conferma. Se un cavallo spuntato ha già un altro maniscalco, questo lo sostituisce: per sostituti a tempo e cambi da una data usa Cavalli › Maniscalchi." : "Solo l'amministratore o un membro di livello 2-3 può cambiare i cavalli."}</p>
     <div id="scheda-pro-cav-lista">` + cav.map(c => {
       const chip = (CHIP[c.stato] || (c.ha_proprietario ? chipConferma : ""))
         + (c.uscito ? ' <span class="badge-pill badge-gray" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">uscito dal centro</span>' : "");
-      return rigaCavalloAbbina(c, c.stato === "attivo" || c.stato === "da_confermare_proprietario", chip).replace('type="checkbox"', puo ? 'type="checkbox"' : 'type="checkbox" disabled');
+      return rigaCavalloAbbina(c, ["attivo", "da_confermare_proprietario", "programmato"].includes(c.stato), chip).replace('type="checkbox"', puo ? 'type="checkbox"' : 'type="checkbox" disabled');
     }).join("") + `</div>
     ${puo ? '<div class="auth-error" id="scheda-pro-cav-error"></div><button class="btn btn-primary btn-block" style="margin-top:12px" id="scheda-pro-cav-salva" onclick="salvaCavalliSchedaPro()">Salva i cavalli</button>' : ""}`;
 }

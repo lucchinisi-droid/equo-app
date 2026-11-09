@@ -1,4 +1,7 @@
 // Equo App · proprietario · PROFESSIONISTI PROPOSTI DALLA SCUDERIA (4/11/2026 · SQL 43)
+// 9/11/2026 (SQL 50): la proposta può essere un cambio («al posto di»), un sostituto a tempo o partire da una data
+const ppPeriodo = p => { const d = x => x ? new Date(x + "T12:00").toLocaleDateString("it-IT") : ""; const oggi = new Date().toISOString().slice(0, 10);
+  return (p.dal && p.dal > oggi ? " dal " + d(p.dal) : "") + (p.ruolo === "sostituto" && p.al ? " fino al " + d(p.al) : ""); };
 // Quando la scuderia abbina un maniscalco a un mio cavallo, l'abbinamento aspetta la mia conferma:
 // in Home compare «Professionisti da confermare» con Accetta / Rifiuta (core/dati/db-01: proposteProfessionisti,
 // rispondiPropostaProfessionista). Accettando, il professionista riceve il cavallo nella sua app; rifiutando no.
@@ -26,7 +29,7 @@ async function ppRenderHome(){
   if(!lista.length){ box.innerHTML = ""; return; }
   box.innerHTML = `<div class="card ter-card"><div class="ter-tit">🐴 Professionisti da confermare</div>
     ${lista.map(p => `<div class="ter-piano" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <div style="flex:1 1 180px;min-width:0;font-size:13.5px;line-height:1.45"><b>${ppEsc(p.scuderia)}</b> propone <b>${ppEsc(p.professionista)}</b> come ${ppEsc(p.professione)} di <b>${ppEsc(p.cavallo)}</b>.
+      <div style="flex:1 1 180px;min-width:0;font-size:13.5px;line-height:1.45"><b>${ppEsc(p.scuderia)}</b> propone <b>${ppEsc(p.professionista)}</b> come ${ppEsc(p.professione)}${p.ruolo === "sostituto" ? " sostituto" : ""} di <b>${ppEsc(p.cavallo)}</b>${p.al_posto_di ? " al posto di " + ppEsc(p.al_posto_di) : ""}${ppPeriodo(p)}.
         <div class="muted" style="font-size:12px">Se accetti, vede il cavallo nella sua app e registra i lavori.</div></div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button type="button" class="btn btn-outline btn-sm" onclick="ppRispondi('${p.id}', false, this)">Rifiuta</button>

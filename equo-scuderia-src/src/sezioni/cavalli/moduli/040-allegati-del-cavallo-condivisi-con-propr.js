@@ -70,7 +70,8 @@ function renderCavalloDetail(){
   if(!c){ closeCavalloDetail(); return; }
 
   document.getElementById("detail-cavallo-nome").innerHTML = escapeHtml(c.nome) + " " + pallinoHtml(c.id);
-  const sub = [c.razza, c.mantello, { femmina: "Femmina", castrone: "Castrone", stallone: "Stallone" }[c.sesso] || null, TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null, c.proprietario ? "proprietario: " + c.proprietario : null].filter(Boolean).join(" · ");
+  const sub = [c.razza, c.mantello, { femmina: "Femmina", castrone: "Castrone", stallone: "Stallone" }[c.sesso] || null, TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null, c.proprietario ? "proprietario: " + c.proprietario : null,
+    typeof doveViveCavallo === "function" ? doveViveCavallo(c.id) : null].filter(Boolean).join(" · ");
   document.getElementById("detail-cavallo-sub").textContent = sub || "Nessun dettaglio aggiuntivo";
   const info = [
     c.codice_equo ? "Codice Equo: " + c.codice_equo : null,

@@ -140,6 +140,11 @@ async function saveCavallo(){
     proprietario: document.getElementById("cav-proprietario").value.trim() || null,
     note: document.getElementById("cav-note").value.trim() || null,
   };
+  // 9/11/2026 (SQL 48): proprietario scelto dall'elenco clienti → collegamento diretto;
+  // nome scritto a mano → ci pensa il database (cliente con lo stesso nome o scheda provvisoria)
+  const propScelto = document.getElementById("cav-proprietario").dataset.membroId || "";
+  if(propScelto && payload.proprietario) payload.proprietario_membro_id = propScelto;
+  const clientiPrima = new Set((typeof teamList !== "undefined" ? teamList : []).map(m => m.id));
   // 26/10/2026: sesso e attività (schema 13); si mandano solo se scelti o se c'erano già
   const vecchio = editingCavalloId ? cavalliList.find(x => x.id === editingCavalloId) : null;
   const sesso = document.getElementById("cav-sesso").value || null, attivita = document.getElementById("cav-attivita").value.trim().slice(0, 60) || null;
@@ -183,7 +188,15 @@ async function saveCavallo(){
     await loadCavalli();
     if(currentCavalloId){ renderCavalloDetail(); } else { renderCavalliList(); }
     closeModal("modal-cavallo");
-    showToast(editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto.");
+    let avvisoProv = "";
+    if(!DEMO_MODE && payload.proprietario && !propScelto){
+      await loadTeam();
+      const cav = cavalliList.find(x => x.id === savedCavalloId);
+      const nuovo = cav?.proprietario_membro_id && !clientiPrima.has(cav.proprietario_membro_id) ? teamList.find(m => m.id === cav.proprietario_membro_id) : null;
+      if(nuovo?.provvisorio) avvisoProv = `Creata la scheda cliente provvisoria di ${nuovo.nome_visualizzato}: completala in Clienti.`;
+      if(typeof caricaClienti === "function") caricaClienti();
+    }
+    showToast(avvisoProv || (editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto."));
 
     if(codiceProprietario){
       const esito = await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);

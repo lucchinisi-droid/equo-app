@@ -6,7 +6,10 @@
                 <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli</h1>
                 <p>Anagrafica cavalli del centro e scadenzario sanitario.</p>
               </div>
-              <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline" onclick="apriIncarichi()" data-tip="Chi è il maniscalco di ogni cavallo: assegna, cambia o revoca, anche su più cavalli insieme"><i class="fa-solid fa-user-gear"></i> Maniscalchi</button>
+                <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+              </div>
             </div>
             <div id="cavalli-arrivi"></div>
             <div id="cavalli-sezioni">
@@ -48,7 +51,37 @@
                 </div>
               </div>
               <div class="box-griglia" id="box-griglia"></div>
+              <!-- PADDOCK (SQL 49): più cavalli insieme, con capienza -->
+              <div class="pad-sezione" id="paddock-sezione">
+                <div class="box-testa">
+                  <div>
+                    <h2><span class="page-icon"><i class="fa-solid fa-tree"></i></span> Paddock</h2>
+                    <div class="box-conta" id="paddock-conta"></div>
+                  </div>
+                </div>
+                <div class="pad-avviso" id="paddock-avviso" style="display:none"></div>
+                <div class="box-griglia" id="paddock-griglia"></div>
+                <p id="paddock-vuoto" style="display:none;color:var(--muted);font-size:13px">Nessun paddock.</p>
+              </div>
             </section>
+          </div>
+
+          <!-- MANISCALCHI DEI CAVALLI (SQL 50) -->
+          <div id="cavalli-incarichi-view" style="display:none">
+            <button class="back-link" onclick="chiudiIncarichi()"><i class="fa-solid fa-arrow-left"></i> Torna ai cavalli</button>
+            <div class="page-header">
+              <div>
+                <h1><span class="page-icon"><i class="fa-solid fa-user-gear"></i></span> Maniscalchi dei cavalli</h1>
+                <p id="inc-conta">Chi segue ogni cavallo.</p>
+              </div>
+            </div>
+            <div class="inc-filtri">
+              <input class="input" id="inc-cerca" type="search" placeholder="Cerca cavallo, proprietario o maniscalco" aria-label="Cerca" oninput="mncFiltra()">
+              <select class="input" id="inc-filtro" aria-label="Filtra" onchange="mncFiltra()"><option value="">Tutti i cavalli</option></select>
+            </div>
+            <div class="inc-barra" id="inc-barra" style="display:none"></div>
+            <div id="inc-corpo"></div>
+            <p class="inc-nota" style="margin-top:14px">Un cavallo ha un maniscalco titolare e, se serve, un sostituto per un periodo. Se il proprietario usa l'app, ogni cambio gli chiede conferma. Revocare non cancella lavori, storico o crediti del maniscalco.</p>
           </div>
 
           <!-- DETTAGLIO CAVALLO -->
@@ -69,6 +102,7 @@
               </div>
             </div>
             <div id="scud-codice-box"></div>
+            <div id="cav-incarico-box"></div>
             <div class="card" style="margin-bottom:16px">
               <h3 style="margin-top:0">Scheda cavallo (PDF + QR)</h3>
               <p id="scheda-pdf-status" style="margin:0 0 12px;color:var(--muted);font-size:12.5px">Nessuna scheda generata ancora.</p>

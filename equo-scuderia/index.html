@@ -1498,6 +1498,14 @@ tr:last-child td{border-bottom:none}
 /* cavallo oltre il limite del pacchetto (9/11/2026): oscurato, al tocco la richiesta del pacchetto superiore */
 .cavallo-card.cavallo-bloccato{opacity:.45;filter:grayscale(.7);position:relative}
 .cavallo-card.cavallo-bloccato::after{content:"\f023";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:12px;bottom:10px;font-size:13px;color:var(--muted)}
+
+/* 9/11/2026 · campo Proprietario con suggerimenti dai clienti (SQL 48) */
+.prop-sugg{position:absolute;left:0;right:0;top:100%;z-index:40;margin-top:-6px;background:var(--surface,#fff);border:1px solid var(--border,#e2e2e2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;max-height:240px;overflow-y:auto}
+.prop-sugg button{display:flex;gap:6px;align-items:center;width:100%;text-align:left;padding:10px 12px;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+.prop-sugg button:hover,.prop-sugg button:focus{background:rgba(0,0,0,.05)}
+.prop-hint{font-size:12px;color:var(--muted);margin-top:4px;min-height:0}
+.prop-hint:empty{display:none}
+.cli-provvisorio{background:#fdf3d8;color:#6b520c;border-radius:10px;padding:10px 12px;font-size:13px;margin:0 0 12px}
 /* ---------- LEZIONI / PACCHETTI / COMUNICAZIONI ---------- */
 .lez-filter-btn{background:var(--muted-bg);color:var(--muted);border:none}
 .lez-filter-btn.active{background:var(--secondary);color:var(--primary-hover)}
@@ -1851,6 +1859,73 @@ textarea.input{resize:vertical}
 .uscito-riga{display:flex;flex-direction:column;padding:8px 0;border-top:1px solid var(--border);font-size:13px}
 .uscito-riga span{color:var(--muted);font-size:12px}
 .usciti-nota{font-size:12px;color:var(--muted);margin:8px 0 0}
+/* ---------- PADDOCK (9/11/2026 · SQL 49) ---------- */
+/* Opzione D: angoli tondi, verde pieno, griglia dei posti, cancello a sbarre */
+.box-card.pad-card{border-radius:24px;background:color-mix(in srgb,var(--surface) 80%,#5f8f4a);min-height:208px}
+.pd-testa{display:flex;align-items:center;gap:6px;padding:10px 10px 6px;min-width:0}
+.pd-tag{font-size:10px;font-weight:800;letter-spacing:.1em;padding:3px 9px;border-radius:99px;background:#2f5d33;color:#fff;flex-shrink:0}
+.pd-tag.over{background:var(--danger);letter-spacing:.04em}
+.pd-nome{font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-posti{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:2px 10px 6px;min-height:0}
+.pd-posto{border-radius:12px;background:color-mix(in srgb,var(--surface) 72%,transparent);display:flex;align-items:center;gap:6px;padding:3px 6px;min-width:0;min-height:30px;font-size:11.5px;font-weight:700;touch-action:none}
+.pd-posto .f{width:26px;height:26px;border-radius:50%;background:#8a6a45 center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;font-weight:800}
+.pd-posto .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.pd-posto{position:relative}
+.pd-posto .g{position:absolute;left:22px;top:1px;font-size:8.5px;font-weight:800;line-height:1.2;color:#5c3f06;background:#f3d98f;padding:0 4px;border-radius:99px;box-shadow:0 0 0 1.5px var(--surface)}
+.pd-posto.v{background:transparent;border:2px dashed color-mix(in srgb,#3f7a45 40%,transparent);justify-content:center;color:#3f7a45;font-size:11px;touch-action:auto}
+.pd-posto.x{background:color-mix(in srgb,var(--danger) 16%,var(--surface));border:2px solid var(--danger)}
+.pd-posto.x .f{background-color:var(--danger)}
+.pd-altri{justify-content:center;font-weight:800;color:var(--text)}
+.pd-icone{display:flex;align-items:center;gap:4px;padding:0 14px 6px}
+.pd-conta{margin-left:auto;font-size:11px;font-weight:800;color:#2f5d33}
+.pd-conta.over{color:var(--danger)}
+.pd-manut{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:13px;color:var(--muted);text-align:center;padding:0 10px}
+.pd-manut i{font-size:20px;color:#9a6b12}
+.pd-manut b{color:var(--text)}
+.pd-cancello{height:22px;margin:0 14px 10px;border-radius:4px;border:2px solid #6f8a5e;opacity:.7;flex-shrink:0;
+  background:repeating-linear-gradient(90deg,transparent 0 14px,#6f8a5e 14px 16px),linear-gradient(180deg,transparent 5px,#6f8a5e 5px 7px,transparent 7px 12px,#6f8a5e 12px 14px,transparent 14px)}
+.box-card.pad-card.rosso .pd-cancello{border-color:var(--danger)}
+.pd-posto.in-trascinamento,.pad-cav.in-trascinamento{opacity:.45}
+.box-sezione.stalla .box-card.pad-card{min-height:270px}
+.box-sezione.stalla .pd-posto{font-size:14px;min-height:40px}
+.box-sezione.stalla .pd-posto .f{width:34px;height:34px}
+.pad-sezione{margin-top:26px}
+.pad-avviso{padding:10px 14px;border-radius:12px;background:var(--danger-bg,#fbe9e7);color:var(--danger);font-size:13.5px;margin:0 0 12px}
+.pad-avviso a{color:inherit;font-weight:700}
+.pad-etichetta{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:4px 0 6px}
+.pad-riga-cap{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin-bottom:12px}
+.pad-riga{border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
+.pad-riga-testa{display:flex;align-items:center;gap:10px}
+.pad-riga-testa .f{width:40px;height:40px;border-radius:50%;background:var(--muted-bg) center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.pad-ic-cav{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pad-ic-cav .box-ic{width:28px;height:28px;font-size:13px;border-radius:8px;opacity:.55;background:var(--muted-bg)}
+.pad-ic-cav .box-ic.on{opacity:1;background:var(--ic-col,#3f7a45)}
+.bp-avviso.rosso{padding:8px 12px;border-radius:10px;background:var(--danger-bg,#fbe9e7);color:var(--danger);font-size:13px;font-weight:600;margin:0 0 10px}
+/* ---------- INCARICHI DEL MANISCALCO (9/11/2026 · SQL 50) ---------- */
+.inc-filtri{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.inc-filtri .input{flex:1;min-width:180px}
+.inc-filtri select.input{flex:0 1 240px}
+.inc-barra{position:sticky;top:8px;z-index:20;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin:0 0 12px;border-radius:12px;background:var(--surface);border:2px solid var(--primary);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.inc-tabella td{vertical-align:middle}
+.inc-tabella tr.sel td{background:color-mix(in srgb,var(--primary) 7%,transparent)}
+.inc-tabella input[type=checkbox]{width:18px;height:18px}
+.inc-cav{display:flex;align-items:center;gap:10px;min-width:160px}
+.inc-cav .f{width:36px;height:36px;border-radius:50%;background:#8a6a45 center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+.inc-attesa{font-size:12.5px;line-height:1.4;color:var(--text)}
+.inc-attesa i{color:#9a6b12;width:14px}
+.inc-attesa.rifiuto,.inc-attesa.rifiuto i{color:var(--danger)}
+.inc-link{border:0;background:none;padding:0 0 0 4px;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
+.inc-quando{border:0;padding:0;margin:0 0 12px;display:flex;flex-direction:column;gap:8px}
+.inc-quando legend{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.inc-quando label{display:flex;align-items:center;gap:8px;font-size:14px;flex-wrap:wrap}
+.inc-quando .input{width:auto}
+.inc-nota{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
+.inc-riepilogo{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:13px;max-height:240px;overflow-y:auto}
+.inc-riepilogo ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.inc-riep-testa{font-weight:800}
+.inc-etichetta{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.inc-storico{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.inc-st-riga{border:1px solid var(--border);border-radius:12px;padding:10px 12px}
 /* Incassi (6/11/2026) */
 .inc-mese{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--border);border-radius:var(--radius-full);padding:2px 4px;background:var(--surface)}
 .inc-mese b{font-size:13.5px;min-width:118px;text-align:center;text-transform:capitalize}
@@ -2103,7 +2178,7 @@ textarea.input{resize:vertical}
           <i class="fa-solid fa-house-chimney"></i> <span class="nav-label">Il tuo Centro</span>
         </button>
         <button class="nav-item" data-module="clienti" onclick="showModule('clienti')" style="display:none">
-          <i class="fa-solid fa-address-book"></i> <span class="nav-label">Clienti</span>
+          <i class="fa-solid fa-address-book"></i> <span class="nav-label">Clienti</span> <span class="nav-unread-badge sem-giallo" id="clienti-nav-badge" style="display:none" title="Schede da completare">0</span>
         </button>
         <button class="nav-item" data-module="cavalli" onclick="showModule('cavalli')">
           <i class="fa-solid fa-horse-head"></i> <span class="nav-label">Cavalli</span> <span class="nav-unread-badge sem-verde" id="cavalli-nav-badge" title="Scadenze sanitarie">0</span>
@@ -2334,7 +2409,7 @@ textarea.input{resize:vertical}
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
               <input class="input" id="clienti-cerca" placeholder="Cerca per nome, telefono o email" oninput="filtraClienti()" style="flex:1;min-width:180px">
-              <select class="input" id="clienti-ruolo" onchange="filtraClienti()" style="width:auto"><option value="">Tutti</option><option value="allievo">Allievi e genitori</option><option value="proprietario">Proprietari</option></select>
+              <select class="input" id="clienti-ruolo" onchange="filtraClienti()" style="width:auto"><option value="">Tutti</option><option value="allievo">Allievi e genitori</option><option value="proprietario">Proprietari</option><option value="provvisori">Da completare</option></select>
             </div>
             <div class="table-wrap"><table>
               <thead><tr><th>Nome</th><th>Ruolo</th><th>Contatti</th><th>Età</th><th></th></tr></thead>
@@ -2353,7 +2428,10 @@ textarea.input{resize:vertical}
                 <h1><span class="page-icon"><i class="fa-solid fa-horse-head"></i></span> Cavalli</h1>
                 <p>Anagrafica cavalli del centro e scadenzario sanitario.</p>
               </div>
-              <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline" onclick="apriIncarichi()" data-tip="Chi è il maniscalco di ogni cavallo: assegna, cambia o revoca, anche su più cavalli insieme"><i class="fa-solid fa-user-gear"></i> Maniscalchi</button>
+                <button class="btn btn-primary" id="btn-nuovo-cavallo" onclick="openCavalloForm()"><i class="fa-solid fa-plus"></i> Nuovo cavallo</button>
+              </div>
             </div>
             <div id="cavalli-arrivi"></div>
             <div id="cavalli-sezioni">
@@ -2395,7 +2473,37 @@ textarea.input{resize:vertical}
                 </div>
               </div>
               <div class="box-griglia" id="box-griglia"></div>
+              <!-- PADDOCK (SQL 49): più cavalli insieme, con capienza -->
+              <div class="pad-sezione" id="paddock-sezione">
+                <div class="box-testa">
+                  <div>
+                    <h2><span class="page-icon"><i class="fa-solid fa-tree"></i></span> Paddock</h2>
+                    <div class="box-conta" id="paddock-conta"></div>
+                  </div>
+                </div>
+                <div class="pad-avviso" id="paddock-avviso" style="display:none"></div>
+                <div class="box-griglia" id="paddock-griglia"></div>
+                <p id="paddock-vuoto" style="display:none;color:var(--muted);font-size:13px">Nessun paddock.</p>
+              </div>
             </section>
+          </div>
+
+          <!-- MANISCALCHI DEI CAVALLI (SQL 50) -->
+          <div id="cavalli-incarichi-view" style="display:none">
+            <button class="back-link" onclick="chiudiIncarichi()"><i class="fa-solid fa-arrow-left"></i> Torna ai cavalli</button>
+            <div class="page-header">
+              <div>
+                <h1><span class="page-icon"><i class="fa-solid fa-user-gear"></i></span> Maniscalchi dei cavalli</h1>
+                <p id="inc-conta">Chi segue ogni cavallo.</p>
+              </div>
+            </div>
+            <div class="inc-filtri">
+              <input class="input" id="inc-cerca" type="search" placeholder="Cerca cavallo, proprietario o maniscalco" aria-label="Cerca" oninput="mncFiltra()">
+              <select class="input" id="inc-filtro" aria-label="Filtra" onchange="mncFiltra()"><option value="">Tutti i cavalli</option></select>
+            </div>
+            <div class="inc-barra" id="inc-barra" style="display:none"></div>
+            <div id="inc-corpo"></div>
+            <p class="inc-nota" style="margin-top:14px">Un cavallo ha un maniscalco titolare e, se serve, un sostituto per un periodo. Se il proprietario usa l'app, ogni cambio gli chiede conferma. Revocare non cancella lavori, storico o crediti del maniscalco.</p>
           </div>
 
           <!-- DETTAGLIO CAVALLO -->
@@ -2416,6 +2524,7 @@ textarea.input{resize:vertical}
               </div>
             </div>
             <div id="scud-codice-box"></div>
+            <div id="cav-incarico-box"></div>
             <div class="card" style="margin-bottom:16px">
               <h3 style="margin-top:0">Scheda cavallo (PDF + QR)</h3>
               <p id="scheda-pdf-status" style="margin:0 0 12px;color:var(--muted);font-size:12.5px">Nessuna scheda generata ancora.</p>
@@ -2903,9 +3012,9 @@ textarea.input{resize:vertical}
   <div class="modal" style="max-height:90vh;overflow-y:auto">
     <div class="modal-title"><span id="pro-aggiungi-titolo">Aggiungi maniscalco</span> <span class="x" onclick="closeModal('modal-aggiungi-pro')">✕</span></div>
     <div class="field" id="pro-codice-wrap">
-      <label>Codice professionista</label>
-      <input class="input" id="pro-codice-input" placeholder="Es. EQUOPRO0FKEM" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')confermaAggiungiProfessionista()">
-      <p style="color:var(--muted);font-size:12px;margin-top:4px">Il maniscalco trova il suo codice in Equo App (menu profilo). Riceverà l'invito e dovrà accettarlo. Se nel suo profilo mancano P.IVA o codice fiscale te lo segnaliamo, ma puoi collegarlo lo stesso.</p>
+      <label>Codice del maniscalco o codice invito</label>
+      <input class="input" id="pro-codice-input" placeholder="Es. EQUOPRO0FKEM oppure EQUO3F8A2" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')confermaAggiungiProfessionista()">
+      <p style="color:var(--muted);font-size:12px;margin-top:4px">Con il suo codice personale (in Equo App, menu profilo) riceve l'invito e deve accettarlo. Con il codice invito o il QR della scheda della tua scuderia vi collegate subito e i cavalli che ha già inserito ti arrivano da confermare. Se nel suo profilo mancano P.IVA o codice fiscale te lo segnaliamo, ma puoi collegarlo lo stesso.</p>
     </div>
     <div class="field">
       <label>Quali cavalli segue? <span style="color:var(--muted);font-weight:400">(potrai cambiarli dalla sua scheda)</span></label>
@@ -3120,7 +3229,7 @@ textarea.input{resize:vertical}
       <div class="field"><label>Microchip</label><input class="input" id="cav-microchip" placeholder="15 cifre"></div>
     </div>
     <div class="field"><label>Gruppo sanguigno</label><input class="input" id="cav-gruppo-sanguigno" placeholder="Facoltativo"></div>
-    <div class="field"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario"></div>
+    <div class="field" style="position:relative"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario" autocomplete="off" oninput="propCavSuggerisci()" onfocus="propCavSuggerisci()" onblur="setTimeout(propCavChiudi, 200)"><div id="cav-prop-sugg" class="prop-sugg" style="display:none"></div><div id="cav-prop-hint" class="prop-hint"></div></div>
     <div class="field">
       <label>Codice app proprietario <span style="color:var(--muted);font-weight:400">(facoltativo)</span></label>
       <input class="input" id="cav-codice-proprietario" placeholder="Es. EQUOOWN3Q9NM" style="text-transform:uppercase">
@@ -3277,6 +3386,34 @@ textarea.input{resize:vertical}
 </div>
 
 <!-- MODAL: invia la scheda PDF del cavallo in chat -->
+<!-- MODAL: pannello del paddock (SQL 49) -->
+<div class="modal-overlay" id="modal-paddock" onclick="if(event.target.id==='modal-paddock'){closeModal('modal-paddock');paddockPannelloId=null}">
+  <div class="modal">
+    <div class="modal-title"><span id="paddock-pannello-titolo">Paddock</span> <span class="x" onclick="closeModal('modal-paddock');paddockPannelloId=null">✕</span></div>
+    <div id="paddock-pannello-corpo"></div>
+  </div>
+</div>
+<!-- MODAL: incarichi del maniscalco (SQL 50) -->
+<div class="modal-overlay" id="modal-incarico" onclick="closeOut(event,'modal-incarico')">
+  <div class="modal">
+    <div class="modal-title"><span id="incarico-titolo">Maniscalco</span> <span class="x" onclick="closeModal('modal-incarico')">✕</span></div>
+    <div id="incarico-corpo"></div>
+  </div>
+</div>
+<!-- MODAL: il codice del maniscalco alla prima iscrizione (SQL 52) -->
+<div class="modal-overlay" id="modal-codice-iscrizione" onclick="closeOut(event,'modal-codice-iscrizione')">
+  <div class="modal">
+    <div class="modal-title"><span>Il tuo maniscalco usa già Equo?</span> <span class="x" onclick="saltaCodiceIscrizione()">✕</span></div>
+    <p style="font-size:14px;line-height:1.5;margin:0 0 14px">Chiedigli il <b>codice Equo</b> o il QR della scheda della tua scuderia: potremmo avere già i tuoi cavalli e lo storico, così non devi inserirli da capo.</p>
+    <div class="field"><label for="codice-iscr-input">Codice o link del maniscalco</label>
+      <input class="input" id="codice-iscr-input" placeholder="Es. EQUO3F8A2 oppure EQUOPRO0FKEM" autocomplete="off" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')usaCodiceIscrizione()"></div>
+    <p style="color:var(--muted);font-size:12px;margin:-4px 0 12px">Va bene anche il link che ti ha mandato (app.equohub.com/?invito=…).</p>
+    <div class="auth-error" id="codice-iscr-error"></div>
+    <button class="btn btn-primary btn-block" id="codice-iscr-btn" onclick="usaCodiceIscrizione()">Collega</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="saltaCodiceIscrizione()">Continua senza codice</button>
+    <p style="color:var(--muted);font-size:12px;text-align:center;margin:6px 0 0">Potrai farlo quando vuoi da Professionisti › Aggiungi maniscalco.</p>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-pdf-chat" onclick="closeOut(event,'modal-pdf-chat')">
   <div class="modal">
     <div class="modal-title"><span><i class="fa-solid fa-paper-plane" style="color:var(--primary)"></i> Invia la scheda in chat</span> <span class="x" onclick="closeModal('modal-pdf-chat')">✕</span></div>
@@ -3653,6 +3790,7 @@ textarea.input{resize:vertical}
 <div class="modal-overlay" id="modal-cliente" onclick="closeOut(event,'modal-cliente')">
   <div class="modal">
     <div class="modal-title"><span id="modal-cliente-title">Nuovo cliente</span> <span class="x" onclick="closeModal('modal-cliente')">✕</span></div>
+    <div id="cli-provvisorio" class="cli-provvisorio" style="display:none"></div>
     <div class="grid grid-2">
       <div class="field"><label>Nome e cognome</label><input class="input" id="cli-nome" maxlength="80" placeholder="Es. Sofia Rossi"></div>
       <div class="field"><label>Ruolo</label><select class="input" id="cli-ruolo"><option value="allievo">Allievo o genitore</option><option value="proprietario">Proprietario di un cavallo</option></select></div>
@@ -4129,6 +4267,8 @@ async function createCentro(){
     await loadTeam();
     enterAppShell();
     showToast("Centro creato! Sei l'amministratore.");
+    // 9/11/2026 (SQL 52): «Il tuo maniscalco usa già Equo?» subito dopo la creazione del centro
+    setTimeout(() => { if(typeof apriCodiceIscrizione === "function") apriCodiceIscrizione(); }, 900);
   } catch(err){
     errBox.textContent = err.message || "Errore nella creazione del centro.";
     errBox.style.display = "block";
@@ -4174,8 +4314,11 @@ const euro = (n, dec) => n == null || isNaN(n) ? "—" : "€ " + Number(n).toLo
 			teamList = demoState.membri;
 			return;
 		}
-		const { data, error } = await sb.from("scuderia_membri").select("id, user_id, ruolo, nome_visualizzato, livello, permessi").eq("centro_id", currentCentro.id).order("created_at", { ascending: true });
+		const leggi = (campi) => sb.from("scuderia_membri").select(campi).eq("centro_id", currentCentro.id).order("created_at", { ascending: true });
+		let { data, error } = await leggi("id, user_id, ruolo, nome_visualizzato, livello, permessi, provvisorio");
+		if (error) ({data, error} = await leggi("id, user_id, ruolo, nome_visualizzato, livello, permessi"));
 		if (!error) teamList = data || [];
+		if (typeof aggiornaBadgeClienti === "function") aggiornaBadgeClienti();
 	}
 	function renderTeam() {
 		document.getElementById("team-count").textContent = teamList.length;
@@ -8830,14 +8973,71 @@ function confermaAggiungiProfessionista(){
   return inviaInvitoProfessionista();
 }
 
+// ── Codice invito del maniscalco (9/11/2026 · SQL 52) ───────────────────────────
+// Codice personale EQUOPRO… = invito classico (lui accetta). Codice invito EQUO… o link del QR della scheda della scuderia =
+// collegamento subito alla scheda che il maniscalco ha già, con i suoi cavalli da confermare (nessuna scheda doppia).
+function codiceDaTestoScud(t){
+  const s = String(t || "").trim();
+  const m = s.match(/[?&]invito=([^&#\s]+)/i);
+  return decodeURIComponent(m ? m[1] : s).replace(/[\s-]/g, "").toUpperCase();
+}
+const ePersonaleScud = c => /^EQUO(PRO|TRA|MED|OWN)/.test(c);
+async function usaCodiceInvitoScud(codice){
+  const { data, error } = await sb.rpc("scuderia_usa_codice_invito", { p_centro: currentCentro.id, p_codice: codice });
+  if(error) return { ok: false, errore: /scuderia_usa_codice_invito|schema cache/.test(error.message || "") ? "Manca un aggiornamento del database (SQL 52): avvisa l'assistenza." : (error.message || "Non riuscito, riprova.") };
+  if(!data?.ok) return { ok: false, errore: data?.errore || "Codice non valido." };
+  const nome = data.nome || "Il maniscalco";
+  return { ok: true, testo: data.gia ? (data.unita ? `${nome} era già collegato: abbiamo unito le schede, niente doppioni.` : `${nome} è già collegato alla scuderia.`)
+    : `Collegati con ${nome}!` + (Number(data.cavalli) ? ` Ha già inserito ${data.cavalli} cavalli: li trovi in Cavalli da confermare.` : "") };
+}
+function apriCodiceIscrizione(){
+  if(DEMO_MODE || !document.getElementById("modal-codice-iscrizione")) return;
+  document.getElementById("codice-iscr-input").value = "";
+  document.getElementById("codice-iscr-error").style.display = "none";
+  openModal("modal-codice-iscrizione");
+}
+function saltaCodiceIscrizione(){
+  closeModal("modal-codice-iscrizione");
+  showToast("Va bene! Se il tuo maniscalco usa Equo, lo colleghi quando vuoi da Professionisti.");
+}
+async function usaCodiceIscrizione(){
+  const err = document.getElementById("codice-iscr-error"), btn = document.getElementById("codice-iscr-btn");
+  const codice = codiceDaTestoScud(document.getElementById("codice-iscr-input").value);
+  err.style.display = "none";
+  if(!codice){ err.textContent = "Scrivi il codice del maniscalco."; err.style.display = "block"; return; }
+  btn.disabled = true;
+  let esito;
+  try{
+    if(ePersonaleScud(codice)){
+      const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: null });
+      esito = error || !data?.ok ? { ok: false, errore: data?.errore || "Non è stato possibile inviare l'invito. Riprova." }
+        : { ok: true, testo: data.gia ? `${data.nome} è già collegato o c'è già una richiesta in corso.` : `Invito inviato a ${data.nome}: appena accetta vi collegate e i cavalli che ha già inserito ti arrivano da confermare.` };
+    } else esito = await usaCodiceInvitoScud(codice);
+  } finally { btn.disabled = false; }
+  if(!esito.ok){ err.textContent = esito.errore; err.style.display = "block"; return; }
+  closeModal("modal-codice-iscrizione");
+  showToast(esito.testo);
+  if(typeof refreshProfessionistiModule === "function") refreshProfessionistiModule().catch(() => {});
+}
+
 async function inviaInvitoProfessionista(){
   const input = document.getElementById("pro-codice-input");
   const err = document.getElementById("pro-codice-error");
   const btn = document.getElementById("pro-codice-btn");
-  const codice = input.value.trim().toUpperCase();
+  const codice = codiceDaTestoScud(input.value);
   err.style.display = "none";
   if(!codice){ err.textContent = "Inserisci il codice professionista."; err.style.display = "block"; return; }
   if(DEMO_MODE){ closeModal("modal-aggiungi-pro"); showToast("In demo il collegamento non è disponibile."); return; }
+  // codice invito o link del QR: collegamento immediato alla scheda che il maniscalco ha già (SQL 52)
+  if(!ePersonaleScud(codice)){
+    btn.disabled = true;
+    const esito = await usaCodiceInvitoScud(codice);
+    btn.disabled = false;
+    if(!esito.ok){ err.textContent = esito.errore; err.style.display = "block"; return; }
+    closeModal("modal-aggiungi-pro"); showToast(esito.testo);
+    await refreshProfessionistiModule();
+    return;
+  }
   const cavalli = cavalliSpuntati("pro-abbina-cavalli");
   btn.disabled = true;
   const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: cavalli });
@@ -9007,14 +9207,15 @@ function renderSchedaProCavalli(){
     attivo: '<span class="badge-pill badge-green" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">abbinato</span>',
     da_confermare_proprietario: '<span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px;flex-shrink:0"><i class="fa-solid fa-hourglass-half"></i> in attesa del proprietario</span>',
     rifiutato: '<span class="badge-pill badge-red" style="font-size:10.5px;padding:2px 8px;flex-shrink:0" title="Spunta di nuovo per richiedere la conferma">rifiutato dal proprietario</span>',
+    programmato: '<span class="badge-pill badge-gray" style="font-size:10.5px;padding:2px 8px;flex-shrink:0"><i class="fa-regular fa-calendar"></i> dalla data scelta</span>',
   };
   const n = cav.filter(c => c.stato === "attivo").length;
   box.innerHTML = `<p style="color:var(--muted);font-size:12.5px;margin:0 0 8px">${n} ${n === 1 ? "cavallo abbinato" : "cavalli abbinati"}. Il professionista vede nella sua app solo questi.
-      ${puo ? "Se togli un cavallo, nella sua app finisce tra gli archiviati: i lavori fatti restano nello storico. I cavalli con un proprietario su Equo aspettano la sua conferma." : "Solo l'amministratore o un membro di livello 2-3 può cambiare i cavalli."}</p>
+      ${puo ? "Se togli un cavallo, nella sua app finisce tra gli archiviati: i lavori fatti restano nello storico. I cavalli con un proprietario su Equo aspettano la sua conferma. Se un cavallo spuntato ha già un altro maniscalco, questo lo sostituisce: per sostituti a tempo e cambi da una data usa Cavalli › Maniscalchi." : "Solo l'amministratore o un membro di livello 2-3 può cambiare i cavalli."}</p>
     <div id="scheda-pro-cav-lista">` + cav.map(c => {
       const chip = (CHIP[c.stato] || (c.ha_proprietario ? chipConferma : ""))
         + (c.uscito ? ' <span class="badge-pill badge-gray" style="font-size:10.5px;padding:2px 8px;flex-shrink:0">uscito dal centro</span>' : "");
-      return rigaCavalloAbbina(c, c.stato === "attivo" || c.stato === "da_confermare_proprietario", chip).replace('type="checkbox"', puo ? 'type="checkbox"' : 'type="checkbox" disabled');
+      return rigaCavalloAbbina(c, ["attivo", "da_confermare_proprietario", "programmato"].includes(c.stato), chip).replace('type="checkbox"', puo ? 'type="checkbox"' : 'type="checkbox" disabled');
     }).join("") + `</div>
     ${puo ? '<div class="auth-error" id="scheda-pro-cav-error"></div><button class="btn btn-primary btn-block" style="margin-top:12px" id="scheda-pro-cav-salva" onclick="salvaCavalliSchedaPro()">Salva i cavalli</button>' : ""}`;
 }
@@ -11052,6 +11253,9 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			proprietario: document.getElementById("cav-proprietario").value.trim() || null,
 			note: document.getElementById("cav-note").value.trim() || null
 		};
+		const propScelto = document.getElementById("cav-proprietario").dataset.membroId || "";
+		if (propScelto && payload.proprietario) payload.proprietario_membro_id = propScelto;
+		const clientiPrima = new Set((typeof teamList !== "undefined" ? teamList : []).map((m) => m.id));
 		const vecchio = editingCavalloId ? cavalliList.find((x) => x.id === editingCavalloId) : null;
 		const sesso = document.getElementById("cav-sesso").value || null, attivita = document.getElementById("cav-attivita").value.trim().slice(0, 60) || null;
 		if (sesso || vecchio?.sesso) payload.sesso = sesso;
@@ -11104,7 +11308,15 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			if (currentCavalloId) renderCavalloDetail();
 			else renderCavalliList();
 			closeModal("modal-cavallo");
-			showToast(editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto.");
+			let avvisoProv = "";
+			if (!DEMO_MODE && payload.proprietario && !propScelto) {
+				await loadTeam();
+				const cav = cavalliList.find((x) => x.id === savedCavalloId);
+				const nuovo = cav?.proprietario_membro_id && !clientiPrima.has(cav.proprietario_membro_id) ? teamList.find((m) => m.id === cav.proprietario_membro_id) : null;
+				if (nuovo?.provvisorio) avvisoProv = `Creata la scheda cliente provvisoria di ${nuovo.nome_visualizzato}: completala in Clienti.`;
+				if (typeof caricaClienti === "function") caricaClienti();
+			}
+			showToast(avvisoProv || (editingCavalloId ? "Cavallo aggiornato." : "Cavallo aggiunto."));
 			if (codiceProprietario) {
 				const esito = await collegaProprietarioDaCodice(codiceProprietario, savedCavalloId, payload.proprietario);
 				if (esito.ok) {
@@ -11825,6 +12037,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			document.getElementById("cav-microchip").value = c?.microchip || "";
 			document.getElementById("cav-gruppo-sanguigno").value = c?.gruppo_sanguigno || "";
 			document.getElementById("cav-proprietario").value = c?.proprietario || "";
+			document.getElementById("cav-proprietario").dataset.membroId = "";
+			if (typeof propCavReset === "function") propCavReset();
 			document.getElementById("cav-codice-proprietario").value = "";
 			document.getElementById("cav-note").value = c?.note || "";
 			preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
@@ -11844,6 +12058,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 				"cav-codice-proprietario",
 				"cav-note"
 			].forEach((id) => document.getElementById(id).value = "");
+			document.getElementById("cav-proprietario").dataset.membroId = "";
+			if (typeof propCavReset === "function") propCavReset();
 			preview.innerHTML = "";
 		}
 		openModal("modal-cavallo");
@@ -11979,7 +12195,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 				stallone: "Stallone"
 			}[c.sesso] || null,
 			TIPO_PROPRIETA_LABELS[c.tipo_proprieta] || null,
-			c.proprietario ? "proprietario: " + c.proprietario : null
+			c.proprietario ? "proprietario: " + c.proprietario : null,
+			typeof doveViveCavallo === "function" ? doveViveCavallo(c.id) : null
 		].filter(Boolean).join(" · ");
 		document.getElementById("detail-cavallo-sub").textContent = sub || "Nessun dettaglio aggiuntivo";
 		const info = [
@@ -12235,9 +12452,12 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 	function openCavalloDetail(id) {
 		currentCavalloId = id;
 		document.getElementById("cavalli-list-view").style.display = "none";
+		const incView = document.getElementById("cavalli-incarichi-view");
+		if (incView) incView.style.display = "none";
 		document.getElementById("cavalli-detail-view").style.display = "block";
 		renderCavalloDetail();
 		caricaAllegatiScud(id);
+		if (typeof mncAlCavallo === "function") mncAlCavallo(id);
 	}
 	function closeCavalloDetail() {
 		currentCavalloId = null;
@@ -12435,7 +12655,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 	function boxDragReset() {
 		clearTimeout(boxDrag.timer);
 		if (boxDrag.ghost) boxDrag.ghost.remove();
-		document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento").forEach((el) => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
+		document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no, .box-card.in-trascinamento, .pad-cav.in-trascinamento").forEach((el) => el.classList.remove("drop-ok", "drop-no", "in-trascinamento"));
 		document.body.classList.remove("box-trascina");
 		Object.assign(boxDrag, {
 			timer: null,
@@ -12448,13 +12668,13 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		window.__boxDrag = false;
 	}
 	document.addEventListener("pointerdown", (e) => {
-		const card = e.target.closest && e.target.closest(".box-card[data-cav]");
+		const card = e.target.closest && e.target.closest(".pad-cav[data-cav], .box-card[data-cav]");
 		if (!card || e.target.closest(".box-ic, .box-nota") || !boxPuoGestire() || boxBloccati()) return;
 		if (e.pointerType === "mouse" && e.button !== 0) return;
 		boxDragReset();
 		Object.assign(boxDrag, {
 			cav: card.dataset.cav,
-			da: card.dataset.box,
+			da: card.dataset.box || "pad:" + card.dataset.pad,
 			x0: e.clientX,
 			y0: e.clientY
 		});
@@ -12485,14 +12705,20 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		}
 		boxDrag.ghost.style.left = e.clientX + "px";
 		boxDrag.ghost.style.top = e.clientY + "px";
-		const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box]");
+		const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".box-card[data-box], .pad-card[data-pad]");
 		document.querySelectorAll(".box-card.drop-ok, .box-card.drop-no").forEach((x) => {
 			if (x !== el) x.classList.remove("drop-ok", "drop-no");
 		});
-		boxDrag.target = el && el.dataset.box !== boxDrag.da ? el.dataset.box : null;
+		const dest = !el ? null : el.dataset.box || "pad:" + el.dataset.pad;
+		boxDrag.target = dest && dest !== boxDrag.da ? dest : null;
 		if (boxDrag.target) {
-			const b = boxList.find((x) => x.id === boxDrag.target);
-			el.classList.add(b && !b.cavallo_id && !b.manutenzione ? "drop-ok" : "drop-no");
+			if (boxDrag.target.startsWith("pad:")) {
+				const p = (typeof paddockList !== "undefined" ? paddockList : []).find((x) => x.id === boxDrag.target.slice(4));
+				el.classList.add(p && !p.manutenzione ? "drop-ok" : "drop-no");
+			} else {
+				const b = boxList.find((x) => x.id === boxDrag.target);
+				el.classList.add(b && (!b.cavallo_id || b.cavallo_id === boxDrag.cav) && !b.manutenzione ? "drop-ok" : "drop-no");
+			}
 		}
 	});
 	document.addEventListener("touchmove", (e) => {
@@ -12507,7 +12733,10 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		setTimeout(() => {
 			boxDrag.blocca = false;
 		}, 400);
-		if (target) await boxMuovi(cav, da, target);
+		if (!target) return;
+		if (target.startsWith("pad:")) await paddockMetti(cav, target.slice(4));
+		else if (da.startsWith("pad:")) await paddockVersoBox(cav, target);
+		else await boxMuovi(cav, da, target);
 	});
 	document.addEventListener("pointercancel", () => {
 		if (!boxDrag.attivo) boxDragReset();
@@ -13966,18 +14195,22 @@ function renderClienti(){
   const q = clientiFiltro.q;
   const lista = tutti.filter(m => {
     const d = clientiDati[m.id] || {};
-    if(clientiFiltro.ruolo && m.ruolo !== clientiFiltro.ruolo) return false;
+    if(clientiFiltro.ruolo === "provvisori"){ if(!m.provvisorio) return false; }
+    else if(clientiFiltro.ruolo && m.ruolo !== clientiFiltro.ruolo) return false;
     if(!q) return true;
     return (m.nome_visualizzato || "").toLowerCase().includes(q) || (d.telefono || "").replace(/\s/g, "").includes(q.replace(/\s/g, "")) || (d.email || "").includes(q);
   }).sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it"));
   const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
-  document.getElementById("clienti-count").textContent = lim ? `${tutti.length} di ${lim}` : tutti.length;
+  // le schede provvisorie non contano nel limite del pacchetto (SQL 48)
+  const definitivi = tutti.filter(m => !m.provvisorio).length, provv = tutti.length - definitivi;
+  document.getElementById("clienti-count").textContent = (lim ? `${definitivi} di ${lim}` : definitivi) + (provv ? ` · ${provv} da completare` : "");
+  aggiornaBadgeClienti();
   document.getElementById("clienti-empty").style.display = tutti.length ? "none" : "block";
   body.innerHTML = lista.map(m => {
     const d = clientiDati[m.id] || {}, eta = etaDi(d.data_nascita);
     const contatti = [d.telefono ? `<a href="tel:${escapeHtml(d.telefono.replace(/\s/g, ""))}">${escapeHtml(d.telefono)}</a>` : "", d.email ? `<a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a>` : ""].filter(Boolean).join("<br>");
     return `<tr>
-      <td>${escapeHtml(m.nome_visualizzato || "Cliente")}${m.user_id ? ' <span class="badge-pill badge-green" title="Usa l\'app Equo">app</span>' : ""}${d.consenso_privacy_il ? "" : ' <span class="badge-pill badge-gray" title="Consenso privacy non registrato">senza consenso</span>'}</td>
+      <td>${escapeHtml(m.nome_visualizzato || "Cliente")}${m.provvisorio ? ' <span class="badge-pill badge-yellow" title="Scheda nata dal nome scritto nel cavallo: aggiungi telefono o email">da completare</span>' : ""}${m.user_id ? ' <span class="badge-pill badge-green" title="Usa l\'app Equo">app</span>' : ""}${d.consenso_privacy_il ? "" : ' <span class="badge-pill badge-gray" title="Consenso privacy non registrato">senza consenso</span>'}</td>
       <td>${escapeHtml(RUOLO_LABELS[m.ruolo] || m.ruolo)}</td>
       <td style="font-size:13px">${contatti || '<span style="color:var(--muted)">—</span>'}</td>
       <td>${eta == null ? '<span style="color:var(--muted)">—</span>' : eta + " anni" + (eta < 18 ? ' <span class="badge-pill badge-yellow">minore</span>' : "")}${d.referente_id ? `<div style="color:var(--muted);font-size:12px">ref. ${escapeHtml(nomeCliente(d.referente_id))}</div>` : ""}</td>
@@ -14014,7 +14247,7 @@ async function clienteCollegati(id){
 function openClienteForm(id, daPacchetto){
   if(!puoVedereClienti()){ showToast("Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti."); return; }
   const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
-  if(!id && lim && clientiElenco().length >= lim){ showToast(`Hai raggiunto i ${lim} clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.`); return; }
+  if(!id && lim && clientiElenco().filter(x => !x.provvisorio).length >= lim){ showToast(`Hai raggiunto i ${lim} clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.`); return; }
   const m = id ? (teamList || []).find(x => x.id === id) : null;
   const d = (m && clientiDati[m.id]) || {};
   editingClienteId = m ? m.id : null;
@@ -14036,6 +14269,12 @@ function openClienteForm(id, daPacchetto){
   document.getElementById("cli-referente").value = d.referente_id || "";
   clienteNascitaCambiata();
   clienteCollegati(editingClienteId);
+  const prov = document.getElementById("cli-provvisorio");
+  if(prov){
+    const cav = m?.provvisorio ? (typeof cavalliList !== "undefined" ? cavalliList : []).filter(c => c.proprietario_membro_id === m.id).map(c => c.nome) : [];
+    prov.style.display = m?.provvisorio ? "block" : "none";
+    if(m?.provvisorio) prov.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <b>Scheda provvisoria</b>${cav.length ? ", nata dal cavallo " + cav.map(escapeHtml).join(", ") : ""}. Aggiungi almeno <b>telefono o email</b> per completarla: poi potrai fargli le ricevute ASD.`;
+  }
   openModal("modal-cliente");
 }
 
@@ -14089,6 +14328,50 @@ async function saveCliente(){
   clienteDaPacchetto = false;
 }
 
+
+// ── Schede provvisorie (9/11/2026 · SQL 48) ──────────────────────────────────
+// Contatore giallo accanto a «Clienti» nel menu: schede nate dal nome del proprietario scritto nel cavallo.
+function aggiornaBadgeClienti(){
+  const b = document.getElementById("clienti-nav-badge"); if(!b) return;
+  const n = puoVedereClienti() ? clientiElenco().filter(m => m.provvisorio).length : 0;
+  b.textContent = n; b.style.display = n ? "" : "none";
+  b.title = n === 1 ? "1 scheda cliente da completare" : n + " schede clienti da completare";
+}
+// Campo «Proprietario» nella scheda del cavallo: propone i clienti già presenti mentre si scrive
+// («rossi m» trova «Mario Rossi»). Se non ce n'è nessuno, avvisa che nascerà una scheda provvisoria.
+function parolePersona(s){ return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").split(" ").filter(Boolean); }
+function propCavReset(){
+  const box = document.getElementById("cav-prop-sugg"), hint = document.getElementById("cav-prop-hint");
+  if(box) box.style.display = "none";
+  if(hint) hint.innerHTML = "";
+}
+function propCavChiudi(){ const box = document.getElementById("cav-prop-sugg"); if(box) box.style.display = "none"; }
+function propCavSuggerisci(){
+  const inp = document.getElementById("cav-proprietario"), box = document.getElementById("cav-prop-sugg"), hint = document.getElementById("cav-prop-hint");
+  if(!inp || !box || !hint) return;
+  const clienti = clientiElenco();
+  const scelto = inp.dataset.membroId ? clienti.find(m => m.id === inp.dataset.membroId) : null;
+  if(inp.dataset.membroId && (!scelto || (scelto.nome_visualizzato || "") !== inp.value.trim())) inp.dataset.membroId = "";
+  const q = parolePersona(inp.value);
+  if(!q.length){ propCavReset(); return; }
+  if(inp.dataset.membroId){ box.style.display = "none"; hint.innerHTML = '<i class="fa-solid fa-link"></i> Collegato alla scheda cliente.'; return; }
+  const lista = clienti.filter(m => { const t = parolePersona(m.nome_visualizzato); return q.every(w => t.some(x => x.startsWith(w))); })
+    .sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it")).slice(0, 6);
+  box.innerHTML = lista.map(m => `<button type="button" onmousedown="event.preventDefault();propCavScegli('${m.id}')">${escapeHtml(m.nome_visualizzato || "Cliente")}${m.provvisorio ? ' <span class="badge-pill badge-yellow">da completare</span>' : ""}${m.user_id ? ' <span class="badge-pill badge-green">app</span>' : ""}</button>`).join("");
+  box.style.display = lista.length ? "block" : "none";
+  const chiave = [...q].sort().join(" ");
+  const uguale = clienti.some(m => [...parolePersona(m.nome_visualizzato)].sort().join(" ") === chiave);
+  const tipo = document.getElementById("cav-tipo-proprieta")?.value;
+  hint.innerHTML = uguale ? '<i class="fa-solid fa-link"></i> Salvando si collega al cliente con questo nome.'
+    : tipo === "proprieta" ? ""
+    : '<i class="fa-solid fa-user-plus"></i> Non è tra i clienti: salvando creiamo una scheda cliente provvisoria da completare.';
+}
+function propCavScegli(id){
+  const m = clientiElenco().find(x => x.id === id), inp = document.getElementById("cav-proprietario"); if(!m || !inp) return;
+  inp.value = m.nome_visualizzato || "";
+  inp.dataset.membroId = id;
+  propCavSuggerisci();
+}
 
 // aprendo la sezione si ricaricano i dati (team compreso: un cliente può essersi collegato con l'app)
 quandoApriSezione(function(k){ if(k === "clienti") loadTeam().then(caricaClienti); });
@@ -15567,6 +15850,8 @@ const BOX_MOTIVI = { pulizia:"Pulizia", disinfezione:"Disinfezione", riparazione
 const oggiRoma = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
 const boxBloccati = () => !!(pianoCentro && Number(pianoCentro.box) === 0);
 const boxLimite = () => pianoCentro ? Number(pianoCentro.box ?? 100) : 100;
+// box e paddock condividono lo stesso limite del pacchetto (SQL 49)
+const postiUsati = () => boxList.length + (typeof paddockList !== "undefined" ? paddockList.length : 0);
 const boxPuoGestire = () => DEMO_MODE || currentMembro?.ruolo === "admin" || ["admin","2","3"].includes(String(currentMembro?.livello)) || currentCentro?.owner_id === currentUser?.id;
 function boxIconeAttive(){ const extra = currentCentro?.box_icone_extra || []; return Object.keys(BOX_ICONE).filter(k => !BOX_ICONE[k].extra || extra.includes(k)); }
 
@@ -15659,20 +15944,20 @@ function renderBox(){
   const el = document.getElementById("box-griglia"); if(!el) return;
   const n = { verde: 0, giallo: 0, rosso: 0, blu: 0, manut: 0 };
   boxList.forEach(b => { n[boxStato(b).cls]++; });
-  document.getElementById("box-conta").innerHTML = `<span data-tip="Box creati / massimo del tuo pacchetto"><b>${boxList.length}</b> box${boxBloccati() ? "" : " su " + boxLimite()}</span>
+  document.getElementById("box-conta").innerHTML = `<span data-tip="Posti creati (box + paddock) / massimo del tuo pacchetto"><b>${boxList.length}</b> box${boxBloccati() ? "" : (typeof paddockList !== "undefined" && paddockList.length ? " + " + paddockList.length + " paddock" : "") + " · " + postiUsati() + " posti su " + boxLimite()}</span>
     <span data-tip="Box di proprietà con il suo cavallo, o cavallo nel suo posto"><i class="l bv"></i>${n.verde} al loro posto</span>
     <span data-tip="Cavallo in un box che non è il suo"><i class="l bg"></i>${n.giallo} fuori posto</span>
     <span data-tip="Box di proprietà senza il suo cavallo dentro"><i class="l br"></i>${n.rosso} riservati vuoti</span>
     <span data-tip="Box libero, non assegnato"><i class="l bb"></i>${n.blu} liberi</span>
     <span data-tip="Box in manutenzione"><i class="l bm"></i>${n.manut} in manutenzione</span>`;
-  const puoAgg = !boxBloccati() && boxPuoGestire() && boxList.length < boxLimite();
+  const puoAgg = !boxBloccati() && boxPuoGestire() && postiUsati() < boxLimite();
   el.innerHTML = boxList.map(boxCardHtml).join("") + (puoAgg ? `<div class="box-card box-nuovo" onclick="boxNuovo()" data-tip="Crea un nuovo box con il primo numero libero (da 1 a 100)"><i class="fa-solid fa-plus" style="font-size:20px"></i> Nuovo box</div>` : "");
   document.getElementById("box-btn-impost").style.display = !boxBloccati() && boxPuoGestire() ? "" : "none";
 }
 
 async function boxNuovo(){
   if(boxBloccati()){ apriUpsell("box"); return; }
-  if(boxList.length >= boxLimite()){ showToast(`Hai già ${boxLimite()} box: è il massimo del tuo pacchetto${boxLimite() < 100 ? " (PREMIUM arriva a 100)" : ""}.`); return; }
+  if(postiUsati() >= boxLimite()){ showToast(`Hai già ${boxLimite()} posti tra box e paddock: è il massimo del tuo pacchetto${boxLimite() < 100 ? " (PREMIUM arriva a 100)" : ""}.`); return; }
   const usati = new Set(boxList.map(b => b.numero));
   let n = 1; while(usati.has(n) && n <= 100) n++;
   if(n > 100){ showToast("Hai raggiunto il limite di 100 box."); return; }
@@ -15715,6 +16000,620 @@ async function boxToggleIcona(boxId, tipo){
   renderBox(); if(boxPannelloId) boxRenderPannello();
 }
 
+/* =====================================================================
+   PADDOCK (9/11/2026 · SQL 49) — script normale: funzioni globali.
+   Un paddock ha nome, zona e capienza e ospita più cavalli insieme.
+   Un cavallo può avere il box e stare nel paddock "di giorno", oppure vivere solo nel paddock.
+   Box + paddock condividono il limite del pacchetto (ADVANCE 20, PREMIUM 100).
+   Capienza superata: si può aggiungere lo stesso, la card diventa rossa e compare l'avviso «sovraffollato».
+   Icone del giorno: fieno, acqua e pulizia valgono per il paddock; quelle di ogni cavallo seguono il cavallo
+   (sono le stesse righe dei box: se Luna ha mangiato, lo vedi sia nel box sia nel paddock).
+   ===================================================================== */
+let paddockList = [], paddockCav = [], paddockAttivita = [], paddockPannelloId = null, paddockCanale = null, paddockNuovoForm = false;
+const PADDOCK_ICONE = ["fieno", "acqua", "box_pulito"];   // icone del paddock intero
+const PADDOCK_MOTIVI = { pulizia: "Pulizia", riparazione: "Recinzione / riparazione", terreno: "Terreno (fango, allagato)", altro: "Altro" };
+const padIconaNome = k => k === "box_pulito" ? "Pulito" : BOX_ICONE[k].nome;
+const padCavalliDi = id => paddockCav.filter(r => r.paddock_id === id).map(r => ({ r, c: cavalliList.find(x => x.id === r.cavallo_id) })).filter(x => x.c);
+const padDiCavallo = cavId => { const r = paddockCav.find(x => x.cavallo_id === cavId); return r ? paddockList.find(p => p.id === r.paddock_id) : null; };
+const padBoxDi = cavId => boxList.find(b => b.cavallo_id === cavId) || boxList.find(b => b.assegnato_cavallo_id === cavId) || null;
+const padSovraffollati = () => paddockList.filter(p => padCavalliDi(p.id).length > p.capienza);
+
+async function loadPaddock(){
+  if(DEMO_MODE){
+    if(!demoState.paddock){
+      const l = demoState.cavalli?.[1];
+      demoState.paddock = [{ id: "pd1", centro_id: "demo-centro", nome: "Paddock grande", zona: "Dietro la scuderia", capienza: 3, manutenzione: false, ordine: 0 },
+                           { id: "pd2", centro_id: "demo-centro", nome: "Recinto nord", zona: null, capienza: 2, manutenzione: false, ordine: 1 }];
+      demoState.paddockCav = l ? [{ id: "pc1", paddock_id: "pd1", cavallo_id: l.id, dal: new Date().toISOString() }] : [];
+      demoState.paddockAtt = [{ paddock_id: "pd1", cavallo_id: null, tipo: "fieno", giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: "Sara" }];
+    }
+    paddockList = demoState.paddock; paddockCav = demoState.paddockCav; paddockAttivita = demoState.paddockAtt;
+    return;
+  }
+  if(!currentCentro?.id) return;
+  const [p, c, a] = await Promise.all([
+    sb.from("scuderia_paddock").select("*").eq("centro_id", currentCentro.id).order("ordine").order("nome"),
+    sb.from("scuderia_paddock_cavalli").select("id, paddock_id, cavallo_id, dal").eq("centro_id", currentCentro.id),
+    sb.from("scuderia_box_attivita").select("paddock_id, cavallo_id, tipo, giorno, fatto_il, fatto_da_nome, fonte").eq("centro_id", currentCentro.id).eq("giorno", oggiRoma()).not("paddock_id", "is", null).is("cavallo_id", null),
+  ]);
+  // prima dell'SQL 49 le tabelle non esistono: la sezione paddock resta semplicemente vuota
+  paddockList = p.error ? [] : (p.data || []);
+  paddockCav = c.error ? [] : (c.data || []);
+  paddockAttivita = a.error ? [] : (a.data || []);
+}
+function paddockAscolta(){
+  if(DEMO_MODE || !currentCentro?.id || paddockCanale) return;
+  const ricarica = () => { clearTimeout(boxRicaricaTimer); boxRicaricaTimer = setTimeout(async () => { await loadBox(); renderBox(); if(boxPannelloId) boxRenderPannello(); }, 350); };
+  paddockCanale = sb.channel("paddock-" + currentCentro.id)
+    .on("postgres_changes", { event: "*", schema: "public", table: "scuderia_paddock", filter: "centro_id=eq." + currentCentro.id }, ricarica)
+    .on("postgres_changes", { event: "*", schema: "public", table: "scuderia_paddock_cavalli", filter: "centro_id=eq." + currentCentro.id }, ricarica)
+    .subscribe();
+}
+
+// i box si caricano e si disegnano insieme ai paddock (così ogni aggiornamento, anche in modalità stalla, li tiene allineati)
+(function(){
+  const loadBoxOrig = loadBox, renderBoxOrig = renderBox, refreshOrig = refreshBoxSezione;
+  loadBox = async function(){ await Promise.all([loadBoxOrig(), loadPaddock()]); };
+  renderBox = function(){ renderBoxOrig(); renderPaddock(); };
+  refreshBoxSezione = async function(){ await refreshOrig(); paddockAscolta(); };
+})();
+
+function padAttivitaDi(padId, tipo){ return paddockAttivita.find(a => a.paddock_id === padId && !a.cavallo_id && a.tipo === tipo && a.giorno === oggiRoma()); }
+function padCavAttivitaDi(cavId, tipo){ return boxAttivita.find(a => a.cavallo_id === cavId && a.tipo === tipo && a.giorno === oggiRoma()); }
+function padIconeCavallo(){ return boxIconeAttive().filter(k => k !== "paddock" && k !== "box_pulito"); }
+function padOra(a){ return a ? new Date(a.fatto_il).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) + (a.fatto_da_nome ? " · " + a.fatto_da_nome.split(" ")[0] : "") : "da fare"; }
+
+function padStato(p){
+  const n = padCavalliDi(p.id).length;
+  if(n > p.capienza) return { cls: "rosso", tip: `Paddock sovraffollato: ${n} cavalli su ${p.capienza} posti` };
+  if(p.manutenzione && !n) return { cls: "manut", tip: "Paddock in manutenzione" };
+  if(n) return { cls: "verde", tip: `${n} cavall${n === 1 ? "o" : "i"} su ${p.capienza} posti` };
+  return { cls: "blu", tip: "Paddock vuoto: tocca per aggiungere cavalli" };
+}
+function padCardHtml(p){
+  // Opzione D (9/11/2026): angoli tondi, verde pieno, cancello a sbarre; la capienza è una griglia di posti
+  const cav = padCavalliDi(p.id), st = padStato(p), n = cav.length, over = n > p.capienza;
+  const classe = boxBloccati() ? "bloccato" : st.cls;
+  const MAX = 8, totale = Math.max(p.capienza, n), mostra = Math.min(totale, MAX);
+  const posti = [];
+  for(let i = 0; i < mostra; i++){
+    if(i === MAX - 1 && totale > MAX){ posti.push(`<div class="pd-posto pd-altri">+${totale - MAX + 1}</div>`); break; }
+    const x = cav[i];
+    if(x){
+      const c = x.c, box = padBoxDi(c.id), inPiu = i >= p.capienza;
+      posti.push(`<div class="pd-posto pad-cav ${inPiu ? "x" : ""}" data-cav="${c.id}" data-pad="${p.id}" data-tip="${escapeHtml(c.nome + (box ? " · ha il box " + box.numero + ": qui di giorno" : " · vive nel paddock") + (inPiu ? " · oltre la capienza" : "") + (boxPuoGestire() ? " · tieni premuto per spostarlo" : ""))}">
+        ${c.foto_url ? `<span class="f" style="background-image:${cssUrl(c.foto_url)}"></span>` : `<span class="f nf">${escapeHtml((c.nome || "?").trim().charAt(0).toUpperCase())}</span>`}
+        <span class="n">${escapeHtml(c.nome)}</span>${box ? `<span class="g">B${box.numero}</span>` : ""}</div>`);
+    } else posti.push(`<div class="pd-posto v">${p.manutenzione ? "" : "libero"}</div>`);
+  }
+  const righe = Math.ceil(posti.length / 2);
+  let corpo;
+  if(p.manutenzione && !n){
+    corpo = `<div class="pd-manut">${iconHtml("fa-screwdriver-wrench")}<b>In manutenzione</b><span>${PADDOCK_MOTIVI[p.manutenzione_motivo] || "Lavori"}${p.manutenzione_fino ? " · fino al " + formatDate(p.manutenzione_fino) : ""}</span></div>`;
+  } else corpo = `<div class="pd-posti" style="grid-template-rows:repeat(${righe},minmax(0,1fr))">${posti.join("")}</div>`;
+  const icone = n ? `<div class="pd-icone">${PADDOCK_ICONE.map(k => { const d = BOX_ICONE[k], a = padAttivitaDi(p.id, k);
+    return `<button class="box-ic ${a ? "on" : ""}" style="--ic-col:${d.col}" data-tip="${escapeHtml(padIconaNome(k) + " (tutto il paddock)" + (a ? " · fatto alle " + padOra(a) : " · da fare oggi: tocca per segnarlo"))}" onclick="event.stopPropagation();paddockToggleIcona('${p.id}','${k}')">${iconHtml(d.icon)}</button>`; }).join("")}
+    <span class="pd-conta ${over ? "over" : ""}">${n}/${p.capienza}</span></div>` : "";
+  return `<div class="box-card pad-card ${classe}" data-pad="${p.id}" data-tip="${escapeHtml(st.tip)}" onclick="${boxBloccati() ? "apriUpsell('box')" : `paddockApri('${p.id}')`}">
+    <div class="pd-testa"><span class="pd-tag ${over ? "over" : ""}">${over ? n + "/" + p.capienza : "PADDOCK"}</span><span class="pd-nome">${escapeHtml(p.nome)}</span></div>
+    ${corpo}${icone}
+    <div class="pd-cancello" aria-hidden="true"></div>
+    ${boxBloccati() ? `<div class="box-lucchetto"><i class="fa-solid fa-lock"></i>Disponibile da ADVANCE</div>` : ""}
+  </div>`;
+}
+function renderPaddock(){
+  const el = document.getElementById("paddock-griglia"); if(!el) return;
+  const conta = document.getElementById("paddock-conta"), avv = document.getElementById("paddock-avviso");
+  const tot = paddockCav.length, over = padSovraffollati();
+  if(conta) conta.innerHTML = `<span><b>${paddockList.length}</b> paddock</span><span data-tip="Cavalli nei paddock in questo momento"><i class="fa-solid fa-horse"></i> ${tot} cavall${tot === 1 ? "o" : "i"}</span>`
+    + (over.length ? `<span style="color:var(--danger);font-weight:700"><i class="l br"></i>${over.length} sovraffollat${over.length === 1 ? "o" : "i"}</span>` : "");
+  if(avv){
+    avv.style.display = over.length ? "" : "none";
+    avv.innerHTML = over.length ? `<i class="fa-solid fa-triangle-exclamation"></i> <b>Paddock sovraffollat${over.length === 1 ? "o" : "i"}:</b> ` + over.map(p => `<a href="#" onclick="event.preventDefault();paddockApri('${p.id}')">${escapeHtml(p.nome)} (${padCavalliDi(p.id).length} su ${p.capienza})</a>`).join(", ") : "";
+  }
+  const puoAgg = !boxBloccati() && boxPuoGestire() && (boxList.length + paddockList.length) < boxLimite();
+  el.innerHTML = paddockList.map(padCardHtml).join("") + (puoAgg ? `<div class="box-card box-nuovo pad-nuovo" onclick="paddockNuovo()" data-tip="Crea un paddock: nome, zona e quanti cavalli può ospitare"><i class="fa-solid fa-plus" style="font-size:20px"></i> Nuovo paddock</div>` : "");
+  const vuoto = document.getElementById("paddock-vuoto");
+  if(vuoto) vuoto.style.display = !paddockList.length && !puoAgg ? "" : "none";
+}
+
+/* ---- pannello del paddock ---- */
+function paddockApri(id){ paddockNuovoForm = false; paddockPannelloId = id; paddockRenderPannello(); openModal("modal-paddock"); }
+function paddockNuovo(){
+  if(boxBloccati()){ apriUpsell("box"); return; }
+  if(boxList.length + paddockList.length >= boxLimite()){ showToast(`Hai già ${boxLimite()} posti tra box e paddock: è il massimo del tuo pacchetto${boxLimite() < 100 ? " (PREMIUM arriva a 100)" : ""}.`); return; }
+  paddockNuovoForm = true; paddockPannelloId = null; paddockRenderPannello(); openModal("modal-paddock");
+  setTimeout(() => document.getElementById("pad-nome")?.focus(), 60);
+}
+function padCampiHtml(p){
+  return `<div class="grid grid-2"><div class="field"><label>Nome</label><input class="input" id="pad-nome" maxlength="60" value="${escapeHtml(p?.nome || "")}" placeholder="Es. Paddock grande"></div>
+    <div class="field"><label>Quanti cavalli può ospitare</label><input class="input" id="pad-capienza" type="number" min="1" max="60" value="${p?.capienza || 4}"></div></div>
+    <div class="field"><label>Zona (facoltativa)</label><input class="input" id="pad-zona" maxlength="60" value="${escapeHtml(p?.zona || "")}" placeholder="Es. Dietro la scuderia"></div>`;
+}
+function paddockRenderPannello(){
+  const tit = document.getElementById("paddock-pannello-titolo"), corpo = document.getElementById("paddock-pannello-corpo");
+  if(paddockNuovoForm){
+    tit.innerHTML = `<span class="box-targa pad-targa">PADDOCK</span> Nuovo paddock`;
+    corpo.innerHTML = padCampiHtml(null) + `<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px">Se ci metti più cavalli della capienza puoi farlo lo stesso: il paddock viene segnalato come sovraffollato.</p>
+      <button class="btn btn-primary btn-block" onclick="paddockSalva(null)"><i class="fa-solid fa-check"></i> Crea paddock</button>`;
+    return;
+  }
+  const p = paddockList.find(x => x.id === paddockPannelloId); if(!p){ closeModal("modal-paddock"); paddockPannelloId = null; return; }
+  const gest = boxPuoGestire(), cav = padCavalliDi(p.id), n = cav.length;
+  tit.innerHTML = `<span class="box-targa pad-targa">PADDOCK</span> ${escapeHtml(p.nome)}`;
+  let h = `<div class="pad-riga-cap"><span class="pad-capienza ${n > p.capienza ? "over" : ""}">${n}/${p.capienza}</span> ${escapeHtml(p.zona || "")}</div>`;
+  if(n > p.capienza) h += `<div class="bp-avviso rosso"><i class="fa-solid fa-triangle-exclamation"></i> Sovraffollato: ci sono ${n} cavalli e i posti sono ${p.capienza}.</div>`;
+  if(p.manutenzione){
+    h += `<div class="bp-avviso giallo"><i class="fa-solid fa-screwdriver-wrench"></i> In manutenzione · ${PADDOCK_MOTIVI[p.manutenzione_motivo] || "Lavori"}${p.manutenzione_fino ? " · fino al " + formatDate(p.manutenzione_fino) : ""}${p.manutenzione_nota ? "<br>" + escapeHtml(p.manutenzione_nota) : ""}</div>`
+      + (gest ? `<button class="btn btn-primary btn-block" style="margin-bottom:12px" onclick="paddockAggiorna('${p.id}', { manutenzione: false })"><i class="fa-solid fa-check"></i> Fine manutenzione</button>` : "");
+  }
+  if(n || !p.manutenzione){
+    h += `<label class="pad-etichetta">Oggi · tutto il paddock</label>
+      <div class="bp-ic-griglia" style="grid-template-columns:repeat(3,minmax(0,1fr))">${PADDOCK_ICONE.map(k => { const d = BOX_ICONE[k], a = padAttivitaDi(p.id, k);
+        return `<button class="bp-ic ${a ? "on" : ""}" style="--ic-col:${d.col}" onclick="paddockToggleIcona('${p.id}','${k}')"><span class="i">${iconHtml(d.icon)}</span><b>${padIconaNome(k)}</b><small>${escapeHtml(padOra(a))}</small></button>`; }).join("")}</div>`;
+  }
+  h += `<label class="pad-etichetta">Cavalli nel paddock</label>`;
+  h += n ? cav.map(({ c }) => { const box = padBoxDi(c.id);
+    return `<div class="pad-riga">
+      <div class="pad-riga-testa">${c.foto_url ? `<span class="f" style="background-image:${cssUrl(c.foto_url)}"></span>` : `<span class="f nf"><i class="fa-solid fa-horse-head"></i></span>`}
+        <div style="min-width:0;flex:1"><div style="font-weight:800;display:flex;gap:6px;align-items:center">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}</div>
+        <div style="font-size:12px;color:var(--muted)">${box ? `Ha il box ${box.numero}: qui di giorno` : "Vive nel paddock"}${c.proprietario ? " · " + escapeHtml(c.proprietario) : ""}</div></div>
+        <button class="btn btn-ghost btn-sm" data-tip="Scheda cavallo" onclick="closeModal('modal-paddock');paddockPannelloId=null;showModule('cavalli');openCavalloDetail('${c.id}')"><i class="fa-solid fa-horse-head"></i></button>
+        ${gest ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-tip="${box ? "Rientra nel box " + box.numero : "Togli dal paddock"}" onclick="paddockTogli('${c.id}')"><i class="fa-solid fa-right-from-bracket"></i></button>` : ""}</div>
+      <div class="pad-ic-cav">${padIconeCavallo().map(k => { const d = BOX_ICONE[k], a = padCavAttivitaDi(c.id, k);
+        return `<button class="box-ic ${a ? "on" : ""}" style="--ic-col:${d.col}" data-tip="${escapeHtml(d.nome + " · " + padOra(a))}" onclick="paddockToggleIconaCavallo('${p.id}','${c.id}','${k}')">${iconHtml(d.icon)}</button>`; }).join("")}</div>
+    </div>`; }).join("") : `<p style="color:var(--muted);font-size:13px;margin:0 0 12px">Nessun cavallo.</p>`;
+  if(gest && !p.manutenzione){
+    const liberi = cavalliList.filter(c => !paddockCav.some(r => r.cavallo_id === c.id)).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it"));
+    h += liberi.length ? `<div class="field" style="margin-top:6px"><label>Aggiungi un cavallo</label><div style="display:flex;gap:8px">
+        <select class="input" id="pad-scegli">${liberi.map(c => { const box = padBoxDi(c.id); return `<option value="${c.id}">${escapeHtml(c.nome)}${box ? " · box " + box.numero + " (di giorno)" : ""}</option>`; }).join("")}</select>
+        <button class="btn btn-primary" onclick="paddockMetti(document.getElementById('pad-scegli').value, '${p.id}')">Aggiungi</button></div></div>`
+      : `<p style="color:var(--muted);font-size:13px">Tutti i cavalli sono già in un paddock.</p>`;
+  }
+  if(gest){
+    h += `<details style="margin:10px 0"><summary style="cursor:pointer;font-weight:700;font-size:13.5px">Nome, zona e capienza</summary><div style="margin-top:10px">${padCampiHtml(p)}
+        <button class="btn btn-variazione btn-sm" onclick="paddockSalva('${p.id}')">Salva</button></div></details>`;
+    if(!p.manutenzione) h += `<details style="margin:0 0 10px"><summary style="cursor:pointer;font-weight:700;font-size:13.5px">Metti in manutenzione</summary>
+        <div class="grid grid-2" style="margin-top:10px"><div class="field"><label>Motivo</label><select class="input" id="pad-man-motivo">${Object.entries(PADDOCK_MOTIVI).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div>
+        <div class="field"><label>Fino al (facoltativo)</label><input class="input" type="date" id="pad-man-fino"></div></div>
+        <div class="field"><label>Nota (facoltativa)</label><input class="input" id="pad-man-nota" maxlength="300" placeholder="Es. recinzione da sistemare"></div>
+        ${n ? `<p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">I cavalli presenti restano dove sono: spostali tu prima, se serve.</p>` : ""}
+        <button class="btn btn-variazione btn-sm" onclick="paddockManutenzione('${p.id}')"><i class="fa-solid fa-screwdriver-wrench"></i> Metti in manutenzione</button></details>`;
+    h += `<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="paddockElimina('${p.id}')"><i class="fa-solid fa-trash"></i> Elimina paddock</button>`;
+  }
+  corpo.innerHTML = h;
+}
+
+/* ---- azioni ---- */
+async function paddockSalva(id){
+  const nome = document.getElementById("pad-nome").value.trim(), zona = document.getElementById("pad-zona").value.trim() || null;
+  const capienza = Math.max(1, Math.min(60, parseInt(document.getElementById("pad-capienza").value, 10) || 1));
+  if(!nome){ showToast("Scrivi il nome del paddock."); return; }
+  if(DEMO_MODE){
+    if(id) Object.assign(demoState.paddock.find(x => x.id === id), { nome, zona, capienza });
+    else { id = "pd" + Date.now(); demoState.paddock.push({ id, centro_id: "demo-centro", nome, zona, capienza, manutenzione: false, ordine: demoState.paddock.length }); }
+  } else if(id){
+    const { error } = await sb.from("scuderia_paddock").update({ nome, zona, capienza }).eq("id", id);
+    if(error){ showToast(error.message); return; }
+  } else {
+    const { data, error } = await sb.from("scuderia_paddock").insert({ centro_id: currentCentro.id, nome, zona, capienza, ordine: paddockList.length }).select("id").single();
+    if(error){ showToast(error.message); return; }
+    id = data.id;
+  }
+  const nuovo = paddockNuovoForm;
+  await loadPaddock(); renderBox();
+  paddockNuovoForm = false; paddockPannelloId = id; paddockRenderPannello();
+  showToast(nuovo ? `Paddock «${nome}» creato: ora aggiungi i cavalli.` : "Paddock aggiornato.");
+}
+async function paddockAggiorna(id, campi){
+  if(DEMO_MODE){ const p = demoState.paddock.find(x => x.id === id); Object.assign(p, campi); if(campi.manutenzione === false){ p.manutenzione_motivo = null; p.manutenzione_nota = null; p.manutenzione_fino = null; } }
+  else { const { error } = await sb.from("scuderia_paddock").update(campi).eq("id", id); if(error){ showToast(error.message); return false; } }
+  await loadPaddock(); renderBox(); if(paddockPannelloId) paddockRenderPannello(); return true;
+}
+async function paddockManutenzione(id){
+  const campi = { manutenzione: true, manutenzione_motivo: document.getElementById("pad-man-motivo").value,
+    manutenzione_fino: document.getElementById("pad-man-fino").value || null, manutenzione_nota: document.getElementById("pad-man-nota").value.trim() || null };
+  if(await paddockAggiorna(id, campi)) showToast("Paddock in manutenzione.");
+}
+async function paddockElimina(id){
+  const p = paddockList.find(x => x.id === id), n = padCavalliDi(id).length;
+  if(!confirm(`Eliminare il paddock «${p?.nome}»?${n ? ` I ${n} cavalli presenti escono dal paddock (restano nell'anagrafica e nei loro box).` : ""}`)) return;
+  for(const { c } of padCavalliDi(id)) await padStatoBox(c.id, false);
+  if(DEMO_MODE){ demoState.paddock = demoState.paddock.filter(x => x.id !== id); demoState.paddockCav = demoState.paddockCav.filter(r => r.paddock_id !== id); }
+  else { const { error } = await sb.from("scuderia_paddock").delete().eq("id", id); if(error){ showToast(error.message); return; } }
+  closeModal("modal-paddock"); paddockPannelloId = null;
+  await loadPaddock(); renderBox(); showToast("Paddock eliminato.");
+}
+// se il cavallo ha un box, il box mostra «Al paddock» mentre è fuori e «In box» quando rientra
+async function padStatoBox(cavId, alPaddock){
+  const b = boxList.find(x => x.cavallo_id === cavId); if(!b) return;
+  const nuovo = alPaddock ? "paddock" : "in_box";
+  if(alPaddock ? b.stato_cavallo === "in_box" : b.stato_cavallo === "paddock") await boxAggiorna(b.id, { stato_cavallo: nuovo });
+}
+// mette un cavallo in un paddock (da nessun posto, da un altro paddock o da un box)
+async function paddockMetti(cavId, padId){
+  const p = paddockList.find(x => x.id === padId), c = cavalliList.find(x => x.id === cavId);
+  if(!p || !c) return false;
+  if(p.manutenzione){ showToast(`${p.nome} è in manutenzione: non puoi metterci cavalli.`); return false; }
+  const prima = paddockCav.find(r => r.cavallo_id === cavId);
+  if(prima?.paddock_id === padId) return false;
+  if(DEMO_MODE){
+    if(prima) prima.paddock_id = padId; else demoState.paddockCav.push({ id: "pc" + Date.now(), paddock_id: padId, cavallo_id: cavId, dal: new Date().toISOString() });
+  } else {
+    const r = prima ? await sb.from("scuderia_paddock_cavalli").update({ paddock_id: padId }).eq("id", prima.id)
+                    : await sb.from("scuderia_paddock_cavalli").insert({ centro_id: currentCentro.id, paddock_id: padId, cavallo_id: cavId });
+    if(r.error){ showToast(r.error.message); return false; }
+  }
+  await loadPaddock();
+  await padStatoBox(cavId, true);
+  renderBox(); if(paddockPannelloId) paddockRenderPannello(); if(boxPannelloId) boxRenderPannello();
+  const n = padCavalliDi(padId).length, box = padBoxDi(cavId);
+  showToast(n > p.capienza ? `${c.nome} in ${p.nome}. Attenzione: ora è sovraffollato (${n} su ${p.capienza}).`
+    : `${c.nome} in ${p.nome}${box ? " (di giorno, il box " + box.numero + " resta suo)" : ""}.`);
+  return true;
+}
+// toglie il cavallo dal paddock: se ha un box, rientra lì
+async function paddockTogli(cavId, zitto){
+  const r = paddockCav.find(x => x.cavallo_id === cavId), c = cavalliList.find(x => x.id === cavId); if(!r) return true;
+  if(DEMO_MODE) demoState.paddockCav = demoState.paddockCav.filter(x => x !== r);
+  else { const { error } = await sb.from("scuderia_paddock_cavalli").delete().eq("id", r.id); if(error){ showToast(error.message); return false; } }
+  await loadPaddock();
+  await padStatoBox(cavId, false);
+  renderBox(); if(paddockPannelloId) paddockRenderPannello();
+  const box = padBoxDi(cavId);
+  if(!zitto) showToast(box ? `${c?.nome || "Il cavallo"} rientra nel box ${box.numero}.` : `${c?.nome || "Il cavallo"} tolto dal paddock.`);
+  return true;
+}
+// dal trascinamento: da un paddock a un box
+async function paddockVersoBox(cavId, boxId){
+  const b = boxList.find(x => x.id === boxId); if(!b) return;
+  if(b.cavallo_id === cavId){ await paddockTogli(cavId); return; }
+  if(b.cavallo_id || b.manutenzione){ await boxMuovi(cavId, null, boxId); return; }   // mostra il messaggio giusto (occupato / manutenzione)
+  const da = boxList.find(x => x.cavallo_id === cavId);
+  if(await boxMuovi(cavId, da ? da.id : null, boxId)) await paddockTogli(cavId, true);
+}
+async function paddockToggleIcona(padId, tipo){
+  if(boxBloccati()){ apriUpsell("box"); return; }
+  const esiste = padAttivitaDi(padId, tipo);
+  if(DEMO_MODE){
+    if(esiste) demoState.paddockAtt = demoState.paddockAtt.filter(a => a !== esiste);
+    else demoState.paddockAtt.push({ paddock_id: padId, cavallo_id: null, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "Tu" });
+    paddockAttivita = demoState.paddockAtt;
+  } else {
+    if(esiste) paddockAttivita = paddockAttivita.filter(a => a !== esiste);
+    else paddockAttivita = [...paddockAttivita, { paddock_id: padId, cavallo_id: null, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "" }];
+    renderPaddock(); if(paddockPannelloId) paddockRenderPannello();
+    const r = esiste ? await sb.from("scuderia_box_attivita").delete().eq("paddock_id", padId).is("cavallo_id", null).eq("tipo", tipo).eq("giorno", oggiRoma())
+                     : await sb.from("scuderia_box_attivita").insert({ centro_id: currentCentro.id, paddock_id: padId, cavallo_id: null, tipo });
+    if(r.error) showToast(r.error.message);
+    await loadPaddock();
+  }
+  renderPaddock(); if(paddockPannelloId) paddockRenderPannello();
+}
+// icone del singolo cavallo nel paddock: sono le stesse del box (seguono il cavallo)
+async function paddockToggleIconaCavallo(padId, cavId, tipo){
+  if(boxBloccati()){ apriUpsell("box"); return; }
+  const esiste = padCavAttivitaDi(cavId, tipo);
+  if(DEMO_MODE){
+    if(esiste) demoState.boxAttivita = demoState.boxAttivita.filter(a => a !== esiste);
+    else demoState.boxAttivita.push({ box_id: null, paddock_id: padId, cavallo_id: cavId, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "Tu" });
+    boxAttivita = demoState.boxAttivita;
+  } else {
+    if(esiste) boxAttivita = boxAttivita.filter(a => a !== esiste);
+    else boxAttivita = [...boxAttivita, { box_id: null, paddock_id: padId, cavallo_id: cavId, tipo, giorno: oggiRoma(), fatto_il: new Date().toISOString(), fatto_da_nome: currentMembro?.nome_visualizzato || "" }];
+    renderBox(); if(paddockPannelloId) paddockRenderPannello();
+    const r = esiste ? await sb.from("scuderia_box_attivita").delete().eq("cavallo_id", cavId).eq("tipo", tipo).eq("giorno", oggiRoma())
+                     : await sb.from("scuderia_box_attivita").insert({ centro_id: currentCentro.id, paddock_id: padId, cavallo_id: cavId, tipo });
+    if(r.error) showToast(r.error.message);
+    await loadBox();
+  }
+  renderBox(); if(paddockPannelloId) paddockRenderPannello();
+}
+
+// «dove vive» nella scheda del cavallo: «Box 4», «Box 4 · di giorno nel Paddock grande», «Vive nel Paddock grande»
+function doveViveCavallo(cavId){
+  const box = boxList.find(b => b.cavallo_id === cavId), pad = padDiCavallo(cavId);
+  if(box && pad) return `Box ${box.numero} · di giorno in ${pad.nome}`;
+  if(box) return `Box ${box.numero}`;
+  if(pad) return `Vive in ${pad.nome}`;
+  return null;
+}
+/* =====================================================================
+   INCARICHI DEL MANISCALCO (9/11/2026 · SQL 50) — script normale: funzioni globali.
+   Cavalli › Maniscalchi: elenco cavallo → maniscalco, ricerca e filtri, selezione multipla,
+   assegna / sostituto a tempo / revoca, con riepilogo prima di confermare. Lo stesso riquadro è nella scheda del cavallo.
+   Regole (nel database): 1 titolare + al massimo 1 sostituto con data di fine; il proprietario con l'app conferma;
+   il cambio vale subito o da una data; la revoca chiude l'incarico ma non cancella lavori, storico o crediti.
+   ===================================================================== */
+let mncDati = null, mncSel = new Set(), mncFiltro = { q: "", f: "" }, mncForm = null, mncErrore = "";
+const MNC_APERTI = ["attivo", "da_confermare_proprietario", "programmato"];
+
+async function caricaIncarichi(){
+  mncErrore = "";
+  if(DEMO_MODE){
+    if(!demoState.incarichi){
+      const pro = (typeof professionistiList !== "undefined" && professionistiList.length ? professionistiList : [{ cliente_id: "demo-pro-1", nome: "Marco Ferri", stato: "attivo" }]);
+      demoState.mncPro = [...pro.map(p => ({ cliente_id: p.cliente_id, nome: p.nome, stato: p.stato || "attivo", professione: "maniscalco" })),
+        { cliente_id: "demo-pro-2", nome: "Luca Bianchi", stato: "attivo", professione: "maniscalco" }];
+      demoState.incarichi = (demoState.cavalli || []).map((c, i) => ({ id: "inc" + i, cav: c.id, cliente_id: i === 0 ? demoState.mncPro[0].cliente_id : null }))
+        .filter(x => x.cliente_id).map(x => ({ id: x.id, cav: x.cav, cliente_id: x.cliente_id, ruolo: "titolare", stato: "attivo", dal: isoLoc(new Date()), al: null }));
+    }
+    const nomePro = id => (demoState.mncPro.find(p => p.cliente_id === id) || {}).nome || "Maniscalco";
+    mncDati = { puo: true, pro: demoState.mncPro, cavalli: (cavalliList || []).map(c => ({ id: c.id, nome: c.nome, foto_url: c.foto_url, proprietario: c.proprietario,
+      chiede_conferma: false, incarichi: demoState.incarichi.filter(a => a.cav === c.id && MNC_APERTI.includes(a.stato)).map(a => ({ ...a, nome: nomePro(a.cliente_id), collegato: true })) })) };
+    return;
+  }
+  const { data, error } = await sb.rpc("scuderia_incarichi", { p_centro: currentCentro.id });
+  if(error || !data || data.errore){
+    mncDati = { puo: false, pro: [], cavalli: [] };
+    mncErrore = /scuderia_incarichi|schema cache|function/.test(error?.message || "") ? "Manca un aggiornamento del database (SQL 50): avvisa l'assistenza." : (data?.errore || error?.message || "Non riesco a caricare gli incarichi.");
+    return;
+  }
+  mncDati = data;
+}
+const mncTitolare = c => c.incarichi.find(a => a.ruolo === "titolare" && a.stato === "attivo") || null;
+const mncSostituto = c => c.incarichi.find(a => a.ruolo === "sostituto" && a.stato === "attivo") || null;
+const mncInAttesa = c => c.incarichi.filter(a => a.stato !== "attivo");
+const mncGiorno = d => d ? formatDate(d) : "";
+
+/* ---- vista Cavalli › Maniscalchi ---- */
+async function apriIncarichi(){
+  document.getElementById("cavalli-list-view").style.display = "none";
+  document.getElementById("cavalli-detail-view").style.display = "none";
+  document.getElementById("cavalli-incarichi-view").style.display = "block";
+  mncSel = new Set();
+  document.getElementById("inc-corpo").innerHTML = `<div style="color:var(--muted);padding:20px 0">Caricamento…</div>`;
+  await caricaIncarichi(); renderIncarichi();
+}
+function chiudiIncarichi(){
+  document.getElementById("cavalli-incarichi-view").style.display = "none";
+  document.getElementById("cavalli-list-view").style.display = "block";
+  if(typeof renderCavalliList === "function") renderCavalliList();
+}
+function mncFiltra(){
+  mncFiltro.q = (document.getElementById("inc-cerca")?.value || "").trim().toLowerCase();
+  mncFiltro.f = document.getElementById("inc-filtro")?.value || "";
+  renderIncarichi();
+}
+function mncVisibili(){
+  const q = mncFiltro.q, f = mncFiltro.f;
+  return (mncDati?.cavalli || []).filter(c => {
+    if(q){
+      const testo = [c.nome, c.proprietario, ...c.incarichi.map(a => a.nome)].filter(Boolean).join(" ").toLowerCase();
+      if(!testo.includes(q)) return false;
+    }
+    if(f === "senza") return !mncTitolare(c);
+    if(f === "attesa") return mncInAttesa(c).length > 0 || c.incarichi.some(a => a.stato === "attivo" && a.al);
+    if(f.startsWith("pro:")) return c.incarichi.some(a => a.cliente_id === f.slice(4));
+    return true;
+  });
+}
+function mncCellaPro(a, cosa){
+  if(!a) return `<span style="color:var(--muted)">${cosa === "titolare" ? "Nessuno" : "—"}</span>`;
+  return `<div style="font-weight:700">${escapeHtml(a.nome)}</div><div style="font-size:12px;color:var(--muted)">${
+    a.al ? (cosa === "sostituto" ? "fino al " : "termina il ") + mncGiorno(a.al) : "dal " + mncGiorno(a.dal)}${a.collegato === false ? " · non ha ancora accettato il collegamento" : ""}</div>`;
+}
+function mncAttesaHtml(c){
+  const righe = mncInAttesa(c).map(a => `<div class="inc-attesa">${a.stato === "da_confermare_proprietario" ? '<i class="fa-solid fa-hourglass-half"></i>' : '<i class="fa-regular fa-calendar"></i>'}
+      ${a.ruolo === "sostituto" ? "Sostituto " : "→ "}<b>${escapeHtml(a.nome)}</b> ${a.stato === "da_confermare_proprietario" ? "· in attesa del proprietario" : "dal " + mncGiorno(a.dal)}${a.al && a.ruolo === "sostituto" ? " al " + mncGiorno(a.al) : ""}
+      ${mncDati.puo ? `<button class="inc-link" onclick="mncAnnulla('${a.id}')">annulla</button>` : ""}</div>`);
+  if(c.ultimo_rifiuto && !mncInAttesa(c).length) righe.push(`<div class="inc-attesa rifiuto"><i class="fa-solid fa-xmark"></i> ${escapeHtml(c.ultimo_rifiuto.nome || "")}: rifiutato dal proprietario</div>`);
+  return righe.join("");
+}
+function renderIncarichi(){
+  const el = document.getElementById("inc-corpo"); if(!el || !mncDati) return;
+  const fil = document.getElementById("inc-filtro");
+  if(fil){
+    const v = mncFiltro.f;
+    fil.innerHTML = `<option value="">Tutti i cavalli</option><option value="senza">Senza maniscalco</option><option value="attesa">Cambi in attesa o programmati</option>`
+      + (mncDati.pro.length ? `<optgroup label="Seguiti da">${mncDati.pro.map(p => `<option value="pro:${p.cliente_id}">${escapeHtml(p.nome)}</option>`).join("")}</optgroup>` : "");
+    fil.value = v;
+  }
+  if(mncErrore){ el.innerHTML = `<div class="bp-avviso giallo">${escapeHtml(mncErrore)}</div>`; return; }
+  const tutti = mncDati.cavalli, lista = mncVisibili(), puo = mncDati.puo;
+  const senza = tutti.filter(c => !mncTitolare(c)).length;
+  document.getElementById("inc-conta").textContent = `${tutti.length} cavalli · ${tutti.length - senza} con maniscalco · ${senza} senza`;
+  mncSel = new Set([...mncSel].filter(id => tutti.some(c => c.id === id)));
+  const barra = document.getElementById("inc-barra");
+  barra.style.display = puo && mncSel.size ? "flex" : "none";
+  barra.innerHTML = `<b>${mncSel.size} selezionat${mncSel.size === 1 ? "o" : "i"}</b>
+    <button class="btn btn-primary btn-sm" onclick="mncApriForm('assegna')"><i class="fa-solid fa-user-check"></i> Assegna / cambia</button>
+    <button class="btn btn-outline btn-sm" onclick="mncApriForm('sostituto')"><i class="fa-solid fa-user-clock"></i> Sostituto a tempo</button>
+    <button class="btn btn-outline btn-sm" style="color:var(--danger)" onclick="mncApriForm('revoca')"><i class="fa-solid fa-user-xmark"></i> Revoca</button>
+    <button class="btn btn-ghost btn-sm" onclick="mncSel.clear();renderIncarichi()">Deseleziona</button>`;
+  if(!mncDati.pro.length){
+    el.innerHTML = `<div class="empty-state"><i class="fa-solid fa-user-plus"></i><div>Nessun maniscalco collegato al centro.<br>Collegalo da <a href="#" onclick="event.preventDefault();showModule('professionisti')">Professionisti</a>, poi assegnagli i cavalli da qui.</div></div>`;
+    return;
+  }
+  if(!lista.length){ el.innerHTML = `<div class="empty-state"><i class="fa-solid fa-magnifying-glass"></i><div>Nessun cavallo con questi filtri.</div></div>`; return; }
+  const tuttiSel = lista.every(c => mncSel.has(c.id));
+  el.innerHTML = `<div class="table-wrap"><table class="inc-tabella">
+    <thead><tr>${puo ? `<th style="width:36px"><input type="checkbox" aria-label="Seleziona tutti i cavalli in elenco" ${tuttiSel ? "checked" : ""} onchange="mncSelTutti(this.checked)"></th>` : ""}
+      <th>Cavallo</th><th>Maniscalco</th><th>Sostituto</th><th>Cambi in corso</th><th></th></tr></thead>
+    <tbody>${lista.map(c => { const t = mncTitolare(c), s = mncSostituto(c);
+      return `<tr class="${mncSel.has(c.id) ? "sel" : ""}">
+        ${puo ? `<td><input type="checkbox" aria-label="Seleziona ${escapeHtml(c.nome)}" ${mncSel.has(c.id) ? "checked" : ""} onchange="mncSeleziona('${c.id}', this.checked)"></td>` : ""}
+        <td><div class="inc-cav">${c.foto_url ? `<span class="f" style="background-image:${cssUrl(c.foto_url)}"></span>` : `<span class="f nf">${escapeHtml((c.nome || "?").charAt(0).toUpperCase())}</span>`}
+          <div style="min-width:0"><div style="font-weight:800">${escapeHtml(c.nome)}</div><div style="font-size:12px;color:var(--muted)">${escapeHtml(c.proprietario || "")}${c.chiede_conferma ? `${c.proprietario ? " · " : ""}<span data-tip="Il proprietario ha l'app: ogni cambio gli chiede conferma">conferma il proprietario</span>` : ""}</div></div></div></td>
+        <td>${mncCellaPro(t, "titolare")}</td>
+        <td>${mncCellaPro(s, "sostituto")}</td>
+        <td>${mncAttesaHtml(c) || '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="text-align:right;white-space:nowrap">
+          ${puo ? `<button class="btn btn-ghost btn-sm" onclick="mncApriForm('assegna', ['${c.id}'])">${t ? "Cambia" : "Assegna"}</button>` : ""}
+          ${puo && (t || s) ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="mncApriForm('revoca', ['${c.id}'])">Revoca</button>` : ""}
+          <button class="btn btn-ghost btn-sm" data-tip="Storico degli incarichi" aria-label="Storico degli incarichi di ${escapeHtml(c.nome)}" onclick="mncStorico('${c.id}')"><i class="fa-solid fa-clock-rotate-left"></i></button></td></tr>`; }).join("")}</tbody></table></div>`;
+}
+function mncSeleziona(id, on){ if(on) mncSel.add(id); else mncSel.delete(id); renderIncarichi(); }
+function mncSelTutti(on){ mncVisibili().forEach(c => on ? mncSel.add(c.id) : mncSel.delete(c.id)); renderIncarichi(); }
+
+/* ---- finestra: assegna / sostituto / revoca, con riepilogo ---- */
+async function mncApriForm(azione, cavalli){
+  if(!mncDati) await caricaIncarichi();
+  if(!mncDati.puo){ showToast("Solo l'amministratore o un membro di livello 2 o 3 può assegnare i maniscalchi."); return; }
+  const ids = cavalli || [...mncSel];
+  if(!ids.length){ showToast("Seleziona almeno un cavallo."); return; }
+  if(azione !== "revoca" && !mncDati.pro.length){ showToast("Prima collega un maniscalco da Professionisti."); return; }
+  mncForm = { azione, ids };
+  const oggi = isoLoc(new Date()), tra7 = isoLoc(new Date(Date.now() + 7 * 864e5));
+  const titoli = { assegna: "Assegna o cambia il maniscalco", sostituto: "Maniscalco sostituto a tempo", revoca: "Revoca il maniscalco" };
+  document.getElementById("incarico-titolo").textContent = titoli[azione];
+  const proSel = `<div class="field"><label for="inc-f-pro">Maniscalco</label><select class="input" id="inc-f-pro" onchange="mncRiepilogo()">
+      <option value="">Scegli…</option>${mncDati.pro.map(p => `<option value="${p.cliente_id}">${escapeHtml(p.nome)}${p.stato !== "attivo" ? " (collegamento in attesa)" : ""}</option>`).join("")}</select></div>`;
+  let h = "";
+  if(azione === "assegna"){
+    h = proSel + `<fieldset class="inc-quando"><legend>Da quando</legend>
+        <label><input type="radio" name="inc-f-quando" value="subito" checked onchange="mncRiepilogo()"> Da subito</label>
+        <label><input type="radio" name="inc-f-quando" value="data" onchange="mncRiepilogo()"> Dal giorno <input class="input" type="date" id="inc-f-dal" min="${oggi}" value="${oggi}" onchange="mncRiepilogo()" aria-label="Data di inizio"></label></fieldset>`;
+  } else if(azione === "sostituto"){
+    h = proSel + `<div class="grid grid-2"><div class="field"><label for="inc-f-dal">Dal</label><input class="input" type="date" id="inc-f-dal" min="${oggi}" value="${oggi}" onchange="mncRiepilogo()"></div>
+        <div class="field"><label for="inc-f-al">Fino al (compreso)</label><input class="input" type="date" id="inc-f-al" min="${oggi}" value="${tra7}" onchange="mncRiepilogo()"></div></div>
+        <p class="inc-nota">Finito il periodo torna da solo il maniscalco titolare.</p>`;
+  } else {
+    h = `<fieldset class="inc-quando"><legend>Da quando</legend>
+        <label><input type="radio" name="inc-f-quando" value="subito" checked onchange="mncRiepilogo()"> Da subito</label>
+        <label><input type="radio" name="inc-f-quando" value="data" onchange="mncRiepilogo()"> Dal giorno <input class="input" type="date" id="inc-f-dal" min="${oggi}" value="${oggi}" onchange="mncRiepilogo()" aria-label="Data della revoca"></label></fieldset>
+      <div class="field"><label for="inc-f-motivo">Motivo (facoltativo, lo legge il maniscalco)</label><input class="input" id="inc-f-motivo" maxlength="200" placeholder="Es. cambio di organizzazione"></div>
+      <p class="inc-nota">I lavori fatti restano nel suo storico e i crediti aperti non cambiano. Gli appuntamenti già fissati restano a lui: decide lui se confermarli o annullarli.</p>`;
+  }
+  document.getElementById("incarico-corpo").innerHTML = h + `<div class="inc-riepilogo" id="inc-riepilogo"></div><div class="auth-error" id="inc-f-errore"></div>
+    <button class="btn btn-primary btn-block btn-conferma" id="inc-f-ok" onclick="mncConferma()">Conferma</button>`;
+  mncRiepilogo();
+  openModal("modal-incarico");
+}
+function mncValoriForm(){
+  const v = { cliente: document.getElementById("inc-f-pro")?.value || null, dal: null, al: null, motivo: document.getElementById("inc-f-motivo")?.value.trim() || null };
+  const quando = document.querySelector('input[name="inc-f-quando"]:checked')?.value;
+  if(mncForm.azione === "sostituto" || quando === "data") v.dal = document.getElementById("inc-f-dal")?.value || null;
+  if(mncForm.azione === "sostituto") v.al = document.getElementById("inc-f-al")?.value || null;
+  return v;
+}
+function mncRiepilogo(){
+  const box = document.getElementById("inc-riepilogo"); if(!box || !mncForm) return;
+  const v = mncValoriForm(), oggi = isoLoc(new Date());
+  const pro = mncDati.pro.find(p => p.cliente_id === v.cliente);
+  const quando = v.dal && v.dal > oggi ? " dal " + mncGiorno(v.dal) : " da subito";
+  const cav = mncForm.ids.map(id => mncDati.cavalli.find(c => c.id === id)).filter(Boolean);
+  const righe = cav.slice(0, 12).map(c => {
+    const t = mncTitolare(c), s = mncSostituto(c);
+    if(mncForm.azione === "revoca"){
+      const chi = [t?.nome, s ? s.nome + " (sostituto)" : null].filter(Boolean).join(", ");
+      return `<li><b>${escapeHtml(c.nome)}</b>: ${chi ? "via " + escapeHtml(chi) : '<span style="color:var(--muted)">nessun maniscalco, nessun cambio</span>'}</li>`;
+    }
+    if(!pro) return `<li><b>${escapeHtml(c.nome)}</b>: ${t ? escapeHtml(t.nome) : "nessuno"} → …</li>`;
+    if(mncForm.azione === "assegna" && t && t.cliente_id === pro.cliente_id) return `<li><b>${escapeHtml(c.nome)}</b>: è già di ${escapeHtml(pro.nome)}</li>`;
+    const da = mncForm.azione === "sostituto" ? (s ? escapeHtml(s.nome) + " (sostituto)" : (t ? "titolare " + escapeHtml(t.nome) : "nessuno")) : (t ? escapeHtml(t.nome) : "nessuno");
+    return `<li><b>${escapeHtml(c.nome)}</b>: ${da} → <b>${escapeHtml(pro.nome)}</b>${c.chiede_conferma ? ' <span class="badge-pill badge-yellow">chiede conferma al proprietario</span>' : ""}</li>`;
+  });
+  if(cav.length > 12) righe.push(`<li style="color:var(--muted)">… e altri ${cav.length - 12}</li>`);
+  const testa = mncForm.azione === "revoca" ? `Revoca${quando}` : mncForm.azione === "sostituto"
+    ? `Sostituto${v.dal ? " dal " + mncGiorno(v.dal) : ""}${v.al ? " al " + mncGiorno(v.al) : ""}` : `Nuovo maniscalco${quando}`;
+  box.innerHTML = `<div class="inc-riep-testa">${testa} · ${cav.length} cavall${cav.length === 1 ? "o" : "i"}</div><ul>${righe.join("")}</ul>`;
+}
+async function mncConferma(){
+  const err = document.getElementById("inc-f-errore"), btn = document.getElementById("inc-f-ok"); err.style.display = "none";
+  const v = mncValoriForm(), oggi = isoLoc(new Date());
+  const errore = t => { err.textContent = t; err.style.display = "block"; };
+  if(mncForm.azione !== "revoca" && !v.cliente) return errore("Scegli il maniscalco.");
+  if(v.dal && v.dal < oggi) return errore("La data non può essere nel passato.");
+  if(mncForm.azione === "sostituto" && (!v.al || v.al < (v.dal || oggi))) return errore("Indica fino a quando, dopo la data di inizio.");
+  btn.disabled = true;
+  try{
+    let esito;
+    if(DEMO_MODE) esito = mncDemoAzione(mncForm.azione, mncForm.ids, v);
+    else {
+      const { data, error } = await sb.rpc("scuderia_incarico_azione", { p_centro: currentCentro.id, p_azione: mncForm.azione, p_cavalli: mncForm.ids,
+        p_cliente: v.cliente, p_dal: v.dal, p_al: v.al, p_motivo: v.motivo, p_incarico: null });
+      if(error) throw error;
+      esito = data;
+    }
+    if(!esito?.ok) return errore(esito?.errore || "Operazione non riuscita.");
+    closeModal("modal-incarico");
+    showToast(mncTestoEsito(esito));
+    mncSel.clear();
+    await caricaIncarichi(); renderIncarichi(); mncRenderScheda();
+  }catch(e){ errore(e.message || "Operazione non riuscita."); }
+  finally{ btn.disabled = false; }
+}
+function mncTestoEsito(e){
+  const parti = [], n = k => Number(e[k]) || 0;
+  if(n("attivo")) parti.push(`${n("attivo")} assegnat${n("attivo") === 1 ? "o" : "i"}`);
+  if(n("programmato")) parti.push(`${n("programmato")} dalla data scelta`);
+  if(n("da_confermare")) parti.push(`${n("da_confermare")} in attesa del proprietario`);
+  if(n("revocati")) parti.push(`${n("revocati")} revocat${n("revocati") === 1 ? "o" : "i"}`);
+  if(n("revoca_programmata")) parti.push(`${n("revoca_programmata")} revoca programmata`);
+  if(n("gia")) parti.push(`${n("gia")} già a posto`);
+  if(n("nessuno")) parti.push(`${n("nessuno")} senza maniscalco da revocare`);
+  if(n("errore") || n("saltati")) parti.push(`${n("errore") + n("saltati")} non modificat${n("errore") + n("saltati") === 1 ? "o" : "i"}`);
+  return parti.length ? "Fatto: " + parti.join(" · ") + "." : "Fatto.";
+}
+async function mncAnnulla(id){
+  if(!confirm("Annullare questa richiesta di cambio?")) return;
+  if(DEMO_MODE){ const a = demoState.incarichi.find(x => x.id === id); if(a) a.stato = "chiuso"; }
+  else {
+    const { data, error } = await sb.rpc("scuderia_incarico_azione", { p_centro: currentCentro.id, p_azione: "annulla", p_cavalli: [], p_cliente: null, p_dal: null, p_al: null, p_motivo: null, p_incarico: id });
+    if(error || !data?.ok){ showToast(data?.errore || error?.message || "Non riuscito."); return; }
+  }
+  showToast("Richiesta annullata.");
+  await caricaIncarichi(); renderIncarichi(); mncRenderScheda();
+}
+// demo: stessa logica, in memoria
+function mncDemoAzione(azione, ids, v){
+  const oggi = isoLoc(new Date()), out = { ok: true };
+  const conta = k => { out[k] = (out[k] || 0) + 1; };
+  ids.forEach(cav => {
+    const aperti = demoState.incarichi.filter(a => a.cav === cav && MNC_APERTI.includes(a.stato));
+    if(azione === "revoca"){ if(!aperti.length) return conta("nessuno"); aperti.forEach(a => { a.stato = "chiuso"; }); return conta("revocati"); }
+    const ruolo = azione === "sostituto" ? "sostituto" : "titolare";
+    if(aperti.some(a => a.ruolo === ruolo && a.cliente_id === v.cliente && a.stato === "attivo")) return conta("gia");
+    const futuro = v.dal && v.dal > oggi;
+    if(!futuro) aperti.filter(a => a.ruolo === ruolo).forEach(a => { a.stato = "chiuso"; });
+    demoState.incarichi.push({ id: "inc" + Date.now() + cav, cav, cliente_id: v.cliente, ruolo, stato: futuro ? "programmato" : "attivo", dal: v.dal || oggi, al: v.al });
+    conta(futuro ? "programmato" : "attivo");
+  });
+  return out;
+}
+
+/* ---- storico di un cavallo ---- */
+async function mncStorico(cavId){
+  const c = mncDati?.cavalli.find(x => x.id === cavId) || (cavalliList || []).find(x => x.id === cavId);
+  document.getElementById("incarico-titolo").textContent = "Storico maniscalchi · " + (c?.nome || "");
+  document.getElementById("incarico-corpo").innerHTML = `<div style="color:var(--muted)">Caricamento…</div>`;
+  openModal("modal-incarico");
+  let righe = [];
+  if(DEMO_MODE) righe = demoState.incarichi.filter(a => a.cav === cavId).map(a => ({ ...a, nome: (demoState.mncPro.find(p => p.cliente_id === a.cliente_id) || {}).nome }));
+  else { const { data } = await sb.rpc("scuderia_incarichi_storico", { p_cav: cavId }); righe = data || []; }
+  const STATO = { attivo: ["In corso", "badge-green"], programmato: ["Programmato", "badge-blue"], da_confermare_proprietario: ["In attesa del proprietario", "badge-yellow"],
+    rifiutato: ["Rifiutato dal proprietario", "badge-red"], chiuso: ["Concluso", "badge-gray"] };
+  document.getElementById("incarico-corpo").innerHTML = righe.length ? `<div class="inc-storico">${righe.map(a => { const [t, cls] = STATO[a.stato] || [a.stato, "badge-gray"];
+    return `<div class="inc-st-riga"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${escapeHtml(a.nome || "Maniscalco")}${a.ruolo === "sostituto" ? " · sostituto" : ""}</b><span class="badge-pill ${cls}">${t}</span></div>
+      <div style="font-size:12.5px;color:var(--muted)">dal ${mncGiorno(a.dal)}${a.al ? " al " + mncGiorno(a.al) : ""}${a.motivo ? " · " + escapeHtml(a.motivo) : ""}${a.da ? " · " + escapeHtml(a.da) : ""}</div></div>`; }).join("")}</div>
+    <p class="inc-nota">I lavori di ogni maniscalco restano nel suo storico anche dopo la fine dell'incarico.</p>`
+    : `<p style="color:var(--muted)">Nessun maniscalco assegnato finora.</p>`;
+}
+
+/* ---- riquadro nella scheda del cavallo ---- */
+function mncRenderScheda(){
+  const box = document.getElementById("cav-incarico-box"); if(!box) return;
+  const id = typeof currentCavalloId !== "undefined" ? currentCavalloId : null;
+  const c = id && mncDati ? mncDati.cavalli.find(x => x.id === id) : null;
+  if(!id || mncErrore || !c){ box.innerHTML = ""; return; }
+  const t = mncTitolare(c), s = mncSostituto(c), puo = mncDati.puo;
+  box.innerHTML = `<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <h3 style="margin:0">Maniscalco</h3>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${puo && mncDati.pro.length ? `<button class="btn btn-outline btn-sm" onclick="mncApriForm('assegna', ['${c.id}'])">${t ? "Cambia" : "Assegna"}</button>
+          <button class="btn btn-outline btn-sm" onclick="mncApriForm('sostituto', ['${c.id}'])">Sostituto</button>` : ""}
+        ${puo && (t || s) ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="mncApriForm('revoca', ['${c.id}'])">Revoca</button>` : ""}
+        <button class="btn btn-ghost btn-sm" onclick="mncStorico('${c.id}')"><i class="fa-solid fa-clock-rotate-left"></i> Storico</button></div></div>
+    <div class="grid grid-2"><div><div class="inc-etichetta">Titolare</div>${mncCellaPro(t, "titolare")}</div><div><div class="inc-etichetta">Sostituto</div>${mncCellaPro(s, "sostituto")}</div></div>
+    ${mncAttesaHtml(c) ? `<div style="margin-top:10px">${mncAttesaHtml(c)}</div>` : ""}
+    ${!mncDati.pro.length ? `<p class="inc-nota">Nessun maniscalco collegato: collegalo da Professionisti.</p>` : ""}</div>`;
+}
+// la scheda del cavallo mostra il riquadro appena si apre (chiamata da openCavalloDetail)
+function mncAlCavallo(){
+  const box = document.getElementById("cav-incarico-box"); if(box) box.innerHTML = "";
+  caricaIncarichi().then(mncRenderScheda);
+}
 /* ---------- ATHENA (segreteria AI: guida del gestionale + situazione del centro) ---------- */
 // La funzione è sul sito dell'app: /api/agent è un proxy (netlify.toml) → stesso dominio, niente CORS.
 let athenaCaricata = false, athenaInCorso = false, agenteAttivo = "athena";

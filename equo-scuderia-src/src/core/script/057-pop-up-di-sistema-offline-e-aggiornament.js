@@ -139,6 +139,8 @@ const BOX_MOTIVI = { pulizia:"Pulizia", disinfezione:"Disinfezione", riparazione
 const oggiRoma = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
 const boxBloccati = () => !!(pianoCentro && Number(pianoCentro.box) === 0);
 const boxLimite = () => pianoCentro ? Number(pianoCentro.box ?? 100) : 100;
+// box e paddock condividono lo stesso limite del pacchetto (SQL 49)
+const postiUsati = () => boxList.length + (typeof paddockList !== "undefined" ? paddockList.length : 0);
 const boxPuoGestire = () => DEMO_MODE || currentMembro?.ruolo === "admin" || ["admin","2","3"].includes(String(currentMembro?.livello)) || currentCentro?.owner_id === currentUser?.id;
 function boxIconeAttive(){ const extra = currentCentro?.box_icone_extra || []; return Object.keys(BOX_ICONE).filter(k => !BOX_ICONE[k].extra || extra.includes(k)); }
 
@@ -231,20 +233,20 @@ function renderBox(){
   const el = document.getElementById("box-griglia"); if(!el) return;
   const n = { verde: 0, giallo: 0, rosso: 0, blu: 0, manut: 0 };
   boxList.forEach(b => { n[boxStato(b).cls]++; });
-  document.getElementById("box-conta").innerHTML = `<span data-tip="Box creati / massimo del tuo pacchetto"><b>${boxList.length}</b> box${boxBloccati() ? "" : " su " + boxLimite()}</span>
+  document.getElementById("box-conta").innerHTML = `<span data-tip="Posti creati (box + paddock) / massimo del tuo pacchetto"><b>${boxList.length}</b> box${boxBloccati() ? "" : (typeof paddockList !== "undefined" && paddockList.length ? " + " + paddockList.length + " paddock" : "") + " · " + postiUsati() + " posti su " + boxLimite()}</span>
     <span data-tip="Box di proprietà con il suo cavallo, o cavallo nel suo posto"><i class="l bv"></i>${n.verde} al loro posto</span>
     <span data-tip="Cavallo in un box che non è il suo"><i class="l bg"></i>${n.giallo} fuori posto</span>
     <span data-tip="Box di proprietà senza il suo cavallo dentro"><i class="l br"></i>${n.rosso} riservati vuoti</span>
     <span data-tip="Box libero, non assegnato"><i class="l bb"></i>${n.blu} liberi</span>
     <span data-tip="Box in manutenzione"><i class="l bm"></i>${n.manut} in manutenzione</span>`;
-  const puoAgg = !boxBloccati() && boxPuoGestire() && boxList.length < boxLimite();
+  const puoAgg = !boxBloccati() && boxPuoGestire() && postiUsati() < boxLimite();
   el.innerHTML = boxList.map(boxCardHtml).join("") + (puoAgg ? `<div class="box-card box-nuovo" onclick="boxNuovo()" data-tip="Crea un nuovo box con il primo numero libero (da 1 a 100)"><i class="fa-solid fa-plus" style="font-size:20px"></i> Nuovo box</div>` : "");
   document.getElementById("box-btn-impost").style.display = !boxBloccati() && boxPuoGestire() ? "" : "none";
 }
 
 async function boxNuovo(){
   if(boxBloccati()){ apriUpsell("box"); return; }
-  if(boxList.length >= boxLimite()){ showToast(`Hai già ${boxLimite()} box: è il massimo del tuo pacchetto${boxLimite() < 100 ? " (PREMIUM arriva a 100)" : ""}.`); return; }
+  if(postiUsati() >= boxLimite()){ showToast(`Hai già ${boxLimite()} posti tra box e paddock: è il massimo del tuo pacchetto${boxLimite() < 100 ? " (PREMIUM arriva a 100)" : ""}.`); return; }
   const usati = new Set(boxList.map(b => b.numero));
   let n = 1; while(usati.has(n) && n <= 100) n++;
   if(n > 100){ showToast("Hai raggiunto il limite di 100 box."); return; }

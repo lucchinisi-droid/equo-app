@@ -2,7 +2,11 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span>Collega il tuo maniscalco</div>
-    <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
+    <!-- 9/11/2026 (SQL 52): alla prima iscrizione la stessa finestra chiede il codice del maniscalco -->
+    <div id="collega-maniscalco-iscrizione" style="display:none;font-size:14px;line-height:1.5;margin-bottom:12px">
+      <b>Il tuo maniscalco usa già Equo?</b><br>Chiedigli il codice Equo: potremmo avere già i tuoi cavalli e lo storico, così non devi inserirli da capo.
+    </div>
+    <div class="muted" id="collega-maniscalco-spiega" style="font-size:13px;margin-bottom:14px;line-height:1.5">
       Inserisci o scansiona il codice del tuo maniscalco (il suo codice personale, es. EQUOPRO0FKEM, oppure quello che ti ha dato): potrai scrivergli in chat e ricevere qui appuntamenti e riepiloghi in PDF.
     </div>
     <div class="auth-form">
@@ -15,6 +19,10 @@
       <button class="btn btn-outline" onclick="openQrScanner()" style="width:100%;margin-top:8px">
         <span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Scansiona QR
       </button>
+      <div id="collega-maniscalco-salta-box" style="display:none;text-align:center;margin-top:12px">
+        <button class="btn btn-ghost" onclick="saltaCodiceIscrizione()" style="width:100%">Continua senza codice</button>
+        <div class="muted" style="font-size:12px;margin-top:4px">Potrai farlo quando vuoi dal menu › «Collega il tuo maniscalco».</div>
+      </div>
     </div>
   </div>
 </div>

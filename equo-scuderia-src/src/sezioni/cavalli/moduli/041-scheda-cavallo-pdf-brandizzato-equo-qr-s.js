@@ -346,6 +346,8 @@ function openCavalloForm(id){
     document.getElementById("cav-microchip").value = c?.microchip || "";
     document.getElementById("cav-gruppo-sanguigno").value = c?.gruppo_sanguigno || "";
     document.getElementById("cav-proprietario").value = c?.proprietario || "";
+    document.getElementById("cav-proprietario").dataset.membroId = "";
+    if(typeof propCavReset === "function") propCavReset();
     document.getElementById("cav-codice-proprietario").value = "";
     document.getElementById("cav-note").value = c?.note || "";
     preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
@@ -354,6 +356,8 @@ function openCavalloForm(id){
     document.getElementById("cav-tipo-proprieta").value = "proprieta";
     razzaImposta("cav-razza", "");
     ["cav-nome","cav-mantello","cav-sesso","cav-attivita","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("cav-proprietario").dataset.membroId = "";
+    if(typeof propCavReset === "function") propCavReset();
     preview.innerHTML = "";
   }
   openModal("modal-cavallo");

@@ -1,6 +1,7 @@
 <div class="modal-overlay" id="modal-cliente" onclick="closeOut(event,'modal-cliente')">
   <div class="modal">
     <div class="modal-title"><span id="modal-cliente-title">Nuovo cliente</span> <span class="x" onclick="closeModal('modal-cliente')">✕</span></div>
+    <div id="cli-provvisorio" class="cli-provvisorio" style="display:none"></div>
     <div class="grid grid-2">
       <div class="field"><label>Nome e cognome</label><input class="input" id="cli-nome" maxlength="80" placeholder="Es. Sofia Rossi"></div>
       <div class="field"><label>Ruolo</label><select class="input" id="cli-ruolo"><option value="allievo">Allievo o genitore</option><option value="proprietario">Proprietario di un cavallo</option></select></div>

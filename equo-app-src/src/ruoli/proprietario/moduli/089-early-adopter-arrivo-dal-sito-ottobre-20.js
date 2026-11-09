@@ -271,7 +271,8 @@ async function invitoControlla(){
     }
     if(res?.errore === "errore" || res?.errore === "non_autenticato") return;   // problema di rete o sessione: riprova al prossimo accesso
     invitoCancella();
-    const msg = { codice_non_valido: "Il codice invito non è più valido: chiedi al tuo professionista di mandartelo di nuovo.", codice_gia_usato: "Questo invito è già stato usato da un altro account.", codice_tuo: "Questo è un tuo invito: va dato al cliente." }[res?.errore];
+    const msg = { codice_non_valido: "Il codice invito non è più valido: chiedi al tuo professionista di mandartelo di nuovo.", codice_gia_usato: "Questo invito è già stato usato da un altro account.", codice_tuo: "Questo è un tuo invito: va dato al cliente.",
+      codice_scuderia: "Questo invito è per una scuderia: si usa in Equo Scuderia. Chiedi al maniscalco il suo codice personale." }[res?.errore];
     if(msg) showToast(msg);
   } finally { invitoInCorso = false; }
 }

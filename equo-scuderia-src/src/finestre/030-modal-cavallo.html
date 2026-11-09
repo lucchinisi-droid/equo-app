@@ -24,7 +24,7 @@
       <div class="field"><label>Microchip</label><input class="input" id="cav-microchip" placeholder="15 cifre"></div>
     </div>
     <div class="field"><label>Gruppo sanguigno</label><input class="input" id="cav-gruppo-sanguigno" placeholder="Facoltativo"></div>
-    <div class="field"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario"></div>
+    <div class="field" style="position:relative"><label>Proprietario</label><input class="input" id="cav-proprietario" placeholder="Nome proprietario" autocomplete="off" oninput="propCavSuggerisci()" onfocus="propCavSuggerisci()" onblur="setTimeout(propCavChiudi, 200)"><div id="cav-prop-sugg" class="prop-sugg" style="display:none"></div><div id="cav-prop-hint" class="prop-hint"></div></div>
     <div class="field">
       <label>Codice app proprietario <span style="color:var(--muted);font-weight:400">(facoltativo)</span></label>
       <input class="input" id="cav-codice-proprietario" placeholder="Es. EQUOOWN3Q9NM" style="text-transform:uppercase">

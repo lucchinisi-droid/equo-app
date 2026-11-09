@@ -7,8 +7,11 @@
 			teamList = demoState.membri;
 			return;
 		}
-		const { data, error } = await sb.from("scuderia_membri").select("id, user_id, ruolo, nome_visualizzato, livello, permessi").eq("centro_id", currentCentro.id).order("created_at", { ascending: true });
+		const leggi = (campi) => sb.from("scuderia_membri").select(campi).eq("centro_id", currentCentro.id).order("created_at", { ascending: true });
+		let { data, error } = await leggi("id, user_id, ruolo, nome_visualizzato, livello, permessi, provvisorio");
+		if (error) ({data, error} = await leggi("id, user_id, ruolo, nome_visualizzato, livello, permessi"));
 		if (!error) teamList = data || [];
+		if (typeof aggiornaBadgeClienti === "function") aggiornaBadgeClienti();
 	}
 	function renderTeam() {
 		document.getElementById("team-count").textContent = teamList.length;

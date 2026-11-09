@@ -1,0 +1,25 @@
+/* ---------- INCARICHI DEL MANISCALCO (9/11/2026 · SQL 50) ---------- */
+.inc-filtri{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.inc-filtri .input{flex:1;min-width:180px}
+.inc-filtri select.input{flex:0 1 240px}
+.inc-barra{position:sticky;top:8px;z-index:20;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin:0 0 12px;border-radius:12px;background:var(--surface);border:2px solid var(--primary);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.inc-tabella td{vertical-align:middle}
+.inc-tabella tr.sel td{background:color-mix(in srgb,var(--primary) 7%,transparent)}
+.inc-tabella input[type=checkbox]{width:18px;height:18px}
+.inc-cav{display:flex;align-items:center;gap:10px;min-width:160px}
+.inc-cav .f{width:36px;height:36px;border-radius:50%;background:#8a6a45 center/cover no-repeat;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+.inc-attesa{font-size:12.5px;line-height:1.4;color:var(--text)}
+.inc-attesa i{color:#9a6b12;width:14px}
+.inc-attesa.rifiuto,.inc-attesa.rifiuto i{color:var(--danger)}
+.inc-link{border:0;background:none;padding:0 0 0 4px;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
+.inc-quando{border:0;padding:0;margin:0 0 12px;display:flex;flex-direction:column;gap:8px}
+.inc-quando legend{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.inc-quando label{display:flex;align-items:center;gap:8px;font-size:14px;flex-wrap:wrap}
+.inc-quando .input{width:auto}
+.inc-nota{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
+.inc-riepilogo{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:13px;max-height:240px;overflow-y:auto}
+.inc-riepilogo ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.inc-riep-testa{font-weight:800}
+.inc-etichetta{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.inc-storico{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.inc-st-riga{border:1px solid var(--border);border-radius:12px;padding:10px 12px}

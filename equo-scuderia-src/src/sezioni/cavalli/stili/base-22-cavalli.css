@@ -13,3 +13,11 @@
 /* cavallo oltre il limite del pacchetto (9/11/2026): oscurato, al tocco la richiesta del pacchetto superiore */
 .cavallo-card.cavallo-bloccato{opacity:.45;filter:grayscale(.7);position:relative}
 .cavallo-card.cavallo-bloccato::after{content:"\f023";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:12px;bottom:10px;font-size:13px;color:var(--muted)}
+
+/* 9/11/2026 · campo Proprietario con suggerimenti dai clienti (SQL 48) */
+.prop-sugg{position:absolute;left:0;right:0;top:100%;z-index:40;margin-top:-6px;background:var(--surface,#fff);border:1px solid var(--border,#e2e2e2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;max-height:240px;overflow-y:auto}
+.prop-sugg button{display:flex;gap:6px;align-items:center;width:100%;text-align:left;padding:10px 12px;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+.prop-sugg button:hover,.prop-sugg button:focus{background:rgba(0,0,0,.05)}
+.prop-hint{font-size:12px;color:var(--muted);margin-top:4px;min-height:0}
+.prop-hint:empty{display:none}
+.cli-provvisorio{background:#fdf3d8;color:#6b520c;border-radius:10px;padding:10px 12px;font-size:13px;margin:0 0 12px}

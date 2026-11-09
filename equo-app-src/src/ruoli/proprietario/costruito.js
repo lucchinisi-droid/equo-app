@@ -330,17 +330,34 @@
     </div>`;
 		}).join("");
 	}
-	function openCollegaManiscalco() {
+	function openCollegaManiscalco(iscrizione) {
 		document.getElementById("collega-maniscalco-codice").value = "";
 		document.getElementById("collega-maniscalco-error").style.display = "none";
+		const isc = iscrizione === true;
+		document.getElementById("collega-maniscalco-iscrizione").style.display = isc ? "" : "none";
+		document.getElementById("collega-maniscalco-spiega").style.display = isc ? "none" : "";
+		document.getElementById("collega-maniscalco-salta-box").style.display = isc ? "" : "none";
 		openModal("modal-collega-maniscalco");
+	}
+	function chiediCodiceIscrizione() {
+		let invito = null;
+		try {
+			invito = JSON.parse(lsGet("equo-invito") || "null");
+		} catch (e) {}
+		if (invito && invito.codice) return;
+		openCollegaManiscalco(true);
+	}
+	function saltaCodiceIscrizione() {
+		closeModal("modal-collega-maniscalco");
+		showToast("Va bene! Se il tuo maniscalco usa Equo, lo colleghi quando vuoi dal menu.");
 	}
 	var ERRORI_CODICE_MANISCALCO = {
 		codice_non_valido: "Codice non valido. Controlla di averlo scritto bene.",
 		codice_gia_usato: "Questo codice è già stato usato da un altro account. Chiedi al tuo maniscalco di verificarlo.",
 		codice_tuo: "Questo è un codice creato da te: va dato al tuo cliente.",
 		non_autenticato: "Sessione scaduta: esci e rientra.",
-		codice_altro_tipo: "Questo non è il codice di un maniscalco: controlla di averlo copiato bene."
+		codice_altro_tipo: "Questo non è il codice di un maniscalco: controlla di averlo copiato bene.",
+		codice_scuderia: "Questo è l'invito per una scuderia: va usato in Equo Scuderia. Chiedi al maniscalco il suo codice personale (EQUOPRO…) o il QR della tua scheda cliente."
 	};
 	async function collegaManiscalco() {
 		const input = document.getElementById("collega-maniscalco-codice");
@@ -1639,7 +1656,8 @@
 			const msg = {
 				codice_non_valido: "Il codice invito non è più valido: chiedi al tuo professionista di mandartelo di nuovo.",
 				codice_gia_usato: "Questo invito è già stato usato da un altro account.",
-				codice_tuo: "Questo è un tuo invito: va dato al cliente."
+				codice_tuo: "Questo è un tuo invito: va dato al cliente.",
+				codice_scuderia: "Questo invito è per una scuderia: si usa in Equo Scuderia. Chiedi al maniscalco il suo codice personale."
 			}[res?.errore];
 			if (msg) showToast(msg);
 		} finally {
@@ -3658,6 +3676,11 @@
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", diaAggancia, { once: true });
 	else diaAggancia();
 	// equo-app-src/src/ruoli/proprietario/moduli/106-proposte-professionisti.js
+	var ppPeriodo = (p) => {
+		const d = (x) => x ? (/* @__PURE__ */ new Date(x + "T12:00")).toLocaleDateString("it-IT") : "";
+		const oggi = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+		return (p.dal && p.dal > oggi ? " dal " + d(p.dal) : "") + (p.ruolo === "sostituto" && p.al ? " fino al " + d(p.al) : "");
+	};
 	var ppEsc = (s) => escapeHtml(s == null ? "" : String(s));
 	var PP = {
 		lista: [],
@@ -3687,7 +3710,7 @@
 		}
 		box.innerHTML = `<div class="card ter-card"><div class="ter-tit">🐴 Professionisti da confermare</div>
     ${lista.map((p) => `<div class="ter-piano" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <div style="flex:1 1 180px;min-width:0;font-size:13.5px;line-height:1.45"><b>${ppEsc(p.scuderia)}</b> propone <b>${ppEsc(p.professionista)}</b> come ${ppEsc(p.professione)} di <b>${ppEsc(p.cavallo)}</b>.
+      <div style="flex:1 1 180px;min-width:0;font-size:13.5px;line-height:1.45"><b>${ppEsc(p.scuderia)}</b> propone <b>${ppEsc(p.professionista)}</b> come ${ppEsc(p.professione)}${p.ruolo === "sostituto" ? " sostituto" : ""} di <b>${ppEsc(p.cavallo)}</b>${p.al_posto_di ? " al posto di " + ppEsc(p.al_posto_di) : ""}${ppPeriodo(p)}.
         <div class="muted" style="font-size:12px">Se accetti, vede il cavallo nella sua app e registra i lavori.</div></div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button type="button" class="btn btn-outline btn-sm" onclick="ppRispondi('${p.id}', false, this)">Rifiuta</button>
@@ -3834,6 +3857,7 @@
 		caricaConfermePro,
 		cavalliUsabili: cavalliUsabili$1,
 		closeHorseDetail,
+		chiediCodiceIscrizione,
 		collegaManiscalco,
 		confermaCavalloPro,
 		confermaDatiCavallo,
@@ -3892,6 +3916,7 @@
 		openAddExpenseModal,
 		openAddLezioneModal,
 		openCollegaManiscalco,
+		saltaCodiceIscrizione,
 		openEditEventModal,
 		openEditExpenseModal,
 		openHorseDetail,

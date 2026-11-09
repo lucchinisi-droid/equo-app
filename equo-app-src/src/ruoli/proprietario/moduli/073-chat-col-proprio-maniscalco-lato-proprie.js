@@ -62,10 +62,26 @@ async function loadFarrierChatSection(){
   }).join("");
 }
 
-function openCollegaManiscalco(){
+function openCollegaManiscalco(iscrizione){
   document.getElementById("collega-maniscalco-codice").value = "";
   document.getElementById("collega-maniscalco-error").style.display = "none";
+  // 9/11/2026 (SQL 52): alla prima iscrizione la finestra spiega perché e si può saltare
+  const isc = iscrizione === true;
+  document.getElementById("collega-maniscalco-iscrizione").style.display = isc ? "" : "none";
+  document.getElementById("collega-maniscalco-spiega").style.display = isc ? "none" : "";
+  document.getElementById("collega-maniscalco-salta-box").style.display = isc ? "" : "none";
   openModal("modal-collega-maniscalco");
+}
+// subito dopo la scelta «Ho un cavallo»: se non è arrivato già con il link o il QR del maniscalco
+function chiediCodiceIscrizione(){
+  let invito = null;
+  try{ invito = JSON.parse(lsGet("equo-invito") || "null"); }catch(e){}
+  if(invito && invito.codice) return;      // c'è già il codice dal QR: il collegamento parte da solo
+  openCollegaManiscalco(true);
+}
+function saltaCodiceIscrizione(){
+  closeModal("modal-collega-maniscalco");
+  showToast("Va bene! Se il tuo maniscalco usa Equo, lo colleghi quando vuoi dal menu.");
 }
 
 const ERRORI_CODICE_MANISCALCO = {
@@ -74,6 +90,7 @@ const ERRORI_CODICE_MANISCALCO = {
   codice_tuo: "Questo è un codice creato da te: va dato al tuo cliente.",
   non_autenticato: "Sessione scaduta: esci e rientra.",
   codice_altro_tipo: "Questo non è il codice di un maniscalco: controlla di averlo copiato bene.",
+  codice_scuderia: "Questo è l'invito per una scuderia: va usato in Equo Scuderia. Chiedi al maniscalco il suo codice personale (EQUOPRO…) o il QR della tua scheda cliente.",
 };
 
 async function collegaManiscalco(){
@@ -102,4 +119,4 @@ async function collegaManiscalco(){
 }
 
 
-export { apriDocumentoPrivato, bollaAllegato, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia };
+export { apriDocumentoPrivato, bollaAllegato, chiediCodiceIscrizione, collegaManiscalco, loadFarrierChatSection, openCollegaManiscalco, previewAllegato, previewMessaggioMascalcia, saltaCodiceIscrizione };

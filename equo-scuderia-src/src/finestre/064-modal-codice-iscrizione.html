@@ -1,0 +1,14 @@
+<!-- MODAL: il codice del maniscalco alla prima iscrizione (SQL 52) -->
+<div class="modal-overlay" id="modal-codice-iscrizione" onclick="closeOut(event,'modal-codice-iscrizione')">
+  <div class="modal">
+    <div class="modal-title"><span>Il tuo maniscalco usa già Equo?</span> <span class="x" onclick="saltaCodiceIscrizione()">✕</span></div>
+    <p style="font-size:14px;line-height:1.5;margin:0 0 14px">Chiedigli il <b>codice Equo</b> o il QR della scheda della tua scuderia: potremmo avere già i tuoi cavalli e lo storico, così non devi inserirli da capo.</p>
+    <div class="field"><label for="codice-iscr-input">Codice o link del maniscalco</label>
+      <input class="input" id="codice-iscr-input" placeholder="Es. EQUO3F8A2 oppure EQUOPRO0FKEM" autocomplete="off" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')usaCodiceIscrizione()"></div>
+    <p style="color:var(--muted);font-size:12px;margin:-4px 0 12px">Va bene anche il link che ti ha mandato (app.equohub.com/?invito=…).</p>
+    <div class="auth-error" id="codice-iscr-error"></div>
+    <button class="btn btn-primary btn-block" id="codice-iscr-btn" onclick="usaCodiceIscrizione()">Collega</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="saltaCodiceIscrizione()">Continua senza codice</button>
+    <p style="color:var(--muted);font-size:12px;text-align:center;margin:6px 0 0">Potrai farlo quando vuoi da Professionisti › Aggiungi maniscalco.</p>
+  </div>
+</div>

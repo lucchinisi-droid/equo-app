@@ -48,18 +48,22 @@ function renderClienti(){
   const q = clientiFiltro.q;
   const lista = tutti.filter(m => {
     const d = clientiDati[m.id] || {};
-    if(clientiFiltro.ruolo && m.ruolo !== clientiFiltro.ruolo) return false;
+    if(clientiFiltro.ruolo === "provvisori"){ if(!m.provvisorio) return false; }
+    else if(clientiFiltro.ruolo && m.ruolo !== clientiFiltro.ruolo) return false;
     if(!q) return true;
     return (m.nome_visualizzato || "").toLowerCase().includes(q) || (d.telefono || "").replace(/\s/g, "").includes(q.replace(/\s/g, "")) || (d.email || "").includes(q);
   }).sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it"));
   const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
-  document.getElementById("clienti-count").textContent = lim ? `${tutti.length} di ${lim}` : tutti.length;
+  // le schede provvisorie non contano nel limite del pacchetto (SQL 48)
+  const definitivi = tutti.filter(m => !m.provvisorio).length, provv = tutti.length - definitivi;
+  document.getElementById("clienti-count").textContent = (lim ? `${definitivi} di ${lim}` : definitivi) + (provv ? ` · ${provv} da completare` : "");
+  aggiornaBadgeClienti();
   document.getElementById("clienti-empty").style.display = tutti.length ? "none" : "block";
   body.innerHTML = lista.map(m => {
     const d = clientiDati[m.id] || {}, eta = etaDi(d.data_nascita);
     const contatti = [d.telefono ? `<a href="tel:${escapeHtml(d.telefono.replace(/\s/g, ""))}">${escapeHtml(d.telefono)}</a>` : "", d.email ? `<a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a>` : ""].filter(Boolean).join("<br>");
     return `<tr>
-      <td>${escapeHtml(m.nome_visualizzato || "Cliente")}${m.user_id ? ' <span class="badge-pill badge-green" title="Usa l\'app Equo">app</span>' : ""}${d.consenso_privacy_il ? "" : ' <span class="badge-pill badge-gray" title="Consenso privacy non registrato">senza consenso</span>'}</td>
+      <td>${escapeHtml(m.nome_visualizzato || "Cliente")}${m.provvisorio ? ' <span class="badge-pill badge-yellow" title="Scheda nata dal nome scritto nel cavallo: aggiungi telefono o email">da completare</span>' : ""}${m.user_id ? ' <span class="badge-pill badge-green" title="Usa l\'app Equo">app</span>' : ""}${d.consenso_privacy_il ? "" : ' <span class="badge-pill badge-gray" title="Consenso privacy non registrato">senza consenso</span>'}</td>
       <td>${escapeHtml(RUOLO_LABELS[m.ruolo] || m.ruolo)}</td>
       <td style="font-size:13px">${contatti || '<span style="color:var(--muted)">—</span>'}</td>
       <td>${eta == null ? '<span style="color:var(--muted)">—</span>' : eta + " anni" + (eta < 18 ? ' <span class="badge-pill badge-yellow">minore</span>' : "")}${d.referente_id ? `<div style="color:var(--muted);font-size:12px">ref. ${escapeHtml(nomeCliente(d.referente_id))}</div>` : ""}</td>
@@ -96,7 +100,7 @@ async function clienteCollegati(id){
 function openClienteForm(id, daPacchetto){
   if(!puoVedereClienti()){ showToast("Solo l'amministratore e lo staff di livello 2 e 3 gestiscono i clienti."); return; }
   const lim = (typeof pianoCentro !== "undefined" && pianoCentro) ? pianoCentro.clienti : null;
-  if(!id && lim && clientiElenco().length >= lim){ showToast(`Hai raggiunto i ${lim} clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.`); return; }
+  if(!id && lim && clientiElenco().filter(x => !x.provvisorio).length >= lim){ showToast(`Hai raggiunto i ${lim} clienti del tuo pacchetto: per aggiungerne altri serve il pacchetto superiore.`); return; }
   const m = id ? (teamList || []).find(x => x.id === id) : null;
   const d = (m && clientiDati[m.id]) || {};
   editingClienteId = m ? m.id : null;
@@ -118,6 +122,12 @@ function openClienteForm(id, daPacchetto){
   document.getElementById("cli-referente").value = d.referente_id || "";
   clienteNascitaCambiata();
   clienteCollegati(editingClienteId);
+  const prov = document.getElementById("cli-provvisorio");
+  if(prov){
+    const cav = m?.provvisorio ? (typeof cavalliList !== "undefined" ? cavalliList : []).filter(c => c.proprietario_membro_id === m.id).map(c => c.nome) : [];
+    prov.style.display = m?.provvisorio ? "block" : "none";
+    if(m?.provvisorio) prov.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <b>Scheda provvisoria</b>${cav.length ? ", nata dal cavallo " + cav.map(escapeHtml).join(", ") : ""}. Aggiungi almeno <b>telefono o email</b> per completarla: poi potrai fargli le ricevute ASD.`;
+  }
   openModal("modal-cliente");
 }
 
@@ -171,6 +181,50 @@ async function saveCliente(){
   clienteDaPacchetto = false;
 }
 
+
+// ── Schede provvisorie (9/11/2026 · SQL 48) ──────────────────────────────────
+// Contatore giallo accanto a «Clienti» nel menu: schede nate dal nome del proprietario scritto nel cavallo.
+function aggiornaBadgeClienti(){
+  const b = document.getElementById("clienti-nav-badge"); if(!b) return;
+  const n = puoVedereClienti() ? clientiElenco().filter(m => m.provvisorio).length : 0;
+  b.textContent = n; b.style.display = n ? "" : "none";
+  b.title = n === 1 ? "1 scheda cliente da completare" : n + " schede clienti da completare";
+}
+// Campo «Proprietario» nella scheda del cavallo: propone i clienti già presenti mentre si scrive
+// («rossi m» trova «Mario Rossi»). Se non ce n'è nessuno, avvisa che nascerà una scheda provvisoria.
+function parolePersona(s){ return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").split(" ").filter(Boolean); }
+function propCavReset(){
+  const box = document.getElementById("cav-prop-sugg"), hint = document.getElementById("cav-prop-hint");
+  if(box) box.style.display = "none";
+  if(hint) hint.innerHTML = "";
+}
+function propCavChiudi(){ const box = document.getElementById("cav-prop-sugg"); if(box) box.style.display = "none"; }
+function propCavSuggerisci(){
+  const inp = document.getElementById("cav-proprietario"), box = document.getElementById("cav-prop-sugg"), hint = document.getElementById("cav-prop-hint");
+  if(!inp || !box || !hint) return;
+  const clienti = clientiElenco();
+  const scelto = inp.dataset.membroId ? clienti.find(m => m.id === inp.dataset.membroId) : null;
+  if(inp.dataset.membroId && (!scelto || (scelto.nome_visualizzato || "") !== inp.value.trim())) inp.dataset.membroId = "";
+  const q = parolePersona(inp.value);
+  if(!q.length){ propCavReset(); return; }
+  if(inp.dataset.membroId){ box.style.display = "none"; hint.innerHTML = '<i class="fa-solid fa-link"></i> Collegato alla scheda cliente.'; return; }
+  const lista = clienti.filter(m => { const t = parolePersona(m.nome_visualizzato); return q.every(w => t.some(x => x.startsWith(w))); })
+    .sort((a, b) => (a.nome_visualizzato || "").localeCompare(b.nome_visualizzato || "", "it")).slice(0, 6);
+  box.innerHTML = lista.map(m => `<button type="button" onmousedown="event.preventDefault();propCavScegli('${m.id}')">${escapeHtml(m.nome_visualizzato || "Cliente")}${m.provvisorio ? ' <span class="badge-pill badge-yellow">da completare</span>' : ""}${m.user_id ? ' <span class="badge-pill badge-green">app</span>' : ""}</button>`).join("");
+  box.style.display = lista.length ? "block" : "none";
+  const chiave = [...q].sort().join(" ");
+  const uguale = clienti.some(m => [...parolePersona(m.nome_visualizzato)].sort().join(" ") === chiave);
+  const tipo = document.getElementById("cav-tipo-proprieta")?.value;
+  hint.innerHTML = uguale ? '<i class="fa-solid fa-link"></i> Salvando si collega al cliente con questo nome.'
+    : tipo === "proprieta" ? ""
+    : '<i class="fa-solid fa-user-plus"></i> Non è tra i clienti: salvando creiamo una scheda cliente provvisoria da completare.';
+}
+function propCavScegli(id){
+  const m = clientiElenco().find(x => x.id === id), inp = document.getElementById("cav-proprietario"); if(!m || !inp) return;
+  inp.value = m.nome_visualizzato || "";
+  inp.dataset.membroId = id;
+  propCavSuggerisci();
+}
 
 // aprendo la sezione si ricaricano i dati (team compreso: un cliente può essersi collegato con l'app)
 quandoApriSezione(function(k){ if(k === "clienti") loadTeam().then(caricaClienti); });
