@@ -14,7 +14,7 @@ async function refreshCavalliModule(){
 let cavalliUsciti = [], cavalliArrivi = [];
 async function loadCavalli(){
   if(DEMO_MODE){ cavalliList = demoState.cavalli.filter(c => !c.uscito_il); cavalliUsciti = demoState.cavalli.filter(c => c.uscito_il); cavalliArrivi = demoState.arrivi || []; return; }
-  const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita, oltre_limite";
+  const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita, oltre_limite, da_verificare";
   // cavalli usciti (spostati altrove con «Sposta»): non si cancellano, restano in fondo come «Usciti dal centro»
   const [att, usc, arr] = await Promise.all([
     sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).is("uscito_il", null).order("nome", { ascending: true }),
@@ -142,7 +142,7 @@ function renderCavalliList(){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
           ${c.foto_url ? `<div style="width:40px;height:40px;border-radius:8px;background-image:${cssUrl(c.foto_url)};background-size:cover;background-position:center;flex-shrink:0"></div>` : ""}
           <div style="flex:1">
-            <h3 style="margin:0 0 2px;display:flex;align-items:center;gap:8px">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}</h3>
+            <h3 style="margin:0 0 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}${c.da_verificare ? ' <span class="dv-badge" data-tip="Scheda arrivata dal maniscalco: controllate e confermate i dati">Da verificare</span>' : ""}</h3>
             <div style="color:var(--muted);font-size:13px">${escapeHtml(sub)}</div>
           </div>
           <span class="badge-pill badge-${worst}" data-tip="Stato dello scadenzario (vaccino, Coggins, ferratura, sverminazione)">${STATUS_LABELS[worst]}</span>
@@ -159,7 +159,8 @@ function openCavalloDetail(id){
   document.getElementById("cavalli-detail-view").style.display = "block";
   renderCavalloDetail();
   caricaAllegatiScud(id);
-  if(typeof mncAlCavallo === "function") mncAlCavallo(id);   // riquadro «Maniscalco» (SQL 50)
+  if(typeof mncAlCavallo === "function") mncAlCavallo(id);
+  if(typeof cavVerificaRender === "function") cavVerificaRender(id);   // «Da verificare» (SQL 54)   // riquadro «Maniscalco» (SQL 50)
 }
 
 function closeCavalloDetail(){

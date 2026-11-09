@@ -873,14 +873,17 @@ function proposteProHtml(clienteId){
   if(!lista.length) return "";
   const puo = puoCollegareProfessionisti();
   const opzCavalli = (sel) => (schedaProDati?.cavalli || []).filter(c => !c.uscito).map(c => `<option value="${c.id}"${c.id === sel ? " selected" : ""}>${escapeHtml(c.nome)}</option>`).join("");
+  // 9/11/2026 (SQL 53): stesso microchip o codice Equo = certo; si collegano tutti con un tocco, dopo la conferma
+  const certi = lista.filter(p => p.candidato && p.candidato.certo);
   return `<div style="border:1px solid rgba(232,176,75,.7);background:rgba(232,176,75,.12);border-radius:12px;padding:10px 12px;margin-bottom:14px">
     <div style="font-weight:800;margin-bottom:4px">🐴 ${lista.length} ${lista.length === 1 ? "cavallo proposto" : "cavalli proposti"} dal professionista</div>
     <p style="margin:0 0 8px;color:var(--muted);font-size:12.5px">Li ha nella sua app per questa struttura, ma non sono collegati a una vostra scheda. ${puo ? "Dite voi cosa sono." : "Decide l'amministratore o un membro di livello 2-3."}</p>
+    ${puo && certi.length > 1 ? `<button class="btn btn-primary btn-sm" style="margin:0 0 8px" onclick="collegaPropostiSicuri('${clienteId}',this)"><i class="fa-solid fa-link"></i> Collega i ${certi.length} sicuri</button>` : ""}
     ${lista.map(p => {
       const c = p.candidato, sicuro = c && c.punti >= 85;
       return `<div style="padding:8px 0;border-top:1px solid rgba(232,176,75,.4)" id="prop-${p.riga_id}">
         <div style="font-size:13.5px"><b>«${escapeHtml(p.nome)}»</b> <span style="color:var(--muted);font-size:12px">${p.lavori ? `${p.lavori} ${p.lavori === 1 ? "lavoro" : "lavori"}` : "nessun lavoro"}${p.microchip ? " · chip " + escapeHtml(p.microchip) : ""}</span></div>
-        <div style="font-size:12.5px;margin:2px 0 6px">${c ? `${sicuro ? "Probabilmente è" : "Forse è"} <b>${escapeHtml(c.nome)}</b>?` : "Non trovo un cavallo simile nella vostra scheda."}</div>
+        <div style="font-size:12.5px;margin:2px 0 6px">${c ? (c.certo ? `È <b>${escapeHtml(c.nome)}</b> (${escapeHtml(c.perche || "stesso cavallo")}).` : `${sicuro ? "Probabilmente è" : "Forse è"} <b>${escapeHtml(c.nome)}</b>?`) : "Non trovo un cavallo simile nella vostra scheda."}</div>
         ${puo ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           ${c ? `<button class="btn btn-primary btn-sm" onclick="rispondiPropostaPro('${p.riga_id}','conferma','${c.id}',this)">Sì, è ${escapeHtml(c.nome)}</button>` : ""}
           <select class="input" id="prop-sel-${p.riga_id}" style="width:auto;padding:6px 10px;font-size:13px"><option value="">${c ? "È un altro…" : "È un cavallo che avete…"}</option>${opzCavalli()}</select>
@@ -905,6 +908,24 @@ async function rispondiPropostaPro(riga, azione, scheda, btn, categoria){
     : (data.abb && data.abb.da_confermare ? "Collegato: il proprietario deve confermare il professionista." : "Collegato: lo storico dei lavori ora è sul vostro cavallo."));
   await caricaProposteProfessionisti();
   if(typeof cavalliList !== "undefined" && azione === "aggiungi" && typeof loadCavalli === "function") loadCavalli();
+  if(schedaProCliente) await caricaSchedaPro();
+  renderProfessionistiList(); aggiornaBadgeProfessionisti();
+}
+// collega in un colpo i cavalli certi (stesso microchip o codice Equo), dopo aver mostrato l'elenco
+async function collegaPropostiSicuri(clienteId, btn){
+  const certi = proposteDi(clienteId).filter(p => p.candidato && p.candidato.certo);
+  if(!certi.length) return;
+  const elenco = certi.map(p => `• «${p.nome}» → ${p.candidato.nome} (${p.candidato.perche || "stesso cavallo"})`).join("\n");
+  if(!confirm(`Collego questi ${certi.length} cavalli alle vostre schede?\n\n${elenco}\n\nLo storico dei lavori del professionista passa sui vostri cavalli.`)) return;
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  if(btn) btn.disabled = true;
+  let ok = 0, ko = 0;
+  for(const p of certi){
+    const { data, error } = await sb.rpc("scuderia_proposta_rispondi", { p_riga: p.riga_id, p_azione: "conferma", p_scheda: p.candidato.id, p_categoria: null });
+    if(!error && data?.ok) ok++; else ko++;
+  }
+  showToast(`Collegati ${ok} cavalli${ko ? `, ${ko} non riusciti: riprova da qui sotto` : ""}.`);
+  await caricaProposteProfessionisti();
   if(schedaProCliente) await caricaSchedaPro();
   renderProfessionistiList(); aggiornaBadgeProfessionisti();
 }

@@ -128,7 +128,11 @@ async function athenaInvia(){
     else if(res.status === 403) pensa.innerHTML = athenaFormatta(data.error ? data.error + "." : "Non risulti nello staff di questo centro.");
     else if(data.limite_raggiunto && agenteAttivo !== "athena" && data.uso.limite === 10 && !((pianoCentro?.agenti || []).includes(agenteAttivo))){ pensa.innerHTML = athenaFormatta(`La prova gratuita di ${AGENTI_CHAT[agenteAttivo].nome} è finita (10 messaggi). Se ti è piaciuto lo attivi da "Agenti AI".`); proveAgenti = undefined; }
     else if(data.limite_raggiunto) pensa.innerHTML = athenaFormatta(`Il centro ha usato tutti i **${data.uso.limite} messaggi** di ${AGENTI_CHAT[agenteAttivo].nome} di questo mese: il contatore riparte il 1° del mese.${agenteAttivo !== "athena" ? " Puoi aggiungere messaggi extra da \"Agenti AI\" (200 a 7 € o 500 a 15 € + IVA al mese, condivisi fra gli agenti)." : ""} Per un problema urgente usa "Serve aiuto?" → "Apri un ticket" in Home.`);
-    else pensa.innerHTML = athenaFormatta(data.reply || "Non sono riuscita a rispondere, riprova.");
+    else{
+      pensa.innerHTML = athenaFormatta(data.reply || "Non sono riuscita a rispondere, riprova.");
+      // 9/11/2026: schede da confermare (azioni di Athena)
+      if(Array.isArray(data.azioni) && data.azioni.length && typeof athenaMostraAzioni === "function") athenaMostraAzioni(data.azioni, pensa);
+    }
     if(data.uso) document.getElementById("athena-uso").textContent = data.prova ? `Prova gratuita: ${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome}` : `${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome} questo mese (tutto il centro)`;
     if(data.prova) proveAgenti = undefined;
   } catch(e){

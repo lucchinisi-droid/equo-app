@@ -21,6 +21,7 @@ import { terCarica, terRenderHome, terRenderCavallo, terFatto, TER } from "./104
 import { diaRenderCavallo, diaGiorno, DIA } from "./105-diario-scuderia.js";
 import { ppCarica, ppRenderHome, ppRispondi, PP } from "./106-proposte-professionisti.js";
 import { ctCarica, ctRenderHome, ctApri, ctHoPagato, CT } from "./107-conti-scuderia.js";
+import { verificaRender, verificaScelta } from "./110-da-verificare.js";
 
 // API PUBBLICA (proprietario): le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione di questo ruolo, va aggiunta qui (il controllo automatico lo segnala).
@@ -148,5 +149,7 @@ Object.assign(window, {
   ecAzione,
   ecCondividi,
   ecGira,
-  ecMostraQr
+  ecMostraQr,
+  verificaRender,
+  verificaScelta
 });

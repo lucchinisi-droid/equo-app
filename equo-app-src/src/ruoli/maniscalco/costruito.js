@@ -54,10 +54,11 @@
 		const { data } = await sb.rpc("pro_struttura_avvisi", { p_cliente_id: clienteId });
 		if (!data || currentClienteId !== clienteId) return;
 		const parti = [];
+		const cliente = data.tipo === "cliente";
 		(data.simili || []).forEach((s) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
-    <div style="font-size:13.5px">Hai anche <b>${suEsc(s.nome)}</b> tra i clienti (${s.cavalli} cavalli, ${s.lavori} lavori · ${suEsc(s.motivo)}): è la stessa struttura?</div>
+    <div style="font-size:13.5px">Hai anche <b>${suEsc(s.nome)}</b> tra i clienti (${s.cavalli} cavalli, ${s.lavori} lavori · ${suEsc(s.motivo)}): ${cliente ? "è la stessa persona? Unendo, i suoi cavalli e i lavori passano qui e lui li riceve da accettare." : "è la stessa struttura?"}</div>
     <div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="btn btn-primary btn-sm" onclick="proUnisciStruttura('${clienteId}','${s.id}',this)">Sì, unisci</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="proNonUnire('${clienteId}','${s.id}',this)">No, è diversa</button></div></div>`));
+      <button type="button" class="btn btn-outline btn-sm" onclick="proNonUnire('${clienteId}','${s.id}',this)">${cliente ? "No, è un altro" : "No, è diversa"}</button></div></div>`));
 		(data.rifiutati || []).forEach((r) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
     <div style="font-size:13.5px"><b>${suEsc(r.nome)}</b>: la struttura dice che non è suo. <span class="muted" style="font-size:12px">Da verificare</span></div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
@@ -65,7 +66,7 @@
       <button type="button" class="btn btn-ghost btn-sm" ${r.eliminabile ? "" : "title=\"Si può eliminare 30 giorni dopo la risposta della struttura\""} onclick="proCavalloRifiutato('${r.id}','elimina',this)">Elimina</button></div></div>`));
 		if (Number(data.in_attesa) > 0) parti.push(`<div class="muted" style="padding:8px 0;border-top:1px solid var(--border);font-size:12.5px">⏳ ${data.in_attesa} ${Number(data.in_attesa) === 1 ? "cavallo è" : "cavalli sono"} in attesa che la struttura confermi che sono suoi.</div>`);
 		if (!parti.length) return;
-		box.innerHTML = `<div class="card" style="margin:10px 0;border-color:rgba(232,176,75,.7)"><div style="font-weight:800;margin-bottom:2px">Da sistemare con la struttura</div>${parti.join("")}</div>`;
+		box.innerHTML = `<div class="card" style="margin:10px 0;border-color:rgba(232,176,75,.7)"><div style="font-weight:800;margin-bottom:2px">${cliente ? "Forse è un cliente che hai già" : "Da sistemare con la struttura"}</div>${parti.join("")}</div>`;
 	}
 	async function proUnisciStruttura(collegato, vecchio, btn) {
 		if (btn) btn.disabled = true;
@@ -77,7 +78,7 @@
 			if (btn) btn.disabled = false;
 			return showToast("Unione non riuscita: riprova");
 		}
-		showToast(`Fatto: ${data.uniti} cavalli uniti, ${data.spostati} spostati, ${data.lavori} lavori nella struttura`);
+		showToast(`Fatto: ${data.uniti} cavalli uniti, ${data.spostati} spostati, ${data.lavori} lavori nella scheda collegata`);
 		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
 		if (typeof openClienteDetail === "function") openClienteDetail(collegato);
 	}
@@ -12186,7 +12187,7 @@
 		document.getElementById("clienti-detail-view").style.display = "block";
 		document.getElementById("detail-cliente-nome").textContent = c.nome;
 		document.getElementById("pro-avvisi-struttura")?.remove();
-		if (c.centro_id && c.collegamento_stato === "attivo" && typeof window.proAvvisiStruttura === "function") setTimeout(() => window.proAvvisiStruttura(id), 0);
+		if ((c.centro_id && c.collegamento_stato === "attivo" || !c.centro_id && c.cliente_user_id) && typeof window.proAvvisiStruttura === "function") setTimeout(() => window.proAvvisiStruttura(id), 0);
 		document.getElementById("detail-cliente-info").innerHTML = `
     <div style="font-size:13.5px;line-height:1.8">
       ${c.archiviato_il ? `<div style="color:var(--muted)"><strong>Archiviato</strong> il ${new Date(c.archiviato_il).toLocaleDateString("it-IT")}: non compare nella lista né nelle scadenze.</div>` : ""}

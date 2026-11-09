@@ -49,19 +49,22 @@ async function confermaCodiceScud(id){
   caricaDaConfermareScud(true);
 }
 
-let daConfermareScud = [], daConfermareScudTs = 0;
+let daConfermareScud = [], daConfermareScudTs = 0, daConfermareScudAperto = false;   // chiuso di base
 async function caricaDaConfermareScud(forza){
   const box = document.getElementById("scud-da-confermare");
   if(!box || DEMO_MODE) return;
   if(!forza && Date.now() - daConfermareScudTs < 60000) return;
   daConfermareScudTs = Date.now();
   try{ const { data, error } = await sb.rpc("equo_cavalli_da_confermare"); daConfermareScud = (!error && Array.isArray(data)) ? data : []; }catch(e){ daConfermareScud = []; }
-  if(!daConfermareScud.length){ box.innerHTML = ""; return; }
-  box.innerHTML = `<div class="card" style="margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">Da confermare (${daConfermareScud.length})</h3></div>
-    <p style="margin:4px 0 8px;color:var(--muted);font-size:12.5px">Cavalli con nome, razza e data di nascita completi che aspettano la conferma del centro per il codice definitivo.</p>
+  // 9/11/2026: riquadro chiuso di base, colore dal numero (verde 0 · giallo/arancio 1-5 · rosso sfumato oltre 5); si apre al tocco
+  const n = daConfermareScud.length, liv = n === 0 ? "ok" : n <= 5 ? "medio" : "alto";
+  const sotto = n === 0 ? "Tutti i cavalli con i dati completi sono confermati." : "Cavalli con nome, razza e data di nascita completi che aspettano la conferma del centro per il codice definitivo.";
+  box.innerHTML = `<details class="dc-box dc-${liv}" ${daConfermareScudAperto && n ? "open" : ""} ontoggle="daConfermareScudAperto = this.open">
+    <summary><span class="dc-titolo"><i class="fa-solid ${n ? "fa-circle-exclamation" : "fa-circle-check"}"></i> Da confermare (${n})</span><span class="dc-freccia" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span></summary>
+    <div class="dc-corpo"><p style="margin:0 0 8px;color:var(--muted);font-size:12.5px">${sotto}</p>
     ${daConfermareScud.map((x, i) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border)">
       <div><b>${escapeHtml(x.nome || "")}</b> <span style="color:var(--muted);font-size:12px;font-family:monospace">${escapeHtml(x.codice || "")}</span>${x.motivo === "dati_modificati" ? ' <span style="color:var(--muted);font-size:12px">· dati cambiati, riconferma</span>' : ""}</div>
-      <button class="btn btn-primary btn-sm" onclick="confermaDaHomeScud(${i})">Confermo</button></div>`).join("")}</div>`;
+      <button class="btn btn-primary btn-sm" onclick="confermaDaHomeScud(${i})">Confermo</button></div>`).join("")}</div></details>`;
 }
 async function confermaDaHomeScud(i){
   const x = daConfermareScud[i]; if(!x) return;

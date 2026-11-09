@@ -75,7 +75,7 @@ function renderHorsesList(){
     <div class="card horse-card${bl ? " bloccato" : ""}" data-cerca="${escapeHtml([h.microchip, h.mantello, h.codice_equo].filter(Boolean).join(" "))}" onclick="openHorseDetail('${h.id}')">
       <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:22px"></i></div>
       <div>
-        <div style="font-weight:700">${escapeHtml(h.name)}${bl ? ' <span style="font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px">Bloccato</span>' : ""}</div>
+        <div style="font-weight:700">${escapeHtml(h.name)}${h.da_verificare ? ' <span style="font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px">Da verificare</span>' : ""}${bl ? ' <span style="font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px">Bloccato</span>' : ""}</div>
         <div class="muted" style="font-size:13px">${escapeHtml(sub)}</div>
       </div>
     </div>`;

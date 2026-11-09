@@ -85,15 +85,32 @@ function renderProposteCavalli(){
   if(!proposteCav.length){ box.innerHTML = ""; return; }
   { const s = document.getElementById("home-setup"); if(s) s.style.display = "none"; }   // niente «Aggiungi il tuo primo cavallo»: ci sono già
   const man = proposteCav[0].maniscalco || "Il tuo maniscalco";
-  const righe = proposteCav.map(p => `
+  // 9/11/2026 (SQL 53): stesso codice o microchip = si collega da solo; solo il nome = domanda «È la tua …?»
+  const righe = proposteCav.map(p => {
+    const cand = Array.isArray(p.candidati) ? p.candidati : [];
+    const certo = cand.find(c => c.esito === "certo"), dubbi = certo ? [] : cand.filter(c => c.esito === "probabile");
+    const sotto = [p.razza, p.codice, p.microchip ? "chip " + p.microchip : null].filter(Boolean).join(" · ");
+    if(dubbi.length) return `
+    <div style="padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
+      <div style="font-weight:600">${escapeHtml(p.nome || "")}</div>
+      <div class="muted" style="font-size:12px">${escapeHtml(sotto)}</div>
+      <div style="font-size:13.5px;margin:6px 0">Hai già ${dubbi.length === 1 ? "un cavallo che si chiama in modo simile" : "cavalli con un nome simile"}: è lo stesso?</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${dubbi.map(c => `<button class="btn btn-primary btn-sm" onclick="accettaProposta('${p.proposta}','${c.horse_id}')">Sì, è ${escapeHtml(c.nome)}</button>`).join("")}
+        <button class="btn btn-outline btn-sm" onclick="accettaProposta('${p.proposta}',null,true)">No, è un altro cavallo</button>
+        <button class="btn btn-ghost btn-sm" onclick="rifiutaProposta('${p.proposta}')">Non è mio</button>
+      </div>
+    </div>`;
+    return `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
       <div style="min-width:0"><div style="font-weight:600">${escapeHtml(p.nome || "")}</div>
-        <div class="muted" style="font-size:12px">${escapeHtml([p.razza, p.codice].filter(Boolean).join(" · "))}${p.esiste_gia ? " · hai già un cavallo con questo nome: si uniscono" : ""}</div></div>
+        <div class="muted" style="font-size:12px">${escapeHtml(sotto)}${certo ? ` · è il tuo ${escapeHtml(certo.nome)} (${escapeHtml(certo.perche || "")}): si collegano` : ""}</div></div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button class="btn btn-primary btn-sm" onclick="accettaProposta('${p.proposta}')">Accetta</button>
         <button class="btn btn-ghost btn-sm" onclick="rifiutaProposta('${p.proposta}')">Non è mio</button>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
   box.innerHTML = `<div class="card" style="margin-bottom:14px">
     <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
     <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free sono completi 3 cavalli: dal quarto in poi si aggiungono ma restano bloccati finché non passi a Premium."}</div>
@@ -102,19 +119,24 @@ function renderProposteCavalli(){
     <div class="muted" style="font-size:12px;margin-top:6px">I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.</div>
   </div>`;
 }
-async function accettaPropostaSilenzioso(id){
-  const { data, error } = await sb.rpc("equo_accetta_cavallo_proposto", { p_proposta: id });
+async function accettaPropostaSilenzioso(id, horseId, nuovo){
+  const arg = { p_proposta: id };
+  if(horseId) arg.p_horse = horseId;
+  if(nuovo) arg.p_nuovo = true;
+  const { data, error } = await sb.rpc("equo_accetta_cavallo_proposto", arg);
   if(error || !data) return { ok: false, motivo: "errore" };
   return data;
 }
 function messaggioProposta(res){
   if(res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere 3 cavalli: passa a Premium per accettare anche gli altri.";
   if(res.motivo === "proposta_non_trovata") return "Questa proposta non è più disponibile.";
+  if(res.motivo === "da_confermare") return `Hai già un cavallo con un nome simile a ${res.nome || "questo"}: rispondi alla domanda qui sotto.`;
+  if(res.motivo === "microchip_diverso") return "Hanno microchip diversi: non possono essere lo stesso cavallo.";
   return "Operazione non riuscita. Riprova.";
 }
-async function accettaProposta(id){
-  const res = await accettaPropostaSilenzioso(id);
-  if(!res.ok){ showToast(messaggioProposta(res)); return; }
+async function accettaProposta(id, horseId, nuovo){
+  const res = await accettaPropostaSilenzioso(id, horseId, nuovo);
+  if(!res.ok){ showToast(messaggioProposta(res)); if(res.motivo === "da_confermare") caricaProposteCavalli(); return; }
   showToast(res.lavori > 0 ? `Cavallo aggiunto con ${res.lavori} ${res.lavori === 1 ? "lavoro" : "lavori"} del maniscalco nel libretto. Controlla i dati e confermali.` : "Cavallo aggiunto. Controlla i dati e confermali.");
   await loadHorses();
   await caricaCavalliBloccati();
@@ -128,6 +150,7 @@ async function accettaTuttiProposte(){
     const n = data.accettati || 0, l = data.lavori || 0;
     if(n) showToast(`${n === 1 ? "1 cavallo aggiunto" : n + " cavalli aggiunti"}${l ? ` con ${l} ${l === 1 ? "lavoro" : "lavori"} nel libretto` : ""}.`);
     if(data.limite){ showToast(messaggioProposta({ motivo: "limite_cavalli_free" })); openModal("modal-limite-cavalli"); }
+    else if(data.domande) showToast(`${data.domande === 1 ? "Un cavallo ha" : data.domande + " cavalli hanno"} un nome simile a uno dei tuoi: rispondi alle domande qui sotto.`);
     await loadHorses(); await caricaCavalliBloccati(); caricaProposteCavalli();
     return;
   }

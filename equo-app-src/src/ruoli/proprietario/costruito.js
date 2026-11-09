@@ -571,7 +571,7 @@
 			].filter(Boolean).join(" "))}" onclick="openHorseDetail('${h.id}')">
       <div class="horse-avatar"><i class="fa-solid fa-horse-head" style="font-size:22px"></i></div>
       <div>
-        <div style="font-weight:700">${escapeHtml(h.name)}${bl ? " <span style=\"font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px\">Bloccato</span>" : ""}</div>
+        <div style="font-weight:700">${escapeHtml(h.name)}${h.da_verificare ? " <span style=\"font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px\">Da verificare</span>" : ""}${bl ? " <span style=\"font-size:11px;font-weight:700;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:2px 8px;margin-left:4px\">Bloccato</span>" : ""}</div>
         <div class="muted" style="font-size:13px">${escapeHtml(sub)}</div>
       </div>
     </div>`;
@@ -925,15 +925,35 @@
 			if (s) s.style.display = "none";
 		}
 		const man = proposteCav[0].maniscalco || "Il tuo maniscalco";
-		const righe = proposteCav.map((p) => `
+		const righe = proposteCav.map((p) => {
+			const cand = Array.isArray(p.candidati) ? p.candidati : [];
+			const certo = cand.find((c) => c.esito === "certo"), dubbi = certo ? [] : cand.filter((c) => c.esito === "probabile");
+			const sotto = [
+				p.razza,
+				p.codice,
+				p.microchip ? "chip " + p.microchip : null
+			].filter(Boolean).join(" · ");
+			if (dubbi.length) return `
+    <div style="padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
+      <div style="font-weight:600">${escapeHtml(p.nome || "")}</div>
+      <div class="muted" style="font-size:12px">${escapeHtml(sotto)}</div>
+      <div style="font-size:13.5px;margin:6px 0">Hai già ${dubbi.length === 1 ? "un cavallo che si chiama in modo simile" : "cavalli con un nome simile"}: è lo stesso?</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${dubbi.map((c) => `<button class="btn btn-primary btn-sm" onclick="accettaProposta('${p.proposta}','${c.horse_id}')">Sì, è ${escapeHtml(c.nome)}</button>`).join("")}
+        <button class="btn btn-outline btn-sm" onclick="accettaProposta('${p.proposta}',null,true)">No, è un altro cavallo</button>
+        <button class="btn btn-ghost btn-sm" onclick="rifiutaProposta('${p.proposta}')">Non è mio</button>
+      </div>
+    </div>`;
+			return `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--border,#DDE5E0)">
       <div style="min-width:0"><div style="font-weight:600">${escapeHtml(p.nome || "")}</div>
-        <div class="muted" style="font-size:12px">${escapeHtml([p.razza, p.codice].filter(Boolean).join(" · "))}${p.esiste_gia ? " · hai già un cavallo con questo nome: si uniscono" : ""}</div></div>
+        <div class="muted" style="font-size:12px">${escapeHtml(sotto)}${certo ? ` · è il tuo ${escapeHtml(certo.nome)} (${escapeHtml(certo.perche || "")}): si collegano` : ""}</div></div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button class="btn btn-primary btn-sm" onclick="accettaProposta('${p.proposta}')">Accetta</button>
         <button class="btn btn-ghost btn-sm" onclick="rifiutaProposta('${p.proposta}')">Non è mio</button>
       </div>
-    </div>`).join("");
+    </div>`;
+		}).join("");
 		box.innerHTML = `<div class="card" style="margin-bottom:14px">
     <div class="section-title" style="margin-bottom:4px">${escapeHtml(man)} ha preparato ${proposteCav.length === 1 ? "1 cavallo" : proposteCav.length + " cavalli"} per te</div>
     <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free sono completi 3 cavalli: dal quarto in poi si aggiungono ma restano bloccati finché non passi a Premium."}</div>
@@ -942,8 +962,11 @@
     <div class="muted" style="font-size:12px;margin-top:6px">I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.</div>
   </div>`;
 	}
-	async function accettaPropostaSilenzioso(id) {
-		const { data, error } = await sb.rpc("equo_accetta_cavallo_proposto", { p_proposta: id });
+	async function accettaPropostaSilenzioso(id, horseId, nuovo) {
+		const arg = { p_proposta: id };
+		if (horseId) arg.p_horse = horseId;
+		if (nuovo) arg.p_nuovo = true;
+		const { data, error } = await sb.rpc("equo_accetta_cavallo_proposto", arg);
 		if (error || !data) return {
 			ok: false,
 			motivo: "errore"
@@ -953,12 +976,15 @@
 	function messaggioProposta(res) {
 		if (res.motivo === "limite_cavalli_free") return "Con il piano Free puoi avere 3 cavalli: passa a Premium per accettare anche gli altri.";
 		if (res.motivo === "proposta_non_trovata") return "Questa proposta non è più disponibile.";
+		if (res.motivo === "da_confermare") return `Hai già un cavallo con un nome simile a ${res.nome || "questo"}: rispondi alla domanda qui sotto.`;
+		if (res.motivo === "microchip_diverso") return "Hanno microchip diversi: non possono essere lo stesso cavallo.";
 		return "Operazione non riuscita. Riprova.";
 	}
-	async function accettaProposta(id) {
-		const res = await accettaPropostaSilenzioso(id);
+	async function accettaProposta(id, horseId, nuovo) {
+		const res = await accettaPropostaSilenzioso(id, horseId, nuovo);
 		if (!res.ok) {
 			showToast(messaggioProposta(res));
+			if (res.motivo === "da_confermare") caricaProposteCavalli();
 			return;
 		}
 		showToast(res.lavori > 0 ? `Cavallo aggiunto con ${res.lavori} ${res.lavori === 1 ? "lavoro" : "lavori"} del maniscalco nel libretto. Controlla i dati e confermali.` : "Cavallo aggiunto. Controlla i dati e confermali.");
@@ -974,7 +1000,7 @@
 			if (data.limite) {
 				showToast(messaggioProposta({ motivo: "limite_cavalli_free" }));
 				openModal("modal-limite-cavalli");
-			}
+			} else if (data.domande) showToast(`${data.domande === 1 ? "Un cavallo ha" : data.domande + " cavalli hanno"} un nome simile a uno dei tuoi: rispondi alle domande qui sotto.`);
 			await loadHorses();
 			await caricaCavalliBloccati();
 			caricaProposteCavalli();
@@ -3820,6 +3846,75 @@
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ctAggancia, { once: true });
 	else ctAggancia();
+	// equo-app-src/src/ruoli/proprietario/moduli/110-da-verificare.js
+	var dvEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	(function dvStile() {
+		if (document.getElementById("dv-stile")) return;
+		const st = document.createElement("style");
+		st.id = "dv-stile";
+		st.textContent = `.dv-card{border:1.5px solid rgba(232,176,75,.8);margin-bottom:14px}
+.dv-badge{font-size:11px;font-weight:800;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:3px 10px;letter-spacing:.02em}
+.dv-riga{padding:8px 0;border-top:1px solid var(--border,#DDE5E0);font-size:13.5px;line-height:1.45}
+.dv-bottoni{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}`;
+		document.head.appendChild(st);
+	})();
+	async function verificaRender(id) {
+		const info = document.getElementById("horse-info-box");
+		if (!info || DEMO_MODE) return;
+		let box = document.getElementById("horse-verifica");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "horse-verifica";
+			info.parentNode.insertBefore(box, info);
+		}
+		box.innerHTML = "";
+		const { data, error } = await sb.rpc("equo_cavallo_verifica", {
+			p_horse: id,
+			p_sc: null
+		});
+		if (error || !data || data.errore || currentHorseId !== id) return;
+		const diff = data.differenze || [], manca = data.mancano || [];
+		if (!data.da_verificare && !diff.length) return;
+		const da = (data.da || []).join(", ");
+		const righe = diff.map((d) => {
+			const tuo = d.tuo == null || d.tuo === "" ? "—" : d.tuo;
+			const val = String(d.suo).replace(/'/g, "\\'");
+			return `<div class="dv-riga"><div><b>${dvEsc(d.etichetta)}</b>: tu <i>${dvEsc(tuo)}</i> · ${dvEsc(d.chi || "il maniscalco")} <i>${dvEsc(d.suo)}</i></div>
+      <div class="dv-bottoni">${d.solo_info ? "" : `<button type="button" class="btn btn-primary btn-sm" onclick="verificaScelta('${id}','usa','${d.campo}','${dvEsc(val)}')">Usa ${dvEsc(d.suo)}</button>`}
+        <button type="button" class="btn btn-outline btn-sm" onclick="verificaScelta('${id}','tieni','${d.campo}','${dvEsc(val)}')">${d.solo_info ? "Ok, tengo il mio" : d.manca ? "Lascia vuoto" : "Tieni il mio"}</button></div></div>`;
+		}).join("");
+		box.innerHTML = `<div class="card dv-card">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="dv-badge">Da verificare</span>
+      ${da ? `<span class="muted" style="font-size:12.5px">Scheda arrivata da ${dvEsc(da)}</span>` : ""}</div>
+    ${manca.length ? `<div style="font-size:13.5px;margin-top:8px">Mancano: <b>${manca.map(dvEsc).join(", ")}</b> <button type="button" class="btn btn-ghost btn-sm" onclick="openHorseForm('${id}')">Completa</button></div>` : ""}
+    ${righe ? `<div style="font-size:13px;margin-top:8px">Il maniscalco ha scritto qualcosa di diverso: scegli tu cosa tenere.</div>${righe}` : ""}
+    ${data.da_verificare ? `<button type="button" class="btn btn-primary" style="width:100%;margin-top:10px" onclick="verificaScelta('${id}','conferma')">I dati sono giusti</button>` : ""}
+    <div class="muted" style="font-size:11.5px;margin-top:6px">Nulla cambia da solo. I lavori del maniscalco restano nel libretto con il suo nome.</div></div>`;
+	}
+	async function verificaScelta(id, azione, campo, valore) {
+		const { data, error } = await sb.rpc("equo_cavallo_scelta", {
+			p_horse: id,
+			p_sc: null,
+			p_azione: azione,
+			p_campo: campo || null,
+			p_valore: valore || null
+		});
+		if (error || !data?.ok) {
+			showToast(data && data.errore || "Non riuscito, riprova.");
+			return;
+		}
+		showToast(azione === "conferma" ? "Dati confermati." : azione === "usa" ? "Dato aggiornato." : "Ok, tieni il tuo.");
+		await loadHorses();
+		if (typeof renderHorsesList === "function") renderHorsesList();
+		if (currentHorseId === id) await openHorseDetail(id);
+	}
+	try {
+		estendiDopo("openHorseDetail", function(id) {
+			return verificaRender(id);
+		});
+	} catch (err) {
+		console.error("da verificare:", err);
+	}
 	// equo-app-src/src/ruoli/proprietario/moduli/index.js
 	Object.assign(window, {
 		terCarica,
@@ -3958,7 +4053,9 @@
 		ecAzione,
 		ecCondividi,
 		ecGira,
-		ecMostraQr
+		ecMostraQr,
+		verificaRender,
+		verificaScelta
 	});
 })();
 

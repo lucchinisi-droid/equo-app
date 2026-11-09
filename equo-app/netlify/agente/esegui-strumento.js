@@ -4,6 +4,7 @@ const { TIPI_EVENTO } = require("./configurazione");
 const { GUIDE_SOLO_MANISCALCO } = require("./istruzioni-galeno");
 const { strumentoMeteo } = require("./meteo");
 const { STRUMENTI_GESTIONE, TIPI_INTERVENTO } = require("./strumenti");
+const { NOMI_AZIONI_SCUDERIA, eseguiAzioneScuderia } = require("./azioni-scuderia");
 
 async function eseguiStrumento(nome, input, ctx) {
   if (ctx.incassiNascosti && ["incassi", "proponi_segna_saldato", "proponi_conto", "proponi_spesa_officina"].includes(nome)) {
@@ -14,6 +15,11 @@ async function eseguiStrumento(nome, input, ctx) {
   if (nome !== "naviga_verso" && STRUMENTI_GESTIONE.some((t) => t.name === nome) && ctx.ambito !== "maniscalco") return "Strumento riservato ai maniscalchi.";
   if (ctx.vista === "scuderia" && !(ctx.strumenti || []).some((t) => t.name === nome)) return "Strumento non disponibile.";
   if (["situazione_centro", "statistiche_centro", "ultimo_radar"].includes(nome) && ctx.vista !== "scuderia") return "Strumento disponibile solo in Equo Scuderia.";
+  if (NOMI_AZIONI_SCUDERIA.includes(nome)) {   // azioni di Athena in Equo Scuderia (9/11/2026)
+    if (ctx.vista !== "scuderia") return "Strumento disponibile solo in Equo Scuderia.";
+    try { return (await eseguiAzioneScuderia(nome, input || {}, ctx)) || "Strumento non disponibile."; }
+    catch (e) { console.error(nome + ":", e); return "Errore nel preparare la scheda, riprova."; }
+  }
   switch (nome) {
     case "elenco_cavalli":
       return cavalli.length ? cavalli.map((c) => ({ nome: c.name, razza: c.breed, nascita: c.birth_date, microchip: c.microchip, mantello: c.mantello, note: c.note, condiviso_con_professionisti: c.condiviso_ecosistema !== false })) : "Nessun cavallo registrato.";

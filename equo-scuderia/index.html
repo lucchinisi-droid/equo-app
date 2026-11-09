@@ -1364,6 +1364,21 @@ body.box-trascina{user-select:none;-webkit-user-select:none;cursor:grabbing}
   .content{padding:18px 18px 150px}
 }
 
+
+/* Athena: schede delle azioni da confermare (9/11/2026) */
+.ath-schede{display:flex;flex-direction:column;gap:8px;max-width:92%;align-self:flex-start}
+.ath-scheda{border:1.5px solid var(--primary);border-radius:14px;background:var(--surface);padding:10px 12px}
+.ath-scheda-testa{display:flex;align-items:center;gap:8px;font-size:14px}
+.ath-scheda-testa i{color:var(--primary);width:16px;text-align:center}
+.ath-scheda-testo{font-size:13.5px;line-height:1.45;margin:4px 0 8px;white-space:pre-line}
+.ath-scheda-bottoni{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ath-scheda.fatta{border-color:#3f7a45}
+.ath-scheda.fatta .ath-esito{color:#3f7a45;font-weight:700;font-size:13px}
+.ath-scheda.errore{border-color:var(--danger)}
+.ath-scheda.errore .ath-esito{color:var(--danger);font-weight:700;font-size:13px}
+.ath-scheda.scartata{opacity:.6;border-style:dashed}
+.ath-esito{font-size:13px;color:var(--muted)}
+.ath-tutte{align-self:flex-start}
 /* ---------- UI PRIMITIVES ---------- */
 .page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
 .page-header h1{font-size:22px;margin:0;font-weight:700;display:flex;align-items:center;gap:10px}
@@ -1926,6 +1941,28 @@ textarea.input{resize:vertical}
 .inc-etichetta{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
 .inc-storico{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .inc-st-riga{border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+
+/* «Da verificare» (SQL 54) */
+.dv-card{border:1.5px solid rgba(232,176,75,.8)}
+.dv-badge{font-size:11px;font-weight:800;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:3px 10px;letter-spacing:.02em}
+.dv-riga{padding:8px 0;border-top:1px solid var(--border);font-size:13.5px;line-height:1.45}
+.dv-bottoni{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+
+/* «Da confermare»: chiuso di base, colore dal numero di cavalli (9/11/2026) */
+.dc-box{border-radius:14px;margin-bottom:20px;border:1.5px solid var(--dc-bordo);background:var(--dc-fondo);overflow:hidden}
+.dc-box summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;min-height:44px;box-sizing:border-box}
+.dc-box summary::-webkit-details-marker{display:none}
+.dc-titolo{font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;color:var(--dc-testo)}
+.dc-freccia{color:var(--dc-testo);transition:transform .15s}
+.dc-box[open] .dc-freccia{transform:rotate(180deg)}
+.dc-corpo{padding:0 16px 10px;background:var(--surface)}
+.dc-corpo > p:first-child{padding-top:10px}
+.dc-ok{--dc-bordo:#3f7a45;--dc-fondo:color-mix(in srgb,#3f7a45 14%,var(--surface));--dc-testo:#2f6a37}
+.dc-medio{--dc-bordo:#e0a100;--dc-fondo:linear-gradient(90deg,color-mix(in srgb,#e2b23c 26%,var(--surface)),color-mix(in srgb,#e8892b 22%,var(--surface)));--dc-testo:#8a5a00}
+.dc-alto{--dc-bordo:#c0473d;--dc-fondo:linear-gradient(90deg,color-mix(in srgb,#c0473d 30%,var(--surface)),color-mix(in srgb,#c0473d 8%,var(--surface)));--dc-testo:#a23a31}
+[data-theme="dark"] .dc-ok{--dc-testo:#7cc487}
+[data-theme="dark"] .dc-medio{--dc-testo:#f0c060}
+[data-theme="dark"] .dc-alto{--dc-testo:#f08a80}
 /* Incassi (6/11/2026) */
 .inc-mese{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--border);border-radius:var(--radius-full);padding:2px 4px;background:var(--surface)}
 .inc-mese b{font-size:13.5px;min-width:118px;text-align:center;text-transform:capitalize}
@@ -2524,6 +2561,7 @@ textarea.input{resize:vertical}
               </div>
             </div>
             <div id="scud-codice-box"></div>
+            <div id="cav-verifica-box"></div>
             <div id="cav-incarico-box"></div>
             <div class="card" style="margin-bottom:16px">
               <h3 style="margin-top:0">Scheda cavallo (PDF + QR)</h3>
@@ -9298,14 +9336,17 @@ function proposteProHtml(clienteId){
   if(!lista.length) return "";
   const puo = puoCollegareProfessionisti();
   const opzCavalli = (sel) => (schedaProDati?.cavalli || []).filter(c => !c.uscito).map(c => `<option value="${c.id}"${c.id === sel ? " selected" : ""}>${escapeHtml(c.nome)}</option>`).join("");
+  // 9/11/2026 (SQL 53): stesso microchip o codice Equo = certo; si collegano tutti con un tocco, dopo la conferma
+  const certi = lista.filter(p => p.candidato && p.candidato.certo);
   return `<div style="border:1px solid rgba(232,176,75,.7);background:rgba(232,176,75,.12);border-radius:12px;padding:10px 12px;margin-bottom:14px">
     <div style="font-weight:800;margin-bottom:4px">🐴 ${lista.length} ${lista.length === 1 ? "cavallo proposto" : "cavalli proposti"} dal professionista</div>
     <p style="margin:0 0 8px;color:var(--muted);font-size:12.5px">Li ha nella sua app per questa struttura, ma non sono collegati a una vostra scheda. ${puo ? "Dite voi cosa sono." : "Decide l'amministratore o un membro di livello 2-3."}</p>
+    ${puo && certi.length > 1 ? `<button class="btn btn-primary btn-sm" style="margin:0 0 8px" onclick="collegaPropostiSicuri('${clienteId}',this)"><i class="fa-solid fa-link"></i> Collega i ${certi.length} sicuri</button>` : ""}
     ${lista.map(p => {
       const c = p.candidato, sicuro = c && c.punti >= 85;
       return `<div style="padding:8px 0;border-top:1px solid rgba(232,176,75,.4)" id="prop-${p.riga_id}">
         <div style="font-size:13.5px"><b>«${escapeHtml(p.nome)}»</b> <span style="color:var(--muted);font-size:12px">${p.lavori ? `${p.lavori} ${p.lavori === 1 ? "lavoro" : "lavori"}` : "nessun lavoro"}${p.microchip ? " · chip " + escapeHtml(p.microchip) : ""}</span></div>
-        <div style="font-size:12.5px;margin:2px 0 6px">${c ? `${sicuro ? "Probabilmente è" : "Forse è"} <b>${escapeHtml(c.nome)}</b>?` : "Non trovo un cavallo simile nella vostra scheda."}</div>
+        <div style="font-size:12.5px;margin:2px 0 6px">${c ? (c.certo ? `È <b>${escapeHtml(c.nome)}</b> (${escapeHtml(c.perche || "stesso cavallo")}).` : `${sicuro ? "Probabilmente è" : "Forse è"} <b>${escapeHtml(c.nome)}</b>?`) : "Non trovo un cavallo simile nella vostra scheda."}</div>
         ${puo ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           ${c ? `<button class="btn btn-primary btn-sm" onclick="rispondiPropostaPro('${p.riga_id}','conferma','${c.id}',this)">Sì, è ${escapeHtml(c.nome)}</button>` : ""}
           <select class="input" id="prop-sel-${p.riga_id}" style="width:auto;padding:6px 10px;font-size:13px"><option value="">${c ? "È un altro…" : "È un cavallo che avete…"}</option>${opzCavalli()}</select>
@@ -9330,6 +9371,24 @@ async function rispondiPropostaPro(riga, azione, scheda, btn, categoria){
     : (data.abb && data.abb.da_confermare ? "Collegato: il proprietario deve confermare il professionista." : "Collegato: lo storico dei lavori ora è sul vostro cavallo."));
   await caricaProposteProfessionisti();
   if(typeof cavalliList !== "undefined" && azione === "aggiungi" && typeof loadCavalli === "function") loadCavalli();
+  if(schedaProCliente) await caricaSchedaPro();
+  renderProfessionistiList(); aggiornaBadgeProfessionisti();
+}
+// collega in un colpo i cavalli certi (stesso microchip o codice Equo), dopo aver mostrato l'elenco
+async function collegaPropostiSicuri(clienteId, btn){
+  const certi = proposteDi(clienteId).filter(p => p.candidato && p.candidato.certo);
+  if(!certi.length) return;
+  const elenco = certi.map(p => `• «${p.nome}» → ${p.candidato.nome} (${p.candidato.perche || "stesso cavallo"})`).join("\n");
+  if(!confirm(`Collego questi ${certi.length} cavalli alle vostre schede?\n\n${elenco}\n\nLo storico dei lavori del professionista passa sui vostri cavalli.`)) return;
+  if(DEMO_MODE){ showToast("In demo le modifiche non vengono salvate."); return; }
+  if(btn) btn.disabled = true;
+  let ok = 0, ko = 0;
+  for(const p of certi){
+    const { data, error } = await sb.rpc("scuderia_proposta_rispondi", { p_riga: p.riga_id, p_azione: "conferma", p_scheda: p.candidato.id, p_categoria: null });
+    if(!error && data?.ok) ok++; else ko++;
+  }
+  showToast(`Collegati ${ok} cavalli${ko ? `, ${ko} non riusciti: riprova da qui sotto` : ""}.`);
+  await caricaProposteProfessionisti();
   if(schedaProCliente) await caricaSchedaPro();
   renderProfessionistiList(); aggiornaBadgeProfessionisti();
 }
@@ -12277,7 +12336,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			cavalliArrivi = demoState.arrivi || [];
 			return;
 		}
-		const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita, oltre_limite";
+		const campi = "id, centro_id, nome, razza, mantello, data_nascita, microchip, proprietario, note, tipo_proprieta, gruppo_sanguigno, foto_url, pdf_url, pdf_generato_at, updated_at, proprietario_membro_id, codice_equo, codice_livello, codice_definitivo, sesso, attivita, oltre_limite, da_verificare";
 		const [att, usc, arr] = await Promise.all([
 			sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).is("uscito_il", null).order("nome", { ascending: true }),
 			sb.from("scuderia_cavalli").select("id, nome, razza, proprietario, codice_equo, uscito_il, uscito_verso").eq("centro_id", currentCentro.id).not("uscito_il", "is", null).order("uscito_il", { ascending: false }).limit(50),
@@ -12440,7 +12499,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
           ${c.foto_url ? `<div style="width:40px;height:40px;border-radius:8px;background-image:${cssUrl(c.foto_url)};background-size:cover;background-position:center;flex-shrink:0"></div>` : ""}
           <div style="flex:1">
-            <h3 style="margin:0 0 2px;display:flex;align-items:center;gap:8px">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}</h3>
+            <h3 style="margin:0 0 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">${escapeHtml(c.nome)} ${pallinoHtml(c.id)}${c.da_verificare ? " <span class=\"dv-badge\" data-tip=\"Scheda arrivata dal maniscalco: controllate e confermate i dati\">Da verificare</span>" : ""}</h3>
             <div style="color:var(--muted);font-size:13px">${escapeHtml(sub)}</div>
           </div>
           <span class="badge-pill badge-${worst}" data-tip="Stato dello scadenzario (vaccino, Coggins, ferratura, sverminazione)">${STATUS_LABELS[worst]}</span>
@@ -12458,6 +12517,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		renderCavalloDetail();
 		caricaAllegatiScud(id);
 		if (typeof mncAlCavallo === "function") mncAlCavallo(id);
+		if (typeof cavVerificaRender === "function") cavVerificaRender(id);
 	}
 	function closeCavalloDetail() {
 		currentCavalloId = null;
@@ -16614,6 +16674,44 @@ function mncAlCavallo(){
   const box = document.getElementById("cav-incarico-box"); if(box) box.innerHTML = "";
   caricaIncarichi().then(mncRenderScheda);
 }
+/* =====================================================================
+   «DA VERIFICARE» (9/11/2026 · SQL 54, QR intelligente fase 3) — script normale: funzioni globali.
+   I cavalli aggiunti dalle proposte del maniscalco nascono «Da verificare». Nella scheda del cavallo:
+   campi che mancano, dati diversi da quelli scritti dal maniscalco (Usa questo / Tieni il nostro), «I dati sono giusti».
+   Niente si sovrascrive da solo; i lavori restano del maniscalco che li ha fatti.
+   ===================================================================== */
+async function cavVerificaRender(id){
+  const box = document.getElementById("cav-verifica-box"); if(!box) return;
+  box.innerHTML = "";
+  if(DEMO_MODE || !id) return;
+  const { data, error } = await sb.rpc("equo_cavallo_verifica", { p_horse: null, p_sc: id });
+  if(error || !data || data.errore || currentCavalloId !== id) return;
+  const diff = data.differenze || [], manca = data.mancano || [];
+  if(!data.da_verificare && !diff.length) return;
+  const puo = typeof puoCollegareProfessionisti === "function" ? puoCollegareProfessionisti() : true;
+  const da = (data.da || []).join(", ");
+  const righe = diff.map(d => {
+    const tuo = d.tuo == null || d.tuo === "" ? "—" : d.tuo;
+    const val = String(d.suo).replace(/'/g, "\\'");
+    return `<div class="dv-riga"><div><b>${escapeHtml(d.etichetta)}</b>: voi <i>${escapeHtml(String(tuo))}</i> · ${escapeHtml(d.chi || "il maniscalco")} <i>${escapeHtml(String(d.suo))}</i></div>
+      ${puo ? `<div class="dv-bottoni">${d.solo_info ? "" : `<button class="btn btn-primary btn-sm" onclick="cavVerificaScelta('${id}','usa','${d.campo}','${escapeHtml(val)}')">Usa ${escapeHtml(String(d.suo))}</button>`}
+        <button class="btn btn-outline btn-sm" onclick="cavVerificaScelta('${id}','tieni','${d.campo}','${escapeHtml(val)}')">${d.solo_info ? "Ok, teniamo il nostro" : d.manca ? "Lascia vuoto" : "Tieni il nostro"}</button></div>` : ""}</div>`;
+  }).join("");
+  box.innerHTML = `<div class="card dv-card" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="dv-badge">Da verificare</span>
+      ${da ? `<span style="color:var(--muted);font-size:12.5px">Scheda arrivata da ${escapeHtml(da)}</span>` : ""}</div>
+    ${manca.length ? `<div style="font-size:13.5px;margin-top:8px">Mancano: <b>${manca.map(escapeHtml).join(", ")}</b> ${puo ? `<button class="btn btn-ghost btn-sm" onclick="openCavalloForm('${id}')">Completa</button>` : ""}</div>` : ""}
+    ${righe ? `<div style="font-size:13px;margin-top:8px">Il maniscalco ha scritto qualcosa di diverso: scegliete voi cosa tenere.</div>${righe}` : ""}
+    ${data.da_verificare && puo ? `<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="cavVerificaScelta('${id}','conferma')"><i class="fa-solid fa-check"></i> I dati sono giusti</button>` : ""}
+    <p style="color:var(--muted);font-size:11.5px;margin:6px 0 0">Nulla cambia da solo. I lavori restano del maniscalco che li ha fatti.</p></div>`;
+}
+async function cavVerificaScelta(id, azione, campo, valore){
+  const { data, error } = await sb.rpc("equo_cavallo_scelta", { p_horse: null, p_sc: id, p_azione: azione, p_campo: campo || null, p_valore: valore || null });
+  if(error || !data?.ok){ showToast((data && data.errore) || "Non riuscito, riprova."); return; }
+  showToast(azione === "conferma" ? "Dati confermati." : azione === "usa" ? "Dato aggiornato." : "Ok, tenete il vostro.");
+  await loadCavalli();
+  if(currentCavalloId === id){ renderCavalloDetail(); cavVerificaRender(id); } else renderCavalliList();
+}
 /* ---------- ATHENA (segreteria AI: guida del gestionale + situazione del centro) ---------- */
 // La funzione è sul sito dell'app: /api/agent è un proxy (netlify.toml) → stesso dominio, niente CORS.
 let athenaCaricata = false, athenaInCorso = false, agenteAttivo = "athena";
@@ -16744,7 +16842,11 @@ async function athenaInvia(){
     else if(res.status === 403) pensa.innerHTML = athenaFormatta(data.error ? data.error + "." : "Non risulti nello staff di questo centro.");
     else if(data.limite_raggiunto && agenteAttivo !== "athena" && data.uso.limite === 10 && !((pianoCentro?.agenti || []).includes(agenteAttivo))){ pensa.innerHTML = athenaFormatta(`La prova gratuita di ${AGENTI_CHAT[agenteAttivo].nome} è finita (10 messaggi). Se ti è piaciuto lo attivi da "Agenti AI".`); proveAgenti = undefined; }
     else if(data.limite_raggiunto) pensa.innerHTML = athenaFormatta(`Il centro ha usato tutti i **${data.uso.limite} messaggi** di ${AGENTI_CHAT[agenteAttivo].nome} di questo mese: il contatore riparte il 1° del mese.${agenteAttivo !== "athena" ? " Puoi aggiungere messaggi extra da \"Agenti AI\" (200 a 7 € o 500 a 15 € + IVA al mese, condivisi fra gli agenti)." : ""} Per un problema urgente usa "Serve aiuto?" → "Apri un ticket" in Home.`);
-    else pensa.innerHTML = athenaFormatta(data.reply || "Non sono riuscita a rispondere, riprova.");
+    else{
+      pensa.innerHTML = athenaFormatta(data.reply || "Non sono riuscita a rispondere, riprova.");
+      // 9/11/2026: schede da confermare (azioni di Athena)
+      if(Array.isArray(data.azioni) && data.azioni.length && typeof athenaMostraAzioni === "function") athenaMostraAzioni(data.azioni, pensa);
+    }
     if(data.uso) document.getElementById("athena-uso").textContent = data.prova ? `Prova gratuita: ${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome}` : `${data.uso.usati} di ${data.uso.limite} messaggi a ${AGENTI_CHAT[agenteAttivo].nome} questo mese (tutto il centro)`;
     if(data.prova) proveAgenti = undefined;
   } catch(e){
@@ -16754,6 +16856,209 @@ async function athenaInvia(){
   document.getElementById("athena-box").scrollTop = 1e9;
 }
 
+/* ---------- ATHENA: AZIONI CON CONFERMA (9/11/2026) ----------
+   Athena prepara le schede (netlify/agente/azioni-scuderia.js); qui si mostrano sotto la risposta e partono SOLO con «Conferma».
+   Ogni azione usa i permessi di chi è collegato (RLS e funzioni del database): lezioni, incassi, eventi sanitari,
+   messaggi ai clienti, nuovo cliente, richiesta di appuntamento al maniscalco;
+   dal 9/11 sera anche box/paddock, nuovo cavallo, pacchetti, conferme, maniscalco dei cavalli, magazzino, avvisi allo staff. */
+const ATH_ICONE = { sc_lezione: "fa-calendar-check", sc_incasso: "fa-euro-sign", sc_evento: "fa-syringe", sc_messaggio: "fa-comment-dots", sc_cliente: "fa-user-plus", sc_appuntamento: "fa-hammer",
+  sc_box: "fa-warehouse", sc_cavallo: "fa-horse", sc_pacchetto: "fa-ticket", sc_conferma: "fa-circle-check", sc_incarico: "fa-user-gear", sc_magazzino: "fa-boxes-stacked", sc_comunicazione: "fa-bullhorn" };
+let athAzioni = {};
+
+function athenaMostraAzioni(azioni, bolla){
+  const schede = (azioni || []).filter(a => ATH_ICONE[a.tipo]);
+  if(!schede.length || !bolla) return;
+  const box = document.createElement("div");
+  box.className = "ath-schede";
+  box.innerHTML = schede.map(a => {
+    const id = "ath" + Math.random().toString(36).slice(2, 9);
+    athAzioni[id] = a;
+    return `<div class="ath-scheda" id="${id}">
+      <div class="ath-scheda-testa"><i class="fa-solid ${ATH_ICONE[a.tipo]}"></i> <b>${escapeHtml(a.dati.titolo || "")}</b></div>
+      <div class="ath-scheda-testo">${escapeHtml(a.dati.testo || "").replace(/\n/g, "<br>")}</div>
+      <div class="ath-scheda-bottoni"><button class="btn btn-primary btn-sm" onclick="athenaConfermaAzione('${id}', this)"><i class="fa-solid fa-check"></i> Conferma</button>
+        <button class="btn btn-ghost btn-sm" onclick="athenaScartaAzione('${id}')">Annulla</button></div></div>`;
+  }).join("") + (schede.length > 1 ? `<button class="btn btn-outline btn-sm ath-tutte" onclick="athenaConfermaTutte(this)">Conferma tutte (${schede.length})</button>` : "");
+  bolla.after(box);
+  document.getElementById("athena-box").scrollTop = 1e9;
+}
+function athenaEsito(id, ok, testo){
+  const el = document.getElementById(id); if(!el) return;
+  el.classList.add(ok ? "fatta" : "errore");
+  el.querySelector(".ath-scheda-bottoni").innerHTML = `<span class="ath-esito">${ok ? '<i class="fa-solid fa-circle-check"></i> ' : '<i class="fa-solid fa-triangle-exclamation"></i> '}${escapeHtml(testo)}</span>`
+    + (ok ? "" : `<button class="btn btn-ghost btn-sm" onclick="athenaConfermaAzione('${id}', this)">Riprova</button>`);
+}
+function athenaScartaAzione(id){
+  const el = document.getElementById(id); if(!el) return;
+  delete athAzioni[id];
+  el.classList.add("scartata");
+  el.querySelector(".ath-scheda-bottoni").innerHTML = '<span class="ath-esito">Annullata: non ho fatto nulla.</span>';
+}
+async function athenaConfermaTutte(btn){
+  btn.disabled = true;
+  for(const id of [...btn.parentElement.querySelectorAll(".ath-scheda")].map(x => x.id)){
+    if(athAzioni[id] && !document.getElementById(id).classList.contains("fatta")) await athenaConfermaAzione(id);
+  }
+  btn.remove();
+}
+async function athenaConfermaAzione(id, btn){
+  const a = athAzioni[id]; if(!a) return;
+  if(btn) btn.disabled = true;
+  if(DEMO_MODE){ athenaEsito(id, true, "Fatto (demo: non salvato)."); return; }
+  let esito;
+  try{ esito = await athenaEsegui(a); }
+  catch(e){ esito = { ok: false, testo: e?.message || "Non riuscito, riprova." }; }
+  if(esito.ok) delete athAzioni[id];
+  athenaEsito(id, esito.ok, esito.testo);
+}
+const athErr = (error, data) => ({ ok: false, testo: (data && (data.errore || data.error)) || error?.message || "Non riuscito, riprova." });
+
+async function athenaEsegui(a){
+  const d = a.dati, c = currentCentro.id;
+  switch(a.tipo){
+    case "sc_lezione": {
+      const r = d.op === "nuova" ? await sb.from("scuderia_lezioni").insert({ centro_id: c, ...d.payload })
+        : await sb.from("scuderia_lezioni").update(d.payload).eq("id", d.lezione_id).eq("centro_id", c);
+      if(r.error) return athErr(r.error);
+      if(typeof loadLezioni === "function"){ try{ await loadLezioni(); if(typeof renderLezioni === "function") renderLezioni(); }catch(e){} }
+      return { ok: true, testo: { nuova: "Lezione aggiunta.", sposta: "Lezione spostata.", annulla: "Lezione annullata.", fatta: "Segnata come fatta." }[d.op] || "Fatto." };
+    }
+    case "sc_incasso": {
+      const { data, error } = await sb.rpc("incassi_registra_pagamento", { p_centro: c, p_membro: d.membro_id, p_cassa: d.cassa, p_importo: d.importo,
+        p_metodo: d.metodo, p_data: d.data, p_addebito: null, p_conto: null, p_note: d.note });
+      if(error || (data && data.ok === false)) return athErr(error, data);
+      return { ok: true, testo: "Incasso registrato." };
+    }
+    case "sc_evento": {
+      const r = await sb.from("scuderia_eventi_sanitari").insert({ centro_id: c, cavallo_id: d.cavallo_id, tipo: d.tipo, tipo_altro: d.tipo_altro,
+        data_evento: d.data_evento, data_scadenza: d.data_scadenza, note: d.note, creato_da: typeof currentMembroId === "function" ? currentMembroId() : null });
+      if(r.error) return athErr(r.error);
+      if(typeof loadEventiAll === "function"){ try{ await loadEventiAll(); }catch(e){} }
+      return { ok: true, testo: "Registrato nella scheda del cavallo." };
+    }
+    case "sc_messaggio": {
+      const r = await sb.from("chat_messaggi").insert({ centro_id: c, membro_id: d.membro_id, mittente_user_id: currentUser.id, tipo: "testo", testo: d.testo });
+      if(r.error) return athErr(r.error);
+      return { ok: true, testo: "Messaggio inviato." };
+    }
+    case "sc_cliente": {
+      const { data, error } = await sb.rpc("salva_cliente", { p_centro: c, p_membro: null, p_ruolo: d.ruolo, p_nome: d.nome, p_telefono: d.telefono,
+        p_email: d.email, p_data_nascita: d.data_nascita, p_referente: null, p_note: d.note, p_consenso: false });
+      if(error){
+        const m = error.message || "";
+        if(m.includes("MINORE_SENZA_REFERENTE")) return { ok: false, testo: "È minorenne: crealo da Clienti scegliendo il genitore o referente." };
+        if(m.includes("clienti, il massimo")) return { ok: false, testo: "Hai raggiunto i clienti del tuo pacchetto." };
+        return athErr(error);
+      }
+      if(typeof loadTeam === "function"){ try{ await loadTeam(); if(typeof caricaClienti === "function") caricaClienti(); }catch(e){} }
+      return { ok: true, testo: "Cliente creato. Ricorda di spuntare il consenso privacy nella sua scheda." };
+    }
+    case "sc_appuntamento": {
+      const { data, error } = await sb.rpc("scuderia_proponi_appuntamento", { p_cliente_id: d.cliente_id, p_tipo: d.tipo, p_tipo_altro: d.tipo_altro,
+        p_data: d.data, p_ora: d.ora, p_cavalli: d.cavalli && d.cavalli.length ? d.cavalli : null, p_note: d.note });
+      if(error || (data && data.ok === false)) return athErr(error, data);
+      return { ok: true, testo: "Richiesta inviata al maniscalco: la trovi in Professionisti." };
+    }
+    case "sc_box": {
+      let r;
+      const ricarica = async () => { if(typeof loadBox === "function"){ try{ await loadBox(); if(typeof renderBox === "function") renderBox(); }catch(e){} } };
+      const statoBox = async (stato, da) => { await sb.from("scuderia_box").update({ stato_cavallo: stato }).eq("centro_id", c).eq("cavallo_id", d.cavallo_id).eq("stato_cavallo", da); };
+      if(d.op === "metti_box"){
+        const { data: b } = await sb.from("scuderia_box").select("cavallo_id, manutenzione").eq("id", d.box_id).single();
+        if(b && b.cavallo_id && b.cavallo_id !== d.cavallo_id) return { ok: false, testo: "Nel frattempo il box è stato occupato." };
+        if(b && b.manutenzione) return { ok: false, testo: "Il box è in manutenzione." };
+        let stato = "in_box";
+        if(d.da_box_id){
+          const { data: da } = await sb.from("scuderia_box").select("stato_cavallo").eq("id", d.da_box_id).single();
+          stato = da?.stato_cavallo || "in_box";
+          r = await sb.from("scuderia_box").update({ cavallo_id: null }).eq("id", d.da_box_id).eq("centro_id", c); if(r.error) return athErr(r.error);
+        }
+        r = await sb.from("scuderia_box").update({ cavallo_id: d.cavallo_id, stato_cavallo: stato, manutenzione: false }).eq("id", d.box_id).eq("centro_id", c);
+        if(r.error) return athErr(r.error);
+        await ricarica(); return { ok: true, testo: "Cavallo nel box." };
+      }
+      if(d.op === "metti_paddock"){
+        const { data: gia } = await sb.from("scuderia_paddock_cavalli").select("id").eq("cavallo_id", d.cavallo_id).maybeSingle();
+        r = gia ? await sb.from("scuderia_paddock_cavalli").update({ paddock_id: d.paddock_id }).eq("id", gia.id)
+                : await sb.from("scuderia_paddock_cavalli").insert({ centro_id: c, paddock_id: d.paddock_id, cavallo_id: d.cavallo_id });
+        if(r.error) return athErr(r.error);
+        await statoBox("paddock", "in_box");
+        await ricarica(); return { ok: true, testo: "Cavallo nel paddock (il suo box, se ce l'ha, resta suo)." };
+      }
+      if(d.op === "togli_paddock"){
+        r = await sb.from("scuderia_paddock_cavalli").delete().eq("cavallo_id", d.cavallo_id).eq("centro_id", c);
+        if(r.error) return athErr(r.error);
+        await statoBox("in_box", "paddock");
+        await ricarica(); return { ok: true, testo: "Tolto dal paddock." };
+      }
+      if(d.op === "icona"){
+        let q = sb.from("scuderia_box_attivita").select("id").eq("centro_id", c).eq("tipo", d.icona).eq("giorno", oggiRoma());
+        q = d.cavallo_id ? q.eq("cavallo_id", d.cavallo_id) : q.is("cavallo_id", null).eq("paddock_id", d.paddock_id);
+        const { data: gia } = await q.limit(1);
+        if(gia && gia.length) return { ok: true, testo: "Era già segnato oggi." };
+        r = await sb.from("scuderia_box_attivita").insert({ centro_id: c, box_id: d.box_id, paddock_id: d.paddock_id, cavallo_id: d.cavallo_id, tipo: d.icona });
+        if(r.error) return athErr(r.error);
+        await ricarica(); return { ok: true, testo: "Segnato." };
+      }
+      if(d.op === "manutenzione" || d.op === "fine_manutenzione"){
+        const upd = d.op === "manutenzione" ? { manutenzione: true, manutenzione_motivo: d.motivo, manutenzione_fino: d.fino } : { manutenzione: false, manutenzione_fino: null, manutenzione_nota: null };
+        r = await sb.from("scuderia_box").update(upd).eq("id", d.box_id).eq("centro_id", c);
+        if(r.error) return athErr(r.error);
+        await ricarica(); return { ok: true, testo: d.op === "manutenzione" ? "Box in manutenzione." : "Box di nuovo libero." };
+      }
+      break;
+    }
+    case "sc_cavallo": {
+      const r = await sb.from("scuderia_cavalli").insert({ centro_id: c, ...d.payload }).select("id").single();
+      if(r.error){
+        const m = r.error.message || "";
+        if(/limite|massimo|pacchetto/i.test(m)) return { ok: false, testo: "Hai raggiunto i cavalli del tuo pacchetto." };
+        return athErr(r.error);
+      }
+      if(typeof loadCavalli === "function"){ try{ await loadCavalli(); if(typeof renderCavalliList === "function") renderCavalliList(); }catch(e){} }
+      return { ok: true, testo: "Cavallo aggiunto." + (d.payload.proprietario ? " Se il proprietario era nuovo trovi la sua scheda in Clienti, da completare." : "") };
+    }
+    case "sc_pacchetto": {
+      const r = await sb.from("scuderia_pacchetti").insert({ centro_id: c, ...d.payload });
+      if(r.error) return athErr(r.error);
+      if(typeof loadPacchetti === "function"){ try{ await loadPacchetti(); if(typeof renderPacchetti === "function") renderPacchetti(); }catch(e){} }
+      return { ok: true, testo: "Pacchetto registrato." };
+    }
+    case "sc_conferma": {
+      let data, error;
+      if(d.op === "codice") ({ data, error } = await sb.rpc("equo_conferma_cavallo", { p_horse: null, p_scuderia_cavallo: d.id }));
+      else if(d.op === "verifica") ({ data, error } = await sb.rpc("equo_cavallo_scelta", { p_horse: null, p_sc: d.id, p_azione: "conferma", p_campo: null, p_valore: null }));
+      else ({ data, error } = await sb.rpc("scuderia_proposta_rispondi", { p_riga: d.id, p_azione: "conferma", p_scheda: d.scheda, p_categoria: null }));
+      if(error || (data && data.ok === false)){
+        if(data && data.motivo === "dati_incompleti") return { ok: false, testo: "Mancano nome, razza o data di nascita: completali nella scheda del cavallo." };
+        return athErr(error, data);
+      }
+      for(const f of ["loadCavalli", "renderCavalliList", "caricaDaConfermareScud"]) if(typeof window[f] === "function"){ try{ await window[f](); }catch(e){} }
+      return { ok: true, testo: { codice: "Dati confermati.", verifica: "Dati confermati.", proposta: "Cavallo collegato." }[d.op] };
+    }
+    case "sc_incarico": {
+      const { data, error } = await sb.rpc("scuderia_incarico_azione", { p_centro: c, p_azione: d.azione, p_cavalli: d.cavalli, p_cliente: d.cliente,
+        p_dal: d.dal, p_al: d.al, p_motivo: d.motivo, p_incarico: null });
+      if(error || !data || data.ok === false) return athErr(error, data);
+      if(typeof caricaIncarichi === "function"){ try{ await caricaIncarichi(); if(typeof renderIncarichi === "function") renderIncarichi(); }catch(e){} }
+      return { ok: true, testo: typeof mncTestoEsito === "function" ? mncTestoEsito(data) : "Fatto." };
+    }
+    case "sc_magazzino": {
+      const r = await sb.from("mag_movimenti").insert(d.righe.map(x => ({ centro_id: c, ...x })));
+      if(r.error) return athErr(r.error);
+      if(typeof loadMagazzino === "function"){ try{ await loadMagazzino(); }catch(e){} }
+      return { ok: true, testo: "Movimento registrato." };
+    }
+    case "sc_comunicazione": {
+      const r = await sb.from("scuderia_messaggi").insert({ centro_id: c, mittente_id: typeof currentMembroId === "function" ? currentMembroId() : null,
+        destinatario_tipo: d.destinatario_tipo, destinatario_ruolo: d.destinatario_ruolo, destinatario_membro_id: d.destinatario_membro_id, testo: d.testo, priorita: d.priorita });
+      if(r.error) return athErr(r.error);
+      if(typeof refreshComunicazioniModule === "function"){ try{ await refreshComunicazioniModule(); }catch(e){} }
+      return { ok: true, testo: "Avviso pubblicato." };
+    }
+  }
+  return { ok: false, testo: "Azione non riconosciuta." };
+}
 /* ---------- TICKET DI ASSISTENZA (Home → "Serve aiuto?") ---------- */
 function apriTicketAssistenza(){
   document.getElementById("tk-categoria").value = "problema";
@@ -17485,19 +17790,22 @@ async function confermaCodiceScud(id){
   caricaDaConfermareScud(true);
 }
 
-let daConfermareScud = [], daConfermareScudTs = 0;
+let daConfermareScud = [], daConfermareScudTs = 0, daConfermareScudAperto = false;   // chiuso di base
 async function caricaDaConfermareScud(forza){
   const box = document.getElementById("scud-da-confermare");
   if(!box || DEMO_MODE) return;
   if(!forza && Date.now() - daConfermareScudTs < 60000) return;
   daConfermareScudTs = Date.now();
   try{ const { data, error } = await sb.rpc("equo_cavalli_da_confermare"); daConfermareScud = (!error && Array.isArray(data)) ? data : []; }catch(e){ daConfermareScud = []; }
-  if(!daConfermareScud.length){ box.innerHTML = ""; return; }
-  box.innerHTML = `<div class="card" style="margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0">Da confermare (${daConfermareScud.length})</h3></div>
-    <p style="margin:4px 0 8px;color:var(--muted);font-size:12.5px">Cavalli con nome, razza e data di nascita completi che aspettano la conferma del centro per il codice definitivo.</p>
+  // 9/11/2026: riquadro chiuso di base, colore dal numero (verde 0 · giallo/arancio 1-5 · rosso sfumato oltre 5); si apre al tocco
+  const n = daConfermareScud.length, liv = n === 0 ? "ok" : n <= 5 ? "medio" : "alto";
+  const sotto = n === 0 ? "Tutti i cavalli con i dati completi sono confermati." : "Cavalli con nome, razza e data di nascita completi che aspettano la conferma del centro per il codice definitivo.";
+  box.innerHTML = `<details class="dc-box dc-${liv}" ${daConfermareScudAperto && n ? "open" : ""} ontoggle="daConfermareScudAperto = this.open">
+    <summary><span class="dc-titolo"><i class="fa-solid ${n ? "fa-circle-exclamation" : "fa-circle-check"}"></i> Da confermare (${n})</span><span class="dc-freccia" aria-hidden="true"><i class="fa-solid fa-chevron-down"></i></span></summary>
+    <div class="dc-corpo"><p style="margin:0 0 8px;color:var(--muted);font-size:12.5px">${sotto}</p>
     ${daConfermareScud.map((x, i) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border)">
       <div><b>${escapeHtml(x.nome || "")}</b> <span style="color:var(--muted);font-size:12px;font-family:monospace">${escapeHtml(x.codice || "")}</span>${x.motivo === "dati_modificati" ? ' <span style="color:var(--muted);font-size:12px">· dati cambiati, riconferma</span>' : ""}</div>
-      <button class="btn btn-primary btn-sm" onclick="confermaDaHomeScud(${i})">Confermo</button></div>`).join("")}</div>`;
+      <button class="btn btn-primary btn-sm" onclick="confermaDaHomeScud(${i})">Confermo</button></div>`).join("")}</div></details>`;
 }
 async function confermaDaHomeScud(i){
   const x = daConfermareScud[i]; if(!x) return;

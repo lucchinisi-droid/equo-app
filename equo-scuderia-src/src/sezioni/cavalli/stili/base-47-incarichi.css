@@ -23,3 +23,25 @@
 .inc-etichetta{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
 .inc-storico{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .inc-st-riga{border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+
+/* «Da verificare» (SQL 54) */
+.dv-card{border:1.5px solid rgba(232,176,75,.8)}
+.dv-badge{font-size:11px;font-weight:800;color:#7A5A00;background:#F8EDD2;border-radius:999px;padding:3px 10px;letter-spacing:.02em}
+.dv-riga{padding:8px 0;border-top:1px solid var(--border);font-size:13.5px;line-height:1.45}
+.dv-bottoni{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+
+/* «Da confermare»: chiuso di base, colore dal numero di cavalli (9/11/2026) */
+.dc-box{border-radius:14px;margin-bottom:20px;border:1.5px solid var(--dc-bordo);background:var(--dc-fondo);overflow:hidden}
+.dc-box summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;min-height:44px;box-sizing:border-box}
+.dc-box summary::-webkit-details-marker{display:none}
+.dc-titolo{font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;color:var(--dc-testo)}
+.dc-freccia{color:var(--dc-testo);transition:transform .15s}
+.dc-box[open] .dc-freccia{transform:rotate(180deg)}
+.dc-corpo{padding:0 16px 10px;background:var(--surface)}
+.dc-corpo > p:first-child{padding-top:10px}
+.dc-ok{--dc-bordo:#3f7a45;--dc-fondo:color-mix(in srgb,#3f7a45 14%,var(--surface));--dc-testo:#2f6a37}
+.dc-medio{--dc-bordo:#e0a100;--dc-fondo:linear-gradient(90deg,color-mix(in srgb,#e2b23c 26%,var(--surface)),color-mix(in srgb,#e8892b 22%,var(--surface)));--dc-testo:#8a5a00}
+.dc-alto{--dc-bordo:#c0473d;--dc-fondo:linear-gradient(90deg,color-mix(in srgb,#c0473d 30%,var(--surface)),color-mix(in srgb,#c0473d 8%,var(--surface)));--dc-testo:#a23a31}
+[data-theme="dark"] .dc-ok{--dc-testo:#7cc487}
+[data-theme="dark"] .dc-medio{--dc-testo:#f0c060}
+[data-theme="dark"] .dc-alto{--dc-testo:#f08a80}

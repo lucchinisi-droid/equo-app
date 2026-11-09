@@ -1,4 +1,5 @@
 // Equo · agenti AI (netlify/functions/agent.js) · definizione degli strumenti (tool) di ogni agente
+const { STRUMENTI_ATHENA_AZIONI } = require("./azioni-scuderia");
 const { HAMMER_MAX_RICERCHE, HAMMER_SITI } = require("./configurazione");
 const { MERLINO_MAX_RICERCHE } = require("./istruzioni-merlino");
 
@@ -170,6 +171,7 @@ const STRUMENTI_ATHENA = [
   { name: "situazione_centro", description: "Situazione attuale del centro: scadenze sanitarie entro 30 giorni (e già scadute), pacchetti/carnet da rinnovare, lezioni di oggi e domani, articoli di magazzino sotto la soglia minima, ordini aperti, box (occupati, liberi, in manutenzione, cavalli fuori dal box e, dopo le 11, cavalli in box senza pasto del mattino segnato).", input_schema: { type: "object", properties: {} } },
   clonaStrumento("riferisci_ai_boss"),
   clonaStrumento("le_mie_segnalazioni"),
+  ...STRUMENTI_ATHENA_AZIONI,   // 9/11/2026: azioni con conferma (azioni-scuderia.js)
   { ...STRUMENTO_METEO, cache_control: { type: "ephemeral" } },
 ];
 // Athena BASIC (pacchetto START): solo guida al gestionale, niente proattività, niente segnalazioni ai Boss

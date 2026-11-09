@@ -193,7 +193,7 @@ async function openClienteDetail(id){
   document.getElementById("clienti-detail-view").style.display = "block";
   document.getElementById("detail-cliente-nome").textContent = c.nome;
   document.getElementById("pro-avvisi-struttura")?.remove();
-  if(c.centro_id && c.collegamento_stato === "attivo" && typeof window.proAvvisiStruttura === "function") setTimeout(() => window.proAvvisiStruttura(id), 0);
+  if(((c.centro_id && c.collegamento_stato === "attivo") || (!c.centro_id && c.cliente_user_id)) && typeof window.proAvvisiStruttura === "function") setTimeout(() => window.proAvvisiStruttura(id), 0);
   document.getElementById("detail-cliente-info").innerHTML = `
     <div style="font-size:13.5px;line-height:1.8">
       ${c.archiviato_il ? `<div style="color:var(--muted)"><strong>Archiviato</strong> il ${new Date(c.archiviato_il).toLocaleDateString("it-IT")}: non compare nella lista né nelle scadenze.</div>` : ""}

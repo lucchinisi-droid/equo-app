@@ -50,3 +50,18 @@
   .content{padding:18px 18px 150px}
 }
 
+
+/* Athena: schede delle azioni da confermare (9/11/2026) */
+.ath-schede{display:flex;flex-direction:column;gap:8px;max-width:92%;align-self:flex-start}
+.ath-scheda{border:1.5px solid var(--primary);border-radius:14px;background:var(--surface);padding:10px 12px}
+.ath-scheda-testa{display:flex;align-items:center;gap:8px;font-size:14px}
+.ath-scheda-testa i{color:var(--primary);width:16px;text-align:center}
+.ath-scheda-testo{font-size:13.5px;line-height:1.45;margin:4px 0 8px;white-space:pre-line}
+.ath-scheda-bottoni{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ath-scheda.fatta{border-color:#3f7a45}
+.ath-scheda.fatta .ath-esito{color:#3f7a45;font-weight:700;font-size:13px}
+.ath-scheda.errore{border-color:var(--danger)}
+.ath-scheda.errore .ath-esito{color:var(--danger);font-weight:700;font-size:13px}
+.ath-scheda.scartata{opacity:.6;border-style:dashed}
+.ath-esito{font-size:13px;color:var(--muted)}
+.ath-tutte{align-self:flex-start}
