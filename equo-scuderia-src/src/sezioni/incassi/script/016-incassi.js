@@ -953,6 +953,7 @@ async function asdRicevuta(pagamentoId, btn){
   }
   if(!window.jspdf){ showToast("Generatore PDF non disponibile, riprova."); return; }
   const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a5", orientation: "landscape" });
+  if(typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, 198, 8);   // logo del centro (configurazione, SQL 59)
   let y = 16;
   doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(r.asd?.nome || "ASD", 12, y);
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100);

@@ -1,0 +1,62 @@
+<!-- CONFIGURAZIONE GUIDATA (10/11/2026 · SQL 58): benvenuto + finestra a passi con Athena in basso a sinistra -->
+<div class="modal-overlay conf-overlay" id="modal-conf-benvenuto">
+  <section class="conf-benvenuto" role="dialog" aria-modal="true" aria-labelledby="conf-ben-titolo">
+    <div class="conf-ombra" aria-hidden="true"></div>
+    <img class="conf-civetta" src="assets/agenti/athena-cartoon.webp" alt="Athena, la civetta di Equo">
+    <div class="conf-ben-dx">
+      <div class="conf-fumetto nuovo"><b id="conf-ben-titolo">Ciao, sono Athena!</b> In circa 10 minuti configuriamo insieme la tua scuderia: puoi fermarti quando vuoi e riprendere dopo.<svg class="conf-coda" viewBox="0 0 20 18" aria-hidden="true"><path d="M18 2 L2 12 L18 15"/></svg></div>
+      <ol class="conf-ben-passi" id="conf-ben-passi"></ol>
+      <div class="conf-ben-bottoni">
+        <button type="button" class="btn btn-outline" onclick="confPiuTardi()">Più tardi</button>
+        <button type="button" class="btn btn-primary" onclick="confInizia()">Inizia ora</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-overlay conf-overlay" id="modal-configurazione">
+  <section class="conf-modal" id="conf-modal" role="dialog" aria-modal="true" aria-labelledby="conf-titolo">
+    <header class="conf-testa">
+      <div class="conf-testa-riga">
+        <div>
+          <span class="conf-sopra" id="conf-sopra">Configura la tua scuderia</span>
+          <h2 id="conf-titolo">…</h2>
+        </div>
+        <button type="button" class="conf-x" onclick="confChiudi()" aria-label="Chiudi: riprendi quando vuoi" title="Chiudi: riprendi quando vuoi"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="conf-barra" role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-label="Avanzamento della configurazione" id="conf-barra"><div id="conf-barra-dentro" style="width:0%"></div></div>
+      <nav class="conf-pallini" id="conf-pallini" aria-label="Passi"></nav>
+    </header>
+
+    <div class="conf-corpo">
+      <aside class="conf-athena" aria-label="Athena">
+        <button type="button" class="btn btn-ghost btn-sm conf-athena-chiudi" onclick="confAthena(false)" aria-label="Chiudi Athena"><i class="fa-solid fa-chevron-down"></i></button>
+        <div class="conf-scena">
+          <div class="conf-ombra" aria-hidden="true"></div>
+          <img class="conf-civetta" src="assets/agenti/athena-cartoon.webp" alt="Athena, la civetta di Equo">
+          <div class="conf-fumetti" id="conf-fumetti" aria-live="polite"></div>
+        </div>
+        <form class="conf-scrivi" onsubmit="event.preventDefault(); confScriviAthena()">
+          <div class="conf-scrivi-riga">
+            <label for="conf-msg" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">Scrivi ad Athena</label>
+            <input id="conf-msg" type="text" autocomplete="off" placeholder="Scrivi ad Athena…">
+            <button type="submit" class="conf-invia" id="conf-invia" aria-label="Invia ad Athena"><i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+          <span class="conf-nota-ai" id="conf-nota-ai"></span>
+        </form>
+      </aside>
+
+      <div class="conf-passo" id="conf-passo" tabindex="-1"></div>
+    </div>
+
+    <button type="button" class="conf-fab" onclick="confAthena(true)" aria-label="Apri Athena"><img src="assets/agenti/athena-cartoon.webp" alt=""><span>Ti aiuto?</span></button>
+
+    <footer class="conf-piede">
+      <button type="button" class="btn btn-outline conf-indietro" id="conf-indietro" onclick="confVai(-1)">Indietro</button>
+      <button type="button" class="btn btn-ghost" id="conf-salta" onclick="confSalta()">Salta per ora</button>
+      <button type="button" class="btn btn-ghost" id="conf-na" onclick="confNonApplicabile()">Non applicabile</button>
+      <span class="conf-salvato" id="conf-salvato" role="status"></span>
+      <button type="button" class="btn btn-primary conf-avanti" id="conf-avanti" onclick="confAvanti()">Salva e continua</button>
+    </footer>
+  </section>
+</div>

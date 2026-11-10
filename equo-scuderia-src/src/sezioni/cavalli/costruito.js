@@ -2400,6 +2400,7 @@
 		doc.setFontSize(9.5);
 		doc.setTextColor(...PDF_GRIGIO);
 		doc.text(currentCentro?.nome || "", R, 27, { align: "right" });
+		if (typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, 119, 13);
 		doc.setDrawColor(...PDF_ORO);
 		doc.setLineWidth(.5);
 		doc.line(L, 38, R, 38);

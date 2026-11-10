@@ -1963,6 +1963,146 @@ textarea.input{resize:vertical}
 [data-theme="dark"] .dc-ok{--dc-testo:#7cc487}
 [data-theme="dark"] .dc-medio{--dc-testo:#f0c060}
 [data-theme="dark"] .dc-alto{--dc-testo:#f08a80}
+/* ---------- CONFIGURAZIONE GUIDATA (10/11/2026 · SQL 58) ---------- */
+.conf-overlay{padding:0}
+.conf-modal{position:relative;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);
+  width:min(80vw,1180px);height:min(84vh,780px);display:flex;flex-direction:column;overflow:hidden;overflow:clip}
+@media (max-width:1100px){.conf-modal{width:92vw}}
+.conf-testa{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
+.conf-testa-riga{display:flex;align-items:center;gap:14px}
+.conf-testa-riga > div{flex:1;min-width:0}
+.conf-sopra{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+.conf-testa h2{margin:2px 0 0;font-size:21px;font-weight:700}
+.conf-x{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.conf-barra{height:8px;background:var(--muted-bg);border-radius:999px;overflow:hidden}
+.conf-barra > div{height:100%;background:var(--primary);border-radius:999px;transition:width .3s ease}
+.conf-pallini{display:flex;gap:6px;flex-wrap:wrap}
+.conf-pallino{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.conf-pallino.fatto{background:var(--primary);border-color:var(--primary);color:var(--primary-fg,#fff)}
+.conf-pallino.saltato,.conf-pallino.non_applicabile{background:var(--muted-bg);border-style:dashed}
+.conf-pallino.attivo{outline:2.5px solid var(--primary);outline-offset:2px;color:var(--text)}
+.conf-corpo{flex:1;display:flex;min-height:0}
+.conf-passo{flex:1;min-width:0;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:16px}
+.conf-passo:focus{outline:none}
+.conf-passo p{margin:0;line-height:1.55;font-size:14px}
+.conf-riquadro{border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.conf-riquadro h3{margin:0;font-size:15px}
+.conf-esiste{display:flex;align-items:center;gap:8px;font-size:14px}
+.conf-esiste i{color:var(--primary)}
+.conf-esiste.vuoto i{color:var(--muted)}
+.conf-gia{background:#eef4ec;border:1.5px solid var(--primary);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;color:var(--text)}
+[data-theme="dark"] .conf-gia{background:rgba(106,154,96,.16)}
+.conf-piede{padding:12px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.conf-piede .btn{min-height:44px}
+.conf-salvato{flex:1;text-align:right;font-size:12.5px;color:var(--muted);min-width:120px}
+.conf-salvato.ok{color:var(--primary)}
+.conf-salvato.err{color:var(--danger)}
+
+/* Athena: in basso a sinistra, fumetti accanto */
+.conf-athena{width:400px;flex-shrink:0;background:#fbf3f9;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+[data-theme="dark"] .conf-athena{background:#2a2029}
+.conf-scena{flex:1;position:relative;min-height:0;overflow:hidden}
+.conf-ombra{position:absolute;left:22px;bottom:6px;width:116px;height:14px;border-radius:50%;background:#19160b;opacity:.18}
+.conf-civetta{position:absolute;left:8px;bottom:12px;width:146px;height:auto;transform-origin:50% 100%;pointer-events:none}
+.conf-fumetti{position:absolute;left:148px;right:14px;top:12px;bottom:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:14px;overflow-y:auto}
+.conf-fumetto{position:relative;align-self:flex-start;max-width:100%;background:#fff;color:#19160b;border:2.5px solid #19160b;border-radius:18px;
+  padding:10px 14px;font-size:14px;line-height:1.45;box-shadow:3px 3px 0 #19160b;flex-shrink:0}
+.conf-fumetto.mio{align-self:flex-end;background:#e6efe2;box-shadow:-3px 3px 0 #19160b}
+.conf-coda{position:absolute;left:-17px;bottom:10px;width:20px;height:18px;overflow:visible}
+.conf-coda path{fill:#fff;stroke:#19160b;stroke-width:2.5;stroke-linejoin:round}
+.conf-fumetto.mio .conf-coda{left:auto;right:-17px;transform:scaleX(-1)}
+.conf-fumetto.mio .conf-coda path{fill:#e6efe2}
+.conf-fumetto .conf-fum-bottoni{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.conf-scrivi{padding:10px 14px 12px;border-top:1px solid rgba(25,22,11,.1);display:flex;flex-direction:column;gap:5px}
+.conf-scrivi-riga{display:flex;gap:8px}
+.conf-scrivi input{flex:1;min-width:0;height:44px;border:2px solid #19160b;border-radius:22px;padding:0 16px;font-size:14px;font-family:inherit;background:#fff;color:#19160b}
+.conf-scrivi input:disabled{background:#f4f2ea;color:#676357}
+.conf-invia{width:44px;height:44px;border-radius:22px;border:2px solid #19160b;background:#7a2f73;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.conf-invia:disabled{opacity:.45;cursor:default}
+.conf-nota-ai{font-size:11.5px;color:var(--muted)}
+.conf-fab{display:none}
+.conf-athena-chiudi{display:none}
+
+@keyframes confVive{0%,100%{transform:translateY(0) rotate(-1.6deg)}50%{transform:translateY(-7px) rotate(1.6deg)}}
+@keyframes confOmbra{0%,100%{transform:scaleX(1);opacity:.20}50%{transform:scaleX(.84);opacity:.11}}
+@keyframes confEntra{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:none}}
+.conf-civetta{animation:confVive 3.4s ease-in-out infinite}
+.conf-ombra{animation:confOmbra 3.4s ease-in-out infinite}
+.conf-fumetto.nuovo{animation:confEntra .45s ease-out both}
+@media (prefers-reduced-motion: reduce){.conf-civetta,.conf-ombra,.conf-fumetto.nuovo{animation:none}}
+
+/* benvenuto */
+.conf-benvenuto{position:relative;width:min(700px,94vw);min-height:520px;background:#fbf3f9;border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
+[data-theme="dark"] .conf-benvenuto{background:#2a2029}
+.conf-benvenuto .conf-civetta{width:210px;left:24px;bottom:34px}
+.conf-benvenuto .conf-ombra{left:44px;bottom:26px;width:170px;height:18px}
+.conf-ben-dx{position:relative;margin-left:262px;padding:40px 30px 28px 0;display:flex;flex-direction:column;gap:22px;min-height:520px;box-sizing:border-box}
+.conf-ben-dx .conf-fumetto{font-size:16.5px;padding:16px 18px;margin-top:40px}
+.conf-ben-passi{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;font-size:13px;color:var(--muted)}
+.conf-ben-bottoni{margin-top:auto;display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
+.conf-ben-bottoni .btn{min-height:48px;padding:0 22px}
+
+/* card in Home */
+.conf-card{display:flex;align-items:center;gap:14px;border:1.5px solid var(--primary);background:var(--surface);border-radius:14px;padding:12px 16px;margin-bottom:18px}
+.conf-card img{width:56px;height:auto;flex-shrink:0}
+.conf-card > div{flex:1;min-width:0}
+.conf-card b{display:block;font-size:15px}
+.conf-card span{font-size:13px;color:var(--muted)}
+
+/* telefono: quasi a tutto schermo, Athena si apre dal basso */
+@media (max-width:760px){
+  .conf-modal{width:100vw;height:100dvh;max-height:none;border-radius:0}
+  .conf-testa{padding:14px 14px 10px}
+  .conf-testa h2{font-size:19px}
+  .conf-pallini{display:none}
+  .conf-passo{padding:16px 14px 130px}
+  .conf-piede{padding:10px 14px 18px}
+  .conf-piede .conf-salvato{order:-1;flex-basis:100%;text-align:center}
+  .conf-piede .conf-avanti{flex:2}
+  .conf-piede .conf-indietro{flex:1}
+  #conf-salta,#conf-na{min-height:36px!important;padding:4px 10px;font-size:13.5px}
+  .conf-athena{position:absolute;left:0;right:0;bottom:0;width:auto;height:min(78dvh,640px);border-right:0;border-top:2.5px solid #19160b;
+    border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform .28s ease;z-index:3}
+  .conf-modal.athena-aperta .conf-athena{transform:none}
+  .conf-athena-chiudi{display:flex;align-self:flex-end;margin:8px 10px 0}
+  .conf-civetta{width:108px;left:4px}
+  .conf-ombra{left:14px;width:88px}
+  .conf-fumetti{left:112px;right:10px}
+  .conf-fab{display:flex;position:absolute;left:6px;bottom:104px;align-items:flex-end;gap:6px;border:0;background:transparent;padding:0;cursor:pointer;z-index:2}
+  .conf-fab img{width:84px;height:auto;animation:confVive 3.4s ease-in-out infinite;transform-origin:50% 100%}
+  .conf-fab span{margin-bottom:46px;background:#fff;color:#19160b;border:2.5px solid #19160b;border-radius:16px;padding:6px 10px;font-size:13.5px;font-weight:700;box-shadow:3px 3px 0 #19160b}
+  .conf-modal.athena-aperta .conf-fab{display:none}
+  .conf-benvenuto .conf-civetta{width:130px;left:10px;bottom:auto;top:24px}
+  .conf-benvenuto .conf-ombra{display:none}
+  .conf-ben-dx{margin-left:0;padding:24px 18px 20px}
+  .conf-ben-dx .conf-fumetto{margin:0 0 0 128px;font-size:15px}
+  .conf-ben-passi{grid-template-columns:1fr}
+}
+@media (max-width:760px) and (prefers-reduced-motion: reduce){.conf-fab img{animation:none}}
+
+/* B2: i moduli dentro i passi */
+.conf-griglia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+@media (max-width:760px){.conf-griglia{grid-template-columns:1fr}}
+.conf-campo{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--text)}
+.conf-campo .input{min-height:44px;font-weight:400}
+.conf-facolt{font-weight:400;color:var(--muted);font-size:12px}
+.conf-nota{font-size:12.5px!important;color:var(--muted)}
+.conf-check{display:flex;align-items:center;gap:10px;font-size:14px;min-height:44px}
+.conf-check input{width:20px;height:20px}
+.conf-avviso{background:#fff7e6;border:1.5px solid #e8b04b;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;color:#19160b}
+[data-theme="dark"] .conf-avviso{background:rgba(232,176,75,.14);color:var(--text)}
+.conf-bottoni-riga{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.conf-bottoni-riga .btn{min-height:44px}
+.conf-logo-ant img{max-height:64px;max-width:200px;border-radius:8px;border:1px solid var(--border);padding:4px;background:#fff}
+.conf-gia-presente{background:var(--muted-bg)}
+#sidebar-centro-logo{max-height:28px;max-width:110px;border-radius:4px;margin-top:4px;object-fit:contain}
+
+/* B3: Athena che compila */
+.conf-proposto{border-color:var(--primary)!important;background:#f3f7f1!important;box-shadow:0 0 0 2px rgba(63,93,58,.18)}
+[data-theme="dark"] .conf-proposto{background:rgba(106,154,96,.16)!important}
+.conf-fumetto.pensa{color:#676357;font-style:italic}
 /* Incassi (6/11/2026) */
 .inc-mese{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--border);border-radius:var(--radius-full);padding:2px 4px;background:var(--surface)}
 .inc-mese b{font-size:13.5px;min-width:118px;text-align:center;text-transform:capitalize}
@@ -2201,6 +2341,7 @@ textarea.input{resize:vertical}
         <div class="brand-text">
           <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase">Scuderia</div>
           <div class="sub" id="sidebar-centro-name">—</div>
+          <img id="sidebar-centro-logo" alt="Logo del centro" style="display:none">
         </div>
         <button class="sidebar-toggle" onclick="toggleSidebarCollapse()" title="Riduci/espandi menu">
           <i class="fa-solid fa-chevron-left" id="sidebar-toggle-icon"></i>
@@ -2291,6 +2432,7 @@ textarea.input{resize:vertical}
             <div class="meteo-box" id="meteo-scud" aria-label="Meteo dei prossimi 7 giorni"></div>
             <button type="button" class="scud-lente home" onclick="apriCercaScud()" aria-label="Cerca nel gestionale" title="Cerca (Ctrl+K)"><i class="fa-solid fa-magnifying-glass"></i></button>
           </div>
+          <div id="scud-configurazione"></div>
           <div id="scud-da-confermare"></div>
           <div id="scud-lasciati"></div>
           <div class="grid grid-3" id="home-stats" style="margin-bottom:26px"></div>
@@ -3452,6 +3594,68 @@ textarea.input{resize:vertical}
     <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="saltaCodiceIscrizione()">Continua senza codice</button>
     <p style="color:var(--muted);font-size:12px;text-align:center;margin:6px 0 0">Potrai farlo quando vuoi da Professionisti › Aggiungi maniscalco.</p>
   </div>
+</div>
+<!-- CONFIGURAZIONE GUIDATA (10/11/2026 · SQL 58): benvenuto + finestra a passi con Athena in basso a sinistra -->
+<div class="modal-overlay conf-overlay" id="modal-conf-benvenuto">
+  <section class="conf-benvenuto" role="dialog" aria-modal="true" aria-labelledby="conf-ben-titolo">
+    <div class="conf-ombra" aria-hidden="true"></div>
+    <img class="conf-civetta" src="assets/agenti/athena-cartoon.webp" alt="Athena, la civetta di Equo">
+    <div class="conf-ben-dx">
+      <div class="conf-fumetto nuovo"><b id="conf-ben-titolo">Ciao, sono Athena!</b> In circa 10 minuti configuriamo insieme la tua scuderia: puoi fermarti quando vuoi e riprendere dopo.<svg class="conf-coda" viewBox="0 0 20 18" aria-hidden="true"><path d="M18 2 L2 12 L18 15"/></svg></div>
+      <ol class="conf-ben-passi" id="conf-ben-passi"></ol>
+      <div class="conf-ben-bottoni">
+        <button type="button" class="btn btn-outline" onclick="confPiuTardi()">Più tardi</button>
+        <button type="button" class="btn btn-primary" onclick="confInizia()">Inizia ora</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-overlay conf-overlay" id="modal-configurazione">
+  <section class="conf-modal" id="conf-modal" role="dialog" aria-modal="true" aria-labelledby="conf-titolo">
+    <header class="conf-testa">
+      <div class="conf-testa-riga">
+        <div>
+          <span class="conf-sopra" id="conf-sopra">Configura la tua scuderia</span>
+          <h2 id="conf-titolo">…</h2>
+        </div>
+        <button type="button" class="conf-x" onclick="confChiudi()" aria-label="Chiudi: riprendi quando vuoi" title="Chiudi: riprendi quando vuoi"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="conf-barra" role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-label="Avanzamento della configurazione" id="conf-barra"><div id="conf-barra-dentro" style="width:0%"></div></div>
+      <nav class="conf-pallini" id="conf-pallini" aria-label="Passi"></nav>
+    </header>
+
+    <div class="conf-corpo">
+      <aside class="conf-athena" aria-label="Athena">
+        <button type="button" class="btn btn-ghost btn-sm conf-athena-chiudi" onclick="confAthena(false)" aria-label="Chiudi Athena"><i class="fa-solid fa-chevron-down"></i></button>
+        <div class="conf-scena">
+          <div class="conf-ombra" aria-hidden="true"></div>
+          <img class="conf-civetta" src="assets/agenti/athena-cartoon.webp" alt="Athena, la civetta di Equo">
+          <div class="conf-fumetti" id="conf-fumetti" aria-live="polite"></div>
+        </div>
+        <form class="conf-scrivi" onsubmit="event.preventDefault(); confScriviAthena()">
+          <div class="conf-scrivi-riga">
+            <label for="conf-msg" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">Scrivi ad Athena</label>
+            <input id="conf-msg" type="text" autocomplete="off" placeholder="Scrivi ad Athena…">
+            <button type="submit" class="conf-invia" id="conf-invia" aria-label="Invia ad Athena"><i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+          <span class="conf-nota-ai" id="conf-nota-ai"></span>
+        </form>
+      </aside>
+
+      <div class="conf-passo" id="conf-passo" tabindex="-1"></div>
+    </div>
+
+    <button type="button" class="conf-fab" onclick="confAthena(true)" aria-label="Apri Athena"><img src="assets/agenti/athena-cartoon.webp" alt=""><span>Ti aiuto?</span></button>
+
+    <footer class="conf-piede">
+      <button type="button" class="btn btn-outline conf-indietro" id="conf-indietro" onclick="confVai(-1)">Indietro</button>
+      <button type="button" class="btn btn-ghost" id="conf-salta" onclick="confSalta()">Salta per ora</button>
+      <button type="button" class="btn btn-ghost" id="conf-na" onclick="confNonApplicabile()">Non applicabile</button>
+      <span class="conf-salvato" id="conf-salvato" role="status"></span>
+      <button type="button" class="btn btn-primary conf-avanti" id="conf-avanti" onclick="confAvanti()">Salva e continua</button>
+    </footer>
+  </section>
 </div>
 <div class="modal-overlay" id="modal-pdf-chat" onclick="closeOut(event,'modal-pdf-chat')">
   <div class="modal">
@@ -11892,6 +12096,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		doc.setFontSize(9.5);
 		doc.setTextColor(...PDF_GRIGIO);
 		doc.text(currentCentro?.nome || "", R, 27, { align: "right" });
+		if (typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, 119, 13);
 		doc.setDrawColor(...PDF_ORO);
 		doc.setLineWidth(.5);
 		doc.line(L, 38, R, 38);
@@ -15428,6 +15633,7 @@ async function asdRicevuta(pagamentoId, btn){
   }
   if(!window.jspdf){ showToast("Generatore PDF non disponibile, riprova."); return; }
   const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a5", orientation: "landscape" });
+  if(typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, 198, 8);   // logo del centro (configurazione, SQL 59)
   let y = 16;
   doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(r.asd?.nome || "ASD", 12, y);
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100);
@@ -15671,6 +15877,7 @@ function stReportPdf(){
     doc.splitTextToSize(String(t), W).forEach(l => { if(y > 280){ doc.addPage(); y = 18; } doc.text(l, L, y); y += (size || 10.5) * 0.48; }); y += 1.5; };
   const mesi = s.incassi_mesi || [], cur = mesi[mesi.length - 1] || {};
   doc.setFillColor(31, 61, 43); doc.rect(0, 0, 210, 12, "F"); doc.setTextColor(243, 230, 192); doc.setFontSize(9); doc.text("EQUO SCUDERIA · REPORT DEL CENTRO", L, 8);
+  if(typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, 194, 16);   // logo del centro (SQL 59)
   y = 24; riga(currentCentro?.nome || "Centro", 18, true); riga(new Date().toLocaleDateString("it-IT", { month:"long", year:"numeric" }) + " · generato da Merlino", 10, false, [110, 110, 110]); y += 3;
   if(s.salute) riga(`Indice di salute: ${s.salute.indice}/100  (incassi ${s.salute.componenti.incassi}, occupazione ${s.salute.componenti.occupazione}, fedeltà ${s.salute.componenti.fedelta}, sanitario ${s.salute.componenti.sanitario}, magazzino ${s.salute.componenti.magazzino})`, 11.5, true);
   riga(`Incassi del mese: ${euro(cur.incasso)} · ultimi 12 mesi: ${euro(mesi.reduce((t, m) => t + Number(m.incasso || 0), 0))}`, 11);
@@ -17096,6 +17303,1004 @@ async function athenaEsegui(a){
     }
   }
   return { ok: false, testo: "Azione non riconosciuta." };
+}
+/* =====================================================================
+   CONFIGURAZIONE GUIDATA · I 10 PASSI E LA GUIDA FISSA DI ATHENA (modalità A, 10/11/2026)
+   Testi scritti: nessuna chiamata all'AI, costo zero. Ogni passo: titolo, se è facoltativo o può essere
+   «non applicabile», le frasi di Athena, il modulo del gestionale dove si fa oggi e come riconoscere i dati già presenti.
+   Blocco B1: i passi mostrano i dati che la scuderia ha già e portano al modulo vero; i moduli dentro la
+   finestra arrivano con il blocco B2.
+   ===================================================================== */
+const CONF_PASSI = [
+  { n: 1, titolo: "Il tuo maniscalco", breve: "Codice del maniscalco", facoltativo: true,
+    guida: ["Il tuo maniscalco usa già Equo? Chiedigli il suo codice (o il QR): collego la scuderia e ti propongo i cavalli che segue già.",
+            "Nessun codice? Nessun problema: puoi saltare e collegarlo quando vuoi da Professionisti. Il veterinario arriverà prossimamente."],
+    modulo: "professionisti", moduloNome: "Professionisti",
+    cosa: "Collegare il maniscalco che usa Equo: chat, appuntamenti e cavalli già pronti, senza doppioni. Veterinario: prossimamente." },
+  { n: 2, titolo: "Dati della struttura", breve: "Dati della struttura",
+    guida: ["Partiamo dalla tua scuderia: nome, indirizzo e telefono. Li uso nelle ricevute, nei PDF e nel meteo della Home.",
+            "Email, forma giuridica e logo sono facoltativi: se non li hai sotto mano, li aggiungi dopo."],
+    modulo: "centro", moduloNome: "Il tuo Centro",
+    cosa: "Nome, indirizzo, città, telefono. Facoltativi: email, forma giuridica, logo." },
+  { n: 3, titolo: "ASD e amministrazione", breve: "ASD", facoltativo: true, nonApplicabile: true,
+    guida: ["Sei un'associazione sportiva dilettantistica? Qui metti denominazione, codice fiscale, sede e numero RASD.",
+            "Se la tua struttura non è un'ASD tocca «Non applicabile»: non ti chiederò più nulla."],
+    modulo: "centro", moduloNome: "Il tuo Centro",
+    cosa: "Denominazione, codice fiscale, sede, RASD, affiliazioni, quota annuale e referente." },
+  { n: 4, titolo: "Collaboratori", breve: "Collaboratori", facoltativo: true,
+    guida: ["Chi lavora con te? Istruttori, segreteria, groom: ognuno entra con il codice del centro e tu decidi il livello.",
+            "Puoi farlo anche più tardi: il codice è sempre in Il tuo Centro."],
+    modulo: "centro", moduloNome: "Il tuo Centro",
+    cosa: "Il primo membro dello staff, il ruolo e il livello di accesso. Si invita con il codice del centro." },
+  { n: 5, titolo: "Box e paddock", breve: "Box e paddock", facoltativo: true,
+    guida: ["Ora box e paddock! Dimmi quanti ne hai: li creo con la numerazione che vuoi.",
+            "I paddock hanno una capienza: se ci metti più cavalli te lo segnalo, ma non ti blocco."],
+    modulo: "cavalli", moduloNome: "Cavalli › Box",
+    cosa: "I box con il loro numero e i paddock con la capienza. Il limite del pacchetto vale per box e paddock insieme." },
+  { n: 6, titolo: "Il primo cavallo", breve: "Primo cavallo",
+    guida: ["Il primo cavallo! Se ha già un codice Equo o il microchip lo cerco prima: se esiste lo colleghiamo, niente doppioni.",
+            "Se scrivi il nome del proprietario e non è tra i clienti, preparo la sua scheda da completare."],
+    modulo: "cavalli", moduloNome: "Cavalli",
+    cosa: "Nome, categoria, razza, sesso, nascita, microchip e proprietario." },
+  { n: 7, titolo: "Il primo proprietario", breve: "Primo proprietario", facoltativo: true,
+    guida: ["Chi è il proprietario? Prima di creare la scheda controllo che non ci sia già tra i tuoi clienti.",
+            "Se usa l'app Equo, con il suo codice vedrete lo stesso libretto del cavallo."],
+    modulo: "clienti", moduloNome: "Clienti",
+    cosa: "La scheda del proprietario, collegata al suo cavallo. Nessun doppione." },
+  { n: 8, titolo: "La prima lezione", breve: "Prima lezione", facoltativo: true, nonApplicabile: true,
+    guida: ["Fai lezioni? Fissiamo la prima: data, ora, allievo, cavallo e istruttore.",
+            "Se la tua struttura non fa lezioni tocca «Non applicabile». Non creo mai lezioni di prova."],
+    modulo: "lezioni", moduloNome: "Lezioni",
+    cosa: "Una lezione vera nel calendario, con allievo, cavallo e istruttore." },
+  { n: 9, titolo: "Il primo incasso", breve: "Primo incasso", facoltativo: true,
+    guida: ["Hai ricevuto un pagamento? Registralo con causale, cliente, importo, data e metodo.",
+            "Solo incassi veri: nessun importo di esempio. Se non ne hai ancora, salta e lo farai al primo pagamento."],
+    modulo: "incassi", moduloNome: "Incassi",
+    cosa: "Un incasso reale: causale, cliente, importo, data, metodo e stato." },
+  { n: 10, titolo: "Riepilogo", breve: "Riepilogo",
+    guida: ["Ecco cosa abbiamo fatto insieme. I passi saltati li ritrovi qui e nella Home finché non li completi.",
+            "Quando vuoi, tocca «Concludi»: la configurazione non si riaprirà più da sola."],
+    modulo: null, moduloNome: null,
+    cosa: "Cosa è stato creato o collegato, i passi saltati e quelli non applicabili." },
+];
+const CONF_STATI = { fatto: "Fatto", saltato: "Saltato", non_applicabile: "Non applicabile", in_corso: "In corso" };
+/* =====================================================================
+   CONFIGURAZIONE GUIDATA DELLA SCUDERIA · motore della finestra (blocco B1, 10/11/2026 · SQL 58)
+   - Benvenuto al primo accesso («Inizia ora» / «Più tardi»), poi card «Riprendi configurazione» in Home.
+   - Finestra a 10 passi: avanti, indietro, salta, non applicabile; lo stato si salva nel database
+     (configurazione_salva) e si riprende da qualsiasi dispositivo; due amministratori insieme non si
+     sovrascrivono (rev). Lo stato del salvataggio mostrato è quello reale.
+   - Athena (civetta cartoon) in basso a sinistra con i fumetti accanto: guida fissa (071). La chat e la
+     compilazione da una frase arrivano con il blocco B3; i moduli dentro i passi con il blocco B2.
+   - La vedono solo amministratore e livelli 2-3. Finché CONF_RILASCIATA è false si attiva solo per prova:
+     indirizzo con «?configura» oppure localStorage equo_conf_prova = "1".
+   ===================================================================== */
+const CONF_RILASCIATA = false;
+let confStato = null;          // risposta di configurazione_leggi
+let confPassoVisto = 1;        // passo mostrato nella finestra
+let confDati = null;           // dati già presenti nei moduli
+let confOccupato = false;      // salvataggio in corso (niente doppio clic)
+let confUltimoEsito = null;    // testo dell'ultimo salvataggio riuscito, mostrato da Athena
+
+function confAbilitata(){
+  if(CONF_RILASCIATA) return true;
+  try{ if(/[?&]configura\b/.test(location.search)) localStorage.setItem("equo_conf_prova", "1"); }catch(e){}
+  try{ return localStorage.getItem("equo_conf_prova") === "1"; }catch(e){ return false; }
+}
+function confPuo(){ return typeof puoCollegareProfessionisti === "function" && puoCollegareProfessionisti(); }
+
+// ---------- stato nel database ----------
+async function confCarica(){
+  if(!currentCentro || !confPuo()){ confStato = null; return null; }
+  if(DEMO_MODE){
+    demoState.conf = demoState.conf || { ok: true, puo: true, versione_passi: 1, passo_corrente: 1, passi: {}, stato: "nuova", proposta_vista: false, ai_bonus_usati: 0, rev: 0 };
+    confStato = demoState.conf; return confStato;
+  }
+  const { data, error } = await sb.rpc("configurazione_leggi", { p_centro: currentCentro.id });
+  if(error){ console.warn("configurazione_leggi:", error.message); confStato = null; return null; }
+  confStato = data && data.ok ? data : null;
+  return confStato;
+}
+// salva: passo + stato del passo, oppure un'azione (proposta_vista, rimanda, completa)
+async function confSalva(passo, statoPasso, azione){
+  if(!confStato) return false;
+  confOccupato = true; confBottoni();
+  confMostraSalvato("Salvataggio…", "");
+  if(DEMO_MODE){
+    const s = demoState.conf;
+    if(passo){ s.passo_corrente = passo; if(statoPasso) s.passi = { ...s.passi, [passo]: statoPasso }; if(["nuova", "rimandata"].includes(s.stato)) s.stato = "in_corso"; s.proposta_vista = true; }
+    if(azione === "proposta_vista") s.proposta_vista = true;
+    if(azione === "rimanda"){ s.proposta_vista = true; if(s.stato !== "completata") s.stato = "rimandata"; }
+    if(azione === "completa"){ s.stato = "completata"; s.completata_il = new Date().toISOString(); }
+    s.rev++; s.aggiornato_da_me = true; s.ultima_attivita = new Date().toISOString();
+    confStato = s; confOccupato = false; confBottoni();
+    confMostraSalvato("Salvato alle " + confOra(), "ok");
+    return true;
+  }
+  let esito;
+  try{
+    const { data, error } = await sb.rpc("configurazione_salva", { p_centro: currentCentro.id, p_passo: passo || null, p_passo_stato: statoPasso || null,
+      p_passi: null, p_azione: azione || null, p_rev: confStato.rev });
+    if(error) throw error;
+    esito = data;
+  }catch(e){
+    confOccupato = false; confBottoni();
+    confMostraSalvato("Non salvato: controlla la connessione e riprova", "err");
+    return false;
+  }
+  confOccupato = false;
+  if(esito && esito.conflitto){
+    confStato = esito.conf || confStato;
+    confBottoni();
+    showToast((confStato.aggiornato_da_nome || "Un altro membro") + " ha appena aggiornato la configurazione: ti mostro la versione più recente.");
+    confMostraSalvato("Aggiornato da " + (confStato.aggiornato_da_nome || "un altro membro"), "");
+    if(document.getElementById("modal-configurazione")?.classList.contains("active")){ confPassoVisto = confStato.passo_corrente || confPassoVisto; confRender(); }
+    return false;
+  }
+  if(!esito || !esito.ok){
+    confBottoni();
+    confMostraSalvato((esito && esito.errore) || "Non salvato: riprova", "err");
+    return false;
+  }
+  confStato = esito.conf || confStato;
+  confBottoni();
+  confMostraSalvato("Salvato alle " + confOra(), "ok");
+  return true;
+}
+function confOra(){ return new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }); }
+function confMostraSalvato(testo, tipo){
+  const el = document.getElementById("conf-salvato"); if(!el) return;
+  el.className = "conf-salvato" + (tipo ? " " + tipo : "");
+  el.innerHTML = tipo === "ok" ? `<i class="fa-solid fa-check"></i> ${escapeHtml(testo)}` : escapeHtml(testo);
+}
+
+// ---------- dati già presenti nei moduli (per le scuderie già attive) ----------
+async function confLeggiDati(){
+  const d = { box: 0, paddock: 0, cavalli: 0, staff: 0, proprietari: 0, lezioni: 0, incassi: 0, maniscalchi: 0, centro: {} };
+  if(DEMO_MODE){
+    d.box = (demoState.box || []).length; d.paddock = (demoState.paddock || []).length; d.cavalli = (demoState.cavalli || []).length;
+    d.staff = (typeof teamList !== "undefined" ? teamList : []).filter(m => !["allievo", "proprietario"].includes(m.ruolo)).length;
+    d.proprietari = (typeof teamList !== "undefined" ? teamList : []).filter(m => m.ruolo === "proprietario").length;
+    d.lezioni = (demoState.lezioni || []).length; d.incassi = (demoState.pagamenti || demoState.incassi || []).length;
+    d.maniscalchi = (typeof professionistiList !== "undefined" ? professionistiList : []).filter(p => p.stato === "attivo").length || 1;
+    d.centro = { ...currentCentro };
+    confDati = d; return d;
+  }
+  const c = currentCentro.id;
+  const conta = async (q) => { try{ const { count } = await q; return count || 0; }catch(e){ return 0; } };
+  const testa = { count: "exact", head: true };
+  const [box, pad, cav, staff, prop, lez, inc, man, cen] = await Promise.all([
+    conta(sb.from("scuderia_box").select("id", testa).eq("centro_id", c)),
+    conta(sb.from("scuderia_paddock").select("id", testa).eq("centro_id", c)),
+    conta(sb.from("scuderia_cavalli").select("id", testa).eq("centro_id", c).is("uscito_il", null)),
+    conta(sb.from("scuderia_membri").select("id", testa).eq("centro_id", c).not("ruolo", "in", "(allievo,proprietario)")),
+    conta(sb.from("scuderia_membri").select("id", testa).eq("centro_id", c).eq("ruolo", "proprietario")),
+    conta(sb.from("scuderia_lezioni").select("id", testa).eq("centro_id", c)),
+    conta(sb.from("scuderia_pagamenti").select("id", testa).eq("centro_id", c)),
+    conta(sb.from("clienti_mascalcia").select("id", testa).eq("centro_id", c).eq("collegamento_stato", "attivo")),
+    sb.from("centri").select("nome, indirizzo, telefono, citta, provincia, join_code, asd_attiva, asd_nome, asd_cf, asd_sede, asd_rasd, asd_affiliazioni, asd_quota_annuale, asd_mese_inizio, lezioni_addebito, cassa_lezioni").eq("id", c).maybeSingle().then(r => r.data || {}, () => ({})),
+  ]);
+  try{ const { data: ex } = await sb.from("centri").select("email, forma_giuridica, logo_url").eq("id", c).maybeSingle(); if(ex) Object.assign(cen, ex); }catch(e){}
+  Object.assign(d, { box, paddock: pad, cavalli: cav, staff, proprietari: prop, lezioni: lez, incassi: inc, maniscalchi: man, centro: cen });
+  confDati = d; return d;
+}
+// un passo è già soddisfatto dai dati che la scuderia ha? (lo si mostra «Già fatto: controlla», niente si segna da solo)
+function confGiaFatto(n, d){
+  if(!d) return false;
+  const c = d.centro || {};
+  switch(n){
+    case 1: return d.maniscalchi > 0;
+    case 2: return !!(c.nome && c.indirizzo && c.telefono);
+    case 3: return !!(c.asd_attiva && c.asd_nome);
+    case 4: return d.staff > 1;
+    case 5: return d.box + d.paddock > 0;
+    case 6: return d.cavalli > 0;
+    case 7: return d.proprietari > 0;
+    case 8: return d.lezioni > 0;
+    case 9: return d.incassi > 0;
+  }
+  return false;
+}
+function confRiepilogoDati(n, d){
+  if(!d) return [];
+  const c = d.centro || {}, si = (v, t, vuoto) => ({ ok: !!v, testo: v ? t : vuoto });
+  const num = (k, uno, tanti, nessuno) => si(d[k] > 0, d[k] === 1 ? "1 " + uno : d[k] + " " + tanti, nessuno);
+  switch(n){
+    case 1: return [num("maniscalchi", "maniscalco collegato", "maniscalchi collegati", "Nessun maniscalco collegato")];
+    case 2: return [si(c.nome, "Nome: " + (c.nome || ""), "Manca il nome"), si(c.indirizzo, "Indirizzo: " + (c.indirizzo || "") + (c.citta ? ", " + c.citta : ""), "Manca l'indirizzo"), si(c.telefono, "Telefono: " + (c.telefono || ""), "Manca il telefono")];
+    case 3: return [si(c.asd_attiva, "ASD attiva" + (c.asd_nome ? ": " + c.asd_nome : ""), "ASD non attiva"), si(c.asd_cf, "Codice fiscale: " + (c.asd_cf || ""), "Codice fiscale ASD non inserito")];
+    case 4: return [si(d.staff > 1, d.staff + " persone nello staff", "Per ora nello staff ci sei solo tu")];
+    case 5: return [num("box", "box", "box", "Nessun box"), num("paddock", "paddock", "paddock", "Nessun paddock")];
+    case 6: return [num("cavalli", "cavallo", "cavalli", "Nessun cavallo")];
+    case 7: return [num("proprietari", "proprietario tra i clienti", "proprietari tra i clienti", "Nessun proprietario tra i clienti")];
+    case 8: return [num("lezioni", "lezione nel calendario", "lezioni nel calendario", "Nessuna lezione")];
+    case 9: return [num("incassi", "incasso registrato", "incassi registrati", "Nessun incasso registrato")];
+  }
+  return [];
+}
+
+// ---------- benvenuto e card in Home ----------
+async function confControllaAllAvvio(){
+  if(!confAbilitata() || !confPuo()) return;
+  await confCarica();
+  confRenderCard();
+  if(confStato && confStato.stato === "nuova" && !confStato.proposta_vista) confApriBenvenuto();
+}
+function confApriBenvenuto(){
+  const ol = document.getElementById("conf-ben-passi");
+  if(ol) ol.innerHTML = CONF_PASSI.map(p => `<li>${p.n} · ${escapeHtml(p.breve)}</li>`).join("");
+  openModal("modal-conf-benvenuto");
+  setTimeout(() => document.querySelector("#modal-conf-benvenuto .btn-primary")?.focus(), 50);
+}
+async function confPiuTardi(){
+  closeModal("modal-conf-benvenuto");
+  await confSalva(null, null, "rimanda");
+  confRenderCard();
+  showToast("Va bene! Riprendi quando vuoi dalla Home.");
+}
+async function confInizia(){
+  closeModal("modal-conf-benvenuto");
+  await confSalva(null, null, "proposta_vista");
+  confApri();
+}
+function confRenderCard(){
+  const box = document.getElementById("scud-configurazione"); if(!box) return;
+  if(!confAbilitata() || !confStato || confStato.stato === "completata" || (!confStato.proposta_vista && confStato.stato === "nuova")){ box.innerHTML = ""; return; }
+  const fatti = Object.values(confStato.passi || {}).filter(s => s !== "in_corso").length;
+  const chi = confStato.aggiornato_da_nome && !confStato.aggiornato_da_me ? ` · ultima modifica di ${escapeHtml(confStato.aggiornato_da_nome)}` : "";
+  box.innerHTML = `<div class="conf-card">
+    <img src="assets/agenti/athena-cartoon.webp" alt="">
+    <div><b>Riprendi la configurazione</b><span>Passo ${confStato.passo_corrente} di 10 · ${fatti} ${fatti === 1 ? "passo completato" : "passi completati"}${chi}</span></div>
+    <button type="button" class="btn btn-primary" onclick="confApri()">Riprendi</button></div>`;
+}
+
+// ---------- la finestra ----------
+async function confApri(passo){
+  if(!confStato) await confCarica();
+  if(!confStato){ showToast("Non riesco a caricare la configurazione: riprova tra poco."); return; }
+  confPassoVisto = passo || confStato.passo_corrente || 1;
+  document.getElementById("conf-modal")?.classList.remove("athena-aperta");
+  openModal("modal-configurazione");
+  confMostraSalvato(confStato.ultima_attivita ? "Ripreso dal passo " + confPassoVisto : "", "");
+  confRender();
+  (async () => {
+    try{
+      if(typeof loadTeam === "function" && !(typeof teamList !== "undefined" && teamList.length)) await loadTeam();
+      if(typeof loadCavalli === "function" && !(typeof cavalliList !== "undefined" && cavalliList.length)) await loadCavalli();
+    }catch(e){}
+    await confLeggiDati();
+    if(document.getElementById("modal-configurazione")?.classList.contains("active")) confRender(true);
+  })();
+}
+async function confChiudi(){
+  closeModal("modal-configurazione");
+  confRenderCard();
+}
+function confRender(soloCorpo){
+  const p = CONF_PASSI.find(x => x.n === confPassoVisto) || CONF_PASSI[0];
+  const passi = confStato?.passi || {};
+  document.getElementById("conf-sopra").textContent = p.n === 10 ? "Configura la tua scuderia · ultimo passo" : `Configura la tua scuderia · passo ${p.n} di 10`;
+  document.getElementById("conf-titolo").textContent = p.titolo;
+  const chiusi = CONF_PASSI.filter(x => ["fatto", "saltato", "non_applicabile"].includes(passi[x.n])).length;
+  document.getElementById("conf-barra-dentro").style.width = Math.round(chiusi / 10 * 100) + "%";
+  document.getElementById("conf-barra").setAttribute("aria-valuenow", String(chiusi));
+  document.getElementById("conf-pallini").innerHTML = CONF_PASSI.map(x => {
+    const st = passi[x.n] || "";
+    return `<button type="button" class="conf-pallino ${st}${x.n === p.n ? " attivo" : ""}" onclick="confVaiA(${x.n})" aria-label="Passo ${x.n}: ${escapeHtml(x.breve)}${st ? ", " + (CONF_STATI[st] || st).toLowerCase() : ""}"${x.n === p.n ? ' aria-current="step"' : ""}>${st === "fatto" ? '<i class="fa-solid fa-check"></i>' : x.n}</button>`;
+  }).join("");
+  document.getElementById("conf-passo").innerHTML = p.n === 10 ? confCorpoRiepilogo() : confCorpoPasso(p);
+  confBottoni();
+  if(!soloCorpo){ confFumetti(p); document.getElementById("conf-passo").focus({ preventScroll: true }); }
+}
+function confCorpoPasso(p){
+  const d = confDati, gia = confGiaFatto(p.n, d), st = confStato?.passi?.[p.n];
+  const righe = confRiepilogoDati(p.n, d);
+  return `${gia ? `<div class="conf-gia"><i class="fa-solid fa-circle-check"></i> Già fatto: controlla e vai avanti.</div>` : ""}
+    ${st && st !== "in_corso" ? `<p style="color:var(--muted)">Stato: <b>${escapeHtml(CONF_STATI[st] || st)}</b></p>` : ""}
+    <p>${escapeHtml(p.cosa)}${p.facoltativo ? ' <span style="color:var(--muted)">(facoltativo)</span>' : ""}</p>
+    <div class="conf-riquadro conf-gia-presente"><h3>Cosa c'è già nel gestionale</h3>
+      ${d ? righe.map(r => `<div class="conf-esiste${r.ok ? "" : " vuoto"}"><i class="fa-solid ${r.ok ? "fa-circle-check" : "fa-circle"}"></i> ${escapeHtml(r.testo)}</div>`).join("")
+          : '<div class="conf-esiste vuoto"><i class="fa-solid fa-spinner fa-spin"></i> Controllo i tuoi dati…</div>'}
+    </div>
+    ${d && typeof CONF_FORM !== "undefined" && CONF_FORM[p.n] ? CONF_FORM[p.n].html() : ""}
+    ${p.modulo ? `<p class="conf-nota">Preferisci il modulo completo? <button type="button" class="btn btn-ghost btn-sm" onclick="confApriModulo(${p.n})">Apri ${escapeHtml(p.moduloNome)}</button> (la configurazione resta salvata).</p>` : ""}`;
+}
+function confCorpoRiepilogo(){
+  const passi = confStato?.passi || {};
+  const righe = CONF_PASSI.filter(p => p.n < 10).map(p => {
+    const st = passi[p.n] || (confGiaFatto(p.n, confDati) ? "gia" : "");
+    const etichetta = st === "gia" ? "Già presente" : st ? (CONF_STATI[st] || st) : "Da fare";
+    const icona = st === "fatto" || st === "gia" ? "fa-circle-check" : st === "non_applicabile" ? "fa-ban" : st === "saltato" ? "fa-forward" : "fa-circle";
+    return `<div class="conf-esiste${st === "fatto" || st === "gia" ? "" : " vuoto"}"><i class="fa-solid ${icona}"></i>
+      <span style="flex:1">${p.n} · ${escapeHtml(p.breve)} <span style="color:var(--muted)">· ${escapeHtml(etichetta)}</span></span>
+      ${st !== "fatto" && st !== "gia" && st !== "non_applicabile" ? `<button type="button" class="btn btn-ghost btn-sm" onclick="confVaiA(${p.n})">Vai</button>` : ""}</div>`;
+  }).join("");
+  return `<p>Ecco a che punto è la tua scuderia. I passi saltati restano qui e nella card della Home finché non li completi.</p>
+    <div class="conf-riquadro"><h3>I passi</h3>${righe}</div>
+    <p style="color:var(--muted);font-size:13px">Configurazione completata non vuol dire profilo completo: i dati che mancano restano segnati nei moduli.</p>`;
+}
+function confBottoni(){
+  const p = CONF_PASSI.find(x => x.n === confPassoVisto) || CONF_PASSI[0];
+  const set = (id, vis, dis) => { const b = document.getElementById(id); if(!b) return; b.style.display = vis ? "" : "none"; b.disabled = !!dis; };
+  set("conf-indietro", true, confOccupato || p.n === 1);
+  set("conf-salta", !!p.facoltativo && p.n < 10, confOccupato);
+  set("conf-na", !!p.nonApplicabile, confOccupato);
+  set("conf-avanti", true, confOccupato);
+  const av = document.getElementById("conf-avanti"); if(av) av.textContent = p.n === 10 ? "Concludi" : "Salva e continua";
+}
+function confFumetti(p){
+  const box = document.getElementById("conf-fumetti"); if(!box) return;
+  box.innerHTML = "";
+  // l'esito del passo appena salvato resta visibile come primo fumetto del passo nuovo
+  const esito = confUltimoEsito; confUltimoEsito = null;
+  if(esito) confAggiungiFumetto("✓ " + esito, false);
+  p.guida.forEach((t, i) => setTimeout(() => {
+    if(confPassoVisto !== p.n) return;
+    confAggiungiFumetto(t, false);
+  }, (esito ? 900 : 0) + i * 650));
+  if(typeof confInputAthena === "function") confInputAthena();   // B3: chat del passo e compilazione da una frase
+}
+function confAggiungiFumetto(testo, mio){
+  const box = document.getElementById("conf-fumetti"); if(!box) return;
+  const d = document.createElement("div");
+  d.className = "conf-fumetto nuovo" + (mio ? " mio" : "");
+  d.innerHTML = escapeHtml(testo) + '<svg class="conf-coda" viewBox="0 0 20 18" aria-hidden="true"><path d="M18 2 L2 12 L18 15"/></svg>';
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  return d;
+}
+function confAthena(apri){
+  document.getElementById("conf-modal")?.classList.toggle("athena-aperta", !!apri);
+  if(apri) setTimeout(() => document.querySelector("#conf-modal .conf-athena-chiudi")?.focus(), 300);
+}
+
+// ---------- navigazione ----------
+async function confAvanti(){
+  if(confOccupato) return;
+  const n = confPassoVisto;
+  if(n === 10){
+    const ok = await confSalva(10, "fatto", "completa");
+    if(!ok) return;
+    closeModal("modal-configurazione");
+    confRenderCard();
+    showToast("Configurazione completata! Trovi tutto nei moduli del gestionale.");
+    return;
+  }
+  const p = CONF_PASSI.find(x => x.n === n);
+  const f = typeof CONF_FORM !== "undefined" ? CONF_FORM[n] : null;
+  let st;
+  if(f && f.salva && confDati && !f.vuoto()){
+    // B2: il passo scrive nel modulo vero; se non riesce si resta qui con l'errore
+    confOccupato = true; confBottoni(); confMostraSalvato("Salvataggio…", "");
+    let r;
+    try{ r = await f.salva(); }catch(e){ r = { ok: false, errore: e?.message || "Non riuscito, riprova." }; }
+    confOccupato = false; confBottoni();
+    if(!r || !r.ok){ confMostraSalvato((r && r.errore) || "Non riuscito, riprova.", "err"); confAggiungiFumetto((r && r.errore) || "Qualcosa non è andato: riprova.", false); return; }
+    confUltimoEsito = r.testo || "Fatto!";
+    st = "fatto";
+    await confLeggiDati();
+  } else {
+    // niente di nuovo da salvare: fatto se i dati ci sono già, altrimenti saltato (facoltativo) o da completare
+    st = confGiaFatto(n, confDati) ? "fatto" : (p.facoltativo ? "saltato" : "in_corso");
+  }
+  if(!(await confSalva(n, st, null))) return;
+  if(!(await confSalva(n + 1, null, null))) return;
+  confPassoVisto = n + 1;
+  confRender();
+}
+async function confVai(delta){
+  if(confOccupato) return;
+  const prossimo = Math.max(1, Math.min(10, confPassoVisto + delta));
+  if(prossimo === confPassoVisto) return;
+  if(!(await confSalva(prossimo, null, null))) return;
+  confPassoVisto = prossimo;
+  confRender();
+}
+async function confVaiA(n){
+  if(confOccupato || n === confPassoVisto) return;
+  if(!(await confSalva(n, null, null))) return;
+  confPassoVisto = n;
+  confRender();
+}
+async function confSalta(){
+  if(confOccupato) return;
+  const n = confPassoVisto;
+  if(!(await confSalva(n, "saltato", null))) return;
+  if(!(await confSalva(Math.min(10, n + 1), null, null))) return;
+  confPassoVisto = Math.min(10, n + 1);
+  confRender();
+}
+async function confNonApplicabile(){
+  if(confOccupato) return;
+  const n = confPassoVisto;
+  if(!(await confSalva(n, "non_applicabile", null))) return;
+  if(!(await confSalva(Math.min(10, n + 1), null, null))) return;
+  confPassoVisto = Math.min(10, n + 1);
+  confRender();
+}
+async function confApriModulo(n){
+  const p = CONF_PASSI.find(x => x.n === n); if(!p || !p.modulo) return;
+  if(!confStato.passi?.[n]) await confSalva(n, "in_corso", null);
+  closeModal("modal-configurazione");
+  confRenderCard();
+  if(typeof showModule === "function") showModule(p.modulo);
+}
+
+// Esc chiude la finestra (lo stato è già salvato)
+document.addEventListener("keydown", (e) => {
+  if(e.key !== "Escape") return;
+  if(document.getElementById("modal-configurazione")?.classList.contains("active")){ e.preventDefault(); confChiudi(); }
+});
+
+// avvio: dopo l'ingresso nel gestionale; la card si ridisegna con la Home
+(function(){
+  try{
+    const ingressoOrig = enterAppShell;
+    enterAppShell = function(){ const r = ingressoOrig.apply(this, arguments); setTimeout(() => { confControllaAllAvvio().catch(e => console.warn("configurazione:", e)); }, 800); return r; };
+  }catch(e){ console.warn("configurazione (avvio):", e); }
+  try{
+    const homeOrig = refreshHomeModule;
+    refreshHomeModule = async function(){ const r = await homeOrig.apply(this, arguments); try{ confRenderCard(); }catch(e){} return r; };
+  }catch(e){ console.warn("configurazione (home):", e); }
+})();
+/* =====================================================================
+   CONFIGURAZIONE GUIDATA · I MODULI DENTRO I PASSI (blocco B2, 10/11/2026 · SQL 59)
+   Ogni passo scrive con le stesse funzioni dei moduli del gestionale (nessun archivio parallelo):
+     1 maniscalco  → scuderia_usa_codice_invito / scuderia_aggiungi_maniscalco (SQL 51-53: niente scuderie doppie)
+     2 anagrafica  → centri (+ email, forma giuridica, logo: SQL 59; logo nel bucket cavalli-foto del centro)
+     3 ASD         → incassi_impostazioni + asd_salva_dati
+     4 staff       → codice del centro da condividere (nessun invio automatico)
+     5 box/paddock → scuderia_box (solo i numeri che mancano) e scuderia_paddock
+     6 cavallo     → prima equo_cerca_cavallo_conf (microchip/codice), poi scuderia_cavalli solo se assente
+     7 proprietario→ salva_cliente + collegamento al cavallo (niente doppioni per nome)
+     8 lezione     → scuderia_lezioni (solo lezioni vere) · 9 incasso → incassi_registra_pagamento (solo incassi veri)
+   Ogni modulo ha: html() da mostrare, vuoto() se l'utente non ha scritto nulla, salva() → { ok, testo | errore }.
+   ===================================================================== */
+const confV = id => (document.getElementById(id)?.value || "").trim();
+const confNorma = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const confOggi = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+const confCampo = (id, etichetta, attr, facolt) => `<label class="conf-campo" for="${id}">${etichetta}${facolt ? ' <span class="conf-facolt">facoltativo</span>' : ""}<input class="input" id="${id}" ${attr || ""}></label>`;
+const confEsc = s => escapeHtml(s == null ? "" : String(s));
+const confClienti = () => (typeof teamList !== "undefined" ? teamList : []).filter(m => ["allievo", "proprietario"].includes(m.ruolo) && !m.provvisorio_nascosto);
+const confStaff = () => (typeof teamList !== "undefined" ? teamList : []).filter(m => !["allievo", "proprietario"].includes(m.ruolo));
+const confNomeMembro = m => m.nome_visualizzato || m.nome || "—";
+const confCavalli = () => (typeof cavalliList !== "undefined" ? cavalliList : []).filter(c => !c.uscito_il);
+let confCavalloRicerca = null;   // esito dell'ultima ricerca del passo 6
+let confLogoFile = null;
+
+const CONF_FORM = {
+  // ---------- 1 · maniscalco ----------
+  1: {
+    html: () => `<div class="conf-riquadro"><h3>Codice del maniscalco <span class="conf-facolt">facoltativo</span></h3>
+      <p>Scrivi il codice che ti ha dato (o incolla il link dell'invito). Se la scuderia è già nella sua rubrica la colleghiamo a quella, senza doppioni.</p>
+      ${confCampo("conf-codice-pro", "Codice o link", 'autocomplete="off" placeholder="es. EQUOPRO1A2B3C" style="text-transform:uppercase"')}
+      <p class="conf-nota">Veterinario: prossimamente.</p></div>`,
+    vuoto: () => !confV("conf-codice-pro"),
+    salva: async () => {
+      const codice = typeof codiceDaTestoScud === "function" ? codiceDaTestoScud(confV("conf-codice-pro")) : confV("conf-codice-pro").toUpperCase();
+      if(DEMO_MODE) return { ok: true, testo: "Maniscalco collegato (demo: non salvato)." };
+      if(/^EQUO(PRO|TRA|MED|OWN)/.test(codice)){
+        const { data, error } = await sb.rpc("scuderia_aggiungi_maniscalco", { p_centro_id: currentCentro.id, p_codice: codice, p_cavalli: null });
+        if(error || !data?.ok) return { ok: false, errore: data?.errore || "Non è stato possibile inviare l'invito. Riprova." };
+        return { ok: true, testo: data.gia ? `${data.nome} è già collegato o c'è già una richiesta in corso.` : `Invito inviato a ${data.nome}: appena accetta i suoi cavalli ti arrivano da confermare.` };
+      }
+      if(typeof usaCodiceInvitoScud !== "function") return { ok: false, errore: "Funzione non disponibile: riprova da Professionisti." };
+      const r = await usaCodiceInvitoScud(codice);
+      return r.ok ? { ok: true, testo: r.testo } : { ok: false, errore: r.errore };
+    },
+  },
+  // ---------- 2 · anagrafica ----------
+  2: {
+    html: () => {
+      const c = confDati?.centro || currentCentro || {};
+      const forme = { "": "—", asd: "ASD", ssd: "SSD", ditta_individuale: "Ditta individuale", societa_agricola: "Società agricola", snc: "S.n.c.", sas: "S.a.s.", srl: "S.r.l.", srls: "S.r.l.s.", spa: "S.p.A.", associazione: "Associazione", altro: "Altro" };
+      return `<div class="conf-riquadro"><h3>Dati della struttura</h3>
+        <div class="conf-griglia">
+          ${confCampo("conf-c-nome", "Nome *", `value="${confEsc(c.nome)}" maxlength="80"`)}
+          ${confCampo("conf-c-telefono", "Telefono", `value="${confEsc(c.telefono)}" inputmode="tel"`)}
+          ${confCampo("conf-c-indirizzo", "Indirizzo", `value="${confEsc(c.indirizzo)}"`)}
+          ${confCampo("conf-c-citta", "Città", `value="${confEsc(c.citta)}"`)}
+          ${confCampo("conf-c-provincia", "Provincia", `value="${confEsc(c.provincia)}" maxlength="2" style="text-transform:uppercase"`)}
+          ${confCampo("conf-c-email", "Email", `value="${confEsc(c.email)}" type="email"`, true)}
+          <label class="conf-campo" for="conf-c-forma">Forma giuridica <span class="conf-facolt">facoltativo</span>
+            <select class="input" id="conf-c-forma">${Object.entries(forme).map(([k, n]) => `<option value="${k}"${(c.forma_giuridica || "") === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+          <label class="conf-campo" for="conf-c-logo">Logo <span class="conf-facolt">facoltativo</span>
+            <input class="input" id="conf-c-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="confLogoScelto(this)"></label>
+        </div>
+        <div id="conf-logo-anteprima" class="conf-logo-ant">${c.logo_url ? `<img src="${confEsc(c.logo_url)}" alt="Logo attuale">` : ""}</div>
+        <p class="conf-nota">Il logo compare nell'intestazione del gestionale, nei PDF e nelle ricevute ASD.</p></div>`;
+    },
+    vuoto: () => {
+      const c = confDati?.centro || currentCentro || {};
+      const pari = (id, v) => confV(id) === String(v || "");
+      return !confLogoFile && pari("conf-c-nome", c.nome) && pari("conf-c-telefono", c.telefono) && pari("conf-c-indirizzo", c.indirizzo) && pari("conf-c-citta", c.citta)
+        && confV("conf-c-provincia").toUpperCase() === String(c.provincia || "").toUpperCase() && pari("conf-c-email", c.email) && confV("conf-c-forma") === String(c.forma_giuridica || "");
+    },
+    salva: async () => {
+      const p = { nome: confV("conf-c-nome"), telefono: confV("conf-c-telefono") || null, indirizzo: confV("conf-c-indirizzo") || null,
+        citta: confV("conf-c-citta") || null, provincia: confV("conf-c-provincia").toUpperCase() || null };
+      if(!p.nome) return { ok: false, errore: "Il nome della struttura è obbligatorio." };
+      const extra = { email: confV("conf-c-email") || null, forma_giuridica: confV("conf-c-forma") || null };
+      if(extra.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(extra.email)) return { ok: false, errore: "Controlla l'email." };
+      if(DEMO_MODE){ Object.assign(currentCentro, p, extra); return { ok: true, testo: "Dati salvati (demo: non salvato)." }; }
+      const r1 = await sb.from("centri").update(p).eq("id", currentCentro.id);
+      if(r1.error) return { ok: false, errore: r1.error.message || "Salvataggio non riuscito." };
+      Object.assign(currentCentro, p);
+      const r2 = await sb.from("centri").update(extra).eq("id", currentCentro.id);
+      if(r2.error) return { ok: false, errore: /column|schema cache/.test(r2.error.message || "") ? "Email e forma giuridica richiedono un aggiornamento del database (SQL 59)." : r2.error.message };
+      Object.assign(currentCentro, extra);
+      if(confLogoFile){
+        const ext = confLogoFile.type === "image/png" ? "png" : confLogoFile.type === "image/webp" ? "webp" : "jpg";
+        const path = `${currentCentro.id}/logo-${Date.now()}.${ext}`;
+        const up = await sb.storage.from("cavalli-foto").upload(path, confLogoFile, { contentType: confLogoFile.type, upsert: false });
+        if(up.error) return { ok: false, errore: "Dati salvati, ma il logo non è stato caricato: " + up.error.message };
+        const url = sb.storage.from("cavalli-foto").getPublicUrl(path).data.publicUrl;
+        const r3 = await sb.from("centri").update({ logo_url: url }).eq("id", currentCentro.id);
+        if(r3.error) return { ok: false, errore: "Dati salvati, ma il logo non è stato registrato: " + r3.error.message };
+        currentCentro.logo_url = url; confLogoFile = null; logoCentroCarica(true);
+      }
+      ["sidebar-centro-name", "home-centro-name", "centro-view-nome"].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = p.nome; });
+      try{ if(typeof renderZonaCentro === "function") renderZonaCentro(); }catch(e){}
+      return { ok: true, testo: "Dati della struttura salvati." };
+    },
+  },
+  // ---------- 3 · ASD ----------
+  3: {
+    html: () => {
+      const c = confDati?.centro || {};
+      return `<div class="conf-riquadro"><h3>Associazione sportiva</h3>
+        <label class="conf-check"><input type="checkbox" id="conf-asd-si" ${c.asd_attiva ? "checked" : ""} onchange="document.getElementById('conf-asd-campi').style.display=this.checked?'':'none'"> La struttura è (o ha) un'ASD / SSD con cassa separata</label>
+        <div id="conf-asd-campi" class="conf-griglia" style="${c.asd_attiva ? "" : "display:none"}">
+          ${confCampo("conf-asd-nome", "Denominazione *", `value="${confEsc(c.asd_nome)}"`)}
+          ${confCampo("conf-asd-cf", "Codice fiscale", `value="${confEsc(c.asd_cf)}" style="text-transform:uppercase"`)}
+          ${confCampo("conf-asd-sede", "Sede legale", `value="${confEsc(c.asd_sede)}"`, true)}
+          ${confCampo("conf-asd-rasd", "Numero RASD", `value="${confEsc(c.asd_rasd)}"`, true)}
+          ${confCampo("conf-asd-aff", "Affiliazioni (FISE, enti…)", `value="${confEsc(c.asd_affiliazioni)}"`, true)}
+          ${confCampo("conf-asd-quota", "Quota associativa annuale (€)", `value="${confEsc(c.asd_quota_annuale)}" type="number" min="0" step="1"`, true)}
+        </div></div>`;
+    },
+    vuoto: () => { const c = confDati?.centro || {}; return !!document.getElementById("conf-asd-si")?.checked === !!c.asd_attiva && (!c.asd_attiva || (confV("conf-asd-nome") === String(c.asd_nome || "") && confV("conf-asd-cf") === String(c.asd_cf || "") && confV("conf-asd-sede") === String(c.asd_sede || "") && confV("conf-asd-rasd") === String(c.asd_rasd || "") && confV("conf-asd-aff") === String(c.asd_affiliazioni || "") && confV("conf-asd-quota") === String(c.asd_quota_annuale ?? ""))); },
+    salva: async () => {
+      const si = !!document.getElementById("conf-asd-si")?.checked, c = confDati?.centro || {};
+      const nome = confV("conf-asd-nome");
+      if(si && !nome) return { ok: false, errore: "Scrivi la denominazione dell'ASD." };
+      if(DEMO_MODE){ Object.assign(c, { asd_attiva: si, asd_nome: nome }); return { ok: true, testo: "ASD salvata (demo: non salvato)." }; }
+      const r1 = await sb.rpc("incassi_impostazioni", { p_centro: currentCentro.id, p_asd_attiva: si, p_asd_nome: si ? nome : (c.asd_nome || null),
+        p_lezioni_addebito: c.lezioni_addebito || "nessuno", p_cassa_lezioni: c.cassa_lezioni || "scuderia" });
+      if(r1.error || r1.data?.ok === false) return { ok: false, errore: r1.data?.errore || r1.error?.message || "Salvataggio non riuscito." };
+      if(si){
+        const q = confV("conf-asd-quota");
+        const r2 = await sb.rpc("asd_salva_dati", { p_centro: currentCentro.id, p_cf: confV("conf-asd-cf").toUpperCase() || null, p_sede: confV("conf-asd-sede") || null,
+          p_rasd: confV("conf-asd-rasd") || null, p_affiliazioni: confV("conf-asd-aff") || null, p_quota: q === "" ? null : Number(q), p_mese: c.asd_mese_inizio || 1 });
+        if(r2.error || r2.data?.ok === false) return { ok: false, errore: r2.data?.errore || r2.error?.message || "Dati ASD non salvati." };
+      }
+      return { ok: true, testo: si ? "Dati dell'ASD salvati." : "Segnato: niente ASD." };
+    },
+  },
+  // ---------- 4 · collaboratori ----------
+  4: {
+    html: () => {
+      const codice = currentCentro?.join_code || "—";
+      const testo = `Ciao! Entra in ${currentCentro?.nome || "scuderia"} su Equo Scuderia (scuderia.equohub.com): registrati e usa il codice del centro ${codice}.`;
+      const staff = confStaff();
+      confTestoInvito = testo;
+      return `<div class="conf-riquadro"><h3>Invita lo staff <span class="conf-facolt">facoltativo</span></h3>
+        <p>Ogni collaboratore si registra e inserisce il codice del centro. Poi in Il tuo Centro scegli il suo livello.</p>
+        <div class="join-code-box">${confEsc(codice)} <button type="button" class="btn btn-outline btn-sm" onclick="confCopia(currentCentro.join_code)">Copia</button></div>
+        <div class="conf-bottoni-riga">
+          <a class="btn btn-outline" href="https://wa.me/?text=${encodeURIComponent(testo)}" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-outline" href="mailto:?subject=${encodeURIComponent("Invito su Equo Scuderia")}&body=${encodeURIComponent(testo)}">Email</a>
+          <button type="button" class="btn btn-outline" onclick="confCopia(confTestoInvito)">Copia il messaggio</button>
+        </div>
+        ${staff.length ? `<p class="conf-nota">Nello staff: ${staff.map(m => confEsc(confNomeMembro(m))).join(", ")}.</p>` : ""}</div>`;
+    },
+    vuoto: () => true,
+  },
+  // ---------- 5 · box e paddock ----------
+  5: {
+    html: () => {
+      const d = confDati || {};
+      return `<div class="conf-riquadro"><h3>Box <span class="conf-facolt">facoltativo</span></h3>
+        <div class="conf-griglia">
+          ${confCampo("conf-box-n", "Quanti box in totale", `type="number" min="0" max="100" step="1" value="${d.box || ""}" placeholder="es. 12"`)}
+        </div>
+        <p class="conf-nota">Creo solo i box che mancano, numerati dall'1 in poi. Quelli che hai restano come sono${d.box ? ` (ora ne hai ${d.box})` : ""}.</p></div>
+        <div class="conf-riquadro"><h3>Paddock <span class="conf-facolt">facoltativo</span></h3>
+        <div id="conf-pad-righe">${[1, 2].map(i => confRigaPaddock(i)).join("")}</div>
+        <div><button type="button" class="btn btn-ghost btn-sm" onclick="confAggiungiPaddock()">+ Aggiungi un paddock</button></div>
+        <p class="conf-nota">Box e paddock insieme contano nel limite del pacchetto.${d.paddock ? ` Ora hai ${d.paddock} paddock.` : ""}</p></div>`;
+    },
+    vuoto: () => { const n = confV("conf-box-n"); return (n === "" || Number(n) <= (confDati?.box || 0)) && !confPaddockNuovi().length; },
+    salva: async () => {
+      const n = Math.floor(Number(confV("conf-box-n") || 0));
+      if(n < 0 || n > 100) return { ok: false, errore: "Il numero di box va da 0 a 100." };
+      const pad = confPaddockNuovi();
+      if(pad.some(p => !(p.capienza >= 1 && p.capienza <= 60))) return { ok: false, errore: "La capienza di un paddock va da 1 a 60 cavalli." };
+      if(DEMO_MODE){ return { ok: true, testo: "Box e paddock creati (demo: non salvato)." }; }
+      let creati = 0;
+      if(n > 0){
+        const { data: esist } = await sb.from("scuderia_box").select("numero").eq("centro_id", currentCentro.id);
+        const ci = new Set((esist || []).map(b => b.numero));
+        const righe = []; for(let i = 1; i <= n; i++) if(!ci.has(i)) righe.push({ centro_id: currentCentro.id, numero: i });
+        if(righe.length){
+          const r = await sb.from("scuderia_box").upsert(righe, { onConflict: "centro_id,numero", ignoreDuplicates: true });
+          if(r.error) return { ok: false, errore: /massimo|limite|pacchetto/i.test(r.error.message || "") ? r.error.message : "Box non creati: " + r.error.message };
+          creati = righe.length;
+        }
+      }
+      for(const p of pad){
+        const r = await sb.from("scuderia_paddock").insert({ centro_id: currentCentro.id, nome: p.nome, capienza: p.capienza });
+        if(r.error) return { ok: false, errore: (creati ? `${creati} box creati, ma ` : "") + "il paddock «" + p.nome + "» non è stato creato: " + r.error.message };
+      }
+      try{ if(typeof loadBox === "function") await loadBox(); }catch(e){}
+      return { ok: true, testo: [creati ? `${creati} box creati` : "", pad.length ? `${pad.length} paddock creati` : ""].filter(Boolean).join(" e ") + "." };
+    },
+  },
+  // ---------- 6 · primo cavallo ----------
+  6: {
+    html: () => `<div class="conf-riquadro"><h3>1 · Cerca prima il cavallo</h3>
+        <p>Se ha già un microchip o un codice Equo controllo che non esista già: così non nascono doppioni.</p>
+        <div class="conf-bottoni-riga">
+          <input class="input" id="conf-cav-cerca" placeholder="Microchip o codice Equo" autocomplete="off" style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter'){event.preventDefault();confCercaCavallo()}">
+          <button type="button" class="btn btn-outline" onclick="confCercaCavallo()">Cerca</button>
+        </div>
+        <div id="conf-cav-esito" aria-live="polite"></div></div>
+      <div class="conf-riquadro" id="conf-cav-nuovo"><h3>2 · Oppure inserisci un cavallo nuovo</h3>
+        <div class="conf-griglia">
+          ${confCampo("conf-cav-nome", "Nome *", 'maxlength="80"')}
+          <label class="conf-campo" for="conf-cav-cat">Categoria<select class="input" id="conf-cav-cat"><option value="pensione">In pensione</option><option value="mezza_pensione">Mezza pensione</option><option value="proprieta">Di proprietà del centro</option><option value="soci">Di soci / istruttori</option></select></label>
+          ${confCampo("conf-cav-razza", "Razza", "", true)}
+          <label class="conf-campo" for="conf-cav-sesso">Sesso <span class="conf-facolt">facoltativo</span><select class="input" id="conf-cav-sesso"><option value="">—</option><option value="femmina">Femmina</option><option value="castrone">Castrone</option><option value="stallone">Stallone</option></select></label>
+          ${confCampo("conf-cav-nascita", "Data di nascita", 'type="date"', true)}
+          ${confCampo("conf-cav-chip", "Microchip", 'autocomplete="off"', true)}
+          ${confCampo("conf-cav-prop", "Proprietario (nome e cognome)", "", true)}
+        </div>
+        <p class="conf-nota">Se il proprietario non è tra i clienti preparo la sua scheda, da completare nel passo 7.</p></div>`,
+    vuoto: () => !confV("conf-cav-nome"),
+    salva: async () => {
+      if(confCavalloRicerca?.esito === "tuo" && !confV("conf-cav-nome")) return { ok: true, testo: "Il cavallo è già nella scuderia." };
+      const nome = confV("conf-cav-nome").replace(/\s+/g, " ");
+      if(!nome) return { ok: false, errore: "Scrivi il nome del cavallo." };
+      const chip = confV("conf-cav-chip").replace(/[^0-9A-Za-z]/g, "").toUpperCase();
+      if(confCavalli().some(c => confNorma(c.nome) === confNorma(nome)) && !confCavalloConfermaNome){
+        confCavalloConfermaNome = true;
+        return { ok: false, errore: `C'è già un cavallo «${nome}» nella scuderia. Se è un altro cavallo tocca di nuovo «Salva e continua».` };
+      }
+      if(chip.length >= 6 && !DEMO_MODE){
+        const { data } = await sb.rpc("equo_cerca_cavallo_conf", { p_centro: currentCentro.id, p_testo: chip });
+        if(data?.esito === "tuo") return { ok: false, errore: `Questo microchip è già di «${data.nome}» nella tua scuderia: niente doppione.` };
+        if(data?.esito === "altrove") return { ok: false, errore: "Questo microchip esiste già su Equo: chiedi al proprietario di collegarsi con il codice del centro, così il cavallo arriva con il suo storico." };
+      }
+      const cat = confV("conf-cav-cat") || "pensione";
+      const payload = { centro_id: currentCentro.id, nome, tipo_proprieta: cat, razza: confV("conf-cav-razza") || null, sesso: confV("conf-cav-sesso") || null,
+        data_nascita: confV("conf-cav-nascita") || null, microchip: chip || null, proprietario: cat === "proprieta" ? null : (confV("conf-cav-prop") || null) };
+      if(DEMO_MODE){ (demoState.cavalli = demoState.cavalli || []).push({ id: "dc" + Date.now(), ...payload }); return { ok: true, testo: `«${nome}» aggiunto (demo: non salvato).` }; }
+      const r = await sb.from("scuderia_cavalli").insert(payload);
+      if(r.error) return { ok: false, errore: /limite|massimo|pacchetto/i.test(r.error.message || "") ? "Hai raggiunto i cavalli del tuo pacchetto." : r.error.message };
+      confCavalloConfermaNome = false;
+      try{ if(typeof loadCavalli === "function") await loadCavalli(); if(typeof loadTeam === "function") await loadTeam(); }catch(e){}
+      return { ok: true, testo: `«${nome}» aggiunto alla scuderia.` + (payload.proprietario ? " Se il proprietario era nuovo trovi la sua scheda in Clienti." : "") };
+    },
+  },
+  // ---------- 7 · primo proprietario ----------
+  7: {
+    html: () => {
+      const cav = confCavalli();
+      return `<div class="conf-riquadro"><h3>Proprietario e cavallo</h3>
+        <div class="conf-griglia">
+          <label class="conf-campo" for="conf-pr-cav">Cavallo<select class="input" id="conf-pr-cav"><option value="">— scegli —</option>${cav.map(c => `<option value="${c.id}">${confEsc(c.nome)}${c.proprietario ? " · " + confEsc(c.proprietario) : ""}</option>`).join("")}</select></label>
+          ${confCampo("conf-pr-nome", "Nome e cognome del proprietario *", 'oninput="confSimiliProprietario()"')}
+          ${confCampo("conf-pr-tel", "Telefono", 'inputmode="tel"', true)}
+          ${confCampo("conf-pr-email", "Email", 'type="email"', true)}
+        </div>
+        <div id="conf-pr-simili" aria-live="polite"></div>
+        <p class="conf-nota">Se ha l'app Equo, dopo potrà collegarsi con il codice del centro e vedere lo stesso libretto.</p></div>`;
+    },
+    vuoto: () => !confV("conf-pr-nome") && !confV("conf-pr-esistente"),
+    salva: async () => {
+      const esistente = confV("conf-pr-esistente"), nome = confV("conf-pr-nome").replace(/\s+/g, " "), cavId = confV("conf-pr-cav");
+      if(!esistente && !nome) return { ok: false, errore: "Scrivi il nome del proprietario." };
+      if(!esistente && nome.split(" ").length < 2) return { ok: false, errore: "Scrivi nome e cognome." };
+      if(DEMO_MODE) return { ok: true, testo: "Proprietario salvato (demo: non salvato)." };
+      let membro = esistente, nomeFinale = nome;
+      if(!membro){
+        const { data, error } = await sb.rpc("salva_cliente", { p_centro: currentCentro.id, p_membro: null, p_ruolo: "proprietario", p_nome: nome,
+          p_telefono: confV("conf-pr-tel") || null, p_email: confV("conf-pr-email") || null, p_data_nascita: null, p_referente: null, p_note: null, p_consenso: false });
+        if(error) return { ok: false, errore: /clienti, il massimo/.test(error.message || "") ? "Hai raggiunto i clienti del tuo pacchetto." : error.message };
+        membro = data;
+      } else nomeFinale = confNomeMembro(confClienti().find(m => m.id === membro) || {});
+      if(cavId){
+        const r = await sb.from("scuderia_cavalli").update({ proprietario_membro_id: membro, proprietario: nomeFinale }).eq("id", cavId).eq("centro_id", currentCentro.id);
+        if(r.error) return { ok: false, errore: "Proprietario salvato, ma non collegato al cavallo: " + r.error.message };
+      }
+      try{ if(typeof loadTeam === "function") await loadTeam(); if(typeof loadCavalli === "function") await loadCavalli(); }catch(e){}
+      return { ok: true, testo: esistente ? "Cavallo collegato al proprietario." : "Proprietario salvato" + (cavId ? " e collegato al cavallo." : ".") + " Ricorda il consenso privacy nella sua scheda." };
+    },
+  },
+  // ---------- 8 · prima lezione ----------
+  8: {
+    html: () => {
+      const cli = confClienti(), cav = confCavalli(), staff = confStaff();
+      return `<div class="conf-riquadro"><h3>Prima lezione</h3>
+        <div class="conf-griglia">
+          ${confCampo("conf-lz-data", "Data *", `type="date" min="${confOggi()}"`)}
+          ${confCampo("conf-lz-ora", "Ora *", 'type="time" step="900"')}
+          <label class="conf-campo" for="conf-lz-allievo">Allievo *<select class="input" id="conf-lz-allievo"><option value="">— scegli —</option>${cli.map(m => `<option value="${m.id}">${confEsc(confNomeMembro(m))}</option>`).join("")}</select></label>
+          <label class="conf-campo" for="conf-lz-cav">Cavallo <span class="conf-facolt">facoltativo</span><select class="input" id="conf-lz-cav"><option value="">—</option>${cav.map(c => `<option value="${c.id}">${confEsc(c.nome)}</option>`).join("")}</select></label>
+          <label class="conf-campo" for="conf-lz-ist">Istruttore <span class="conf-facolt">facoltativo</span><select class="input" id="conf-lz-ist"><option value="">—</option>${staff.map(m => `<option value="${m.id}">${confEsc(confNomeMembro(m))}</option>`).join("")}</select></label>
+        </div>
+        ${cli.length ? "" : '<p class="conf-nota">Non hai ancora allievi: aggiungili in Clienti, oppure salta questo passo.</p>'}
+        <p class="conf-nota">Solo lezioni vere: se non fai lezioni tocca «Non applicabile».</p></div>`;
+    },
+    vuoto: () => !confV("conf-lz-data") && !confV("conf-lz-ora") && !confV("conf-lz-allievo"),
+    salva: async () => {
+      const data = confV("conf-lz-data"), ora = confV("conf-lz-ora"), allievo = confV("conf-lz-allievo");
+      if(!data || !ora || !allievo) return { ok: false, errore: "Per la lezione servono data, ora e allievo." };
+      if(data < confOggi()) return { ok: false, errore: "Scegli una data da oggi in poi." };
+      const al = confClienti().find(m => m.id === allievo);
+      const payload = { centro_id: currentCentro.id, data, ora_inizio: ora, allievo_id: allievo, allievo_nome: al ? confNomeMembro(al) : null,
+        cavallo_id: confV("conf-lz-cav") || null, istruttore_id: confV("conf-lz-ist") || null, stato: "prenotata" };
+      if(DEMO_MODE) return { ok: true, testo: "Lezione aggiunta (demo: non salvato)." };
+      const r = await sb.from("scuderia_lezioni").insert(payload);
+      if(r.error) return { ok: false, errore: r.error.message };
+      try{ if(typeof loadLezioni === "function") await loadLezioni(); }catch(e){}
+      return { ok: true, testo: "Lezione aggiunta al calendario." };
+    },
+  },
+  // ---------- 9 · primo incasso ----------
+  9: {
+    html: () => {
+      const cli = confClienti(), asd = !!confDati?.centro?.asd_attiva;
+      return `<div class="conf-riquadro"><h3>Un incasso ricevuto</h3>
+        <div class="conf-griglia">
+          <label class="conf-campo" for="conf-in-cli">Da chi *<select class="input" id="conf-in-cli"><option value="">— scegli —</option>${cli.map(m => `<option value="${m.id}">${confEsc(confNomeMembro(m))}</option>`).join("")}</select></label>
+          ${confCampo("conf-in-imp", "Importo (€) *", 'type="number" min="0.01" step="0.01" inputmode="decimal"')}
+          <label class="conf-campo" for="conf-in-met">Metodo<select class="input" id="conf-in-met"><option value="contanti">Contanti</option><option value="bonifico">Bonifico</option><option value="pos">POS / carta</option><option value="assegno">Assegno</option><option value="altro">Altro</option></select></label>
+          ${confCampo("conf-in-data", "Data *", `type="date" max="${confOggi()}" value="${confOggi()}"`)}
+          ${asd ? `<label class="conf-campo" for="conf-in-cassa">Cassa<select class="input" id="conf-in-cassa"><option value="scuderia">Scuderia</option><option value="asd">ASD</option></select></label>` : ""}
+          ${confCampo("conf-in-causale", "Causale *", 'placeholder="es. Pensione di novembre" maxlength="200"')}
+        </div>
+        <p class="conf-nota">Solo incassi veri: nessun importo di esempio. Se non hai ancora incassi, salta questo passo.</p></div>`;
+    },
+    vuoto: () => !confV("conf-in-cli") && !confV("conf-in-imp") && !confV("conf-in-causale"),
+    salva: async () => {
+      const membro = confV("conf-in-cli"), imp = Math.round(Number(confV("conf-in-imp")) * 100) / 100, data = confV("conf-in-data"), causale = confV("conf-in-causale");
+      if(!membro || !(imp > 0) || !data || !causale) return { ok: false, errore: "Per l'incasso servono cliente, importo, data e causale." };
+      if(data > confOggi()) return { ok: false, errore: "La data non può essere nel futuro." };
+      if(DEMO_MODE) return { ok: true, testo: "Incasso registrato (demo: non salvato)." };
+      const { data: r, error } = await sb.rpc("incassi_registra_pagamento", { p_centro: currentCentro.id, p_membro: membro, p_cassa: confV("conf-in-cassa") || "scuderia",
+        p_importo: imp, p_metodo: confV("conf-in-met") || "contanti", p_data: data, p_addebito: null, p_conto: null, p_note: causale });
+      if(error || r?.ok === false) return { ok: false, errore: r?.errore || error?.message || "Incasso non registrato." };
+      return { ok: true, testo: "Incasso registrato: lo trovi in Incassi." };
+    },
+  },
+};
+let confCavalloConfermaNome = false;
+let confTestoInvito = "";
+
+function confRigaPaddock(i){
+  return `<div class="conf-griglia conf-pad-riga">
+    ${confCampo("conf-pad-nome-" + i, "Nome paddock", 'placeholder="es. Paddock ' + String.fromCharCode(64 + i) + '"')}
+    ${confCampo("conf-pad-cap-" + i, "Capienza (cavalli)", 'type="number" min="1" max="60" step="1"')}
+  </div>`;
+}
+function confAggiungiPaddock(){
+  const box = document.getElementById("conf-pad-righe"); if(!box) return;
+  const n = box.querySelectorAll(".conf-pad-riga").length + 1; if(n > 12) return;
+  box.insertAdjacentHTML("beforeend", confRigaPaddock(n));
+}
+function confPaddockNuovi(){
+  return [...document.querySelectorAll(".conf-pad-riga")].map((r, i) => ({ nome: confV("conf-pad-nome-" + (i + 1)), capienza: Math.floor(Number(confV("conf-pad-cap-" + (i + 1)))) }))
+    .filter(p => p.nome);
+}
+function confLogoScelto(inp){
+  const f = inp.files && inp.files[0]; confLogoFile = null;
+  const ant = document.getElementById("conf-logo-anteprima");
+  if(!f) return;
+  if(!/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > 2 * 1024 * 1024){ showToast("Il logo deve essere PNG, JPG o WEBP, al massimo 2 MB."); inp.value = ""; return; }
+  confLogoFile = f;
+  if(ant) ant.innerHTML = `<img src="${URL.createObjectURL(f)}" alt="Anteprima del logo">`;
+}
+async function confCercaCavallo(){
+  const t = confV("conf-cav-cerca"), box = document.getElementById("conf-cav-esito"); if(!box) return;
+  if(t.replace(/[^0-9A-Za-z]/g, "").length < 6){ box.innerHTML = '<p class="conf-nota">Scrivi almeno 6 caratteri del microchip o del codice.</p>'; return; }
+  box.innerHTML = '<p class="conf-nota">Cerco…</p>';
+  let r;
+  if(DEMO_MODE){ const c = confCavalli().find(x => (x.microchip || "").replace(/[^0-9A-Za-z]/g, "").toUpperCase() === t.replace(/[^0-9A-Za-z]/g, "").toUpperCase()); r = c ? { esito: "tuo", nome: c.nome, proprietario: c.proprietario } : { esito: "nessuno" }; }
+  else { const { data, error } = await sb.rpc("equo_cerca_cavallo_conf", { p_centro: currentCentro.id, p_testo: t }); r = error ? { esito: "errore", errore: /equo_cerca_cavallo_conf|schema cache/.test(error.message || "") ? "Manca un aggiornamento del database (SQL 59)." : error.message } : data; }
+  confCavalloRicerca = r;
+  if(r.esito === "tuo") box.innerHTML = `<div class="conf-gia">«${confEsc(r.nome)}» è già nella tua scuderia${r.proprietario ? " (di " + confEsc(r.proprietario) + ")" : ""}: non serve crearlo. Vai avanti.</div>`;
+  else if(r.esito === "altrove") box.innerHTML = '<div class="conf-avviso">Questo cavallo esiste già su Equo, ma non nella tua scuderia. Per non creare un doppione chiedi al proprietario di collegarsi con il codice del centro: il cavallo arriverà con il suo storico.</div>';
+  else if(r.esito === "nessuno"){ box.innerHTML = '<p class="conf-nota">Non c\'è su Equo: inseriscilo qui sotto.</p>'; const ch = document.getElementById("conf-cav-chip"); if(ch && !ch.value) ch.value = t; document.getElementById("conf-cav-nome")?.focus(); }
+  else box.innerHTML = `<p class="conf-nota">${confEsc(r.errore || "Ricerca non riuscita, riprova.")}</p>`;
+}
+function confSimiliProprietario(){
+  const box = document.getElementById("conf-pr-simili"); if(!box) return;
+  const n = confNorma(confV("conf-pr-nome"));
+  if(n.length < 3){ box.innerHTML = ""; return; }
+  const simili = confClienti().filter(m => { const k = confNorma(confNomeMembro(m)); return k && (k === n || k.includes(n) || n.includes(k)); }).slice(0, 5);
+  box.innerHTML = simili.length ? `<div class="conf-avviso"><b>Forse c'è già:</b>
+    <select class="input" id="conf-pr-esistente" style="margin-top:6px"><option value="">No, è una persona nuova</option>${simili.map(m => `<option value="${m.id}">${confEsc(confNomeMembro(m))}</option>`).join("")}</select></div>` : "";
+}
+async function confCopia(t){
+  try{ await navigator.clipboard.writeText(t); showToast("Copiato."); }catch(e){ showToast("Non riesco a copiare: tieni premuto per selezionare."); }
+}
+
+/* ---------- LOGO DEL CENTRO: intestazione del gestionale, PDF, ricevute ASD ---------- */
+let logoCentroPdf = null;   // { data, w, h } in mm, già pronto per jsPDF (sincrono)
+async function logoCentroCarica(forza){
+  try{
+    if(!currentCentro) return;
+    if(!DEMO_MODE && (forza || currentCentro.logo_url === undefined)){
+      const { data, error } = await sb.from("centri").select("logo_url").eq("id", currentCentro.id).maybeSingle();
+      if(!error) currentCentro.logo_url = data?.logo_url || null;
+    }
+    const url = currentCentro.logo_url;
+    const img = document.getElementById("sidebar-centro-logo");
+    if(img){ if(url){ img.src = url; img.style.display = ""; } else img.style.display = "none"; }
+    logoCentroPdf = null;
+    if(!url) return;
+    const el = new Image(); el.crossOrigin = "anonymous";
+    await new Promise((ok, ko) => { el.onload = ok; el.onerror = ko; el.src = url; });
+    const max = 400, sc = Math.min(1, max / Math.max(el.width, el.height));
+    const cv = document.createElement("canvas"); cv.width = Math.round(el.width * sc); cv.height = Math.round(el.height * sc);
+    cv.getContext("2d").drawImage(el, 0, 0, cv.width, cv.height);
+    const r = cv.width / cv.height, h = r > 2 ? 28 / r : 14;   // al massimo 28 x 14 mm
+    logoCentroPdf = { data: cv.toDataURL("image/png"), w: Math.min(28, 14 * r), h };
+  }catch(e){ logoCentroPdf = null; }
+}
+// disegna il logo nel PDF, allineato a destra, se c'è (le funzioni dei PDF lo chiamano)
+function logoCentroNelPdf(doc, destra, y){
+  if(!logoCentroPdf) return;
+  try{ doc.addImage(logoCentroPdf.data, "PNG", destra - logoCentroPdf.w, y, logoCentroPdf.w, logoCentroPdf.h); }catch(e){}
+}
+(function(){
+  try{ const o = enterAppShell; enterAppShell = function(){ const r = o.apply(this, arguments); setTimeout(() => logoCentroCarica(), 1200); return r; }; }catch(e){}
+})();
+/* =====================================================================
+   CONFIGURAZIONE GUIDATA · ATHENA CHE PARLA E COMPILA (blocco B3, 10/11/2026)
+   - Chat del passo (modalità B): /api/agent con «configurazione: { passo, contesto }»; Athena risponde nei fumetti.
+   - Compila da una frase (modalità C): Athena propone i campi (azione «conf_campi»), l'app li scrive nel modulo del
+     passo evidenziati in verde e aspetta «Conferma» → stesso salvataggio di «Salva e continua». Nessuna scrittura
+     diretta dell'AI.
+   - 30 messaggi bonus per scuderia (contati sul server); finiti quelli si usa la quota del mese; senza AI si continua
+     con i campi. Errori, limite e rete assente sono detti chiaramente.
+   ===================================================================== */
+let confAiInCorso = false;
+let confBonusAi = null;        // { usati, limite, finito } dall'ultima risposta del server
+
+// campo dell'AI → elemento del modulo (sel: scelta per testo dell'opzione; val: scelta per valore)
+const CONF_CAMPI_ID = {
+  1: { codice: "conf-codice-pro" },
+  2: { nome: "conf-c-nome", telefono: "conf-c-telefono", indirizzo: "conf-c-indirizzo", citta: "conf-c-citta", provincia: "conf-c-provincia", email: "conf-c-email", forma_giuridica: "val:conf-c-forma" },
+  3: { asd: "check:conf-asd-si", asd_nome: "conf-asd-nome", asd_cf: "conf-asd-cf", asd_sede: "conf-asd-sede", asd_rasd: "conf-asd-rasd", asd_affiliazioni: "conf-asd-aff", asd_quota: "conf-asd-quota" },
+  5: { box_totali: "conf-box-n", paddock: "paddock" },
+  6: { nome: "conf-cav-nome", categoria: "val:conf-cav-cat", razza: "conf-cav-razza", sesso: "val:conf-cav-sesso", data_nascita: "conf-cav-nascita", microchip: "conf-cav-chip", proprietario: "conf-cav-prop" },
+  7: { proprietario_nome: "conf-pr-nome", telefono: "conf-pr-tel", email: "conf-pr-email", cavallo: "sel:conf-pr-cav" },
+  8: { data: "conf-lz-data", ora: "conf-lz-ora", allievo: "sel:conf-lz-allievo", cavallo: "sel:conf-lz-cav", istruttore: "sel:conf-lz-ist" },
+  9: { cliente: "sel:conf-in-cli", importo: "conf-in-imp", metodo: "val:conf-in-met", data: "conf-in-data", causale: "conf-in-causale", cassa: "val:conf-in-cassa" },
+};
+
+function confInputAthena(){
+  const inp = document.getElementById("conf-msg"), inv = document.getElementById("conf-invia");
+  if(inp){ inp.disabled = confAiInCorso; inp.placeholder = confPassoVisto === 10 ? "Chiedi ad Athena…" : "Scrivi ad Athena, anche i dati a parole…"; }
+  if(inv) inv.disabled = confAiInCorso;
+  confNotaBonus();
+}
+function confNotaBonus(){
+  const nota = document.getElementById("conf-nota-ai"); if(!nota) return;
+  const b = confBonusAi;
+  nota.textContent = !b ? "Hai 30 messaggi gratuiti per la configurazione. Senza AI puoi continuare con i campi."
+    : b.finito ? "I 30 messaggi della configurazione sono finiti: ora Athena usa i messaggi del mese. Puoi sempre continuare con i campi."
+    : `Messaggi della configurazione: ${Math.max(0, b.limite - b.usati)} di ${b.limite} rimasti.`;
+}
+
+// cosa c'è ora nel passo: i valori dei campi e i nomi tra cui scegliere (aiuta Athena a non inventare)
+function confContestoPasso(){
+  const righe = [];
+  document.querySelectorAll("#conf-passo .conf-campo").forEach(l => {
+    const el = l.querySelector("input, select"); if(!el || el.type === "file") return;
+    const nome = (l.childNodes[0]?.textContent || "").trim();
+    const v = el.tagName === "SELECT" ? (el.selectedIndex > 0 ? el.options[el.selectedIndex].text : "") : el.value;
+    righe.push(`${nome}: ${v || "(vuoto)"}`);
+  });
+  const nomi = (id, et) => { const s = document.getElementById(id); if(s && s.options.length > 1) righe.push(`${et}: ${[...s.options].slice(1, 41).map(o => o.text).join(", ")}`); };
+  if(confPassoVisto === 7) nomi("conf-pr-cav", "Cavalli tra cui scegliere");
+  if(confPassoVisto === 8){ nomi("conf-lz-allievo", "Allievi"); nomi("conf-lz-cav", "Cavalli"); nomi("conf-lz-ist", "Istruttori"); }
+  if(confPassoVisto === 9) nomi("conf-in-cli", "Clienti");
+  const d = confRiepilogoDati(confPassoVisto, confDati).map(r => r.testo);
+  if(d.length) righe.push("Già nel gestionale: " + d.join("; "));
+  return righe.join("\n").slice(0, 1500);
+}
+
+async function confScriviAthena(){
+  const inp = document.getElementById("conf-msg"); if(!inp) return;
+  const testo = inp.value.trim();
+  if(!testo || confAiInCorso) return;
+  inp.value = "";
+  const passo = confPassoVisto;
+  confAggiungiFumetto(testo, true);
+  const pensa = confAggiungiFumetto("Athena sta scrivendo…", false);
+  pensa?.classList.add("pensa");
+  confAiInCorso = true; confInputAthena();
+  let risposta = "", azioni = [];
+  try{
+    if(DEMO_MODE){
+      await new Promise(r => setTimeout(r, 700));
+      const n = (testo.match(/\d+/) || [])[0];
+      if(passo === 5 && n){ azioni = [{ tipo: "conf_campi", dati: { passo: 5, campi: { box_totali: Number(n) } } }]; risposta = "[Demo] Ho compilato i campi in verde: controlla e conferma."; }
+      else risposta = "[Demo] Nel gestionale vero qui ti rispondo sul passo in corso e, se mi scrivi i dati, compilo io i campi.";
+      confBonusAi = { usati: (confBonusAi?.usati || 0) + 1, limite: 30 };
+    } else {
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess?.session?.access_token;
+      const res = await fetch("/api/agent", { method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) },
+        body: JSON.stringify({ message: testo, vista: "scuderia", agente: "athena", centro_id: currentCentro?.id, configurazione: { passo, contesto: confContestoPasso() } }) });
+      const data = await res.json().catch(() => ({}));
+      if(data.bonus) confBonusAi = data.bonus;
+      if(res.status === 401) risposta = "La sessione è scaduta: esci e rientra per parlare con me. Intanto puoi continuare con i campi.";
+      else if(res.status === 403) risposta = (data.error || "Non posso aiutarti in questo momento") + ".";
+      else if(data.limite_raggiunto) risposta = "Il centro ha finito i messaggi di Athena di questo mese. Nessun problema: continua con i campi, ci sono anche i miei consigli.";
+      else if(!res.ok || data.errore) risposta = data.reply || "Non riesco a rispondere ora: riprova tra poco, oppure continua con i campi.";
+      else { risposta = data.reply || "Non sono riuscita a rispondere, riprova."; azioni = Array.isArray(data.azioni) ? data.azioni : []; }
+    }
+  }catch(e){
+    risposta = "Non riesco a collegarmi: controlla la rete. Puoi continuare con i campi.";
+  }
+  confAiInCorso = false;
+  if(pensa){ pensa.classList.remove("pensa"); pensa.firstChild && (pensa.firstChild.textContent = risposta); }
+  confInputAthena();
+  // la proposta vale solo se si è ancora sullo stesso passo
+  azioni.filter(a => a.tipo === "conf_campi" && a.dati?.passo === passo && confPassoVisto === passo).slice(0, 1).forEach(a => confApplicaCampi(a.dati.campi, pensa));
+  document.getElementById("conf-msg")?.focus();
+}
+
+// scrive i valori proposti nei campi (evidenziati) e chiede conferma
+function confApplicaCampi(campi, bollaRisposta){
+  const mappa = CONF_CAMPI_ID[confPassoVisto] || {};
+  const fatti = [], mancati = [];
+  const segna = el => { el.classList.add("conf-proposto"); el.addEventListener("input", () => el.classList.remove("conf-proposto"), { once: true }); };
+  for(const [k, v] of Object.entries(campi || {})){
+    const dove = mappa[k]; if(!dove) continue;
+    if(dove === "paddock"){
+      (Array.isArray(v) ? v : []).forEach((p, i) => {
+        if(!document.getElementById("conf-pad-nome-" + (i + 1)) && typeof confAggiungiPaddock === "function") confAggiungiPaddock();
+        const n = document.getElementById("conf-pad-nome-" + (i + 1)), c = document.getElementById("conf-pad-cap-" + (i + 1));
+        if(n && c){ n.value = p.nome; c.value = p.capienza; segna(n); segna(c); fatti.push(n); }
+      });
+      continue;
+    }
+    const [tipo, id] = dove.includes(":") ? dove.split(":") : ["txt", dove];
+    const el = document.getElementById(id); if(!el){ continue; }
+    if(tipo === "check"){
+      el.checked = !!v; el.dispatchEvent(new Event("change")); segna(el); fatti.push(el); continue;
+    }
+    if(tipo === "val"){
+      const opt = [...el.options].find(o => o.value === String(v)); if(opt){ el.value = opt.value; segna(el); fatti.push(el); } else mancati.push(String(v)); continue;
+    }
+    if(tipo === "sel"){
+      const cerca = confNorma(v), opts = [...el.options].slice(1);
+      const opt = opts.find(o => confNorma(o.text) === cerca) || opts.find(o => confNorma(o.text).includes(cerca) || (cerca.length > 3 && cerca.includes(confNorma(o.text).split(" ")[0])));
+      if(opt){ el.value = opt.value; segna(el); fatti.push(el); } else mancati.push(String(v));
+      continue;
+    }
+    el.value = String(v); el.dispatchEvent(new Event("input")); el.classList.add("conf-proposto"); fatti.push(el);
+  }
+  if(confPassoVisto === 7 && typeof confSimiliProprietario === "function") confSimiliProprietario();
+  if(!fatti.length && !mancati.length) return;
+  // i tasti vanno sotto la risposta di Athena; un fumetto in più solo se qualcosa non si è potuto scegliere
+  const b = mancati.length || !bollaRisposta
+    ? confAggiungiFumetto((fatti.length ? "Ho compilato i campi in verde: controlla e conferma." : "") + (mancati.length ? ` Non ho trovato «${mancati.join("», «")}» tra le scelte: sceglilo tu.` : ""), false)
+    : bollaRisposta;
+  if(b && fatti.length){
+    const riga = document.createElement("div"); riga.className = "conf-fum-bottoni";
+    riga.innerHTML = '<button type="button" class="btn btn-primary btn-sm">Conferma</button><button type="button" class="btn btn-outline btn-sm">Correggo io</button>';
+    riga.children[0].onclick = () => { riga.remove(); confAthena(false); confAvanti(); };
+    riga.children[1].onclick = () => { riga.remove(); confAthena(false); fatti[0].focus(); };
+    b.insertBefore(riga, b.querySelector(".conf-coda"));
+  }
+  fatti[0]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 /* ---------- TICKET DI ASSISTENZA (Home → "Serve aiuto?") ---------- */
 function apriTicketAssistenza(){

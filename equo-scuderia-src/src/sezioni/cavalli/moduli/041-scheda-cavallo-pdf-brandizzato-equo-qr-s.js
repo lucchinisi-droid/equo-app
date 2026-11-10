@@ -220,6 +220,7 @@ async function generateSchedaPdf(c){
   doc.text("SCHEDA CAVALLO", R, 21, { align: "right", charSpace: 1.2 });
   doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...PDF_GRIGIO);
   doc.text(currentCentro?.nome || "", R, 27, { align: "right" });
+  if(typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, W / 2 + 14, 13);   // logo del centro al centro dell'intestazione (SQL 59)
   doc.setDrawColor(...PDF_ORO); doc.setLineWidth(0.5); doc.line(L, 38, R, 38);
 
   // nome, foto, dati

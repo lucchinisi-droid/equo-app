@@ -23,6 +23,7 @@ const { linkCitati, oggiISO, senzaImporti, testoDaBlocchi, utenteDaToken } = req
 const { CHIAVE_PUBBLICA, COSTO_RICERCA_USD, LIMITI, MAX_GIRI_TOOL, MODELLO, PREZZI } = require("../agente/configurazione");
 const { eseguiDettatura } = require("../agente/dettatura");
 const { eseguiStrumento } = require("../agente/esegui-strumento");
+const { BONUS_CONFIGURAZIONE, STRUMENTI_CONFIGURAZIONE, eseguiConfigurazione, istruzioniConfigurazione } = require("../agente/configurazione-guidata");
 const { ISTRUZIONI_ARES } = require("../agente/istruzioni-ares");
 const { ISTRUZIONI_GALENO } = require("../agente/istruzioni-galeno");
 const { ISTRUZIONI_CASO, ISTRUZIONI_FOTO_GUIDATA, ISTRUZIONI_HAMMER } = require("../agente/istruzioni-hammer");
@@ -136,6 +137,12 @@ exports.handler = async (event) => {
   if (agScud && !(limitiCentro.agenti || []).includes(agScud) && !prova) return risposta(403, { error: `${({ hammer: "Hammer", ares: "Ares", galeno: "Galeno" })[agScud]} non è attivo per questo centro`, bloccato: true });
   const athena = scud && !merlino && !agScud;
   const athenaBasic = athena && limitiCentro.athena_proattiva === false;
+  // configurazione guidata della scuderia (10/11/2026): Athena sul passo in corso, con 30 messaggi bonus per centro
+  const confPasso = athena && body.configurazione ? parseInt(body.configurazione.passo, 10) : NaN;
+  const configurazione = Number.isInteger(confPasso) && confPasso >= 1 && confPasso <= 10
+    ? { passo: confPasso, contesto: String(body.configurazione.contesto || "").replace(/\s+\n/g, "\n").slice(0, 1500) } : null;
+  if (configurazione && !(centro.owner_id === user.id || membro.ruolo === "admin" || ["admin", "2", "3"].includes(String(membro.livello))))
+    return risposta(403, { error: "La configurazione è riservata all'amministratore e ai livelli 2-3" });
   // il Premium da proprietario non vale nella vista professionista (Hammer & co.): lì serve il Premium professionista
   const premiumSoloProp = profilo?.premium_livello === "proprietario";
   const piano = profilo?.piano === "premium" && !(vista === "professionista" && premiumSoloProp) ? "premium" : "free";
@@ -178,14 +185,22 @@ exports.handler = async (event) => {
       }
     }
   }
+  // configurazione: prima i 30 messaggi bonus del centro (conteggio atomico a parte); finiti quelli, la quota normale
+  const chiaveBonus = configurazione ? `centro:${centro.id}:athena:config` : null;
+  let bonusConf = null;
+  if (configurazione) {
+    const { data: pb, error: eb } = await admin.rpc("ai_prenota", { p_chiave: chiaveBonus, p_mese: "config", p_limite: BONUS_CONFIGURAZIONE, p_base: 0 });
+    if (!eb) bonusConf = Number(pb) > 0 ? { usati: Number(pb), limite: BONUS_CONFIGURAZIONE } : { usati: BONUS_CONFIGURAZIONE, limite: BONUS_CONFIGURAZIONE, finito: true };
+  }
+  const daBonus = !!(bonusConf && !bonusConf.finito);
   // un'analisi foto guidata vale 3 messaggi nel piano Free
   const peso = hammer && modalita === "foto" && giornaliero ? 3 : 1;
-  if (usati + peso > limite) return risposta(200, { limite_raggiunto: true, peso, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
+  if (!daBonus && usati + peso > limite) return risposta(200, { limite_raggiunto: true, peso, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   // prenotazione ATOMICA del messaggio (SQL ai_prenota): richieste in parallelo non superano il limite
   // e il messaggio resta contato anche se la risposta va in timeout. Se la funzione SQL manca, si prosegue come prima.
   const chiavePren = scud ? `centro:${centro.id}:${merlino ? "merlino" : agScud || "athena"}${prova ? ":prova" : ""}` : `utente:${user.id}:${chiaveMese}`;
   let prenotato = 0;
-  for (let k = 0; k < peso; k++) {
+  for (let k = 0; !daBonus && k < peso; k++) {
     const { data: pren, error: ePren } = await admin.rpc("ai_prenota", { p_chiave: chiavePren, p_mese: scud ? mese : periodo, p_limite: limite, p_base: usati + k });
     if (ePren) { console.warn("ai_prenota non disponibile:", ePren.message); break; }
     if (Number(pren) < 0) {
@@ -215,7 +230,7 @@ exports.handler = async (event) => {
   }
 
   // chat del giorno o chat dello storico riaperta dall'utente (27/10/2026). Se lo SQL non c'è ancora si prosegue come prima.
-  const chiaveConv = scud ? (merlino ? "merlino" : agScud || "athena") : "";
+  const chiaveConv = scud ? (configurazione ? "configurazione" : merlino ? "merlino" : agScud || "athena") : "";
   let convId = null;
   const convRichiesta = /^[0-9a-f-]{36}$/i.test(String(body.conversazione_id || "")) ? String(body.conversazione_id) : null;
   if (convRichiesta) {
@@ -242,7 +257,7 @@ exports.handler = async (event) => {
   // Ogni ~14 giorni (non ai nuovi iscritti, non con allegati, solo in conversazioni già avviate) l'agente chiede un parere per i Boss
   const GIORNI_FEEDBACK = 14;
   const ultimoFeedback = profilo?.ai_feedback_chiesto_at ? new Date(profilo.ai_feedback_chiesto_at).getTime() : 0;
-  const chiediFeedback = !athenaBasic && !allegati.length && (storia || []).length >= 4
+  const chiediFeedback = !configurazione && !athenaBasic && !allegati.length && (storia || []).length >= 4
     && Date.now() - ultimoFeedback > GIORNI_FEEDBACK * 86400000
     && Date.now() - new Date(profilo?.created_at || Date.now()).getTime() > 3 * 86400000;
   const contesto = [
@@ -280,7 +295,7 @@ exports.handler = async (event) => {
   const ctx = { db, admin, userId: user.id, cavalli: listaCavalli, proposta: null, azioni: [], ambito: hammer || agScud === "hammer" ? "maniscalco" : ares || agScud === "ares" ? "istruttore" : galeno || agScud === "galeno" ? "veterinario" : "proprietario",
     guida: scud ? "scuderia" : ares ? "istruttore" : galeno ? "veterinario" : vista === "professionista" ? "maniscalco" : "proprietario",
     strumenti: merlino ? STRUMENTI_MERLINO : agScud === "hammer" ? STRUMENTI_HAMMER_SCUD : agScud === "ares" ? STRUMENTI_ARES_SCUD : agScud === "galeno" ? STRUMENTI_GALENO_SCUD : athenaBasic ? STRUMENTI_ATHENA_BASIC : athena ? STRUMENTI_ATHENA : null,
-    centroId: centro?.id || null, agente, vista, contestoConversazione };
+    centroId: centro?.id || null, agente, vista, contestoConversazione, configurazione };
   // ultima posizione nota del telefono (solo per il meteo, arrotondata a ~1 km dall'app)
   if (body.posizione && Number.isFinite(Number(body.posizione.lat)) && Number.isFinite(Number(body.posizione.lon)))
     ctx.posizione = { lat: Math.round(Number(body.posizione.lat) * 100) / 100, lon: Math.round(Number(body.posizione.lon) * 100) / 100 };
@@ -303,10 +318,10 @@ exports.handler = async (event) => {
           model: MODELLO,
           max_tokens: allegati.length ? 2000 : (hammer || merlino || ares || galeno || agScud ? 1600 : 1200),
           system: [
-            { type: "text", text: merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : agScud === "galeno" ? ISTRUZIONI_GALENO_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : galeno ? ISTRUZIONI_GALENO : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
+            { type: "text", text: configurazione ? istruzioniConfigurazione(configurazione.passo, configurazione.contesto) : merlino ? ISTRUZIONI_MERLINO : agScud === "hammer" ? ISTRUZIONI_HAMMER_SCUD : agScud === "ares" ? ISTRUZIONI_ARES_SCUD : agScud === "galeno" ? ISTRUZIONI_GALENO_SCUD : athenaBasic ? ISTRUZIONI_ATHENA_BASIC : athena ? ISTRUZIONI_ATHENA : hammer ? ISTRUZIONI_HAMMER : ares ? ISTRUZIONI_ARES : galeno ? ISTRUZIONI_GALENO : pegasus ? ISTRUZIONI_PEGASUS : ISTRUZIONI, cache_control: { type: "ephemeral" } },
             { type: "text", text: contesto },
           ],
-          tools: scud ? ctx.strumenti : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : galeno ? STRUMENTI_GALENO : STRUMENTI,
+          tools: scud ? (configurazione ? STRUMENTI_CONFIGURAZIONE : ctx.strumenti) : hammer ? STRUMENTI_HAMMER : ares ? STRUMENTI_ARES : galeno ? STRUMENTI_GALENO : STRUMENTI,
           messages,
         }),
       });
@@ -330,7 +345,7 @@ exports.handler = async (event) => {
       const risultati = [];
       for (const t of chiamate) {
         let out;
-        try { out = await eseguiStrumento(t.name, t.input, ctx); } catch (e) { console.error("tool", t.name, e); out = "Errore interno nello strumento."; }
+        try { out = configurazione ? (eseguiConfigurazione(t.name, t.input, ctx) || "Strumento non disponibile.") : await eseguiStrumento(t.name, t.input, ctx); } catch (e) { console.error("tool", t.name, e); out = "Errore interno nello strumento."; }
         if (ctx.incassiNascosti) out = senzaImporti(out);
         risultati.push({ type: "tool_result", tool_use_id: t.id, content: typeof out === "string" ? out : JSON.stringify(out) });
       }
@@ -339,7 +354,8 @@ exports.handler = async (event) => {
   } catch (e) {
     // errore del servizio AI: il messaggio prenotato si restituisce
     for (let j = 0; j < prenotato; j++) await admin.rpc("ai_rilascia", { p_chiave: chiavePren, p_mese: scud ? mese : periodo }).then(() => {}, () => {});
-    return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
+    if (daBonus) await admin.rpc("ai_rilascia", { p_chiave: chiaveBonus, p_mese: "config" }).then(() => {}, () => {});
+    return risposta(200, { reply: "Non riesco a rispondere in questo momento, riprova tra poco.", errore: true, bonus: bonusConf, uso: { usati, limite, piano, periodo: giornaliero ? "giorno" : "mese" } });
   }
 
   // se ha usato la ricerca web ma non ha scritto i link, aggiungiamo quelli citati
@@ -351,9 +367,11 @@ exports.handler = async (event) => {
   const p = PREZZI[MODELLO] || PREZZI["claude-sonnet-5"];
   const costoUsd = (costo.in * p.in + costo.out * p.out + costo.cacheRead * p.cacheRead + costo.cacheWrite * p.cacheWrite) / 1e6 + costo.ricerche * COSTO_RICERCA_USD;
   const conChat = convId ? { conversazione_id: convId } : {};
+  // i messaggi del bonus di configurazione si salvano come «configurazione»: non entrano nel conteggio mensile di Athena
+  const agenteSalvato = configurazione && daBonus ? "configurazione" : agente;
   await admin.from("ai_messaggi").insert([
-    { user_id: user.id, vista, agente, ruolo: "user", contenuto: testoUtenteSalvato, centro_id: centro?.id || null, ...conChat },
-    { user_id: user.id, vista, agente, ruolo: "assistant", contenuto: testoFinale, centro_id: centro?.id || null, ...conChat },
+    { user_id: user.id, vista, agente: agenteSalvato, ruolo: "user", contenuto: testoUtenteSalvato, centro_id: centro?.id || null, ...conChat },
+    { user_id: user.id, vista, agente: agenteSalvato, ruolo: "assistant", contenuto: testoFinale, centro_id: centro?.id || null, ...conChat },
   ]);
   const conversazione = convId ? await titoloConversazione(admin, convId).catch(() => null) : null;
   // domanda per i Boss fatta davvero: si segna per non ripeterla prima di 14 giorni
@@ -366,7 +384,7 @@ exports.handler = async (event) => {
       prova: !!prova, costo_usd: Math.round(costoUsd * 100000) / 100000 });
   } catch (_) {}
 
-  return risposta(200, { reply: testoFinale, agente, conversazione, azioni: ctx.azioni, proposedEvent: ctx.proposta, uso: { usati: usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, prova: prova ? { fine: new Date(prova.fine).toISOString() } : undefined, modalita });
+  return risposta(200, { reply: testoFinale, agente, conversazione, azioni: ctx.azioni, proposedEvent: ctx.proposta, bonus: bonusConf, uso: { usati: daBonus ? usati : usati + peso, limite, piano, periodo: giornaliero ? "giorno" : "mese" }, prova: prova ? { fine: new Date(prova.fine).toISOString() } : undefined, modalita });
 };
 
 // esportati solo per i test

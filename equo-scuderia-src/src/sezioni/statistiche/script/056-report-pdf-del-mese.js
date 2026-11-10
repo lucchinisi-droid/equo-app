@@ -8,6 +8,7 @@ function stReportPdf(){
     doc.splitTextToSize(String(t), W).forEach(l => { if(y > 280){ doc.addPage(); y = 18; } doc.text(l, L, y); y += (size || 10.5) * 0.48; }); y += 1.5; };
   const mesi = s.incassi_mesi || [], cur = mesi[mesi.length - 1] || {};
   doc.setFillColor(31, 61, 43); doc.rect(0, 0, 210, 12, "F"); doc.setTextColor(243, 230, 192); doc.setFontSize(9); doc.text("EQUO SCUDERIA · REPORT DEL CENTRO", L, 8);
+  if(typeof logoCentroNelPdf === "function") logoCentroNelPdf(doc, 194, 16);   // logo del centro (SQL 59)
   y = 24; riga(currentCentro?.nome || "Centro", 18, true); riga(new Date().toLocaleDateString("it-IT", { month:"long", year:"numeric" }) + " · generato da Merlino", 10, false, [110, 110, 110]); y += 3;
   if(s.salute) riga(`Indice di salute: ${s.salute.indice}/100  (incassi ${s.salute.componenti.incassi}, occupazione ${s.salute.componenti.occupazione}, fedeltà ${s.salute.componenti.fedelta}, sanitario ${s.salute.componenti.sanitario}, magazzino ${s.salute.componenti.magazzino})`, 11.5, true);
   riga(`Incassi del mese: ${euro(cur.incasso)} · ultimi 12 mesi: ${euro(mesi.reduce((t, m) => t + Number(m.incasso || 0), 0))}`, 11);

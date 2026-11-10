@@ -1,0 +1,140 @@
+/* ---------- CONFIGURAZIONE GUIDATA (10/11/2026 · SQL 58) ---------- */
+.conf-overlay{padding:0}
+.conf-modal{position:relative;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);
+  width:min(80vw,1180px);height:min(84vh,780px);display:flex;flex-direction:column;overflow:hidden;overflow:clip}
+@media (max-width:1100px){.conf-modal{width:92vw}}
+.conf-testa{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
+.conf-testa-riga{display:flex;align-items:center;gap:14px}
+.conf-testa-riga > div{flex:1;min-width:0}
+.conf-sopra{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+.conf-testa h2{margin:2px 0 0;font-size:21px;font-weight:700}
+.conf-x{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.conf-barra{height:8px;background:var(--muted-bg);border-radius:999px;overflow:hidden}
+.conf-barra > div{height:100%;background:var(--primary);border-radius:999px;transition:width .3s ease}
+.conf-pallini{display:flex;gap:6px;flex-wrap:wrap}
+.conf-pallino{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.conf-pallino.fatto{background:var(--primary);border-color:var(--primary);color:var(--primary-fg,#fff)}
+.conf-pallino.saltato,.conf-pallino.non_applicabile{background:var(--muted-bg);border-style:dashed}
+.conf-pallino.attivo{outline:2.5px solid var(--primary);outline-offset:2px;color:var(--text)}
+.conf-corpo{flex:1;display:flex;min-height:0}
+.conf-passo{flex:1;min-width:0;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:16px}
+.conf-passo:focus{outline:none}
+.conf-passo p{margin:0;line-height:1.55;font-size:14px}
+.conf-riquadro{border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.conf-riquadro h3{margin:0;font-size:15px}
+.conf-esiste{display:flex;align-items:center;gap:8px;font-size:14px}
+.conf-esiste i{color:var(--primary)}
+.conf-esiste.vuoto i{color:var(--muted)}
+.conf-gia{background:#eef4ec;border:1.5px solid var(--primary);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;color:var(--text)}
+[data-theme="dark"] .conf-gia{background:rgba(106,154,96,.16)}
+.conf-piede{padding:12px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.conf-piede .btn{min-height:44px}
+.conf-salvato{flex:1;text-align:right;font-size:12.5px;color:var(--muted);min-width:120px}
+.conf-salvato.ok{color:var(--primary)}
+.conf-salvato.err{color:var(--danger)}
+
+/* Athena: in basso a sinistra, fumetti accanto */
+.conf-athena{width:400px;flex-shrink:0;background:#fbf3f9;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+[data-theme="dark"] .conf-athena{background:#2a2029}
+.conf-scena{flex:1;position:relative;min-height:0;overflow:hidden}
+.conf-ombra{position:absolute;left:22px;bottom:6px;width:116px;height:14px;border-radius:50%;background:#19160b;opacity:.18}
+.conf-civetta{position:absolute;left:8px;bottom:12px;width:146px;height:auto;transform-origin:50% 100%;pointer-events:none}
+.conf-fumetti{position:absolute;left:148px;right:14px;top:12px;bottom:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:14px;overflow-y:auto}
+.conf-fumetto{position:relative;align-self:flex-start;max-width:100%;background:#fff;color:#19160b;border:2.5px solid #19160b;border-radius:18px;
+  padding:10px 14px;font-size:14px;line-height:1.45;box-shadow:3px 3px 0 #19160b;flex-shrink:0}
+.conf-fumetto.mio{align-self:flex-end;background:#e6efe2;box-shadow:-3px 3px 0 #19160b}
+.conf-coda{position:absolute;left:-17px;bottom:10px;width:20px;height:18px;overflow:visible}
+.conf-coda path{fill:#fff;stroke:#19160b;stroke-width:2.5;stroke-linejoin:round}
+.conf-fumetto.mio .conf-coda{left:auto;right:-17px;transform:scaleX(-1)}
+.conf-fumetto.mio .conf-coda path{fill:#e6efe2}
+.conf-fumetto .conf-fum-bottoni{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.conf-scrivi{padding:10px 14px 12px;border-top:1px solid rgba(25,22,11,.1);display:flex;flex-direction:column;gap:5px}
+.conf-scrivi-riga{display:flex;gap:8px}
+.conf-scrivi input{flex:1;min-width:0;height:44px;border:2px solid #19160b;border-radius:22px;padding:0 16px;font-size:14px;font-family:inherit;background:#fff;color:#19160b}
+.conf-scrivi input:disabled{background:#f4f2ea;color:#676357}
+.conf-invia{width:44px;height:44px;border-radius:22px;border:2px solid #19160b;background:#7a2f73;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.conf-invia:disabled{opacity:.45;cursor:default}
+.conf-nota-ai{font-size:11.5px;color:var(--muted)}
+.conf-fab{display:none}
+.conf-athena-chiudi{display:none}
+
+@keyframes confVive{0%,100%{transform:translateY(0) rotate(-1.6deg)}50%{transform:translateY(-7px) rotate(1.6deg)}}
+@keyframes confOmbra{0%,100%{transform:scaleX(1);opacity:.20}50%{transform:scaleX(.84);opacity:.11}}
+@keyframes confEntra{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:none}}
+.conf-civetta{animation:confVive 3.4s ease-in-out infinite}
+.conf-ombra{animation:confOmbra 3.4s ease-in-out infinite}
+.conf-fumetto.nuovo{animation:confEntra .45s ease-out both}
+@media (prefers-reduced-motion: reduce){.conf-civetta,.conf-ombra,.conf-fumetto.nuovo{animation:none}}
+
+/* benvenuto */
+.conf-benvenuto{position:relative;width:min(700px,94vw);min-height:520px;background:#fbf3f9;border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
+[data-theme="dark"] .conf-benvenuto{background:#2a2029}
+.conf-benvenuto .conf-civetta{width:210px;left:24px;bottom:34px}
+.conf-benvenuto .conf-ombra{left:44px;bottom:26px;width:170px;height:18px}
+.conf-ben-dx{position:relative;margin-left:262px;padding:40px 30px 28px 0;display:flex;flex-direction:column;gap:22px;min-height:520px;box-sizing:border-box}
+.conf-ben-dx .conf-fumetto{font-size:16.5px;padding:16px 18px;margin-top:40px}
+.conf-ben-passi{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;font-size:13px;color:var(--muted)}
+.conf-ben-bottoni{margin-top:auto;display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
+.conf-ben-bottoni .btn{min-height:48px;padding:0 22px}
+
+/* card in Home */
+.conf-card{display:flex;align-items:center;gap:14px;border:1.5px solid var(--primary);background:var(--surface);border-radius:14px;padding:12px 16px;margin-bottom:18px}
+.conf-card img{width:56px;height:auto;flex-shrink:0}
+.conf-card > div{flex:1;min-width:0}
+.conf-card b{display:block;font-size:15px}
+.conf-card span{font-size:13px;color:var(--muted)}
+
+/* telefono: quasi a tutto schermo, Athena si apre dal basso */
+@media (max-width:760px){
+  .conf-modal{width:100vw;height:100dvh;max-height:none;border-radius:0}
+  .conf-testa{padding:14px 14px 10px}
+  .conf-testa h2{font-size:19px}
+  .conf-pallini{display:none}
+  .conf-passo{padding:16px 14px 130px}
+  .conf-piede{padding:10px 14px 18px}
+  .conf-piede .conf-salvato{order:-1;flex-basis:100%;text-align:center}
+  .conf-piede .conf-avanti{flex:2}
+  .conf-piede .conf-indietro{flex:1}
+  #conf-salta,#conf-na{min-height:36px!important;padding:4px 10px;font-size:13.5px}
+  .conf-athena{position:absolute;left:0;right:0;bottom:0;width:auto;height:min(78dvh,640px);border-right:0;border-top:2.5px solid #19160b;
+    border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform .28s ease;z-index:3}
+  .conf-modal.athena-aperta .conf-athena{transform:none}
+  .conf-athena-chiudi{display:flex;align-self:flex-end;margin:8px 10px 0}
+  .conf-civetta{width:108px;left:4px}
+  .conf-ombra{left:14px;width:88px}
+  .conf-fumetti{left:112px;right:10px}
+  .conf-fab{display:flex;position:absolute;left:6px;bottom:104px;align-items:flex-end;gap:6px;border:0;background:transparent;padding:0;cursor:pointer;z-index:2}
+  .conf-fab img{width:84px;height:auto;animation:confVive 3.4s ease-in-out infinite;transform-origin:50% 100%}
+  .conf-fab span{margin-bottom:46px;background:#fff;color:#19160b;border:2.5px solid #19160b;border-radius:16px;padding:6px 10px;font-size:13.5px;font-weight:700;box-shadow:3px 3px 0 #19160b}
+  .conf-modal.athena-aperta .conf-fab{display:none}
+  .conf-benvenuto .conf-civetta{width:130px;left:10px;bottom:auto;top:24px}
+  .conf-benvenuto .conf-ombra{display:none}
+  .conf-ben-dx{margin-left:0;padding:24px 18px 20px}
+  .conf-ben-dx .conf-fumetto{margin:0 0 0 128px;font-size:15px}
+  .conf-ben-passi{grid-template-columns:1fr}
+}
+@media (max-width:760px) and (prefers-reduced-motion: reduce){.conf-fab img{animation:none}}
+
+/* B2: i moduli dentro i passi */
+.conf-griglia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+@media (max-width:760px){.conf-griglia{grid-template-columns:1fr}}
+.conf-campo{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--text)}
+.conf-campo .input{min-height:44px;font-weight:400}
+.conf-facolt{font-weight:400;color:var(--muted);font-size:12px}
+.conf-nota{font-size:12.5px!important;color:var(--muted)}
+.conf-check{display:flex;align-items:center;gap:10px;font-size:14px;min-height:44px}
+.conf-check input{width:20px;height:20px}
+.conf-avviso{background:#fff7e6;border:1.5px solid #e8b04b;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;color:#19160b}
+[data-theme="dark"] .conf-avviso{background:rgba(232,176,75,.14);color:var(--text)}
+.conf-bottoni-riga{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.conf-bottoni-riga .btn{min-height:44px}
+.conf-logo-ant img{max-height:64px;max-width:200px;border-radius:8px;border:1px solid var(--border);padding:4px;background:#fff}
+.conf-gia-presente{background:var(--muted-bg)}
+#sidebar-centro-logo{max-height:28px;max-width:110px;border-radius:4px;margin-top:4px;object-fit:contain}
+
+/* B3: Athena che compila */
+.conf-proposto{border-color:var(--primary)!important;background:#f3f7f1!important;box-shadow:0 0 0 2px rgba(63,93,58,.18)}
+[data-theme="dark"] .conf-proposto{background:rgba(106,154,96,.16)!important}
+.conf-fumetto.pensa{color:#676357;font-style:italic}
