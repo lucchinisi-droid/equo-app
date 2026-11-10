@@ -9,6 +9,9 @@ import { richiesteCache, testoRichiesta } from "./054-richieste-di-appuntamento-
 import { agAttivaTrascina, agOrdinaGiro } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 import { pmPannelloGiorno } from "./111-promemoria-personali.js";
 import { lcRender, lcTogli } from "./118-lista-cavalli-scadenze.js";
+
+// SQL 55 (10/11/2026): un appuntamento con la scuderia ancora da confermare si può segnare fatto se la data è oggi o passata
+const fattoOkStruttura = e => e.stato !== "proposto" || String(e.data_intervento || "") <= new Date().toLocaleDateString("sv-SE");
 /* ---------- APPUNTAMENTI CON STRUTTURE EQUO SCUDERIA (doppia conferma, più cavalli) ---------- */
 async function azioneGruppoStruttura(gruppoId, azione){
   const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", { p_gruppo_id: gruppoId, p_azione: azione });
@@ -126,7 +129,7 @@ function agRigaEvento(e, di){
         </div>
         ${e.stato === "fatto"
           ? '<span class="ag-ev-done">✓ Fatto</span>'
-          : e.stato === "proposto"
+          : !fattoOkStruttura(e)
             ? '<span class="ag-ev-done" style="color:var(--accent)">attesa</span>'
           : e.stato === "richiesto"
             ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>`

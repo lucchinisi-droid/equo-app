@@ -3138,6 +3138,7 @@ textarea.input{resize:vertical}
   <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
     <div class="modal-title"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span class="pro-avatar" id="scheda-pro-avatar" style="width:34px;height:34px;font-size:15px"><i class="fa-solid fa-user"></i></span><span id="scheda-pro-nome" style="overflow:hidden;text-overflow:ellipsis">Professionista</span></span> <span class="x" onclick="chiudiSchedaProfessionista()">✕</span></div>
     <div id="scheda-pro-sotto" style="color:var(--muted);font-size:12.5px;margin:-6px 0 12px"></div>
+    <div id="scheda-pro-fiducia"></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
       <button class="btn btn-outline btn-sm" onclick="schedaProApri('chat')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
       <button class="btn btn-outline btn-sm" onclick="schedaProApri('appuntamenti')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
@@ -8527,7 +8528,8 @@ function renderProfessionistiList(){
       + (p.senza_piva ? ' <span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px" title="Il professionista non ha ancora inserito P.IVA o codice fiscale nel suo profilo Equo"><i class="fa-solid fa-triangle-exclamation"></i> P.IVA/CF mancante</span>' : "");
     let stato = "", azioni = "";
     if(p.stato === "attivo"){
-      stato = '<span style="color:#2f8a4e;font-weight:600">Collegato</span>';
+      stato = '<span style="color:#2f8a4e;font-weight:600">Collegato</span>'
+        + (p.di_fiducia ? ' · <span style="color:#2f8a4e;font-weight:600" title="I suoi appuntamenti non hanno bisogno della vostra conferma"><i class="fa-solid fa-handshake"></i> Di fiducia</span>' : "");   // SQL 55
       azioni = `
         <button class="btn btn-outline btn-sm" onclick="apriChatProfessionista('${p.cliente_id}')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
         <button class="btn btn-outline btn-sm" onclick="apriEventiProfessionista('${p.cliente_id}')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
@@ -9158,6 +9160,7 @@ async function apriSchedaProfessionista(clienteId){
   document.getElementById("scheda-pro-avatar").innerHTML = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : '<i class="fa-solid fa-user"></i>';
   document.getElementById("scheda-pro-sotto").textContent = "Maniscalco collegato"
     + (p.prossimo ? ` · prossimo: ${p.prossimo.tipo} ${dataAppIt(p.prossimo.data, p.prossimo.ora)}` : "");
+  if(typeof fiduciaRender === "function") fiduciaRender(p);   // SQL 55 · maniscalco di fiducia
   ["lavori","cavalli","documenti"].forEach(t => document.getElementById("scheda-pro-" + t).innerHTML = '<p style="color:var(--muted);font-size:13px">Caricamento…</p>');
   schedaProTab("lavori");
   openModal("modal-scheda-pro");
@@ -9222,7 +9225,7 @@ function renderSchedaProLavori(filtro){
     if(l.ferro) ferri.push("n. " + escapeHtml(String(l.ferro)));
     if(l.misura) ferri.push(escapeHtml(l.misura));
     const pag = l.importo != null && l.importo !== ""
-      ? `${euroPro(l.importo)} · ${l.pagamento === "saldato" ? `<span style="color:#2f8a4e;font-weight:600">saldato${l.saldato_il ? " il " + dataBreveIt(l.saldato_il) : ""}</span>` : '<span style="color:var(--danger);font-weight:600">da saldare</span>'}` : "";
+      ? `${euroPro(l.importo)} · ${l.pagamento === "saldato" ? `<span style="color:#2f8a4e;font-weight:600">saldato${l.saldato_il ? " il " + dataBreveIt(l.saldato_il) : ""}</span>` : '<span style="color:var(--danger);font-weight:600">da saldare</span>'}` : l.paga_proprietario ? '<span style="color:var(--muted)">paga il proprietario</span>' : "";   // SQL 56
     return `<div class="msg-item">
       <div style="display:flex;justify-content:space-between;gap:6px 10px;align-items:flex-start;flex-wrap:wrap">
         <div style="font-weight:700;font-size:14px;min-width:0;flex:1 1 200px">${escapeHtml(dataAppIt(l.data, l.ora))} · ${escapeHtml(l.tipo || "Lavoro")}${l.cavallo ? ` · <span style="font-weight:600">${escapeHtml(l.cavallo)}</span>` : ""}</div>
@@ -9448,6 +9451,41 @@ function aggiungiPropostaPro(riga, btn){
   });
   if(typeof quandoApriSezione === "function") agganciaPropCavalli(); else document.addEventListener("DOMContentLoaded", agganciaPropCavalli);
 })();
+/* =====================================================================
+   MANISCALCO DI FIDUCIA (10/11/2026 · SQL 55) — script normale: funzioni globali.
+   Nella scheda del maniscalco: con il flag acceso i suoi appuntamenti nascono già confermati (anche se sposta
+   data o servizio) e la scuderia riceve solo l'avviso in chat. Lo decide l'amministratore o un livello 2-3.
+   ===================================================================== */
+function fiduciaRender(p){
+  const box = document.getElementById("scheda-pro-fiducia"); if(!box || !p) return;
+  if(p.categoria && p.categoria !== "maniscalco"){ box.innerHTML = ""; return; }
+  const puo = typeof puoCollegareProfessionisti === "function" ? puoCollegareProfessionisti() : false;
+  const on = !!p.di_fiducia;
+  box.innerHTML = `<div class="card" style="padding:12px 14px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start;${on ? "border-color:rgba(47,138,78,.45)" : ""}">
+    <i class="fa-solid fa-handshake" style="color:${on ? "#2f8a4e" : "var(--muted)"};font-size:18px;margin-top:2px"></i>
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:700;font-size:14px">Maniscalco di fiducia</div>
+      <div style="color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:2px">${on
+        ? "Si organizza da solo: i suoi appuntamenti sono già confermati e voi ricevete solo l'avviso in chat."
+        : "Ogni appuntamento che propone aspetta la vostra conferma. Il lavoro di oggi può comunque segnarlo fatto."}</div>
+    </div>
+    ${puo ? `<button class="btn ${on ? "btn-ghost" : "btn-primary"} btn-sm" style="flex-shrink:0" onclick="fiduciaCambia('${p.cliente_id}', ${!on}, this)">${on ? "Spegni" : "Accendi"}</button>`
+          : `<span style="font-size:12px;font-weight:700;color:${on ? "#2f8a4e" : "var(--muted)"}">${on ? "Attivo" : "Spento"}</span>`}
+  </div>`;
+}
+async function fiduciaCambia(clienteId, on, el){
+  if(on && !confirm("Accendere «maniscalco di fiducia»? I suoi appuntamenti non avranno più bisogno della vostra conferma (quelli in attesa diventano confermati).")) return;
+  el.disabled = true;
+  const p = professionistiList.find(x => x.cliente_id === clienteId);
+  if(DEMO_MODE){ if(p) p.di_fiducia = on; showToast(on ? "Maniscalco di fiducia attivo (demo)." : "Tolto (demo)."); fiduciaRender(p); renderProfessionistiList(); return; }
+  const { data, error } = await sb.rpc("scuderia_pro_fiducia", { p_cliente: clienteId, p_on: on });
+  el.disabled = false;
+  if(error || !data?.ok){ showToast((data && data.errore) || "Non riuscito, riprova."); return; }
+  if(p) p.di_fiducia = on;
+  showToast(on ? "Maniscalco di fiducia attivo" + (data.confermati ? ` · ${data.confermati} appuntament${data.confermati === 1 ? "o confermato" : "i confermati"}` : "") + "." : "Tolto: i nuovi appuntamenti tornano da confermare.");
+  fiduciaRender(p);
+  if(typeof renderProfessionistiList === "function") renderProfessionistiList();
+}
 // Equo App · cavalli · STATO CONDIVISO: variabili che anche altre parti dell'app leggono o cambiano.
 // Script classico caricato PRIMA dei moduli cavalli e dello script principale: qui solo dati, nessuna funzione.
 // da 039-cavalli-salute.js

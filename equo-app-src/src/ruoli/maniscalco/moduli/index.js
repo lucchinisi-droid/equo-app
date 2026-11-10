@@ -58,7 +58,7 @@ import { creaCavalloUnico, creaClienteUnico, onbScansionaCavallo, onbSollecita }
 import { avvisaNuovoSeCollegato, clientePaganteCavallo, prossimaAutomatica, segnaFatto } from "./117-segna-fatto.js";
 import { tcChiudi, tcImpostaLettura, tcLettura, tcNaviga, tcRiepilogo, tcSalvaCasaQui, tcSalvaMattina, tcScegliKm, tcTornaACasa } from "./114-torna-a-casa.js";
 import { pagResiduo, pagModoScegli, pagChiediModo, pagSaldaConModo, pagApri, pagApriRate, pagElimina, pagImporto, pagNumeroRate, pagRegistra, pagRiga, pagSalvaSoloRate, pagSet, pagSollecita, pagTogliRate } from "./113-pagamenti-a-rate.js";
-import { acavSesso, apriAnagraficaCavallo, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
+import { acavSesso, apriAnagraficaCavallo, cavChiPaga, cavIntervalloCambia, cavPrezzoModifica, cavPrezzoSalva, salvaAnagraficaCavallo, testoAnagraficaCavallo } from "./103-intervallo-prezzo-anagrafica-cavallo.js";
 import { cicloCambia, cicloTogli, fissaProssimoGiro } from "./102-scadenze-della-struttura.js";
 import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } from "./101-importazione-vecchia-app.js";
 
@@ -106,6 +106,7 @@ Object.assign(window, {
   pagTogliRate,
   cavPrezzoModifica,
   cavPrezzoSalva,
+  cavChiPaga,
   apriScadenzaCavallo,
   richiamoAnteprima,
   richiamoCambiaData,

@@ -39,7 +39,23 @@ function riquadroIntervalloPrezzo(cv, clienteId, storico){
       <span class="cav-int-t">Intervallo di ferratura: <b id="cav-int-val">${e.giorni} giorni</b>${mio ? "" : ` <small>(${TESTO_DA[e.da]})</small>`}</span>
       <span class="cav-int-step"><button type="button" onclick="cavIntervalloCambia(-1)" aria-label="Meno giorni">−</button><button type="button" onclick="cavIntervalloCambia(1)" aria-label="Più giorni">+</button></span>
     </div>
-    <div class="cav-prezzo" id="cav-prezzo">${prezzoRigaHtml(prezzo)}</div>`;
+    <div class="cav-prezzo" id="cav-prezzo">${prezzoRigaHtml(prezzo)}</div>${chiPagaHtml(cv, clienteId)}`;
+}
+// SQL 56 (10/11/2026): cavallo nella scheda di una struttura Equo → chi paga i lavori. Se paga il proprietario,
+// la scuderia vede il lavoro ma non il prezzo né il pagamento, e il lavoro non entra nel conto della struttura.
+function chiPagaHtml(cv, clienteId){
+  const c = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find(x => x.id === (cv.cliente_mascalcia_id || clienteId));
+  if(!c || !c.centro_id) return "";
+  const prop = cv.chi_paga === "proprietario";
+  const b = (v, t, on) => `<button type="button" class="btn ${on ? "btn-primary" : "btn-outline"} btn-sm" onclick="cavChiPaga('${v}')">${t}</button>`;
+  return `<div class="cav-prezzo" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <span style="font-size:13px">Chi paga i lavori:</span>${b("struttura", "La struttura", !prop)}${b("proprietario", "Il proprietario", prop)}
+      ${prop ? '<span class="muted" style="font-size:11.5px;width:100%">La struttura vede il lavoro ma non il prezzo.</span>' : ""}</div>`;
+}
+async function cavChiPaga(v){
+  const cv = schedaCavalli.find(c => c.key === schedaCavalloKey);
+  if(!cv || (cv.chi_paga || "struttura") === v) return;
+  await salvaCampiCavallo(cv, { chi_paga: v }, v === "proprietario" ? `${cv.nome}: paga il proprietario (la struttura non vede i prezzi)` : `${cv.nome}: paga la struttura`);
 }
 // prezzo abituale: sempre visibile (anche con gli incassi nascosti: serve sul lavoro), si cambia toccandolo
 function prezzoRigaHtml(prezzo){
@@ -83,7 +99,7 @@ async function salvaCampiCavallo(cv, campi, messaggio){
   if(!id){ ({ cavallo_cliente_id: id } = await DB.risolviCavalloPerIntervento(currentClienteId, cv)); }
   if(!id){ showToast("Non riuscito, riprova."); return false; }
   const { error } = await DB.updateCavalloCliente(id, campi);
-  if(error){ showToast(/intervallo_giorni|prezzo_ferratura/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message); return false; }
+  if(error){ showToast(/intervallo_giorni|prezzo_ferratura|chi_paga/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message); return false; }
   Object.assign(cv, campi, { id });
   [schedaCavalli, cavalliMieiLista].forEach(l => (l || []).forEach(x => { if(x !== cv && x.id === id) Object.assign(x, campi); }));
   if(messaggio) showToast(messaggio);
@@ -185,4 +201,4 @@ function testoAnagraficaCavallo(cv){
   return anagraficaRighe(cv || {}).map(([k, v]) => k.toLowerCase() + " " + v).join(", ");
 }
 
-export { cavPrezzoModifica, cavPrezzoSalva, acavSesso, anagraficaRighe, apriAnagraficaCavallo, testoAnagraficaCavallo, cavIntervalloCambia, intervalloCavallo, intervalloEffettivo, prezzoCavallo, riquadroIntervalloPrezzo, salvaAnagraficaCavallo, salvaCampiCavallo };
+export { cavChiPaga, cavPrezzoModifica, cavPrezzoSalva, acavSesso, anagraficaRighe, apriAnagraficaCavallo, testoAnagraficaCavallo, cavIntervalloCambia, intervalloCavallo, intervalloEffettivo, prezzoCavallo, riquadroIntervalloPrezzo, salvaAnagraficaCavallo, salvaCampiCavallo };

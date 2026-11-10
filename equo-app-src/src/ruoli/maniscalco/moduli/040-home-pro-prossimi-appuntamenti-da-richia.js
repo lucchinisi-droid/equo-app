@@ -6,6 +6,9 @@ import { AG_GIORNI, AG_MESI, agDescrizioneTipoPro, agNomeCavallo } from "./053-a
 import { formatDataBreve } from "./054-richieste-di-appuntamento-step-5d.js";
 import { agOrdinaGiro } from "./056-ordine-del-giro-trascina-un-cavallo-nel.js";
 import { wgRidisegna } from "./096-vista-applica-cambia-salva.js";
+
+// SQL 55 (10/11/2026): un appuntamento con la scuderia ancora da confermare si può segnare fatto se la data è oggi o passata
+const fattoOkStruttura = e => e.stato !== "proposto" || String(e.data_intervento || "") <= new Date().toLocaleDateString("sv-SE");
 /* ---------- HOME PRO: PROSSIMI APPUNTAMENTI + DA RICHIAMARE ----------
    Appuntamenti = lavoro già in agenda (semaforo: rosso passato non segnato fatto, ocra da confermare, verde confermato).
    Da richiamare = cavalli senza appuntamento la cui prossima ferratura/pareggio è vicina (rosso scaduto, ocra ≤7 gg, verde ≤30 gg). */
@@ -44,10 +47,10 @@ function hpRigaApp(e){
   const cav = agNomeCavallo(e);
   const stato = col === "rosso" ? '<span class="rosso">' + formatDataBreve(e.data_intervento) + " · non ancora segnato fatto</span>"
     : e.stato === "richiesto" ? '<span class="ocra">Richiesta del cliente · da confermare</span>'
-    : e.stato === "proposto" ? '<span class="ocra">In attesa della scuderia</span>'
+    : e.stato === "proposto" ? '<span class="ocra">In attesa della scuderia' + (fattoOkStruttura(e) ? " · puoi segnarlo fatto" : "") + '</span>'
     : `<span>${escapeHtml(agDescrizioneTipoPro(e))}</span>`;
   const btn = e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="event.stopPropagation();accettaRichiesta('${e.id}')">Accetta</button>`
-    : e.stato === "proposto" ? "" : `<button class="ag-ev-fatto" onclick="event.stopPropagation();hpSegnaFatto('${e.id}')">Fatto</button>`;
+    : !fattoOkStruttura(e) ? "" : `<button class="ag-ev-fatto" onclick="event.stopPropagation();hpSegnaFatto('${e.id}')">Fatto</button>`;
   return `<div class="hp-riga" onclick="apriAzioniEvento('${e.id}')">
     <span class="hp-dot ${col}"></span>
     <div class="hp-ora">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>

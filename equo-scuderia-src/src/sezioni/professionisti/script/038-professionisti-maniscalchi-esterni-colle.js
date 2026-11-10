@@ -64,7 +64,8 @@ function renderProfessionistiList(){
       + (p.senza_piva ? ' <span class="badge-pill badge-yellow" style="font-size:10.5px;padding:2px 8px" title="Il professionista non ha ancora inserito P.IVA o codice fiscale nel suo profilo Equo"><i class="fa-solid fa-triangle-exclamation"></i> P.IVA/CF mancante</span>' : "");
     let stato = "", azioni = "";
     if(p.stato === "attivo"){
-      stato = '<span style="color:#2f8a4e;font-weight:600">Collegato</span>';
+      stato = '<span style="color:#2f8a4e;font-weight:600">Collegato</span>'
+        + (p.di_fiducia ? ' · <span style="color:#2f8a4e;font-weight:600" title="I suoi appuntamenti non hanno bisogno della vostra conferma"><i class="fa-solid fa-handshake"></i> Di fiducia</span>' : "");   // SQL 55
       azioni = `
         <button class="btn btn-outline btn-sm" onclick="apriChatProfessionista('${p.cliente_id}')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
         <button class="btn btn-outline btn-sm" onclick="apriEventiProfessionista('${p.cliente_id}')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
@@ -695,6 +696,7 @@ async function apriSchedaProfessionista(clienteId){
   document.getElementById("scheda-pro-avatar").innerHTML = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : '<i class="fa-solid fa-user"></i>';
   document.getElementById("scheda-pro-sotto").textContent = "Maniscalco collegato"
     + (p.prossimo ? ` · prossimo: ${p.prossimo.tipo} ${dataAppIt(p.prossimo.data, p.prossimo.ora)}` : "");
+  if(typeof fiduciaRender === "function") fiduciaRender(p);   // SQL 55 · maniscalco di fiducia
   ["lavori","cavalli","documenti"].forEach(t => document.getElementById("scheda-pro-" + t).innerHTML = '<p style="color:var(--muted);font-size:13px">Caricamento…</p>');
   schedaProTab("lavori");
   openModal("modal-scheda-pro");
@@ -759,7 +761,7 @@ function renderSchedaProLavori(filtro){
     if(l.ferro) ferri.push("n. " + escapeHtml(String(l.ferro)));
     if(l.misura) ferri.push(escapeHtml(l.misura));
     const pag = l.importo != null && l.importo !== ""
-      ? `${euroPro(l.importo)} · ${l.pagamento === "saldato" ? `<span style="color:#2f8a4e;font-weight:600">saldato${l.saldato_il ? " il " + dataBreveIt(l.saldato_il) : ""}</span>` : '<span style="color:var(--danger);font-weight:600">da saldare</span>'}` : "";
+      ? `${euroPro(l.importo)} · ${l.pagamento === "saldato" ? `<span style="color:#2f8a4e;font-weight:600">saldato${l.saldato_il ? " il " + dataBreveIt(l.saldato_il) : ""}</span>` : '<span style="color:var(--danger);font-weight:600">da saldare</span>'}` : l.paga_proprietario ? '<span style="color:var(--muted)">paga il proprietario</span>' : "";   // SQL 56
     return `<div class="msg-item">
       <div style="display:flex;justify-content:space-between;gap:6px 10px;align-items:flex-start;flex-wrap:wrap">
         <div style="font-weight:700;font-size:14px;min-width:0;flex:1 1 200px">${escapeHtml(dataAppIt(l.data, l.ora))} · ${escapeHtml(l.tipo || "Lavoro")}${l.cavallo ? ` · <span style="font-weight:600">${escapeHtml(l.cavallo)}</span>` : ""}</div>

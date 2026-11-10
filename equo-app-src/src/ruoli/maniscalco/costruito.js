@@ -3499,7 +3499,7 @@
 				}));
 				(demoState.conti || []).filter((c) => c.stato !== "annullato").forEach((c) => c.righe.forEach((r) => usati.add(r.intervento_id)));
 			} else {
-				const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome)").eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`).order("data_intervento", { ascending: true });
+				const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome, chi_paga)").eq("maniscalco_id", currentUser.id).eq("stato", "fatto").or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`).order("data_intervento", { ascending: true });
 				if (error) {
 					console.error("lavoriLiberi:", error);
 					return [];
@@ -3508,7 +3508,7 @@
 				const ids = righe.map((r) => r.id);
 				if (ids.length) ((await sb.from("conti_mascalcia_righe").select("intervento_id, conti_mascalcia!inner(stato)").in("intervento_id", ids).neq("conti_mascalcia.stato", "annullato")).data || []).forEach((r) => usati.add(r.intervento_id));
 			}
-			return righe.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0 && !usati.has(i.id));
+			return righe.filter((i) => i.stato === "fatto" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0 && !usati.has(i.id) && !(i.cliente_mascalcia_id === clienteId && i.cavalli_clienti_mascalcia?.chi_paga === "proprietario"));
 		},
 		async crea(clienteId, modo, da, a, righe) {
 			if (DEMO_MODE) {
@@ -6268,6 +6268,7 @@
 		lcCache.t = 0;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
+	var fattoOkStruttura$2 = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
 	async function azioneGruppoStruttura(gruppoId, azione) {
 		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
 			p_gruppo_id: gruppoId,
@@ -6409,7 +6410,7 @@
           <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.aiutante_nome ? " · con " + escapeHtml(e.aiutante_nome) : ""}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
           ${notaModificaMan(e)}
         </div>
-        ${e.stato === "fatto" ? "<span class=\"ag-ev-done\">✓ Fatto</span>" : e.stato === "proposto" ? "<span class=\"ag-ev-done\" style=\"color:var(--accent)\">attesa</span>" : e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>` : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
+        ${e.stato === "fatto" ? "<span class=\"ag-ev-done\">✓ Fatto</span>" : !fattoOkStruttura$2(e) ? "<span class=\"ag-ev-done\" style=\"color:var(--accent)\">attesa</span>" : e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>` : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
         <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
       </div>`;
 	}
@@ -6526,6 +6527,7 @@
 		openInterventoModal(null, null, preset);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/056-ordine-del-giro-trascina-un-cavallo-nel.js
+	var fattoOkStruttura$1 = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
 	function agOrdinaGiro(l) {
 		return (l || []).slice().sort((a, b) => (a.data_intervento || "").localeCompare(b.data_intervento || "") || (a.ordine_giro ?? 1e9) - (b.ordine_giro ?? 1e9) || String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
 	}
@@ -6738,14 +6740,14 @@
 			`${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
 			escapeHtml(agDescrizioneTipoPro(e)),
 			"<span class=\"solo-incassi\">" + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
-			e.stato === "fatto" ? "<span style=\"color:var(--green);font-weight:700\">✓ Fatto</span>" : e.stato === "richiesto" ? "<span style=\"color:var(--accent);font-weight:700\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span style=\"color:var(--accent);font-weight:700\">In attesa della conferma della scuderia</span>" : "Da fare",
+			e.stato === "fatto" ? "<span style=\"color:var(--green);font-weight:700\">✓ Fatto</span>" : e.stato === "richiesto" ? "<span style=\"color:var(--accent);font-weight:700\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span style=\"color:var(--accent);font-weight:700\">In attesa della conferma della scuderia</span>" + (fattoOkStruttura$1(e) ? "<br><span class=\"muted\" style=\"font-size:12px\">La data è arrivata: puoi segnarlo fatto anche senza conferma, la scuderia riceve l'avviso.</span>" : "") : "Da fare",
 			notaModificaMan(e, true),
 			e.gruppo_id ? "<span class=\"muted\" style=\"font-size:12px\">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>" : "",
 			e.note ? escapeHtml(e.note) : ""
 		].filter(Boolean).join("<br>");
 		const btnFatto = document.getElementById("azioni-evento-fatto");
 		btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
-		btnFatto.style.display = e.stato === "proposto" ? "none" : "";
+		btnFatto.style.display = !fattoOkStruttura$1(e) ? "none" : "";
 		const btnAnnStr = document.getElementById("azioni-evento-annulla-struttura");
 		if (btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto", "programmato"].includes(e.stato) ? "" : "none";
 		const btnElim = document.getElementById("azioni-evento-elimina");
@@ -7966,6 +7968,7 @@
 		await renderProDeadlines();
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/040-home-pro-prossimi-appuntamenti-da-richia.js
+	var fattoOkStruttura = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
 	var HP_IN_HOME = 5;
 	function hpTipo(i) {
 		if (i.tipo_ferratura === "altro" && i.tipo_altro) return i.tipo_altro;
@@ -7998,8 +8001,8 @@
 	function hpRigaApp(e) {
 		const col = hpColoreApp(e);
 		const cav = agNomeCavallo(e);
-		const stato = col === "rosso" ? "<span class=\"rosso\">" + formatDataBreve(e.data_intervento) + " · non ancora segnato fatto</span>" : e.stato === "richiesto" ? "<span class=\"ocra\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span class=\"ocra\">In attesa della scuderia</span>" : `<span>${escapeHtml(agDescrizioneTipoPro(e))}</span>`;
-		const btn = e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="event.stopPropagation();accettaRichiesta('${e.id}')">Accetta</button>` : e.stato === "proposto" ? "" : `<button class="ag-ev-fatto" onclick="event.stopPropagation();hpSegnaFatto('${e.id}')">Fatto</button>`;
+		const stato = col === "rosso" ? "<span class=\"rosso\">" + formatDataBreve(e.data_intervento) + " · non ancora segnato fatto</span>" : e.stato === "richiesto" ? "<span class=\"ocra\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span class=\"ocra\">In attesa della scuderia" + (fattoOkStruttura(e) ? " · puoi segnarlo fatto" : "") + "</span>" : `<span>${escapeHtml(agDescrizioneTipoPro(e))}</span>`;
+		const btn = e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="event.stopPropagation();accettaRichiesta('${e.id}')">Accetta</button>` : !fattoOkStruttura(e) ? "" : `<button class="ag-ev-fatto" onclick="event.stopPropagation();hpSegnaFatto('${e.id}')">Fatto</button>`;
 		return `<div class="hp-riga" onclick="apriAzioniEvento('${e.id}')">
     <span class="hp-dot ${col}"></span>
     <div class="hp-ora">${e.ora ? String(e.ora).slice(0, 5) : "—"}</div>
@@ -9389,7 +9392,21 @@
       <span class="cav-int-t">Intervallo di ferratura: <b id="cav-int-val">${e.giorni} giorni</b>${mio ? "" : ` <small>(${TESTO_DA[e.da]})</small>`}</span>
       <span class="cav-int-step"><button type="button" onclick="cavIntervalloCambia(-1)" aria-label="Meno giorni">−</button><button type="button" onclick="cavIntervalloCambia(1)" aria-label="Più giorni">+</button></span>
     </div>
-    <div class="cav-prezzo" id="cav-prezzo">${prezzoRigaHtml(prezzo)}</div>`;
+    <div class="cav-prezzo" id="cav-prezzo">${prezzoRigaHtml(prezzo)}</div>${chiPagaHtml(cv, clienteId)}`;
+	}
+	function chiPagaHtml(cv, clienteId) {
+		const c = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === (cv.cliente_mascalcia_id || clienteId));
+		if (!c || !c.centro_id) return "";
+		const prop = cv.chi_paga === "proprietario";
+		const b = (v, t, on) => `<button type="button" class="btn ${on ? "btn-primary" : "btn-outline"} btn-sm" onclick="cavChiPaga('${v}')">${t}</button>`;
+		return `<div class="cav-prezzo" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <span style="font-size:13px">Chi paga i lavori:</span>${b("struttura", "La struttura", !prop)}${b("proprietario", "Il proprietario", prop)}
+      ${prop ? "<span class=\"muted\" style=\"font-size:11.5px;width:100%\">La struttura vede il lavoro ma non il prezzo.</span>" : ""}</div>`;
+	}
+	async function cavChiPaga(v) {
+		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
+		if (!cv || (cv.chi_paga || "struttura") === v) return;
+		await salvaCampiCavallo(cv, { chi_paga: v }, v === "proprietario" ? `${cv.nome}: paga il proprietario (la struttura non vede i prezzi)` : `${cv.nome}: paga la struttura`);
 	}
 	function prezzoRigaHtml(prezzo) {
 		return `<button type="button" class="cav-prezzo-riga" onclick="cavPrezzoModifica()">Prezzo abituale: ${prezzo != null ? `<b>${escapeHtml(formatEuro(prezzo))}</b>` : "<i>non impostato</i>"} <span>✎</span></button>`;
@@ -9443,7 +9460,7 @@
 		}
 		const { error } = await DB.updateCavalloCliente(id, campi);
 		if (error) {
-			showToast(/intervallo_giorni|prezzo_ferratura/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
+			showToast(/intervallo_giorni|prezzo_ferratura|chi_paga/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Errore: " + error.message);
 			return false;
 		}
 		Object.assign(cv, campi, { id });
@@ -16011,6 +16028,7 @@
 		pagTogliRate,
 		cavPrezzoModifica,
 		cavPrezzoSalva,
+		cavChiPaga,
 		apriScadenzaCavallo,
 		richiamoAnteprima,
 		richiamoCambiaData,

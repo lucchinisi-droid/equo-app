@@ -6,6 +6,9 @@ import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipoPro, agNomeCavallo, renderA
 import { segnaFatto } from "./117-segna-fatto.js";
 import { accettaRichiesta, agDisegnaGriglia, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { generaPdfEvento, inviaEventoInChat } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
+
+// SQL 55 (10/11/2026): un appuntamento con la scuderia ancora da confermare si può segnare fatto se la data è oggi o passata
+const fattoOkStruttura = e => e.stato !== "proposto" || String(e.data_intervento || "") <= new Date().toLocaleDateString("sv-SE");
 /* ---------- ORDINE DEL GIRO: trascina un cavallo nel suo cliente o un cliente intero ---------- */
 function agOrdinaGiro(l){
   return (l || []).slice().sort((a, b) => (a.data_intervento || "").localeCompare(b.data_intervento || "")
@@ -164,14 +167,14 @@ function apriAzioniEvento(id){
     `${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
     escapeHtml(agDescrizioneTipoPro(e)),
     '<span class="solo-incassi">' + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
-    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della scuderia</span>' : "Da fare",
+    e.stato === "fatto" ? '<span style="color:var(--green);font-weight:700">✓ Fatto</span>' : e.stato === "richiesto" ? '<span style="color:var(--accent);font-weight:700">Richiesta del cliente · da confermare</span>' : e.stato === "proposto" ? '<span style="color:var(--accent);font-weight:700">In attesa della conferma della scuderia</span>' + (fattoOkStruttura(e) ? '<br><span class="muted" style="font-size:12px">La data è arrivata: puoi segnarlo fatto anche senza conferma, la scuderia riceve l\'avviso.</span>' : "") : "Da fare",
     notaModificaMan(e, true),
     e.gruppo_id ? '<span class="muted" style="font-size:12px">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>' : "",
     e.note ? escapeHtml(e.note) : ""
   ].filter(Boolean).join("<br>");
   const btnFatto = document.getElementById("azioni-evento-fatto");
   btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
-  btnFatto.style.display = e.stato === "proposto" ? "none" : "";
+  btnFatto.style.display = !fattoOkStruttura(e) ? "none" : "";
   const btnAnnStr = document.getElementById("azioni-evento-annulla-struttura");
   if(btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto","programmato"].includes(e.stato) ? "" : "none";
   const btnElim = document.getElementById("azioni-evento-elimina");

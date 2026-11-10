@@ -187,7 +187,7 @@ const ContoDB = {
         .map(i => ({ ...i, cavalli_clienti_mascalcia: (demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id) ? { nome: demoState.cavalliClientiMascalcia.find(x => x.id === i.cavallo_cliente_id).nome } : null) }));
       (demoState.conti || []).filter(c => c.stato !== "annullato").forEach(c => c.righe.forEach(r => usati.add(r.intervento_id)));
     } else {
-      const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome)")
+      const { data, error } = await sb.from("interventi_mascalcia").select("*, cavalli_clienti_mascalcia(nome, chi_paga)")
         .eq("maniscalco_id", currentUser.id).eq("stato", "fatto")
         .or(`cliente_mascalcia_id.eq.${clienteId},luogo_cliente_id.eq.${clienteId}`)
         .order("data_intervento", { ascending: true });
@@ -199,7 +199,9 @@ const ContoDB = {
         (u.data || []).forEach(r => usati.add(r.intervento_id));
       }
     }
-    return righe.filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0 && !usati.has(i.id));
+    // SQL 56: i lavori dei cavalli che paga il proprietario non entrano nel conto della struttura
+    return righe.filter(i => i.stato === "fatto" && i.stato_pagamento !== "saldato" && Number(i.importo) > 0 && !usati.has(i.id)
+      && !(i.cliente_mascalcia_id === clienteId && i.cavalli_clienti_mascalcia?.chi_paga === "proprietario"));
   },
   async crea(clienteId, modo, da, a, righe){
     if(DEMO_MODE){
