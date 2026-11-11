@@ -6951,6 +6951,10 @@
 				agLuoghi[l.key] = l;
 			}
 			gruppi.get(l.key).ev.push(x);
+			if (typeof vapRigaAperti === "function" && typeof vaaAperto === "function" && typeof eVeterinario === "function" && eVeterinario() && vaaAperto(x)) {
+				(gruppi.get(l.key).aperti = gruppi.get(l.key).aperti || []).push(x);
+				return;
+			}
 			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId$1(x.cliente_mascalcia_id)?.nome || "" : "";
 			gruppi.get(l.key).righe.push(riga(x, di));
 		};
@@ -6974,7 +6978,7 @@
       <div class="ag-gblock${et && et.cls ? " " + et.cls : ""}" data-cli="${escapeHtml(k)}">
         <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span>${et ? et.html : `<span>${gr.righe.length}</span>`}
           <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some((e) => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
-        <div class="ag-gr">${gr.righe.join("")}</div>
+        <div class="ag-gr">${gr.aperti ? vapRigaAperti(gr.aperti) : ""}${gr.righe.join("")}</div>
       </div>`;
 		}).join("");
 		return `<div class="ag-pannello" data-iso="${d.iso}">
@@ -8658,6 +8662,7 @@
 			return;
 		}
 		box.style.display = "";
+		if (typeof vetRichiamiStruttura === "function" && typeof eVeterinario === "function" && eVeterinario()) return vetRichiamiStruttura(c, box);
 		const g = intervalloStruttura(c.id);
 		box.innerHTML = `<div class="ciclo-tit">Scadenze della struttura</div>
     <div class="ciclo-riga"><span>Ferratura ogni</span>
@@ -11652,6 +11657,10 @@
         <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this).then(() => closeClienteDetail())">Rifiuta</button></div>` : ""}
       <button class="btn btn-ghost btn-sm" id="cliente-scollega-btn" style="width:100%;color:var(--red)" onclick="scollegaStrutturaCorrente()">${c.collegamento_stato === "attivo" ? "Scollega da Equo Scuderia" : "Annulla richiesta"}</button>`;
+		} else if (isStruttura(c) && isManiscalcoUtente() && typeof eVeterinario === "function" && eVeterinario()) {
+			if (qrCard) qrCard.style.display = "none";
+			boxScud.style.display = "none";
+			boxScud.innerHTML = "";
 		} else if (isStruttura(c) && isManiscalcoUtente()) {
 			if (qrCard) qrCard.style.display = "none";
 			boxScud.style.display = "block";
@@ -15261,7 +15270,7 @@
 			const gg = giorniTra(g.data, oggi);
 			return `<div class="ag-gruppo">
         <div class="ag-gruppo-t"><div><b>${escapeHtml(formatDataBreve(g.data))} · ${escapeHtml(g.nome)}</b><small>${g.righe.length} ${g.righe.length === 1 ? "cavallo" : "cavalli"}</small></div><span class="ag-pill r">${gg === 1 ? "ieri" : gg + " giorni fa"}</span></div>
-        ${g.righe.map((e) => `<div class="ag-riga"><div class="ag-riga-c" onclick="apriAzioniEvento('${e.id}')"><b>${escapeHtml(nomeCav(e))}</b><small>${escapeHtml(tipoLav(e))}${e.gruppo_id ? " · con la scuderia" : ""}</small></div><button type="button" class="btn btn-primary btn-sm" onclick="segnaFattoAgenda('${e.id}')">Fatto</button><button type="button" class="ag-piu" onclick="apriAzioniEvento('${e.id}')" aria-label="Altre azioni">⋯</button></div>`).join("")}
+        ${g.righe.map((e) => `<div class="ag-riga"><div class="ag-riga-c" onclick="apriAzioniEvento('${e.id}')"><b>${escapeHtml(nomeCav(e))}</b><small>${escapeHtml(tipoLav(e))}${e.gruppo_id ? " · con la scuderia" : ""}</small></div><button type="button" class="btn btn-primary btn-sm" onclick="segnaFattoAgenda('${e.id}')">${typeof vaaAperto === "function" && vaaAperto(e) ? "Segna i cavalli" : "Fatto"}</button><button type="button" class="ag-piu" onclick="apriAzioniEvento('${e.id}')" aria-label="Altre azioni">⋯</button></div>`).join("")}
         <div class="agc-azioni"><label class="ag-sposta"><span>Sposta al</span><input type="date" id="ag-nf-data-${n}" min="${oggi}" value="${agDataProposta(oggi)}"></label><button type="button" class="btn btn-outline btn-sm" onclick="agNfSposta(${n})">Sposta</button><button type="button" class="btn btn-outline btn-sm ag-rosso" onclick="agNfAnnulla(${n})">Annulla</button></div>
       </div>`;
 		}).join("") : "<div class=\"ag-vuoto\">✓ Tutto in ordine</div>"}`;

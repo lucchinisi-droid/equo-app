@@ -10,6 +10,10 @@
 //     cavallo all'altro), costo (quello dell'ultima volta). «Salva e vai al lavoro N».
 //  4. Chiuso l'ultimo lavoro: i documenti. Certificato di vaccinazione per ogni cavallo vaccinato (al proprietario e alla struttura),
 //     riepilogo e conto a chi paga (il cliente dell'appuntamento). Il referto delle visite si fa dalla scheda della visita (08).
+// 11/11/2026 (Simone, mockup «Visita in corso» approvato): «Fatto» confondeva. Per l'appuntamento aperto il tasto è
+//  «Segna i cavalli» e apre UNA lista «Visita in corso» (righe da spuntare, «+ Aggiungi un cavallo», «Chiudi la visita e
+//  invia i documenti»); ogni riga apre il foglio del cavallo e «Salva» torna alla lista. In Home il riquadro oro
+//  «Oggi da … · Inizia ›»; in agenda una sola riga «N cavalli da segnare». Scheda della scuderia: richiami vaccinali.
 // Più avanti: lo stesso per il maniscalco (es. pareggi a più cavalli dello stesso maneggio), in lista delle cose da fare.
 
 const VAP = { via: null, a: null, c: null, fatti: {}, passate: null, caricando: false, risolvi: null, vacc: null };
@@ -22,7 +26,7 @@ const VAP_TIPI = ["vaccino", "visita", "terapia", "fisio", "mtc", "altro"];
 const VAP_DURATA = { vaccino: 15, visita: 30, terapia: 30, fisio: 45, mtc: 45, urgenza: 45, altro: 30, posto: 20 };
 const VAP_PLURALE = { vaccino: "vaccini", visita: "visite", terapia: "terapie", fisio: "sedute di fisioterapia", mtc: "sedute MTC", urgenza: "urgenze", altro: "lavori" };
 const vaaVet = () => typeof eVeterinario === "function" && eVeterinario();
-const vaaAperto = e => !!e && !e.cavallo_cliente_id && !e.horse_id && e.stato !== "fatto" && !["annullato", "rifiutato"].includes(e.stato);
+const vaaAperto = e => !!e && !(VAP.tolti && VAP.tolti.has(e.id)) && !e.cavallo_cliente_id && !e.horse_id && e.stato !== "fatto" && !["annullato", "rifiutato"].includes(e.stato);
 const vapDaDecidere = e => !e || (e.tipo_altro || "") === VAP_DECIDERE;
 const vapEtTipo = t => TIPO_FERRATURA_LABELS?.[t] || "Visita";
 const vapNomeCliente = id => (typeof clienteDiId === "function" ? clienteDiId(id)?.nome : "") || "Cliente";
@@ -86,10 +90,11 @@ function vapAddMin(ora, min){
   const [h, m] = String(ora).split(":").map(Number), t = h * 60 + m + min;
   return String(Math.floor(t / 60) % 24).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
 }
-function vapApriAperto(){
+function vapApriAperto(pre){
   const ora = new Date(), mezz = new Date(Math.ceil((ora.getTime() + 15 * 6e4) / 18e5) * 18e5);
   const oraProposta = isoLocale(mezz) === vapOggi() ? mezz.toTimeString().slice(0, 5) : "";   // dopo mezzanotte: niente ora proposta
   VAP.a = { cid: "", nuovo: "", cerca: "", quando: "oggi", data: vapOggi(), ora: oraProposta, n: 1, slot: ["posto"], prev: null, err: "" };
+  if(pre) Object.assign(VAP.a, pre);
   vapFoglio("modal-vap-aperto", "vap-modal", true);
   vapDisegnaAperto();
   openModal("modal-vap-aperto");
@@ -224,7 +229,7 @@ async function vapLavoriDelGiorno(cid, giorno){
   else{ try{ l = (await DB.listInterventiPeriodo(giorno, giorno)) || []; }catch(_){ l = []; } }
   const hp = typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti || [] : [];
   return [...l, ...hp].filter((e, i, a) => a.findIndex(x => x.id === e.id) === i)
-    .filter(e => e.cliente_mascalcia_id === cid && e.data_intervento === giorno && !["annullato", "rifiutato"].includes(e.stato))
+    .filter(e => e.cliente_mascalcia_id === cid && e.data_intervento === giorno && !["annullato", "rifiutato"].includes(e.stato) && !(VAP.tolti && VAP.tolti.has(e.id)))
     .sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
 }
 async function vapPrezzoPrevisto(cid, tipo, e){
@@ -241,33 +246,92 @@ function vapVaccMemoria(){
 }
 
 // segnaFatto (117) → per un appuntamento senza cavallo
-async function vaaFatto(e){
-  if(VAP.risolvi){ VAP.risolvi({ ok: false }); VAP.risolvi = null; }
+// segnaFatto (117) e «Segna i cavalli» → la lista «Visita in corso» del posto e del giorno di questo appuntamento
+async function vaaFatto(e){ return vapInCorso(e); }
+async function vapInCorso(e){
+  if(VAP.ic?.risolvi){ const f = VAP.ic.risolvi; VAP.ic.risolvi = null; f({ ok: false }); }
   const giorno = e.data_intervento && e.data_intervento <= vapOggi() ? e.data_intervento : vapOggi();
-  const cid = e.cliente_mascalcia_id;
-  // i lavori di questo appuntamento aperto: quelli ancora senza cavallo e quelli già chiusi qui (non le altre visite del giorno)
-  // (un appuntamento di un altro giorno chiuso oggi passa a oggi: si guardano tutti e due i giorni; prima i già chiusi, poi gli aperti per ora)
-  const chiusi = VAP.fatti[vapChiave(cid, giorno)] || [];
-  const giorni = [...new Set([e.data_intervento || giorno, giorno])];
-  const tutti = []; for(const g of giorni) (await vapLavoriDelGiorno(cid, g)).forEach(x => { if(!tutti.some(y => y.id === x.id)) tutti.push(x); });
-  const lavori = [...chiusi.map(id => tutti.find(x => x.id === id)).filter(Boolean),
-    ...tutti.filter(x => !chiusi.includes(x.id) && (x.id === e.id || vaaAperto(x))).sort((p, q) => String(p.ora || "99").localeCompare(String(q.ora || "99")))];
+  VAP.ic = { cid: e.cliente_mascalcia_id, giorno, giorni: [...new Set([e.data_intervento || giorno, giorno])], ora: e.ora || null, lavori: [], risolvi: null, fattiQui: 0 };
+  await vapIcCarica();
+  vapFoglio("modal-vic", "vap-modal vic-modal", false);
+  vapIcDisegna();
+  openModal("modal-vic");
+  return new Promise(res => { VAP.ic.risolvi = res; });
+}
+// lavori della visita: quelli già segnati qui (fatti, con il cavallo) e quelli ancora senza cavallo
+async function vapIcCarica(){
+  const ic = VAP.ic, tutti = [];
+  for(const g of ic.giorni) (await vapLavoriDelGiorno(ic.cid, g)).forEach(x => { if(!tutti.some(y => y.id === x.id)) tutti.push(x); });
+  const chiusi = VAP.fatti[vapChiave(ic.cid, ic.giorno)] || [];
+  const fatti = tutti.filter(x => x.stato === "fatto" && x.cavallo_cliente_id && (chiusi.includes(x.id) || x.data_intervento === ic.giorno))
+    .sort((p, q) => (chiusi.indexOf(p.id) + 1 || 999) - (chiusi.indexOf(q.id) + 1 || 999));
+  const aperti = tutti.filter(vaaAperto).sort((p, q) => String(p.ora || "99").localeCompare(String(q.ora || "99")) || String(p.created_at || "").localeCompare(String(q.created_at || "")));
+  ic.lavori = [...fatti, ...aperti];
+  ic.tutti = tutti;
+}
+function vapIcNomeCav(id){
+  const c = (typeof cavalliCartella === "function" ? cavalliCartella() : []).find(x => x.id === id) || (DEMO_MODE ? (demoState.cavalliClientiMascalcia || []).find(x => x.id === id) : null);
+  return c?.nome || "Cavallo";
+}
+function vapIcDisegna(){
+  const box = document.getElementById("modal-vic-corpo"); if(!box || !VAP.ic) return;
+  const ic = VAP.ic, n = ic.lavori.length, fatti = ic.lavori.filter(x => !vaaAperto(x)), vuoti = n - fatti.length;
+  const tot = fatti.reduce((t, x) => t + (Number(x.importo) > 0 ? Number(x.importo) : 0), 0);
+  const quando = ic.giorno === vapOggi() ? "oggi" : new Date(ic.giorno + "T12:00").toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+  box.innerHTML = `<div class="modal-title" id="modal-vic-tit">Visita in corso</div>
+    <div class="vaa-sotto-tit">${vaaEsc(vapNomeCliente(ic.cid))} · ${quando}${ic.ora ? " " + String(ic.ora).slice(0, 5) : ""}</div>
+    <div class="vic-prog"><div><span>${fatti.length} di ${n} ${n === 1 ? "cavallo segnato" : "cavalli segnati"}</span><span>${tot > 0 ? formatEuro(tot) : ""}</span></div>
+      <i><b style="width:${n ? Math.round(fatti.length / n * 100) : 0}%"></b></i></div>
+    <div class="vic-lista">${ic.lavori.map((x, i) => vaaAperto(x)
+      ? `<button type="button" class="vic-riga vuota" onclick="vapApriLavoro('${x.id}')"><span class="n">${i + 1}</span><span class="c"><b>${vaaEsc(vapDaDecidere(x) ? "Da decidere" : vapEtTipo(x.tipo_ferratura))}</b><small>Tocca per segnare il cavallo</small></span><span class="fr" aria-hidden="true">›</span></button>`
+      : `<div class="vic-riga ok"><span class="n">✓</span><span class="c"><b>${vaaEsc(vapIcNomeCav(x.cavallo_cliente_id))}</b><small>${vaaEsc(x.tipo_altro || vapEtTipo(x.tipo_ferratura))}</small></span><span class="p">${Number(x.importo) > 0 ? formatEuro(Number(x.importo)) : ""}</span></div>`).join("")}
+      <button type="button" class="vic-agg" id="vic-agg" onclick="vapAggiungiLavoro()" ${VAP.occupato ? "disabled" : ""}>+ Aggiungi un cavallo</button></div>
+    <button class="btn btn-primary vaa-ok" onclick="vapChiudiVisita()" ${fatti.length ? "" : "disabled"}>Chiudi la visita e invia i documenti</button>
+    <button class="btn btn-outline vaa-dopo" onclick="vapIcPiuTardi()">Continuo più tardi</button>
+    ${!fatti.length ? `<div class="vaa-nota oro">Tocca una riga per segnare il cavallo che hai visitato. ${vuoti > 1 ? "L'ordine lo scegli tu." : ""}</div>` : ""}`;
+}
+function vapIcFine(r){ closeModal("modal-vic"); const f = VAP.ic?.risolvi; if(VAP.ic) VAP.ic.risolvi = null; if(f) f(r); }
+// «Continuo più tardi»: i lavori restano aperti e «da completare» in Home
+function vapIcPiuTardi(){
+  try{ const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]"); (VAP.ic?.lavori || []).filter(vaaAperto).forEach(x => { if(!l.includes(x.id)) l.push(x.id); }); localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l.slice(-50))); }catch(_){}
+  vapIcFine({ ok: (VAP.ic?.lavori || []).some(x => !vaaAperto(x)), rimandata: true });
+  vaaAggiorna();
+}
+// «Chiudi la visita»: le righe rimaste senza cavallo si tolgono (dopo conferma), poi i documenti
+async function vapChiudiVisita(){
+  const ic = VAP.ic; if(!ic) return;
+  const vuoti = ic.lavori.filter(vaaAperto);
+  if(vuoti.length){
+    const uno = vuoti.length === 1;
+    const ok = await chiediSiNo(uno ? "Resta 1 lavoro senza cavallo" : `Restano ${vuoti.length} lavori senza cavallo`,
+      (uno ? "Lo togli e chiudi la visita" : "Li togli e chiudi la visita") + ` con ${ic.lavori.length - vuoti.length} ${ic.lavori.length - vuoti.length === 1 ? "cavallo" : "cavalli"}, oppure torni alla lista per segnarl${uno ? "o" : "i"}.`,
+      { si: uno ? "Toglilo e chiudi" : "Toglili e chiudi", no: "Torna alla lista" });
+    if(!ok) return;
+    for(const x of vuoti){ const { error } = await DB.deleteInterventoMascalcia(x.id); if(error) return showToast("Errore: " + error.message); (VAP.tolti = VAP.tolti || new Set()).add(x.id); }
+  }
+  vapIcFine({ ok: true });
+  await vaaAggiorna();
+  setTimeout(() => vapDocumenti(ic.cid, ic.giorno), 250);
+}
+// riga della lista → foglio del cavallo (sopra la lista); «Salva» torna alla lista
+async function vapApriLavoro(id){
+  const ic = VAP.ic, e = ic?.lavori.find(x => x.id === id); if(!e) return;
+  const cid = ic.cid, giorno = ic.giorno;
   const cav = await vaaCavalliDelCliente(cid);
-  const giaVisti = new Set(tutti.filter(x => x.stato === "fatto" && x.cavallo_cliente_id && x.data_intervento === giorno).map(x => x.cavallo_cliente_id));
+  const giaVisti = new Set(ic.lavori.filter(x => !vaaAperto(x) && x.cavallo_cliente_id).map(x => x.cavallo_cliente_id));
+  (ic.tutti || []).forEach(x => { if(x.stato === "fatto" && x.cavallo_cliente_id && x.data_intervento === giorno) giaVisti.add(x.cavallo_cliente_id); });
   const tipo = vapDaDecidere(e) ? null : e.tipo_ferratura;
   const v = vapVaccMemoria();
-  VAP.c = { e, giorno, cid, lavori, cavalli: cav, giaVisti, nome: "", scelto: null, chip: "", chipEsito: "",
+  VAP.c = { e, giorno, cid, lavori: ic.lavori, cavalli: cav, giaVisti, nome: "", scelto: null, chip: "", chipEsito: "",
     tipo, motivo: vapDaDecidere(e) || vaaVaccino(e) ? "" : (e.tipo_altro || ""),
     fatto: v.fatto.slice(), lotto: v.lotto, lottoScad: v.lottoScad, richiamo: v.richiamo, prezzo: tipo ? await vapPrezzoPrevisto(cid, tipo, e) : (Number(e.importo) > 0 ? String(e.importo) : "") };
   vapFoglio("modal-vaa", "vaa-modal", false);
   vapDisegnaChiusura();
   openModal("modal-vaa");
-  return new Promise(res => { VAP.risolvi = res; });
 }
 function vapNumeri(){
   const c = VAP.c, idx = c.lavori.findIndex(x => x.id === c.e.id);
-  return { k: (idx >= 0 ? idx : c.lavori.length) + 1, n: Math.max(c.lavori.length, idx + 1),
-    prossimo: c.lavori.find(x => x.id !== c.e.id && vaaAperto(x)) || null };
+  return { k: (idx >= 0 ? idx : c.lavori.length) + 1, n: Math.max(c.lavori.length, idx + 1) };
 }
 function vapSuggeriti(){
   const c = VAP.c, q = (typeof cercaNorm === "function" ? cercaNorm(c.nome) : c.nome.toLowerCase()).trim();
@@ -275,11 +339,11 @@ function vapSuggeriti(){
 }
 function vapDisegnaChiusura(){
   const box = document.getElementById("modal-vaa-corpo"); if(!box) return;
-  const c = VAP.c, e = c.e, { k, n, prossimo } = vapNumeri(), vacc = c.tipo === "vaccino";
+  const c = VAP.c, { k } = vapNumeri(), vacc = c.tipo === "vaccino";
   const sug = c.scelto ? [] : vapSuggeriti();
   const tipi = VAP_TIPI.map(t => `<button type="button" class="vs-chip${c.tipo === t ? " on" : ""}" aria-pressed="${c.tipo === t}" onclick="vapTipo('${t}')">${vaaEsc(vapEtTipo(t))}</button>`).join("");
-  box.innerHTML = `<div class="modal-title" id="modal-vaa-tit">Chi era il cavallo?</div>
-    <div class="vaa-sotto-tit">Lavoro ${k} di ${n} · ${vaaEsc(c.tipo ? vapEtTipo(c.tipo) : "da decidere")} · ${vaaEsc(vapNomeCliente(c.cid))}</div>
+  box.innerHTML = `<div class="modal-title" id="modal-vaa-tit">Lavoro ${k} · ${vaaEsc(c.tipo ? vapEtTipo(c.tipo) : "Da decidere")}</div>
+    <div class="vaa-sotto-tit">${vaaEsc(vapNomeCliente(c.cid))} · chi era il cavallo?</div>
     <div class="vaa-lab">Nome del cavallo</div>
     ${c.scelto ? `<button type="button" class="vap-dove-scelto" onclick="vapTogliCavallo()"><b>${vaaEsc(c.scelto.nome)}</b><span>${c.scelto.di ? "di " + vaaEsc(c.scelto.di) + " · " : ""}${c.scelto.microchip ? "chip " + vaaEsc(c.scelto.microchip) + " · " : ""}cambia</span></button>`
       : `<input class="input" id="vap-nome" autocomplete="off" placeholder="Scrivi il nome" value="${vaaEsc(c.nome)}" oninput="vapNome(this.value)">
@@ -298,11 +362,9 @@ function vapDisegnaChiusura(){
     <label class="vaa-prezzo base">€<input type="number" min="0" step="1" inputmode="decimal" id="vaa-prezzo-base" value="${vaaEsc(c.prezzo)}" oninput="VAP.c.prezzo = this.value">
       <small>${c.prezzo ? "proposto dall'ultima volta: lo cambi se serve" : ""}</small></label>
     <div class="auth-error" id="vaa-err" style="display:none"></div>
-    <button class="btn btn-primary vaa-ok" onclick="vaaSalva()">${prossimo ? `Salva e vai al lavoro ${k + 1} ›` : "Salva e chiudi la visita"}</button>
-    ${(c.aggiunti || []).length ? `<div class="vaa-nota vap-aggiunto" role="status"><span>✓ ${c.aggiunti.length === 1 ? "Aggiunto 1 lavoro" : "Aggiunti " + c.aggiunti.length + " lavori"}: ${c.aggiunti.length === 1 ? "lo compili" : "li compili"} dopo questo.</span><button type="button" class="vap-mini" onclick="vapTogliAggiunto()">Togli</button></div>` : ""}
-    <button class="btn btn-outline vap-altro" id="vap-altro" onclick="vapAggiungiLavoro()" ${VAP.occupato ? "disabled" : ""}>+ Un altro cavallo qui</button>
-    <button class="btn btn-outline vaa-dopo" onclick="vaaDopo()">Più tardi</button>
-    <div class="vaa-nota oro">Se esci senza nome, il lavoro resta «aperto» e te lo ricordo in Home.</div>`;
+    <button class="btn btn-primary vaa-ok" onclick="vaaSalva()">Salva</button>
+    <button class="btn btn-outline vap-togli" onclick="vapTogliLavoro()">Togli questo lavoro</button>
+    <button class="btn btn-ghost vaa-dopo" onclick="vaaDopo()">Annulla</button>`;
 }
 function vapRidisegna(idFuoco){
   const a = document.activeElement, id = idFuoco || (a && a.id) || null, pos = a && "selectionStart" in a ? a.selectionStart : null;
@@ -339,11 +401,25 @@ async function vapTipo(t){
 }
 function vaaVacc(v){ const c = VAP.c; c.fatto = c.fatto.includes(v) ? c.fatto.filter(x => x !== v) : VAA_VACCINI.filter(x => x === v || c.fatto.includes(x)); vapDisegnaChiusura(); }
 function vaaRichiamo(g){ VAP.c.richiamo = g; vapDisegnaChiusura(); }
-function vaaChiudi(r){ closeModal("modal-vaa"); const f = VAP.risolvi; VAP.risolvi = null; if(f) f(r); }
-// «Più tardi»: resta aperta e «da completare» in Home
-function vaaDopo(){
-  try{ const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]"); if(VAP.c?.e && !l.includes(VAP.c.e.id)) l.push(VAP.c.e.id); localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l.slice(-50))); }catch(_){}
-  vaaChiudi({ ok: false, rimandata: true });
+// il foglio del cavallo si chiude e si torna alla lista «Visita in corso» (ricaricata)
+async function vaaChiudi(){
+  closeModal("modal-vaa");
+  if(VAP.ic){ await vapIcCarica(); vapIcDisegna(); }
+}
+// «Annulla»: torna alla lista senza salvare
+function vaaDopo(){ closeModal("modal-vaa"); }
+// «Togli questo lavoro»: il lavoro (ancora senza cavallo) non serve
+async function vapTogliLavoro(){
+  if(VAP.occupato) return;
+  const e = VAP.c?.e; if(!e || !vaaAperto(e)) return;
+  VAP.occupato = true;
+  try{
+    const { error } = await DB.deleteInterventoMascalcia(e.id);
+    if(error) return showToast("Errore: " + error.message);
+    (VAP.tolti = VAP.tolti || new Set()).add(e.id);
+  } finally { VAP.occupato = false; }
+  showToast("Lavoro tolto");
+  await vaaChiudi();
   vaaAggiorna();
 }
 function vaaDescrizione(){
@@ -391,44 +467,31 @@ async function vaaSalva(){
     try{ const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]").filter(x => x !== e.id); localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l)); }catch(_){}
     if(VAP.passate) VAP.passate = VAP.passate.filter(x => x.id !== e.id);
     const kk = vapChiave(c.cid, c.giorno); (VAP.fatti[kk] = VAP.fatti[kk] || []).push(e.id);
-    const { prossimo } = vapNumeri();
     showToast(`${cav.nome}: segnato`);
-    vaaChiudi({ ok: true, cavalli: 1 });
     if(cav.nuovo && typeof caricaCavalliMiei === "function") await caricaCavalliMiei().catch(() => {});
-    await vaaAggiorna();
-    if(prossimo) setTimeout(() => vaaFatto({ ...prossimo }), 250);
-    else setTimeout(() => vapDocumenti(c.cid, c.giorno), 250);
+    await vaaChiudi();
+    vaaAggiorna();
   } finally { if(btn) btn.disabled = false; }
 }
-// «+ Un altro cavallo qui»: un lavoro in più, stesso posto e giorno
-// 4/11/2026 (Simone: «il tasto sembra non funzionare ma crea duplicati»): il tasto si blocca mentre salva e nel foglio
-// compare «✓ Aggiunto 1 lavoro: lo compili dopo questo» con «Togli» (prima c'era solo un avviso nascosto dietro il foglio).
+// «+ Aggiungi un cavallo» (riga della lista): un lavoro in più, stesso posto e giorno, e subito il suo foglio.
+// 4/11/2026: il tasto si blocca mentre salva (prima due tocchi = due lavori).
 async function vapAggiungiLavoro(){
-  if(VAP.occupato) return;
-  const c = VAP.c, e = c.e;
-  VAP.occupato = true; const bt = document.getElementById("vap-altro"); if(bt) bt.disabled = true;
+  if(VAP.occupato || !VAP.ic) return;
+  const ic = VAP.ic;
+  VAP.occupato = true; const bt = document.getElementById("vic-agg"); if(bt) bt.disabled = true;
+  let nuovo = null;
   try{
-    const { data, error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: c.cid, tipo_ferratura: c.tipo || e.tipo_ferratura || "visita", tipo_altro: c.tipo ? null : VAP_DECIDERE,
-      data_intervento: e.data_intervento || c.giorno, ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
+    const ultimo = ic.lavori.filter(vaaAperto).slice(-1)[0];
+    const { data, error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: ic.cid, tipo_ferratura: ultimo?.tipo_ferratura || "visita", tipo_altro: ultimo ? ultimo.tipo_altro : VAP_DECIDERE,
+      data_intervento: ic.giorno, ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
     if(error || !data) return showToast("Errore: " + (error?.message || "riprova"));
-    c.lavori.push(data); (c.aggiunti = c.aggiunti || []).push(data.id);
-  } finally { VAP.occupato = false; }
-  vapRidisegna();
+    nuovo = data;
+  } finally { VAP.occupato = false; if(bt) bt.disabled = false; }
+  await vapIcCarica(); vapIcDisegna();
   vaaAggiorna();
+  if(nuovo) vapApriLavoro(nuovo.id);
 }
-// «Togli»: l'ultimo lavoro aggiunto per sbaglio (ancora vuoto)
-async function vapTogliAggiunto(){
-  if(VAP.occupato) return;
-  const c = VAP.c, id = (c.aggiunti || []).slice(-1)[0]; if(!id) return;
-  VAP.occupato = true;
-  try{
-    const { error } = await DB.deleteInterventoMascalcia(id);
-    if(error) return showToast("Errore: " + error.message);
-    c.aggiunti = c.aggiunti.filter(x => x !== id); c.lavori = c.lavori.filter(x => x.id !== id);
-  } finally { VAP.occupato = false; }
-  vapRidisegna();
-  vaaAggiorna();
-}
+const vapTogliAggiunto = vapTogliLavoro;   // nome di prima
 
 /* ======================= 4. visita chiusa: i documenti ======================= */
 async function vapDocumenti(cid, giorno){
@@ -474,7 +537,7 @@ async function vapAltroDopoChiusa(){
   const d = VAP.d;
   const { data, error } = await DB.insertInterventoMascalcia({ cliente_mascalcia_id: d.cid, tipo_ferratura: "visita", tipo_altro: VAP_DECIDERE, data_intervento: d.giorno, ora: null, stato: "programmato", stato_pagamento: "da_saldare" });
   if(error || !data) return showToast("Errore: " + (error?.message || "riprova"));
-  closeModal("modal-vap-doc"); await vaaAggiorna(); vaaFatto(data);
+  closeModal("modal-vap-doc"); await vaaAggiorna(); await vaaFatto(data);
 }
 function vapNomePro(){ return currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "Veterinario"; }
 // PDF: certificato di vaccinazione (un cavallo) o riepilogo e conto (tutti i lavori), colori del mockup C
@@ -585,18 +648,66 @@ function vaaDaCompletare(eventi){
   const tutte = [...(VAP.passate || []), ...(eventi || [])].filter((e, i, a) => a.findIndex(x => x.id === e.id) === i);
   return tutte.filter(e => vaaAperto(e) && e.data_intervento && (e.data_intervento < oggi || (e.data_intervento === oggi && rim.includes(e.id))));
 }
+// Home: riquadro oro. Oggi: «Oggi da … · N cavalli da segnare · Inizia ›»; giorni passati: «Da completare … · Completa ›»
 function vaaBannerHtml(eventi){
-  const l = vaaDaCompletare(eventi); if(!l.length) return "";
-  const e = l[0], nome = vapNomeCliente(e.cliente_mascalcia_id) || e.clienti_mascalcia?.nome || "Cliente";
-  return `<button class="vaa-banner" onclick="vaaCompleta('${e.id}')"><b>${l.length === 1 ? "1 lavoro da completare" : l.length + " lavori da completare"}</b>
-    <span>${vaaEsc(nome)} · ${vaaEsc(vapNomeLavoro(e))}: segna chi era il cavallo, così il conto e i libretti sono giusti. <u>Completa</u></span></button>`;
+  const oggi = vapOggi();
+  const diOggi = (eventi || []).filter(e => vaaAperto(e) && e.data_intervento === oggi);
+  const passati = vaaDaCompletare(eventi).filter(e => e.data_intervento < oggi);
+  const l = diOggi.length ? diOggi : passati; if(!l.length) return "";
+  const cid = l[0].cliente_mascalcia_id, suoi = l.filter(x => x.cliente_mascalcia_id === cid), altri = new Set(l.map(x => x.cliente_mascalcia_id)).size - 1;
+  const nome = vapNomeCliente(cid) || l[0].clienti_mascalcia?.nome || "Cliente";
+  (VAP.agEv = VAP.agEv || {}); l.forEach(x => { VAP.agEv[x.id] = x; });
+  const quando = diOggi.length ? "Oggi da " + nome : "Da completare · " + nome + " (" + new Date(l[0].data_intervento + "T12:00").toLocaleDateString("it-IT", { day: "numeric", month: "short" }) + ")";
+  return `<button class="vaa-banner vic-home" onclick="vaaCompleta('${l[0].id}')"><span class="ic" aria-hidden="true">${VAP_IC_APERTO}</span>
+    <span class="tx"><b>${vaaEsc(quando)}</b><span>appuntamento aperto · ${suoi.length === 1 ? "1 cavallo" : suoi.length + " cavalli"} da segnare${altri > 0 ? ` · e ${altri === 1 ? "un altro posto" : altri + " altri posti"}` : ""}</span></span>
+    <span class="go">${diOggi.length ? "Inizia" : "Completa"} ›</span></button>`;
+}
+// Agenda (055): i lavori aperti di un posto in UNA riga con «Segna i cavalli»
+function vapRigaAperti(l){
+  (VAP.agEv = VAP.agEv || {}); l.forEach(x => { VAP.agEv[x.id] = x; });
+  const conta = {}; l.forEach(x => { const t = vapNomeLavoro(x); conta[t] = (conta[t] || 0) + 1; });
+  const tipi = Object.entries(conta).map(([t, n]) => n > 1 ? `${t[0].toUpperCase() + t.slice(1)} ×${n}` : `${n} ${t}`).join(" · ");
+  const ora = l.map(x => x.ora).filter(Boolean).sort()[0];
+  return `<div class="ag-ev vic-ag" data-ev="${l[0].id}">
+      <div class="ag-ev-time">${ora ? String(ora).slice(0, 5) : "—"}</div>
+      <div class="ag-ev-main" onclick="vaaCompleta('${l[0].id}')"><div class="ag-ev-title">${l.length === 1 ? "1 cavallo" : l.length + " cavalli"} da segnare</div><div class="ag-ev-sub">Appuntamento aperto · ${vaaEsc(tipi)}</div></div>
+      <button class="ag-ev-fatto vic-segna" onclick="vaaCompleta('${l[0].id}')">Segna i cavalli</button>
+      <button class="ag-ev-menu" onclick="apriAzioniEvento('${l[0].id}')" aria-label="Azioni">⋯</button>
+    </div>`;
 }
 function vaaCompleta(id){
   const hp = typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti || [] : [];
-  const e = [...(VAP.passate || []), ...hp, ...(DEMO_MODE ? demoState.interventiMascalcia || [] : [])].find(x => x.id === id);
+  const e = (VAP.agEv || {})[id] || [...(VAP.passate || []), ...hp, ...(DEMO_MODE ? demoState.interventiMascalcia || [] : [])].find(x => x.id === id);
   if(e) vaaFatto(e);
 }
 
+/* ======================= 6. scheda della scuderia: richiami vaccinali (11/11/2026) ======================= */
+async function vetRichiamiStruttura(c, box){
+  box.innerHTML = `<div class="ciclo-tit">Richiami della struttura</div><div class="ciclo-nota">Controllo i vaccini…</div>`;
+  const cav = await vaaCavalliDelCliente(c.id), ids = new Set(cav.map(x => x.id));
+  const tutti = await vapTutti(), ult = {};
+  tutti.filter(i => i.stato === "fatto" && ids.has(i.cavallo_cliente_id) && vaaVaccino(i))
+    .forEach(i => { if(!ult[i.cavallo_cliente_id] || i.data_intervento > ult[i.cavallo_cliente_id].data_intervento) ult[i.cavallo_cliente_id] = i; });
+  const limite = aggiungiGiorniIso(vapOggi(), 30);
+  const lista = cav.map(x => ({ nome: x.nome, d: ult[x.id]?.prossima_scadenza })).filter(x => x.d && x.d <= limite).sort((a, b) => a.d.localeCompare(b.d));
+  if(document.getElementById("cli-ciclo") !== box) return;
+  const dt = d => new Date(d + "T12:00").toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" });
+  VAP.richiami = { cid: c.id, n: lista.length, data: lista.length ? (lista[0].d < vapOggi() ? vapOggi() : lista[0].d) : null };
+  box.innerHTML = `<div class="ciclo-tit">Richiami della struttura</div>
+    ${lista.length ? `<div class="vrs-testo"><b>${lista.length === 1 ? "1 cavallo" : lista.length + " cavalli"}</b> con il vaccino in scadenza nei prossimi 30 giorni: ${lista.map(x => `${vaaEsc(x.nome)} (${x.d < vapOggi() ? "scaduto " : ""}${dt(x.d)})`).join(", ")}.</div>
+      <button type="button" class="ciclo-fissa" onclick="vetFissaRichiami()">${VAP_IC_APERTO}Fissa il giro dei richiami</button>
+      <div class="ciclo-nota">Apre l'appuntamento aperto con la scuderia già scelta, ${lista.length === 1 ? "1 lavoro" : lista.length + " lavori"} «Vaccino» e la data del primo richiamo.</div>`
+      : `<div class="ciclo-nota">Nessun richiamo vaccinale nei prossimi 30 giorni per i cavalli di questa struttura.</div>`}`;
+}
+function vetFissaRichiami(){
+  const r = VAP.richiami; if(!r || !r.n) return;
+  const oggi = vapOggi(), domani = aggiungiGiorniIso(oggi, 1);
+  vapApriAperto({ cid: r.cid, n: r.n, slot: Array.from({ length: r.n }, () => "vaccino"), data: r.data,
+    quando: r.data === oggi ? "oggi" : r.data === domani ? "domani" : "scegli", ...(r.data === oggi ? {} : { ora: "09:00" }),
+    prev: { n: r.n, tipo: "vaccino", testo: `${r.n === 1 ? "1 cavallo ha" : r.n + " cavalli hanno"} il richiamo in scadenza: ho proposto ${r.n === 1 ? "1 lavoro" : r.n + " lavori"} «Vaccino».` } });
+}
+
+export { vapInCorso, vapIcDisegna, vapIcPiuTardi, vapChiudiVisita, vapApriLavoro, vapTogliLavoro, vapRigaAperti, vetRichiamiStruttura, vetFissaRichiami };
 export { VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
   vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
   vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta };

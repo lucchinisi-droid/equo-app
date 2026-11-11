@@ -176,6 +176,10 @@ function agPannello(d){
     const l = luogoEvento(x, attuale);
     if(!gruppi.has(l.key)){ gruppi.set(l.key, { nome: l.nome, l, righe: [], ev: [] }); agLuoghi[l.key] = l; }
     gruppi.get(l.key).ev.push(x);
+    // 11/11/2026: veterinario, appuntamento aperto = UNA riga «N cavalli da segnare» con «Segna i cavalli» (14-visita-aperta)
+    if(typeof vapRigaAperti === "function" && typeof vaaAperto === "function" && typeof eVeterinario === "function" && eVeterinario() && vaaAperto(x)){
+      (gruppi.get(l.key).aperti = gruppi.get(l.key).aperti || []).push(x); return;
+    }
     const di = l.key !== "c:" + x.cliente_mascalcia_id ? (x.clienti_mascalcia?.nome || clienteDiId(x.cliente_mascalcia_id)?.nome || "") : "";
     gruppi.get(l.key).righe.push(riga(x, di));
   };
@@ -190,7 +194,7 @@ function agPannello(d){
       <div class="ag-gblock${et && et.cls ? " " + et.cls : ""}" data-cli="${escapeHtml(k)}">
         <div class="ag-cli">${d.ev.length > 1 ? '<span class="ag-mani" data-drag="gr" aria-label="Trascina il luogo" title="Trascina il luogo">⋮⋮</span>' : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span>${et ? et.html : `<span>${gr.righe.length}</span>`}
           <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some(e => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
-        <div class="ag-gr">${gr.righe.join("")}</div>
+        <div class="ag-gr">${gr.aperti ? vapRigaAperti(gr.aperti) : ""}${gr.righe.join("")}</div>
       </div>`; }).join("");
   return `<div class="ag-pannello" data-iso="${d.iso}">
       <div class="ag-pannello-testa"><b>${nomeEsteso} ${d.g.getDate()} ${AG_MESI[d.g.getMonth()]}${d.oggi ? " · oggi" : ""}</b>

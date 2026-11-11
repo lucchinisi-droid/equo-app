@@ -27,6 +27,8 @@ function renderCicloStruttura(c){
   if(!box) return;
   if(!c || !isStruttura(c) || c.archiviato_il){ box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
+  // 11/11/2026: il veterinario vede i richiami vaccinali della struttura, non la ferratura (14-visita-aperta)
+  if(typeof vetRichiamiStruttura === "function" && typeof eVeterinario === "function" && eVeterinario()) return vetRichiamiStruttura(c, box);
   const g = intervalloStruttura(c.id);
   box.innerHTML = `<div class="ciclo-tit">Scadenze della struttura</div>
     <div class="ciclo-riga"><span>Ferratura ogni</span>

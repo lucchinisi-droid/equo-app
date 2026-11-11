@@ -4715,6 +4715,40 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 .mp-leg{display:flex;gap:12px;font-size:12px;color:var(--vt-testo2);margin:6px 2px}
 .mp-leg i{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:5px;vertical-align:-2px}
 .mp-aree{margin-top:8px}
+
+/* 11/11/2026 · «Visita in corso» (lista dell'appuntamento aperto), riquadro oro in Home, riga in agenda, richiami della scuderia (14-visita-aperta) */
+:where(body.pl-vet) .vic-prog{background:var(--vt-notte);color:#FFFFFF;border-radius:16px;padding:12px 14px;margin:4px 0 12px}
+:where(body.pl-vet) .vic-prog > div{display:flex;justify-content:space-between;font-weight:800;font-size:14px}
+:where(body.pl-vet) .vic-prog i{display:block;height:6px;background:var(--vt-notte3);border-radius:6px;margin-top:9px;overflow:hidden}
+:where(body.pl-vet) .vic-prog i b{display:block;height:100%;background:var(--vt-tif);border-radius:6px}
+:where(body.pl-vet) .vic-lista{display:flex;flex-direction:column;gap:8px}
+:where(body.pl-vet) .vic-riga{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1.5px solid var(--vt-bordo);border-radius:16px;padding:11px 12px;background:var(--vt-sup);font:inherit;color:var(--vt-testo)}
+:where(body.pl-vet) .vic-riga .n{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--vt-chip);color:var(--vt-notte)}
+:where(body.pl-vet) .vic-riga .c{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vic-riga .c b{font-size:14.5px}
+:where(body.pl-vet) .vic-riga .c small{font-size:12px;color:var(--vt-testo2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(body.pl-vet) .vic-riga .p{font-weight:800;font-size:14px}
+:where(body.pl-vet) .vic-riga .fr{font-size:20px;color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vic-riga.ok{background:var(--vt-tif-chiaro);border-color:var(--vt-tif)}
+:where(body.pl-vet) .vic-riga.ok .n{background:var(--vt-tif-testo);color:#FFFFFF}
+:where(body.pl-vet) .vic-riga.vuota{border-style:dashed;border-color:var(--vt-oro);background:var(--vt-oro-chiaro);cursor:pointer}
+:where(body.pl-vet) .vic-riga.vuota .n{background:var(--vt-oro);color:#FFFFFF}
+:where(body.pl-vet) .vic-riga.vuota .c small{color:var(--vt-oro-testo);font-weight:700}
+:where(body.pl-vet) .vic-agg{border:1.5px dashed var(--vt-tif-scuro);color:var(--vt-tif-testo);border-radius:16px;padding:12px;background:var(--vt-sup);font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+:where(body.pl-vet) .vic-agg:disabled{opacity:.5}
+:where(body.pl-vet) .vap-togli{width:100%;margin-top:8px;color:var(--vt-urg)}
+:where(body.pl-vet) .vic-home{display:flex;align-items:center;gap:12px;text-align:left;width:100%;background:var(--vt-oro-chiaro);border:2px solid var(--vt-oro);border-radius:18px;padding:12px;margin-top:12px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vic-home .ic{width:42px;height:42px;flex:none;border-radius:50%;background:var(--vt-oro);color:#FFFFFF;display:grid;place-items:center}
+:where(body.pl-vet) .vic-home .ic svg{width:20px;height:20px}
+:where(body.pl-vet) .vic-home .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vic-home .tx b{font-size:14.5px;color:var(--vt-notte)}
+:where(body.pl-vet) .vic-home .tx span{font-size:12px;color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vic-home .go{flex:none;background:var(--vt-notte);color:#FFFFFF;border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px;white-space:nowrap}
+:where(body.pl-vet) .vic-ag{border:1.5px dashed var(--vt-oro);background:var(--vt-oro-chiaro);border-radius:14px}
+:where(body.pl-vet) .vic-ag .vic-segna{background:var(--vt-oro);color:#FFFFFF;border-color:var(--vt-oro);white-space:nowrap}
+:where(body.pl-vet) .vrs-testo{font-size:13.5px;line-height:1.5;margin:4px 0 10px}
+:where(body.pl-vet) .ciclo-fissa svg{width:18px;height:18px}
+:where(:root:not([data-theme="light"])) body.pl-vet .vic-home .tx b{color:#1D2D50}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -6614,8 +6648,8 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
       <div class="menu-section-label">Chat</div>
       <div class="menu-row" style="cursor:pointer;margin-bottom:8px" onclick="closeModal('modal-menu');openCollegaManiscalco()">
         <div class="menu-row-label">
-          <span class="fa-icon"><i class="fa-solid fa-hammer"></i></span>
-          <span>Collega il tuo maniscalco</span>
+          <span class="fa-icon"><i class="fa-solid fa-link"></i></span>
+          <span>Collega maniscalco o veterinario</span>
         </div>
         <span class="icon"><svg><use href="#i-chevron"/></svg></span>
       </div>
@@ -7113,18 +7147,18 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 <div class="modal-overlay" id="modal-collega-maniscalco" onclick="closeOut(event,'modal-collega-maniscalco')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-hammer"></i></span>Collega il tuo maniscalco</div>
+    <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-link"></i></span>Collega il tuo professionista</div>
     <!-- 9/11/2026 (SQL 52): alla prima iscrizione la stessa finestra chiede il codice del maniscalco -->
     <div id="collega-maniscalco-iscrizione" style="display:none;font-size:14px;line-height:1.5;margin-bottom:12px">
-      <b>Il tuo maniscalco usa già Equo?</b><br>Chiedigli il codice Equo: potremmo avere già i tuoi cavalli e lo storico, così non devi inserirli da capo.
+      <b>Il tuo maniscalco o il tuo veterinario usano già Equo?</b><br>Chiedigli il codice Equo (o inquadra il suo QR): potremmo avere già i tuoi cavalli e il loro storico, così non devi inserirli da capo.
     </div>
     <div class="muted" id="collega-maniscalco-spiega" style="font-size:13px;margin-bottom:14px;line-height:1.5">
-      Inserisci o scansiona il codice del tuo maniscalco (il suo codice personale, es. EQUOPRO0FKEM, oppure quello che ti ha dato): potrai scrivergli in chat e ricevere qui appuntamenti e riepiloghi in PDF.
+      Inserisci o scansiona il codice del tuo maniscalco o del tuo veterinario (il codice personale, es. EQUOPRO… o EQUOMED…, oppure quello che ti ha dato): potrai scrivergli in chat e ricevere qui appuntamenti, referti e riepiloghi in PDF.
     </div>
     <div class="auth-form">
       <div class="input-group">
-        <label class="input-label">Codice maniscalco</label>
-        <input class="input" id="collega-maniscalco-codice" placeholder="es. EQUOPRO0FKEM" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')collegaManiscalco()">
+        <label class="input-label">Codice del professionista</label>
+        <input class="input" id="collega-maniscalco-codice" placeholder="EQUOPRO… o EQUOMED…" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')collegaManiscalco()">
       </div>
       <div class="auth-error" id="collega-maniscalco-error" style="display:none"></div>
       <button class="btn btn-primary" id="collega-maniscalco-btn" onclick="collegaManiscalco()" style="width:100%;margin-top:6px">Collega</button>
@@ -7133,7 +7167,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
       </button>
       <div id="collega-maniscalco-salta-box" style="display:none;text-align:center;margin-top:12px">
         <button class="btn btn-ghost" onclick="saltaCodiceIscrizione()" style="width:100%">Continua senza codice</button>
-        <div class="muted" style="font-size:12px;margin-top:4px">Potrai farlo quando vuoi dal menu › «Collega il tuo maniscalco».</div>
+        <div class="muted" style="font-size:12px;margin-top:4px">Potrai farlo quando vuoi dal menu › «Collega maniscalco o veterinario».</div>
       </div>
     </div>
   </div>
@@ -14662,6 +14696,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 				agLuoghi[l.key] = l;
 			}
 			gruppi.get(l.key).ev.push(x);
+			if (typeof vapRigaAperti === "function" && typeof vaaAperto === "function" && typeof eVeterinario === "function" && eVeterinario() && vaaAperto(x)) {
+				(gruppi.get(l.key).aperti = gruppi.get(l.key).aperti || []).push(x);
+				return;
+			}
 			const di = l.key !== "c:" + x.cliente_mascalcia_id ? x.clienti_mascalcia?.nome || clienteDiId$1(x.cliente_mascalcia_id)?.nome || "" : "";
 			gruppi.get(l.key).righe.push(riga(x, di));
 		};
@@ -14685,7 +14723,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
       <div class="ag-gblock${et && et.cls ? " " + et.cls : ""}" data-cli="${escapeHtml(k)}">
         <div class="ag-cli">${d.ev.length > 1 ? "<span class=\"ag-mani\" data-drag=\"gr\" aria-label=\"Trascina il luogo\" title=\"Trascina il luogo\">⋮⋮</span>" : ""}<span class="ag-cli-nome">${escapeHtml(gr.nome)}</span>${et ? et.html : `<span>${gr.righe.length}</span>`}
           <button class="ag-cli-nav" onclick="event.stopPropagation();navigaLuogo(agLuoghi[this.closest('.ag-gblock').dataset.cli])" aria-label="Naviga">Naviga</button>${d.oggi && agenteAiHammer() && d.ev.some((e) => e.stato !== "fatto" && luogoEvento(e, false).key === k) ? `<button class="ag-cli-lav" onclick="event.stopPropagation();mlApri(this.closest('.ag-gblock').dataset.cli)" aria-label="Modalità Lavoro"><svg viewBox="0 0 24 24"><use href="#i-ferro"/></svg>Lavoro</button>` : ""}</div>
-        <div class="ag-gr">${gr.righe.join("")}</div>
+        <div class="ag-gr">${gr.aperti ? vapRigaAperti(gr.aperti) : ""}${gr.righe.join("")}</div>
       </div>`;
 		}).join("");
 		return `<div class="ag-pannello" data-iso="${d.iso}">
@@ -16369,6 +16407,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			return;
 		}
 		box.style.display = "";
+		if (typeof vetRichiamiStruttura === "function" && typeof eVeterinario === "function" && eVeterinario()) return vetRichiamiStruttura(c, box);
 		const g = intervalloStruttura(c.id);
 		box.innerHTML = `<div class="ciclo-tit">Scadenze della struttura</div>
     <div class="ciclo-riga"><span>Ferratura ogni</span>
@@ -19363,6 +19402,10 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
         <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this).then(() => closeClienteDetail())">Rifiuta</button></div>` : ""}
       <button class="btn btn-ghost btn-sm" id="cliente-scollega-btn" style="width:100%;color:var(--red)" onclick="scollegaStrutturaCorrente()">${c.collegamento_stato === "attivo" ? "Scollega da Equo Scuderia" : "Annulla richiesta"}</button>`;
+		} else if (isStruttura(c) && isManiscalcoUtente() && typeof eVeterinario === "function" && eVeterinario()) {
+			if (qrCard) qrCard.style.display = "none";
+			boxScud.style.display = "none";
+			boxScud.innerHTML = "";
 		} else if (isStruttura(c) && isManiscalcoUtente()) {
 			if (qrCard) qrCard.style.display = "none";
 			boxScud.style.display = "block";
@@ -22972,7 +23015,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 			const gg = giorniTra(g.data, oggi);
 			return `<div class="ag-gruppo">
         <div class="ag-gruppo-t"><div><b>${escapeHtml(formatDataBreve(g.data))} · ${escapeHtml(g.nome)}</b><small>${g.righe.length} ${g.righe.length === 1 ? "cavallo" : "cavalli"}</small></div><span class="ag-pill r">${gg === 1 ? "ieri" : gg + " giorni fa"}</span></div>
-        ${g.righe.map((e) => `<div class="ag-riga"><div class="ag-riga-c" onclick="apriAzioniEvento('${e.id}')"><b>${escapeHtml(nomeCav(e))}</b><small>${escapeHtml(tipoLav(e))}${e.gruppo_id ? " · con la scuderia" : ""}</small></div><button type="button" class="btn btn-primary btn-sm" onclick="segnaFattoAgenda('${e.id}')">Fatto</button><button type="button" class="ag-piu" onclick="apriAzioniEvento('${e.id}')" aria-label="Altre azioni">⋯</button></div>`).join("")}
+        ${g.righe.map((e) => `<div class="ag-riga"><div class="ag-riga-c" onclick="apriAzioniEvento('${e.id}')"><b>${escapeHtml(nomeCav(e))}</b><small>${escapeHtml(tipoLav(e))}${e.gruppo_id ? " · con la scuderia" : ""}</small></div><button type="button" class="btn btn-primary btn-sm" onclick="segnaFattoAgenda('${e.id}')">${typeof vaaAperto === "function" && vaaAperto(e) ? "Segna i cavalli" : "Fatto"}</button><button type="button" class="ag-piu" onclick="apriAzioniEvento('${e.id}')" aria-label="Altre azioni">⋯</button></div>`).join("")}
         <div class="agc-azioni"><label class="ag-sposta"><span>Sposta al</span><input type="date" id="ag-nf-data-${n}" min="${oggi}" value="${agDataProposta(oggi)}"></label><button type="button" class="btn btn-outline btn-sm" onclick="agNfSposta(${n})">Sposta</button><button type="button" class="btn btn-outline btn-sm ag-rosso" onclick="agNfAnnulla(${n})">Annulla</button></div>
       </div>`;
 		}).join("") : "<div class=\"ag-vuoto\">✓ Tutto in ordine</div>"}`;
@@ -31771,17 +31814,18 @@ const mlSigla = k => String(k || "").toUpperCase();
 		const lista = await DB.listManiscalchiCollegati();
 		if (!lista.length) {
 			box.innerHTML = `<div class="muted" style="font-size:13px;line-height:1.6;text-align:center;padding:6px 4px">
-      Hai un codice dal tuo maniscalco?<br>Tocca "+ Collega" per scrivergli in chat e ricevere appuntamenti e PDF.</div>`;
+      Hai un codice dal tuo maniscalco o dal tuo veterinario?<br>Tocca "+ Collega" per scrivergli in chat e ricevere appuntamenti e PDF.</div>`;
 			return;
 		}
 		box.innerHTML = lista.map((f) => {
-			let preview = "Inizia la conversazione col tuo maniscalco";
+			const vet = f.professione === "veterinario", chi = vet ? "Il tuo veterinario" : f.professione === "istruttore" ? "Il tuo istruttore" : "Il tuo maniscalco";
+			let preview = "Inizia la conversazione col " + (vet ? "tuo veterinario" : f.professione === "istruttore" ? "tuo istruttore" : "tuo maniscalco");
 			if (f.ultimo_at) preview = (f.ultimo_mittente === "cliente" ? "Tu: " : "") + previewMessaggioMascalcia(f.ultimo_tipo, f.ultimo_testo, f.ultimo_file_nome);
 			return `
-    <div class="inbox-item ${f.non_letti > 0 ? "unread" : ""}" onclick="openFarrierChatThread(${jsArg(f.cliente_mascalcia_id)}, ${jsArg(f.nome_maniscalco || "Il tuo maniscalco")}, ${f.certificato ? "true" : "false"})">
-      <div class="horse-avatar"><i class="fa-solid fa-hammer" style="font-size:20px"></i></div>
+    <div class="inbox-item ${f.non_letti > 0 ? "unread" : ""}" onclick="openFarrierChatThread(${jsArg(f.cliente_mascalcia_id)}, ${jsArg(f.nome_maniscalco || chi)}, ${f.certificato ? "true" : "false"})">
+      <div class="horse-avatar"><i class="fa-solid ${vet ? "fa-stethoscope" : "fa-hammer"}" style="font-size:20px"></i></div>
       <div style="flex:1;min-width:0">
-        <div class="inbox-name" style="font-size:14px">${escapeHtml(f.nome_maniscalco || "Il tuo maniscalco")}${f.certificato ? " " + BADGE_CERTIFIED_HTML : ""}</div>
+        <div class="inbox-name" style="font-size:14px">${escapeHtml(f.nome_maniscalco || chi)}${f.certificato ? " " + BADGE_CERTIFIED_HTML : ""}${f.nome_maniscalco && f.professione ? ` <span class="muted" style="font-weight:500;font-size:12px">· ${vet ? "veterinario" : f.professione === "istruttore" ? "istruttore" : "maniscalco"}</span>` : ""}</div>
         <div class="inbox-preview muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>
       </div>
       ${f.non_letti > 0 ? `<span class="inbox-unread-dot"></span>` : ""}
@@ -31807,14 +31851,14 @@ const mlSigla = k => String(k || "").toUpperCase();
 	}
 	function saltaCodiceIscrizione() {
 		closeModal("modal-collega-maniscalco");
-		showToast("Va bene! Se il tuo maniscalco usa Equo, lo colleghi quando vuoi dal menu.");
+		showToast("Va bene! Se il tuo maniscalco o il tuo veterinario usano Equo, li colleghi quando vuoi dal menu.");
 	}
 	var ERRORI_CODICE_MANISCALCO = {
 		codice_non_valido: "Codice non valido. Controlla di averlo scritto bene.",
 		codice_gia_usato: "Questo codice è già stato usato da un altro account. Chiedi al tuo maniscalco di verificarlo.",
 		codice_tuo: "Questo è un codice creato da te: va dato al tuo cliente.",
 		non_autenticato: "Sessione scaduta: esci e rientra.",
-		codice_altro_tipo: "Questo non è il codice di un maniscalco: controlla di averlo copiato bene.",
+		codice_altro_tipo: "Questo non è il codice di un maniscalco o di un veterinario: controlla di averlo copiato bene.",
 		codice_scuderia: "Questo è l'invito per una scuderia: va usato in Equo Scuderia. Chiedi al maniscalco il suo codice personale (EQUOPRO…) o il QR della tua scheda cliente."
 	};
 	async function collegaManiscalco() {
@@ -31841,9 +31885,10 @@ const mlSigla = k => String(k || "").toUpperCase();
 			return;
 		}
 		closeModal("modal-collega-maniscalco");
-		showToast("Collegato a " + (res.nome_maniscalco || "il tuo maniscalco") + "!");
+		const proN = res.professione === "veterinario" ? "il tuo veterinario" : "il tuo maniscalco";
+		showToast("Collegato a " + (res.nome_maniscalco || proN) + "!");
 		await loadFarrierChatSection$1();
-		const nomeMan = res.nome_maniscalco || "Il tuo maniscalco";
+		const nomeMan = res.nome_maniscalco || (res.professione === "veterinario" ? "Il tuo veterinario" : "Il tuo maniscalco");
 		await proponiAbbinamentoCavalli(res.cliente_mascalcia_id, nomeMan, () => openFarrierChatThread(res.cliente_mascalcia_id, nomeMan));
 	}
 	// equo-app-src/src/ruoli/proprietario/moduli/069-chat-proprietario-proprietario.js
@@ -32412,7 +32457,8 @@ const mlSigla = k => String(k || "").toUpperCase();
 			const s = document.getElementById("home-setup");
 			if (s) s.style.display = "none";
 		}
-		const man = proposteCav[0].maniscalco || "Il tuo maniscalco";
+		const vetP = proposteCav[0].professione === "veterinario";
+		const man = proposteCav[0].maniscalco ? vetP ? "Il veterinario " + proposteCav[0].maniscalco : proposteCav[0].maniscalco : vetP ? "Il tuo veterinario" : "Il tuo maniscalco";
 		const righe = proposteCav.map((p) => {
 			const cand = Array.isArray(p.candidati) ? p.candidati : [];
 			const certo = cand.find((c) => c.esito === "certo"), dubbi = certo ? [] : cand.filter((c) => c.esito === "probabile");
@@ -32447,7 +32493,7 @@ const mlSigla = k => String(k || "").toUpperCase();
     <div class="muted" style="font-size:13px;line-height:1.5;margin-bottom:6px">Accettali: non crei nulla da zero e non nascono schede doppie. Poi controlli e completi i dati.${isPremium() ? "" : " Con il piano Free sono completi 3 cavalli: dal quarto in poi si aggiungono ma restano bloccati finché non passi a Premium."}</div>
     ${righe}
     ${proposteCav.length > 1 ? `<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="accettaTuttiProposte()">Accetta tutti (${proposteCav.length})</button>` : ""}
-    <div class="muted" style="font-size:12px;margin-top:6px">I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.</div>
+    <div class="muted" style="font-size:12px;margin-top:6px">${vetP ? `Le visite che ${escapeHtml(man.replace(/^Il veterinario /, "il veterinario "))} ha già fatto su questi cavalli entrano nel loro libretto (data e tipo di visita).` : `I lavori che ${escapeHtml(man)} ha già fatto su questi cavalli entrano nel loro libretto.`}</div>
   </div>`;
 	}
 	async function accettaPropostaSilenzioso(id, horseId, nuovo) {
@@ -32475,7 +32521,8 @@ const mlSigla = k => String(k || "").toUpperCase();
 			if (res.motivo === "da_confermare") caricaProposteCavalli();
 			return;
 		}
-		showToast(res.lavori > 0 ? `Cavallo aggiunto con ${res.lavori} ${res.lavori === 1 ? "lavoro" : "lavori"} del maniscalco nel libretto. Controlla i dati e confermali.` : "Cavallo aggiunto. Controlla i dati e confermali.");
+		const vetR = (proposteCav.find((p) => p.proposta === id) || proposteCav[0] || {}).professione === "veterinario";
+		showToast(res.lavori > 0 ? `Cavallo aggiunto con ${res.lavori} ${vetR ? res.lavori === 1 ? "visita del veterinario" : "visite del veterinario" : res.lavori === 1 ? "lavoro del maniscalco" : "lavori del maniscalco"} nel libretto. Controlla i dati e confermali.` : "Cavallo aggiunto. Controlla i dati e confermali.");
 		await loadHorses();
 		await caricaCavalliBloccati();
 		if (res.horse_id && horses.some((h) => h.id === res.horse_id)) openHorseDetail(res.horse_id);
@@ -45074,7 +45121,7 @@ plAggiorna();
 		altro: "lavori"
 	};
 	var vaaVet = () => typeof eVeterinario === "function" && eVeterinario();
-	var vaaAperto$1 = (e) => !!e && !e.cavallo_cliente_id && !e.horse_id && e.stato !== "fatto" && !["annullato", "rifiutato"].includes(e.stato);
+	var vaaAperto$1 = (e) => !!e && !(VAP.tolti && VAP.tolti.has(e.id)) && !e.cavallo_cliente_id && !e.horse_id && e.stato !== "fatto" && !["annullato", "rifiutato"].includes(e.stato);
 	var vapDaDecidere = (e) => !e || (e.tipo_altro || "") === "Da decidere sul posto";
 	var vapEtTipo = (t) => TIPO_FERRATURA_LABELS?.[t] || "Visita";
 	var vapNomeCliente = (id) => (typeof clienteDiId === "function" ? clienteDiId(id)?.nome : "") || "Cliente";
@@ -45158,7 +45205,7 @@ plAggiorna();
 		const [h, m] = String(ora).split(":").map(Number), t = h * 60 + m + min;
 		return String(Math.floor(t / 60) % 24).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
 	}
-	function vapApriAperto() {
+	function vapApriAperto(pre) {
 		const mezz = /* @__PURE__ */ new Date(Math.ceil(((/* @__PURE__ */ new Date()).getTime() + 9e5) / 18e5) * 18e5);
 		const oraProposta = isoLocale(mezz) === vapOggi() ? mezz.toTimeString().slice(0, 5) : "";
 		VAP.a = {
@@ -45173,6 +45220,7 @@ plAggiorna();
 			prev: null,
 			err: ""
 		};
+		if (pre) Object.assign(VAP.a, pre);
 		vapFoglio("modal-vap-aperto", "vap-modal", true);
 		vapDisegnaAperto();
 		openModal("modal-vap-aperto");
@@ -45394,7 +45442,7 @@ plAggiorna();
 			l = [];
 		}
 		const hp = typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti || [] : [];
-		return [...l, ...hp].filter((e, i, a) => a.findIndex((x) => x.id === e.id) === i).filter((e) => e.cliente_mascalcia_id === cid && e.data_intervento === giorno && !["annullato", "rifiutato"].includes(e.stato)).sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
+		return [...l, ...hp].filter((e, i, a) => a.findIndex((x) => x.id === e.id) === i).filter((e) => e.cliente_mascalcia_id === cid && e.data_intervento === giorno && !["annullato", "rifiutato"].includes(e.stato) && !(VAP.tolti && VAP.tolti.has(e.id))).sort((a, b) => String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
 	}
 	async function vapPrezzoPrevisto(cid, tipo, e) {
 		if (Number(e?.importo) > 0) return String(e.importo);
@@ -45416,28 +45464,121 @@ plAggiorna();
 		};
 	}
 	async function vaaFatto(e) {
-		if (VAP.risolvi) {
-			VAP.risolvi({ ok: false });
-			VAP.risolvi = null;
+		return vapInCorso(e);
+	}
+	async function vapInCorso(e) {
+		if (VAP.ic?.risolvi) {
+			const f = VAP.ic.risolvi;
+			VAP.ic.risolvi = null;
+			f({ ok: false });
 		}
 		const giorno = e.data_intervento && e.data_intervento <= vapOggi() ? e.data_intervento : vapOggi();
-		const cid = e.cliente_mascalcia_id;
-		const chiusi = VAP.fatti[vapChiave(cid, giorno)] || [];
-		const giorni = [.../* @__PURE__ */ new Set([e.data_intervento || giorno, giorno])];
-		const tutti = [];
-		for (const g of giorni) (await vapLavoriDelGiorno(cid, g)).forEach((x) => {
+		VAP.ic = {
+			cid: e.cliente_mascalcia_id,
+			giorno,
+			giorni: [.../* @__PURE__ */ new Set([e.data_intervento || giorno, giorno])],
+			ora: e.ora || null,
+			lavori: [],
+			risolvi: null,
+			fattiQui: 0
+		};
+		await vapIcCarica();
+		vapFoglio("modal-vic", "vap-modal vic-modal", false);
+		vapIcDisegna();
+		openModal("modal-vic");
+		return new Promise((res) => {
+			VAP.ic.risolvi = res;
+		});
+	}
+	async function vapIcCarica() {
+		const ic = VAP.ic, tutti = [];
+		for (const g of ic.giorni) (await vapLavoriDelGiorno(ic.cid, g)).forEach((x) => {
 			if (!tutti.some((y) => y.id === x.id)) tutti.push(x);
 		});
-		const lavori = [...chiusi.map((id) => tutti.find((x) => x.id === id)).filter(Boolean), ...tutti.filter((x) => !chiusi.includes(x.id) && (x.id === e.id || vaaAperto$1(x))).sort((p, q) => String(p.ora || "99").localeCompare(String(q.ora || "99")))];
+		const chiusi = VAP.fatti[vapChiave(ic.cid, ic.giorno)] || [];
+		const fatti = tutti.filter((x) => x.stato === "fatto" && x.cavallo_cliente_id && (chiusi.includes(x.id) || x.data_intervento === ic.giorno)).sort((p, q) => (chiusi.indexOf(p.id) + 1 || 999) - (chiusi.indexOf(q.id) + 1 || 999));
+		const aperti = tutti.filter(vaaAperto$1).sort((p, q) => String(p.ora || "99").localeCompare(String(q.ora || "99")) || String(p.created_at || "").localeCompare(String(q.created_at || "")));
+		ic.lavori = [...fatti, ...aperti];
+		ic.tutti = tutti;
+	}
+	function vapIcNomeCav(id) {
+		return ((typeof cavalliCartella === "function" ? cavalliCartella() : []).find((x) => x.id === id) || (DEMO_MODE ? (demoState.cavalliClientiMascalcia || []).find((x) => x.id === id) : null))?.nome || "Cavallo";
+	}
+	function vapIcDisegna() {
+		const box = document.getElementById("modal-vic-corpo");
+		if (!box || !VAP.ic) return;
+		const ic = VAP.ic, n = ic.lavori.length, fatti = ic.lavori.filter((x) => !vaaAperto$1(x)), vuoti = n - fatti.length;
+		const tot = fatti.reduce((t, x) => t + (Number(x.importo) > 0 ? Number(x.importo) : 0), 0);
+		const quando = ic.giorno === vapOggi() ? "oggi" : (/* @__PURE__ */ new Date(ic.giorno + "T12:00")).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "short"
+		});
+		box.innerHTML = `<div class="modal-title" id="modal-vic-tit">Visita in corso</div>
+    <div class="vaa-sotto-tit">${vaaEsc(vapNomeCliente(ic.cid))} · ${quando}${ic.ora ? " " + String(ic.ora).slice(0, 5) : ""}</div>
+    <div class="vic-prog"><div><span>${fatti.length} di ${n} ${n === 1 ? "cavallo segnato" : "cavalli segnati"}</span><span>${tot > 0 ? formatEuro(tot) : ""}</span></div>
+      <i><b style="width:${n ? Math.round(fatti.length / n * 100) : 0}%"></b></i></div>
+    <div class="vic-lista">${ic.lavori.map((x, i) => vaaAperto$1(x) ? `<button type="button" class="vic-riga vuota" onclick="vapApriLavoro('${x.id}')"><span class="n">${i + 1}</span><span class="c"><b>${vaaEsc(vapDaDecidere(x) ? "Da decidere" : vapEtTipo(x.tipo_ferratura))}</b><small>Tocca per segnare il cavallo</small></span><span class="fr" aria-hidden="true">›</span></button>` : `<div class="vic-riga ok"><span class="n">✓</span><span class="c"><b>${vaaEsc(vapIcNomeCav(x.cavallo_cliente_id))}</b><small>${vaaEsc(x.tipo_altro || vapEtTipo(x.tipo_ferratura))}</small></span><span class="p">${Number(x.importo) > 0 ? formatEuro(Number(x.importo)) : ""}</span></div>`).join("")}
+      <button type="button" class="vic-agg" id="vic-agg" onclick="vapAggiungiLavoro()" ${VAP.occupato ? "disabled" : ""}>+ Aggiungi un cavallo</button></div>
+    <button class="btn btn-primary vaa-ok" onclick="vapChiudiVisita()" ${fatti.length ? "" : "disabled"}>Chiudi la visita e invia i documenti</button>
+    <button class="btn btn-outline vaa-dopo" onclick="vapIcPiuTardi()">Continuo più tardi</button>
+    ${!fatti.length ? `<div class="vaa-nota oro">Tocca una riga per segnare il cavallo che hai visitato. ${vuoti > 1 ? "L'ordine lo scegli tu." : ""}</div>` : ""}`;
+	}
+	function vapIcFine(r) {
+		closeModal("modal-vic");
+		const f = VAP.ic?.risolvi;
+		if (VAP.ic) VAP.ic.risolvi = null;
+		if (f) f(r);
+	}
+	function vapIcPiuTardi() {
+		try {
+			const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]");
+			(VAP.ic?.lavori || []).filter(vaaAperto$1).forEach((x) => {
+				if (!l.includes(x.id)) l.push(x.id);
+			});
+			localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l.slice(-50)));
+		} catch (_) {}
+		vapIcFine({
+			ok: (VAP.ic?.lavori || []).some((x) => !vaaAperto$1(x)),
+			rimandata: true
+		});
+		vaaAggiorna();
+	}
+	async function vapChiudiVisita() {
+		const ic = VAP.ic;
+		if (!ic) return;
+		const vuoti = ic.lavori.filter(vaaAperto$1);
+		if (vuoti.length) {
+			const uno = vuoti.length === 1;
+			if (!await chiediSiNo(uno ? "Resta 1 lavoro senza cavallo" : `Restano ${vuoti.length} lavori senza cavallo`, (uno ? "Lo togli e chiudi la visita" : "Li togli e chiudi la visita") + ` con ${ic.lavori.length - vuoti.length} ${ic.lavori.length - vuoti.length === 1 ? "cavallo" : "cavalli"}, oppure torni alla lista per segnarl${uno ? "o" : "i"}.`, {
+				si: uno ? "Toglilo e chiudi" : "Toglili e chiudi",
+				no: "Torna alla lista"
+			})) return;
+			for (const x of vuoti) {
+				const { error } = await DB.deleteInterventoMascalcia(x.id);
+				if (error) return showToast("Errore: " + error.message);
+				(VAP.tolti = VAP.tolti || /* @__PURE__ */ new Set()).add(x.id);
+			}
+		}
+		vapIcFine({ ok: true });
+		await vaaAggiorna();
+		setTimeout(() => vapDocumenti(ic.cid, ic.giorno), 250);
+	}
+	async function vapApriLavoro(id) {
+		const ic = VAP.ic, e = ic?.lavori.find((x) => x.id === id);
+		if (!e) return;
+		const cid = ic.cid, giorno = ic.giorno;
 		const cav = await vaaCavalliDelCliente(cid);
-		const giaVisti = new Set(tutti.filter((x) => x.stato === "fatto" && x.cavallo_cliente_id && x.data_intervento === giorno).map((x) => x.cavallo_cliente_id));
+		const giaVisti = new Set(ic.lavori.filter((x) => !vaaAperto$1(x) && x.cavallo_cliente_id).map((x) => x.cavallo_cliente_id));
+		(ic.tutti || []).forEach((x) => {
+			if (x.stato === "fatto" && x.cavallo_cliente_id && x.data_intervento === giorno) giaVisti.add(x.cavallo_cliente_id);
+		});
 		const tipo = vapDaDecidere(e) ? null : e.tipo_ferratura;
 		const v = vapVaccMemoria();
 		VAP.c = {
 			e,
 			giorno,
 			cid,
-			lavori,
+			lavori: ic.lavori,
 			cavalli: cav,
 			giaVisti,
 			nome: "",
@@ -45455,16 +45596,12 @@ plAggiorna();
 		vapFoglio("modal-vaa", "vaa-modal", false);
 		vapDisegnaChiusura();
 		openModal("modal-vaa");
-		return new Promise((res) => {
-			VAP.risolvi = res;
-		});
 	}
 	function vapNumeri() {
 		const c = VAP.c, idx = c.lavori.findIndex((x) => x.id === c.e.id);
 		return {
 			k: (idx >= 0 ? idx : c.lavori.length) + 1,
-			n: Math.max(c.lavori.length, idx + 1),
-			prossimo: c.lavori.find((x) => x.id !== c.e.id && vaaAperto$1(x)) || null
+			n: Math.max(c.lavori.length, idx + 1)
 		};
 	}
 	function vapSuggeriti() {
@@ -45474,13 +45611,11 @@ plAggiorna();
 	function vapDisegnaChiusura() {
 		const box = document.getElementById("modal-vaa-corpo");
 		if (!box) return;
-		const c = VAP.c;
-		c.e;
-		const { k, n, prossimo } = vapNumeri(), vacc = c.tipo === "vaccino";
+		const c = VAP.c, { k } = vapNumeri(), vacc = c.tipo === "vaccino";
 		const sug = c.scelto ? [] : vapSuggeriti();
 		const tipi = VAP_TIPI.map((t) => `<button type="button" class="vs-chip${c.tipo === t ? " on" : ""}" aria-pressed="${c.tipo === t}" onclick="vapTipo('${t}')">${vaaEsc(vapEtTipo(t))}</button>`).join("");
-		box.innerHTML = `<div class="modal-title" id="modal-vaa-tit">Chi era il cavallo?</div>
-    <div class="vaa-sotto-tit">Lavoro ${k} di ${n} · ${vaaEsc(c.tipo ? vapEtTipo(c.tipo) : "da decidere")} · ${vaaEsc(vapNomeCliente(c.cid))}</div>
+		box.innerHTML = `<div class="modal-title" id="modal-vaa-tit">Lavoro ${k} · ${vaaEsc(c.tipo ? vapEtTipo(c.tipo) : "Da decidere")}</div>
+    <div class="vaa-sotto-tit">${vaaEsc(vapNomeCliente(c.cid))} · chi era il cavallo?</div>
     <div class="vaa-lab">Nome del cavallo</div>
     ${c.scelto ? `<button type="button" class="vap-dove-scelto" onclick="vapTogliCavallo()"><b>${vaaEsc(c.scelto.nome)}</b><span>${c.scelto.di ? "di " + vaaEsc(c.scelto.di) + " · " : ""}${c.scelto.microchip ? "chip " + vaaEsc(c.scelto.microchip) + " · " : ""}cambia</span></button>` : `<input class="input" id="vap-nome" autocomplete="off" placeholder="Scrivi il nome" value="${vaaEsc(c.nome)}" oninput="vapNome(this.value)">
          ${sug.length ? `<div class="vap-sug">${sug.map((x) => `<button type="button" onclick="vapScegliCavallo('${x.id}')">${vaaEsc(x.nome)}${x.di ? `<small>di ${vaaEsc(x.di)}</small>` : ""}</button>`).join("")}</div>
@@ -45497,11 +45632,9 @@ plAggiorna();
     <label class="vaa-prezzo base">€<input type="number" min="0" step="1" inputmode="decimal" id="vaa-prezzo-base" value="${vaaEsc(c.prezzo)}" oninput="VAP.c.prezzo = this.value">
       <small>${c.prezzo ? "proposto dall'ultima volta: lo cambi se serve" : ""}</small></label>
     <div class="auth-error" id="vaa-err" style="display:none"></div>
-    <button class="btn btn-primary vaa-ok" onclick="vaaSalva()">${prossimo ? `Salva e vai al lavoro ${k + 1} ›` : "Salva e chiudi la visita"}</button>
-    ${(c.aggiunti || []).length ? `<div class="vaa-nota vap-aggiunto" role="status"><span>✓ ${c.aggiunti.length === 1 ? "Aggiunto 1 lavoro" : "Aggiunti " + c.aggiunti.length + " lavori"}: ${c.aggiunti.length === 1 ? "lo compili" : "li compili"} dopo questo.</span><button type="button" class="vap-mini" onclick="vapTogliAggiunto()">Togli</button></div>` : ""}
-    <button class="btn btn-outline vap-altro" id="vap-altro" onclick="vapAggiungiLavoro()" ${VAP.occupato ? "disabled" : ""}>+ Un altro cavallo qui</button>
-    <button class="btn btn-outline vaa-dopo" onclick="vaaDopo()">Più tardi</button>
-    <div class="vaa-nota oro">Se esci senza nome, il lavoro resta «aperto» e te lo ricordo in Home.</div>`;
+    <button class="btn btn-primary vaa-ok" onclick="vaaSalva()">Salva</button>
+    <button class="btn btn-outline vap-togli" onclick="vapTogliLavoro()">Togli questo lavoro</button>
+    <button class="btn btn-ghost vaa-dopo" onclick="vaaDopo()">Annulla</button>`;
 	}
 	function vapRidisegna(idFuoco) {
 		const a = document.activeElement, id = idFuoco || a && a.id || null, pos = a && "selectionStart" in a ? a.selectionStart : null;
@@ -45575,22 +45708,30 @@ plAggiorna();
 		VAP.c.richiamo = g;
 		vapDisegnaChiusura();
 	}
-	function vaaChiudi(r) {
+	async function vaaChiudi() {
 		closeModal("modal-vaa");
-		const f = VAP.risolvi;
-		VAP.risolvi = null;
-		if (f) f(r);
+		if (VAP.ic) {
+			await vapIcCarica();
+			vapIcDisegna();
+		}
 	}
 	function vaaDopo() {
+		closeModal("modal-vaa");
+	}
+	async function vapTogliLavoro() {
+		if (VAP.occupato) return;
+		const e = VAP.c?.e;
+		if (!e || !vaaAperto$1(e)) return;
+		VAP.occupato = true;
 		try {
-			const l = JSON.parse(localStorage.getItem(VAA_RIMANDATE) || "[]");
-			if (VAP.c?.e && !l.includes(VAP.c.e.id)) l.push(VAP.c.e.id);
-			localStorage.setItem(VAA_RIMANDATE, JSON.stringify(l.slice(-50)));
-		} catch (_) {}
-		vaaChiudi({
-			ok: false,
-			rimandata: true
-		});
+			const { error } = await DB.deleteInterventoMascalcia(e.id);
+			if (error) return showToast("Errore: " + error.message);
+			(VAP.tolti = VAP.tolti || /* @__PURE__ */ new Set()).add(e.id);
+		} finally {
+			VAP.occupato = false;
+		}
+		showToast("Lavoro tolto");
+		await vaaChiudi();
 		vaaAggiorna();
 	}
 	function vaaDescrizione() {
@@ -45679,61 +45820,44 @@ plAggiorna();
 			if (VAP.passate) VAP.passate = VAP.passate.filter((x) => x.id !== e.id);
 			const kk = vapChiave(c.cid, c.giorno);
 			(VAP.fatti[kk] = VAP.fatti[kk] || []).push(e.id);
-			const { prossimo } = vapNumeri();
 			showToast(`${cav.nome}: segnato`);
-			vaaChiudi({
-				ok: true,
-				cavalli: 1
-			});
 			if (cav.nuovo && typeof caricaCavalliMiei === "function") await caricaCavalliMiei().catch(() => {});
-			await vaaAggiorna();
-			if (prossimo) setTimeout(() => vaaFatto({ ...prossimo }), 250);
-			else setTimeout(() => vapDocumenti(c.cid, c.giorno), 250);
+			await vaaChiudi();
+			vaaAggiorna();
 		} finally {
 			if (btn) btn.disabled = false;
 		}
 	}
 	async function vapAggiungiLavoro() {
-		if (VAP.occupato) return;
-		const c = VAP.c, e = c.e;
+		if (VAP.occupato || !VAP.ic) return;
+		const ic = VAP.ic;
 		VAP.occupato = true;
-		const bt = document.getElementById("vap-altro");
+		const bt = document.getElementById("vic-agg");
 		if (bt) bt.disabled = true;
+		let nuovo = null;
 		try {
+			const ultimo = ic.lavori.filter(vaaAperto$1).slice(-1)[0];
 			const { data, error } = await DB.insertInterventoMascalcia({
-				cliente_mascalcia_id: c.cid,
-				tipo_ferratura: c.tipo || e.tipo_ferratura || "visita",
-				tipo_altro: c.tipo ? null : VAP_DECIDERE,
-				data_intervento: e.data_intervento || c.giorno,
+				cliente_mascalcia_id: ic.cid,
+				tipo_ferratura: ultimo?.tipo_ferratura || "visita",
+				tipo_altro: ultimo ? ultimo.tipo_altro : VAP_DECIDERE,
+				data_intervento: ic.giorno,
 				ora: null,
 				stato: "programmato",
 				stato_pagamento: "da_saldare"
 			});
 			if (error || !data) return showToast("Errore: " + (error?.message || "riprova"));
-			c.lavori.push(data);
-			(c.aggiunti = c.aggiunti || []).push(data.id);
+			nuovo = data;
 		} finally {
 			VAP.occupato = false;
+			if (bt) bt.disabled = false;
 		}
-		vapRidisegna();
+		await vapIcCarica();
+		vapIcDisegna();
 		vaaAggiorna();
+		if (nuovo) vapApriLavoro(nuovo.id);
 	}
-	async function vapTogliAggiunto() {
-		if (VAP.occupato) return;
-		const c = VAP.c, id = (c.aggiunti || []).slice(-1)[0];
-		if (!id) return;
-		VAP.occupato = true;
-		try {
-			const { error } = await DB.deleteInterventoMascalcia(id);
-			if (error) return showToast("Errore: " + error.message);
-			c.aggiunti = c.aggiunti.filter((x) => x !== id);
-			c.lavori = c.lavori.filter((x) => x.id !== id);
-		} finally {
-			VAP.occupato = false;
-		}
-		vapRidisegna();
-		vaaAggiorna();
-	}
+	var vapTogliAggiunto = vapTogliLavoro;
 	async function vapDocumenti(cid, giorno) {
 		const chiusi = VAP.fatti[vapChiave(cid, giorno)] || [];
 		const lavori = (await vapLavoriDelGiorno(cid, giorno)).filter((x) => x.stato === "fatto" && x.cavallo_cliente_id && (!chiusi.length || chiusi.includes(x.id)));
@@ -45831,7 +45955,7 @@ plAggiorna();
 		if (error || !data) return showToast("Errore: " + (error?.message || "riprova"));
 		closeModal("modal-vap-doc");
 		await vaaAggiorna();
-		vaaFatto(data);
+		await vaaFatto(data);
 	}
 	function vapNomePro() {
 		return currentUser?.datiPagamentoNome || currentUser?.fullName || currentUser?.full_name || currentUser?.email || "Veterinario";
@@ -46092,20 +46216,97 @@ plAggiorna();
 		return [...VAP.passate || [], ...eventi || []].filter((e, i, a) => a.findIndex((x) => x.id === e.id) === i).filter((e) => vaaAperto$1(e) && e.data_intervento && (e.data_intervento < oggi || e.data_intervento === oggi && rim.includes(e.id)));
 	}
 	function vaaBannerHtml$1(eventi) {
-		const l = vaaDaCompletare(eventi);
+		const oggi = vapOggi();
+		const diOggi = (eventi || []).filter((e) => vaaAperto$1(e) && e.data_intervento === oggi);
+		const passati = vaaDaCompletare(eventi).filter((e) => e.data_intervento < oggi);
+		const l = diOggi.length ? diOggi : passati;
 		if (!l.length) return "";
-		const e = l[0], nome = vapNomeCliente(e.cliente_mascalcia_id) || e.clienti_mascalcia?.nome || "Cliente";
-		return `<button class="vaa-banner" onclick="vaaCompleta('${e.id}')"><b>${l.length === 1 ? "1 lavoro da completare" : l.length + " lavori da completare"}</b>
-    <span>${vaaEsc(nome)} · ${vaaEsc(vapNomeLavoro$1(e))}: segna chi era il cavallo, così il conto e i libretti sono giusti. <u>Completa</u></span></button>`;
+		const cid = l[0].cliente_mascalcia_id, suoi = l.filter((x) => x.cliente_mascalcia_id === cid), altri = new Set(l.map((x) => x.cliente_mascalcia_id)).size - 1;
+		const nome = vapNomeCliente(cid) || l[0].clienti_mascalcia?.nome || "Cliente";
+		VAP.agEv = VAP.agEv || {};
+		l.forEach((x) => {
+			VAP.agEv[x.id] = x;
+		});
+		const quando = diOggi.length ? "Oggi da " + nome : "Da completare · " + nome + " (" + (/* @__PURE__ */ new Date(l[0].data_intervento + "T12:00")).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "short"
+		}) + ")";
+		return `<button class="vaa-banner vic-home" onclick="vaaCompleta('${l[0].id}')"><span class="ic" aria-hidden="true">${VAP_IC_APERTO}</span>
+    <span class="tx"><b>${vaaEsc(quando)}</b><span>appuntamento aperto · ${suoi.length === 1 ? "1 cavallo" : suoi.length + " cavalli"} da segnare${altri > 0 ? ` · e ${altri === 1 ? "un altro posto" : altri + " altri posti"}` : ""}</span></span>
+    <span class="go">${diOggi.length ? "Inizia" : "Completa"} ›</span></button>`;
+	}
+	function vapRigaAperti(l) {
+		VAP.agEv = VAP.agEv || {};
+		l.forEach((x) => {
+			VAP.agEv[x.id] = x;
+		});
+		const conta = {};
+		l.forEach((x) => {
+			const t = vapNomeLavoro$1(x);
+			conta[t] = (conta[t] || 0) + 1;
+		});
+		const tipi = Object.entries(conta).map(([t, n]) => n > 1 ? `${t[0].toUpperCase() + t.slice(1)} ×${n}` : `${n} ${t}`).join(" · ");
+		const ora = l.map((x) => x.ora).filter(Boolean).sort()[0];
+		return `<div class="ag-ev vic-ag" data-ev="${l[0].id}">
+      <div class="ag-ev-time">${ora ? String(ora).slice(0, 5) : "—"}</div>
+      <div class="ag-ev-main" onclick="vaaCompleta('${l[0].id}')"><div class="ag-ev-title">${l.length === 1 ? "1 cavallo" : l.length + " cavalli"} da segnare</div><div class="ag-ev-sub">Appuntamento aperto · ${vaaEsc(tipi)}</div></div>
+      <button class="ag-ev-fatto vic-segna" onclick="vaaCompleta('${l[0].id}')">Segna i cavalli</button>
+      <button class="ag-ev-menu" onclick="apriAzioniEvento('${l[0].id}')" aria-label="Azioni">⋯</button>
+    </div>`;
 	}
 	function vaaCompleta(id) {
 		const hp = typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti || [] : [];
-		const e = [
+		const e = (VAP.agEv || {})[id] || [
 			...VAP.passate || [],
 			...hp,
 			...DEMO_MODE ? demoState.interventiMascalcia || [] : []
 		].find((x) => x.id === id);
 		if (e) vaaFatto(e);
+	}
+	async function vetRichiamiStruttura(c, box) {
+		box.innerHTML = `<div class="ciclo-tit">Richiami della struttura</div><div class="ciclo-nota">Controllo i vaccini…</div>`;
+		const cav = await vaaCavalliDelCliente(c.id), ids = new Set(cav.map((x) => x.id));
+		const tutti = await vapTutti(), ult = {};
+		tutti.filter((i) => i.stato === "fatto" && ids.has(i.cavallo_cliente_id) && vaaVaccino(i)).forEach((i) => {
+			if (!ult[i.cavallo_cliente_id] || i.data_intervento > ult[i.cavallo_cliente_id].data_intervento) ult[i.cavallo_cliente_id] = i;
+		});
+		const limite = aggiungiGiorniIso(vapOggi(), 30);
+		const lista = cav.map((x) => ({
+			nome: x.nome,
+			d: ult[x.id]?.prossima_scadenza
+		})).filter((x) => x.d && x.d <= limite).sort((a, b) => a.d.localeCompare(b.d));
+		if (document.getElementById("cli-ciclo") !== box) return;
+		const dt = (d) => (/* @__PURE__ */ new Date(d + "T12:00")).toLocaleDateString("it-IT", {
+			day: "2-digit",
+			month: "2-digit"
+		});
+		VAP.richiami = {
+			cid: c.id,
+			n: lista.length,
+			data: lista.length ? lista[0].d < vapOggi() ? vapOggi() : lista[0].d : null
+		};
+		box.innerHTML = `<div class="ciclo-tit">Richiami della struttura</div>
+    ${lista.length ? `<div class="vrs-testo"><b>${lista.length === 1 ? "1 cavallo" : lista.length + " cavalli"}</b> con il vaccino in scadenza nei prossimi 30 giorni: ${lista.map((x) => `${vaaEsc(x.nome)} (${x.d < vapOggi() ? "scaduto " : ""}${dt(x.d)})`).join(", ")}.</div>
+      <button type="button" class="ciclo-fissa" onclick="vetFissaRichiami()">${VAP_IC_APERTO}Fissa il giro dei richiami</button>
+      <div class="ciclo-nota">Apre l'appuntamento aperto con la scuderia già scelta, ${lista.length === 1 ? "1 lavoro" : lista.length + " lavori"} «Vaccino» e la data del primo richiamo.</div>` : `<div class="ciclo-nota">Nessun richiamo vaccinale nei prossimi 30 giorni per i cavalli di questa struttura.</div>`}`;
+	}
+	function vetFissaRichiami() {
+		const r = VAP.richiami;
+		if (!r || !r.n) return;
+		const oggi = vapOggi(), domani = aggiungiGiorniIso(oggi, 1);
+		vapApriAperto({
+			cid: r.cid,
+			n: r.n,
+			slot: Array.from({ length: r.n }, () => "vaccino"),
+			data: r.data,
+			quando: r.data === oggi ? "oggi" : r.data === domani ? "domani" : "scegli",
+			...r.data === oggi ? {} : { ora: "09:00" },
+			prev: {
+				n: r.n,
+				tipo: "vaccino",
+				testo: `${r.n === 1 ? "1 cavallo ha" : r.n + " cavalli hanno"} il richiamo in scadenza: ho proposto ${r.n === 1 ? "1 lavoro" : r.n + " lavori"} «Vaccino».`
+			}
+		});
 	}
 	// equo-app-src/src/ruoli/veterinario/moduli/index.js
 	Object.assign(window, {
@@ -46271,6 +46472,15 @@ plAggiorna();
 		vpReset: vpReset$1,
 		mpAreaTocca,
 		MP_AREE,
+		vapInCorso,
+		vapIcDisegna,
+		vapIcPiuTardi,
+		vapChiudiVisita,
+		vapApriLavoro,
+		vapTogliLavoro,
+		vapRigaAperti,
+		vetRichiamiStruttura,
+		vetFissaRichiami,
 		VAA,
 		VAP,
 		VAP_DECIDERE,

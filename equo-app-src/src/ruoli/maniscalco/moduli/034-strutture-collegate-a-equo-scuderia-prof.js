@@ -253,6 +253,10 @@ async function openClienteDetail(id){
         <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this).then(() => closeClienteDetail())">Rifiuta</button></div>` : ""}
       <button class="btn btn-ghost btn-sm" id="cliente-scollega-btn" style="width:100%;color:var(--red)" onclick="scollegaStrutturaCorrente()">${c.collegamento_stato === "attivo" ? "Scollega da Equo Scuderia" : "Annulla richiesta"}</button>`;
+  } else if(isStruttura(c) && isManiscalcoUtente() && typeof eVeterinario === "function" && eVeterinario()){
+    // 11/11/2026: il collegamento con Equo Scuderia per i veterinari non c'è ancora (il database lo rifiuta): niente tasto
+    if(qrCard) qrCard.style.display = "none";
+    boxScud.style.display = "none"; boxScud.innerHTML = "";
   } else if(isStruttura(c) && isManiscalcoUtente()){
     if(qrCard) qrCard.style.display = "none";
     boxScud.style.display = "block";

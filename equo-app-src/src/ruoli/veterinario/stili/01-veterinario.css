@@ -588,3 +588,37 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 .mp-leg{display:flex;gap:12px;font-size:12px;color:var(--vt-testo2);margin:6px 2px}
 .mp-leg i{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:5px;vertical-align:-2px}
 .mp-aree{margin-top:8px}
+
+/* 11/11/2026 · «Visita in corso» (lista dell'appuntamento aperto), riquadro oro in Home, riga in agenda, richiami della scuderia (14-visita-aperta) */
+:where(body.pl-vet) .vic-prog{background:var(--vt-notte);color:#FFFFFF;border-radius:16px;padding:12px 14px;margin:4px 0 12px}
+:where(body.pl-vet) .vic-prog > div{display:flex;justify-content:space-between;font-weight:800;font-size:14px}
+:where(body.pl-vet) .vic-prog i{display:block;height:6px;background:var(--vt-notte3);border-radius:6px;margin-top:9px;overflow:hidden}
+:where(body.pl-vet) .vic-prog i b{display:block;height:100%;background:var(--vt-tif);border-radius:6px}
+:where(body.pl-vet) .vic-lista{display:flex;flex-direction:column;gap:8px}
+:where(body.pl-vet) .vic-riga{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:1.5px solid var(--vt-bordo);border-radius:16px;padding:11px 12px;background:var(--vt-sup);font:inherit;color:var(--vt-testo)}
+:where(body.pl-vet) .vic-riga .n{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--vt-chip);color:var(--vt-notte)}
+:where(body.pl-vet) .vic-riga .c{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vic-riga .c b{font-size:14.5px}
+:where(body.pl-vet) .vic-riga .c small{font-size:12px;color:var(--vt-testo2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:where(body.pl-vet) .vic-riga .p{font-weight:800;font-size:14px}
+:where(body.pl-vet) .vic-riga .fr{font-size:20px;color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vic-riga.ok{background:var(--vt-tif-chiaro);border-color:var(--vt-tif)}
+:where(body.pl-vet) .vic-riga.ok .n{background:var(--vt-tif-testo);color:#FFFFFF}
+:where(body.pl-vet) .vic-riga.vuota{border-style:dashed;border-color:var(--vt-oro);background:var(--vt-oro-chiaro);cursor:pointer}
+:where(body.pl-vet) .vic-riga.vuota .n{background:var(--vt-oro);color:#FFFFFF}
+:where(body.pl-vet) .vic-riga.vuota .c small{color:var(--vt-oro-testo);font-weight:700}
+:where(body.pl-vet) .vic-agg{border:1.5px dashed var(--vt-tif-scuro);color:var(--vt-tif-testo);border-radius:16px;padding:12px;background:var(--vt-sup);font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+:where(body.pl-vet) .vic-agg:disabled{opacity:.5}
+:where(body.pl-vet) .vap-togli{width:100%;margin-top:8px;color:var(--vt-urg)}
+:where(body.pl-vet) .vic-home{display:flex;align-items:center;gap:12px;text-align:left;width:100%;background:var(--vt-oro-chiaro);border:2px solid var(--vt-oro);border-radius:18px;padding:12px;margin-top:12px;font:inherit;color:var(--vt-testo);cursor:pointer}
+:where(body.pl-vet) .vic-home .ic{width:42px;height:42px;flex:none;border-radius:50%;background:var(--vt-oro);color:#FFFFFF;display:grid;place-items:center}
+:where(body.pl-vet) .vic-home .ic svg{width:20px;height:20px}
+:where(body.pl-vet) .vic-home .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+:where(body.pl-vet) .vic-home .tx b{font-size:14.5px;color:var(--vt-notte)}
+:where(body.pl-vet) .vic-home .tx span{font-size:12px;color:var(--vt-oro-testo)}
+:where(body.pl-vet) .vic-home .go{flex:none;background:var(--vt-notte);color:#FFFFFF;border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px;white-space:nowrap}
+:where(body.pl-vet) .vic-ag{border:1.5px dashed var(--vt-oro);background:var(--vt-oro-chiaro);border-radius:14px}
+:where(body.pl-vet) .vic-ag .vic-segna{background:var(--vt-oro);color:#FFFFFF;border-color:var(--vt-oro);white-space:nowrap}
+:where(body.pl-vet) .vrs-testo{font-size:13.5px;line-height:1.5;margin:4px 0 10px}
+:where(body.pl-vet) .ciclo-fissa svg{width:18px;height:18px}
+:where(:root:not([data-theme="light"])) body.pl-vet .vic-home .tx b{color:#1D2D50}
