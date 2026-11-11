@@ -79,7 +79,7 @@ function ecAnelli(h){
   const conScad = Object.values(ultimi).filter(e => e.next_due_date);
   const scaduti = conScad.filter(e => ecGiorni(oggi, e.next_due_date) < 0);
   let cura, curaTesto;
-  if(!ev.length){ cura = 0; curaTesto = "Segna ferratura e vaccini nel libretto"; }
+  if(!ev.length){ cura = 0; curaTesto = h.non_ferrato ? "Segna vaccini e pareggi nel libretto" : "Segna ferratura e vaccini nel libretto"; }
   else if(!conScad.length){ cura = 70; curaTesto = "Nessuna scadenza impostata nel libretto"; }
   else {
     cura = Math.max(0, 100 - 45 * scaduti.length);

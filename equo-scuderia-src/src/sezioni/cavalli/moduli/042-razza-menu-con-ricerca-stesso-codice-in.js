@@ -185,6 +185,12 @@ async function saveCavallo(){
         await sb.from("scuderia_cavalli").update({ foto_url }).eq("id", data.id);
       }
     }
+    // «non ferrato» (SQL 62): salvato a parte, così se manca l'aggiornamento del database il cavallo si salva lo stesso
+    const nfNuovo = !!document.getElementById("cav-non-ferrato")?.checked, nfMotivo = nfNuovo ? (document.getElementById("cav-nf-motivo")?.value || null) : null;
+    if(!DEMO_MODE && (nfNuovo !== !!vecchio?.non_ferrato || (nfMotivo || null) !== (vecchio?.non_ferrato_motivo || null))){
+      const r = await sb.from("scuderia_cavalli").update({ non_ferrato: nfNuovo, non_ferrato_motivo: nfMotivo }).eq("id", savedCavalloId);
+      if(r.error) showToast("Cavallo salvato, ma la spunta «non ferrato» richiede un aggiornamento del database (SQL 62).");
+    } else if(DEMO_MODE){ const dc = demoState.cavalli.find(x => x.id === savedCavalloId); if(dc){ dc.non_ferrato = nfNuovo; dc.non_ferrato_motivo = nfMotivo; } }
     await loadCavalli();
     if(currentCavalloId){ renderCavalloDetail(); } else { renderCavalliList(); }
     closeModal("modal-cavallo");

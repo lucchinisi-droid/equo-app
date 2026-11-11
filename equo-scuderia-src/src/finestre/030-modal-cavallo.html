@@ -7,8 +7,19 @@
       <select class="input" id="cav-tipo-proprieta">
         <option value="proprieta">Cavallo di proprietà del centro ippico</option>
         <option value="pensione">Cavallo in pensione (privato)</option>
+        <option value="mezza_pensione">Cavallo in mezza pensione</option>
         <option value="soci">Cavallo di soci/istruttori</option>
       </select>
+    </div>
+    <div class="field nf-box">
+      <label class="nf-check"><input type="checkbox" id="cav-non-ferrato" onchange="nfSpunta()"> Questo cavallo non viene ferrato</label>
+      <div id="cav-nf-motivo-box" style="display:none">
+        <select class="input" id="cav-nf-motivo" aria-label="Motivo">
+          <option value="">Motivo (facoltativo)</option><option value="puledro">Puledro</option><option value="anziano">Anziano</option><option value="scalzo">Scalzo (barefoot)</option><option value="altro">Altro</option>
+        </select>
+        <small class="nf-nota">Lo scadenzario segue il pareggio al posto della ferratura. Quando inizia a essere ferrato, togli la spunta.</small>
+      </div>
+      <small class="nf-nota" id="cav-nf-suggerimento" style="display:none">Ha meno di 3 anni: se è un puledro non ancora ferrato, metti la spunta.</small>
     </div>
     <div class="grid grid-2">
       <div class="field"><label>Razza</label><input class="input" id="cav-razza" placeholder="Scrivi per cercare, es. puros, maremm…"></div>

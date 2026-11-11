@@ -226,7 +226,7 @@
 				TIPO_ORDER.forEach((tipo) => {
 					const s = scad[tipo];
 					if (s.status === "red" || s.status === "yellow") rows.push({
-						main: `${c.nome} — ${TIPO_LABELS[tipo]}`,
+						main: `${c.nome} — ${s.titolo || TIPO_LABELS[tipo]}`,
 						sub: s.ultimo?.data_scadenza ? "Scadenza: " + formatDate(s.ultimo.data_scadenza) : "Mai registrato",
 						badge: s.status
 					});

@@ -86,6 +86,13 @@ function renderHorsesList(){
 const TIPO_PROPRIETA_LABELS = { proprieta: "Cavallo di proprietà", noleggio: "Cavallo a noleggio" };
 
 /* -> stato-condiviso.js */
+// «non ferrato» (SQL 62): puledri, anziani, scalzi; la spunta si toglie quando inizia a essere ferrato
+function nfImpostaHorse(h){
+  const cb = document.getElementById("horse-non-ferrato"); if(!cb) return;
+  cb.checked = !!h?.non_ferrato;
+  const m = document.getElementById("horse-nf-motivo"); if(m) m.value = h?.non_ferrato_motivo || "";
+  const box = document.getElementById("horse-nf-box"); if(box) box.style.display = cb.checked ? "" : "none";
+}
 function openHorseForm(id){
   if(!id && !isPremium() && horses.length >= LIMITE_CAVALLI_FREE){ openModal("modal-limite-cavalli"); return; }
   editingHorseId = id || null;
@@ -104,6 +111,7 @@ function openHorseForm(id){
     document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
     document.getElementById("horse-note").value = h?.note || "";
     document.getElementById("horse-condiviso").checked = h?.condiviso_ecosistema !== false;
+    nfImpostaHorse(h);
   } else {
     ["horse-name","horse-mantello","horse-birthdate","horse-microchip","horse-gruppo-sanguigno","horse-note"].forEach(id => document.getElementById(id).value = "");
     attivitaImposta("");
@@ -111,6 +119,7 @@ function openHorseForm(id){
     razzaImposta("horse-breed", "");
     document.getElementById("horse-tipo-proprieta").value = "proprieta";
     document.getElementById("horse-condiviso").checked = true;
+    nfImpostaHorse(null);
   }
   onbAvvisoNuovoCavallo(!editingHorseId);   // 27/10/2026: cavalli già preparati dal maniscalco → accettali
   openModal("modal-add-horse");
@@ -191,6 +200,13 @@ async function eseguiSalvataggioHorseBase(payload){
       if(error) throw error;
       horseId = data?.id || null;
     }
+    // «non ferrato» (SQL 62): salvato a parte, così il cavallo si salva anche se manca l'aggiornamento del database
+    const prima = editingHorseId ? horses.find(x => x.id === editingHorseId) : null;
+    const nfOn = !!document.getElementById("horse-non-ferrato")?.checked, nfMot = nfOn ? (document.getElementById("horse-nf-motivo")?.value || null) : null;
+    if(horseId && !DEMO_MODE && (nfOn !== !!prima?.non_ferrato || (nfMot || null) !== (prima?.non_ferrato_motivo || null))){
+      const r = await sb.from("horses").update({ non_ferrato: nfOn, non_ferrato_motivo: nfMot }).eq("id", horseId);
+      if(r.error) showToast("Cavallo salvato, ma la spunta «non ferrato» non è stata registrata: riprova più tardi.");
+    } else if(DEMO_MODE && horseId){ const dh = (typeof horses !== "undefined" ? horses : []).find(x => x.id === horseId); if(dh){ dh.non_ferrato = nfOn; dh.non_ferrato_motivo = nfMot; } }
     closeModal("modal-add-horse");
     await loadHorses();
     if(currentHorseId) await openHorseDetail(currentHorseId);
@@ -216,6 +232,7 @@ function renderHorseInfoBoxBase(h){
     ["Mantello", h.mantello || "—"],
     ["Sesso", { femmina: "Femmina", castrone: "Castrone", stallone: "Stallone" }[h.sesso] || "—"],
     ["Attività", h.attivita || "—"],
+    ["Ferratura", h.non_ferrato ? "Non ferrato" + ({ puledro: " · puledro", anziano: " · anziano", scalzo: " · scalzo" }[h.non_ferrato_motivo] || "") + " (si segue il pareggio)" : "Ferrato"],
     ["Data di nascita", h.birth_date ? formatDate(h.birth_date) : "—"],
     ["Microchip", h.microchip || "Non inserito"],
     ["Gruppo sanguigno", h.gruppo_sanguigno || "—"],

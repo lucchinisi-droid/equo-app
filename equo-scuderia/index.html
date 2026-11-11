@@ -1963,6 +1963,14 @@ textarea.input{resize:vertical}
 [data-theme="dark"] .dc-ok{--dc-testo:#7cc487}
 [data-theme="dark"] .dc-medio{--dc-testo:#f0c060}
 [data-theme="dark"] .dc-alto{--dc-testo:#f08a80}
+
+/* «non ferrato» (SQL 62) */
+.nf-check{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text);min-height:40px;cursor:pointer}
+.nf-check input{width:20px;height:20px}
+.nf-box .input{margin-top:6px}
+.nf-nota{display:block;color:var(--muted);font-size:12px;margin-top:6px;line-height:1.4}
+.nf-chip{font-size:10.5px;font-weight:700;color:var(--muted);background:var(--muted-bg);border-radius:999px;padding:2px 8px;margin-left:4px;vertical-align:middle}
+.badge-nf{background:var(--muted-bg);color:var(--muted)}
 /* ---------- CONFIGURAZIONE GUIDATA (10/11/2026 · SQL 58) ---------- */
 .conf-overlay{padding:0}
 .conf-modal{position:relative;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);
@@ -2622,6 +2630,11 @@ textarea.input{resize:vertical}
               <div class="cavalli-sezione" data-sezione="pensione">
                 <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('pensione')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli in pensione<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
                 <div class="grid grid-3" id="cavalli-grid-pensione"></div>
+                <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
+              </div>
+              <div class="cavalli-sezione" data-sezione="mezza_pensione">
+                <h3 class="cav-sez-testa" onclick="toggleSezioneCavalli('mezza_pensione')" data-tip="Tocca per aprire o chiudere questa categoria"><span class="cav-chev">▾</span>Cavalli in mezza pensione<span class="cav-sez-n"></span><span class="cav-sez-alert"></span></h3>
+                <div class="grid grid-3" id="cavalli-grid-mezza_pensione"></div>
                 <p class="empty-state-sezione" style="display:none;color:var(--muted);font-size:13px;margin:0 0 10px">Nessun cavallo in questa categoria.</p>
               </div>
               <div class="cavalli-sezione" data-sezione="soci">
@@ -3393,8 +3406,19 @@ textarea.input{resize:vertical}
       <select class="input" id="cav-tipo-proprieta">
         <option value="proprieta">Cavallo di proprietà del centro ippico</option>
         <option value="pensione">Cavallo in pensione (privato)</option>
+        <option value="mezza_pensione">Cavallo in mezza pensione</option>
         <option value="soci">Cavallo di soci/istruttori</option>
       </select>
+    </div>
+    <div class="field nf-box">
+      <label class="nf-check"><input type="checkbox" id="cav-non-ferrato" onchange="nfSpunta()"> Questo cavallo non viene ferrato</label>
+      <div id="cav-nf-motivo-box" style="display:none">
+        <select class="input" id="cav-nf-motivo" aria-label="Motivo">
+          <option value="">Motivo (facoltativo)</option><option value="puledro">Puledro</option><option value="anziano">Anziano</option><option value="scalzo">Scalzo (barefoot)</option><option value="altro">Altro</option>
+        </select>
+        <small class="nf-nota">Lo scadenzario segue il pareggio al posto della ferratura. Quando inizia a essere ferrato, togli la spunta.</small>
+      </div>
+      <small class="nf-nota" id="cav-nf-suggerimento" style="display:none">Ha meno di 3 anni: se è un puledro non ancora ferrato, metti la spunta.</small>
     </div>
     <div class="grid grid-2">
       <div class="field"><label>Razza</label><input class="input" id="cav-razza" placeholder="Scrivi per cercare, es. puros, maremm…"></div>
@@ -4168,7 +4192,7 @@ const ACTIVE_PLACEHOLDER_COPY = {};
 
 const TIPO_LABELS = { vaccino:"Vaccino", coggins:"Coggins test", ferratura:"Ferratura", sverminazione:"Sverminazione", altro:"Altro" };
 const TIPO_ICONS = { vaccino:"fa-syringe", coggins:"fa-vial", ferratura:"svg:horseshoe", sverminazione:"fa-pills", altro:"fa-ellipsis" };
-const TIPO_PROPRIETA_LABELS = { proprieta:"Proprietà del centro ippico", pensione:"Pensione privata", soci:"Soci/istruttori" };
+const TIPO_PROPRIETA_LABELS = { proprieta:"Proprietà del centro ippico", pensione:"Pensione privata", mezza_pensione:"Mezza pensione", soci:"Soci/istruttori" };
 const TIPO_ORDER = ["vaccino","coggins","ferratura","sverminazione"];
 
 /* Icone custom (non presenti nel set gratuito di Font Awesome) */
@@ -9693,7 +9717,7 @@ async function fiduciaCambia(clienteId, on, el){
 // Equo App · cavalli · STATO CONDIVISO: variabili che anche altre parti dell'app leggono o cambiano.
 // Script classico caricato PRIMA dei moduli cavalli e dello script principale: qui solo dati, nessuna funzione.
 // da 039-cavalli-salute.js
-const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", gray:"Da registrare" };
+const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", gray:"Da registrare", nf:"Non ferrato" };
 
 // === GENERATO da equo-app-src/strumenti/costruisci-moduli.mjs: NON modificare qui, modificare equo-scuderia-src/src/sezioni/cavalli/moduli/ ===
 (function() {
@@ -11605,6 +11629,19 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 					await sb.from("scuderia_cavalli").update({ foto_url }).eq("id", data.id);
 				}
 			}
+			const nfNuovo = !!document.getElementById("cav-non-ferrato")?.checked, nfMotivo = nfNuovo ? document.getElementById("cav-nf-motivo")?.value || null : null;
+			if (!DEMO_MODE && (nfNuovo !== !!vecchio?.non_ferrato || (nfMotivo || null) !== (vecchio?.non_ferrato_motivo || null))) {
+				if ((await sb.from("scuderia_cavalli").update({
+					non_ferrato: nfNuovo,
+					non_ferrato_motivo: nfMotivo
+				}).eq("id", savedCavalloId)).error) showToast("Cavallo salvato, ma la spunta «non ferrato» richiede un aggiornamento del database (SQL 62).");
+			} else if (DEMO_MODE) {
+				const dc = demoState.cavalli.find((x) => x.id === savedCavalloId);
+				if (dc) {
+					dc.non_ferrato = nfNuovo;
+					dc.non_ferrato_motivo = nfMotivo;
+				}
+			}
 			await loadCavalli();
 			if (currentCavalloId) renderCavalloDetail();
 			else renderCavalliList();
@@ -12203,6 +12240,11 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 				150,
 				150,
 				150
+			],
+			nf: [
+				150,
+				150,
+				150
 			]
 		};
 		const bw = 82;
@@ -12215,11 +12257,11 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			doc.setFont("helvetica", "bold");
 			doc.setFontSize(10.5);
 			doc.setTextColor(25, 35, 30);
-			doc.text(TIPO_LABELS[tipo], bx + 11, by + 6.5);
+			doc.text(s.titolo || TIPO_LABELS[tipo], bx + 11, by + 6.5);
 			doc.setFont("helvetica", "normal");
 			doc.setFontSize(8.5);
 			doc.setTextColor(...PDF_GRIGIO);
-			doc.text(s.ultimo ? `Ultimo ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · scadenza " + formatDate(s.ultimo.data_scadenza) : ""}` : "Mai registrato", bx + 11, by + 11.8);
+			doc.text(s.ultimo ? `Ultimo ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · scadenza " + formatDate(s.ultimo.data_scadenza) : ""}` : s.nonFerrato ? "Non ferrato" : "Mai registrato", bx + 11, by + 11.8);
 			doc.setFont("helvetica", "bold");
 			doc.setFontSize(7.5);
 			doc.setTextColor(...colori[s.status]);
@@ -12343,6 +12385,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			if (typeof propCavReset === "function") propCavReset();
 			document.getElementById("cav-codice-proprietario").value = "";
 			document.getElementById("cav-note").value = c?.note || "";
+			nfImposta(c);
 			preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
 		} else {
 			document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
@@ -12362,6 +12405,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			].forEach((id) => document.getElementById(id).value = "");
 			document.getElementById("cav-proprietario").dataset.membroId = "";
 			if (typeof propCavReset === "function") propCavReset();
+			nfImposta(null);
 			preview.innerHTML = "";
 		}
 		openModal("modal-cavallo");
@@ -12523,11 +12567,17 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		const grid = document.getElementById("scadenzario-grid");
 		grid.innerHTML = TIPO_ORDER.map((tipo) => {
 			const s = scad[tipo];
-			const meta = s.ultimo ? `Ultimo: ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · Scadenza: " + formatDate(s.ultimo.data_scadenza) : ""}` : "Nessun evento registrato";
+			const NF_MOTIVI = {
+				puledro: "puledro",
+				anziano: "anziano",
+				scalzo: "scalzo",
+				altro: ""
+			};
+			const meta = s.ultimo ? `Ultimo: ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · Scadenza: " + formatDate(s.ultimo.data_scadenza) : ""}` : s.nonFerrato ? `Non ferrato${NF_MOTIVI[s.motivo] ? " · " + NF_MOTIVI[s.motivo] : ""} · nessun pareggio registrato` : "Nessun evento registrato";
 			return `
       <div class="scad-tile">
         <div class="t">
-          <span class="lbl">${iconHtml(TIPO_ICONS[tipo])} ${TIPO_LABELS[tipo]}</span>
+          <span class="lbl">${iconHtml(TIPO_ICONS[tipo])} ${s.titolo || TIPO_LABELS[tipo]}${s.nonFerrato ? " <span class=\"nf-chip\">non ferrato</span>" : ""}</span>
           <span class="badge-pill badge-${s.status}">${etichettaStato(s)}</span>
         </div>
         <div class="meta">${meta}</div>
@@ -12586,9 +12636,16 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			sb.from("cavalli_arrivi").select("id, nome_cavallo, proprietario_nome, richiesto_nome, richiesto_ruolo, dal, created_at").eq("centro_id", currentCentro.id).eq("stato", "in_attesa").order("created_at", { ascending: true })
 		]);
 		cavalliUsciti = usc.error ? [] : usc.data || [];
+		const nf = await sb.from("scuderia_cavalli").select("id, non_ferrato, non_ferrato_motivo").eq("centro_id", currentCentro.id).eq("non_ferrato", true).then((r) => r, () => ({ error: true }));
+		const nfMappa = new Map(nf.error ? [] : (nf.data || []).map((r) => [r.id, r]));
+		const conNf = (l) => (l || []).map((c) => nfMappa.has(c.id) ? {
+			...c,
+			non_ferrato: true,
+			non_ferrato_motivo: nfMappa.get(c.id).non_ferrato_motivo
+		} : c);
 		cavalliArrivi = arr.error ? [] : arr.data || [];
 		if (!att.error) {
-			cavalliList = att.data || [];
+			cavalliList = conNf(att.data);
 			return;
 		}
 		const { data, error } = await sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).order("nome", { ascending: true });
@@ -12619,6 +12676,17 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 				status: statusFor(ultimo)
 			};
 		});
+		const cav = (typeof cavalliList !== "undefined" ? cavalliList : []).find((x) => x.id === cavalloId);
+		if (cav && cav.non_ferrato) {
+			const u = eventiCavallo.filter((e) => e.tipo === "ferratura" || e.tipo === "altro" && /pareggi/i.test(e.tipo_altro || "")).sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento))[0] || null;
+			result.ferratura = {
+				ultimo: u,
+				status: u && u.data_scadenza ? statusFor(u) : "nf",
+				nonFerrato: true,
+				titolo: "Pareggio",
+				motivo: cav.non_ferrato_motivo || null
+			};
+		}
 		return result;
 	}
 	function statusFor(evento) {
@@ -12638,7 +12706,8 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 			red: 0,
 			yellow: 1,
 			gray: 2,
-			green: 3
+			green: 3,
+			nf: 3
 		};
 		let worst = "green";
 		TIPO_ORDER.forEach((tipo) => {
@@ -12716,6 +12785,7 @@ const STATUS_LABELS = { red:"Scaduto", yellow:"In scadenza", green:"In regola", 
 		[
 			"proprieta",
 			"pensione",
+			"mezza_pensione",
 			"soci"
 		].forEach((sezione) => {
 			const grid = document.getElementById("cavalli-grid-" + sezione);
@@ -14121,7 +14191,7 @@ const MODULE_TITLES = {
 				TIPO_ORDER.forEach((tipo) => {
 					const s = scad[tipo];
 					if (s.status === "red" || s.status === "yellow") rows.push({
-						main: `${c.nome} — ${TIPO_LABELS[tipo]}`,
+						main: `${c.nome} — ${s.titolo || TIPO_LABELS[tipo]}`,
 						sub: s.ultimo?.data_scadenza ? "Scadenza: " + formatDate(s.ultimo.data_scadenza) : "Mai registrato",
 						badge: s.status
 					});
@@ -16957,6 +17027,26 @@ async function cavVerificaScelta(id, azione, campo, valore){
   await loadCavalli();
   if(currentCavalloId === id){ renderCavalloDetail(); cavVerificaRender(id); } else renderCavalliList();
 }
+/* =====================================================================
+   «QUESTO CAVALLO NON VIENE FERRATO» (11/11/2026 · SQL 62) — script normale: funzioni globali.
+   Puledri, anziani, scalzi: con la spunta lo scadenzario segue il pareggio al posto della ferratura e non segnala
+   dati mancanti. La spunta si toglie quando il cavallo inizia a essere ferrato. Si allinea con il libretto del proprietario.
+   ===================================================================== */
+function nfImposta(c){
+  const cb = document.getElementById("cav-non-ferrato"); if(!cb) return;
+  cb.checked = !!c?.non_ferrato;
+  const m = document.getElementById("cav-nf-motivo"); if(m) m.value = c?.non_ferrato_motivo || "";
+  nfSpunta();
+}
+function nfSpunta(){
+  const on = !!document.getElementById("cav-non-ferrato")?.checked;
+  const box = document.getElementById("cav-nf-motivo-box"); if(box) box.style.display = on ? "" : "none";
+  // suggerimento per i puledri: meno di 3 anni dalla data di nascita (solo un invito, la spunta la mette l'utente)
+  const sug = document.getElementById("cav-nf-suggerimento"), nasc = document.getElementById("cav-nascita")?.value;
+  const anni = nasc ? (Date.now() - new Date(nasc + "T00:00").getTime()) / (365.25 * 864e5) : null;
+  if(sug) sug.style.display = !on && anni != null && anni >= 0 && anni < 3 ? "" : "none";
+}
+document.addEventListener("change", e => { if(e.target && e.target.id === "cav-nascita") nfSpunta(); });
 /* ---------- ATHENA (segreteria AI: guida del gestionale + situazione del centro) ---------- */
 // La funzione è sul sito dell'app: /api/agent è un proxy (netlify.toml) → stesso dominio, niente CORS.
 let athenaCaricata = false, athenaInCorso = false, agenteAttivo = "athena";

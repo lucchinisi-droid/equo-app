@@ -22,8 +22,12 @@ async function loadCavalli(){
     sb.from("cavalli_arrivi").select("id, nome_cavallo, proprietario_nome, richiesto_nome, richiesto_ruolo, dal, created_at").eq("centro_id", currentCentro.id).eq("stato", "in_attesa").order("created_at", { ascending: true })
   ]);
   cavalliUsciti = usc.error ? [] : (usc.data || []);
+  // «non ferrato» (SQL 62) letto a parte: se la colonna non c'è ancora il resto funziona uguale
+  const nf = await sb.from("scuderia_cavalli").select("id, non_ferrato, non_ferrato_motivo").eq("centro_id", currentCentro.id).eq("non_ferrato", true).then(r => r, () => ({ error: true }));
+  const nfMappa = new Map(nf.error ? [] : (nf.data || []).map(r => [r.id, r]));
+  const conNf = l => (l || []).map(c => nfMappa.has(c.id) ? { ...c, non_ferrato: true, non_ferrato_motivo: nfMappa.get(c.id).non_ferrato_motivo } : c);
   cavalliArrivi = arr.error ? [] : (arr.data || []);
-  if(!att.error){ cavalliList = att.data || []; return; }
+  if(!att.error){ cavalliList = conNf(att.data); return; }
   const { data, error } = await sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).order("nome", { ascending: true });
   if(!error){ cavalliList = data || []; return; }
   // ripiego se la colonna proprietario_membro_id non esistesse
@@ -52,6 +56,14 @@ function scadenzarioFor(cavalloId){
     const ultimo = eventi[0] || null;
     result[tipo] = { ultimo, status: statusFor(ultimo) };
   });
+  // 11/11/2026 (SQL 62): cavallo non ferrato → al posto della ferratura si segue il pareggio, mai «dato mancante»
+  const cav = (typeof cavalliList !== "undefined" ? cavalliList : []).find(x => x.id === cavalloId);
+  if(cav && cav.non_ferrato){
+    const par = eventiCavallo.filter(e => e.tipo === "ferratura" || (e.tipo === "altro" && /pareggi/i.test(e.tipo_altro || "")))
+      .sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento));
+    const u = par[0] || null;
+    result.ferratura = { ultimo: u, status: u && u.data_scadenza ? statusFor(u) : "nf", nonFerrato: true, titolo: "Pareggio", motivo: cav.non_ferrato_motivo || null };
+  }
   return result;
 }
 
@@ -68,7 +80,7 @@ function statusFor(evento){
 
 function worstStatus(cavalloId){
   const scad = scadenzarioFor(cavalloId);
-  const order = { red:0, yellow:1, gray:2, green:3 };
+  const order = { red:0, yellow:1, gray:2, green:3, nf:3 };
   let worst = "green";
   TIPO_ORDER.forEach(tipo => { if(order[scad[tipo].status] < order[worst]) worst = scad[tipo].status; });
   return worst;
@@ -116,11 +128,11 @@ function renderCavalliList(){
   empty.style.display = cavalliList.length === 0 ? "block" : "none";
   document.getElementById("cavalli-sezioni").style.display = cavalliList.length === 0 ? "none" : "block";
 
-  ["proprieta","pensione","soci"].forEach(sezione => {
+  ["proprieta","pensione","mezza_pensione","soci"].forEach(sezione => {
     const grid = document.getElementById("cavalli-grid-" + sezione);
     const sezioneEl = document.querySelector(`.cavalli-sezione[data-sezione="${sezione}"]`);
     const emptySezione = sezioneEl.querySelector(".empty-state-sezione");
-    const list = cavalliList.filter(c => (c.tipo_proprieta || "proprieta") === sezione);
+    const list = cavalliList.filter(c => (c.tipo_proprieta || "proprieta") === sezione);   // 11/11: la mezza pensione sta con la pensione (prima spariva dalla lista)
     grid.innerHTML = "";
     sezioneEl.style.display = cavalliList.length === 0 ? "none" : "block";
     emptySezione.style.display = list.length === 0 ? "block" : "none";

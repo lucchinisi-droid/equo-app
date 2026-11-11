@@ -1909,6 +1909,19 @@
 					await sb.from("scuderia_cavalli").update({ foto_url }).eq("id", data.id);
 				}
 			}
+			const nfNuovo = !!document.getElementById("cav-non-ferrato")?.checked, nfMotivo = nfNuovo ? document.getElementById("cav-nf-motivo")?.value || null : null;
+			if (!DEMO_MODE && (nfNuovo !== !!vecchio?.non_ferrato || (nfMotivo || null) !== (vecchio?.non_ferrato_motivo || null))) {
+				if ((await sb.from("scuderia_cavalli").update({
+					non_ferrato: nfNuovo,
+					non_ferrato_motivo: nfMotivo
+				}).eq("id", savedCavalloId)).error) showToast("Cavallo salvato, ma la spunta «non ferrato» richiede un aggiornamento del database (SQL 62).");
+			} else if (DEMO_MODE) {
+				const dc = demoState.cavalli.find((x) => x.id === savedCavalloId);
+				if (dc) {
+					dc.non_ferrato = nfNuovo;
+					dc.non_ferrato_motivo = nfMotivo;
+				}
+			}
 			await loadCavalli();
 			if (currentCavalloId) renderCavalloDetail();
 			else renderCavalliList();
@@ -2507,6 +2520,11 @@
 				150,
 				150,
 				150
+			],
+			nf: [
+				150,
+				150,
+				150
 			]
 		};
 		const bw = 82;
@@ -2519,11 +2537,11 @@
 			doc.setFont("helvetica", "bold");
 			doc.setFontSize(10.5);
 			doc.setTextColor(25, 35, 30);
-			doc.text(TIPO_LABELS[tipo], bx + 11, by + 6.5);
+			doc.text(s.titolo || TIPO_LABELS[tipo], bx + 11, by + 6.5);
 			doc.setFont("helvetica", "normal");
 			doc.setFontSize(8.5);
 			doc.setTextColor(...PDF_GRIGIO);
-			doc.text(s.ultimo ? `Ultimo ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · scadenza " + formatDate(s.ultimo.data_scadenza) : ""}` : "Mai registrato", bx + 11, by + 11.8);
+			doc.text(s.ultimo ? `Ultimo ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · scadenza " + formatDate(s.ultimo.data_scadenza) : ""}` : s.nonFerrato ? "Non ferrato" : "Mai registrato", bx + 11, by + 11.8);
 			doc.setFont("helvetica", "bold");
 			doc.setFontSize(7.5);
 			doc.setTextColor(...colori[s.status]);
@@ -2647,6 +2665,7 @@
 			if (typeof propCavReset === "function") propCavReset();
 			document.getElementById("cav-codice-proprietario").value = "";
 			document.getElementById("cav-note").value = c?.note || "";
+			nfImposta(c);
 			preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
 		} else {
 			document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
@@ -2666,6 +2685,7 @@
 			].forEach((id) => document.getElementById(id).value = "");
 			document.getElementById("cav-proprietario").dataset.membroId = "";
 			if (typeof propCavReset === "function") propCavReset();
+			nfImposta(null);
 			preview.innerHTML = "";
 		}
 		openModal("modal-cavallo");
@@ -2827,11 +2847,17 @@
 		const grid = document.getElementById("scadenzario-grid");
 		grid.innerHTML = TIPO_ORDER.map((tipo) => {
 			const s = scad[tipo];
-			const meta = s.ultimo ? `Ultimo: ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · Scadenza: " + formatDate(s.ultimo.data_scadenza) : ""}` : "Nessun evento registrato";
+			const NF_MOTIVI = {
+				puledro: "puledro",
+				anziano: "anziano",
+				scalzo: "scalzo",
+				altro: ""
+			};
+			const meta = s.ultimo ? `Ultimo: ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · Scadenza: " + formatDate(s.ultimo.data_scadenza) : ""}` : s.nonFerrato ? `Non ferrato${NF_MOTIVI[s.motivo] ? " · " + NF_MOTIVI[s.motivo] : ""} · nessun pareggio registrato` : "Nessun evento registrato";
 			return `
       <div class="scad-tile">
         <div class="t">
-          <span class="lbl">${iconHtml(TIPO_ICONS[tipo])} ${TIPO_LABELS[tipo]}</span>
+          <span class="lbl">${iconHtml(TIPO_ICONS[tipo])} ${s.titolo || TIPO_LABELS[tipo]}${s.nonFerrato ? " <span class=\"nf-chip\">non ferrato</span>" : ""}</span>
           <span class="badge-pill badge-${s.status}">${etichettaStato(s)}</span>
         </div>
         <div class="meta">${meta}</div>
@@ -2890,9 +2916,16 @@
 			sb.from("cavalli_arrivi").select("id, nome_cavallo, proprietario_nome, richiesto_nome, richiesto_ruolo, dal, created_at").eq("centro_id", currentCentro.id).eq("stato", "in_attesa").order("created_at", { ascending: true })
 		]);
 		cavalliUsciti = usc.error ? [] : usc.data || [];
+		const nf = await sb.from("scuderia_cavalli").select("id, non_ferrato, non_ferrato_motivo").eq("centro_id", currentCentro.id).eq("non_ferrato", true).then((r) => r, () => ({ error: true }));
+		const nfMappa = new Map(nf.error ? [] : (nf.data || []).map((r) => [r.id, r]));
+		const conNf = (l) => (l || []).map((c) => nfMappa.has(c.id) ? {
+			...c,
+			non_ferrato: true,
+			non_ferrato_motivo: nfMappa.get(c.id).non_ferrato_motivo
+		} : c);
 		cavalliArrivi = arr.error ? [] : arr.data || [];
 		if (!att.error) {
-			cavalliList = att.data || [];
+			cavalliList = conNf(att.data);
 			return;
 		}
 		const { data, error } = await sb.from("scuderia_cavalli").select(campi).eq("centro_id", currentCentro.id).order("nome", { ascending: true });
@@ -2923,6 +2956,17 @@
 				status: statusFor(ultimo)
 			};
 		});
+		const cav = (typeof cavalliList !== "undefined" ? cavalliList : []).find((x) => x.id === cavalloId);
+		if (cav && cav.non_ferrato) {
+			const u = eventiCavallo.filter((e) => e.tipo === "ferratura" || e.tipo === "altro" && /pareggi/i.test(e.tipo_altro || "")).sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento))[0] || null;
+			result.ferratura = {
+				ultimo: u,
+				status: u && u.data_scadenza ? statusFor(u) : "nf",
+				nonFerrato: true,
+				titolo: "Pareggio",
+				motivo: cav.non_ferrato_motivo || null
+			};
+		}
 		return result;
 	}
 	function statusFor(evento) {
@@ -2942,7 +2986,8 @@
 			red: 0,
 			yellow: 1,
 			gray: 2,
-			green: 3
+			green: 3,
+			nf: 3
 		};
 		let worst = "green";
 		TIPO_ORDER.forEach((tipo) => {
@@ -3020,6 +3065,7 @@
 		[
 			"proprieta",
 			"pensione",
+			"mezza_pensione",
 			"soci"
 		].forEach((sezione) => {
 			const grid = document.getElementById("cavalli-grid-" + sezione);

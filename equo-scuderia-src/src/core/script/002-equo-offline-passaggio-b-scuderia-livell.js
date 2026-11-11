@@ -64,7 +64,7 @@ const ACTIVE_PLACEHOLDER_COPY = {};
 
 const TIPO_LABELS = { vaccino:"Vaccino", coggins:"Coggins test", ferratura:"Ferratura", sverminazione:"Sverminazione", altro:"Altro" };
 const TIPO_ICONS = { vaccino:"fa-syringe", coggins:"fa-vial", ferratura:"svg:horseshoe", sverminazione:"fa-pills", altro:"fa-ellipsis" };
-const TIPO_PROPRIETA_LABELS = { proprieta:"Proprietà del centro ippico", pensione:"Pensione privata", soci:"Soci/istruttori" };
+const TIPO_PROPRIETA_LABELS = { proprieta:"Proprietà del centro ippico", pensione:"Pensione privata", mezza_pensione:"Mezza pensione", soci:"Soci/istruttori" };
 const TIPO_ORDER = ["vaccino","coggins","ferratura","sverminazione"];
 
 /* Icone custom (non presenti nel set gratuito di Font Awesome) */

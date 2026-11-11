@@ -581,6 +581,15 @@
 		proprieta: "Cavallo di proprietà",
 		noleggio: "Cavallo a noleggio"
 	};
+	function nfImpostaHorse(h) {
+		const cb = document.getElementById("horse-non-ferrato");
+		if (!cb) return;
+		cb.checked = !!h?.non_ferrato;
+		const m = document.getElementById("horse-nf-motivo");
+		if (m) m.value = h?.non_ferrato_motivo || "";
+		const box = document.getElementById("horse-nf-box");
+		if (box) box.style.display = cb.checked ? "" : "none";
+	}
 	function openHorseForm(id) {
 		if (!id && !isPremium() && horses.length >= LIMITE_CAVALLI_FREE) {
 			openModal("modal-limite-cavalli");
@@ -602,6 +611,7 @@
 			document.getElementById("horse-gruppo-sanguigno").value = h?.gruppo_sanguigno || "";
 			document.getElementById("horse-note").value = h?.note || "";
 			document.getElementById("horse-condiviso").checked = h?.condiviso_ecosistema !== false;
+			nfImpostaHorse(h);
 		} else {
 			[
 				"horse-name",
@@ -616,6 +626,7 @@
 			razzaImposta("horse-breed", "");
 			document.getElementById("horse-tipo-proprieta").value = "proprieta";
 			document.getElementById("horse-condiviso").checked = true;
+			nfImpostaHorse(null);
 		}
 		onbAvvisoNuovoCavallo(!editingHorseId);
 		openModal("modal-add-horse");
@@ -690,14 +701,28 @@
 		const btn = document.getElementById("horse-save-btn");
 		btn.disabled = true;
 		try {
-			editingHorseId;
+			let horseId = editingHorseId;
 			if (editingHorseId) {
 				const { error } = await DB.updateHorse(editingHorseId, payload);
 				if (error) throw error;
 			} else {
 				const { error, data } = await DB.insertHorse(payload);
 				if (error) throw error;
-				data?.id;
+				horseId = data?.id || null;
+			}
+			const prima = editingHorseId ? horses.find((x) => x.id === editingHorseId) : null;
+			const nfOn = !!document.getElementById("horse-non-ferrato")?.checked, nfMot = nfOn ? document.getElementById("horse-nf-motivo")?.value || null : null;
+			if (horseId && !DEMO_MODE && (nfOn !== !!prima?.non_ferrato || (nfMot || null) !== (prima?.non_ferrato_motivo || null))) {
+				if ((await sb.from("horses").update({
+					non_ferrato: nfOn,
+					non_ferrato_motivo: nfMot
+				}).eq("id", horseId)).error) showToast("Cavallo salvato, ma la spunta «non ferrato» non è stata registrata: riprova più tardi.");
+			} else if (DEMO_MODE && horseId) {
+				const dh = (typeof horses !== "undefined" ? horses : []).find((x) => x.id === horseId);
+				if (dh) {
+					dh.non_ferrato = nfOn;
+					dh.non_ferrato_motivo = nfMot;
+				}
 			}
 			closeModal("modal-add-horse");
 			await loadHorses();
@@ -729,6 +754,11 @@
 				stallone: "Stallone"
 			}[h.sesso] || "—"],
 			["Attività", h.attivita || "—"],
+			["Ferratura", h.non_ferrato ? "Non ferrato" + ({
+				puledro: " · puledro",
+				anziano: " · anziano",
+				scalzo: " · scalzo"
+			}[h.non_ferrato_motivo] || "") + " (si segue il pareggio)" : "Ferrato"],
 			["Data di nascita", h.birth_date ? formatDate(h.birth_date) : "—"],
 			["Microchip", h.microchip || "Non inserito"],
 			["Gruppo sanguigno", h.gruppo_sanguigno || "—"],
@@ -3049,7 +3079,7 @@
 		let cura, curaTesto;
 		if (!ev.length) {
 			cura = 0;
-			curaTesto = "Segna ferratura e vaccini nel libretto";
+			curaTesto = h.non_ferrato ? "Segna vaccini e pareggi nel libretto" : "Segna ferratura e vaccini nel libretto";
 		} else if (!conScad.length) {
 			cura = 70;
 			curaTesto = "Nessuna scadenza impostata nel libretto";

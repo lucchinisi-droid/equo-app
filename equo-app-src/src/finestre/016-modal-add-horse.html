@@ -42,6 +42,15 @@
         <input class="input" id="horse-birthdate" type="date">
       </div>
       <div class="input-group">
+        <label style="display:flex;gap:10px;align-items:center;font-weight:600;font-size:14px;cursor:pointer;min-height:40px">
+          <input type="checkbox" id="horse-non-ferrato" style="width:20px;height:20px" onchange="document.getElementById('horse-nf-box').style.display=this.checked?'':'none'"> Questo cavallo non viene ferrato
+        </label>
+        <div id="horse-nf-box" style="display:none">
+          <select class="input" id="horse-nf-motivo" aria-label="Motivo"><option value="">Motivo (facoltativo)</option><option value="puledro">Puledro</option><option value="anziano">Anziano</option><option value="scalzo">Scalzo (barefoot)</option><option value="altro">Altro</option></select>
+          <span class="muted" style="display:block;font-size:12px;line-height:1.45;margin-top:6px">Al posto della ferratura segui il pareggio. Quando inizia a essere ferrato, togli la spunta.</span>
+        </div>
+      </div>
+      <div class="input-group">
         <label class="input-label">Microchip (opzionale)</label>
         <input class="input" id="horse-microchip" placeholder="15 cifre">
       </div>

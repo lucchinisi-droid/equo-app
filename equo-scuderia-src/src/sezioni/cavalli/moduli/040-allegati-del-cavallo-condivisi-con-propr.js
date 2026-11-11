@@ -96,13 +96,14 @@ function renderCavalloDetail(){
   const grid = document.getElementById("scadenzario-grid");
   grid.innerHTML = TIPO_ORDER.map(tipo => {
     const s = scad[tipo];
+    const NF_MOTIVI = { puledro: "puledro", anziano: "anziano", scalzo: "scalzo", altro: "" };
     const meta = s.ultimo
       ? `Ultimo: ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · Scadenza: " + formatDate(s.ultimo.data_scadenza) : ""}`
-      : "Nessun evento registrato";
+      : s.nonFerrato ? `Non ferrato${NF_MOTIVI[s.motivo] ? " · " + NF_MOTIVI[s.motivo] : ""} · nessun pareggio registrato` : "Nessun evento registrato";
     return `
       <div class="scad-tile">
         <div class="t">
-          <span class="lbl">${iconHtml(TIPO_ICONS[tipo])} ${TIPO_LABELS[tipo]}</span>
+          <span class="lbl">${iconHtml(TIPO_ICONS[tipo])} ${s.titolo || TIPO_LABELS[tipo]}${s.nonFerrato ? ' <span class="nf-chip">non ferrato</span>' : ""}</span>
           <span class="badge-pill badge-${s.status}">${etichettaStato(s)}</span>
         </div>
         <div class="meta">${meta}</div>

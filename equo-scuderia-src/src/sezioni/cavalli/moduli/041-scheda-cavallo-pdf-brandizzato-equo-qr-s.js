@@ -263,15 +263,15 @@ async function generateSchedaPdf(c){
     doc.setDrawColor(...PDF_ORO); doc.setLineWidth(0.8); doc.line(L, y + 2, L + 14, y + 2); y += 9; };
   titolo("Scadenzario sanitario");
   const scad = scadenzarioFor(c.id);
-  const colori = { red: [201, 75, 64], yellow: [214, 150, 40], green: [47, 125, 70], gray: [150, 150, 150] };
+  const colori = { red: [201, 75, 64], yellow: [214, 150, 40], green: [47, 125, 70], gray: [150, 150, 150], nf: [150, 150, 150] };
   const bw = (R - L - 6) / 2;
   TIPO_ORDER.forEach((tipo, i) => {
     const s = scad[tipo], bx = L + (i % 2) * (bw + 6), by = y + Math.floor(i / 2) * 20;
     doc.setFillColor(...PDF_BEIGE); doc.roundedRect(bx, by, bw, 16, 2.5, 2.5, "F");
     doc.setFillColor(...colori[s.status]); doc.circle(bx + 6, by + 8, 1.9, "F");
-    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(25, 35, 30); doc.text(TIPO_LABELS[tipo], bx + 11, by + 6.5);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(25, 35, 30); doc.text(s.titolo || TIPO_LABELS[tipo], bx + 11, by + 6.5);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...PDF_GRIGIO);
-    doc.text(s.ultimo ? `Ultimo ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · scadenza " + formatDate(s.ultimo.data_scadenza) : ""}` : "Mai registrato", bx + 11, by + 11.8);
+    doc.text(s.ultimo ? `Ultimo ${formatDate(s.ultimo.data_evento)}${s.ultimo.data_scadenza ? " · scadenza " + formatDate(s.ultimo.data_scadenza) : ""}` : s.nonFerrato ? "Non ferrato" : "Mai registrato", bx + 11, by + 11.8);
     doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(...colori[s.status]);
     doc.text(etichettaStato(s).toUpperCase(), bx + bw - 4, by + 6.5, { align: "right" });
   });
@@ -327,7 +327,7 @@ async function generateSchedaPdf(c){
   await loadCavalli();
   renderCavalloDetail();
 }
-function etichettaStato(s){ return s.ultimo && !s.ultimo.data_scadenza ? "Senza scadenza" : STATUS_LABELS[s.status]; }
+function etichettaStato(s){ return s.ultimo && !s.ultimo.data_scadenza ? "Senza scadenza" : STATUS_LABELS[s.status]; }   // «nf» = non ferrato (SQL 62)
 
 function openCavalloForm(id){
   editingCavalloId = id || null;
@@ -351,6 +351,7 @@ function openCavalloForm(id){
     if(typeof propCavReset === "function") propCavReset();
     document.getElementById("cav-codice-proprietario").value = "";
     document.getElementById("cav-note").value = c?.note || "";
+    nfImposta(c);
     preview.innerHTML = c?.foto_url ? `<img src="${escapeHtml(urlSicuro(c.foto_url))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">` : "";
   } else {
     document.getElementById("modal-cavallo-title").textContent = "Nuovo cavallo";
@@ -359,6 +360,7 @@ function openCavalloForm(id){
     ["cav-nome","cav-mantello","cav-sesso","cav-attivita","cav-nascita","cav-microchip","cav-gruppo-sanguigno","cav-proprietario","cav-codice-proprietario","cav-note"].forEach(id => document.getElementById(id).value = "");
     document.getElementById("cav-proprietario").dataset.membroId = "";
     if(typeof propCavReset === "function") propCavReset();
+    nfImposta(null);
     preview.innerHTML = "";
   }
   openModal("modal-cavallo");
