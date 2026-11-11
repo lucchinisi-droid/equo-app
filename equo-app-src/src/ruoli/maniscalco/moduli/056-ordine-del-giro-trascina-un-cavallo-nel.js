@@ -6,6 +6,7 @@ import { AG_GIORNI, AG_MESI_LUNGHI, agDescrizioneTipoPro, agNomeCavallo, renderA
 import { segnaFatto } from "./117-segna-fatto.js";
 import { accettaRichiesta, agDisegnaGriglia, azioneGruppoStruttura } from "./055-appuntamenti-con-strutture-equo-scuderia.js";
 import { generaPdfEvento, inviaEventoInChat } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
+import { apriSposta } from "./121-sposta-appuntamenti.js";
 
 // SQL 55 (10/11/2026): un appuntamento con la scuderia ancora da confermare si può segnare fatto se la data è oggi o passata
 const fattoOkStruttura = e => e.stato !== "proposto" || String(e.data_intervento || "") <= new Date().toLocaleDateString("sv-SE");
@@ -175,6 +176,8 @@ function apriAzioniEvento(id){
   const btnFatto = document.getElementById("azioni-evento-fatto");
   btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
   btnFatto.style.display = !fattoOkStruttura(e) ? "none" : "";
+  const btnSposta = document.getElementById("azioni-evento-sposta");   // 11/11/2026: «Sposta» uno, alcuni o tutta la giornata
+  if(btnSposta) btnSposta.style.display = ["programmato", "proposto"].includes(e.stato) ? "" : "none";
   const btnAnnStr = document.getElementById("azioni-evento-annulla-struttura");
   if(btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto","programmato"].includes(e.stato) ? "" : "none";
   const btnElim = document.getElementById("azioni-evento-elimina");
@@ -186,7 +189,9 @@ function apriAzioniEvento(id){
 async function azioneEvento(tipo){
   const e = agEventiCache[agEventoAzioniId];
   if(!e) return;
-  if(tipo === "modifica"){
+  if(tipo === "sposta"){
+    await apriSposta(e);
+  } else if(tipo === "modifica"){
     closeModal("modal-azioni-evento");
     openInterventoModal(null, e);
   } else if(tipo === "annulla_struttura" && e.gruppo_id){

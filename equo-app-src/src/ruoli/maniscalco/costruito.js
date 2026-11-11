@@ -1,109 +1,6 @@
 
 // === GENERATO da equo-app-src/strumenti/costruisci-moduli.mjs: NON modificare qui, modificare ruoli/maniscalco/moduli/ ===
 (function() {
-	// equo-app-src/src/ruoli/maniscalco/moduli/120-strutture-unisci.js
-	var suEsc = (s) => escapeHtml(s == null ? "" : String(s));
-	async function proSceltaUnione(clienteId) {
-		let simili = [];
-		try {
-			const { data } = await sb.rpc("pro_strutture_simili", { p_cliente_id: clienteId });
-			simili = data || [];
-		} catch (_) {
-			simili = [];
-		}
-		if (!simili.length) return null;
-		const c = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === clienteId) || {};
-		return new Promise((risolvi) => {
-			let ov = document.getElementById("modal-unisci-struttura");
-			if (!ov) {
-				ov = document.createElement("div");
-				ov.id = "modal-unisci-struttura";
-				ov.className = "modal-overlay";
-				document.body.appendChild(ov);
-			}
-			ov.innerHTML = `<div class="modal" style="max-width:440px">
-      <div class="modal-title">È la stessa struttura?</div>
-      <p style="font-size:13.5px;line-height:1.5;margin:0 0 10px">Hai già tra i clienti una struttura che sembra <b>${suEsc(c.nome || "questa")}</b>. Se è la stessa, unisco le schede: cavalli e lavori finiscono nel collegamento, senza doppioni.</p>
-      ${simili.map((s, i) => `<label style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
-        <input type="radio" name="su-scelta" value="${s.id}" ${i === 0 ? "checked" : ""} style="margin-top:3px">
-        <span><b>${suEsc(s.nome)}</b><br><small class="muted">${s.cavalli} cavalli · ${s.lavori} lavori · ${suEsc(s.motivo)}</small></span></label>`).join("")}
-      <label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
-        <input type="radio" name="su-scelta" value=""> <span>No, è una struttura nuova</span></label>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button type="button" class="btn btn-outline" style="flex:1" id="su-annulla">Annulla</button>
-        <button type="button" class="btn btn-primary" style="flex:1" id="su-ok">Accetta</button></div></div>`;
-			const chiudi = (v) => {
-				ov.classList.remove("active");
-				risolvi(v);
-			};
-			ov.querySelector("#su-annulla").onclick = () => chiudi(false);
-			ov.querySelector("#su-ok").onclick = () => chiudi(ov.querySelector("input[name=\"su-scelta\"]:checked")?.value || null);
-			ov.classList.add("active");
-		});
-	}
-	async function proAvvisiStruttura(clienteId) {
-		const info = document.getElementById("detail-cliente-info");
-		if (!info || DEMO_MODE) return;
-		let box = document.getElementById("pro-avvisi-struttura");
-		if (!box) {
-			box = document.createElement("div");
-			box.id = "pro-avvisi-struttura";
-			info.parentNode.insertBefore(box, info.nextSibling);
-		}
-		box.innerHTML = "";
-		const { data } = await sb.rpc("pro_struttura_avvisi", { p_cliente_id: clienteId });
-		if (!data || currentClienteId !== clienteId) return;
-		const parti = [];
-		const cliente = data.tipo === "cliente";
-		(data.simili || []).forEach((s) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
-    <div style="font-size:13.5px">Hai anche <b>${suEsc(s.nome)}</b> tra i clienti (${s.cavalli} cavalli, ${s.lavori} lavori · ${suEsc(s.motivo)}): ${cliente ? "è la stessa persona? Unendo, i suoi cavalli e i lavori passano qui e lui li riceve da accettare." : "è la stessa struttura?"}</div>
-    <div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="btn btn-primary btn-sm" onclick="proUnisciStruttura('${clienteId}','${s.id}',this)">Sì, unisci</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="proNonUnire('${clienteId}','${s.id}',this)">${cliente ? "No, è un altro" : "No, è diversa"}</button></div></div>`));
-		(data.rifiutati || []).forEach((r) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
-    <div style="font-size:13.5px"><b>${suEsc(r.nome)}</b>: la struttura dice che non è suo. <span class="muted" style="font-size:12px">Da verificare</span></div>
-    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-      <button type="button" class="btn btn-outline btn-sm" onclick="proCavalloRifiutato('${r.id}','tieni',this)">È suo: riproponi</button>
-      <button type="button" class="btn btn-ghost btn-sm" ${r.eliminabile ? "" : "title=\"Si può eliminare 30 giorni dopo la risposta della struttura\""} onclick="proCavalloRifiutato('${r.id}','elimina',this)">Elimina</button></div></div>`));
-		if (Number(data.in_attesa) > 0) parti.push(`<div class="muted" style="padding:8px 0;border-top:1px solid var(--border);font-size:12.5px">⏳ ${data.in_attesa} ${Number(data.in_attesa) === 1 ? "cavallo è" : "cavalli sono"} in attesa che la struttura confermi che sono suoi.</div>`);
-		if (!parti.length) return;
-		box.innerHTML = `<div class="card" style="margin:10px 0;border-color:rgba(232,176,75,.7)"><div style="font-weight:800;margin-bottom:2px">${cliente ? "Forse è un cliente che hai già" : "Da sistemare con la struttura"}</div>${parti.join("")}</div>`;
-	}
-	async function proUnisciStruttura(collegato, vecchio, btn) {
-		if (btn) btn.disabled = true;
-		const { data, error } = await sb.rpc("pro_unisci_struttura", {
-			p_collegato: collegato,
-			p_vecchio: vecchio
-		});
-		if (error || !data?.ok) {
-			if (btn) btn.disabled = false;
-			return showToast("Unione non riuscita: riprova");
-		}
-		showToast(`Fatto: ${data.uniti} cavalli uniti, ${data.spostati} spostati, ${data.lavori} lavori nella scheda collegata`);
-		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
-		if (typeof openClienteDetail === "function") openClienteDetail(collegato);
-	}
-	async function proNonUnire(collegato, vecchio, btn) {
-		if (btn) btn.disabled = true;
-		await sb.rpc("pro_non_unire", {
-			p_collegato: collegato,
-			p_vecchio: vecchio
-		});
-		proAvvisiStruttura(collegato);
-	}
-	async function proCavalloRifiutato(riga, azione, btn) {
-		if (btn) btn.disabled = true;
-		const { data } = await sb.rpc("pro_cavallo_rifiutato", {
-			p_riga: riga,
-			p_azione: azione
-		});
-		if (!data?.ok) {
-			if (btn) btn.disabled = false;
-			return showToast(data && data.errore || "Non riuscito: riprova");
-		}
-		showToast(data.fatto === "riproposto" ? "Riproposto alla struttura" : data.fatto === "archiviato" ? "Archiviato: lo storico dei lavori resta" : "Eliminato");
-		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
-		if (currentClienteId) proAvvisiStruttura(currentClienteId);
-	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/108-invito-qr.js
 	function linkInvito(codice) {
 		return "https://app.equohub.com/?invito=" + encodeURIComponent(String(codice || "").toUpperCase());
@@ -375,36 +272,6 @@
         <button class="btn btn-outline btn-sm" onclick="rifiutaRichiesta('${r.id}')">Rifiuta</button>
         <button class="btn btn-primary btn-sm btn-conferma" onclick="accettaRichiesta('${r.id}')">Accetta</button>
       </div>`).join("")}`;
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/086-indice-dei-cavalli-dei-clienti-professio.js
-	var cavalliMieiIndice = {};
-	var cavalliMieiLista = [];
-	async function caricaCavalliMiei() {
-		try {
-			cavalliMieiLista = await DB.listCavalliMiei() || [];
-			const idx = {};
-			cavalliMieiLista.forEach((c) => {
-				if (!c.cliente_mascalcia_id) return;
-				(idx[c.cliente_mascalcia_id] = idx[c.cliente_mascalcia_id] || []).push(c.nome || "");
-			});
-			cavalliMieiIndice = idx;
-		} catch (e) {
-			console.warn("caricaCavalliMiei:", e);
-		}
-		return cavalliMieiLista;
-	}
-	function nomiCavalliCliente(c) {
-		const da = cavalliMieiIndice[c.id] || [];
-		const testo = typeof nomiCavalliDaTesto === "function" ? nomiCavalliDaTesto(c.nome_cavallo || "") : [];
-		return [...new Set([...da, ...Array.isArray(testo) ? testo : []].map((n) => String(n || "").trim()).filter(Boolean))];
-	}
-	function paroleCercaCliente(c) {
-		return [
-			c.nome_cavallo,
-			...nomiCavalliCliente(c),
-			c.telefono,
-			isStruttura(c) ? "struttura scuderia maneggio" : "proprietario"
-		].filter(Boolean).join(" ");
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/048-vista-completa-premium-previsionale-clie.js
 	var INC_TIPI_CAVALLO = [
@@ -892,6 +759,230 @@
 		mlSalva();
 		document.querySelectorAll("#ml .ml-pag button").forEach((b, i) => b.classList.toggle("on", i === 0 === (v === "saldato")));
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/099-meteo-accanto-agli-appuntamenti-indirizz.js
+	var wgMeteo = {};
+	async function wgMeteoPos(c) {
+		if (DEMO_MODE) return { demo: true };
+		const proprio = (c?.indirizzo || "").trim();
+		if (proprio) return {
+			indirizzo: proprio,
+			luogo: c.nome
+		};
+		const st = await wgIndirizzoStruttura(c);
+		if (st && (st.indirizzo || st.citta)) return {
+			indirizzo: st.indirizzo || "",
+			citta: [st.citta, st.provincia].filter(Boolean).join(", "),
+			luogo: st.citta || c?.nome || ""
+		};
+		return null;
+	}
+	function wgMeteoCarica(ids) {
+		if (typeof EquoMeteo === "undefined") return;
+		ids.forEach((id) => {
+			const m = wgMeteo[id];
+			if (m && Date.now() - m.t < 18e5) return;
+			wgMeteo[id] = {
+				stato: "carico",
+				t: Date.now()
+			};
+			(async () => {
+				const c = wgClienteDi(id);
+				const pos = c ? await wgMeteoPos(c) : null;
+				if (!pos) wgMeteo[id] = {
+					stato: "nd",
+					motivo: "Meteo non disponibile: manca l'indirizzo del cliente (Clienti → Modifica → Indirizzo)",
+					t: Date.now()
+				};
+				else {
+					const d = await EquoMeteo.previsione(pos, {
+						endpoint: "/.netlify/functions/meteo",
+						token: async () => {
+							try {
+								return (await sb.auth.getSession()).data.session?.access_token || "";
+							} catch (e) {
+								return "";
+							}
+						}
+					});
+					wgMeteo[id] = d && d.giorni ? {
+						stato: "ok",
+						d,
+						t: Date.now()
+					} : {
+						stato: "nd",
+						motivo: d && d.non_trovato ? "Meteo non disponibile: indirizzo del cliente non trovato" : "Meteo non disponibile in questo momento",
+						t: d ? Date.now() : Date.now() - 15e5
+					};
+				}
+				try {
+					if (document.getElementById("wh-pro")) renderWidgetPro();
+				} catch (e) {}
+			})();
+		});
+	}
+	function wgMeteoIcona(e) {
+		if (!e || typeof EquoMeteo === "undefined") return "";
+		const m = wgMeteo[e.cliente_mascalcia_id];
+		if (!m || m.stato === "carico") return "";
+		if (m.stato === "nd") return `<span class="wg-meteo">${EquoMeteo.iconaNd(m.motivo)}</span>`;
+		const o = EquoMeteo.alle(m.d, e.data_intervento, e.ora ? String(e.ora).slice(0, 5) : "10:00");
+		if (!o) return `<span class="wg-meteo">${EquoMeteo.iconaNd("Meteo non disponibile per questa data")}</span>`;
+		return `<span class="wg-meteo">${EquoMeteo.icona(o.sim, o.notte)}${o.temp != null ? `<small>${o.temp}°</small>` : ""}</span>`;
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/098-professionista.js
+	function wgTipoApp(e) {
+		return typeof agDescrizioneTipoPro === "function" ? agDescrizioneTipoPro(e) : hpTipo(e);
+	}
+	function wgClienteDi(id) {
+		return (clientiMascalcia || []).find((c) => c.id === id) || null;
+	}
+	var wgScelto = null;
+	function wgScegli(id) {
+		wgScelto = id;
+		renderWidgetPro();
+	}
+	function renderWidgetPro() {
+		const box = document.getElementById("wh-pro");
+		if (!box || !currentUser) return;
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		const adesso = (/* @__PURE__ */ new Date()).toTimeString().slice(0, 5);
+		const app = (hpAppuntamenti || []).filter((e) => e.stato !== "annullato" && e.stato !== "rifiutato");
+		const diOggi = agOrdinaGiro(app.filter((e) => e.data_intervento === oggi));
+		const prossimoOggi = diOggi.find((e) => !e.ora || String(e.ora).slice(0, 5) >= adesso) || null;
+		const futuri = agOrdinaGiro(app.filter((e) => e.data_intervento > oggi));
+		const scelto = wgScelto ? app.find((e) => e.id === wgScelto && e.data_intervento >= oggi) : null;
+		if (wgScelto && !scelto) wgScelto = null;
+		const prossimo = scelto || prossimoOggi || futuri[0] || null;
+		const cavalliOggi = diOggi.length;
+		const strutture = new Set(diOggi.filter((e) => isStruttura(wgClienteDi(e.cliente_mascalcia_id))).map((e) => e.cliente_mascalcia_id)).size;
+		const ric = (hpRichiamiLista || []).slice().sort((a, b) => a.giorni - b.giorni);
+		const giro = (typeof hpGiri === "function" ? hpGiri() : [])[0] || null;
+		const quando = (e) => {
+			if (!e) return "";
+			const ora = e.ora ? String(e.ora).slice(0, 5) : "";
+			if (scelto && e.id === scelto.id) return e.data_intervento === oggi ? `In evidenza · oggi${ora ? " " + ora : ""}` : `In evidenza · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
+			if (e.data_intervento === oggi && ora) {
+				const [h, m] = ora.split(":").map(Number);
+				const d = /* @__PURE__ */ new Date();
+				d.setHours(h, m, 0, 0);
+				const min = Math.round((d - /* @__PURE__ */ new Date()) / 6e4);
+				return min > 0 && min < 180 ? `Prossimo · tra ${min} min · ${ora}` : `Prossimo · oggi ${ora}`;
+			}
+			return e.data_intervento === oggi ? "Prossimo · oggi" : `Prossimo · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
+		};
+		wgMeteoCarica([...new Set([...diOggi, prossimo].filter(Boolean).map((e) => e.cliente_mascalcia_id))]);
+		let oggiHtml;
+		if (prossimo) {
+			const c = wgClienteDi(prossimo.cliente_mascalcia_id);
+			const cav = agNomeCavallo(prossimo);
+			const lp = cavalliMieiCache ? luogoEvento(prossimo, true) : null;
+			const dove = lp && lp.key !== "c:" + prossimo.cliente_mascalcia_id ? [
+				lp.nome,
+				lp.indirizzo,
+				"di " + (prossimo.clienti_mascalcia?.nome || c?.nome || "")
+			].filter(Boolean).join(" · ") : [prossimo.clienti_mascalcia?.nome || c?.nome, c?.indirizzo].filter(Boolean).join(" · ");
+			const altri = diOggi.filter((e) => e.id !== prossimo.id).slice(0, 6);
+			oggiHtml = `
+      <div class="wg-prossimo" onclick="apriAzioniEvento('${prossimo.id}')">
+        <div class="wg-quando">${wgEsc(quando(prossimo))}</div>
+        <div class="wg-chi">${wgEsc(cav || prossimo.clienti_mascalcia?.nome || "Appuntamento")} · ${wgEsc(wgTipoApp(prossimo).toLowerCase())}${wgMeteoIcona(prossimo)}</div>
+        <div class="wg-dove">${wgEsc(dove)}</div>
+        <div class="wg-azioni">
+          <button class="oro" onclick="event.stopPropagation();wgNavigaEvento('${prossimo.id}')">${WG_IC.mappa}Naviga</button>
+          <button onclick="event.stopPropagation();openChatThread('${prossimo.cliente_mascalcia_id}')">${WG_IC.msg}Chatta</button>
+          ${prossimo.stato === "programmato" ? `<button onclick="event.stopPropagation();hpSegnaFatto('${prossimo.id}')">${WG_IC.ok}Fatto</button>` : `<button onclick="event.stopPropagation();apriAzioniEvento('${prossimo.id}')">Apri</button>`}
+        </div>
+      </div>
+      ${altri.map((e) => `<div class="wg-voce" onclick="wgScegli('${e.id}')">${e.ora ? `<span class="wg-ora">${String(e.ora).slice(0, 5)}</span>` : ""}<span class="wg-t">${wgEsc(agNomeCavallo(e) || "")} · ${wgEsc(wgTipoApp(e).toLowerCase())} <small>· ${wgEsc(e.clienti_mascalcia?.nome || "")}</small></span>${wgMeteoIcona(e)}<button class="wg-piu" aria-label="Modifica appuntamento" onclick="event.stopPropagation();apriAzioniEvento('${e.id}')">⋯</button></div>`).join("")}
+      ${altri.length ? "<div class=\"wg-nota\">Tocca un appuntamento per metterlo in evidenza con Naviga, Chatta e Fatto.</div>" : ""}
+      ${!prossimoOggi && prossimo ? "<div class=\"wg-nota\">Oggi nessun appuntamento: questo è il prossimo in agenda.</div>" : ""}`;
+		} else oggiHtml = `<div class="wg-vuoto">Nessun appuntamento in agenda.<br><button class="wg-link" onclick="openInterventoModal(null)">+ Fissane uno</button></div>`;
+		const ricHtml = ric.length ? ric.slice(0, 3).map((r) => `<div class="wg-ric" onclick="apriRichiamo('${r.intervento_id}')"><span class="wg-sem ${hpColoreRic(r)}"></span><span class="wg-t"><b>${wgEsc(r.cavallo_nome || "Cavallo")}</b> · ${wgEsc(r.cliente_nome || "")}<small>${wgEsc(hpTipo(r).toLowerCase())} · ${wgEsc(hpQuando(r))}</small></span><button class="wg-scrivi" onclick="event.stopPropagation();wgScriviRichiamo('${r.intervento_id}')">Scrivi</button></div>`).join("") : "<div class=\"wg-vuoto piccolo\">Nessun cavallo da richiamare nei prossimi 30 giorni.</div>";
+		const sett = wgPro.settimana;
+		const lun = wgLunedi(oggi);
+		const giorni = [
+			"L",
+			"M",
+			"M",
+			"G",
+			"V",
+			"S",
+			"D"
+		].map((g, i) => {
+			const iso = aggiungiGiorniIso(lun, i);
+			return {
+				g,
+				iso,
+				n: sett ? sett[iso] || 0 : 0
+			};
+		});
+		const max = Math.max(4, ...giorni.map((x) => x.n));
+		const totSett = giorni.reduce((t, x) => t + x.n, 0);
+		if (wgPro.settimanaChiave !== lun) wgCaricaSettimana(lun);
+		box.innerHTML = `
+    <div class="wg wg-grande">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.cal}Oggi</span><span class="wg-meta">${cavalliOggi ? `${cavalliOggi} ${cavalliOggi === 1 ? "appuntamento" : "appuntamenti"}${strutture ? " · " + strutture + (strutture === 1 ? " scuderia" : " scuderie") : ""}` : ""}</span></div>
+      ${oggiHtml}
+    </div>
+    <div class="wg wg-piccolo" onclick="document.querySelector('[data-page=&quot;pro-inbox&quot;]')?.click()">
+      <span class="wg-et">${WG_IC.msg}Messaggi</span>${wgPro.unread ? `<span class="wg-badge">${wgPro.unread}</span>` : ""}
+      <div class="wg-num">${wgPro.unread} <small>${wgPro.unread === 1 ? "non letto" : "non letti"}</small></div>
+      <div class="wg-riga">${wgPro.ultimo ? `<b>${wgEsc(wgPro.ultimo.nome)}:</b> ${wgEsc(wgPro.ultimo.testo)}` : "Nessun messaggio"}</div>
+    </div>
+    <div class="wg wg-piccolo wg-pieno solo-incassi" onclick="showPage('pro-incassi')">
+      <span class="wg-cerchio">${WG_IC.euro}</span>
+      <div class="wg-num">${wgEuro(wgPro.incassatoMese)}</div>
+      <div class="wg-riga">incassati a ${(/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", { month: "long" })}</div>
+      <div class="wg-riga evid">${wgPro.daIncassareMese ? wgEuro(wgPro.daIncassareMese) + " da incassare" : "Tutto incassato"}</div>
+      ${wgPro.previsto ? `<div class="wg-riga">${wgEuro(wgPro.previsto)} previsti in agenda</div>` : ""}
+    </div>
+    <div class="wg wg-medio">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.camp}Da richiamare</span>${ric.length > 3 ? `<button class="wg-link" onclick="apriListaHome('ric')">${ric.length} in tutto ›</button>` : ""}</div>
+      ${ricHtml}
+    </div>
+    <div class="wg wg-piccolo wg-pieno wg-azione" onclick="openInterventoModal(null)">
+      <span class="wg-cerchio grande">${WG_IC.piu}</span>
+      <div class="wg-riga forte">Nuovo appuntamento</div>
+    </div>
+    <div class="wg wg-piccolo" onclick="${giro ? `apriGiro('${giro[0].cliente_mascalcia_id}')` : "showToast('Nessun giro da organizzare: ti avvisiamo quando più cavalli dello stesso cliente scadono insieme')"}">
+      ${isPremium() ? "" : "<span class=\"wg-premium\">PREMIUM</span>"}
+      <span class="wg-et">${WG_IC.giro}Giro</span>
+      <div class="wg-num">${giro ? giro.length : 0} <small>cavalli</small></div>
+      <div class="wg-riga">${giro ? `da <b>${wgEsc(giro[0].cliente_nome || "")}</b>: un solo appuntamento` : "Nessun giro da organizzare"}</div>
+    </div>
+    <div class="wg wg-medio" onclick="showPage('pro-agenda')">
+      <div class="wg-testa"><span class="wg-et">${WG_IC.sett}Settimana</span><span class="wg-meta">${sett ? totSett + (totSett === 1 ? " appuntamento" : " appuntamenti") : ""}</span></div>
+      <div class="wg-barre">${giorni.map((x) => `<div class="wg-barra${x.iso === oggi ? " oggi" : ""}"><b>${x.n || "–"}</b><i style="height:${x.n ? Math.max(12, Math.round(x.n / max * 100)) : 6}%"></i><small>${x.g}</small></div>`).join("")}</div>
+    </div>`;
+	}
+	function wgLunedi(iso) {
+		const [y, m, d] = iso.split("-").map(Number);
+		return aggiungiGiorniIso(iso, -((new Date(y, m - 1, d).getDay() + 6) % 7));
+	}
+	var wgSettInCorso = false;
+	async function wgCaricaSettimana(lun) {
+		if (wgSettInCorso) return;
+		wgSettInCorso = true;
+		try {
+			const lista = await DB.listInterventiPeriodo(lun, aggiungiGiorniIso(lun, 6));
+			const per = {};
+			(lista || []).filter((i) => !["rifiutato", "annullato"].includes(i.stato)).forEach((i) => {
+				per[i.data_intervento] = (per[i.data_intervento] || 0) + 1;
+			});
+			wgPro.settimana = per;
+			wgPro.settimanaChiave = lun;
+		} catch (e) {
+			wgPro.settimana = wgPro.settimana || {};
+			wgPro.settimanaChiave = lun;
+		} finally {
+			wgSettInCorso = false;
+		}
+		if (vistaWidgetAttiva() && vistaAi() === "professionista") renderWidgetPro();
+	}
+	function wgScriviRichiamo(id) {
+		apriRichiamo(id);
+		richiamoAzione("scrivi");
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/106-posizione-attuale.js
 	function coordDaIndirizzo(t) {
 		const m = String(t || "").match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
@@ -952,6 +1043,174 @@
 		inp.dispatchEvent(new Event("input", { bubbles: true }));
 		if (prec > 100) scrivi(`Posizione salvata, ma la precisione è bassa (circa ${prec} m): se puoi, riprova all'aperto.`, "male");
 		else scrivi(`Posizione salvata · precisione circa ${prec || "?"} m. Ricordati di salvare la scheda.`, "ok");
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/100-naviga.js
+	var wgIndirizziStrutture = null;
+	async function wgIndirizzoStruttura(c) {
+		if (!c?.centro_id || DEMO_MODE) return null;
+		if (!wgIndirizziStrutture) try {
+			const { data, error } = await sb.rpc("pro_indirizzi_strutture");
+			wgIndirizziStrutture = error ? [] : data || [];
+		} catch (_) {
+			wgIndirizziStrutture = [];
+		}
+		return wgIndirizziStrutture.find((x) => (x.cliente_id || x.id) === c.id) || null;
+	}
+	async function wgNaviga$1(clienteId) {
+		const c = wgClienteDi(clienteId);
+		if (!c) {
+			showToast("Cliente non trovato");
+			return;
+		}
+		const proprio = (c.indirizzo || "").trim();
+		if (proprio) return wgMostraMappe(c, proprio);
+		const st = await wgIndirizzoStruttura(c);
+		const via = (st?.indirizzo || "").trim();
+		const citta = [st?.citta, st?.provincia ? "(" + st.provincia + ")" : ""].filter(Boolean).join(" ").trim();
+		if (via) return wgMostraMappe(c, [via, citta].filter(Boolean).join(", "), "Indirizzo indicato dalla scuderia in Equo Scuderia");
+		wgCercaLuogo(c, [st?.nome || c.nome, st?.citta].filter(Boolean).join(", "));
+	}
+	function wgMappeOv() {
+		let ov = document.getElementById("modal-naviga");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay";
+			ov.id = "modal-naviga";
+			ov.addEventListener("click", (ev) => {
+				if (ev.target === ov) closeModal("modal-naviga");
+			});
+			document.body.appendChild(ov);
+		}
+		return ov;
+	}
+	function wgMostraMappe(c, indirizzo, nota) {
+		const xy = coordDaIndirizzo(indirizzo);
+		const q = encodeURIComponent(xy ? xy.lat + "," + xy.lon : indirizzo);
+		const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+		const app = [
+			[
+				"Google Maps",
+				`https://www.google.com/maps/dir/?api=1&destination=${q}`,
+				"linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"
+			],
+			...ios ? [[
+				"Apple Mappe",
+				`https://maps.apple.com/?daddr=${q}`,
+				"linear-gradient(160deg,#7fd27b,#3aa0f0)"
+			]] : [],
+			[
+				"Waze",
+				xy ? `https://waze.com/ul?ll=${q}&navigate=yes` : `https://waze.com/ul?q=${q}&navigate=yes`,
+				"#33ccff"
+			]
+		];
+		const ov = wgMappeOv();
+		ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:2px">Indicazioni per ${wgEsc(c?.nome || "il cliente")}</div>
+    <div class="muted" style="font-size:13px;margin-bottom:${nota ? 2 : 14}px">${wgEsc(indirizzo)}</div>
+    ${nota ? `<div class="muted" style="font-size:12px;margin-bottom:14px">${wgEsc(nota)}</div>` : ""}
+    ${app.map(([n, u, bg]) => `<a class="wg-app-mappa" href="${u}" target="_blank" rel="noopener" onclick="closeModal('modal-naviga')"><i style="background:${bg}"></i>${n}</a>`).join("")}
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeModal('modal-naviga')">Annulla</button></div>`;
+		openModal("modal-naviga");
+	}
+	var wgLuogo = {
+		cliente: null,
+		risultati: []
+	};
+	function wgCercaLuogo(c, testo) {
+		wgLuogo = {
+			cliente: c,
+			risultati: []
+		};
+		const ov = wgMappeOv();
+		ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:2px">Dove si trova ${wgEsc(c.nome || "il cliente")}?</div>
+    <div class="muted" style="font-size:13px;margin-bottom:12px">Manca l'indirizzo. Cerca il luogo e tocca quello giusto: lo salvo nella scheda del cliente.</div>
+    <form onsubmit="event.preventDefault();wgCercaLuogoVai()" style="display:flex;gap:8px;margin-bottom:12px">
+      <input class="input" id="wg-luogo-testo" style="flex:1" placeholder="Nome del maneggio o della via, città" value="${wgEsc(testo || "")}">
+      <button class="btn btn-primary" type="submit" style="flex-shrink:0">Cerca</button>
+    </form>
+    <div id="wg-luogo-esiti"></div>
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="wgLuogoAMano()">Scrivo l'indirizzo a mano</button>
+    <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="closeModal('modal-naviga')">Annulla</button></div>`;
+		openModal("modal-naviga");
+		if ((testo || "").trim().length >= 3) wgCercaLuogoVai();
+		else setTimeout(() => document.getElementById("wg-luogo-testo")?.focus(), 250);
+	}
+	async function wgCercaLuogoVai() {
+		const testo = (document.getElementById("wg-luogo-testo")?.value || "").trim();
+		const box = document.getElementById("wg-luogo-esiti");
+		if (!box) return;
+		if (testo.length < 3) {
+			box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Scrivi almeno 3 lettere.</div>`;
+			return;
+		}
+		box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Cerco…</div>`;
+		let d = {};
+		if (DEMO_MODE) {
+			await new Promise((r) => setTimeout(r, 400));
+			d = { risultati: [
+				{
+					nome: testo.split(",")[0] + " (scuderia)",
+					indirizzo: "Via Casilina km 51, 00034 Colleferro RM, Italia"
+				},
+				{
+					nome: testo.split(",")[0],
+					indirizzo: "Via dei Prati 12, 00038 Valmontone RM, Italia"
+				},
+				{
+					nome: "Centro ippico " + testo.split(",")[0],
+					indirizzo: "Strada provinciale 600, 03012 Anagni FR, Italia"
+				}
+			] };
+		} else try {
+			const res = await fetch("/.netlify/functions/cerca-luogo", {
+				method: "POST",
+				headers: await authHeaders(),
+				body: JSON.stringify({ testo })
+			});
+			d = await res.json().catch(() => ({}));
+			if (res.status === 401) d = {
+				errore: true,
+				sessione: true
+			};
+		} catch (_) {
+			d = { errore: true };
+		}
+		const apriMappe = `<a class="wg-app-mappa" href="${`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(testo)}`}" target="_blank" rel="noopener"><i style="background:linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"></i>Cerca su Google Maps</a>`;
+		if (d.non_configurato || d.errore || d.limite_raggiunto) {
+			box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">${d.limite_raggiunto ? "Hai fatto molte ricerche oggi: riprova domani." : d.sessione ? "Sessione scaduta: esci e rientra." : !navigator.onLine ? "Sei offline: la ricerca riparte con la rete." : "La ricerca non è disponibile in questo momento."} Puoi cercare il luogo direttamente nelle mappe.</div>${apriMappe}`;
+			return;
+		}
+		wgLuogo.risultati = d.risultati || [];
+		if (!wgLuogo.risultati.length) {
+			box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Nessun luogo trovato. Prova con il nome del maneggio e la città, oppure scrivi l'indirizzo a mano.</div>${apriMappe}`;
+			return;
+		}
+		box.innerHTML = wgLuogo.risultati.map((r, i) => `<button class="wg-app-mappa wg-luogo" type="button" onclick="wgSceltaLuogo(${i})">
+      <span class="wg-luogo-ico"><i class="fa-solid fa-location-dot"></i></span>
+      <span style="min-width:0"><span style="display:block">${wgEsc(r.nome || r.indirizzo)}</span><span class="muted" style="display:block;font-weight:400;font-size:12.5px">${wgEsc(r.indirizzo)}</span></span></button>`).join("");
+	}
+	async function wgSceltaLuogo(i) {
+		const r = wgLuogo.risultati[i], c = wgLuogo.cliente;
+		if (!r || !c) return;
+		if (!DEMO_MODE) {
+			const { error } = await DB.updateClienteMascalcia(c.id, { indirizzo: r.indirizzo });
+			if (error) showToast("Non sono riuscito a salvare l'indirizzo, ma ti porto lo stesso");
+			else showToast("Indirizzo salvato nella scheda del cliente");
+		}
+		c.indirizzo = r.indirizzo;
+		closeModal("modal-naviga");
+		setTimeout(() => wgMostraMappe(c, r.indirizzo), 200);
+	}
+	function wgLuogoAMano() {
+		const c = wgLuogo.cliente;
+		closeModal("modal-naviga");
+		if (!c) return;
+		showPage("pro-clienti");
+		openClienteDetail$1(c.id).then(() => {
+			if (typeof openEditCliente === "function") openEditCliente().then(() => document.getElementById("edit-cliente-indirizzo")?.focus());
+		});
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/112-officina-mobile.js
 	var OGGI = () => isoLocale(/* @__PURE__ */ new Date());
@@ -4073,7 +4332,7 @@
 		if (typeof renderIncassi$1 === "function") await renderIncassi$1();
 		if (currentClienteId) {
 			caricaContiCliente(currentClienteId);
-			loadClienteInterventi(currentClienteId);
+			loadClienteInterventi$1(currentClienteId);
 		}
 		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
 	}
@@ -4347,7 +4606,7 @@
 		showToast("Segnato come fatto");
 		await renderAgendaSettimana$1();
 		await renderIncassi$1();
-		await renderProDeadlines();
+		await renderProDeadlines$1();
 		return {
 			ok: true,
 			upd
@@ -4437,7 +4696,7 @@
 		mlRender();
 		showToast(errori ? `Tappa chiusa, ma ${errori} lavori non salvati: controlla in agenda` : `Tappa chiusa: ${n} ${n === 1 ? "lavoro fatto" : "lavori fatti"}`);
 		try {
-			await renderProDeadlines();
+			await renderProDeadlines$1();
 			await renderIncassi$1();
 			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
 		} catch (e) {}
@@ -4489,76 +4748,6 @@
 		}
 		currentUser.promemoriaPagamenti = on;
 		showToast(on ? "Promemoria pagamenti attivi: i clienti su Equo ricevono un avviso per i lavori da saldare" : "Promemoria pagamenti spenti per tutti i clienti");
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/099-meteo-accanto-agli-appuntamenti-indirizz.js
-	var wgMeteo = {};
-	async function wgMeteoPos(c) {
-		if (DEMO_MODE) return { demo: true };
-		const proprio = (c?.indirizzo || "").trim();
-		if (proprio) return {
-			indirizzo: proprio,
-			luogo: c.nome
-		};
-		const st = await wgIndirizzoStruttura(c);
-		if (st && (st.indirizzo || st.citta)) return {
-			indirizzo: st.indirizzo || "",
-			citta: [st.citta, st.provincia].filter(Boolean).join(", "),
-			luogo: st.citta || c?.nome || ""
-		};
-		return null;
-	}
-	function wgMeteoCarica(ids) {
-		if (typeof EquoMeteo === "undefined") return;
-		ids.forEach((id) => {
-			const m = wgMeteo[id];
-			if (m && Date.now() - m.t < 18e5) return;
-			wgMeteo[id] = {
-				stato: "carico",
-				t: Date.now()
-			};
-			(async () => {
-				const c = wgClienteDi(id);
-				const pos = c ? await wgMeteoPos(c) : null;
-				if (!pos) wgMeteo[id] = {
-					stato: "nd",
-					motivo: "Meteo non disponibile: manca l'indirizzo del cliente (Clienti → Modifica → Indirizzo)",
-					t: Date.now()
-				};
-				else {
-					const d = await EquoMeteo.previsione(pos, {
-						endpoint: "/.netlify/functions/meteo",
-						token: async () => {
-							try {
-								return (await sb.auth.getSession()).data.session?.access_token || "";
-							} catch (e) {
-								return "";
-							}
-						}
-					});
-					wgMeteo[id] = d && d.giorni ? {
-						stato: "ok",
-						d,
-						t: Date.now()
-					} : {
-						stato: "nd",
-						motivo: d && d.non_trovato ? "Meteo non disponibile: indirizzo del cliente non trovato" : "Meteo non disponibile in questo momento",
-						t: d ? Date.now() : Date.now() - 15e5
-					};
-				}
-				try {
-					if (document.getElementById("wh-pro")) renderWidgetPro();
-				} catch (e) {}
-			})();
-		});
-	}
-	function wgMeteoIcona(e) {
-		if (!e || typeof EquoMeteo === "undefined") return "";
-		const m = wgMeteo[e.cliente_mascalcia_id];
-		if (!m || m.stato === "carico") return "";
-		if (m.stato === "nd") return `<span class="wg-meteo">${EquoMeteo.iconaNd(m.motivo)}</span>`;
-		const o = EquoMeteo.alle(m.d, e.data_intervento, e.ora ? String(e.ora).slice(0, 5) : "10:00");
-		if (!o) return `<span class="wg-meteo">${EquoMeteo.iconaNd("Meteo non disponibile per questa data")}</span>`;
-		return `<span class="wg-meteo">${EquoMeteo.icona(o.sim, o.notte)}${o.temp != null ? `<small>${o.temp}°</small>` : ""}</span>`;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/094-arrivo-sul-posto-se-apri-l-app-vicino-a.js
 	var mlArrivoT = 0;
@@ -5258,6 +5447,289 @@
 		} catch (e) {}
 		renderIncassiCompleta();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/056-ordine-del-giro-trascina-un-cavallo-nel.js
+	var fattoOkStruttura$2 = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
+	function agOrdinaGiro(l) {
+		return (l || []).slice().sort((a, b) => (a.data_intervento || "").localeCompare(b.data_intervento || "") || (a.ordine_giro ?? 1e9) - (b.ordine_giro ?? 1e9) || String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
+	}
+	var agTrascina = null;
+	function agAttivaTrascina(box) {
+		if (box.dataset.trascina) return;
+		box.dataset.trascina = "1";
+		box.addEventListener("pointerdown", (e) => {
+			const h = e.target.closest(".ag-mani");
+			if (!h) return;
+			e.preventDefault();
+			const tipo = h.dataset.drag;
+			const el = tipo === "gr" ? h.closest(".ag-gblock") : h.closest(".ag-ev");
+			const cont = el && el.parentElement;
+			if (!el || !cont) return;
+			const r = el.getBoundingClientRect();
+			const posto = document.createElement("div");
+			posto.className = "ag-posto";
+			posto.style.height = r.height + "px";
+			cont.insertBefore(posto, el);
+			el.classList.add("ag-preso");
+			el.style.width = r.width + "px";
+			el.style.left = r.left + "px";
+			el.style.top = r.top + "px";
+			agTrascina = {
+				el,
+				cont,
+				posto,
+				tipo,
+				y0: e.clientY,
+				top0: r.top,
+				ordinePrima: agOrdineDom()
+			};
+			try {
+				h.setPointerCapture(e.pointerId);
+			} catch (_) {}
+			if (navigator.vibrate) try {
+				navigator.vibrate(15);
+			} catch (_) {}
+		});
+		box.addEventListener("pointermove", (e) => {
+			const t = agTrascina;
+			if (!t) return;
+			e.preventDefault();
+			t.el.style.top = t.top0 + e.clientY - t.y0 + "px";
+			const fratelli = [...t.cont.children].filter((x) => x !== t.el && x !== t.posto && (t.tipo === "gr" ? x.classList.contains("ag-gblock") : x.classList.contains("ag-ev") && x.dataset.ev));
+			let prima = null;
+			for (const f of fratelli) {
+				const rr = f.getBoundingClientRect();
+				if (e.clientY < rr.top + rr.height / 2) {
+					prima = f;
+					break;
+				}
+			}
+			if (prima) t.cont.insertBefore(t.posto, prima);
+			else {
+				const ultimo = fratelli[fratelli.length - 1];
+				if (ultimo) t.cont.insertBefore(t.posto, ultimo.nextSibling);
+			}
+		});
+		const fine = async () => {
+			const t = agTrascina;
+			if (!t) return;
+			agTrascina = null;
+			t.cont.insertBefore(t.el, t.posto);
+			t.posto.remove();
+			t.el.classList.remove("ag-preso");
+			t.el.style.width = t.el.style.left = t.el.style.top = "";
+			const dopo = agOrdineDom();
+			if (dopo.join() === t.ordinePrima.join()) return;
+			await agSalvaOrdine(dopo, t.tipo === "ev" ? t.el.dataset.ev : null);
+		};
+		box.addEventListener("pointerup", fine);
+		box.addEventListener("pointercancel", fine);
+	}
+	function agOrdineDom() {
+		return [...document.querySelectorAll(".ag-pannello .ag-ev[data-ev]")].map((x) => x.dataset.ev);
+	}
+	async function agSalvaOrdine(ids, spostato) {
+		const ev = (id) => agEventiCache[id];
+		let scambio = null;
+		if (spostato && ev(spostato)?.ora) {
+			const m = ev(spostato), pos = ids.indexOf(spostato);
+			const stessoCli = (x) => ev(x) && ev(x).cliente_mascalcia_id === m.cliente_mascalcia_id && ev(x).ora && x !== spostato;
+			const dopo = ids.slice(pos + 1).find(stessoCli), prima = ids.slice(0, pos).reverse().find(stessoCli);
+			const hm = (x) => String(ev(x).ora).slice(0, 5);
+			if (dopo && hm(dopo) < hm(spostato)) scambio = dopo;
+			else if (prima && hm(prima) > hm(spostato)) scambio = prima;
+		}
+		const cambi = ids.map((id, n) => ({
+			id,
+			n
+		})).filter((x) => ev(x.id) && ev(x.id).ordine_giro !== x.n);
+		for (const c of cambi) {
+			const { error } = await DB.updateInterventoMascalcia(c.id, { ordine_giro: c.n });
+			if (error) {
+				showToast("Ordine non salvato: " + error.message);
+				break;
+			}
+			ev(c.id).ordine_giro = c.n;
+		}
+		if (scambio) {
+			const a = ev(spostato), b = ev(scambio), oa = String(a.ora).slice(0, 5), ob = String(b.ora).slice(0, 5);
+			if (await chiediSiNo("Scambiare anche gli orari?", `Hai messo ${agNomeCavallo(a) || "questo cavallo"} (${oa}) ${ids.indexOf(spostato) < ids.indexOf(scambio) ? "prima" : "dopo"} di ${agNomeCavallo(b) || "un altro"} (${ob}). Sì: ${agNomeCavallo(a) || "il primo"} alle ${ob} e ${agNomeCavallo(b) || "l'altro"} alle ${oa}; i clienti collegati ricevono l'avviso. No: cambia solo l'ordine del giro.`)) {
+				for (const [x, nuova] of [[a, ob], [b, oa]]) {
+					const prec = {
+						data: x.data_intervento,
+						ora: String(x.ora).slice(0, 5),
+						cliente: x.cliente_mascalcia_id,
+						tipo_ferratura: x.tipo_ferratura,
+						tipo_altro: x.tipo_altro || ""
+					};
+					const { error } = await DB.updateInterventoMascalcia(x.id, { ora: nuova });
+					if (error) {
+						showToast("Orario non cambiato: " + error.message);
+						continue;
+					}
+					x.ora = nuova;
+					if (!x.gruppo_id && x.stato === "programmato") await avvisaClienteAppuntamento("modificato", {
+						cliente_mascalcia_id: x.cliente_mascalcia_id,
+						tipo_ferratura: x.tipo_ferratura,
+						tipo_altro: x.tipo_altro,
+						data_intervento: x.data_intervento,
+						ora: nuova,
+						cavallo: agNomeCavallo(x)
+					}, prec);
+				}
+				showToast("Orari scambiati");
+			}
+		}
+		if (!scambio) showToast("Ordine del giro salvato");
+		await renderAgendaSettimana$1();
+		try {
+			await renderProDeadlines$1();
+		} catch (_) {}
+	}
+	function toggleGiornoAgenda(iso) {
+		agGiorniAperti = agGiorniAperti && agGiorniAperti.has(iso) ? /* @__PURE__ */ new Set() : /* @__PURE__ */ new Set([iso]);
+		agDisegnaGriglia();
+		const t = document.querySelector(`.ag-tile[data-iso="${iso}"]`);
+		if (t) {
+			t.focus({ preventScroll: true });
+			if (t.getBoundingClientRect().top < 60) t.scrollIntoView({
+				block: "start",
+				behavior: "smooth"
+			});
+		}
+	}
+	function cambiaSettimanaAgenda(delta) {
+		agSettimanaOffset += delta;
+		agGiorniAperti = /* @__PURE__ */ new Set();
+		renderAgendaSettimana$1(delta);
+	}
+	function tornaSettimanaCorrente() {
+		const delta = -agSettimanaOffset;
+		agSettimanaOffset = 0;
+		agGiorniAperti = null;
+		renderAgendaSettimana$1(delta || null);
+	}
+	function agAttivaSwipe(box) {
+		if (box.dataset.swipe) return;
+		box.dataset.swipe = "1";
+		let x0 = null, y0 = null, t0 = 0;
+		box.addEventListener("touchstart", (e) => {
+			if (e.target.closest && e.target.closest(".ag-mani")) {
+				x0 = null;
+				return;
+			}
+			const t = e.touches[0];
+			x0 = t.clientX;
+			y0 = t.clientY;
+			t0 = Date.now();
+		}, { passive: true });
+		box.addEventListener("touchend", (e) => {
+			if (x0 === null) return;
+			const t = e.changedTouches[0];
+			const dx = t.clientX - x0, dy = t.clientY - y0;
+			x0 = null;
+			if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && Date.now() - t0 < 800) cambiaSettimanaAgenda(dx < 0 ? 1 : -1);
+		}, { passive: true });
+	}
+	function nuovoAppuntamentoGiorno(iso) {
+		openInterventoModal(null, null, { data_intervento: iso });
+	}
+	function fissaDaScadenza(id) {
+		const sc = agEventiCache["sc:" + id];
+		if (!sc) return;
+		openInterventoModal(sc.cliente_mascalcia_id, null, {
+			tipo_ferratura: sc.tipo_ferratura,
+			tipo_altro: sc.tipo_altro,
+			misura_sistema: sc.misura_sistema,
+			numero_ferro: sc.numero_ferro,
+			quantita_ferri: sc.quantita_ferri,
+			data_intervento: agDataPerFissare(sc.prossima_scadenza || sc.data_vista),
+			cavallo_cliente_id: sc.cavallo_cliente_id,
+			horse_id: sc.horse_id
+		});
+	}
+	async function segnaFattoAgenda(id) {
+		await segnaFatto(agEventiCache[id]);
+	}
+	function apriAzioniEvento(id) {
+		const e = agEventiCache[id];
+		if (!e) return;
+		agEventoAzioniId = id;
+		const [y, m, d] = e.data_intervento.split("-").map(Number);
+		const dt = new Date(y, m - 1, d);
+		document.getElementById("azioni-evento-titolo").textContent = (e.clienti_mascalcia?.nome || "Appuntamento") + (agNomeCavallo(e) ? " · " + agNomeCavallo(e) : "");
+		document.getElementById("azioni-evento-dettaglio").innerHTML = [
+			`${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
+			escapeHtml(agDescrizioneTipoPro(e)),
+			"<span class=\"solo-incassi\">" + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
+			e.stato === "fatto" ? "<span style=\"color:var(--green);font-weight:700\">✓ Fatto</span>" : e.stato === "richiesto" ? "<span style=\"color:var(--accent);font-weight:700\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span style=\"color:var(--accent);font-weight:700\">In attesa della conferma della scuderia</span>" + (fattoOkStruttura$2(e) ? "<br><span class=\"muted\" style=\"font-size:12px\">La data è arrivata: puoi segnarlo fatto anche senza conferma, la scuderia riceve l'avviso.</span>" : "") : "Da fare",
+			notaModificaMan(e, true),
+			e.gruppo_id ? "<span class=\"muted\" style=\"font-size:12px\">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>" : "",
+			e.note ? escapeHtml(e.note) : ""
+		].filter(Boolean).join("<br>");
+		const btnFatto = document.getElementById("azioni-evento-fatto");
+		btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
+		btnFatto.style.display = !fattoOkStruttura$2(e) ? "none" : "";
+		const btnSposta = document.getElementById("azioni-evento-sposta");
+		if (btnSposta) btnSposta.style.display = ["programmato", "proposto"].includes(e.stato) ? "" : "none";
+		const btnAnnStr = document.getElementById("azioni-evento-annulla-struttura");
+		if (btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto", "programmato"].includes(e.stato) ? "" : "none";
+		const btnElim = document.getElementById("azioni-evento-elimina");
+		if (btnElim) btnElim.style.display = e.gruppo_id && e.stato !== "fatto" ? "none" : "";
+		eseguiEstensioniSubito(estensioniDopo, "apriAzioniEvento", [e]);
+		openModal("modal-azioni-evento");
+	}
+	async function azioneEvento(tipo) {
+		const e = agEventiCache[agEventoAzioniId];
+		if (!e) return;
+		if (tipo === "sposta") await apriSposta(e);
+		else if (tipo === "modifica") {
+			closeModal("modal-azioni-evento");
+			openInterventoModal(null, e);
+		} else if (tipo === "annulla_struttura" && e.gruppo_id) {
+			if (!await chiediConferma("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
+			closeModal("modal-azioni-evento");
+			await azioneGruppoStruttura(e.gruppo_id, "annulla");
+		} else if (tipo === "fatto" && e.stato === "richiesto") {
+			closeModal("modal-azioni-evento");
+			accettaRichiesta(e.id);
+		} else if (tipo === "fatto" && e.stato !== "fatto") {
+			await segnaFatto(e, { prima: () => closeModal("modal-azioni-evento") });
+			closeModal("modal-azioni-evento");
+		} else if (tipo === "fatto") {
+			const { error } = await DB.updateInterventoMascalcia(e.id, { stato: "programmato" });
+			if (error) {
+				showToast("Errore: " + error.message);
+				return;
+			}
+			closeModal("modal-azioni-evento");
+			showToast("Rimesso da fare");
+			await renderAgendaSettimana$1();
+			await renderIncassi$1();
+			await renderProDeadlines$1();
+		} else if (tipo === "elimina") {
+			if (!await chiediConferma(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
+			const { error } = await DB.deleteInterventoMascalcia(e.id);
+			if (error) {
+				showToast("Errore: " + error.message);
+				return;
+			}
+			if (deveAvvisareAnnullo(e)) await avvisaClienteAppuntamento("annullato", {
+				...e,
+				cavallo: agNomeCavallo(e)
+			});
+			closeModal("modal-azioni-evento");
+			showToast("Appuntamento eliminato");
+			await renderAgendaSettimana$1();
+			await renderIncassi$1();
+			await renderProDeadlines$1();
+		} else if (tipo === "pdf") {
+			if (typeof generaPdfEvento === "function") return generaPdfEvento(e);
+			showToast("PDF disponibile a breve");
+		} else if (tipo === "chat") {
+			if (typeof inviaEventoInChat === "function") return inviaEventoInChat(e);
+			showToast("Invio in chat disponibile a breve");
+		}
+	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/061-pdf-del-conto-dai-dati-salvati-snapshot.js
 	async function creaPdfConto(c) {
 		const doc = new (await (caricaJsPdf()))({
@@ -5550,7 +6022,7 @@
 		showToast("Conto pagato: lavori saldati");
 		if (currentClienteId) {
 			caricaContiCliente(currentClienteId);
-			loadClienteInterventi(currentClienteId);
+			loadClienteInterventi$1(currentClienteId);
 		}
 		if (typeof renderIncassi$1 === "function") renderIncassi$1();
 		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
@@ -5569,6 +6041,36 @@
 		if (currentClienteId) caricaContiCliente(currentClienteId);
 		if (typeof renderIncassi$1 === "function") renderIncassi$1();
 		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/086-indice-dei-cavalli-dei-clienti-professio.js
+	var cavalliMieiIndice = {};
+	var cavalliMieiLista = [];
+	async function caricaCavalliMiei() {
+		try {
+			cavalliMieiLista = await DB.listCavalliMiei() || [];
+			const idx = {};
+			cavalliMieiLista.forEach((c) => {
+				if (!c.cliente_mascalcia_id) return;
+				(idx[c.cliente_mascalcia_id] = idx[c.cliente_mascalcia_id] || []).push(c.nome || "");
+			});
+			cavalliMieiIndice = idx;
+		} catch (e) {
+			console.warn("caricaCavalliMiei:", e);
+		}
+		return cavalliMieiLista;
+	}
+	function nomiCavalliCliente(c) {
+		const da = cavalliMieiIndice[c.id] || [];
+		const testo = typeof nomiCavalliDaTesto === "function" ? nomiCavalliDaTesto(c.nome_cavallo || "") : [];
+		return [...new Set([...da, ...Array.isArray(testo) ? testo : []].map((n) => String(n || "").trim()).filter(Boolean))];
+	}
+	function paroleCercaCliente(c) {
+		return [
+			c.nome_cavallo,
+			...nomiCavalliCliente(c),
+			c.telefono,
+			isStruttura(c) ? "struttura scuderia maneggio" : "proprietario"
+		].filter(Boolean).join(" ");
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/059-foglio-fai-il-conto.js
 	async function apriNuovoConto(clienteId) {
@@ -6268,7 +6770,7 @@
 		lcCache.t = 0;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/055-appuntamenti-con-strutture-equo-scuderia.js
-	var fattoOkStruttura$2 = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
+	var fattoOkStruttura$1 = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
 	async function azioneGruppoStruttura(gruppoId, azione) {
 		const { data, error } = await sb.rpc("pro_azione_appuntamento_struttura", {
 			p_gruppo_id: gruppoId,
@@ -6280,8 +6782,8 @@
 		}
 		showToast(azione === "conferma" ? "Confermato: la scuderia riceve l'avviso." : azione === "rifiuta" ? "Richiesta rifiutata." : "Appuntamento annullato.");
 		await renderAgendaSettimana$1();
-		await renderProDeadlines();
-		if (currentClienteId) await loadClienteInterventi(currentClienteId);
+		await renderProDeadlines$1();
+		if (currentClienteId) await loadClienteInterventi$1(currentClienteId);
 	}
 	var propStrutturaClienteId = null;
 	var propStrDaNuovo = null;
@@ -6359,7 +6861,7 @@
 		closeModal("modal-proponi-struttura");
 		showToast("Proposta inviata: la scuderia deve confermarla.");
 		if (document.getElementById("ag-week")) await renderAgendaSettimana$1();
-		if (currentClienteId) await loadClienteInterventi(currentClienteId);
+		if (currentClienteId) await loadClienteInterventi$1(currentClienteId);
 	}
 	function vaiAllaDataAgenda(iso) {
 		const lunCorrente = agLunedi(0);
@@ -6396,8 +6898,8 @@
 		});
 		showToast("Richiesta rifiutata");
 		await renderAgendaSettimana$1();
-		await renderProDeadlines();
-		if (currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi(r.cliente_mascalcia_id);
+		await renderProDeadlines$1();
+		if (currentClienteId === r.cliente_mascalcia_id) await loadClienteInterventi$1(r.cliente_mascalcia_id);
 	}
 	function agRigaEvento(e, di) {
 		const cav = agNomeCavallo(e);
@@ -6410,7 +6912,7 @@
           <div class="ag-ev-sub">${di ? `<span class="ag-di">di ${escapeHtml(di)}</span> · ` : ""}${e.stato === "richiesto" ? "Richiesta · " : e.stato === "proposto" ? "In attesa della scuderia · " : ""}${escapeHtml(agDescrizioneTipoPro(e))}${e.aiutante_nome ? " · con " + escapeHtml(e.aiutante_nome) : ""}${e.note ? " · " + escapeHtml(e.note) : ""}</div>
           ${notaModificaMan(e)}
         </div>
-        ${e.stato === "fatto" ? "<span class=\"ag-ev-done\">✓ Fatto</span>" : !fattoOkStruttura$2(e) ? "<span class=\"ag-ev-done\" style=\"color:var(--accent)\">attesa</span>" : e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>` : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
+        ${e.stato === "fatto" ? "<span class=\"ag-ev-done\">✓ Fatto</span>" : !fattoOkStruttura$1(e) ? "<span class=\"ag-ev-done\" style=\"color:var(--accent)\">attesa</span>" : e.stato === "richiesto" ? `<button class="ag-ev-fatto" onclick="accettaRichiesta('${e.id}')">Accetta</button>` : `<button class="ag-ev-fatto" onclick="segnaFattoAgenda('${e.id}')">Fatto</button>`}
         <button class="ag-ev-menu" onclick="apriAzioniEvento('${e.id}')" aria-label="Azioni">⋯</button>
       </div>`;
 	}
@@ -6526,1117 +7028,6 @@
 		closeModal("modal-proponi-struttura");
 		openInterventoModal(null, null, preset);
 	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/056-ordine-del-giro-trascina-un-cavallo-nel.js
-	var fattoOkStruttura$1 = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
-	function agOrdinaGiro(l) {
-		return (l || []).slice().sort((a, b) => (a.data_intervento || "").localeCompare(b.data_intervento || "") || (a.ordine_giro ?? 1e9) - (b.ordine_giro ?? 1e9) || String(a.ora || "99").localeCompare(String(b.ora || "99")) || String(a.created_at || "").localeCompare(String(b.created_at || "")));
-	}
-	var agTrascina = null;
-	function agAttivaTrascina(box) {
-		if (box.dataset.trascina) return;
-		box.dataset.trascina = "1";
-		box.addEventListener("pointerdown", (e) => {
-			const h = e.target.closest(".ag-mani");
-			if (!h) return;
-			e.preventDefault();
-			const tipo = h.dataset.drag;
-			const el = tipo === "gr" ? h.closest(".ag-gblock") : h.closest(".ag-ev");
-			const cont = el && el.parentElement;
-			if (!el || !cont) return;
-			const r = el.getBoundingClientRect();
-			const posto = document.createElement("div");
-			posto.className = "ag-posto";
-			posto.style.height = r.height + "px";
-			cont.insertBefore(posto, el);
-			el.classList.add("ag-preso");
-			el.style.width = r.width + "px";
-			el.style.left = r.left + "px";
-			el.style.top = r.top + "px";
-			agTrascina = {
-				el,
-				cont,
-				posto,
-				tipo,
-				y0: e.clientY,
-				top0: r.top,
-				ordinePrima: agOrdineDom()
-			};
-			try {
-				h.setPointerCapture(e.pointerId);
-			} catch (_) {}
-			if (navigator.vibrate) try {
-				navigator.vibrate(15);
-			} catch (_) {}
-		});
-		box.addEventListener("pointermove", (e) => {
-			const t = agTrascina;
-			if (!t) return;
-			e.preventDefault();
-			t.el.style.top = t.top0 + e.clientY - t.y0 + "px";
-			const fratelli = [...t.cont.children].filter((x) => x !== t.el && x !== t.posto && (t.tipo === "gr" ? x.classList.contains("ag-gblock") : x.classList.contains("ag-ev") && x.dataset.ev));
-			let prima = null;
-			for (const f of fratelli) {
-				const rr = f.getBoundingClientRect();
-				if (e.clientY < rr.top + rr.height / 2) {
-					prima = f;
-					break;
-				}
-			}
-			if (prima) t.cont.insertBefore(t.posto, prima);
-			else {
-				const ultimo = fratelli[fratelli.length - 1];
-				if (ultimo) t.cont.insertBefore(t.posto, ultimo.nextSibling);
-			}
-		});
-		const fine = async () => {
-			const t = agTrascina;
-			if (!t) return;
-			agTrascina = null;
-			t.cont.insertBefore(t.el, t.posto);
-			t.posto.remove();
-			t.el.classList.remove("ag-preso");
-			t.el.style.width = t.el.style.left = t.el.style.top = "";
-			const dopo = agOrdineDom();
-			if (dopo.join() === t.ordinePrima.join()) return;
-			await agSalvaOrdine(dopo, t.tipo === "ev" ? t.el.dataset.ev : null);
-		};
-		box.addEventListener("pointerup", fine);
-		box.addEventListener("pointercancel", fine);
-	}
-	function agOrdineDom() {
-		return [...document.querySelectorAll(".ag-pannello .ag-ev[data-ev]")].map((x) => x.dataset.ev);
-	}
-	async function agSalvaOrdine(ids, spostato) {
-		const ev = (id) => agEventiCache[id];
-		let scambio = null;
-		if (spostato && ev(spostato)?.ora) {
-			const m = ev(spostato), pos = ids.indexOf(spostato);
-			const stessoCli = (x) => ev(x) && ev(x).cliente_mascalcia_id === m.cliente_mascalcia_id && ev(x).ora && x !== spostato;
-			const dopo = ids.slice(pos + 1).find(stessoCli), prima = ids.slice(0, pos).reverse().find(stessoCli);
-			const hm = (x) => String(ev(x).ora).slice(0, 5);
-			if (dopo && hm(dopo) < hm(spostato)) scambio = dopo;
-			else if (prima && hm(prima) > hm(spostato)) scambio = prima;
-		}
-		const cambi = ids.map((id, n) => ({
-			id,
-			n
-		})).filter((x) => ev(x.id) && ev(x.id).ordine_giro !== x.n);
-		for (const c of cambi) {
-			const { error } = await DB.updateInterventoMascalcia(c.id, { ordine_giro: c.n });
-			if (error) {
-				showToast("Ordine non salvato: " + error.message);
-				break;
-			}
-			ev(c.id).ordine_giro = c.n;
-		}
-		if (scambio) {
-			const a = ev(spostato), b = ev(scambio), oa = String(a.ora).slice(0, 5), ob = String(b.ora).slice(0, 5);
-			if (await chiediSiNo("Scambiare anche gli orari?", `Hai messo ${agNomeCavallo(a) || "questo cavallo"} (${oa}) ${ids.indexOf(spostato) < ids.indexOf(scambio) ? "prima" : "dopo"} di ${agNomeCavallo(b) || "un altro"} (${ob}). Sì: ${agNomeCavallo(a) || "il primo"} alle ${ob} e ${agNomeCavallo(b) || "l'altro"} alle ${oa}; i clienti collegati ricevono l'avviso. No: cambia solo l'ordine del giro.`)) {
-				for (const [x, nuova] of [[a, ob], [b, oa]]) {
-					const prec = {
-						data: x.data_intervento,
-						ora: String(x.ora).slice(0, 5),
-						cliente: x.cliente_mascalcia_id,
-						tipo_ferratura: x.tipo_ferratura,
-						tipo_altro: x.tipo_altro || ""
-					};
-					const { error } = await DB.updateInterventoMascalcia(x.id, { ora: nuova });
-					if (error) {
-						showToast("Orario non cambiato: " + error.message);
-						continue;
-					}
-					x.ora = nuova;
-					if (!x.gruppo_id && x.stato === "programmato") await avvisaClienteAppuntamento("modificato", {
-						cliente_mascalcia_id: x.cliente_mascalcia_id,
-						tipo_ferratura: x.tipo_ferratura,
-						tipo_altro: x.tipo_altro,
-						data_intervento: x.data_intervento,
-						ora: nuova,
-						cavallo: agNomeCavallo(x)
-					}, prec);
-				}
-				showToast("Orari scambiati");
-			}
-		}
-		if (!scambio) showToast("Ordine del giro salvato");
-		await renderAgendaSettimana$1();
-		try {
-			await renderProDeadlines();
-		} catch (_) {}
-	}
-	function toggleGiornoAgenda(iso) {
-		agGiorniAperti = agGiorniAperti && agGiorniAperti.has(iso) ? /* @__PURE__ */ new Set() : /* @__PURE__ */ new Set([iso]);
-		agDisegnaGriglia();
-		const t = document.querySelector(`.ag-tile[data-iso="${iso}"]`);
-		if (t) {
-			t.focus({ preventScroll: true });
-			if (t.getBoundingClientRect().top < 60) t.scrollIntoView({
-				block: "start",
-				behavior: "smooth"
-			});
-		}
-	}
-	function cambiaSettimanaAgenda(delta) {
-		agSettimanaOffset += delta;
-		agGiorniAperti = /* @__PURE__ */ new Set();
-		renderAgendaSettimana$1(delta);
-	}
-	function tornaSettimanaCorrente() {
-		const delta = -agSettimanaOffset;
-		agSettimanaOffset = 0;
-		agGiorniAperti = null;
-		renderAgendaSettimana$1(delta || null);
-	}
-	function agAttivaSwipe(box) {
-		if (box.dataset.swipe) return;
-		box.dataset.swipe = "1";
-		let x0 = null, y0 = null, t0 = 0;
-		box.addEventListener("touchstart", (e) => {
-			if (e.target.closest && e.target.closest(".ag-mani")) {
-				x0 = null;
-				return;
-			}
-			const t = e.touches[0];
-			x0 = t.clientX;
-			y0 = t.clientY;
-			t0 = Date.now();
-		}, { passive: true });
-		box.addEventListener("touchend", (e) => {
-			if (x0 === null) return;
-			const t = e.changedTouches[0];
-			const dx = t.clientX - x0, dy = t.clientY - y0;
-			x0 = null;
-			if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && Date.now() - t0 < 800) cambiaSettimanaAgenda(dx < 0 ? 1 : -1);
-		}, { passive: true });
-	}
-	function nuovoAppuntamentoGiorno(iso) {
-		openInterventoModal(null, null, { data_intervento: iso });
-	}
-	function fissaDaScadenza(id) {
-		const sc = agEventiCache["sc:" + id];
-		if (!sc) return;
-		openInterventoModal(sc.cliente_mascalcia_id, null, {
-			tipo_ferratura: sc.tipo_ferratura,
-			tipo_altro: sc.tipo_altro,
-			misura_sistema: sc.misura_sistema,
-			numero_ferro: sc.numero_ferro,
-			quantita_ferri: sc.quantita_ferri,
-			data_intervento: agDataPerFissare(sc.prossima_scadenza || sc.data_vista),
-			cavallo_cliente_id: sc.cavallo_cliente_id,
-			horse_id: sc.horse_id
-		});
-	}
-	async function segnaFattoAgenda(id) {
-		await segnaFatto(agEventiCache[id]);
-	}
-	function apriAzioniEvento(id) {
-		const e = agEventiCache[id];
-		if (!e) return;
-		agEventoAzioniId = id;
-		const [y, m, d] = e.data_intervento.split("-").map(Number);
-		const dt = new Date(y, m - 1, d);
-		document.getElementById("azioni-evento-titolo").textContent = (e.clienti_mascalcia?.nome || "Appuntamento") + (agNomeCavallo(e) ? " · " + agNomeCavallo(e) : "");
-		document.getElementById("azioni-evento-dettaglio").innerHTML = [
-			`${AG_GIORNI[(dt.getDay() + 6) % 7]} ${d} ${AG_MESI_LUNGHI[m - 1]}${e.ora ? " · ore " + String(e.ora).slice(0, 5) : ""}`,
-			escapeHtml(agDescrizioneTipoPro(e)),
-			"<span class=\"solo-incassi\">" + (e.importo != null ? formatEuro(e.importo) + " · " : "") + (e.stato_pagamento === "saldato" ? "Saldato" : "Da saldare") + "</span>",
-			e.stato === "fatto" ? "<span style=\"color:var(--green);font-weight:700\">✓ Fatto</span>" : e.stato === "richiesto" ? "<span style=\"color:var(--accent);font-weight:700\">Richiesta del cliente · da confermare</span>" : e.stato === "proposto" ? "<span style=\"color:var(--accent);font-weight:700\">In attesa della conferma della scuderia</span>" + (fattoOkStruttura$1(e) ? "<br><span class=\"muted\" style=\"font-size:12px\">La data è arrivata: puoi segnarlo fatto anche senza conferma, la scuderia riceve l'avviso.</span>" : "") : "Da fare",
-			notaModificaMan(e, true),
-			e.gruppo_id ? "<span class=\"muted\" style=\"font-size:12px\">Appuntamento con una scuderia su Equo Scuderia: se cambi servizio, data o ora, la scuderia deve riconfermare.</span>" : "",
-			e.note ? escapeHtml(e.note) : ""
-		].filter(Boolean).join("<br>");
-		const btnFatto = document.getElementById("azioni-evento-fatto");
-		btnFatto.textContent = e.stato === "richiesto" ? "Accetta e conferma" : e.stato === "fatto" ? "Rimetti da fare" : "Segna come fatto";
-		btnFatto.style.display = !fattoOkStruttura$1(e) ? "none" : "";
-		const btnAnnStr = document.getElementById("azioni-evento-annulla-struttura");
-		if (btnAnnStr) btnAnnStr.style.display = e.gruppo_id && ["proposto", "programmato"].includes(e.stato) ? "" : "none";
-		const btnElim = document.getElementById("azioni-evento-elimina");
-		if (btnElim) btnElim.style.display = e.gruppo_id && e.stato !== "fatto" ? "none" : "";
-		eseguiEstensioniSubito(estensioniDopo, "apriAzioniEvento", [e]);
-		openModal("modal-azioni-evento");
-	}
-	async function azioneEvento(tipo) {
-		const e = agEventiCache[agEventoAzioniId];
-		if (!e) return;
-		if (tipo === "modifica") {
-			closeModal("modal-azioni-evento");
-			openInterventoModal(null, e);
-		} else if (tipo === "annulla_struttura" && e.gruppo_id) {
-			if (!await chiediConferma("Annullare l'appuntamento con la scuderia (tutti i cavalli)? La scuderia riceve un avviso in chat.")) return;
-			closeModal("modal-azioni-evento");
-			await azioneGruppoStruttura(e.gruppo_id, "annulla");
-		} else if (tipo === "fatto" && e.stato === "richiesto") {
-			closeModal("modal-azioni-evento");
-			accettaRichiesta(e.id);
-		} else if (tipo === "fatto" && e.stato !== "fatto") {
-			await segnaFatto(e, { prima: () => closeModal("modal-azioni-evento") });
-			closeModal("modal-azioni-evento");
-		} else if (tipo === "fatto") {
-			const { error } = await DB.updateInterventoMascalcia(e.id, { stato: "programmato" });
-			if (error) {
-				showToast("Errore: " + error.message);
-				return;
-			}
-			closeModal("modal-azioni-evento");
-			showToast("Rimesso da fare");
-			await renderAgendaSettimana$1();
-			await renderIncassi$1();
-			await renderProDeadlines();
-		} else if (tipo === "elimina") {
-			if (!await chiediConferma(deveAvvisareAnnullo(e) ? "Eliminare questo appuntamento? Il cliente riceve l'avviso in chat." : "Eliminare questo appuntamento?")) return;
-			const { error } = await DB.deleteInterventoMascalcia(e.id);
-			if (error) {
-				showToast("Errore: " + error.message);
-				return;
-			}
-			if (deveAvvisareAnnullo(e)) await avvisaClienteAppuntamento("annullato", {
-				...e,
-				cavallo: agNomeCavallo(e)
-			});
-			closeModal("modal-azioni-evento");
-			showToast("Appuntamento eliminato");
-			await renderAgendaSettimana$1();
-			await renderIncassi$1();
-			await renderProDeadlines();
-		} else if (tipo === "pdf") {
-			if (typeof generaPdfEvento === "function") return generaPdfEvento(e);
-			showToast("PDF disponibile a breve");
-		} else if (tipo === "chat") {
-			if (typeof inviaEventoInChat === "function") return inviaEventoInChat(e);
-			showToast("Invio in chat disponibile a breve");
-		}
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/098-professionista.js
-	function wgTipoApp(e) {
-		return typeof agDescrizioneTipoPro === "function" ? agDescrizioneTipoPro(e) : hpTipo(e);
-	}
-	function wgClienteDi(id) {
-		return (clientiMascalcia || []).find((c) => c.id === id) || null;
-	}
-	var wgScelto = null;
-	function wgScegli(id) {
-		wgScelto = id;
-		renderWidgetPro();
-	}
-	function renderWidgetPro() {
-		const box = document.getElementById("wh-pro");
-		if (!box || !currentUser) return;
-		const oggi = isoLocale(/* @__PURE__ */ new Date());
-		const adesso = (/* @__PURE__ */ new Date()).toTimeString().slice(0, 5);
-		const app = (hpAppuntamenti || []).filter((e) => e.stato !== "annullato" && e.stato !== "rifiutato");
-		const diOggi = agOrdinaGiro(app.filter((e) => e.data_intervento === oggi));
-		const prossimoOggi = diOggi.find((e) => !e.ora || String(e.ora).slice(0, 5) >= adesso) || null;
-		const futuri = agOrdinaGiro(app.filter((e) => e.data_intervento > oggi));
-		const scelto = wgScelto ? app.find((e) => e.id === wgScelto && e.data_intervento >= oggi) : null;
-		if (wgScelto && !scelto) wgScelto = null;
-		const prossimo = scelto || prossimoOggi || futuri[0] || null;
-		const cavalliOggi = diOggi.length;
-		const strutture = new Set(diOggi.filter((e) => isStruttura(wgClienteDi(e.cliente_mascalcia_id))).map((e) => e.cliente_mascalcia_id)).size;
-		const ric = (hpRichiamiLista || []).slice().sort((a, b) => a.giorni - b.giorni);
-		const giro = (typeof hpGiri === "function" ? hpGiri() : [])[0] || null;
-		const quando = (e) => {
-			if (!e) return "";
-			const ora = e.ora ? String(e.ora).slice(0, 5) : "";
-			if (scelto && e.id === scelto.id) return e.data_intervento === oggi ? `In evidenza · oggi${ora ? " " + ora : ""}` : `In evidenza · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
-			if (e.data_intervento === oggi && ora) {
-				const [h, m] = ora.split(":").map(Number);
-				const d = /* @__PURE__ */ new Date();
-				d.setHours(h, m, 0, 0);
-				const min = Math.round((d - /* @__PURE__ */ new Date()) / 6e4);
-				return min > 0 && min < 180 ? `Prossimo · tra ${min} min · ${ora}` : `Prossimo · oggi ${ora}`;
-			}
-			return e.data_intervento === oggi ? "Prossimo · oggi" : `Prossimo · ${hpGiornoEtichetta(e.data_intervento).toLowerCase()}${ora ? " " + ora : ""}`;
-		};
-		wgMeteoCarica([...new Set([...diOggi, prossimo].filter(Boolean).map((e) => e.cliente_mascalcia_id))]);
-		let oggiHtml;
-		if (prossimo) {
-			const c = wgClienteDi(prossimo.cliente_mascalcia_id);
-			const cav = agNomeCavallo(prossimo);
-			const lp = cavalliMieiCache ? luogoEvento(prossimo, true) : null;
-			const dove = lp && lp.key !== "c:" + prossimo.cliente_mascalcia_id ? [
-				lp.nome,
-				lp.indirizzo,
-				"di " + (prossimo.clienti_mascalcia?.nome || c?.nome || "")
-			].filter(Boolean).join(" · ") : [prossimo.clienti_mascalcia?.nome || c?.nome, c?.indirizzo].filter(Boolean).join(" · ");
-			const altri = diOggi.filter((e) => e.id !== prossimo.id).slice(0, 6);
-			oggiHtml = `
-      <div class="wg-prossimo" onclick="apriAzioniEvento('${prossimo.id}')">
-        <div class="wg-quando">${wgEsc(quando(prossimo))}</div>
-        <div class="wg-chi">${wgEsc(cav || prossimo.clienti_mascalcia?.nome || "Appuntamento")} · ${wgEsc(wgTipoApp(prossimo).toLowerCase())}${wgMeteoIcona(prossimo)}</div>
-        <div class="wg-dove">${wgEsc(dove)}</div>
-        <div class="wg-azioni">
-          <button class="oro" onclick="event.stopPropagation();wgNavigaEvento('${prossimo.id}')">${WG_IC.mappa}Naviga</button>
-          <button onclick="event.stopPropagation();openChatThread('${prossimo.cliente_mascalcia_id}')">${WG_IC.msg}Chatta</button>
-          ${prossimo.stato === "programmato" ? `<button onclick="event.stopPropagation();hpSegnaFatto('${prossimo.id}')">${WG_IC.ok}Fatto</button>` : `<button onclick="event.stopPropagation();apriAzioniEvento('${prossimo.id}')">Apri</button>`}
-        </div>
-      </div>
-      ${altri.map((e) => `<div class="wg-voce" onclick="wgScegli('${e.id}')">${e.ora ? `<span class="wg-ora">${String(e.ora).slice(0, 5)}</span>` : ""}<span class="wg-t">${wgEsc(agNomeCavallo(e) || "")} · ${wgEsc(wgTipoApp(e).toLowerCase())} <small>· ${wgEsc(e.clienti_mascalcia?.nome || "")}</small></span>${wgMeteoIcona(e)}<button class="wg-piu" aria-label="Modifica appuntamento" onclick="event.stopPropagation();apriAzioniEvento('${e.id}')">⋯</button></div>`).join("")}
-      ${altri.length ? "<div class=\"wg-nota\">Tocca un appuntamento per metterlo in evidenza con Naviga, Chatta e Fatto.</div>" : ""}
-      ${!prossimoOggi && prossimo ? "<div class=\"wg-nota\">Oggi nessun appuntamento: questo è il prossimo in agenda.</div>" : ""}`;
-		} else oggiHtml = `<div class="wg-vuoto">Nessun appuntamento in agenda.<br><button class="wg-link" onclick="openInterventoModal(null)">+ Fissane uno</button></div>`;
-		const ricHtml = ric.length ? ric.slice(0, 3).map((r) => `<div class="wg-ric" onclick="apriRichiamo('${r.intervento_id}')"><span class="wg-sem ${hpColoreRic(r)}"></span><span class="wg-t"><b>${wgEsc(r.cavallo_nome || "Cavallo")}</b> · ${wgEsc(r.cliente_nome || "")}<small>${wgEsc(hpTipo(r).toLowerCase())} · ${wgEsc(hpQuando(r))}</small></span><button class="wg-scrivi" onclick="event.stopPropagation();wgScriviRichiamo('${r.intervento_id}')">Scrivi</button></div>`).join("") : "<div class=\"wg-vuoto piccolo\">Nessun cavallo da richiamare nei prossimi 30 giorni.</div>";
-		const sett = wgPro.settimana;
-		const lun = wgLunedi(oggi);
-		const giorni = [
-			"L",
-			"M",
-			"M",
-			"G",
-			"V",
-			"S",
-			"D"
-		].map((g, i) => {
-			const iso = aggiungiGiorniIso(lun, i);
-			return {
-				g,
-				iso,
-				n: sett ? sett[iso] || 0 : 0
-			};
-		});
-		const max = Math.max(4, ...giorni.map((x) => x.n));
-		const totSett = giorni.reduce((t, x) => t + x.n, 0);
-		if (wgPro.settimanaChiave !== lun) wgCaricaSettimana(lun);
-		box.innerHTML = `
-    <div class="wg wg-grande">
-      <div class="wg-testa"><span class="wg-et">${WG_IC.cal}Oggi</span><span class="wg-meta">${cavalliOggi ? `${cavalliOggi} ${cavalliOggi === 1 ? "appuntamento" : "appuntamenti"}${strutture ? " · " + strutture + (strutture === 1 ? " scuderia" : " scuderie") : ""}` : ""}</span></div>
-      ${oggiHtml}
-    </div>
-    <div class="wg wg-piccolo" onclick="document.querySelector('[data-page=&quot;pro-inbox&quot;]')?.click()">
-      <span class="wg-et">${WG_IC.msg}Messaggi</span>${wgPro.unread ? `<span class="wg-badge">${wgPro.unread}</span>` : ""}
-      <div class="wg-num">${wgPro.unread} <small>${wgPro.unread === 1 ? "non letto" : "non letti"}</small></div>
-      <div class="wg-riga">${wgPro.ultimo ? `<b>${wgEsc(wgPro.ultimo.nome)}:</b> ${wgEsc(wgPro.ultimo.testo)}` : "Nessun messaggio"}</div>
-    </div>
-    <div class="wg wg-piccolo wg-pieno solo-incassi" onclick="showPage('pro-incassi')">
-      <span class="wg-cerchio">${WG_IC.euro}</span>
-      <div class="wg-num">${wgEuro(wgPro.incassatoMese)}</div>
-      <div class="wg-riga">incassati a ${(/* @__PURE__ */ new Date()).toLocaleDateString("it-IT", { month: "long" })}</div>
-      <div class="wg-riga evid">${wgPro.daIncassareMese ? wgEuro(wgPro.daIncassareMese) + " da incassare" : "Tutto incassato"}</div>
-      ${wgPro.previsto ? `<div class="wg-riga">${wgEuro(wgPro.previsto)} previsti in agenda</div>` : ""}
-    </div>
-    <div class="wg wg-medio">
-      <div class="wg-testa"><span class="wg-et">${WG_IC.camp}Da richiamare</span>${ric.length > 3 ? `<button class="wg-link" onclick="apriListaHome('ric')">${ric.length} in tutto ›</button>` : ""}</div>
-      ${ricHtml}
-    </div>
-    <div class="wg wg-piccolo wg-pieno wg-azione" onclick="openInterventoModal(null)">
-      <span class="wg-cerchio grande">${WG_IC.piu}</span>
-      <div class="wg-riga forte">Nuovo appuntamento</div>
-    </div>
-    <div class="wg wg-piccolo" onclick="${giro ? `apriGiro('${giro[0].cliente_mascalcia_id}')` : "showToast('Nessun giro da organizzare: ti avvisiamo quando più cavalli dello stesso cliente scadono insieme')"}">
-      ${isPremium() ? "" : "<span class=\"wg-premium\">PREMIUM</span>"}
-      <span class="wg-et">${WG_IC.giro}Giro</span>
-      <div class="wg-num">${giro ? giro.length : 0} <small>cavalli</small></div>
-      <div class="wg-riga">${giro ? `da <b>${wgEsc(giro[0].cliente_nome || "")}</b>: un solo appuntamento` : "Nessun giro da organizzare"}</div>
-    </div>
-    <div class="wg wg-medio" onclick="showPage('pro-agenda')">
-      <div class="wg-testa"><span class="wg-et">${WG_IC.sett}Settimana</span><span class="wg-meta">${sett ? totSett + (totSett === 1 ? " appuntamento" : " appuntamenti") : ""}</span></div>
-      <div class="wg-barre">${giorni.map((x) => `<div class="wg-barra${x.iso === oggi ? " oggi" : ""}"><b>${x.n || "–"}</b><i style="height:${x.n ? Math.max(12, Math.round(x.n / max * 100)) : 6}%"></i><small>${x.g}</small></div>`).join("")}</div>
-    </div>`;
-	}
-	function wgLunedi(iso) {
-		const [y, m, d] = iso.split("-").map(Number);
-		return aggiungiGiorniIso(iso, -((new Date(y, m - 1, d).getDay() + 6) % 7));
-	}
-	var wgSettInCorso = false;
-	async function wgCaricaSettimana(lun) {
-		if (wgSettInCorso) return;
-		wgSettInCorso = true;
-		try {
-			const lista = await DB.listInterventiPeriodo(lun, aggiungiGiorniIso(lun, 6));
-			const per = {};
-			(lista || []).filter((i) => !["rifiutato", "annullato"].includes(i.stato)).forEach((i) => {
-				per[i.data_intervento] = (per[i.data_intervento] || 0) + 1;
-			});
-			wgPro.settimana = per;
-			wgPro.settimanaChiave = lun;
-		} catch (e) {
-			wgPro.settimana = wgPro.settimana || {};
-			wgPro.settimanaChiave = lun;
-		} finally {
-			wgSettInCorso = false;
-		}
-		if (vistaWidgetAttiva() && vistaAi() === "professionista") renderWidgetPro();
-	}
-	function wgScriviRichiamo(id) {
-		apriRichiamo(id);
-		richiamoAzione("scrivi");
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/100-naviga.js
-	var wgIndirizziStrutture = null;
-	async function wgIndirizzoStruttura(c) {
-		if (!c?.centro_id || DEMO_MODE) return null;
-		if (!wgIndirizziStrutture) try {
-			const { data, error } = await sb.rpc("pro_indirizzi_strutture");
-			wgIndirizziStrutture = error ? [] : data || [];
-		} catch (_) {
-			wgIndirizziStrutture = [];
-		}
-		return wgIndirizziStrutture.find((x) => (x.cliente_id || x.id) === c.id) || null;
-	}
-	async function wgNaviga$1(clienteId) {
-		const c = wgClienteDi(clienteId);
-		if (!c) {
-			showToast("Cliente non trovato");
-			return;
-		}
-		const proprio = (c.indirizzo || "").trim();
-		if (proprio) return wgMostraMappe(c, proprio);
-		const st = await wgIndirizzoStruttura(c);
-		const via = (st?.indirizzo || "").trim();
-		const citta = [st?.citta, st?.provincia ? "(" + st.provincia + ")" : ""].filter(Boolean).join(" ").trim();
-		if (via) return wgMostraMappe(c, [via, citta].filter(Boolean).join(", "), "Indirizzo indicato dalla scuderia in Equo Scuderia");
-		wgCercaLuogo(c, [st?.nome || c.nome, st?.citta].filter(Boolean).join(", "));
-	}
-	function wgMappeOv() {
-		let ov = document.getElementById("modal-naviga");
-		if (!ov) {
-			ov = document.createElement("div");
-			ov.className = "modal-overlay";
-			ov.id = "modal-naviga";
-			ov.addEventListener("click", (ev) => {
-				if (ev.target === ov) closeModal("modal-naviga");
-			});
-			document.body.appendChild(ov);
-		}
-		return ov;
-	}
-	function wgMostraMappe(c, indirizzo, nota) {
-		const xy = coordDaIndirizzo(indirizzo);
-		const q = encodeURIComponent(xy ? xy.lat + "," + xy.lon : indirizzo);
-		const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-		const app = [
-			[
-				"Google Maps",
-				`https://www.google.com/maps/dir/?api=1&destination=${q}`,
-				"linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"
-			],
-			...ios ? [[
-				"Apple Mappe",
-				`https://maps.apple.com/?daddr=${q}`,
-				"linear-gradient(160deg,#7fd27b,#3aa0f0)"
-			]] : [],
-			[
-				"Waze",
-				xy ? `https://waze.com/ul?ll=${q}&navigate=yes` : `https://waze.com/ul?q=${q}&navigate=yes`,
-				"#33ccff"
-			]
-		];
-		const ov = wgMappeOv();
-		ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>
-    <div class="modal-title" style="margin-bottom:2px">Indicazioni per ${wgEsc(c?.nome || "il cliente")}</div>
-    <div class="muted" style="font-size:13px;margin-bottom:${nota ? 2 : 14}px">${wgEsc(indirizzo)}</div>
-    ${nota ? `<div class="muted" style="font-size:12px;margin-bottom:14px">${wgEsc(nota)}</div>` : ""}
-    ${app.map(([n, u, bg]) => `<a class="wg-app-mappa" href="${u}" target="_blank" rel="noopener" onclick="closeModal('modal-naviga')"><i style="background:${bg}"></i>${n}</a>`).join("")}
-    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeModal('modal-naviga')">Annulla</button></div>`;
-		openModal("modal-naviga");
-	}
-	var wgLuogo = {
-		cliente: null,
-		risultati: []
-	};
-	function wgCercaLuogo(c, testo) {
-		wgLuogo = {
-			cliente: c,
-			risultati: []
-		};
-		const ov = wgMappeOv();
-		ov.innerHTML = `<div class="modal"><div class="modal-handle"></div>
-    <div class="modal-title" style="margin-bottom:2px">Dove si trova ${wgEsc(c.nome || "il cliente")}?</div>
-    <div class="muted" style="font-size:13px;margin-bottom:12px">Manca l'indirizzo. Cerca il luogo e tocca quello giusto: lo salvo nella scheda del cliente.</div>
-    <form onsubmit="event.preventDefault();wgCercaLuogoVai()" style="display:flex;gap:8px;margin-bottom:12px">
-      <input class="input" id="wg-luogo-testo" style="flex:1" placeholder="Nome del maneggio o della via, città" value="${wgEsc(testo || "")}">
-      <button class="btn btn-primary" type="submit" style="flex-shrink:0">Cerca</button>
-    </form>
-    <div id="wg-luogo-esiti"></div>
-    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="wgLuogoAMano()">Scrivo l'indirizzo a mano</button>
-    <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="closeModal('modal-naviga')">Annulla</button></div>`;
-		openModal("modal-naviga");
-		if ((testo || "").trim().length >= 3) wgCercaLuogoVai();
-		else setTimeout(() => document.getElementById("wg-luogo-testo")?.focus(), 250);
-	}
-	async function wgCercaLuogoVai() {
-		const testo = (document.getElementById("wg-luogo-testo")?.value || "").trim();
-		const box = document.getElementById("wg-luogo-esiti");
-		if (!box) return;
-		if (testo.length < 3) {
-			box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Scrivi almeno 3 lettere.</div>`;
-			return;
-		}
-		box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Cerco…</div>`;
-		let d = {};
-		if (DEMO_MODE) {
-			await new Promise((r) => setTimeout(r, 400));
-			d = { risultati: [
-				{
-					nome: testo.split(",")[0] + " (scuderia)",
-					indirizzo: "Via Casilina km 51, 00034 Colleferro RM, Italia"
-				},
-				{
-					nome: testo.split(",")[0],
-					indirizzo: "Via dei Prati 12, 00038 Valmontone RM, Italia"
-				},
-				{
-					nome: "Centro ippico " + testo.split(",")[0],
-					indirizzo: "Strada provinciale 600, 03012 Anagni FR, Italia"
-				}
-			] };
-		} else try {
-			const res = await fetch("/.netlify/functions/cerca-luogo", {
-				method: "POST",
-				headers: await authHeaders(),
-				body: JSON.stringify({ testo })
-			});
-			d = await res.json().catch(() => ({}));
-			if (res.status === 401) d = {
-				errore: true,
-				sessione: true
-			};
-		} catch (_) {
-			d = { errore: true };
-		}
-		const apriMappe = `<a class="wg-app-mappa" href="${`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(testo)}`}" target="_blank" rel="noopener"><i style="background:linear-gradient(135deg,#34a853 0 33%,#fbbc04 33% 66%,#4285f4 66%)"></i>Cerca su Google Maps</a>`;
-		if (d.non_configurato || d.errore || d.limite_raggiunto) {
-			box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">${d.limite_raggiunto ? "Hai fatto molte ricerche oggi: riprova domani." : d.sessione ? "Sessione scaduta: esci e rientra." : !navigator.onLine ? "Sei offline: la ricerca riparte con la rete." : "La ricerca non è disponibile in questo momento."} Puoi cercare il luogo direttamente nelle mappe.</div>${apriMappe}`;
-			return;
-		}
-		wgLuogo.risultati = d.risultati || [];
-		if (!wgLuogo.risultati.length) {
-			box.innerHTML = `<div class="muted" style="font-size:13px;margin-bottom:10px">Nessun luogo trovato. Prova con il nome del maneggio e la città, oppure scrivi l'indirizzo a mano.</div>${apriMappe}`;
-			return;
-		}
-		box.innerHTML = wgLuogo.risultati.map((r, i) => `<button class="wg-app-mappa wg-luogo" type="button" onclick="wgSceltaLuogo(${i})">
-      <span class="wg-luogo-ico"><i class="fa-solid fa-location-dot"></i></span>
-      <span style="min-width:0"><span style="display:block">${wgEsc(r.nome || r.indirizzo)}</span><span class="muted" style="display:block;font-weight:400;font-size:12.5px">${wgEsc(r.indirizzo)}</span></span></button>`).join("");
-	}
-	async function wgSceltaLuogo(i) {
-		const r = wgLuogo.risultati[i], c = wgLuogo.cliente;
-		if (!r || !c) return;
-		if (!DEMO_MODE) {
-			const { error } = await DB.updateClienteMascalcia(c.id, { indirizzo: r.indirizzo });
-			if (error) showToast("Non sono riuscito a salvare l'indirizzo, ma ti porto lo stesso");
-			else showToast("Indirizzo salvato nella scheda del cliente");
-		}
-		c.indirizzo = r.indirizzo;
-		closeModal("modal-naviga");
-		setTimeout(() => wgMostraMappe(c, r.indirizzo), 200);
-	}
-	function wgLuogoAMano() {
-		const c = wgLuogo.cliente;
-		closeModal("modal-naviga");
-		if (!c) return;
-		showPage("pro-clienti");
-		openClienteDetail$1(c.id).then(() => {
-			if (typeof openEditCliente === "function") openEditCliente().then(() => document.getElementById("edit-cliente-indirizzo")?.focus());
-		});
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js
-	function ubicDi(r, clienteId) {
-		const o = { cliente_mascalcia_id: r && r.cliente_mascalcia_id || clienteId || null };
-		UBIC_CAMPI.forEach((k) => {
-			o[k] = r ? r[k] ?? null : null;
-		});
-		return o;
-	}
-	async function caricaUbicazioni(forza) {
-		if (!forza && cavalliMieiCache && Date.now() - cavalliMieiTs < 6e4) return cavalliMieiCache;
-		try {
-			cavalliMieiCache = await DB.listCavalliMiei();
-		} catch (e) {
-			cavalliMieiCache = cavalliMieiCache || [];
-		}
-		cavalliMieiTs = Date.now();
-		cavalliMieiById = {};
-		cavalliMieiByHorse = {};
-		(cavalliMieiCache || []).forEach((c) => {
-			cavalliMieiById[c.id] = c;
-			if (c.horse_id && !cavalliMieiByHorse[c.horse_id]) cavalliMieiByHorse[c.horse_id] = c;
-		});
-		return cavalliMieiCache;
-	}
-	function clienteDiId$1(id) {
-		return (clientiMascalcia || []).find((x) => x.id === id) || null;
-	}
-	function eLuogoScuderia(c) {
-		return !!(c && (c.tipo_cliente === "struttura" || c.centro_id));
-	}
-	function nomeLuogoCliente(c) {
-		return c ? eLuogoScuderia(c) ? c.nome : "A casa · " + c.nome : "Cliente";
-	}
-	function luogoDi(r) {
-		const cli = clienteDiId$1(r?.cliente_mascalcia_id);
-		const dal = r?.ubicazione_dal || null;
-		if (r?.ubicazione_tipo === "scuderia") {
-			const u = clienteDiId$1(r.ubicazione_cliente_id);
-			return {
-				key: r.ubicazione_cliente_id ? "c:" + r.ubicazione_cliente_id : "n:" + (r.ubicazione_nome || ""),
-				nome: u?.nome || r.ubicazione_nome || "Scuderia",
-				indirizzo: u?.indirizzo || null,
-				clienteId: r.ubicazione_cliente_id || null,
-				scuderia: true,
-				casa: false,
-				dal
-			};
-		}
-		if (r?.ubicazione_tipo === "casa") {
-			const struttura = eLuogoScuderia(cli);
-			return {
-				key: "casa:" + r.cliente_mascalcia_id + ":" + (r.ubicazione_indirizzo || ""),
-				nome: "A casa · " + (r.ubicazione_nome || (struttura ? "privato" : cli?.nome || "")),
-				indirizzo: r.ubicazione_indirizzo || (struttura ? null : cli?.indirizzo || null),
-				clienteId: struttura ? null : r.cliente_mascalcia_id,
-				scuderia: false,
-				casa: true,
-				dal
-			};
-		}
-		return {
-			key: "c:" + (r?.cliente_mascalcia_id || ""),
-			nome: nomeLuogoCliente(cli),
-			indirizzo: cli?.indirizzo || null,
-			clienteId: cli?.id || null,
-			scuderia: eLuogoScuderia(cli),
-			casa: !eLuogoScuderia(cli),
-			dal
-		};
-	}
-	function luogoEvento(e, attuale) {
-		if (!attuale && e.stato === "fatto" && e.luogo_nome) {
-			const lc = e.luogo_cliente_id ? clienteDiId$1(e.luogo_cliente_id) : null;
-			if (lc) return {
-				key: "c:" + lc.id,
-				nome: nomeLuogoCliente(lc),
-				indirizzo: lc.indirizzo || null,
-				clienteId: lc.id,
-				scuderia: eLuogoScuderia(lc)
-			};
-			if (/^A casa/.test(e.luogo_nome)) return luogoDi({ cliente_mascalcia_id: e.cliente_mascalcia_id });
-			return {
-				key: "n:" + e.luogo_nome,
-				nome: e.luogo_nome,
-				indirizzo: null,
-				clienteId: null,
-				scuderia: true
-			};
-		}
-		const riga = e.cavallo_cliente_id && cavalliMieiById[e.cavallo_cliente_id] || e.horse_id && cavalliMieiByHorse[e.horse_id] || null;
-		return luogoDi(riga ? {
-			...ubicDi(riga),
-			cliente_mascalcia_id: riga.ubicazione_tipo ? riga.cliente_mascalcia_id : e.cliente_mascalcia_id
-		} : { cliente_mascalcia_id: e.cliente_mascalcia_id });
-	}
-	function navigaLuogo(l) {
-		if (!l) return;
-		if (l.indirizzo) return wgMostraMappe({ nome: l.nome }, l.indirizzo);
-		if (l.clienteId) return wgNaviga$1(l.clienteId);
-		wgMostraMappe({ nome: l.nome }, l.nome, "Indirizzo non indicato: ricerca per nome, controlla nelle mappe che sia il posto giusto.");
-	}
-	async function wgNavigaEvento(id) {
-		const e = agEventiCache[id] || (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).find((x) => x.id === id);
-		if (!e) return;
-		await caricaUbicazioni();
-		navigaLuogo(luogoEvento(e, true));
-	}
-	function doveStaHtml(l, azione) {
-		const sotto = [l.indirizzo, l.dal ? "dal " + formatDataBreve(l.dal) : ""].filter(Boolean).join(" · ");
-		return `<div class="dove-sta"><span class="ic">${l.scuderia ? "🐴" : "🏠"}</span>
-    <div class="c"><b>${escapeHtml(l.nome)}</b>${sotto ? `<span>${escapeHtml(sotto)}</span>` : ""}</div>${azione || ""}</div>`;
-	}
-	function renderDoveCavalloPro(cv) {
-		const box = document.getElementById("cavpro-dove");
-		if (!box) return;
-		box.innerHTML = doveStaHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }), `<button class="btn btn-primary btn-sm" onclick="apriSpostaCavalloPro()">Sposta</button>`);
-	}
-	var spCtx = null;
-	var spCercaT = null;
-	function spOverlay() {
-		let ov = document.getElementById("modal-sposta");
-		if (!ov) {
-			ov = document.createElement("div");
-			ov.className = "modal-overlay";
-			ov.id = "modal-sposta";
-			ov.addEventListener("click", (ev) => {
-				if (ev.target === ov) closeModal("modal-sposta");
-			});
-			document.body.appendChild(ov);
-		}
-		return ov;
-	}
-	async function apriSpostaCavalloPro() {
-		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
-		if (!cv) return;
-		let id = cv.id;
-		if (!id) {
-			({cavallo_cliente_id: id} = await DB.risolviCavalloPerIntervento(currentClienteId, cv));
-			if (id) cv.id = id;
-		}
-		if (!id) {
-			showToast("Non riuscito, riprova.");
-			return;
-		}
-		await caricaUbicazioni();
-		const ub = cv.ub || { cliente_mascalcia_id: currentClienteId };
-		const att = luogoDi(ub), pagante = clienteDiId$1(ub.cliente_mascalcia_id || currentClienteId);
-		const scuderie = clientiAttivi().filter((c) => eLuogoScuderia(c)).sort((a, b) => a.nome.localeCompare(b.nome, "it")).map((c) => ({
-			v: "cli:" + c.id,
-			nome: c.nome,
-			sotto: [c.indirizzo, (() => {
-				const n = (cavalliMieiCache || []).filter((x) => x.cliente_mascalcia_id === c.id || x.ubicazione_cliente_id === c.id).length;
-				return n ? n + (n === 1 ? " cavallo che segui" : " cavalli che segui") : "";
-			})()].filter(Boolean).join(" · "),
-			equo: !!(c.centro_id && c.collegamento_stato === "attivo"),
-			attuale: att.key === "c:" + c.id
-		}));
-		spCtx = {
-			vista: "maniscalco",
-			id,
-			nome: cv.nome,
-			att,
-			pagante,
-			scuderie,
-			casaInd: eLuogoScuderia(pagante) ? "" : pagante?.indirizzo || "",
-			collegato: clienteCollegatoEquo(pagante?.id)
-		};
-		spDisegna();
-	}
-	async function apriSpostaCavalloProprietario() {
-		const h = (horses || []).find((x) => x.id === currentHorseId);
-		if (!h) return;
-		let mie = [];
-		if (!DEMO_MODE) try {
-			mie = (await sb.rpc("prop_indirizzi_scuderie")).data || [];
-		} catch (e) {}
-		else mie = (demoState.stables || []).map((s) => ({
-			id: s.id,
-			nome: s.name,
-			citta: ""
-		}));
-		spCtx = {
-			vista: "proprietario",
-			id: h.id,
-			nome: h.name,
-			att: {
-				nome: luogoProprietario(h).nome,
-				key: h.ubicazione_centro_id ? "centro:" + h.ubicazione_centro_id : ""
-			},
-			scuderie: mie.map((c) => ({
-				v: "centro:" + c.id,
-				nome: c.nome,
-				sotto: [c.indirizzo, c.citta].filter(Boolean).join(", "),
-				equo: true,
-				attuale: h.ubicazione_centro_id === c.id
-			})),
-			casaInd: h.ubicazione_tipo === "casa" ? h.ubicazione_indirizzo || "" : ""
-		};
-		spDisegna();
-	}
-	function spDisegna() {
-		const c = spCtx, pro = c.vista === "maniscalco";
-		const ov = spOverlay();
-		ov.innerHTML = `<div class="modal sp-modal"><div class="modal-handle"></div>
-    <div class="modal-title" style="margin-bottom:2px">Dove va ${escapeHtml(c.nome)}?</div>
-    <div class="muted" style="font-size:12.5px;margin-bottom:12px">Adesso: ${escapeHtml(c.att.nome || "non indicato")}</div>
-    <label class="sp-o"><input type="radio" name="sp-dest" value="casa" onchange="spAggiorna()"><span class="c"><b>🏠 A casa / privato</b><span>${pro ? `Indirizzo di ${escapeHtml(c.pagante?.nome || "proprietario")} o un altro` : "Il tuo indirizzo o un altro"}</span></span></label>
-    <div class="sp-extra" id="sp-casa-extra" hidden><input class="input" id="sp-casa-ind" maxlength="160" placeholder="Indirizzo (facoltativo)" value="${escapeHtml(c.casaInd || "")}"></div>
-    <div class="sp-sez">${pro ? "Le tue scuderie" : "Scuderie su Equo"}</div>
-    <input class="input" id="sp-cerca" placeholder="${pro ? "Cerca scuderia, maneggio, centro ippico…" : "Cerca per nome o città…"}" oninput="spCerca()" autocomplete="off" style="margin-bottom:6px">
-    <div id="sp-lista" class="sp-lista"></div>
-    <label class="sp-o"><input type="radio" name="sp-dest" value="nuova" onchange="spAggiorna()"><span class="c"><b>${pro ? "+ Nuova scuderia" : "Altra scuderia"}</b><span>${pro ? "Nome e indirizzo, la crei adesso" : "Non è su Equo: scrivi nome e indirizzo"}</span></span></label>
-    <div class="sp-extra" id="sp-nuova-extra" hidden>
-      <input class="input" id="sp-nuova-nome" maxlength="80" placeholder="Nome (es. Maneggio Il Poggio)" style="margin-bottom:6px">
-      <input class="input" id="sp-nuova-ind" maxlength="160" placeholder="Indirizzo (facoltativo)"></div>
-    <label class="sp-dal">Dal giorno <input type="date" class="input" id="sp-dal" value="${isoLocale(/* @__PURE__ */ new Date())}"></label>
-    <div class="sp-info" id="sp-info" hidden></div>
-    <div class="auth-error" id="sp-err" style="display:none"></div>
-    <button class="btn btn-primary" id="sp-ok" style="width:100%;margin-top:12px" onclick="confermaSposta(this)">Sposta ${escapeHtml(c.nome)}</button>
-    <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="closeModal('modal-sposta')">Annulla</button></div>`;
-		spLista(c.scuderie);
-		openModal("modal-sposta");
-	}
-	function spLista(lista) {
-		const box = document.getElementById("sp-lista");
-		if (!box) return;
-		const scelto = document.querySelector("input[name=\"sp-dest\"]:checked")?.value;
-		box.innerHTML = lista.length ? lista.map((s) => `<label class="sp-o${s.attuale ? " attuale" : ""}"><input type="radio" name="sp-dest" value="${s.v}"${scelto === s.v ? " checked" : ""}${s.attuale ? " disabled" : ""} onchange="spAggiorna()">
-      <span class="c"><b>${escapeHtml(s.nome)}</b><span>${s.attuale ? "è qui adesso" : escapeHtml(s.sotto || "")}</span></span>${s.equo ? `<span class="sp-pill">${spCtx.vista === "maniscalco" ? "Equo Scuderia" : "Equo"}</span>` : ""}</label>`).join("") : `<div class="muted" style="font-size:12.5px;padding:4px 2px 8px">${spCtx.vista === "maniscalco" ? "Nessuna scuderia con questo nome: usa «+ Nuova scuderia»." : "Scrivi almeno 2 lettere per cercare, oppure usa «Altra scuderia»."}</div>`;
-	}
-	function spCerca() {
-		const q = document.getElementById("sp-cerca").value.trim();
-		if (spCtx.vista === "maniscalco") {
-			const n = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-			spLista(spCtx.scuderie.filter((s) => !q || n(s.nome + " " + s.sotto).includes(n(q))));
-			return;
-		}
-		clearTimeout(spCercaT);
-		if (q.length < 2) {
-			spLista(spCtx.scuderie);
-			return;
-		}
-		spCercaT = setTimeout(async () => {
-			const r = await DB.cercaCentri(q);
-			if (document.getElementById("sp-cerca")?.value.trim() !== q) return;
-			spLista(r.map((c) => ({
-				v: "centro:" + c.id,
-				nome: c.nome,
-				sotto: [c.citta, c.provincia ? "(" + c.provincia + ")" : ""].filter(Boolean).join(" "),
-				equo: true,
-				attuale: spCtx.att.key === "centro:" + c.id
-			})));
-		}, 300);
-	}
-	function spScelta() {
-		const v = document.querySelector("input[name=\"sp-dest\"]:checked")?.value || "";
-		const s = [...spCtx.scuderie || []].find((x) => x.v === v) || null;
-		return {
-			v,
-			nome: v === "casa" ? "A casa" : v === "nuova" ? document.getElementById("sp-nuova-nome")?.value.trim() || "la nuova scuderia" : s?.nome || document.querySelector(`input[name="sp-dest"][value="${v}"]`)?.closest(".sp-o")?.querySelector("b")?.textContent || "",
-			equo: !!document.querySelector(`input[name="sp-dest"][value="${v}"]`)?.closest(".sp-o")?.querySelector(".sp-pill")
-		};
-	}
-	function spAggiorna() {
-		const sc = spScelta(), c = spCtx;
-		document.getElementById("sp-casa-extra").hidden = sc.v !== "casa";
-		document.getElementById("sp-nuova-extra").hidden = sc.v !== "nuova";
-		if (sc.v === "nuova") setTimeout(() => document.getElementById("sp-nuova-nome")?.focus(), 50);
-		document.querySelectorAll("#modal-sposta .sp-o").forEach((l) => l.classList.toggle("on", !!l.querySelector("input:checked")));
-		const info = document.getElementById("sp-info");
-		if (!sc.v) {
-			info.hidden = true;
-			return;
-		}
-		info.innerHTML = (c.vista === "maniscalco" ? [
-			`Resta cliente <b>${escapeHtml(c.pagante?.nome || "lo stesso")}</b>: incassi e chat non cambiano.`,
-			`I prossimi appuntamenti di ${escapeHtml(c.nome)} passano sotto <b>${escapeHtml(sc.v === "casa" ? "A casa" : sc.nome)}</b> in agenda.`,
-			c.collegato ? `${escapeHtml(c.pagante.nome)} riceve un messaggio e lo vede nel libretto.` : "",
-			sc.equo ? `${escapeHtml(sc.nome)} usa Equo Scuderia: riceve la richiesta di accogliere ${escapeHtml(c.nome)}.` : ""
-		] : [
-			`I maniscalchi che seguono ${escapeHtml(c.nome)} lo vedono subito e ricevono un messaggio.`,
-			sc.equo ? `${escapeHtml(sc.nome)} riceve la richiesta di accogliere ${escapeHtml(c.nome)}.` : "",
-			"Resta nel libretto del cavallo."
-		]).filter(Boolean).map((t) => "✓ " + t).join("<br>");
-		info.hidden = false;
-	}
-	async function confermaSposta(btn) {
-		const sc = spScelta(), c = spCtx;
-		const err = document.getElementById("sp-err");
-		const errore = (m) => {
-			err.textContent = m;
-			err.style.display = "block";
-		};
-		err.style.display = "none";
-		if (!sc.v) return errore("Scegli dove va " + c.nome + ".");
-		const p = {
-			vista: c.vista,
-			id: c.id,
-			dest: sc.v === "casa" ? "casa" : sc.v === "nuova" ? "nuova" : "scuderia",
-			dal: document.getElementById("sp-dal").value || null
-		};
-		if (sc.v === "casa") p.indirizzo = document.getElementById("sp-casa-ind").value.trim() || null;
-		if (sc.v === "nuova") {
-			p.nome = document.getElementById("sp-nuova-nome").value.trim();
-			p.indirizzo = document.getElementById("sp-nuova-ind").value.trim() || null;
-			if (!p.nome) return errore("Scrivi il nome della scuderia.");
-		}
-		if (sc.v.startsWith("cli:")) p.cliente = sc.v.slice(4);
-		if (sc.v.startsWith("centro:")) p.centro = sc.v.slice(7);
-		btn.disabled = true;
-		const r = await DB.spostaCavallo(p);
-		btn.disabled = false;
-		if (!r || !r.ok) return errore(r && r.errore || "Non riuscito, riprova.");
-		closeModal("modal-sposta");
-		const trovalo = c.vista === "maniscalco" && r.luogo !== "A casa" ? ` · lo trovi anche nella scheda di ${r.luogo}, sotto «Qui stanno»` : "";
-		showToast(`${c.nome}: ${r.luogo === "A casa" ? "a casa" : "ora sta a " + r.luogo}${r.arrivo ? " · la scuderia riceve la richiesta" : ""}${trovalo}`);
-		if (c.vista === "maniscalco") {
-			if (r.scuderia_cliente_id && !clienteDiId$1(r.scuderia_cliente_id)) await loadClientiMascalcia$1();
-			await caricaUbicazioni(true);
-			await caricaCavalliMiei();
-			if (typeof renderClientiList === "function") renderClientiList();
-			if (currentClienteId) await loadClienteInterventi(currentClienteId);
-			if (typeof renderAgendaSettimana$1 === "function") renderAgendaSettimana$1();
-		} else {
-			await loadHorses();
-			if (currentHorseId) await openHorseDetail(currentHorseId);
-		}
-	}
-	function luogoProprietario(h) {
-		if (h?.ubicazione_tipo === "scuderia") return {
-			nome: h.ubicazione_nome || "Scuderia",
-			scuderia: true,
-			indirizzo: h.ubicazione_indirizzo,
-			dal: h.ubicazione_dal
-		};
-		if (h?.ubicazione_tipo === "casa") return {
-			nome: "A casa",
-			scuderia: false,
-			indirizzo: h.ubicazione_indirizzo,
-			dal: h.ubicazione_dal
-		};
-		return {
-			nome: "Non indicato",
-			scuderia: false,
-			indirizzo: null,
-			dal: null,
-			vuoto: true
-		};
-	}
-	async function renderDoveStaProprietario(h) {
-		const box = document.getElementById("horse-dove");
-		if (!box) return;
-		const l = luogoProprietario(h);
-		box.innerHTML = doveStaHtml({
-			...l,
-			nome: l.vuoto ? "Dove sta? Non ancora indicato" : l.scuderia ? "Sta a: " + l.nome : l.nome
-		}, `<button class="btn btn-primary btn-sm" onclick="apriSpostaCavalloProprietario()">${l.vuoto ? "Indica" : "Sposta"}</button>`);
-		const arr = await DB.arriviCavallo(h.id);
-		if (currentHorseId !== h.id) return;
-		if (arr.some((a) => a.stato === "in_attesa")) box.insertAdjacentHTML("beforeend", `<div class="dove-attesa">⏳ In attesa che ${escapeHtml(l.nome)} confermi l'arrivo.</div>`);
-		else if (arr[0] && arr[0].stato === "rifiutato" && Date.now() - new Date(arr[0].risposto_il || 0).getTime() < 6048e5) box.insertAdjacentHTML("beforeend", `<div class="dove-attesa no">⚠️ La scuderia ha risposto che ${escapeHtml(h.name)} non è da loro: è tornato dov'era.</div>`);
-	}
-	function spostamentoHtml(s) {
-		const d = new Date(s.creato);
-		const ic = {
-			spostamento: "📍",
-			uscita: "↗️",
-			arrivo: "✅",
-			arrivo_rifiutato: "⚠️"
-		}[s.tipo] || "📍";
-		return `<div class="sposta-voce"><span class="data"><b>${d.getDate()}</b>${AG_MESI[d.getMonth()]} ${d.getFullYear()}</span><span class="t">${ic} ${escapeHtml(s.descrizione)}</span></div>`;
-	}
-	// equo-app-src/src/ruoli/maniscalco/moduli/053-agenda-settimanale-maniscalco.js
-	var AG_GIORNI = [
-		"Lun",
-		"Mar",
-		"Mer",
-		"Gio",
-		"Ven",
-		"Sab",
-		"Dom"
-	];
-	var AG_MESI = [
-		"gen",
-		"feb",
-		"mar",
-		"apr",
-		"mag",
-		"giu",
-		"lug",
-		"ago",
-		"set",
-		"ott",
-		"nov",
-		"dic"
-	];
-	var AG_MESI_LUNGHI = [
-		"gennaio",
-		"febbraio",
-		"marzo",
-		"aprile",
-		"maggio",
-		"giugno",
-		"luglio",
-		"agosto",
-		"settembre",
-		"ottobre",
-		"novembre",
-		"dicembre"
-	];
-	var agRenderToken = 0;
-	function agLunedi(offset) {
-		const oggi = /* @__PURE__ */ new Date();
-		const d = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
-		const dow = (d.getDay() + 6) % 7;
-		d.setDate(d.getDate() - dow + offset * 7);
-		return d;
-	}
-	function agEtichettaSettimana(lun) {
-		const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
-		if (lun.getMonth() === dom.getMonth()) return `${lun.getDate()} – ${dom.getDate()} ${AG_MESI_LUNGHI[dom.getMonth()]} ${dom.getFullYear()}`;
-		return `${lun.getDate()} ${AG_MESI[lun.getMonth()]} – ${dom.getDate()} ${AG_MESI[dom.getMonth()]} ${dom.getFullYear()}`;
-	}
-	function agNomeCavallo(i) {
-		if (i.cavalli_clienti_mascalcia?.nome) return i.cavalli_clienti_mascalcia.nome;
-		const elenco = i.clienti_mascalcia?.nome_cavallo || "";
-		return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
-	}
-	function agNomeCavalloTesto(i) {
-		return agNomeCavallo(i) || "Cavallo non indicato";
-	}
-	function agDescrizioneTipoPro(i) {
-		const t = agDescrizioneTipo(i);
-		if (i.ferri_nuovi === false) return t + " · rimessa";
-		if (i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri\b/, "$1 ferri nuovi");
-		return t;
-	}
-	function agDescrizioneTipo(i) {
-		let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
-		if (i.tipo_ferratura === "altro" && i.tipo_altro) t = i.tipo_altro;
-		else if (TIPI_VET.includes(i.tipo_ferratura) && i.tipo_altro) t += " · " + i.tipo_altro;
-		const extra = [];
-		if (i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
-		if (i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
-		const corr = testoFerroIntervento(i);
-		if (corr) extra.push(corr);
-		return [t, ...extra].join(" · ");
-	}
-	function agGiornoLavoro(iso) {
-		if (!iso) return iso;
-		const [y, m, d] = iso.split("-").map(Number);
-		return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
-	}
-	function agDataPerFissare(iso) {
-		const oggi = isoLocale(/* @__PURE__ */ new Date());
-		return agGiornoLavoro(!iso || iso < oggi ? oggi : iso);
-	}
-	async function renderAgendaSettimana$1(direzione) {
-		const box = document.getElementById("ag-week");
-		if (!box) return;
-		const token = ++agRenderToken;
-		const lun = agLunedi(agSettimanaOffset);
-		const giorni = Array.from({ length: 7 }, (_, k) => new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + k));
-		const isoGiorni = giorni.map(isoLocale);
-		const oggiIso = isoLocale(/* @__PURE__ */ new Date());
-		document.getElementById("ag-week-label").textContent = agEtichettaSettimana(lun);
-		document.getElementById("ag-oggi-btn").style.display = agSettimanaOffset === 0 ? "none" : "inline-block";
-		if (!agGiorniAperti) agGiorniAperti = /* @__PURE__ */ new Set([oggiIso]);
-		renderRichiestePendenti();
-		const pmAttesa = pmCaricaSettimana(isoGiorni[0], isoGiorni[6]).catch(() => []);
-		const [eventi, scadenze] = await Promise.all([
-			DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
-			DB.listScadenzePeriodo(aggiungiGiorniIso(isoGiorni[0], -1), isoGiorni[6]),
-			caricaUbicazioni()
-		]);
-		const promemoria2 = await pmAttesa;
-		if (token !== agRenderToken) return;
-		agEventiCache = {};
-		(typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach((e) => {
-			agEventiCache[e.id] = e;
-		});
-		eventi.forEach((e) => {
-			agEventiCache[e.id] = e;
-		});
-		scadenze.forEach((sc) => {
-			sc.data_vista = agGiornoLavoro(sc.prossima_scadenza);
-			agEventiCache["sc:" + sc.id] = sc;
-		});
-		agGiorniDati = giorni.map((g, k) => {
-			const iso = isoGiorni[k];
-			return {
-				iso,
-				k,
-				g,
-				oggi: iso === oggiIso,
-				ev: eventi.filter((e) => e.data_intervento === iso),
-				sc: scadenze.filter((sc) => sc.data_vista === iso),
-				pm: promemoria2.filter((p) => isoLocale(new Date(p.quando)) === iso)
-			};
-		});
-		agDisegnaGriglia();
-		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
-		box.classList.remove("slide-l", "slide-r");
-		if (direzione) {
-			box.offsetWidth;
-			box.classList.add(direzione > 0 ? "slide-l" : "slide-r");
-		}
-		agAttivaSwipe(box);
-	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/041-giro-della-zona-premium.js
 	var GIRO_GIORNI = 14;
 	function hpGiri() {
@@ -7741,14 +7132,14 @@
 			if (error) {
 				err.textContent = "Non sono riuscito a salvare: " + error.message;
 				err.style.display = "block";
-				await renderProDeadlines();
+				await renderProDeadlines$1();
 				return;
 			}
 		}
 		closeModal("modal-giro");
 		showToast(`Giro fissato: ${righe.length} cavalli ${formatDataBreve(data)}${ora ? " ore " + ora : ""}`);
 		giroCorrente = null;
-		await renderProDeadlines();
+		await renderProDeadlines$1();
 		if (document.getElementById("ag-week")) renderAgendaSettimana$1();
 		if (document.getElementById("giro-avvisa").checked) {
 			const nome = (righe[0].cliente_nome || "").split(" ")[0];
@@ -7864,7 +7255,7 @@
 			}
 			closeModal("modal-richiamo-az");
 			showToast("Fatto, non te lo ricordo più");
-			await renderProDeadlines();
+			await renderProDeadlines$1();
 		}
 	}
 	function richiamoSposta(d) {
@@ -7906,7 +7297,7 @@
 		if (r.rimandato) await DB.setRichiamoStato(r.intervento_id, { rimandato_al: null });
 		closeModal("modal-richiamo-az");
 		showToast("Nuova scadenza" + (r.cavallo_nome ? " di " + r.cavallo_nome : "") + ": " + formatDataBreve(data));
-		await renderProDeadlines();
+		await renderProDeadlines$1();
 		if (schedaCavalloKey && document.getElementById("cavallo-pro-view")?.style.display === "block") await apriSchedaCavalloPro(schedaCavalloKey, true);
 	}
 	async function apriScadenzaCavallo() {
@@ -7965,7 +7356,7 @@
 		}
 		closeModal("modal-richiamo-az");
 		showToast("Te lo ricordo " + formatDataBreve(data));
-		await renderProDeadlines();
+		await renderProDeadlines$1();
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/040-home-pro-prossimi-appuntamenti-da-richia.js
 	var fattoOkStruttura = (e) => e.stato !== "proposto" || String(e.data_intervento || "") <= (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
@@ -8044,7 +7435,7 @@
 		});
 		return html;
 	}
-	async function renderProDeadlines() {
+	async function renderProDeadlines$1() {
 		const boxApp = document.getElementById("home-pro-appuntamenti");
 		const boxRic = document.getElementById("home-pro-deadlines");
 		if (!boxApp && !boxRic) return;
@@ -9674,7 +9065,7 @@
 		}
 		showToast("Schede unite in «" + p.c.nome + "»");
 		schedaCavalli = [];
-		await loadClienteInterventi(currentClienteId);
+		await loadClienteInterventi$1(currentClienteId);
 	}
 	function renderBoxCavalliCliente() {
 		const grid = document.getElementById("cliente-cavalli-grid");
@@ -9760,7 +9151,7 @@
 				return;
 			}
 			showToast(`Assegnato a ${cv.nome}`);
-			await loadClienteInterventi(currentClienteId);
+			await loadClienteInterventi$1(currentClienteId);
 		} finally {
 			btn.disabled = false;
 		}
@@ -9777,9 +9168,9 @@
 			return;
 		}
 		showToast("Intervento eliminato");
-		await loadClienteInterventi(currentClienteId);
+		await loadClienteInterventi$1(currentClienteId);
 		try {
-			await renderProDeadlines();
+			await renderProDeadlines$1();
 			await renderIncassi$1();
 		} catch (e) {}
 	}
@@ -10074,7 +9465,7 @@
 		}).join("");
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/037-scheda-cliente-a-box-scheda-del-cavallo.js
-	async function loadClienteInterventi(clienteId) {
+	async function loadClienteInterventi$1(clienteId) {
 		const grid = document.getElementById("cliente-cavalli-grid");
 		if (!grid) return;
 		if (!schedaCavalli.length || storicoClienteId !== clienteId) grid.innerHTML = "<div class=\"loading\" style=\"grid-column:1/-1\"><div class=\"spinner\"></div> Caricamento...</div>";
@@ -11474,7 +10865,7 @@
 			].includes(statoPrec) && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || servizioCambiato(precInfo, {
 				tipo_ferratura,
 				tipo_altro
-			}))) showToast("Appuntamento modificato: la scuderia riceve l'avviso e deve riconfermarlo");
+			}))) showToast(clienteDiId$1(cliente_mascalcia_id)?.di_fiducia ? "Appuntamento modificato (solo questo cavallo): la scuderia riceve l'avviso" : "Appuntamento modificato (solo questo cavallo): la scuderia riceve l'avviso e deve riconfermarlo");
 			else if (precInfo && !diGruppo && statoPrec === "programmato" && stato === "programmato" && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || precInfo.cliente !== cliente_mascalcia_id || servizioCambiato(precInfo, {
 				tipo_ferratura,
 				tipo_altro
@@ -11501,10 +10892,10 @@
 			} else showToast(interventoInModifica ? "Appuntamento aggiornato" : righe.length > 1 ? `${righe.length} ${stato === "programmato" ? "appuntamenti salvati" : "interventi registrati"} (uno per cavallo)` : stato === "programmato" ? "Appuntamento salvato" : "Intervento registrato");
 			interventoInModifica = null;
 			if (clienteCreatoOra) await loadClientiMascalcia$1();
-			await renderProDeadlines();
+			await renderProDeadlines$1();
 			await renderIncassi$1();
 			if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
-			if (currentClienteId === cliente_mascalcia_id) await loadClienteInterventi(cliente_mascalcia_id);
+			if (currentClienteId === cliente_mascalcia_id) await loadClienteInterventi$1(cliente_mascalcia_id);
 		} finally {
 			saveBtn.disabled = false;
 			if (clienteCreatoOra && !salvati && cliente_mascalcia_id && cliente_mascalcia_id !== "__nuovo__") {
@@ -11590,10 +10981,10 @@
 		interventoInModifica = null;
 		closeModal("modal-add-intervento");
 		showToast("Appuntamento eliminato");
-		await renderProDeadlines();
+		await renderProDeadlines$1();
 		await renderIncassi$1();
 		if (typeof renderAgendaSettimana$1 === "function") await renderAgendaSettimana$1();
-		if (currentClienteId === clienteId) await loadClienteInterventi(clienteId);
+		if (currentClienteId === clienteId) await loadClienteInterventi$1(clienteId);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/035-ferratura-del-cavallo-scheda-libretto-fe.js
 	var LAVORO_CAV = {
@@ -12272,7 +11663,7 @@
 		}
 		document.getElementById("cliente-cavalli-cerca").value = "";
 		document.getElementById("cavallo-pro-view").style.display = "none";
-		await loadClienteInterventi(id);
+		await loadClienteInterventi$1(id);
 	}
 	var qrClienteAperto = false;
 	function toggleQrCliente() {
@@ -13071,10 +12462,745 @@
 		clientiMascalcia = cli;
 		renderClientiList();
 		caricaCartellaCavalli().then(() => renderClientiList()).catch(() => {});
-		await renderProDeadlines();
+		await renderProDeadlines$1();
 	}
 	function clientiAttivi() {
 		return (clientiMascalcia || []).filter((c) => !c.archiviato_il);
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js
+	function ubicDi(r, clienteId) {
+		const o = { cliente_mascalcia_id: r && r.cliente_mascalcia_id || clienteId || null };
+		UBIC_CAMPI.forEach((k) => {
+			o[k] = r ? r[k] ?? null : null;
+		});
+		return o;
+	}
+	async function caricaUbicazioni(forza) {
+		if (!forza && cavalliMieiCache && Date.now() - cavalliMieiTs < 6e4) return cavalliMieiCache;
+		try {
+			cavalliMieiCache = await DB.listCavalliMiei();
+		} catch (e) {
+			cavalliMieiCache = cavalliMieiCache || [];
+		}
+		cavalliMieiTs = Date.now();
+		cavalliMieiById = {};
+		cavalliMieiByHorse = {};
+		(cavalliMieiCache || []).forEach((c) => {
+			cavalliMieiById[c.id] = c;
+			if (c.horse_id && !cavalliMieiByHorse[c.horse_id]) cavalliMieiByHorse[c.horse_id] = c;
+		});
+		return cavalliMieiCache;
+	}
+	function clienteDiId$1(id) {
+		return (clientiMascalcia || []).find((x) => x.id === id) || null;
+	}
+	function eLuogoScuderia(c) {
+		return !!(c && (c.tipo_cliente === "struttura" || c.centro_id));
+	}
+	function nomeLuogoCliente(c) {
+		return c ? eLuogoScuderia(c) ? c.nome : "A casa · " + c.nome : "Cliente";
+	}
+	function luogoDi(r) {
+		const cli = clienteDiId$1(r?.cliente_mascalcia_id);
+		const dal = r?.ubicazione_dal || null;
+		if (r?.ubicazione_tipo === "scuderia") {
+			const u = clienteDiId$1(r.ubicazione_cliente_id);
+			return {
+				key: r.ubicazione_cliente_id ? "c:" + r.ubicazione_cliente_id : "n:" + (r.ubicazione_nome || ""),
+				nome: u?.nome || r.ubicazione_nome || "Scuderia",
+				indirizzo: u?.indirizzo || null,
+				clienteId: r.ubicazione_cliente_id || null,
+				scuderia: true,
+				casa: false,
+				dal
+			};
+		}
+		if (r?.ubicazione_tipo === "casa") {
+			const struttura = eLuogoScuderia(cli);
+			return {
+				key: "casa:" + r.cliente_mascalcia_id + ":" + (r.ubicazione_indirizzo || ""),
+				nome: "A casa · " + (r.ubicazione_nome || (struttura ? "privato" : cli?.nome || "")),
+				indirizzo: r.ubicazione_indirizzo || (struttura ? null : cli?.indirizzo || null),
+				clienteId: struttura ? null : r.cliente_mascalcia_id,
+				scuderia: false,
+				casa: true,
+				dal
+			};
+		}
+		return {
+			key: "c:" + (r?.cliente_mascalcia_id || ""),
+			nome: nomeLuogoCliente(cli),
+			indirizzo: cli?.indirizzo || null,
+			clienteId: cli?.id || null,
+			scuderia: eLuogoScuderia(cli),
+			casa: !eLuogoScuderia(cli),
+			dal
+		};
+	}
+	function luogoEvento(e, attuale) {
+		if (!attuale && e.stato === "fatto" && e.luogo_nome) {
+			const lc = e.luogo_cliente_id ? clienteDiId$1(e.luogo_cliente_id) : null;
+			if (lc) return {
+				key: "c:" + lc.id,
+				nome: nomeLuogoCliente(lc),
+				indirizzo: lc.indirizzo || null,
+				clienteId: lc.id,
+				scuderia: eLuogoScuderia(lc)
+			};
+			if (/^A casa/.test(e.luogo_nome)) return luogoDi({ cliente_mascalcia_id: e.cliente_mascalcia_id });
+			return {
+				key: "n:" + e.luogo_nome,
+				nome: e.luogo_nome,
+				indirizzo: null,
+				clienteId: null,
+				scuderia: true
+			};
+		}
+		const riga = e.cavallo_cliente_id && cavalliMieiById[e.cavallo_cliente_id] || e.horse_id && cavalliMieiByHorse[e.horse_id] || null;
+		return luogoDi(riga ? {
+			...ubicDi(riga),
+			cliente_mascalcia_id: riga.ubicazione_tipo ? riga.cliente_mascalcia_id : e.cliente_mascalcia_id
+		} : { cliente_mascalcia_id: e.cliente_mascalcia_id });
+	}
+	function navigaLuogo(l) {
+		if (!l) return;
+		if (l.indirizzo) return wgMostraMappe({ nome: l.nome }, l.indirizzo);
+		if (l.clienteId) return wgNaviga$1(l.clienteId);
+		wgMostraMappe({ nome: l.nome }, l.nome, "Indirizzo non indicato: ricerca per nome, controlla nelle mappe che sia il posto giusto.");
+	}
+	async function wgNavigaEvento(id) {
+		const e = agEventiCache[id] || (typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).find((x) => x.id === id);
+		if (!e) return;
+		await caricaUbicazioni();
+		navigaLuogo(luogoEvento(e, true));
+	}
+	function doveStaHtml(l, azione) {
+		const sotto = [l.indirizzo, l.dal ? "dal " + formatDataBreve(l.dal) : ""].filter(Boolean).join(" · ");
+		return `<div class="dove-sta"><span class="ic">${l.scuderia ? "🐴" : "🏠"}</span>
+    <div class="c"><b>${escapeHtml(l.nome)}</b>${sotto ? `<span>${escapeHtml(sotto)}</span>` : ""}</div>${azione || ""}</div>`;
+	}
+	function renderDoveCavalloPro(cv) {
+		const box = document.getElementById("cavpro-dove");
+		if (!box) return;
+		box.innerHTML = doveStaHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }), `<button class="btn btn-primary btn-sm" onclick="apriSpostaCavalloPro()">Sposta</button>`);
+	}
+	var spCtx$1 = null;
+	var spCercaT = null;
+	function spOverlay() {
+		let ov = document.getElementById("modal-sposta");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay";
+			ov.id = "modal-sposta";
+			ov.addEventListener("click", (ev) => {
+				if (ev.target === ov) closeModal("modal-sposta");
+			});
+			document.body.appendChild(ov);
+		}
+		return ov;
+	}
+	async function apriSpostaCavalloPro() {
+		const cv = schedaCavalli.find((c) => c.key === schedaCavalloKey);
+		if (!cv) return;
+		let id = cv.id;
+		if (!id) {
+			({cavallo_cliente_id: id} = await DB.risolviCavalloPerIntervento(currentClienteId, cv));
+			if (id) cv.id = id;
+		}
+		if (!id) {
+			showToast("Non riuscito, riprova.");
+			return;
+		}
+		await caricaUbicazioni();
+		const ub = cv.ub || { cliente_mascalcia_id: currentClienteId };
+		const att = luogoDi(ub), pagante = clienteDiId$1(ub.cliente_mascalcia_id || currentClienteId);
+		const scuderie = clientiAttivi().filter((c) => eLuogoScuderia(c)).sort((a, b) => a.nome.localeCompare(b.nome, "it")).map((c) => ({
+			v: "cli:" + c.id,
+			nome: c.nome,
+			sotto: [c.indirizzo, (() => {
+				const n = (cavalliMieiCache || []).filter((x) => x.cliente_mascalcia_id === c.id || x.ubicazione_cliente_id === c.id).length;
+				return n ? n + (n === 1 ? " cavallo che segui" : " cavalli che segui") : "";
+			})()].filter(Boolean).join(" · "),
+			equo: !!(c.centro_id && c.collegamento_stato === "attivo"),
+			attuale: att.key === "c:" + c.id
+		}));
+		spCtx$1 = {
+			vista: "maniscalco",
+			id,
+			nome: cv.nome,
+			att,
+			pagante,
+			scuderie,
+			casaInd: eLuogoScuderia(pagante) ? "" : pagante?.indirizzo || "",
+			collegato: clienteCollegatoEquo(pagante?.id)
+		};
+		spDisegna();
+	}
+	async function apriSpostaCavalloProprietario() {
+		const h = (horses || []).find((x) => x.id === currentHorseId);
+		if (!h) return;
+		let mie = [];
+		if (!DEMO_MODE) try {
+			mie = (await sb.rpc("prop_indirizzi_scuderie")).data || [];
+		} catch (e) {}
+		else mie = (demoState.stables || []).map((s) => ({
+			id: s.id,
+			nome: s.name,
+			citta: ""
+		}));
+		spCtx$1 = {
+			vista: "proprietario",
+			id: h.id,
+			nome: h.name,
+			att: {
+				nome: luogoProprietario(h).nome,
+				key: h.ubicazione_centro_id ? "centro:" + h.ubicazione_centro_id : ""
+			},
+			scuderie: mie.map((c) => ({
+				v: "centro:" + c.id,
+				nome: c.nome,
+				sotto: [c.indirizzo, c.citta].filter(Boolean).join(", "),
+				equo: true,
+				attuale: h.ubicazione_centro_id === c.id
+			})),
+			casaInd: h.ubicazione_tipo === "casa" ? h.ubicazione_indirizzo || "" : ""
+		};
+		spDisegna();
+	}
+	function spDisegna() {
+		const c = spCtx$1, pro = c.vista === "maniscalco";
+		const ov = spOverlay();
+		ov.innerHTML = `<div class="modal sp-modal"><div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:2px">Dove va ${escapeHtml(c.nome)}?</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">Adesso: ${escapeHtml(c.att.nome || "non indicato")}</div>
+    <label class="sp-o"><input type="radio" name="sp-dest" value="casa" onchange="spAggiorna()"><span class="c"><b>🏠 A casa / privato</b><span>${pro ? `Indirizzo di ${escapeHtml(c.pagante?.nome || "proprietario")} o un altro` : "Il tuo indirizzo o un altro"}</span></span></label>
+    <div class="sp-extra" id="sp-casa-extra" hidden><input class="input" id="sp-casa-ind" maxlength="160" placeholder="Indirizzo (facoltativo)" value="${escapeHtml(c.casaInd || "")}"></div>
+    <div class="sp-sez">${pro ? "Le tue scuderie" : "Scuderie su Equo"}</div>
+    <input class="input" id="sp-cerca" placeholder="${pro ? "Cerca scuderia, maneggio, centro ippico…" : "Cerca per nome o città…"}" oninput="spCerca()" autocomplete="off" style="margin-bottom:6px">
+    <div id="sp-lista" class="sp-lista"></div>
+    <label class="sp-o"><input type="radio" name="sp-dest" value="nuova" onchange="spAggiorna()"><span class="c"><b>${pro ? "+ Nuova scuderia" : "Altra scuderia"}</b><span>${pro ? "Nome e indirizzo, la crei adesso" : "Non è su Equo: scrivi nome e indirizzo"}</span></span></label>
+    <div class="sp-extra" id="sp-nuova-extra" hidden>
+      <input class="input" id="sp-nuova-nome" maxlength="80" placeholder="Nome (es. Maneggio Il Poggio)" style="margin-bottom:6px">
+      <input class="input" id="sp-nuova-ind" maxlength="160" placeholder="Indirizzo (facoltativo)"></div>
+    <label class="sp-dal">Dal giorno <input type="date" class="input" id="sp-dal" value="${isoLocale(/* @__PURE__ */ new Date())}"></label>
+    <div class="sp-info" id="sp-info" hidden></div>
+    <div class="auth-error" id="sp-err" style="display:none"></div>
+    <button class="btn btn-primary" id="sp-ok" style="width:100%;margin-top:12px" onclick="confermaSposta(this)">Sposta ${escapeHtml(c.nome)}</button>
+    <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="closeModal('modal-sposta')">Annulla</button></div>`;
+		spLista(c.scuderie);
+		openModal("modal-sposta");
+	}
+	function spLista(lista) {
+		const box = document.getElementById("sp-lista");
+		if (!box) return;
+		const scelto = document.querySelector("input[name=\"sp-dest\"]:checked")?.value;
+		box.innerHTML = lista.length ? lista.map((s) => `<label class="sp-o${s.attuale ? " attuale" : ""}"><input type="radio" name="sp-dest" value="${s.v}"${scelto === s.v ? " checked" : ""}${s.attuale ? " disabled" : ""} onchange="spAggiorna()">
+      <span class="c"><b>${escapeHtml(s.nome)}</b><span>${s.attuale ? "è qui adesso" : escapeHtml(s.sotto || "")}</span></span>${s.equo ? `<span class="sp-pill">${spCtx$1.vista === "maniscalco" ? "Equo Scuderia" : "Equo"}</span>` : ""}</label>`).join("") : `<div class="muted" style="font-size:12.5px;padding:4px 2px 8px">${spCtx$1.vista === "maniscalco" ? "Nessuna scuderia con questo nome: usa «+ Nuova scuderia»." : "Scrivi almeno 2 lettere per cercare, oppure usa «Altra scuderia»."}</div>`;
+	}
+	function spCerca() {
+		const q = document.getElementById("sp-cerca").value.trim();
+		if (spCtx$1.vista === "maniscalco") {
+			const n = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+			spLista(spCtx$1.scuderie.filter((s) => !q || n(s.nome + " " + s.sotto).includes(n(q))));
+			return;
+		}
+		clearTimeout(spCercaT);
+		if (q.length < 2) {
+			spLista(spCtx$1.scuderie);
+			return;
+		}
+		spCercaT = setTimeout(async () => {
+			const r = await DB.cercaCentri(q);
+			if (document.getElementById("sp-cerca")?.value.trim() !== q) return;
+			spLista(r.map((c) => ({
+				v: "centro:" + c.id,
+				nome: c.nome,
+				sotto: [c.citta, c.provincia ? "(" + c.provincia + ")" : ""].filter(Boolean).join(" "),
+				equo: true,
+				attuale: spCtx$1.att.key === "centro:" + c.id
+			})));
+		}, 300);
+	}
+	function spScelta() {
+		const v = document.querySelector("input[name=\"sp-dest\"]:checked")?.value || "";
+		const s = [...spCtx$1.scuderie || []].find((x) => x.v === v) || null;
+		return {
+			v,
+			nome: v === "casa" ? "A casa" : v === "nuova" ? document.getElementById("sp-nuova-nome")?.value.trim() || "la nuova scuderia" : s?.nome || document.querySelector(`input[name="sp-dest"][value="${v}"]`)?.closest(".sp-o")?.querySelector("b")?.textContent || "",
+			equo: !!document.querySelector(`input[name="sp-dest"][value="${v}"]`)?.closest(".sp-o")?.querySelector(".sp-pill")
+		};
+	}
+	function spAggiorna() {
+		const sc = spScelta(), c = spCtx$1;
+		document.getElementById("sp-casa-extra").hidden = sc.v !== "casa";
+		document.getElementById("sp-nuova-extra").hidden = sc.v !== "nuova";
+		if (sc.v === "nuova") setTimeout(() => document.getElementById("sp-nuova-nome")?.focus(), 50);
+		document.querySelectorAll("#modal-sposta .sp-o").forEach((l) => l.classList.toggle("on", !!l.querySelector("input:checked")));
+		const info = document.getElementById("sp-info");
+		if (!sc.v) {
+			info.hidden = true;
+			return;
+		}
+		info.innerHTML = (c.vista === "maniscalco" ? [
+			`Resta cliente <b>${escapeHtml(c.pagante?.nome || "lo stesso")}</b>: incassi e chat non cambiano.`,
+			`I prossimi appuntamenti di ${escapeHtml(c.nome)} passano sotto <b>${escapeHtml(sc.v === "casa" ? "A casa" : sc.nome)}</b> in agenda.`,
+			c.collegato ? `${escapeHtml(c.pagante.nome)} riceve un messaggio e lo vede nel libretto.` : "",
+			sc.equo ? `${escapeHtml(sc.nome)} usa Equo Scuderia: riceve la richiesta di accogliere ${escapeHtml(c.nome)}.` : ""
+		] : [
+			`I maniscalchi che seguono ${escapeHtml(c.nome)} lo vedono subito e ricevono un messaggio.`,
+			sc.equo ? `${escapeHtml(sc.nome)} riceve la richiesta di accogliere ${escapeHtml(c.nome)}.` : "",
+			"Resta nel libretto del cavallo."
+		]).filter(Boolean).map((t) => "✓ " + t).join("<br>");
+		info.hidden = false;
+	}
+	async function confermaSposta(btn) {
+		const sc = spScelta(), c = spCtx$1;
+		const err = document.getElementById("sp-err");
+		const errore = (m) => {
+			err.textContent = m;
+			err.style.display = "block";
+		};
+		err.style.display = "none";
+		if (!sc.v) return errore("Scegli dove va " + c.nome + ".");
+		const p = {
+			vista: c.vista,
+			id: c.id,
+			dest: sc.v === "casa" ? "casa" : sc.v === "nuova" ? "nuova" : "scuderia",
+			dal: document.getElementById("sp-dal").value || null
+		};
+		if (sc.v === "casa") p.indirizzo = document.getElementById("sp-casa-ind").value.trim() || null;
+		if (sc.v === "nuova") {
+			p.nome = document.getElementById("sp-nuova-nome").value.trim();
+			p.indirizzo = document.getElementById("sp-nuova-ind").value.trim() || null;
+			if (!p.nome) return errore("Scrivi il nome della scuderia.");
+		}
+		if (sc.v.startsWith("cli:")) p.cliente = sc.v.slice(4);
+		if (sc.v.startsWith("centro:")) p.centro = sc.v.slice(7);
+		btn.disabled = true;
+		const r = await DB.spostaCavallo(p);
+		btn.disabled = false;
+		if (!r || !r.ok) return errore(r && r.errore || "Non riuscito, riprova.");
+		closeModal("modal-sposta");
+		const trovalo = c.vista === "maniscalco" && r.luogo !== "A casa" ? ` · lo trovi anche nella scheda di ${r.luogo}, sotto «Qui stanno»` : "";
+		showToast(`${c.nome}: ${r.luogo === "A casa" ? "a casa" : "ora sta a " + r.luogo}${r.arrivo ? " · la scuderia riceve la richiesta" : ""}${trovalo}`);
+		if (c.vista === "maniscalco") {
+			if (r.scuderia_cliente_id && !clienteDiId$1(r.scuderia_cliente_id)) await loadClientiMascalcia$1();
+			await caricaUbicazioni(true);
+			await caricaCavalliMiei();
+			if (typeof renderClientiList === "function") renderClientiList();
+			if (currentClienteId) await loadClienteInterventi$1(currentClienteId);
+			if (typeof renderAgendaSettimana$1 === "function") renderAgendaSettimana$1();
+		} else {
+			await loadHorses();
+			if (currentHorseId) await openHorseDetail(currentHorseId);
+		}
+	}
+	function luogoProprietario(h) {
+		if (h?.ubicazione_tipo === "scuderia") return {
+			nome: h.ubicazione_nome || "Scuderia",
+			scuderia: true,
+			indirizzo: h.ubicazione_indirizzo,
+			dal: h.ubicazione_dal
+		};
+		if (h?.ubicazione_tipo === "casa") return {
+			nome: "A casa",
+			scuderia: false,
+			indirizzo: h.ubicazione_indirizzo,
+			dal: h.ubicazione_dal
+		};
+		return {
+			nome: "Non indicato",
+			scuderia: false,
+			indirizzo: null,
+			dal: null,
+			vuoto: true
+		};
+	}
+	async function renderDoveStaProprietario(h) {
+		const box = document.getElementById("horse-dove");
+		if (!box) return;
+		const l = luogoProprietario(h);
+		box.innerHTML = doveStaHtml({
+			...l,
+			nome: l.vuoto ? "Dove sta? Non ancora indicato" : l.scuderia ? "Sta a: " + l.nome : l.nome
+		}, `<button class="btn btn-primary btn-sm" onclick="apriSpostaCavalloProprietario()">${l.vuoto ? "Indica" : "Sposta"}</button>`);
+		const arr = await DB.arriviCavallo(h.id);
+		if (currentHorseId !== h.id) return;
+		if (arr.some((a) => a.stato === "in_attesa")) box.insertAdjacentHTML("beforeend", `<div class="dove-attesa">⏳ In attesa che ${escapeHtml(l.nome)} confermi l'arrivo.</div>`);
+		else if (arr[0] && arr[0].stato === "rifiutato" && Date.now() - new Date(arr[0].risposto_il || 0).getTime() < 6048e5) box.insertAdjacentHTML("beforeend", `<div class="dove-attesa no">⚠️ La scuderia ha risposto che ${escapeHtml(h.name)} non è da loro: è tornato dov'era.</div>`);
+	}
+	function spostamentoHtml(s) {
+		const d = new Date(s.creato);
+		const ic = {
+			spostamento: "📍",
+			uscita: "↗️",
+			arrivo: "✅",
+			arrivo_rifiutato: "⚠️"
+		}[s.tipo] || "📍";
+		return `<div class="sposta-voce"><span class="data"><b>${d.getDate()}</b>${AG_MESI[d.getMonth()]} ${d.getFullYear()}</span><span class="t">${ic} ${escapeHtml(s.descrizione)}</span></div>`;
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/053-agenda-settimanale-maniscalco.js
+	var AG_GIORNI = [
+		"Lun",
+		"Mar",
+		"Mer",
+		"Gio",
+		"Ven",
+		"Sab",
+		"Dom"
+	];
+	var AG_MESI = [
+		"gen",
+		"feb",
+		"mar",
+		"apr",
+		"mag",
+		"giu",
+		"lug",
+		"ago",
+		"set",
+		"ott",
+		"nov",
+		"dic"
+	];
+	var AG_MESI_LUNGHI = [
+		"gennaio",
+		"febbraio",
+		"marzo",
+		"aprile",
+		"maggio",
+		"giugno",
+		"luglio",
+		"agosto",
+		"settembre",
+		"ottobre",
+		"novembre",
+		"dicembre"
+	];
+	var agRenderToken = 0;
+	function agLunedi(offset) {
+		const oggi = /* @__PURE__ */ new Date();
+		const d = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+		const dow = (d.getDay() + 6) % 7;
+		d.setDate(d.getDate() - dow + offset * 7);
+		return d;
+	}
+	function agEtichettaSettimana(lun) {
+		const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
+		if (lun.getMonth() === dom.getMonth()) return `${lun.getDate()} – ${dom.getDate()} ${AG_MESI_LUNGHI[dom.getMonth()]} ${dom.getFullYear()}`;
+		return `${lun.getDate()} ${AG_MESI[lun.getMonth()]} – ${dom.getDate()} ${AG_MESI[dom.getMonth()]} ${dom.getFullYear()}`;
+	}
+	function agNomeCavallo(i) {
+		if (i.cavalli_clienti_mascalcia?.nome) return i.cavalli_clienti_mascalcia.nome;
+		const elenco = i.clienti_mascalcia?.nome_cavallo || "";
+		return !i.cavallo_cliente_id && elenco && !elenco.includes(",") ? elenco : "";
+	}
+	function agNomeCavalloTesto(i) {
+		return agNomeCavallo(i) || "Cavallo non indicato";
+	}
+	function agDescrizioneTipoPro(i) {
+		const t = agDescrizioneTipo(i);
+		if (i.ferri_nuovi === false) return t + " · rimessa";
+		if (i.ferri_nuovi === true && i.quantita_ferri) return t.replace(/(\d+) ferri\b/, "$1 ferri nuovi");
+		return t;
+	}
+	function agDescrizioneTipo(i) {
+		let t = TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura || "";
+		if (i.tipo_ferratura === "altro" && i.tipo_altro) t = i.tipo_altro;
+		else if (TIPI_VET.includes(i.tipo_ferratura) && i.tipo_altro) t += " · " + i.tipo_altro;
+		const extra = [];
+		if (i.numero_ferro) extra.push("n. " + i.numero_ferro + (i.misura_sistema ? " " + MISURA_SISTEMA_LABEL[i.misura_sistema] : ""));
+		if (i.quantita_ferri) extra.push(i.quantita_ferri + " ferri");
+		const corr = testoFerroIntervento(i);
+		if (corr) extra.push(corr);
+		return [t, ...extra].join(" · ");
+	}
+	function agGiornoLavoro(iso) {
+		if (!iso) return iso;
+		const [y, m, d] = iso.split("-").map(Number);
+		return new Date(y, m - 1, d).getDay() === 0 ? aggiungiGiorniIso(iso, 1) : iso;
+	}
+	function agDataPerFissare(iso) {
+		const oggi = isoLocale(/* @__PURE__ */ new Date());
+		return agGiornoLavoro(!iso || iso < oggi ? oggi : iso);
+	}
+	async function renderAgendaSettimana$1(direzione) {
+		const box = document.getElementById("ag-week");
+		if (!box) return;
+		const token = ++agRenderToken;
+		const lun = agLunedi(agSettimanaOffset);
+		const giorni = Array.from({ length: 7 }, (_, k) => new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + k));
+		const isoGiorni = giorni.map(isoLocale);
+		const oggiIso = isoLocale(/* @__PURE__ */ new Date());
+		document.getElementById("ag-week-label").textContent = agEtichettaSettimana(lun);
+		document.getElementById("ag-oggi-btn").style.display = agSettimanaOffset === 0 ? "none" : "inline-block";
+		if (!agGiorniAperti) agGiorniAperti = /* @__PURE__ */ new Set([oggiIso]);
+		renderRichiestePendenti();
+		const pmAttesa = pmCaricaSettimana(isoGiorni[0], isoGiorni[6]).catch(() => []);
+		const [eventi, scadenze] = await Promise.all([
+			DB.listInterventiPeriodo(isoGiorni[0], isoGiorni[6]),
+			DB.listScadenzePeriodo(aggiungiGiorniIso(isoGiorni[0], -1), isoGiorni[6]),
+			caricaUbicazioni()
+		]);
+		const promemoria2 = await pmAttesa;
+		if (token !== agRenderToken) return;
+		agEventiCache = {};
+		(typeof hpAppuntamenti !== "undefined" ? hpAppuntamenti : []).forEach((e) => {
+			agEventiCache[e.id] = e;
+		});
+		eventi.forEach((e) => {
+			agEventiCache[e.id] = e;
+		});
+		scadenze.forEach((sc) => {
+			sc.data_vista = agGiornoLavoro(sc.prossima_scadenza);
+			agEventiCache["sc:" + sc.id] = sc;
+		});
+		agGiorniDati = giorni.map((g, k) => {
+			const iso = isoGiorni[k];
+			return {
+				iso,
+				k,
+				g,
+				oggi: iso === oggiIso,
+				ev: eventi.filter((e) => e.data_intervento === iso),
+				sc: scadenze.filter((sc) => sc.data_vista === iso),
+				pm: promemoria2.filter((p) => isoLocale(new Date(p.quando)) === iso)
+			};
+		});
+		agDisegnaGriglia();
+		if (typeof agAggiornaSchede === "function") agAggiornaSchede();
+		box.classList.remove("slide-l", "slide-r");
+		if (direzione) {
+			box.offsetWidth;
+			box.classList.add(direzione > 0 ? "slide-l" : "slide-r");
+		}
+		agAttivaSwipe(box);
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/121-sposta-appuntamenti.js
+	var spCtx = null;
+	var spEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var spOggi = () => (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE");
+	function spDataLunga(iso) {
+		if (!iso) return "";
+		const [y, m, d] = iso.split("-").map(Number);
+		return new Date(y, m - 1, d).toLocaleDateString("it-IT", {
+			weekday: "long",
+			day: "numeric",
+			month: "long"
+		});
+	}
+	function spLuogoKey(e) {
+		try {
+			return luogoEvento(e, true)?.key || "c:" + e.cliente_mascalcia_id;
+		} catch (_) {
+			return "c:" + e.cliente_mascalcia_id;
+		}
+	}
+	function spNomeLuogo(e) {
+		try {
+			const l = luogoEvento(e, true);
+			if (l?.nome) return l.nome;
+		} catch (_) {}
+		return clienteDiId$1(e.cliente_mascalcia_id)?.nome || e.clienti_mascalcia?.nome || "Cliente";
+	}
+	async function apriSposta(e) {
+		if (!e) return;
+		if (!["programmato", "proposto"].includes(e.stato)) {
+			showToast("Si spostano solo gli appuntamenti ancora da fare");
+			return;
+		}
+		const tutti = await DB.interventiGiornoMascalcia(e.data_intervento);
+		const chiave = spLuogoKey(e);
+		let lista = (tutti || []).filter((x) => x.id === e.id || x.cliente_mascalcia_id === e.cliente_mascalcia_id || spLuogoKey(x) === chiave);
+		if (!lista.some((x) => x.id === e.id)) lista.unshift(e);
+		lista = [e, ...lista.filter((x) => x.id !== e.id).sort((a, b) => agNomeCavalloTesto(a).localeCompare(agNomeCavalloTesto(b), "it"))];
+		spCtx = {
+			e,
+			lista,
+			scelti: /* @__PURE__ */ new Set([e.id]),
+			data: e.data_intervento,
+			ora: e.ora ? String(e.ora).slice(0, 5) : "",
+			motivo: ""
+		};
+		spRender();
+		openModal("modal-sposta");
+	}
+	function spConScuderiaDaConfermare() {
+		return spCtx.lista.some((x) => spCtx.scelti.has(x.id) && x.gruppo_id && !clienteDiId$1(x.cliente_mascalcia_id)?.di_fiducia);
+	}
+	function spRender() {
+		const c = spCtx;
+		if (!c) return;
+		const n = c.scelti.size, tot = c.lista.length, tutti = n === tot;
+		const restano = tot - n;
+		document.getElementById("sposta-sotto").textContent = spNomeLuogo(c.e) + " · " + spDataLunga(c.e.data_intervento);
+		document.getElementById("sposta-corpo").innerHTML = `
+    <div class="sp-campi">
+      <label class="sp-campo">Nuova data<input class="input" type="date" id="sp-data" min="${spOggi()}" value="${spEsc(c.data)}" onchange="spCampo('data', this.value)"></label>
+      <label class="sp-campo">Ora<input class="input" type="time" id="sp-ora" value="${spEsc(c.ora)}" onchange="spCampo('ora', this.value)"></label>
+    </div>
+    ${tot > 1 ? `<div class="sp-testa"><span>Quali cavalli sposti</span><button type="button" class="sp-link" onclick="spTutti()">${tutti ? "Togli tutti" : `Seleziona tutti (${tot})`}</button></div>` : ""}
+    <div class="sp-lista">
+      ${c.lista.map((x) => `<label class="sp-riga${c.scelti.has(x.id) ? " on" : ""}"><input type="checkbox" ${c.scelti.has(x.id) ? "checked" : ""} onchange="spScegli('${x.id}', this.checked)">
+        <span class="sp-cav"><b>${spEsc(agNomeCavalloTesto(x))}</b><small>${spEsc(agDescrizioneTipo(x))}${x.ora ? " · " + spEsc(String(x.ora).slice(0, 5)) : ""}${x.cliente_mascalcia_id !== c.e.cliente_mascalcia_id ? " · di " + spEsc(clienteDiId$1(x.cliente_mascalcia_id)?.nome || "") : ""}</small></span>
+        ${x.id === c.e.id && tot > 1 ? "<span class=\"sp-toccato\">TOCCATO</span>" : ""}</label>`).join("")}
+    </div>
+    <label class="sp-campo">Motivo (facoltativo, lo legge il cliente)<input class="input" type="text" id="sp-motivo" maxlength="200" value="${spEsc(c.motivo)}" oninput="spCampo('motivo', this.value)" placeholder="Es. imprevisto personale"></label>
+    ${n && restano ? `<div class="sp-nota">${restano === 1 ? "L'altro cavallo resta" : `Gli altri ${restano} cavalli restano`} ${spEsc(spDataLunga(c.e.data_intervento))}${c.e.ora ? " alle " + spEsc(String(c.e.ora).slice(0, 5)) : ""}.</div>` : ""}
+    ${spConScuderiaDaConfermare() ? `<div class="sp-info"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.5"></path></svg><span>${spEsc(spNomeLuogo(c.e))} è su Equo Scuderia: riceve la nuova data e deve riconfermarla (se sei il loro maniscalco di fiducia non serve).</span></div>` : ""}
+    <button type="button" class="btn btn-primary sp-vai" id="sp-vai" ${n ? "" : "disabled"} onclick="spConferma()">${n ? `Sposta ${n} ${n === 1 ? "cavallo" : "cavalli"}` : "Scegli almeno un cavallo"}</button>`;
+	}
+	function spCampo(k, v) {
+		if (spCtx) spCtx[k] = v;
+	}
+	function spScegli(id, on) {
+		if (!spCtx) return;
+		if (on) spCtx.scelti.add(id);
+		else spCtx.scelti.delete(id);
+		spRender();
+	}
+	function spTutti() {
+		if (!spCtx) return;
+		spCtx.scelti = spCtx.scelti.size === spCtx.lista.length ? /* @__PURE__ */ new Set() : new Set(spCtx.lista.map((x) => x.id));
+		spRender();
+	}
+	async function spConferma() {
+		const c = spCtx;
+		if (!c) return;
+		const data = document.getElementById("sp-data")?.value || c.data;
+		const ora = document.getElementById("sp-ora")?.value || "";
+		const motivo = (document.getElementById("sp-motivo")?.value || "").trim();
+		if (!c.scelti.size) {
+			showToast("Scegli almeno un cavallo");
+			return;
+		}
+		if (!data || data < spOggi()) {
+			showToast("Scegli oggi o un giorno futuro");
+			return;
+		}
+		const ids = [...c.scelti];
+		if (c.lista.filter((x) => c.scelti.has(x.id)).every((x) => x.data_intervento === data && (x.ora ? String(x.ora).slice(0, 5) : "") === ora)) {
+			showToast("Hai lasciato la stessa data e la stessa ora");
+			return;
+		}
+		const btn = document.getElementById("sp-vai");
+		if (btn) btn.disabled = true;
+		const r = await DB.spostaAppuntamenti(ids, data, ora, motivo);
+		if (!r || !r.ok) {
+			if (btn) btn.disabled = false;
+			showToast(r?.errore || "Non sono riuscito a spostare: riprova");
+			return;
+		}
+		closeModal("modal-sposta");
+		closeModal("modal-azioni-evento");
+		spCtx = null;
+		showToast(`${ids.length === 1 ? "Spostato" : ids.length + " cavalli spostati"} a ${spDataLunga(data)}${ora ? " alle " + ora : ""}: è partito un solo avviso`);
+		if (typeof renderAgendaSettimana === "function") await renderAgendaSettimana();
+		if (typeof renderProDeadlines === "function") await renderProDeadlines();
+		if (typeof currentClienteId !== "undefined" && currentClienteId && typeof loadClienteInterventi === "function") await loadClienteInterventi(currentClienteId);
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/120-strutture-unisci.js
+	var suEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	async function proSceltaUnione(clienteId) {
+		let simili = [];
+		try {
+			const { data } = await sb.rpc("pro_strutture_simili", { p_cliente_id: clienteId });
+			simili = data || [];
+		} catch (_) {
+			simili = [];
+		}
+		if (!simili.length) return null;
+		const c = (typeof clientiMascalcia !== "undefined" ? clientiMascalcia : []).find((x) => x.id === clienteId) || {};
+		return new Promise((risolvi) => {
+			let ov = document.getElementById("modal-unisci-struttura");
+			if (!ov) {
+				ov = document.createElement("div");
+				ov.id = "modal-unisci-struttura";
+				ov.className = "modal-overlay";
+				document.body.appendChild(ov);
+			}
+			ov.innerHTML = `<div class="modal" style="max-width:440px">
+      <div class="modal-title">È la stessa struttura?</div>
+      <p style="font-size:13.5px;line-height:1.5;margin:0 0 10px">Hai già tra i clienti una struttura che sembra <b>${suEsc(c.nome || "questa")}</b>. Se è la stessa, unisco le schede: cavalli e lavori finiscono nel collegamento, senza doppioni.</p>
+      ${simili.map((s, i) => `<label style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
+        <input type="radio" name="su-scelta" value="${s.id}" ${i === 0 ? "checked" : ""} style="margin-top:3px">
+        <span><b>${suEsc(s.nome)}</b><br><small class="muted">${s.cavalli} cavalli · ${s.lavori} lavori · ${suEsc(s.motivo)}</small></span></label>`).join("")}
+      <label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);cursor:pointer">
+        <input type="radio" name="su-scelta" value=""> <span>No, è una struttura nuova</span></label>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" class="btn btn-outline" style="flex:1" id="su-annulla">Annulla</button>
+        <button type="button" class="btn btn-primary" style="flex:1" id="su-ok">Accetta</button></div></div>`;
+			const chiudi = (v) => {
+				ov.classList.remove("active");
+				risolvi(v);
+			};
+			ov.querySelector("#su-annulla").onclick = () => chiudi(false);
+			ov.querySelector("#su-ok").onclick = () => chiudi(ov.querySelector("input[name=\"su-scelta\"]:checked")?.value || null);
+			ov.classList.add("active");
+		});
+	}
+	async function proAvvisiStruttura(clienteId) {
+		const info = document.getElementById("detail-cliente-info");
+		if (!info || DEMO_MODE) return;
+		let box = document.getElementById("pro-avvisi-struttura");
+		if (!box) {
+			box = document.createElement("div");
+			box.id = "pro-avvisi-struttura";
+			info.parentNode.insertBefore(box, info.nextSibling);
+		}
+		box.innerHTML = "";
+		const { data } = await sb.rpc("pro_struttura_avvisi", { p_cliente_id: clienteId });
+		if (!data || currentClienteId !== clienteId) return;
+		const parti = [];
+		const cliente = data.tipo === "cliente";
+		(data.simili || []).forEach((s) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
+    <div style="font-size:13.5px">Hai anche <b>${suEsc(s.nome)}</b> tra i clienti (${s.cavalli} cavalli, ${s.lavori} lavori · ${suEsc(s.motivo)}): ${cliente ? "è la stessa persona? Unendo, i suoi cavalli e i lavori passano qui e lui li riceve da accettare." : "è la stessa struttura?"}</div>
+    <div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="btn btn-primary btn-sm" onclick="proUnisciStruttura('${clienteId}','${s.id}',this)">Sì, unisci</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="proNonUnire('${clienteId}','${s.id}',this)">${cliente ? "No, è un altro" : "No, è diversa"}</button></div></div>`));
+		(data.rifiutati || []).forEach((r) => parti.push(`<div style="padding:8px 0;border-top:1px solid var(--border)">
+    <div style="font-size:13.5px"><b>${suEsc(r.nome)}</b>: la struttura dice che non è suo. <span class="muted" style="font-size:12px">Da verificare</span></div>
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <button type="button" class="btn btn-outline btn-sm" onclick="proCavalloRifiutato('${r.id}','tieni',this)">È suo: riproponi</button>
+      <button type="button" class="btn btn-ghost btn-sm" ${r.eliminabile ? "" : "title=\"Si può eliminare 30 giorni dopo la risposta della struttura\""} onclick="proCavalloRifiutato('${r.id}','elimina',this)">Elimina</button></div></div>`));
+		if (Number(data.in_attesa) > 0) parti.push(`<div class="muted" style="padding:8px 0;border-top:1px solid var(--border);font-size:12.5px">⏳ ${data.in_attesa} ${Number(data.in_attesa) === 1 ? "cavallo è" : "cavalli sono"} in attesa che la struttura confermi che sono suoi.</div>`);
+		if (!parti.length) return;
+		box.innerHTML = `<div class="card" style="margin:10px 0;border-color:rgba(232,176,75,.7)"><div style="font-weight:800;margin-bottom:2px">${cliente ? "Forse è un cliente che hai già" : "Da sistemare con la struttura"}</div>${parti.join("")}</div>`;
+	}
+	async function proUnisciStruttura(collegato, vecchio, btn) {
+		if (btn) btn.disabled = true;
+		const { data, error } = await sb.rpc("pro_unisci_struttura", {
+			p_collegato: collegato,
+			p_vecchio: vecchio
+		});
+		if (error || !data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast("Unione non riuscita: riprova");
+		}
+		showToast(`Fatto: ${data.uniti} cavalli uniti, ${data.spostati} spostati, ${data.lavori} lavori nella scheda collegata`);
+		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
+		if (typeof openClienteDetail === "function") openClienteDetail(collegato);
+	}
+	async function proNonUnire(collegato, vecchio, btn) {
+		if (btn) btn.disabled = true;
+		await sb.rpc("pro_non_unire", {
+			p_collegato: collegato,
+			p_vecchio: vecchio
+		});
+		proAvvisiStruttura(collegato);
+	}
+	async function proCavalloRifiutato(riga, azione, btn) {
+		if (btn) btn.disabled = true;
+		const { data } = await sb.rpc("pro_cavallo_rifiutato", {
+			p_riga: riga,
+			p_azione: azione
+		});
+		if (!data?.ok) {
+			if (btn) btn.disabled = false;
+			return showToast(data && data.errore || "Non riuscito: riprova");
+		}
+		showToast(data.fatto === "riproposto" ? "Riproposto alla struttura" : data.fatto === "archiviato" ? "Archiviato: lo storico dei lavori resta" : "Eliminato");
+		if (typeof loadClientiMascalcia === "function") await loadClientiMascalcia();
+		if (currentClienteId) proAvvisiStruttura(currentClienteId);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/036-archivia-elimina-cliente.js
 	var archiviaModo = "archivia";
@@ -15969,11 +16095,16 @@
 		try {
 			await loadClientiMascalcia$1();
 			await renderIncassi$1();
-			await renderProDeadlines();
+			await renderProDeadlines$1();
 		} catch (e) {}
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/index.js
 	Object.assign(window, {
+		apriSposta,
+		spCampo,
+		spConferma,
+		spScegli,
+		spTutti,
 		proSceltaUnione,
 		proAvvisiStruttura,
 		proUnisciStruttura,
@@ -16168,7 +16299,7 @@
 		isStruttura,
 		isStrutturaCollegata,
 		isoLocale,
-		loadClienteInterventi,
+		loadClienteInterventi: loadClienteInterventi$1,
 		loadClientiMascalcia: loadClientiMascalcia$1,
 		luogoDi,
 		luogoEvento,
@@ -16221,7 +16352,7 @@
 		renderIncassi: renderIncassi$1,
 		renderIncassiCompleta,
 		renderIncassiSaldati,
-		renderProDeadlines,
+		renderProDeadlines: renderProDeadlines$1,
 		renderTabCavalloPro,
 		richiamoAzione,
 		richiamoCambia,

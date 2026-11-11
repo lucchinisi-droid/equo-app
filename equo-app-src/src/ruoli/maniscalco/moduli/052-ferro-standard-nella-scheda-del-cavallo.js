@@ -3,6 +3,7 @@ import { agNomeCavalloSicuro, giorniRichiamoSuggeriti, giorniTra, loadClientiMas
 import { isStruttura, isStrutturaCollegata } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
 import { LAVORO_CAV, apriSchedaFerratura, descrFerraturaCavallo, tipoDaScheda } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 import { cavalliQuiStanno, iniziale, loadClienteInterventi } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
+import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { caricaCavalliMiei } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import { renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { renderIncassi } from "./047-incassi-saldati-per-periodo-da-saldare-p.js";
@@ -655,7 +656,9 @@ async function salvaInterventoMascalcia(){
       showToast("Richiesta confermata: il cliente riceve un messaggio in chat");
     } else if(precInfo && diGruppo && ["programmato","richiesto","proposto"].includes(statoPrec)
         && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || servizioCambiato(precInfo, { tipo_ferratura, tipo_altro }))){
-      showToast("Appuntamento modificato: la scuderia riceve l'avviso e deve riconfermarlo");
+      showToast(clienteDiId(cliente_mascalcia_id)?.di_fiducia
+        ? "Appuntamento modificato (solo questo cavallo): la scuderia riceve l'avviso"
+        : "Appuntamento modificato (solo questo cavallo): la scuderia riceve l'avviso e deve riconfermarlo");
     } else if(precInfo && !diGruppo && statoPrec === "programmato" && stato === "programmato"
         && (precInfo.data !== data_intervento || (precInfo.ora || "") !== (ora || "") || precInfo.cliente !== cliente_mascalcia_id || servizioCambiato(precInfo, { tipo_ferratura, tipo_altro }))){
       // 1. appuntamento già confermato cambiato (data, ora o servizio): il cliente lo deve sapere

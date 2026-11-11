@@ -235,6 +235,25 @@ Object.assign(DB, {
     if(error) return { ok: false, errore: /pro_cambia_proprietario/.test(error.message || "") ? "Manca un aggiornamento del database: avvisa l'assistenza Equo." : "Non riuscito, riprova." };
     return data || { ok: false };
   },
+  // 11/11/2026 · «Sposta»: gli appuntamenti ancora da fare di un giorno (per scegliere quali cavalli spostare)
+  async interventiGiornoMascalcia(data){
+    if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => i.data_intervento === data && ["programmato", "proposto"].includes(i.stato))
+      .map(i => ({ ...i, cavalli_clienti_mascalcia: { nome: (demoState.cavalliClientiMascalcia || []).find(c => c.id === i.cavallo_cliente_id)?.nome || null } }));
+    const { data: righe, error } = await sb.from("interventi_mascalcia").select("*, clienti_mascalcia(nome), cavalli_clienti_mascalcia(nome)")
+      .eq("maniscalco_id", currentUser.id).eq("data_intervento", data).in("stato", ["programmato", "proposto"]);
+    if(error) console.warn("interventiGiornoMascalcia:", error.message);
+    return error ? [] : (righe || []);
+  },
+  // sposta i cavalli scelti (uno, alcuni o tutti): un solo messaggio per cliente o scuderia (SQL 60)
+  async spostaAppuntamenti(ids, data, ora, motivo){
+    if(DEMO_MODE){
+      (demoState.interventiMascalcia || []).forEach(i => { if(ids.includes(i.id)){ i.data_intervento = data; i.ora = ora || null; } });
+      return { ok: true, spostati: ids.length };
+    }
+    const { data: r, error } = await sb.rpc("pro_sposta_appuntamenti", { p_ids: ids, p_data: data, p_ora: ora || null, p_motivo: motivo || null });
+    if(error) return { ok: false, errore: /pro_sposta_appuntamenti/.test(error.message || "") ? "Funzione non ancora attiva: serve l'aggiornamento del database." : error.message };
+    return r || { ok: false };
+  },
   // tutti gli interventi fatti di un cliente o di un luogo (scuderia), pagati e no, in un periodo
   async interventiResoconto(clienteId, da, a){
     if(DEMO_MODE) return (demoState.interventiMascalcia || []).filter(i => i.stato === "fatto" && (i.cliente_mascalcia_id === clienteId || i.luogo_cliente_id === clienteId)
