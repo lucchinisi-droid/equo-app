@@ -44,7 +44,7 @@ import { wgClienteDi, wgScegli, wgScriviRichiamo } from "./098-professionista.js
 import "./099-meteo-accanto-agli-appuntamenti-indirizz.js";
 import { wgCercaLuogoVai, wgLuogoAMano, wgMostraMappe, wgNaviga, wgSceltaLuogo } from "./100-naviga.js";
 import { usaPosizioneQui } from "./106-posizione-attuale.js";
-import { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
+import { apriCambiaProprietario, confermaCambiaProprietario, cpCodiceCambiato, cpDestCambiata, cpScegliCavallo } from "./104-cambia-proprietario.js";
 import { condividiInvitoCliente } from "./108-invito-qr.js";
 import { apriCardPro, chiudiCardPro, ecvAggiungiEsperienza, ecvAggiungiFormazione, ecvAggiungiVoce, ecvCampo, ecvChiediReferenza, ecvCopiaLink, ecvGiraPass, ecvHammer, ecvIndietro, ecvInterruttore, ecvLingua, ecvModello, ecvMostra, ecvPdfCv, ecvPdfPass, ecvPubblica, ecvReferenza, ecvSlug, ecvSpec, ecvTogliElemento, ecvTogliVoce } from "./109-equo-cv-pass.js";
 import { ofStimaKm, ofMatRapido, ofTitoloDaTipo, ofSalvaSpesaDaHammer, ofAggiornaAiutanteData, ofAggiornaRiepiloghi, ofAggiungiMatGiorno, ofApri, ofApriGiornata, ofApriMezzo, ofArchiviaMezzo, ofCampiAiutanteIntervento, ofEliminaIntervento, ofEliminaSpesa, ofFineOnboarding, ofFormAiutante, ofFormIntervento, ofFormMateriale, ofFormMezzo, ofFormSpesa, ofMese, ofMostraMezzo, ofOggiScegli, ofOnboarding, ofPassoAiutante, ofPassoMateriale, ofPassoMezzo, ofPreparaAiutanteAppuntamento, ofSalvaAiutante, ofSalvaBase, ofSalvaGiornataDaForm, ofSalvaIntervento, ofSalvaMateriale, ofSalvaMezzo, ofSalvaOggi, ofSalvaSpesa, ofScheda, ofScorta, ofSeg, ofStriscia, ofTogliAiutante, ofTogliMateriale, ofTornaOfficina, ofWizardAggiungi } from "./112-officina-mobile.js";
@@ -66,6 +66,7 @@ import { controllaImportVecchiaApp, impConfermaGruppo, impPiuTardi, impScegli } 
 // API PUBBLICA del maniscalco: le funzioni chiamate dai pulsanti dell'HTML, dal testo generato e dalle altre parti dell'app.
 // Se un pulsante nuovo chiama una funzione del maniscalco, va aggiunta qui (il controllo automatico lo segnala).
 Object.assign(window, {
+  cpCodiceCambiato,
   apriSposta, spCampo, spConferma, spScegli, spTutti,
   proSceltaUnione, proAvvisiStruttura, proUnisciStruttura, proNonUnire, proCavalloRifiutato,
   ferDetta, ferDettaDaMenu, ferDettaApri, fdApplicaScheda, fdContesto, fdDescriviScheda, FD, ferStatoAttuale,

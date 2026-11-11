@@ -10,9 +10,15 @@
     <div id="cp-nuovo" class="cp-nuovo" hidden>
       <input class="input" id="cp-nuovo-nome" maxlength="80" placeholder="Nome e cognome del proprietario">
       <input class="input" id="cp-nuovo-tel" type="tel" maxlength="30" placeholder="Telefono (opzionale)">
+      <div class="cp-codice">
+        <label class="input-label" for="cp-nuovo-codice">Codice Equo del proprietario (se è già su Equo)</label>
+        <input class="input cp-codice-input" id="cp-nuovo-codice" maxlength="40" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Es. EQUOOWN8TFQ6" oninput="cpCodiceCambiato()">
+        <div class="cp-codice-esito" id="cp-codice-esito" aria-live="polite"></div>
+        <div class="cp-codice-aiuto" id="cp-codice-aiuto">Lo trova nell'app: Menu › Il mio codice Equo. Riceve il cavallo nell'app; se ha già un cavallo con lo stesso nome, Equo chiede se è lo stesso. Se non è ancora su Equo lascia vuoto: potrai collegarlo dopo dalla sua scheda.</div>
+      </div>
     </div>
     <div id="cp-aperti" class="cp-aperti solo-incassi" hidden></div>
     <div class="auth-error" id="cp-errore" style="display:none"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="confermaCambiaProprietario(this)">Conferma</button>
+    <button class="btn btn-primary" id="cp-conferma" style="width:100%;margin-top:12px" onclick="confermaCambiaProprietario(this)">Conferma</button>
   </div>
 </div>

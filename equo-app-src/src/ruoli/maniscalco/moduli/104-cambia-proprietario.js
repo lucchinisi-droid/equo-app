@@ -1,7 +1,7 @@
 // Equo App · maniscalco · modulo (moduli ES, costruiti con Vite in ruoli/maniscalco/costruito.js)
 import { clientiAttivi, loadClientiMascalcia } from "./032-richiamo-prossimo-intervento-sempre-in-g.js";
 import { isStruttura } from "./033-clienti-a-cartelle-stile-telegram-cavall.js";
-import { openClienteDetail } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
+import { messaggioErroreCollegaCliente, openClienteDetail } from "./034-strutture-collegate-a-equo-scuderia-prof.js";
 import { creaClienteUnico } from "./116-onboarding.js";
 import { clienteDiId } from "./050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js";
 import { contoEuro } from "./057-pdf-appuntamento-invio-in-chat-maniscalc.js";
@@ -40,6 +40,7 @@ async function apriCambiaProprietario(daStruttura){
   cpCercaInit([...pr, ...sc]);
   document.getElementById("cp-nuovo").hidden = true;
   document.getElementById("cp-nuovo-nome").value = ""; document.getElementById("cp-nuovo-tel").value = "";
+  cpCodiceReset();
   document.getElementById("cp-errore").style.display = "none";
   document.getElementById("cp-nota").textContent = cpCtx.struttura
     ? `${daStruttura ? "I cavalli scelti restano" : "Il cavallo resta"} in «${cli.nome}» (lo trovi in «Qui stanno»): cambia solo chi paga. Gli appuntamenti futuri passano al nuovo proprietario.`
@@ -111,7 +112,51 @@ function cpCercaInit(candidati){
   document.getElementById("cp-cerca-x").hidden = true;
   document.getElementById("cp-cerca-lista").classList.remove("aperta");
 }
+/* 11/11/2026: nuovo proprietario con il codice Equo (solo il codice, niente email: mockup «Assegna proprietario con codice Equo»).
+   Il codice si controlla subito; se è giusto, dopo «Conferma» il cliente nuovo si collega al suo account e lui riceve il cavallo. */
+let cpCodiceTimer = null;
+function cpCodiceStato(stato, testo, prof){
+  if(cpCtx) cpCtx.codice = { stato, prof: prof || null };
+  const box = document.querySelector("#cp-nuovo .cp-codice"), es = document.getElementById("cp-codice-esito");
+  if(box) box.classList.toggle("errore", stato === "no");
+  if(es){
+    es.className = "cp-codice-esito" + (stato === "ok" ? " ok" : stato === "no" ? " no" : "");
+    es.innerHTML = stato === "ok" ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>${escapeHtml(testo)}` : escapeHtml(testo || "");
+  }
+  const btn = document.getElementById("cp-conferma");
+  if(btn) btn.disabled = (stato === "no" || stato === "verifica") && document.getElementById("cp-dest")?.value === "__nuovo";
+}
+function cpCodiceReset(){
+  clearTimeout(cpCodiceTimer);
+  const inp = document.getElementById("cp-nuovo-codice"); if(inp) inp.value = "";
+  cpCodiceStato("", "");
+}
+function cpCodiceCambiato(){
+  clearTimeout(cpCodiceTimer);
+  const grezzo = (document.getElementById("cp-nuovo-codice")?.value || "").trim();
+  if(!grezzo){ cpCodiceStato("", ""); return; }
+  cpCodiceStato("verifica", "Controllo il codice…");
+  cpCodiceTimer = setTimeout(cpCodiceVerifica, 400);
+}
+async function cpCodiceVerifica(){
+  const grezzo = (document.getElementById("cp-nuovo-codice")?.value || "").trim();
+  if(!grezzo){ cpCodiceStato("", ""); return; }
+  const codice = String(codiceEquoDaTesto(grezzo) || "").trim().toUpperCase();   // il server lo normalizza (O/0, trattini, spazi)
+  const tipo = tipoCodiceEquo(codice);
+  if(["pro", "tra", "med"].includes(tipo)){ cpCodiceStato("no", "Questo è il codice di un professionista: serve quello del proprietario."); return; }
+  if(tipo !== "own"){ cpCodiceStato("no", "Codice non trovato: controlla le lettere con il proprietario."); return; }
+  const prof = await DB.findProprietarioByCodice(codice);
+  if(((document.getElementById("cp-nuovo-codice")?.value || "").trim()) !== grezzo) return;   // nel frattempo è cambiato
+  if(!prof){ cpCodiceStato("no", "Codice non trovato: controlla le lettere con il proprietario."); return; }
+  const gia = clientiAttivi().find(c => c.cliente_user_id === prof.id);
+  if(gia){ cpCodiceStato("no", `È già tra i tuoi clienti come «${gia.nome}»: cercalo nel campo «Proprietario» qui sopra.`); return; }
+  const nomeInp = document.getElementById("cp-nuovo-nome");
+  if(nomeInp && !nomeInp.value.trim() && prof.full_name) nomeInp.value = prof.full_name;
+  cpCodiceStato("ok", `${prof.full_name || "Proprietario"} · su Equo`, prof);
+}
 function cpDestCambiata(sel){
+  const btn = document.getElementById("cp-conferma");
+  if(btn) btn.disabled = sel.value === "__nuovo" && ["no", "verifica"].includes(cpCtx?.codice?.stato);
   document.getElementById("cp-nuovo").hidden = sel.value !== "__nuovo";
   if(sel.value === "__nuovo") document.getElementById("cp-nuovo-nome").focus();
 }
@@ -144,23 +189,37 @@ async function confermaCambiaProprietario(btn){
   const aperti = !!(c.aperti && c.aperti.length && document.querySelector('input[name="cp-aperti"]:checked')?.value === "si");
   btn.disabled = true;
   try{
+    let codiceCollega = null;
     if(dest === "__nuovo"){
       const nome = document.getElementById("cp-nuovo-nome").value.trim();
       if(!nome) return errore("Scrivi il nome del nuovo proprietario.");
+      const grezzo = (document.getElementById("cp-nuovo-codice")?.value || "").trim();
+      if(grezzo){
+        if(c.codice?.stato !== "ok") return errore("Controlla il codice Equo (oppure lascialo vuoto).");
+        codiceCollega = String(codiceEquoDaTesto(grezzo) || "").trim().toUpperCase();
+      }
       const { data, error } = await creaClienteUnico({ nome, telefono: document.getElementById("cp-nuovo-tel").value.trim() || null, tipo_cliente: "proprietario" });   // 28/10/2026: strada unica
       if(error || !data) return errore(error?.message || "Proprietario non creato, riprova.");
       dest = data.id;
     }
     const res = await DB.cambiaProprietario(ids, dest, aperti);
     if(!res || !res.ok) return errore(res?.errore || "Non riuscito, riprova.");
+    // dopo il passaggio dei cavalli: il collegamento manda al proprietario i cavalli da accettare nell'app
+    let collegato = null;
+    if(codiceCollega){
+      collegato = await DB.collegaClienteDaCodice(dest, codiceCollega);
+      if(!collegato?.ok) showToast("Cavalli intestati, ma non collegato a Equo: " + messaggioErroreCollegaCliente(collegato));
+    }
     closeModal("modal-cambia-proprietario");
     await loadClientiMascalcia();
     await caricaCavalliMiei().catch(() => {});
     const nomeDest = clienteDiId(dest)?.nome || "nuovo proprietario";
-    showToast(`${res.spostati === 1 ? "1 cavallo" : res.spostati + " cavalli"} intestati a «${nomeDest}»` + (res.lavori ? ` · ${res.lavori === 1 ? "1 lavoro da saldare passato" : res.lavori + " lavori da saldare passati"}` : ""));
+    if(!codiceCollega || collegato?.ok)
+      showToast(`${res.spostati === 1 ? "1 cavallo" : res.spostati + " cavalli"} intestati a «${nomeDest}»` + (res.lavori ? ` · ${res.lavori === 1 ? "1 lavoro da saldare passato" : res.lavori + " lavori da saldare passati"}` : "")
+        + (collegato?.ok ? " · collegato su Equo: riceve il cavallo nell'app" : ""));
     cpCtx = null;
     await openClienteDetail(c.daId);   // si torna alla scheda della scuderia: i cavalli ora sono in «Qui stanno»
   } finally { btn.disabled = false; }
 }
 
-export { apriCambiaProprietario, confermaCambiaProprietario, cpDestCambiata, cpScegliCavallo };
+export { apriCambiaProprietario, confermaCambiaProprietario, cpCodiceCambiato, cpDestCambiata, cpScegliCavallo };
