@@ -1,0 +1,32 @@
+// 12/11/2026: i clienti archiviati non compaiono nella lente di ricerca né in Messaggi (caso Sara Matteucci doppia)
+const path=require("path");const {chromium}=require("playwright");
+const APP=path.resolve(__dirname,"..","index.html");
+const SUPA=path.join(path.dirname(require.resolve("@supabase/supabase-js/package.json")),"dist","umd","supabase.js");
+(async()=>{const b=await chromium.launch({args:["--allow-file-access-from-files"]});
+const pg=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
+const err=[];pg.on("pageerror",e=>err.push(String(e.message)));
+await pg.route("**/*",r=>{const u=r.request().url();if(u.includes("supabase-js"))return r.fulfill({path:SUPA,contentType:"application/javascript"});if(u.startsWith("file://")||u.startsWith("data:"))return r.continue();return r.abort();});
+await pg.goto("file://"+APP);await pg.waitForTimeout(1200);
+await pg.evaluate(()=>startDemo());await pg.waitForTimeout(800);
+await pg.evaluate(()=>document.querySelectorAll("[id*=cookie]").forEach(e=>e.remove()));
+await pg.evaluate(async()=>{currentUser.ruolo="maniscalco";await enterApp("maniscalco");});await pg.waitForTimeout(2500);
+const ok=(c,m)=>console.log((c?"OK  ":"ERR ")+m);
+await pg.evaluate(async()=>{
+  const now=new Date().toISOString();
+  demoState.clientiMascalcia.push({id:"sara-buona",nome:"Sara Matteucci",tipo_cliente:"proprietario",maniscalco_id:currentUser.id});
+  demoState.clientiMascalcia.push({id:"sara-arch",nome:"Sara matteucci",tipo_cliente:"struttura",maniscalco_id:currentUser.id,archiviato_il:now});
+  demoState.cavalliClientiMascalcia.push({id:"cv-arch",cliente_mascalcia_id:"sara-arch",nome:"Zorro Archiviato",maniscalco_id:currentUser.id});
+  demoState.messaggiMascalcia.push({id:"m1",cliente_mascalcia_id:"sara-buona",mittente_tipo:"cliente",tipo:"testo",testo:"ciao dalla buona",letto:false,created_at:now});
+  demoState.messaggiMascalcia.push({id:"m2",cliente_mascalcia_id:"sara-arch",mittente_tipo:"cliente",tipo:"testo",testo:"ciao dall'archiviata",letto:false,created_at:now});
+  await loadClientiMascalcia();
+});
+const inbox=await pg.evaluate(async()=>(await DB.listInboxMascalcia()).map(m=>m.cliente_mascalcia_id));
+ok(inbox.includes("sara-buona")&&!inbox.includes("sara-arch"),"Messaggi: c'è la chat di Sara buona, non quella archiviata");
+await pg.evaluate(()=>apriCercaTutto());await pg.waitForTimeout(800);
+await pg.fill("#ct-input","sara");await pg.waitForTimeout(1500);
+let t=await pg.evaluate(()=>document.getElementById("ct-risultati").innerText);
+const n=(t.match(/Sara matteucci/g)||[]).length;console.log(t.split("\n").slice(0,8).join(" | "));
+ok(n===0&&/Sara Matteucci/.test(t),"lente «sara»: c'è la Sara buona, non quella archiviata");
+await pg.fill("#ct-input","zorro");await pg.waitForTimeout(800);
+ok(!/Zorro/.test(await pg.evaluate(()=>document.getElementById("ct-risultati").innerText)),"lente: niente cavalli del cliente archiviato");
+console.log("errori:",err);await b.close();})();

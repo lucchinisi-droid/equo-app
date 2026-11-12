@@ -10,14 +10,16 @@ Object.assign(DB, {
     const { error } = await sb.from("segnalazioni_maneggio").insert(payload);
     return { error };
   },
+  // 12/11/2026: niente chat dei clienti archiviati (restano in Clienti › «Archiviati», dove si possono ripristinare)
   async listInboxMascalcia(){
     if(DEMO_MODE){
-      return demoState.messaggiMascalcia.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      const arch = new Set((demoState.clientiMascalcia || []).filter(c => c.archiviato_il).map(c => c.id));
+      return demoState.messaggiMascalcia.filter(m => !arch.has(m.cliente_mascalcia_id)).slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
         .map(m => ({ ...m, clienti_mascalcia: { nome: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome, nome_cavallo: demoState.clientiMascalcia.find(c => c.id === m.cliente_mascalcia_id)?.nome_cavallo } }));
     }
-    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo, centro_id, collegamento_stato, tipo_cliente)")
+    const { data, error } = await sb.from("messaggi_mascalcia").select("*, clienti_mascalcia(nome, nome_cavallo, centro_id, collegamento_stato, tipo_cliente, archiviato_il)")
       .eq("maniscalco_id", currentUser.id).order("created_at", { ascending: false }).limit(200);
-    return error ? [] : (data || []);
+    return error ? [] : (data || []).filter(m => !m.clienti_mascalcia?.archiviato_il);
   },
   async listThreadMascalcia(clienteId){
     if(DEMO_MODE) return demoState.messaggiMascalcia.filter(m => m.cliente_mascalcia_id === clienteId).slice().sort((a,b) => new Date(a.created_at) - new Date(b.created_at));

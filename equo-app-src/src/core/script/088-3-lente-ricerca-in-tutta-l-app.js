@@ -96,11 +96,13 @@ function cercaTuttoMostra(){
   let html = "";
   const sezioni = CT_SEZIONI[vista].filter(s => !(incassiNascosti() && s.t === "Incassi")).filter(s => ok(s.t, s.k)).map(s => ctRiga("fa-arrow-right", s.t, "Sezione", vai(s.az)));
   if(vista === "professionista"){
-    const clienti = (d.clienti || clientiMascalcia || []).filter(c => ok(c.nome, c.telefono, paroleCercaCliente(c)))
+    // 12/11/2026: i clienti archiviati non compaiono (si trovano in Clienti › «Archiviati»), neanche con i loro cavalli
+    const archiviati = new Set((d.clienti || clientiMascalcia || []).filter(c => c.archiviato_il).map(c => c.id));
+    const clienti = (d.clienti || clientiMascalcia || []).filter(c => !c.archiviato_il && ok(c.nome, c.telefono, paroleCercaCliente(c)))
       .map(c => ctRiga(isStruttura(c) ? "fa-building" : "fa-user", c.nome, [nomiCavalliCliente(c).join(", "), c.telefono].filter(Boolean).join(" · ") || (isStruttura(c) ? "Scuderia" : "Cliente"),
         vai(() => { showPage("pro-clienti"); openClienteDetail(c.id); })));
     const nomeCliente = id => ((d.clienti || clientiMascalcia || []).find(c => c.id === id) || {}).nome || "";
-    const cavalli = (d.cavalli || []).filter(c => ok(c.nome, c.microchip, nomeCliente(c.cliente_mascalcia_id)))
+    const cavalli = (d.cavalli || []).filter(c => !archiviati.has(c.cliente_mascalcia_id) && ok(c.nome, c.microchip, nomeCliente(c.cliente_mascalcia_id)))
       .map(c => ctRiga("fa-horse-head", c.nome || "Cavallo", "di " + (nomeCliente(c.cliente_mascalcia_id) || "cliente"), vai(async () => {
         // apre la scheda del cavallo (dentro il suo cliente); «indietro» torna al cliente, non alla cartella Cavalli
         showPage("pro-clienti"); await apriCavalloDaCartella(c.cliente_mascalcia_id, c.id); schedaDaCartella = false; })));
