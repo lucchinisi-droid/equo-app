@@ -7,7 +7,7 @@ update public.ai_conoscenze set aggiornato_il = now(), verificato_il = current_d
 Passi:
 1. Scegli i cavalli ("Quali cavalli?"): puoi sceglierne più di uno insieme.
 2. In "Proprietario (chi paga)" scrivi nella ricerca con la lente il nome del proprietario, di un suo cavallo o il telefono e tocca il nome; con la ✕ lo cambi. In cima c'è "+ Nuovo proprietario" (nome, telefono e "Codice Equo del proprietario").
-3. Se il proprietario è già su Equo, scrivi il suo codice Equo (lo trova nell'app: Menu › Il mio codice Equo): compare "✓ Nome · su Equo" e il nome si compila da solo. Se il codice è sbagliato il riquadro diventa rosso e "Conferma" resta spento. Se non è ancora su Equo lascia vuoto.
+3. Se il proprietario è già su Equo, scrivi il suo codice Equo (lo trova nella sua app: Menu › Il tuo codice per la chat): compare "✓ Nome · su Equo" e il nome si compila da solo. Se il codice è sbagliato il riquadro diventa rosso e "Conferma" resta spento. Se non è ancora su Equo lascia vuoto.
 4. Se ci sono lavori già fatti e da saldare, l'app chiede chi li paga: il nuovo proprietario o la scuderia.
 5. Tocca "Conferma".
 Esempio: Francesco passa Nusi, che sta alla Scuderia Macchia grande, a Daniela: tocca "+ Assegna proprietario a cavallo", spunta Nusi, "+ Nuovo proprietario", scrive il codice EQUOOWN… di Daniela e conferma. Daniela riceve Nusi nell'app; siccome aveva già creato un NUSI, Equo le chiede se è lo stesso cavallo.
