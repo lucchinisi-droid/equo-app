@@ -92,10 +92,10 @@ function vaRiga(d, mia){
   const mini = VA.mini[d.id] ? `<img src="${vaEsc(urlSicuro(VA.mini[d.id]))}" alt="">` : `<span>${vaEtichetta(d)}</span>`;
   return `<div class="va-doc${aperto ? " aperto" : ""}">
     <button class="va-mini" onclick="apriDocumentoPrivato('${d.id}')" aria-label="Apri ${vaEsc(d.titolo)}">${mini}</button>
-    <button class="va-tit" onclick="vaApri('${d.id}')"><b>${vaEsc(d.titolo)}</b><small>${vaEsc(DB.DOC_TIPI[d.categoria] || "Documento")}${d.autore_ruolo && !mio ? " · " + vaEsc(d.autore_ruolo) : ""}</small></button>
+    <button class="va-tit" onclick="vaApri('${d.id}')"><b>${vaEsc(d.nome || d.titolo)}</b><small>${vaEsc(DB.DOC_TIPI[d.categoria] || "Documento")}${d.autore_ruolo && !mio ? " · " + vaEsc(d.autore_ruolo) : ""}</small></button>
     ${aperto ? `<div class="va-azioni">
       <button onclick="apriDocumentoPrivato('${d.id}')">Apri</button>
-      ${mio ? `<button onclick="vaModifica('${d.id}')">Cambia tipo o zona</button>` : ""}
+      ${mio ? `<button onclick="vaModifica('${d.id}')">Cambia tipo o zona</button>` : ""}${mio && /^image\//.test(d.mime || "") && typeof dsApri === "function" ? `<button onclick="dsApri('${d.id}')">Disegna e misura</button>` : ""}
       <button onclick="vaChiVede('${d.id}')">Chi lo vede</button>
       ${mio && mia ? `<button class="urg" onclick="vaElimina('${d.id}')">Elimina</button>` : ""}
     </div>${chi ? vaChiHtml(d, chi) : ""}` : ""}
@@ -116,7 +116,7 @@ function vaSezioneHtml(){
     ${attesa}
     ${VA.lista.length ? VA.lista.map(d => vaRiga(d, true)).join("") : (a ? "" : '<div class="vs-nota">Nessun allegato in questa visita. Video fino a 3 minuti, file fino a 50 MB. Le lastre DICOM si salvano e si scaricano: per vederle serve il tuo programma.</div>')}
     ${VA.altri.length ? `<details class="va-altri"><summary>Documenti di questo cavallo · ${VA.altri.length}</summary>${VA.altri.map(d => vaRiga(d, false)).join("")}</details>` : ""}
-    <div class="vs-nota">Privati: li vedete tu e il proprietario. Il nome lo dà Equo (cavallo, data, tipo, zona).</div>
+    <div class="vs-nota">Privati: all'inizio li vedi solo tu; scegli chi li vede con «Chi lo vede» (Per sempre, 7 giorni o Nascosto). Il nome lo dà Equo (cavallo, data, tipo, zona); lo cambi da Menu › Archivio.</div>
   </section>`;
 }
 function vaRidisegna(){ const b = document.getElementById("va-box"); if(b) b.outerHTML = vaSezioneHtml(); }
@@ -142,7 +142,10 @@ async function vaElimina(id){
 }
 
 /* ---- «Chi lo vede» ---- */
-async function vaChiVede(id){ VA.chi[id] = await DB.chiVedeDocumento(id) || { errore: true }; vaRidisegna(); }
+async function vaChiVede(id){
+  if(typeof arcChiLoVede === "function") return arcChiLoVede(id);   // 13/11/2026: Per sempre / 7 giorni / Nascosto (SQL 69)
+  VA.chi[id] = await DB.chiVedeDocumento(id) || { errore: true }; vaRidisegna();
+}
 function vaChiHtml(d, c){
   if(c.errore) return '<div class="vs-nota">Puoi vedere chi ha accesso solo ai file tuoi o che gestisci.</div>';
   const righe = [];

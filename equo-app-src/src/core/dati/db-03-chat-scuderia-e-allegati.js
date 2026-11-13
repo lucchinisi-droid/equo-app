@@ -115,10 +115,9 @@ Object.assign(DB, {
   },
   // archivio: documenti che vedo di un cavallo (o di una visita)
   async listaDocumenti({ horse_id, cavallo_cliente_id, visita_id } = {}){
-    const campi = "id, categoria, titolo, data_documento, zona, nota, numero, mime, byte, visita_id, autore_user_id, autore_ruolo, horse_id, cavallo_cliente_id, sanitario_obbligatorio, creato_il";
     if(DEMO_MODE) return (demoState.documenti || []).filter(d => !d.eliminato_il && (visita_id ? d.visita_id === visita_id : ((horse_id && d.horse_id === horse_id) || (cavallo_cliente_id && d.cavallo_cliente_id === cavallo_cliente_id))))
       .sort((a, b) => String(b.data_documento).localeCompare(String(a.data_documento)) || String(b.creato_il).localeCompare(String(a.creato_il)));
-    let q = sb.from("documenti").select(campi).is("eliminato_il", null);
+    let q = sb.from("documenti").select("*").is("eliminato_il", null);   // 13/11/2026: anche nome, segni, avviso (SQL 69)
     if(visita_id) q = q.eq("visita_id", visita_id);
     else { const f = [horse_id ? "horse_id.eq." + horse_id : "", cavallo_cliente_id ? "cavallo_cliente_id.eq." + cavallo_cliente_id : ""].filter(Boolean).join(","); if(!f) return []; q = q.or(f); }
     const { data, error } = await q.order("data_documento", { ascending: false }).order("creato_il", { ascending: false }).limit(200);

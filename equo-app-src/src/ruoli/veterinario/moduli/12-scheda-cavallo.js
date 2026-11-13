@@ -72,7 +72,7 @@ function vcDisegnaDocumenti(){
   const gruppi = VC_GRUPPI.map(([k, t]) => [t, VC.docs.filter(d => d.categoria === k)]).filter(([, l]) => l.length);
   box.innerHTML = attesa + (gruppi.length ? gruppi.map(([t, l]) => `<div class="vc-h">${vcEsc(t)} · ${l.length}</div>${l.map(d => `<button type="button" class="vc-doc" onclick="apriDocumentoPrivato('${d.id}')">
       <span class="et">${/^image\//.test(d.mime || "") ? "FOTO" : /^video\//.test(d.mime || "") ? "VIDEO" : d.mime === "application/dicom" ? "DICOM" : "PDF"}</span>
-      <span class="c"><b>${vcEsc(d.titolo)}</b><small>${vcEsc(d.autore_user_id === currentUser?.id ? "tuo" : (d.autore_ruolo || "condiviso con te"))}</small></span></button>`).join("")}`).join("")
+      <span class="c"><b>${vcEsc(d.nome || d.titolo)}</b><small>${vcEsc(d.autore_user_id === currentUser?.id ? "tuo" : (d.autore_ruolo || "condiviso con te"))}</small></span></button>`).join("")}`).join("")
     : (a ? "" : '<div class="muted" style="font-size:13px">Nessun documento privato per questo cavallo. Referti, lastre e foto delle visite arrivano qui da soli.</div>'))
     + '<div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Privati: li vedete tu e il proprietario. Si aprono con un link che dura pochi minuti.</div>';
 }

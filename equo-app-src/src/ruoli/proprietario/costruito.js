@@ -283,6 +283,7 @@
 		return `<a class="mchat-doc" href="${escapeHtml(urlSicuro(url))}" target="_blank" rel="noopener"><span class="mchat-doc-ico">PDF</span><span class="mchat-doc-nome">${escapeHtml(nome || "Documento.pdf")}</span></a>${extra}`;
 	}
 	async function apriDocumentoPrivato(id) {
+		if (typeof docVisualizza === "function") return docVisualizza(id);
 		const w = window.open("", "_blank");
 		const { url, error } = await DB.apriUrlDocumento(id);
 		if (!url) {

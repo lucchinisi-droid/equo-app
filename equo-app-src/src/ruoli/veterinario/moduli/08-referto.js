@@ -328,7 +328,15 @@ async function vrSalvaScelta(e, on){
   const { error } = await DB.updateInterventoMascalcia(e.id, { referto_proprietario: !!on });
   if(error) return { error };
   const { data: vis } = await sb.from("visite_pro").select("id").eq("intervento_id", e.id);
-  if(vis?.length) await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map(x => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+  if(vis?.length){
+    await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map(x => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+    // 13/11/2026 (SQL 69): sui suoi documenti decide il veterinario → accesso del proprietario dato o tolto
+    const prop = (typeof vrDestinatari === "function" ? vrDestinatari() : []).find(x => x.k === "prop")?.cliente;
+    if(prop?.cliente_user_id){
+      const { data: refs } = await sb.from("documenti").select("id").in("visita_id", vis.map(x => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+      for(const r of refs || []) await sb.rpc("equo_doc_imposta", { p_doc: r.id, p_user: prop.cliente_user_id, p_centro: null, p_modo: on ? "sempre" : "nascosto", p_motivo: "chat" }).then(() => {}, () => {});
+    }
+  }
   return { error: null };
 }
 const vrDB = {

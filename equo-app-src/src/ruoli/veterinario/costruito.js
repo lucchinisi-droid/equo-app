@@ -2257,10 +2257,10 @@
 		const mini = VA.mini[d.id] ? `<img src="${vaEsc(urlSicuro(VA.mini[d.id]))}" alt="">` : `<span>${vaEtichetta(d)}</span>`;
 		return `<div class="va-doc${aperto ? " aperto" : ""}">
     <button class="va-mini" onclick="apriDocumentoPrivato('${d.id}')" aria-label="Apri ${vaEsc(d.titolo)}">${mini}</button>
-    <button class="va-tit" onclick="vaApri('${d.id}')"><b>${vaEsc(d.titolo)}</b><small>${vaEsc(DB.DOC_TIPI[d.categoria] || "Documento")}${d.autore_ruolo && !mio ? " · " + vaEsc(d.autore_ruolo) : ""}</small></button>
+    <button class="va-tit" onclick="vaApri('${d.id}')"><b>${vaEsc(d.nome || d.titolo)}</b><small>${vaEsc(DB.DOC_TIPI[d.categoria] || "Documento")}${d.autore_ruolo && !mio ? " · " + vaEsc(d.autore_ruolo) : ""}</small></button>
     ${aperto ? `<div class="va-azioni">
       <button onclick="apriDocumentoPrivato('${d.id}')">Apri</button>
-      ${mio ? `<button onclick="vaModifica('${d.id}')">Cambia tipo o zona</button>` : ""}
+      ${mio ? `<button onclick="vaModifica('${d.id}')">Cambia tipo o zona</button>` : ""}${mio && /^image\//.test(d.mime || "") && typeof dsApri === "function" ? `<button onclick="dsApri('${d.id}')">Disegna e misura</button>` : ""}
       <button onclick="vaChiVede('${d.id}')">Chi lo vede</button>
       ${mio && mia ? `<button class="urg" onclick="vaElimina('${d.id}')">Elimina</button>` : ""}
     </div>${chi ? vaChiHtml(d, chi) : ""}` : ""}
@@ -2290,7 +2290,7 @@
     ${attesa}
     ${VA.lista.length ? VA.lista.map((d) => vaRiga(d, true)).join("") : a ? "" : "<div class=\"vs-nota\">Nessun allegato in questa visita. Video fino a 3 minuti, file fino a 50 MB. Le lastre DICOM si salvano e si scaricano: per vederle serve il tuo programma.</div>"}
     ${VA.altri.length ? `<details class="va-altri"><summary>Documenti di questo cavallo · ${VA.altri.length}</summary>${VA.altri.map((d) => vaRiga(d, false)).join("")}</details>` : ""}
-    <div class="vs-nota">Privati: li vedete tu e il proprietario. Il nome lo dà Equo (cavallo, data, tipo, zona).</div>
+    <div class="vs-nota">Privati: all'inizio li vedi solo tu; scegli chi li vede con «Chi lo vede» (Per sempre, 7 giorni o Nascosto). Il nome lo dà Equo (cavallo, data, tipo, zona); lo cambi da Menu › Archivio.</div>
   </section>`;
 	}
 	function vaRidisegna() {
@@ -2336,6 +2336,7 @@
 		await vaCarica$1();
 	}
 	async function vaChiVede(id) {
+		if (typeof arcChiLoVede === "function") return arcChiLoVede(id);
 		VA.chi[id] = await DB.chiVedeDocumento(id) || { errore: true };
 		vaRidisegna();
 	}
@@ -3002,7 +3003,20 @@
 		const { error } = await DB.updateInterventoMascalcia(e.id, { referto_proprietario: !!on });
 		if (error) return { error };
 		const { data: vis } = await sb.from("visite_pro").select("id").eq("intervento_id", e.id);
-		if (vis?.length) await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map((x) => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+		if (vis?.length) {
+			await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map((x) => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+			const prop = (typeof vrDestinatari$1 === "function" ? vrDestinatari$1() : []).find((x) => x.k === "prop")?.cliente;
+			if (prop?.cliente_user_id) {
+				const { data: refs } = await sb.from("documenti").select("id").in("visita_id", vis.map((x) => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+				for (const r of refs || []) await sb.rpc("equo_doc_imposta", {
+					p_doc: r.id,
+					p_user: prop.cliente_user_id,
+					p_centro: null,
+					p_modo: on ? "sempre" : "nascosto",
+					p_motivo: "chat"
+				}).then(() => {}, () => {});
+			}
+		}
 		return { error: null };
 	}
 	var vrDB = { async refertoSoloAutore(id, solo) {
@@ -3746,7 +3760,7 @@
 		const gruppi = VC_GRUPPI.map(([k, t]) => [t, VC.docs.filter((d) => d.categoria === k)]).filter(([, l]) => l.length);
 		box.innerHTML = attesa + (gruppi.length ? gruppi.map(([t, l]) => `<div class="vc-h">${vcEsc(t)} · ${l.length}</div>${l.map((d) => `<button type="button" class="vc-doc" onclick="apriDocumentoPrivato('${d.id}')">
       <span class="et">${/^image\//.test(d.mime || "") ? "FOTO" : /^video\//.test(d.mime || "") ? "VIDEO" : d.mime === "application/dicom" ? "DICOM" : "PDF"}</span>
-      <span class="c"><b>${vcEsc(d.titolo)}</b><small>${vcEsc(d.autore_user_id === currentUser?.id ? "tuo" : d.autore_ruolo || "condiviso con te")}</small></span></button>`).join("")}`).join("") : a ? "" : "<div class=\"muted\" style=\"font-size:13px\">Nessun documento privato per questo cavallo. Referti, lastre e foto delle visite arrivano qui da soli.</div>") + "<div class=\"muted\" style=\"font-size:11.5px;line-height:1.5;margin-top:8px\">Privati: li vedete tu e il proprietario. Si aprono con un link che dura pochi minuti.</div>";
+      <span class="c"><b>${vcEsc(d.nome || d.titolo)}</b><small>${vcEsc(d.autore_user_id === currentUser?.id ? "tuo" : d.autore_ruolo || "condiviso con te")}</small></span></button>`).join("")}`).join("") : a ? "" : "<div class=\"muted\" style=\"font-size:13px\">Nessun documento privato per questo cavallo. Referti, lastre e foto delle visite arrivano qui da soli.</div>") + "<div class=\"muted\" style=\"font-size:11.5px;line-height:1.5;margin-top:8px\">Privati: li vedete tu e il proprietario. Si aprono con un link che dura pochi minuti.</div>";
 	}
 	function vcTitolo() {
 		const a = VC.attesa;

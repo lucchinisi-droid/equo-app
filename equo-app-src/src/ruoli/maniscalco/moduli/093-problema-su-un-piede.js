@@ -106,7 +106,7 @@ async function mlSalvaProblema(){
       const testo = `🔎 ${r.nome} · ${p.piedi.map(mlNomePiede).join(" e ")}: ${p.voci.join(", ")}.${p.nota ? " " + p.nota : ""}`
         + (ric ? ` Lo ricontrollo il ${formatDataBreve(ric)}.` : "") + (p.vet ? " Ti consiglio di sentire anche il veterinario." : "");
       await DB.insertMessaggioMascalcia({ cliente_mascalcia_id: e.cliente_mascalcia_id, tipo: "testo", testo });
-      if(fotoPath) await sb.rpc("equo_aggiungi_allegato", { p_vista: "maniscalco", p_id: p.cav, p_nome: `Problema ${p.piedi.map(mlSigla).join("-")} ${mlOggi()}.jpg`, p_path: fotoPath, p_mime: "image/jpeg", p_byte: null }).then(() => {}, () => {});
+      if(fotoPath) await sb.rpc("equo_aggiungi_allegato", { p_vista: "maniscalco", p_id: p.cav, p_nome: `Problema ${p.piedi.map(mlSigla).join("-")} ${mlOggi()}.jpg`, p_path: fotoPath, p_mime: "image/jpeg", p_byte: null, p_vedi: "proprietario" }).then(() => {}, () => {});
     }
   } catch(err){ console.error("problema piede:", err); showToast("Non salvato, riprova."); return; }
   ml.problemi = (ml.problemi || []).concat(p.piedi.map(k => ({ ev: p.ev, cav: p.cav, piede: k })));

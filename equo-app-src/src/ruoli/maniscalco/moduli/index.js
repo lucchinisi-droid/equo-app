@@ -8,7 +8,7 @@ import { aggiornaEtichetteNuovoCliente, apriCollegaStruttura, apriFerroCavallo, 
 import { closeClienteDetail, descrFerraturaCavallo, eliminaCavalloEditCliente, ferDettaglio, ferIntervallo, ferIntervalloImposta, ferLavoro, ferMisura, ferSistema, ferStatoSistema, ferTipo, impostaMisuraPredefinita, salvaEditCliente, salvaSchedaFerratura, testoFerroIntervento } from "./035-ferratura-del-cavallo-scheda-libretto-fe.js";
 import { confermaArchiviaCliente, deleteCurrentCliente, mostraSpostaCavalli, spostaCavalliCliente } from "./036-archivia-elimina-cliente.js";
 import { cavalliQuiStanno, loadClienteInterventi, statoCavalloPro } from "./037-scheda-cliente-a-box-scheda-del-cavallo.js";
-import { aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderBoxCavalliCliente, renderCorpoCavalloPro, renderTabCavalloPro, unisciSimili } from "./038-avviso-sembra-lo-stesso-cavallo.js";
+import { ricaricaAllegatiAperti, aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderBoxCavalliCliente, renderCorpoCavalloPro, renderTabCavalloPro, unisciSimili } from "./038-avviso-sembra-lo-stesso-cavallo.js";
 import { razzaImposta, razzaSegnala, razzaValore } from "./039-razza-menu-con-ricerca-stesso-codice-in.js";
 import { hpGiornoEtichetta, renderProDeadlines } from "./040-home-pro-prossimi-appuntamenti-da-richia.js";
 import { apriGiro, apriListaHome, apriRichiamo, apriScadenzaCavallo, confermaGiro, hpFiltra, hpSegnaFatto, richiamoAnteprima, richiamoAzione, richiamoCambiaData, richiamoMostraAzioni, richiamoRimanda, richiamoSposta } from "./041-giro-della-zona-premium.js";
@@ -30,6 +30,8 @@ import { apriInvioConto, contoAnnulla, contoCondividi, contoInviaChat, contoScar
 import { creaPdfConto } from "./061-pdf-del-conto-dai-dati-salvati-snapshot.js";
 import { apriAbbinamentoDaChat, closeFarrierChatThread, confermaAbbinamentoCavalli, openFarrierChatThread, proponiAbbinamentoCavalli, renderFarrierChatThread, saltaAbbinamentoCavalli, sendFarrierChatMessage } from "./074-abbinamento-cavalli-del-maniscalco-caval.js";
 import { apriQrStruttura, closeQrScanner, gestisciCodiceScansionato, openQrScanner } from "./076-scanner-qr-ripristinato-27-09.js";
+import { ARC, arcDB, apriArchivio, arcChiudi, arcRender, arcCerca, arcFiltro, arcOrdine, arcApriCartella, arcSelezione, arcSpunta, arcAzioni, arcDisegna, arcRinomina, arcSalvaNome, arcSposta, arcSpostaIn, arcNuovaCartella, arcCreaCartella, arcOpzioniCartella, arcSalvaCartella, arcEliminaCartella, arcChiLoVede, arcChiScegli, arcConsulto, arcConsultoScegli, arcChiSalva, arcMandaChat, arcScarica, arcElimina, arcRipristina, arcCarica, arcCaricaCavallo, arcCaricaFile, arcCaricaRender, arcRicarica, docVisualizza, docSegni, docChiudi, docDisegna } from "./123-archivio.js";
+import { DS, CF, dsApri, dsChiudi, dsSalva, dsStrumento, dsColore, dsMostra, dsSeleziona, dsTogli, dsNota, dsCalibra, dsAnnulla, dsRifai, dsConfronto, dsConfrontoScegli, dsConfrontoModo, dsConfrontoDisegna, dsCopiaSegni, dsSalvaConfronto, dsConfrontoChiudi, dsCanvasConSegni, dsDisegnaSegni } from "./124-disegna.js";
 import { ccDB, ccSezioneHtml, ccCaricaNote, ccApri, ccScegli, ccAltro, ccDoc, ccAvvisa, ccInvia, ccBollaHtml, ccRicevi, ccCeLho, ccPreviewTesto } from "./122-cavallo-al-collega.js";
 import { caricaCavalliMiei, nomiCavalliCliente, paroleCercaCliente } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import "./087-2-scelta-del-cliente-nell-appuntamento.js";
@@ -475,5 +477,8 @@ Object.assign(window, {
   hmConferme,
   hmContaConferme,
   apriQrStruttura,
-  ccDB, ccSezioneHtml, ccCaricaNote, ccApri, ccScegli, ccAltro, ccDoc, ccAvvisa, ccInvia, ccBollaHtml, ccRicevi, ccCeLho, ccPreviewTesto
+  ccDB, ccSezioneHtml, ccCaricaNote, ccApri, ccScegli, ccAltro, ccDoc, ccAvvisa, ccInvia, ccBollaHtml, ccRicevi, ccCeLho, ccPreviewTesto,
+  ricaricaAllegatiAperti,
+  ARC, arcDB, apriArchivio, arcChiudi, arcRender, arcCerca, arcFiltro, arcOrdine, arcApriCartella, arcSelezione, arcSpunta, arcAzioni, arcDisegna, arcRinomina, arcSalvaNome, arcSposta, arcSpostaIn, arcNuovaCartella, arcCreaCartella, arcOpzioniCartella, arcSalvaCartella, arcEliminaCartella, arcChiLoVede, arcChiScegli, arcConsulto, arcConsultoScegli, arcChiSalva, arcMandaChat, arcScarica, arcElimina, arcRipristina, arcCarica, arcCaricaCavallo, arcCaricaFile, arcCaricaRender, arcRicarica, docVisualizza, docSegni, docChiudi, docDisegna,
+  DS, CF, dsApri, dsChiudi, dsSalva, dsStrumento, dsColore, dsMostra, dsSeleziona, dsTogli, dsNota, dsCalibra, dsAnnulla, dsRifai, dsConfronto, dsConfrontoScegli, dsConfrontoModo, dsConfrontoDisegna, dsCopiaSegni, dsSalvaConfronto, dsConfrontoChiudi, dsCanvasConSegni, dsDisegnaSegni
 });

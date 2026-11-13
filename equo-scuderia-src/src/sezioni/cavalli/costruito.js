@@ -2780,6 +2780,7 @@
 	async function apriAllegatoScud(id, btn) {
 		const a = allegatiScud.find((x) => x.id === id);
 		if (!a) return;
+		if (a.documento) return apriDocumentoScud(a, btn);
 		const w = window.open("", "_blank");
 		if (btn) btn.disabled = true;
 		const { data, error } = await sb.storage.from("cavalli-allegati").createSignedUrl(a.path, 600);
@@ -2791,6 +2792,49 @@
 		}
 		if (w) w.location.href = data.signedUrl;
 		else window.location.href = data.signedUrl;
+	}
+	var AVVISO_DOC = "Questo documento è protetto dalla normativa sulla privacy e dai diritti del professionista che lo ha inviato. Non puoi condividerlo, inoltrarlo o pubblicarlo senza la sua autorizzazione.";
+	async function apriDocumentoScud(a, btn) {
+		if (btn) btn.disabled = true;
+		const { data: info, error } = await sb.rpc("equo_doc_apri", { p_doc: a.id });
+		const url = info?.ok ? (await sb.storage.from(info.bucket || "documenti").createSignedUrl(info.path, 600)).data?.signedUrl : null;
+		if (btn) btn.disabled = false;
+		if (error || !url) {
+			showToast("Non hai accesso a questo documento o non riesco ad aprirlo.");
+			return;
+		}
+		let ov = document.getElementById("scud-doc-avviso");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.id = "scud-doc-avviso";
+			ov.className = "modal-overlay";
+			document.body.appendChild(ov);
+		}
+		ov.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="scud-doc-t" style="max-width:460px">
+    <div class="modal-title" id="scud-doc-t">${info.avviso ? "Documento protetto" : escapeHtml(info.nome || info.titolo || a.nome)}</div>
+    ${info.avviso ? `<p style="font-size:15px;line-height:1.5;margin:6px 0 12px">${escapeHtml(AVVISO_DOC)}</p>
+      <label style="display:flex;align-items:center;gap:10px;min-height:44px;font-weight:700"><input type="checkbox" id="scud-doc-ok" style="width:20px;height:20px"> Ho letto e accetto</label>
+      <div style="color:var(--muted);font-size:12px;margin:4px 0 10px">La tua conferma viene registrata.</div>` : `<div style="color:var(--muted);font-size:13px;margin-bottom:10px">Da ${escapeHtml(info.autore_nome || "un professionista")} · il link vale 10 minuti.</div>`}
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" id="scud-doc-no">Non ora</button>
+      <a class="btn btn-primary" id="scud-doc-apri" href="${escapeHtml(url)}" target="_blank" rel="noopener" ${info.avviso ? "aria-disabled=\"true\" style=\"pointer-events:none;opacity:.45\"" : ""}>Apri il documento</a></div></div>`;
+		ov.classList.add("active");
+		const chiudi = () => ov.classList.remove("active");
+		ov.onclick = (ev) => {
+			if (ev.target === ov) chiudi();
+		};
+		document.getElementById("scud-doc-no").onclick = chiudi;
+		const apri = document.getElementById("scud-doc-apri");
+		apri.onclick = () => {
+			if (info.avviso) sb.rpc("equo_doc_accetta_avviso", { p_doc: a.id }).then(() => {}, () => {});
+			setTimeout(chiudi, 300);
+		};
+		const ok = document.getElementById("scud-doc-ok");
+		if (ok) ok.onchange = () => {
+			apri.style.pointerEvents = ok.checked ? "" : "none";
+			apri.style.opacity = ok.checked ? "" : ".45";
+			apri.setAttribute("aria-disabled", String(!ok.checked));
+		};
 	}
 	async function eliminaAllegatoScud(id) {
 		const a = allegatiScud.find((x) => x.id === id);

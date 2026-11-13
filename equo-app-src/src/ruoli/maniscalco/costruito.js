@@ -366,7 +366,7 @@
       <div class="d">${conPrezzo.length} ${conPrezzo.length === 1 ? "appuntamento" : "appuntamenti"} con prezzo${piuAvanti ? ` · più avanti in agenda altri ${euroTondo(piuAvanti)}` : ""}</div></div></div>
     <div class="inc-grafico" style="height:96px;margin-top:8px">${settBarre.map(([l, v]) => `<div class="c" title="${escapeHtml(l)}: ${euroTondo(v)}"><small>${v ? fmtK(v) : ""}</small><div class="b${v ? "" : " zero"}" style="height:${Math.max(2, Math.round(v / maxB * 62))}px"></div><small>${escapeHtml(l)}</small></div>`).join("")}</div>
     ${senzaPrezzo.length ? `<div class="inc-avviso">⚠️ <span><b>${senzaPrezzo.length} ${senzaPrezzo.length === 1 ? "appuntamento senza prezzo" : "appuntamenti senza prezzo"}</b><br>non ${senzaPrezzo.length === 1 ? "è contato" : "sono contati"}</span><button class="btn btn-outline btn-sm" onclick="aggiungiPrezziMancanti()">Aggiungi</button></div>` : ""}</div>`;
-		const attivi = clientiAttivi();
+		const attivi = clientiAttivi$1();
 		const idAttivi = new Set(attivi.map((c) => c.id));
 		const cavAttivi = incCavalli.filter((c) => idAttivi.has(c.cliente_mascalcia_id));
 		const media = (l) => {
@@ -669,7 +669,8 @@
 					p_nome: `Problema ${p.piedi.map(mlSigla).join("-")} ${mlOggi()}.jpg`,
 					p_path: fotoPath,
 					p_mime: "image/jpeg",
-					p_byte: null
+					p_byte: null,
+					p_vedi: "proprietario"
 				}).then(() => {}, () => {});
 			}
 		} catch (err) {
@@ -4289,7 +4290,7 @@
 		await pagDopo();
 	}
 	async function pagTogliRate() {
-		if (!await chiediSiNo("Togliere le rate?", "I pagamenti già registrati restano; spariscono solo le scadenze.")) return;
+		if (!await chiediSiNo$1("Togliere le rate?", "I pagamenti già registrati restano; spariscono solo le scadenze.")) return;
 		const e = await PagDB.salvaRate(pag.t, []);
 		if (e) {
 			showToast(pagErrore(e));
@@ -4302,7 +4303,7 @@
 		pagDopo();
 	}
 	async function pagElimina(gruppo) {
-		if (!await chiediSiNo("Eliminare questo pagamento?", "Usalo solo se l'hai registrato per sbaglio: l'importo torna da incassare.")) return;
+		if (!await chiediSiNo$1("Eliminare questo pagamento?", "Usalo solo se l'hai registrato per sbaglio: l'importo torna da incassare.")) return;
 		const e = await PagDB.elimina(gruppo);
 		if (e) {
 			showToast(pagErrore(e));
@@ -4547,7 +4548,7 @@
 			showToast("È un appuntamento con la scuderia: segnalo fatto il giorno dell'intervento.");
 			return null;
 		}
-		return await chiediSiNo(`Già fatto oggi?`, `L'appuntamento è per ${formatDataBreve(e.data_intervento)}. «Sì» lo segna fatto con la data di oggi.`) ? { data_intervento: oggi } : null;
+		return await chiediSiNo$1(`Già fatto oggi?`, `L'appuntamento è per ${formatDataBreve(e.data_intervento)}. «Sì» lo segna fatto con la data di oggi.`) ? { data_intervento: oggi } : null;
 	}
 	async function datiDalRiquadro(e, anticipo) {
 		const upd = {
@@ -4653,7 +4654,7 @@
 		mlRender();
 	}
 	async function mlAnnulla() {
-		if (!await chiediSiNo("Uscire dalla modalità Lavoro?", "La tappa resta in agenda da fare; le notifiche tornano attive.")) return;
+		if (!await chiediSiNo$1("Uscire dalla modalità Lavoro?", "La tappa resta in agenda da fare; le notifiche tornano attive.")) return;
 		ml = null;
 		mlProb = null;
 		mlSalva();
@@ -5047,7 +5048,7 @@
 		const ns = document.getElementById("hm-n-scad");
 		ns.hidden = !nScad;
 		ns.textContent = nScad;
-		const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
+		const attivi = typeof clientiAttivi$1 === "function" ? clientiAttivi$1() : [];
 		const nCav = typeof cavalliCartella$1 === "function" ? cavalliCartella$1().length : 0;
 		const nCli = attivi.filter((c) => !isStruttura(c)).length, nScu = attivi.filter(isStruttura).length;
 		document.getElementById("hm-r-cav").innerHTML = `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`;
@@ -5552,7 +5553,7 @@
 		}
 		if (scambio) {
 			const a = ev(spostato), b = ev(scambio), oa = String(a.ora).slice(0, 5), ob = String(b.ora).slice(0, 5);
-			if (await chiediSiNo("Scambiare anche gli orari?", `Hai messo ${agNomeCavallo(a) || "questo cavallo"} (${oa}) ${ids.indexOf(spostato) < ids.indexOf(scambio) ? "prima" : "dopo"} di ${agNomeCavallo(b) || "un altro"} (${ob}). Sì: ${agNomeCavallo(a) || "il primo"} alle ${ob} e ${agNomeCavallo(b) || "l'altro"} alle ${oa}; i clienti collegati ricevono l'avviso. No: cambia solo l'ordine del giro.`)) {
+			if (await chiediSiNo$1("Scambiare anche gli orari?", `Hai messo ${agNomeCavallo(a) || "questo cavallo"} (${oa}) ${ids.indexOf(spostato) < ids.indexOf(scambio) ? "prima" : "dopo"} di ${agNomeCavallo(b) || "un altro"} (${ob}). Sì: ${agNomeCavallo(a) || "il primo"} alle ${ob} e ${agNomeCavallo(b) || "l'altro"} alle ${oa}; i clienti collegati ricevono l'avviso. No: cambia solo l'ordine del giro.`)) {
 				for (const [x, nuova] of [[a, ob], [b, oa]]) {
 					const prec = {
 						data: x.data_intervento,
@@ -6012,7 +6013,7 @@
 	async function contoSegnaPagato() {
 		const c = contoAperto;
 		if (!c) return;
-		if (!await chiediSiNo("Conto pagato?", `${c.n_lavori === 1 ? "Il lavoro" : "Tutti i " + c.n_lavori + " lavori"} del conto ${contoCodice(c)} (${contoEuro(c.totale)}) ${c.n_lavori === 1 ? "risulterà saldato" : "risulteranno saldati"}.`)) return;
+		if (!await chiediSiNo$1("Conto pagato?", `${c.n_lavori === 1 ? "Il lavoro" : "Tutti i " + c.n_lavori + " lavori"} del conto ${contoCodice(c)} (${contoEuro(c.totale)}) ${c.n_lavori === 1 ? "risulterà saldato" : "risulteranno saldati"}.`)) return;
 		const { error } = await ContoDB.pagato(c.id);
 		if (error) {
 			showToast("Errore: " + (error.message || "riprova"));
@@ -6030,7 +6031,7 @@
 	async function contoAnnulla() {
 		const c = contoAperto;
 		if (!c) return;
-		if (!await chiediSiNo("Annullare il conto?", `Il conto ${contoCodice(c)} resta nell'elenco come «annullato» e i suoi lavori tornano da saldare: potrai rifarlo.`)) return;
+		if (!await chiediSiNo$1("Annullare il conto?", `Il conto ${contoCodice(c)} resta nell'elenco come «annullato» e i suoi lavori tornano da saldare: potrai rifarlo.`)) return;
 		const { error } = await ContoDB.annulla(c.id);
 		if (error) {
 			showToast("Errore: " + (error.message || "riprova"));
@@ -6044,12 +6045,12 @@
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/086-indice-dei-cavalli-dei-clienti-professio.js
 	var cavalliMieiIndice = {};
-	var cavalliMieiLista = [];
+	var cavalliMieiLista$1 = [];
 	async function caricaCavalliMiei() {
 		try {
-			cavalliMieiLista = await DB.listCavalliMiei() || [];
+			cavalliMieiLista$1 = await DB.listCavalliMiei() || [];
 			const idx = {};
-			cavalliMieiLista.forEach((c) => {
+			cavalliMieiLista$1.forEach((c) => {
 				if (!c.cliente_mascalcia_id) return;
 				(idx[c.cliente_mascalcia_id] = idx[c.cliente_mascalcia_id] || []).push(c.nome || "");
 			});
@@ -6057,7 +6058,7 @@
 		} catch (e) {
 			console.warn("caricaCavalliMiei:", e);
 		}
-		return cavalliMieiLista;
+		return cavalliMieiLista$1;
 	}
 	function nomiCavalliCliente(c) {
 		const da = cavalliMieiIndice[c.id] || [];
@@ -6105,7 +6106,7 @@
 	async function contoAnnullaERifai(id) {
 		const c = (contoCtx?.aperti || []).find((x) => x.id === id);
 		if (!c) return;
-		if (!await chiediSiNo("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
+		if (!await chiediSiNo$1("Annullare e rifare il conto?", `Il conto ${contoCodice(c)} diventa «annullato» e i suoi ${contoLavori(c.n_lavori)} tornano liberi: subito dopo puoi fare il conto nuovo, anche con i lavori aggiunti nel frattempo.`)) return;
 		const { error } = await ContoDB.annulla(id);
 		if (error) {
 			showToast("Errore: " + (error.message || "riprova"));
@@ -8860,7 +8861,7 @@
 			return false;
 		}
 		Object.assign(cv, campi, { id });
-		[schedaCavalli, cavalliMieiLista].forEach((l) => (l || []).forEach((x) => {
+		[schedaCavalli, cavalliMieiLista$1].forEach((l) => (l || []).forEach((x) => {
 			if (x !== cv && x.id === id) Object.assign(x, campi);
 		}));
 		if (messaggio) showToast(messaggio);
@@ -9164,7 +9165,7 @@
 	async function eliminaInterventoOrfano(id, btn) {
 		const i = (clienteInterventiCache || []).find((x) => x.id === id);
 		if (!i) return;
-		if (!await chiediSiNo("Eliminare questo intervento?", `${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura} del ${formatDate(i.data_intervento)}${i.importo != null ? " (" + i.importo + " €)" : ""}: sparisce anche da incassi e scadenze.`)) return;
+		if (!await chiediSiNo$1("Eliminare questo intervento?", `${TIPO_FERRATURA_LABELS[i.tipo_ferratura] || i.tipo_ferratura} del ${formatDate(i.data_intervento)}${i.importo != null ? " (" + i.importo + " €)" : ""}: sparisce anche da incassi e scadenze.`)) return;
 		btn.disabled = true;
 		const { error } = await DB.deleteInterventoMascalcia(id);
 		btn.disabled = false;
@@ -9223,9 +9224,9 @@
       <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(a.nome)}</div>
         <div class="muted" style="font-size:11.5px">${a.mio ? "caricato da te" : "caricato " + (chi[a.autore_ruolo] || "") + (a.autore_nome ? " " + escapeHtml(a.autore_nome) : "")} · ${formatDataBreve(String(a.created_at).slice(0, 10))}${a.byte ? " · " + (a.byte > 1048576 ? (a.byte / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(a.byte / 1024)) + " KB") : ""}</div></div>
       <button class="btn btn-outline btn-sm" onclick="apriAllegato('${boxId}', '${a.id}', this)">Apri</button>
-      ${a.mio ? `<button class="btn btn-ghost btn-sm" style="color:var(--red);padding:6px" aria-label="Elimina" onclick="eliminaAllegato('${boxId}', '${a.id}')">✕</button>` : ""}
+      ${a.mio && a.documento && typeof arcAzioni === "function" ? `<button class="btn btn-ghost btn-sm" style="padding:6px" aria-label="Rinomina, chi lo vede, disegna, elimina" onclick="arcAzioni('${a.id}')">⋯</button>` : a.mio ? `<button class="btn btn-ghost btn-sm" style="color:var(--red);padding:6px" aria-label="Elimina" onclick="eliminaAllegato('${boxId}', '${a.id}')">✕</button>` : ""}
     </div>`;
-		}).join("") : "<div class=\"muted\" style=\"font-size:13px\">Nessun allegato. Carica lastre, referti o foto: li vedranno anche gli altri che seguono il cavallo.</div>";
+		}).join("") : vista === "maniscalco" ? "<div class=\"muted\" style=\"font-size:13px\">Nessun allegato. Carica lastre, referti o foto: all'inizio li vedi solo tu, poi scegli chi li vede con «⋯ › Chi lo vede» (anche da Menu › Archivio).</div>" : "<div class=\"muted\" style=\"font-size:13px\">Nessun allegato. Carica lastre, referti o foto: li vedranno anche gli altri che seguono il cavallo.</div>";
 	}
 	async function caricaAllegatoCavallo(input, boxId, vista) {
 		const f = input.files && input.files[0];
@@ -9270,12 +9271,13 @@
 			showToast(data && data.errore || "Caricamento non riuscito, riprova.");
 			return;
 		}
-		showToast("Allegato caricato");
+		showToast(data.documento ? "Caricato · lo vedi solo tu: scegli chi lo vede con «⋯»" : "Allegato caricato");
 		await caricaAllegatiCavallo(boxId, vista, ctx.cv);
 	}
 	async function apriAllegato(boxId, id, btn) {
 		const a = (allegatiCtx[boxId]?.lista || []).find((x) => x.id === id);
 		if (!a) return;
+		if (a.documento && typeof docVisualizza === "function") return docVisualizza(a.id);
 		const w = window.open("", "_blank");
 		if (btn) btn.disabled = true;
 		const { data, error } = await sb.storage.from("cavalli-allegati").createSignedUrl(a.path, 600);
@@ -9288,10 +9290,15 @@
 		if (w) w.location.href = data.signedUrl;
 		else window.location.href = data.signedUrl;
 	}
+	function ricaricaAllegatiAperti$1() {
+		Object.entries(allegatiCtx).forEach(([box, c]) => {
+			if (document.getElementById(box)) caricaAllegatiCavallo(box, c.vista, c.cv);
+		});
+	}
 	async function eliminaAllegato(boxId, id) {
 		const a = (allegatiCtx[boxId]?.lista || []).find((x) => x.id === id);
 		if (!a) return;
-		if (!await chiediSiNo("Eliminare questo allegato?", `«${a.nome}» sparisce per tutti quelli che seguono il cavallo. L'eliminazione resta nello storico.`)) return;
+		if (!await chiediSiNo$1("Eliminare questo allegato?", `«${a.nome}» sparisce per tutti quelli che seguono il cavallo. L'eliminazione resta nello storico.`)) return;
 		const { data, error } = await sb.rpc("equo_elimina_allegato", { p_id: id });
 		if (error || !data?.ok) {
 			showToast(data && data.errore || "Non riuscito, riprova.");
@@ -9499,7 +9506,7 @@
 		if (schedaCavalloKey && document.getElementById("cavallo-pro-view").style.display === "block") await apriSchedaCavalloPro(schedaCavalloKey, true);
 	}
 	function cavalliQuiStanno(luogoId) {
-		return (cavalliMieiLista || []).filter((c) => c.ubicazione_tipo === "scuderia" && c.ubicazione_cliente_id === luogoId && c.cliente_mascalcia_id !== luogoId).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		return (cavalliMieiLista$1 || []).filter((c) => c.ubicazione_tipo === "scuderia" && c.ubicazione_cliente_id === luogoId && c.cliente_mascalcia_id !== luogoId).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 	}
 	var quiInterventiCache = [];
 	async function renderCavalliQui(clienteId) {
@@ -9570,7 +9577,7 @@
 	// equo-app-src/src/ruoli/maniscalco/moduli/049-prezzo-mancante-promemoria-salvando-un-a.js
 	var prezziResolve = null;
 	function prezzoSuggerito(clienteId, cavalloId, tipo) {
-		const ab = cavalloId ? prezzoCavallo((cavalliMieiLista || []).find((c) => c.id === cavalloId), tipo) : null;
+		const ab = cavalloId ? prezzoCavallo((cavalliMieiLista$1 || []).find((c) => c.id === cavalloId), tipo) : null;
 		if (ab != null) return {
 			v: ab,
 			fonte: "prezzo abituale del cavallo"
@@ -9718,7 +9725,7 @@
 				}
 				const righe = [];
 				const soloCavalli = window.intCercaSolo === "cavallo";
-				clientiAttivi().forEach((c) => {
+				clientiAttivi$1().forEach((c) => {
 					const cavalli = nomiCavalliCliente(c);
 					if (!soloCavalli && cercaCorrisponde(parole, c.nome + " " + (c.telefono || ""))) righe.push({
 						c,
@@ -9773,7 +9780,7 @@
 		const inp = document.getElementById("int-cerca-input");
 		inp.value = "";
 		document.getElementById("int-cerca-lista").classList.remove("aperta");
-		wrap.style.display = !sel.disabled && (clientiAttivi().length >= CERCA_MIN || window.intCercaSolo === "cavallo") ? "block" : "none";
+		wrap.style.display = !sel.disabled && (clientiAttivi$1().length >= CERCA_MIN || window.intCercaSolo === "cavallo") ? "block" : "none";
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/116-onboarding.js
 	var ONB_STRUTTURA = /^(scuderia|scuderie|centro|circolo|maneggio|asd|a\.s\.d\.?|ssd|s\.s\.d\.?|allevamento|club|tenuta|azienda agricola|agriturismo|ranch|associazione|equitazione|horse|team|pony club)\b|\b(asd|a\.s\.d\.?|ssd|srl|s\.r\.l\.|ranch|club|equestre|ippico|ippica)$/i;
@@ -9893,7 +9900,7 @@
 		const x = lista[0], altri = lista.length - 1;
 		const stesso = usaEsistente && x.tipo === "mio" && !x.archiviato && x.id && clienteId && x.cliente_id === clienteId;
 		const tieni = stesso ? `Usa ${x.nome} di ${x.cliente}` : "È lo stesso cavallo";
-		if (!await chiediSiNo(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È lo stesso cavallo o un altro con lo stesso nome?`, {
+		if (!await chiediSiNo$1(`${x.nome} ${onbDove(x)}`, `${x.motivo === "microchip" ? "Stesso microchip. " : ""}${x.codice ? "Codice " + x.codice + ". " : ""}${altri > 0 ? "Ci sono altri " + altri + " cavalli simili. " : ""}È lo stesso cavallo o un altro con lo stesso nome?`, {
 			si: tieni,
 			no: "È un altro cavallo: scheda nuova"
 		})) return { crea: true };
@@ -9943,9 +9950,9 @@
 		if (c.chiediDoppione !== false) {
 			const gia = (await DB.listClientiMascalcia()).find((x) => !x.archiviato_il && onbNorm(x.nome) === onbNorm(nome));
 			if (gia) {
-				const cav = (cavalliMieiLista || []).filter((v) => v.cliente_mascalcia_id === gia.id && !v.archiviato_il).map((v) => v.nome);
+				const cav = (cavalliMieiLista$1 || []).filter((v) => v.cliente_mascalcia_id === gia.id && !v.archiviato_il).map((v) => v.nome);
 				const quali = cav.length ? (cav.length === 1 ? "1 cavallo: " : cav.length + " cavalli: ") + cav.slice(0, 4).join(", ") + (cav.length > 4 ? "…" : "") : gia.nome_cavallo ? "cavalli: " + gia.nome_cavallo : "";
-				if (await chiediSiNo(`${gia.nome} c'è già tra i tuoi clienti`, (quali ? quali.charAt(0).toUpperCase() + quali.slice(1) + ". " : "") + "È la stessa persona o un altro cliente con lo stesso nome?", {
+				if (await chiediSiNo$1(`${gia.nome} c'è già tra i tuoi clienti`, (quali ? quali.charAt(0).toUpperCase() + quali.slice(1) + ". " : "") + "È la stessa persona o un altro cliente con lo stesso nome?", {
 					si: "Usa questo cliente",
 					no: "È un'altra persona"
 				})) {
@@ -9989,7 +9996,7 @@
 			if (l.length) trovati.push(`${n} (${l[0].tipo === "proprietario" ? "su Equo con " : "sotto "}${l[0].cliente})`);
 		}
 		if (!trovati.length) return [];
-		return await chiediSiNo(trovati.length === 1 ? "Questo cavallo c'è già" : "Questi cavalli ci sono già", trovati.join(", ") + ". Sono altri cavalli? «Sì» crea lo stesso le schede; «No» salva il cliente senza questi cavalli (li colleghi poi dalla scheda giusta).") ? [] : trovati.map((t) => t.replace(/ \(.*$/, ""));
+		return await chiediSiNo$1(trovati.length === 1 ? "Questo cavallo c'è già" : "Questi cavalli ci sono già", trovati.join(", ") + ". Sono altri cavalli? «Sì» crea lo stesso le schede; «No» salva il cliente senza questi cavalli (li colleghi poi dalla scheda giusta).") ? [] : trovati.map((t) => t.replace(/ \(.*$/, ""));
 	}
 	function onbDiChiAggiorna(clienteId) {
 		const box = document.getElementById("ncav-dichi-box"), sel = document.getElementById("ncav-dichi");
@@ -10000,7 +10007,7 @@
 			sel.value = "";
 			return;
 		}
-		const pr = clientiAttivi().filter((k) => !isStruttura(k)).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+		const pr = clientiAttivi$1().filter((k) => !isStruttura(k)).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 		sel.innerHTML = `<option value="">Della scuderia (paga la scuderia)</option>` + (pr.length ? `<optgroup label="Di un mio cliente, sta in ${escapeHtml(c.nome)}">${pr.map((k) => `<option value="${k.id}">${escapeHtml(k.nome)}</option>`).join("")}</optgroup>` : "");
 		box.style.display = "block";
 	}
@@ -10595,7 +10602,7 @@
 		return !!document.getElementById("modal-add-intervento")?.classList.contains("int-lavoro-fatto");
 	}
 	var sinoResolve = null;
-	function chiediSiNo(titolo, testo, etichette) {
+	function chiediSiNo$1(titolo, testo, etichette) {
 		return new Promise((resolve) => {
 			sinoResolve = resolve;
 			document.getElementById("sino-tit").textContent = titolo;
@@ -10609,7 +10616,7 @@
 	}
 	function chiediConferma(testo) {
 		const t = String(testo || ""), i = t.indexOf("?");
-		return i > 0 && i < t.length - 1 ? chiediSiNo(t.slice(0, i + 1).replace(/\s+/g, " "), t.slice(i + 1).replace(/^\s+/, "")) : chiediSiNo(t, "");
+		return i > 0 && i < t.length - 1 ? chiediSiNo$1(t.slice(0, i + 1).replace(/\s+/g, " "), t.slice(i + 1).replace(/^\s+/, "")) : chiediSiNo$1(t, "");
 	}
 	function rispondiSiNo(si) {
 		document.getElementById("eq-pop-sino").classList.remove("attivo");
@@ -11262,7 +11269,7 @@
 				schedaCavalli,
 				cavalliEditCache,
 				cavalliClienteCorrente,
-				cavalliMieiLista
+				cavalliMieiLista$1
 			].forEach((l) => (l || []).forEach((x) => {
 				if (x !== cv && x.id === id) Object.assign(x, campi);
 			}));
@@ -11482,7 +11489,7 @@
 		openModal("modal-limite-clienti");
 	}
 	function apriNuovoCliente(tipo) {
-		if (!isPremium() && clientiAttivi().length >= LIMITE_CLIENTI_FREE) {
+		if (!isPremium() && clientiAttivi$1().length >= LIMITE_CLIENTI_FREE) {
 			mostraLimiteClienti();
 			return;
 		}
@@ -11833,8 +11840,8 @@
 		cliCartella = localStorage.getItem("equo-cli-cartella") || "cavalli";
 	} catch (_) {}
 	function cavalliCartella$1() {
-		const attiviId = new Set(clientiAttivi().map((c) => c.id));
-		const righe = (cavalliMieiLista || []).filter((c) => attiviId.has(c.cliente_mascalcia_id)).map((c) => ({
+		const attiviId = new Set(clientiAttivi$1().map((c) => c.id));
+		const righe = (cavalliMieiLista$1 || []).filter((c) => attiviId.has(c.cliente_mascalcia_id)).map((c) => ({
 			...c,
 			key: "m:" + c.id
 		}));
@@ -11845,7 +11852,7 @@
 		return righe.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 	}
 	async function caricaCartellaCavalli() {
-		const collegati = clientiAttivi().filter((c) => c.cliente_user_id && !c.centro_id);
+		const collegati = clientiAttivi$1().filter((c) => c.cliente_user_id && !c.centro_id);
 		const [eq, inter] = await Promise.all([Promise.all(collegati.map((c) => DEMO_MODE ? Promise.resolve([]) : sb.rpc("cavalli_condivisi_cliente", { p_cliente_id: c.id }).then((r) => (r.data || []).map((h) => ({
 			key: "h:" + h.id,
 			id: null,
@@ -11871,7 +11878,7 @@
 		const box = document.getElementById("clienti-list");
 		if (!box) return;
 		if (typeof eVeterinario === "function" && eVeterinario() && typeof vetRenderClienti === "function") return vetRenderClienti(box);
-		const attivi = clientiAttivi();
+		const attivi = clientiAttivi$1();
 		const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
 		const proprietari = attivi.filter((c) => !isStruttura(c)).sort(alfabetico);
 		const scuderie = attivi.filter(isStruttura).sort(alfabetico);
@@ -11984,11 +11991,11 @@
 		});
 		razzaImposta("ncav-razza", "");
 		const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
-		const pr = clientiAttivi().filter((c) => !isStruttura(c)).sort(alf), sc = clientiAttivi().filter(isStruttura).sort(alf);
+		const pr = clientiAttivi$1().filter((c) => !isStruttura(c)).sort(alf), sc = clientiAttivi$1().filter(isStruttura).sort(alf);
 		document.getElementById("ncav-cliente").innerHTML = "<option value=\"\">Scegli il cliente o la scuderia…</option>" + (pr.length ? `<optgroup label="Clienti">${pr.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + (sc.length ? `<optgroup label="Scuderie">${sc.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + "<option value=\"__nuovo_p\">+ Nuovo cliente</option><option value=\"__nuovo_s\">+ Nuova scuderia</option>";
 		document.getElementById("ncav-errore").style.display = "none";
 		const sel = document.getElementById("ncav-cliente");
-		const pre = typeof clienteId === "string" && clientiAttivi().some((c) => c.id === clienteId) ? clienteId : "";
+		const pre = typeof clienteId === "string" && clientiAttivi$1().some((c) => c.id === clienteId) ? clienteId : "";
 		sel.value = pre;
 		onbDiChiAggiorna(pre);
 		openModal("modal-nuovo-cavallo");
@@ -12026,7 +12033,7 @@
 				});
 				if (error) return errore("Errore: " + error.message);
 				if (data && data.chiedi) {
-					if (!await chiediSiNo(`Spostare ${data.nome}?`, `${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}. Sì: lo sposti in ${data.a}, storico e interventi restano con il cavallo.`)) return;
+					if (!await chiediSiNo$1(`Spostare ${data.nome}?`, `${data.nome} (${data.codice}) ora è tra i cavalli di ${data.da}. Sì: lo sposti in ${data.a}, storico e interventi restano con il cavallo.`)) return;
 					({data, error} = await sb.rpc("pro_cavallo_da_codice", {
 						p_cliente_id: clienteId,
 						p_codice: codice,
@@ -12470,7 +12477,7 @@
 		caricaCartellaCavalli().then(() => renderClientiList()).catch(() => {});
 		await renderProDeadlines$1();
 	}
-	function clientiAttivi() {
+	function clientiAttivi$1() {
 		return (clientiMascalcia || []).filter((c) => !c.archiviato_il);
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/050-sposta-cavallo-dove-sta-il-cavallo-a-cas.js
@@ -12620,7 +12627,7 @@
 		await caricaUbicazioni();
 		const ub = cv.ub || { cliente_mascalcia_id: currentClienteId };
 		const att = luogoDi(ub), pagante = clienteDiId$1(ub.cliente_mascalcia_id || currentClienteId);
-		const scuderie = clientiAttivi().filter((c) => eLuogoScuderia(c)).sort((a, b) => a.nome.localeCompare(b.nome, "it")).map((c) => ({
+		const scuderie = clientiAttivi$1().filter((c) => eLuogoScuderia(c)).sort((a, b) => a.nome.localeCompare(b.nome, "it")).map((c) => ({
 			v: "cli:" + c.id,
 			nome: c.nome,
 			sotto: [c.indirizzo, (() => {
@@ -13231,7 +13238,7 @@
 		document.getElementById("archivia-cliente-sposta").style.display = "none";
 		const ok = document.getElementById("archivia-cliente-ok");
 		ok.disabled = false;
-		const altri = clientiAttivi().filter((x) => x.id !== c.id);
+		const altri = clientiAttivi$1().filter((x) => x.id !== c.id);
 		document.getElementById("archivia-cliente-btn-sposta").style.display = modo === "archivia" && archiviaCavalli.length && altri.length ? "block" : "none";
 		if (modo === "elimina") {
 			document.getElementById("archivia-cliente-titolo").textContent = "Elimina cliente";
@@ -13254,7 +13261,7 @@
 		if (!c) return;
 		document.getElementById("archivia-cliente-cavalli").innerHTML = archiviaCavalli.map((x) => `<label style="display:flex;align-items:center;gap:8px;font-size:13.5px"><input type="checkbox" value="${x.id}" checked> ${escapeHtml(x.nome)}${x.codice_equo ? ` <span class="muted" style="font-size:11.5px">${escapeHtml(x.codice_equo)}</span>` : ""}</label>`).join("");
 		const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
-		const altri = clientiAttivi().filter((x) => x.id !== c.id).sort(alf);
+		const altri = clientiAttivi$1().filter((x) => x.id !== c.id).sort(alf);
 		document.getElementById("archivia-cliente-dest").innerHTML = "<option value=\"\">Scegli dove spostarli…</option>" + altri.map((x) => `<option value="${x.id}">${escapeHtml(x.nome)}${isStruttura(x) ? " (scuderia)" : ""}</option>`).join("");
 		document.getElementById("archivia-cliente-sposta").style.display = "block";
 		document.getElementById("archivia-cliente-btn-sposta").style.display = "none";
@@ -13320,7 +13327,7 @@
 	}
 	async function ripristinaClienteCorrente() {
 		const id = currentClienteId;
-		if (!isPremium() && clientiAttivi().length >= LIMITE_CLIENTI_FREE) {
+		if (!isPremium() && clientiAttivi$1().length >= LIMITE_CLIENTI_FREE) {
 			mostraLimiteClienti();
 			return;
 		}
@@ -13619,6 +13626,2013 @@
 		document.getElementById("collega-maniscalco-error").style.display = "none";
 		openModal("modal-collega-maniscalco");
 		collegaManiscalco();
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/124-disegna.js
+	var DS_COLORI = [
+		{
+			c: "#f0c05e",
+			n: "Giallo"
+		},
+		{
+			c: "#7FD1C9",
+			n: "Azzurro"
+		},
+		{
+			c: "#e2685f",
+			n: "Rosso"
+		},
+		{
+			c: "#ffffff",
+			n: "Bianco"
+		}
+	];
+	var DS_STRUMENTI = [
+		{
+			t: "penna",
+			n: "Penna",
+			ic: "M4 20l4-1 11-11-3-3L5 16z"
+		},
+		{
+			t: "freccia",
+			n: "Freccia",
+			ic: "M5 19L19 5 M10 5h9v9"
+		},
+		{
+			t: "cerchio",
+			n: "Forma",
+			ic: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"
+		},
+		{
+			t: "testo",
+			n: "Testo",
+			ic: "M5 6h14 M12 6v13 M9 19h6"
+		},
+		{
+			t: "misura",
+			n: "Misura",
+			ic: "M3 17L17 3l4 4L7 21z M7 13l2 2 M10 10l2 2 M13 7l2 2"
+		},
+		{
+			t: "angolo",
+			n: "Angolo",
+			ic: "M4 20h16 M4 20L16 5 M10 20a6 6 0 0 0-2-5"
+		},
+		{
+			t: "bilancia",
+			n: "Bilancia",
+			ic: "M12 4v16 M5 8h14 M5 8l-3 6h6z M19 8l-3 6h6z"
+		},
+		{
+			t: "confronto",
+			n: "Prima/dopo",
+			ic: "M3 5h8v14H3z M13 5h8v14h-8z"
+		}
+	];
+	var DS_NOMI = {
+		penna: "Disegno",
+		freccia: "Freccia",
+		cerchio: "Forma",
+		testo: "Testo",
+		misura: "Misura",
+		angolo: "Angolo",
+		bilancia: "Bilanciamento"
+	};
+	var DS = {
+		doc: null,
+		img: null,
+		segni: null,
+		tool: "penna",
+		col: DS_COLORI[0].c,
+		sp: 3,
+		storia: [],
+		rifai: [],
+		mostra: true,
+		sel: null,
+		bozza: null,
+		cal: false,
+		modificato: false
+	};
+	var dsNum = (n, dec = 1) => Number(n).toLocaleString("it-IT", {
+		minimumFractionDigits: dec,
+		maximumFractionDigits: dec
+	});
+	function dsNat(p, W, H) {
+		return [p[0] * W, p[1] * H];
+	}
+	function dsDist(a, b, W, H) {
+		const [x1, y1] = dsNat(a, W, H), [x2, y2] = dsNat(b, W, H);
+		return Math.hypot(x2 - x1, y2 - y1);
+	}
+	function dsAngolo(a, v, b, W, H) {
+		const [ax, ay] = dsNat(a, W, H), [vx, vy] = dsNat(v, W, H), [bx, by] = dsNat(b, W, H);
+		const a1 = Math.atan2(ay - vy, ax - vx), a2 = Math.atan2(by - vy, bx - vx);
+		let d = Math.abs(a1 - a2) * 180 / Math.PI;
+		if (d > 180) d = 360 - d;
+		return d;
+	}
+	function dsValore(it, W, H, cal) {
+		if (!it || !W || !H) return null;
+		if (it.t === "misura" && it.p.length >= 2) {
+			const px = dsDist(it.p[0], it.p[1], W, H);
+			return cal?.mmPx ? {
+				testo: dsNum(px * cal.mmPx / 10) + " cm",
+				num: px * cal.mmPx / 10,
+				u: "cm"
+			} : {
+				testo: "calibra per i cm",
+				num: null
+			};
+		}
+		if (it.t === "angolo" && it.p.length >= 3) {
+			const g = dsAngolo(it.p[0], it.p[1], it.p[2], W, H);
+			return {
+				testo: Math.round(g) + "°",
+				num: g,
+				u: "°"
+			};
+		}
+		if (it.t === "bilancia" && it.p.length >= 2) {
+			const [x1, y1] = dsNat(it.p[0], W, H), [x2, y2] = dsNat(it.p[1], W, H);
+			let g = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+			if (g > 90) g -= 180;
+			if (g < -90) g += 180;
+			const mm = cal?.mmPx ? Math.abs(y2 - y1) * cal.mmPx : null;
+			return {
+				testo: dsNum(Math.abs(g)) + "°" + (mm != null ? " · " + Math.round(mm) + " mm" : ""),
+				num: mm != null ? mm : Math.abs(g),
+				u: mm != null ? "mm" : "°"
+			};
+		}
+		return null;
+	}
+	function dsEtichetta(it, W, H, cal) {
+		const v = dsValore(it, W, H, cal);
+		if (it.t === "testo") return it.testo || "Testo";
+		if (v) return (it.nota ? it.nota + " " : "") + v.testo;
+		return it.nota || DS_NOMI[it.t] || "Segno";
+	}
+	function dsNormalizza(s) {
+		const x = s && typeof s === "object" ? s : {};
+		return {
+			v: 1,
+			cal: x.cal && x.cal.mmPx > 0 ? x.cal : null,
+			items: Array.isArray(x.items) ? x.items.filter((i) => i && Array.isArray(i.p)) : []
+		};
+	}
+	function dsDisegnaSegni(ctx, segni, r, W, H, opz = {}) {
+		const s = dsNormalizza(segni), k = opz.scala || Math.max(1, Math.min(r.w, r.h) / 360);
+		const P = (p) => [r.x + p[0] * r.w, r.y + p[1] * r.h];
+		const etichetta = (x, y, t, col) => {
+			ctx.font = `700 ${Math.round(12 * k)}px "DM Sans", sans-serif`;
+			const w = ctx.measureText(t).width + 12 * k, h = 20 * k;
+			ctx.fillStyle = col;
+			ctx.beginPath();
+			ctx.roundRect ? ctx.roundRect(x - w / 2, y - h / 2, w, h, 5 * k) : ctx.rect(x - w / 2, y - h / 2, w, h);
+			ctx.fill();
+			ctx.fillStyle = col === "#ffffff" || col === "#f0c05e" || col === "#7FD1C9" ? "#1c160c" : "#ffffff";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.fillText(t, x, y + .5 * k);
+		};
+		const numero = (x, y, n, col) => {
+			ctx.fillStyle = col;
+			ctx.beginPath();
+			ctx.arc(x, y, 9 * k, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.fillStyle = col === "#e2685f" ? "#ffffff" : "#1c160c";
+			ctx.font = `700 ${Math.round(11 * k)}px "DM Sans", sans-serif`;
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.fillText(String(n), x, y + .5 * k);
+		};
+		if (opz.cal && s.cal?.p?.length === 2) {
+			const [a, b] = [P(s.cal.p[0]), P(s.cal.p[1])];
+			ctx.save();
+			ctx.setLineDash([6 * k, 5 * k]);
+			ctx.strokeStyle = "#7FD1C9";
+			ctx.lineWidth = 2 * k;
+			ctx.beginPath();
+			ctx.moveTo(a[0], a[1]);
+			ctx.lineTo(b[0], b[1]);
+			ctx.stroke();
+			ctx.restore();
+			etichetta((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 14 * k, "rif. " + s.cal.mm + " mm", "#7FD1C9");
+		}
+		s.items.forEach((it, i) => {
+			const col = it.c || "#f0c05e", lw = (it.s || 3) * k * .8, pts = it.p.map(P);
+			ctx.save();
+			ctx.strokeStyle = col;
+			ctx.fillStyle = col;
+			ctx.lineWidth = lw;
+			ctx.lineCap = "round";
+			ctx.lineJoin = "round";
+			if (opz.sel === it.id) {
+				ctx.shadowColor = "#ffffff";
+				ctx.shadowBlur = 8 * k;
+			}
+			if (it.t === "penna" && pts.length) {
+				ctx.beginPath();
+				ctx.moveTo(pts[0][0], pts[0][1]);
+				pts.slice(1).forEach((p) => ctx.lineTo(p[0], p[1]));
+				ctx.stroke();
+			} else if ((it.t === "freccia" || it.t === "misura" || it.t === "bilancia") && pts.length >= 2) {
+				const [a, b] = pts;
+				ctx.beginPath();
+				ctx.moveTo(a[0], a[1]);
+				ctx.lineTo(b[0], b[1]);
+				ctx.stroke();
+				if (it.t === "freccia") {
+					const ang = Math.atan2(b[1] - a[1], b[0] - a[0]), L = 12 * k + lw * 2;
+					ctx.beginPath();
+					ctx.moveTo(b[0], b[1]);
+					ctx.lineTo(b[0] - L * Math.cos(ang - .45), b[1] - L * Math.sin(ang - .45));
+					ctx.moveTo(b[0], b[1]);
+					ctx.lineTo(b[0] - L * Math.cos(ang + .45), b[1] - L * Math.sin(ang + .45));
+					ctx.stroke();
+				} else {
+					[a, b].forEach((p) => {
+						ctx.beginPath();
+						ctx.arc(p[0], p[1], 4 * k + lw / 2, 0, Math.PI * 2);
+						ctx.fill();
+					});
+					if (it.t === "bilancia") {
+						ctx.save();
+						ctx.setLineDash([5 * k, 5 * k]);
+						ctx.globalAlpha = .7;
+						ctx.lineWidth = Math.max(1, lw / 2);
+						ctx.beginPath();
+						ctx.moveTo(a[0], a[1]);
+						ctx.lineTo(b[0], a[1]);
+						ctx.stroke();
+						ctx.restore();
+					}
+					const v = dsValore(it, W, H, segni?.cal);
+					if (v) etichetta((a[0] + b[0]) / 2 + 16 * k, (a[1] + b[1]) / 2 - 14 * k, v.testo, col);
+				}
+			} else if (it.t === "cerchio" && pts.length >= 2) {
+				const [a, b] = pts;
+				ctx.beginPath();
+				ctx.ellipse((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, Math.abs(b[0] - a[0]) / 2 || 1, Math.abs(b[1] - a[1]) / 2 || 1, 0, 0, Math.PI * 2);
+				ctx.stroke();
+			} else if (it.t === "angolo" && pts.length >= 2) {
+				const v = pts[1] || pts[0];
+				ctx.beginPath();
+				ctx.moveTo(pts[0][0], pts[0][1]);
+				ctx.lineTo(v[0], v[1]);
+				if (pts[2]) ctx.lineTo(pts[2][0], pts[2][1]);
+				ctx.stroke();
+				if (pts[2]) {
+					const a1 = Math.atan2(pts[0][1] - v[1], pts[0][0] - v[0]);
+					let d = Math.atan2(pts[2][1] - v[1], pts[2][0] - v[0]) - a1;
+					while (d > Math.PI) d -= 2 * Math.PI;
+					while (d < -Math.PI) d += 2 * Math.PI;
+					ctx.beginPath();
+					ctx.arc(v[0], v[1], 26 * k, a1, a1 + d, d < 0);
+					ctx.stroke();
+					const val = dsValore(it, W, H, segni?.cal), m = a1 + d / 2;
+					if (val) etichetta(v[0] + Math.cos(m) * 48 * k, v[1] + Math.sin(m) * 48 * k, val.testo, col);
+				}
+			} else if (it.t === "testo" && pts.length) etichetta(pts[0][0], pts[0][1], it.testo || "Testo", col);
+			ctx.restore();
+			if (!opz.senzaNumeri && pts.length && it.t !== "testo") numero(pts[0][0] - 14 * k, pts[0][1] - 14 * k, i + 1, col);
+		});
+	}
+	function dsFiligrana(ctx, w, h, testo) {
+		if (!testo) return;
+		ctx.save();
+		ctx.globalAlpha = .16;
+		ctx.fillStyle = "#ffffff";
+		ctx.strokeStyle = "rgba(0,0,0,0.5)";
+		ctx.lineWidth = 1;
+		const f = Math.max(14, Math.round(Math.min(w, h) / 22));
+		ctx.font = `700 ${f}px "DM Sans", sans-serif`;
+		ctx.textAlign = "center";
+		ctx.translate(w / 2, h / 2);
+		ctx.rotate(-Math.PI / 6);
+		const passo = f * 5, larg = Math.hypot(w, h);
+		for (let y = -larg / 2; y < larg / 2; y += passo) for (let x = -larg / 2; x < larg / 2; x += ctx.measureText(testo).width + f * 3) {
+			ctx.strokeText(testo, x, y);
+			ctx.fillText(testo, x, y);
+		}
+		ctx.restore();
+	}
+	function dsCanvasConSegni(img, segni, opz = {}) {
+		const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height, k = Math.min(1, (opz.maxLato || 2e3) / Math.max(W, H));
+		const cv = document.createElement("canvas");
+		cv.width = Math.round(W * k);
+		cv.height = Math.round(H * k);
+		const ctx = cv.getContext("2d");
+		ctx.drawImage(img, 0, 0, cv.width, cv.height);
+		if (segni) dsDisegnaSegni(ctx, segni, {
+			x: 0,
+			y: 0,
+			w: cv.width,
+			h: cv.height
+		}, W, H, { scala: Math.max(1, Math.min(cv.width, cv.height) / 360) });
+		if (opz.filigrana) dsFiligrana(ctx, cv.width, cv.height, opz.filigrana);
+		return cv;
+	}
+	function dsCaricaImmagine(url) {
+		return new Promise((res, rej) => {
+			const im = new Image();
+			im.crossOrigin = "anonymous";
+			im.onload = () => res(im);
+			im.onerror = () => rej(/* @__PURE__ */ new Error("immagine"));
+			im.src = url;
+		});
+	}
+	function dsAdatta(cw, ch, W, H) {
+		const k = Math.min(cw / W, ch / H);
+		const w = W * k, h = H * k;
+		return {
+			x: (cw - w) / 2,
+			y: (ch - h) / 2,
+			w,
+			h
+		};
+	}
+	function dsFoglio() {
+		let ov = document.getElementById("ds-editor");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.id = "ds-editor";
+			ov.className = "ds-editor";
+			ov.setAttribute("role", "dialog");
+			ov.setAttribute("aria-modal", "true");
+			ov.setAttribute("aria-label", "Disegna e misura");
+			document.body.appendChild(ov);
+		}
+		return ov;
+	}
+	async function dsApri(docId) {
+		const info = await arcDB.apri(docId);
+		if (!info?.ok) return arcToast("Non riesco ad aprire la foto, riprova.");
+		if (!info.mio) return arcToast("Puoi disegnare solo sulle foto che hai caricato tu.");
+		if (!/^image\//.test(info.mime || "")) return arcToast("Si disegna sulle foto e sulle lastre in formato immagine (JPG, PNG). Per i PDF usa «Scarica».");
+		const url = await arcDB.urlDi(info);
+		if (!url) return arcToast("Non riesco ad aprire la foto, riprova.");
+		try {
+			DS.img = await dsCaricaImmagine(url);
+		} catch (_) {
+			return arcToast("Non riesco a caricare la foto, riprova.");
+		}
+		Object.assign(DS, {
+			doc: info,
+			segni: dsNormalizza(info.segni),
+			tool: "penna",
+			storia: [],
+			rifai: [],
+			mostra: true,
+			sel: null,
+			bozza: null,
+			cal: false,
+			modificato: false
+		});
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsTitolo() {
+		return DS.doc?.nome || String(DS.doc?.titolo || "Foto").split(" · ").slice(0, 2).join(" · ");
+	}
+	function dsRender() {
+		const ov = dsFoglio(), s = DS.segni, n = s.items.length;
+		ov.innerHTML = `<div class="ds-top">
+      <button class="ds-ico" aria-label="Chiudi" onclick="dsChiudi()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="ds-tit"><b>${arcEsc(dsTitolo())}</b><small>L'originale non cambia</small></div>
+      <button class="ds-ico" aria-label="Annulla" onclick="dsAnnulla()" ${DS.storia.length ? "" : "disabled"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+      <button class="ds-ico" aria-label="Rifai" onclick="dsRifai()" ${DS.rifai.length ? "" : "disabled"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+      <button class="ds-salva" id="ds-salva" onclick="dsSalva()">Salva</button>
+    </div>
+    <div class="ds-cal">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17L17 3l4 4L7 21z M7 13l2 2 M10 10l2 2 M13 7l2 2"/></svg>
+      <span>${DS.cal ? "Traccia una linea su qualcosa di misura nota" : s.cal ? `Calibrata su <b>${arcEsc(s.cal.rif || s.cal.mm + " mm")}</b>` : "Non calibrata: le misure non sono in cm"}</span>
+      <button onclick="dsCalibra()">${DS.cal ? "Annulla" : s.cal ? "Cambia" : "Calibra"}</button>
+    </div>
+    <div class="ds-stage" id="ds-stage"><canvas id="ds-canvas" role="img" aria-label="Foto con i segni"></canvas>
+      <button class="ds-mostra${DS.mostra ? " on" : ""}" onclick="dsMostra()" aria-pressed="${DS.mostra}"><span class="ds-sw"><span></span></span>Segni</button>
+      <div class="ds-aiuto" id="ds-aiuto">${arcEsc(dsAiuto())}</div>
+    </div>
+    <div class="ds-segni" id="ds-segni">${n ? s.items.map((it, i) => `<button class="ds-chip${DS.sel === it.id ? " on" : ""}" onclick="dsSeleziona('${it.id}')"><span style="background:${it.c}">${i + 1}</span>${arcEsc(dsEtichetta(it, DS.img.naturalWidth, DS.img.naturalHeight, s.cal))}</button>`).join("") : "<span class=\"ds-vuoto\">Nessun segno: scegli uno strumento e tocca la foto.</span>"}</div>
+    ${DS.sel ? `<div class="ds-selbar"><span>Segno ${s.items.findIndex((x) => x.id === DS.sel) + 1}: trascina sulla foto per spostarlo</span>
+      <button onclick="dsNota()">Nota</button><button onclick="dsTogli()">Elimina</button><button onclick="dsSeleziona(null)">Fatto</button></div>` : ""}
+    <div class="ds-tools">${DS_STRUMENTI.map((t) => `<button class="ds-tool${DS.tool === t.t && !DS.sel ? " on" : ""}" onclick="dsStrumento('${t.t}')" aria-pressed="${DS.tool === t.t}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="${t.ic}"/></svg><span>${t.n}</span></button>`).join("")}</div>
+    <div class="ds-stile"><span>Colore</span>${DS_COLORI.map((c) => `<button class="ds-col${DS.col === c.c ? " on" : ""}" style="background:${c.c}" aria-label="${c.n}" onclick="dsColore('${c.c}')"></button>`).join("")}
+      <label class="ds-sp">Spessore <input type="range" min="2" max="8" step="1" value="${DS.sp}" oninput="DS.sp = Number(this.value)" aria-label="Spessore"></label></div>`;
+		ov.classList.add("aperto");
+	}
+	function dsAiuto() {
+		if (DS.cal) return "Calibra: trascina da un capo all'altro del riferimento (marker, larghezza del ferro, righello).";
+		if (DS.sel) return "";
+		if (DS.tool === "angolo") return [
+			"Angolo: tocca il primo punto",
+			"Ora tocca il vertice",
+			"Ora tocca il secondo punto"
+		][DS.bozza?.p?.length || 0];
+		return {
+			penna: "Disegna con il dito",
+			freccia: "Trascina dalla coda alla punta",
+			cerchio: "Trascina per fare il cerchio",
+			testo: "Tocca dove vuoi scrivere",
+			misura: DS.segni.cal ? "Trascina da un punto all'altro" : "Trascina: per i cm prima «Calibra»",
+			bilancia: "Trascina tra i due punti da confrontare (es. talloni)"
+		}[DS.tool] || "";
+	}
+	function dsAggiornaAiuto() {
+		const a = document.getElementById("ds-aiuto");
+		if (a) a.textContent = dsAiuto();
+	}
+	var dsRect = null;
+	function dsIniziaStage() {
+		const st = document.getElementById("ds-stage"), cv = document.getElementById("ds-canvas");
+		if (!st || !cv) return;
+		const dpr = window.devicePixelRatio || 1, cw = st.clientWidth, ch = st.clientHeight;
+		cv.width = Math.round(cw * dpr);
+		cv.height = Math.round(ch * dpr);
+		cv.style.width = cw + "px";
+		cv.style.height = ch + "px";
+		dsRect = dsAdatta(cw, ch, DS.img.naturalWidth, DS.img.naturalHeight);
+		let giu = null;
+		const punto = (ev) => {
+			const b = cv.getBoundingClientRect();
+			return [Math.min(1, Math.max(0, (ev.clientX - b.left - dsRect.x) / dsRect.w)), Math.min(1, Math.max(0, (ev.clientY - b.top - dsRect.y) / dsRect.h))];
+		};
+		cv.onpointerdown = (ev) => {
+			ev.preventDefault();
+			try {
+				cv.setPointerCapture(ev.pointerId);
+			} catch (_) {}
+			const p = punto(ev);
+			giu = p;
+			if (DS.sel) {
+				dsMemoria();
+				DS.bozza = {
+					sposta: DS.sel,
+					da: p
+				};
+				return;
+			}
+			if (DS.cal) {
+				DS.bozza = {
+					t: "cal",
+					p: [p, p]
+				};
+				return;
+			}
+			if (DS.tool === "angolo") return;
+			if (DS.tool === "testo") {
+				dsTesto(p);
+				return;
+			}
+			DS.bozza = {
+				id: "s" + Date.now().toString(36),
+				t: DS.tool,
+				c: DS.col,
+				s: DS.sp,
+				p: DS.tool === "penna" ? [p] : [p, p]
+			};
+			dsDisegna();
+		};
+		cv.onpointermove = (ev) => {
+			if (!giu || !DS.bozza) return;
+			const p = punto(ev);
+			if (DS.bozza.sposta) {
+				const it = DS.segni.items.find((x) => x.id === DS.bozza.sposta);
+				if (!it) return;
+				const dx = p[0] - DS.bozza.da[0], dy = p[1] - DS.bozza.da[1];
+				DS.bozza.da = p;
+				it.p = it.p.map((q) => [Math.min(1, Math.max(0, q[0] + dx)), Math.min(1, Math.max(0, q[1] + dy))]);
+				DS.modificato = true;
+			} else if (DS.bozza.t === "penna") DS.bozza.p.push(p);
+			else DS.bozza.p[1] = p;
+			dsDisegna();
+		};
+		cv.onpointerup = (ev) => {
+			const p = punto(ev), da = giu;
+			giu = null;
+			if (DS.tool === "angolo" && !DS.sel && !DS.cal) {
+				DS.bozza = DS.bozza && DS.bozza.t === "angolo" ? DS.bozza : {
+					id: "s" + Date.now().toString(36),
+					t: "angolo",
+					c: DS.col,
+					s: DS.sp,
+					p: []
+				};
+				DS.bozza.p.push(p);
+				if (DS.bozza.p.length === 3) {
+					dsAggiungi(DS.bozza);
+					DS.bozza = null;
+				} else {
+					dsDisegna();
+					dsAggiornaAiuto();
+				}
+				return;
+			}
+			const b = DS.bozza;
+			DS.bozza = null;
+			if (!b) return;
+			if (b.sposta) {
+				dsRender();
+				dsIniziaStage();
+				return;
+			}
+			const corto = b.t !== "penna" && da && Math.hypot(p[0] - da[0], p[1] - da[1]) < .01;
+			if (b.t === "cal") {
+				if (corto) {
+					dsDisegna();
+					return;
+				}
+				dsChiediRiferimento(b.p);
+				return;
+			}
+			if (corto || b.t === "penna" && b.p.length < 2) {
+				dsDisegna();
+				return;
+			}
+			dsAggiungi(b);
+		};
+		dsDisegna();
+	}
+	function dsDisegna() {
+		const cv = document.getElementById("ds-canvas");
+		if (!cv || !DS.img) return;
+		const ctx = cv.getContext("2d"), dpr = window.devicePixelRatio || 1;
+		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		ctx.clearRect(0, 0, cv.width, cv.height);
+		ctx.drawImage(DS.img, dsRect.x, dsRect.y, dsRect.w, dsRect.h);
+		const W = DS.img.naturalWidth, H = DS.img.naturalHeight;
+		if (DS.mostra) {
+			const items = DS.bozza && !DS.bozza.sposta && DS.bozza.t !== "cal" ? DS.segni.items.concat([DS.bozza]) : DS.segni.items;
+			dsDisegnaSegni(ctx, {
+				...DS.segni,
+				items
+			}, dsRect, W, H, {
+				sel: DS.sel,
+				cal: DS.cal,
+				scala: 1.1
+			});
+		}
+		if (DS.bozza?.t === "cal") dsDisegnaSegni(ctx, {
+			cal: {
+				mmPx: 1,
+				mm: "?",
+				p: DS.bozza.p
+			},
+			items: []
+		}, dsRect, W, H, {
+			cal: true,
+			scala: 1.1
+		});
+	}
+	function dsMemoria() {
+		DS.storia.push(JSON.stringify(DS.segni));
+		if (DS.storia.length > 60) DS.storia.shift();
+		DS.rifai = [];
+	}
+	function dsAggiungi(it) {
+		dsMemoria();
+		DS.segni.items.push(it);
+		DS.modificato = true;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsAnnulla() {
+		if (!DS.storia.length) return;
+		DS.rifai.push(JSON.stringify(DS.segni));
+		DS.segni = JSON.parse(DS.storia.pop());
+		DS.sel = null;
+		DS.modificato = true;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsRifai() {
+		if (!DS.rifai.length) return;
+		DS.storia.push(JSON.stringify(DS.segni));
+		DS.segni = JSON.parse(DS.rifai.pop());
+		DS.modificato = true;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsStrumento(t) {
+		if (t === "confronto") return dsConfronto(DS.doc.id);
+		DS.tool = t;
+		DS.sel = null;
+		DS.cal = false;
+		DS.bozza = null;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsColore(c) {
+		DS.col = c;
+		const it = DS.sel && DS.segni.items.find((x) => x.id === DS.sel);
+		if (it) {
+			dsMemoria();
+			it.c = c;
+			DS.modificato = true;
+		}
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsMostra() {
+		DS.mostra = !DS.mostra;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsSeleziona(id) {
+		DS.sel = id && DS.sel !== id ? id : null;
+		DS.cal = false;
+		DS.bozza = null;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsTogli() {
+		const i = DS.segni.items.findIndex((x) => x.id === DS.sel);
+		if (i < 0) return;
+		dsMemoria();
+		DS.segni.items.splice(i, 1);
+		DS.sel = null;
+		DS.modificato = true;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsCalibra() {
+		DS.cal = !DS.cal;
+		DS.sel = null;
+		DS.bozza = null;
+		dsRender();
+		dsIniziaStage();
+	}
+	function dsChiedi({ titolo, testo, valore, placeholder, tipo, scelte }) {
+		return new Promise((res) => {
+			let ov = document.getElementById("ds-chiedi");
+			if (!ov) {
+				ov = document.createElement("div");
+				ov.id = "ds-chiedi";
+				ov.className = "ds-chiedi";
+				document.body.appendChild(ov);
+			}
+			ov.innerHTML = `<div class="ds-chiedi-box" role="dialog" aria-modal="true" aria-labelledby="ds-chiedi-t"><b id="ds-chiedi-t">${arcEsc(titolo)}</b>${testo ? `<p>${arcEsc(testo)}</p>` : ""}
+      ${scelte ? `<div class="ds-scelte">${scelte.map((s, i) => `<button data-i="${i}">${arcEsc(s.n)}</button>`).join("")}</div>` : ""}
+      <input id="ds-chiedi-in" type="${tipo || "text"}" ${tipo === "number" ? "inputmode=\"decimal\" step=\"0.1\" min=\"0.1\"" : "maxlength=\"60\""} value="${arcEsc(valore ?? "")}" placeholder="${arcEsc(placeholder || "")}" aria-label="${arcEsc(titolo)}">
+      <div class="ds-chiedi-b"><button class="no">Annulla</button><button class="si">OK</button></div></div>`;
+			ov.classList.add("aperto");
+			const inp = ov.querySelector("input"), fine = (v) => {
+				ov.classList.remove("aperto");
+				res(v);
+			};
+			ov.querySelector(".no").onclick = () => fine(null);
+			ov.querySelector(".si").onclick = () => fine(inp.value);
+			inp.onkeydown = (e) => {
+				if (e.key === "Enter") fine(inp.value);
+			};
+			ov.querySelectorAll(".ds-scelte button").forEach((b) => {
+				b.onclick = () => {
+					const s = scelte[+b.dataset.i];
+					if (s.v != null) inp.value = s.v;
+					inp.focus();
+				};
+			});
+			setTimeout(() => inp.focus(), 50);
+		});
+	}
+	async function dsTesto(p) {
+		const t = await dsChiedi({
+			titolo: "Scrivi sulla foto",
+			placeholder: "es. talloni bassi"
+		});
+		if (t && t.trim()) dsAggiungi({
+			id: "s" + Date.now().toString(36),
+			t: "testo",
+			c: DS.col,
+			s: DS.sp,
+			p: [p],
+			testo: t.trim().slice(0, 60)
+		});
+	}
+	async function dsNota() {
+		const it = DS.segni.items.find((x) => x.id === DS.sel);
+		if (!it) return;
+		const t = await dsChiedi({
+			titolo: "Nota del segno " + (DS.segni.items.indexOf(it) + 1),
+			valore: it.nota || "",
+			placeholder: "es. parete, angolo punta"
+		});
+		if (t == null) return;
+		dsMemoria();
+		it.nota = t.trim().slice(0, 60) || void 0;
+		DS.modificato = true;
+		dsRender();
+		dsIniziaStage();
+	}
+	async function dsChiediRiferimento(p) {
+		const v = await dsChiedi({
+			titolo: "Quanto misura il riferimento?",
+			testo: "In millimetri. Scegli o scrivi la misura vera di quello che hai tracciato.",
+			tipo: "number",
+			placeholder: "mm",
+			valore: DS.segni.cal?.mm || "",
+			scelte: [
+				{
+					n: "Marker 25 mm",
+					v: 25
+				},
+				{
+					n: "Ferro 135 mm",
+					v: 135
+				},
+				{
+					n: "Righello 100 mm",
+					v: 100
+				}
+			]
+		});
+		const mm = parseFloat(String(v || "").replace(",", "."));
+		if (!(mm > 0)) {
+			DS.cal = false;
+			dsRender();
+			dsIniziaStage();
+			return;
+		}
+		const px = dsDist(p[0], p[1], DS.img.naturalWidth, DS.img.naturalHeight);
+		if (px < 3) {
+			arcToast("Linea troppo corta, riprova.");
+			return;
+		}
+		dsMemoria();
+		const rif = mm === 25 ? "marker 25 mm" : mm === 135 ? "ferro 13,5 cm" : mm === 100 ? "righello 10 cm" : dsNum(mm, mm % 1 ? 1 : 0) + " mm";
+		DS.segni.cal = {
+			mmPx: mm / px,
+			mm,
+			rif,
+			p
+		};
+		DS.cal = false;
+		DS.modificato = true;
+		dsRender();
+		dsIniziaStage();
+	}
+	async function dsSalva() {
+		const b = document.getElementById("ds-salva");
+		if (b) b.disabled = true;
+		const segni = DS.segni.items.length || DS.segni.cal ? DS.segni : null;
+		const { error } = await arcDB.aggiorna(DS.doc.id, { segni });
+		if (b) b.disabled = false;
+		if (error) return arcToast(/column|segni|schema cache/i.test(error.message || "") ? "Manca un aggiornamento del database (SQL 69)." : "Non salvato: " + (error.message || "riprova"));
+		DS.modificato = false;
+		arcToast("Segni salvati");
+		dsChiudi(true);
+	}
+	async function dsChiudi(salvato) {
+		if (DS.modificato && !salvato && typeof chiediSiNo === "function" && !await chiediSiNo("Uscire senza salvare?", "I segni nuovi andranno persi.", {
+			si: "Esci",
+			no: "Resta"
+		})) return;
+		const ov = document.getElementById("ds-editor");
+		if (ov) {
+			ov.classList.remove("aperto");
+			ov.innerHTML = "";
+		}
+		DS.img = null;
+		DS.modificato = false;
+		if (typeof arcRicarica === "function") arcRicarica();
+	}
+	var CF = {
+		a: null,
+		b: null,
+		modo: "affiancate",
+		trasp: .5
+	};
+	async function dsConfronto(docId) {
+		if (DS.modificato) {
+			const { error } = await arcDB.aggiorna(DS.doc.id, { segni: DS.segni });
+			if (!error) DS.modificato = false;
+		}
+		const lista = await arcDB.fotoStessoCavallo(docId);
+		if (!lista.length) return arcToast("Non ci sono altre foto di questo cavallo da confrontare.");
+		let ov = document.getElementById("ds-confronto");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.id = "ds-confronto";
+			ov.className = "ds-confronto";
+			ov.setAttribute("role", "dialog");
+			ov.setAttribute("aria-modal", "true");
+			document.body.appendChild(ov);
+		}
+		ov.innerHTML = `<div class="arc-testa"><button class="arc-ico" aria-label="Indietro" onclick="dsConfrontoChiudi()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div><div class="arc-tit">Prima / dopo</div><div class="arc-sotto">Scegli la foto da confrontare</div></div></div>
+    <div class="cf-scegli">${lista.map((d) => `<button class="arc-riga" onclick="dsConfrontoScegli('${docId}', '${d.id}')"><span class="arc-thumb">${d.mini ? `<img src="${arcEsc(urlSicuro(d.mini))}" alt="">` : ""}</span>
+      <span class="arc-righe"><b>${arcEsc(d.nome || d.titolo)}</b><small>${arcEsc(d.nome ? d.titolo : d.cavallo_nome || "")}</small></span></button>`).join("")}</div>`;
+		ov.classList.add("aperto");
+	}
+	async function dsConfrontoScegli(idA, idB) {
+		const [a, b] = await Promise.all([idA, idB].map(async (id) => {
+			const info = await arcDB.apri(id);
+			const url = info?.ok ? await arcDB.urlDi(info) : null;
+			return {
+				info,
+				img: url ? await dsCaricaImmagine(url).catch(() => null) : null
+			};
+		}));
+		if (!a.img || !b.img) return arcToast("Non riesco a caricare le foto, riprova.");
+		const vecchia = (x) => String(x.info.data_documento || x.info.creato_il || "");
+		[CF.a, CF.b] = vecchia(a) <= vecchia(b) ? [a, b] : [b, a];
+		CF.a.segni = dsNormalizza(CF.a.info.segni);
+		CF.b.segni = dsNormalizza(CF.b.info.segni);
+		dsConfrontoRender();
+	}
+	function dsConfrontoValori() {
+		const val = (x) => {
+			const W = x.img.naturalWidth, H = x.img.naturalHeight;
+			return x.segni.items.map((it) => ({
+				it,
+				v: dsValore(it, W, H, x.segni.cal)
+			})).filter((o) => o.v && o.v.num != null);
+		};
+		const A = val(CF.a), B = val(CF.b), righe = [];
+		[
+			"angolo",
+			"misura",
+			"bilancia"
+		].forEach((t) => {
+			const la = A.filter((o) => o.it.t === t), lb = B.filter((o) => o.it.t === t);
+			for (let i = 0; i < Math.max(la.length, lb.length); i++) {
+				const x = la[i], y = lb[i], u = (x || y).v.u;
+				const d = x && y ? y.v.num - x.v.num : null;
+				righe.push({
+					n: x?.it.nota || y?.it.nota || {
+						angolo: "Angolo",
+						misura: "Misura",
+						bilancia: "Bilanciamento"
+					}[t] + (Math.max(la.length, lb.length) > 1 ? " " + (i + 1) : ""),
+					a: x ? x.v.testo : "—",
+					b: y ? y.v.testo : "—",
+					d: d == null ? "" : (d > 0 ? "+" : d < 0 ? "−" : "") + (u === "cm" ? dsNum(Math.abs(d)) + " cm" : u === "mm" ? Math.round(Math.abs(d)) + " mm" : Math.round(Math.abs(d)) + "°")
+				});
+			}
+		});
+		return righe;
+	}
+	function dsConfrontoRender() {
+		const ov = document.getElementById("ds-confronto");
+		if (!ov) return;
+		const data = (x) => {
+			const d = x.info.data_documento || String(x.info.creato_il || "").slice(0, 10);
+			return d ? (/* @__PURE__ */ new Date(d + "T12:00")).toLocaleDateString("it-IT", {
+				day: "numeric",
+				month: "short",
+				year: "numeric"
+			}).replace(".", "") : "";
+		};
+		const righe = dsConfrontoValori(), calibrate = CF.a.segni.cal && CF.b.segni.cal;
+		ov.innerHTML = `<div class="arc-testa"><button class="arc-ico" aria-label="Indietro" onclick="dsConfrontoChiudi()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div><div class="arc-tit">Prima / dopo</div><div class="arc-sotto">${arcEsc(CF.a.info.titolo?.split(" · ")[0] || "")}</div></div></div>
+    <div class="arc-seg" role="group" aria-label="Vista"><button class="${CF.modo === "affiancate" ? "on" : ""}" onclick="dsConfrontoModo('affiancate')">Affiancate</button><button class="${CF.modo === "sovrapposte" ? "on" : ""}" onclick="dsConfrontoModo('sovrapposte')">Sovrapposte</button></div>
+    ${CF.modo === "affiancate" ? `<div class="cf-due">${[CF.a, CF.b].map((x, i) => `<div><canvas class="cf-cv" id="cf-cv-${i}"></canvas><b>${i ? "Dopo" : "Prima"} · ${arcEsc(data(x))}</b><small>${x.segni.cal ? "Calibrata · " + arcEsc(x.segni.cal.rif || "") : "Non calibrata"}</small></div>`).join("")}</div>` : `<div class="cf-uno"><canvas class="cf-cv" id="cf-cv-s"></canvas><label class="cf-trasp">Prima <input type="range" min="0" max="1" step="0.05" value="${CF.trasp}" oninput="CF.trasp = Number(this.value); dsConfrontoDisegna()" aria-label="Trasparenza"> Dopo</label></div>`}
+    <div class="cf-tab">${righe.length ? righe.map((r) => `<div class="cf-r"><span>${arcEsc(r.n)}</span><span class="m">${arcEsc(r.a)}</span><span>→</span><b>${arcEsc(r.b)}</b><span class="d">${arcEsc(r.d)}</span></div>`).join("") : "<div class=\"cf-vuoto\">Nessuna misura da confrontare: usa Misura, Angolo o Bilancia su tutte e due le foto, o «Copia i segni».</div>"}</div>
+    <div class="cf-nota">${calibrate ? "Tutte e due le foto sono calibrate: le misure in cm si possono confrontare." : "Le misure in cm si confrontano solo se le due foto sono calibrate (angoli sì)."} «Copia i segni» riporta i segni della foto di prima su quella di dopo.</div>
+    <div class="cf-bott"><button class="arc-btn" onclick="dsCopiaSegni()">Copia i segni</button><button class="arc-btn pri" id="cf-salva" onclick="dsSalvaConfronto()">Salva il confronto</button></div>`;
+		dsConfrontoDisegna();
+	}
+	function dsConfrontoModo(m) {
+		CF.modo = m;
+		dsConfrontoRender();
+	}
+	function dsConfrontoDisegna() {
+		const disegna = (cv, x, alpha) => {
+			if (!cv || !x?.img) return;
+			const dpr = window.devicePixelRatio || 1, cw = cv.clientWidth || 160, ch = cv.clientHeight || 220;
+			if (cv.width !== Math.round(cw * dpr)) {
+				cv.width = Math.round(cw * dpr);
+				cv.height = Math.round(ch * dpr);
+			}
+			const ctx = cv.getContext("2d");
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+			const r = dsAdatta(cw, ch, x.img.naturalWidth, x.img.naturalHeight);
+			ctx.globalAlpha = alpha;
+			ctx.drawImage(x.img, r.x, r.y, r.w, r.h);
+			ctx.globalAlpha = 1;
+			dsDisegnaSegni(ctx, x.segni, r, x.img.naturalWidth, x.img.naturalHeight, { scala: .8 });
+		};
+		if (CF.modo === "affiancate") [0, 1].forEach((i) => {
+			const cv = document.getElementById("cf-cv-" + i);
+			if (cv) cv.getContext("2d").clearRect(0, 0, cv.width, cv.height);
+			disegna(cv, i ? CF.b : CF.a, 1);
+		});
+		else {
+			const cv = document.getElementById("cf-cv-s");
+			if (!cv) return;
+			cv.getContext("2d").clearRect(0, 0, cv.width, cv.height);
+			disegna(cv, CF.a, 1);
+			disegna(cv, CF.b, CF.trasp);
+		}
+	}
+	async function dsCopiaSegni() {
+		if (!CF.b.info.mio) return arcToast("Puoi copiare i segni solo su una foto tua.");
+		if (!CF.a.segni.items.length) return arcToast("La foto di prima non ha segni da copiare.");
+		CF.b.segni.items = CF.b.segni.items.concat(CF.a.segni.items.map((it) => ({
+			...it,
+			id: "s" + Math.random().toString(36).slice(2, 9),
+			p: it.p.map((q) => q.slice())
+		})));
+		const { error } = await arcDB.aggiorna(CF.b.info.id, { segni: CF.b.segni });
+		if (error) return arcToast("Segni non salvati, riprova.");
+		arcToast("Segni copiati: spostali dove servono con «Disegna»");
+		dsConfrontoRender();
+	}
+	async function dsSalvaConfronto() {
+		const btn = document.getElementById("cf-salva");
+		if (btn) btn.disabled = true;
+		try {
+			const ca = dsCanvasConSegni(CF.a.img, CF.a.segni, { maxLato: 1200 }), cb = dsCanvasConSegni(CF.b.img, CF.b.segni, { maxLato: 1200 });
+			const h = Math.max(ca.height, cb.height), testa = 56, cv = document.createElement("canvas");
+			cv.width = ca.width + cb.width + 24;
+			cv.height = h + testa;
+			const ctx = cv.getContext("2d");
+			ctx.fillStyle = "#ffffff";
+			ctx.fillRect(0, 0, cv.width, cv.height);
+			ctx.drawImage(ca, 0, testa);
+			ctx.drawImage(cb, ca.width + 24, testa);
+			ctx.fillStyle = "#1c160c";
+			ctx.font = "700 28px \"DM Sans\", sans-serif";
+			ctx.textBaseline = "middle";
+			ctx.fillText("Prima · " + (CF.a.info.data_documento || ""), 8, testa / 2);
+			ctx.fillText("Dopo · " + (CF.b.info.data_documento || ""), ca.width + 32, testa / 2);
+			const blob = await new Promise((r) => cv.toBlob(r, "image/jpeg", .9));
+			if (!blob) throw new Error("immagine");
+			const d = CF.b.info, r = await DB.caricaDocumentoPrivato({
+				blob,
+				mime: "image/jpeg",
+				categoria: "foto_clinica",
+				cavallo_nome: (d.titolo || "").split(" · ")[0],
+				nota: "Prima/dopo",
+				horse_id: d.horse_id || null,
+				cavallo_cliente_id: d.cavallo_cliente_id || null,
+				autore_ruolo: typeof eVeterinario === "function" && eVeterinario() ? "veterinario" : "maniscalco"
+			});
+			if (!r?.id) throw new Error(r?.error?.message || "salvataggio");
+			arcToast("Confronto salvato nell'Archivio");
+			dsConfrontoChiudi();
+			if (typeof arcRicarica === "function") arcRicarica();
+		} catch (err) {
+			arcToast(/tainted|insecure|SecurityError/i.test(String(err?.message || err)) ? "Non riesco a unire le foto su questo telefono." : "Confronto non salvato: " + (err?.message || err));
+		} finally {
+			if (btn) btn.disabled = false;
+		}
+	}
+	function dsConfrontoChiudi() {
+		const ov = document.getElementById("ds-confronto");
+		if (ov) {
+			ov.classList.remove("aperto");
+			ov.innerHTML = "";
+		}
+		if (document.getElementById("ds-editor")?.classList.contains("aperto")) dsDisegna();
+	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/123-archivio.js
+	var arcEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var arcToast = (t) => {
+		if (typeof showToast === "function") showToast(t);
+	};
+	var ARC = {
+		dati: {
+			cartelle: [],
+			documenti: []
+		},
+		filtro: "tutti",
+		q: "",
+		cartella: null,
+		ordine: "data",
+		sel: null,
+		mini: {},
+		eliminati: false,
+		carica: null,
+		chi: null,
+		aperto: false
+	};
+	var ARC_FILTRI = [
+		["tutti", "Tutti"],
+		["foto", "Foto"],
+		["lastre", "Lastre"],
+		["pdf", "PDF e referti"],
+		["disegnati", "Disegnati"]
+	];
+	var ARC_AVVISO = "Questo documento è protetto dalla normativa sulla privacy e dai diritti del professionista che lo ha inviato. Non puoi condividerlo, inoltrarlo o pubblicarlo senza la sua autorizzazione.";
+	var arcIo = () => currentUser?.id;
+	var arcVet = () => typeof eVeterinario === "function" && eVeterinario();
+	var arcData = (d) => d ? (/* @__PURE__ */ new Date(String(d).slice(0, 10) + "T12:00")).toLocaleDateString("it-IT", {
+		day: "numeric",
+		month: "short",
+		year: "numeric"
+	}).replace(".", "") : "";
+	var arcDemoDocs = () => demoState.documenti = demoState.documenti || [];
+	var arcDB = {
+		async lista() {
+			if (DEMO_MODE) {
+				const cart = demoState.docCartelle = demoState.docCartelle || [];
+				const limite = Date.now() - 2592e6;
+				const docs = arcDemoDocs().filter((d) => d.autore_user_id === arcIo() && (!d.eliminato_il || new Date(d.eliminato_il).getTime() > limite)).map((d) => {
+					const acc = (d.accessi || []).filter((a) => !a.revocato_il && (!a.scade_il || new Date(a.scade_il) > /* @__PURE__ */ new Date()));
+					const cv = (typeof cavalliMieiLista !== "undefined" ? cavalliMieiLista : []).find((c) => c.id === d.cavallo_cliente_id);
+					const cli = cv && typeof clientiAttivi === "function" ? clientiAttivi().find((c) => c.id === cv.cliente_mascalcia_id) : null;
+					return {
+						...d,
+						n_segni: d.segni?.items?.length || 0,
+						cavallo_nome: cv?.nome || String(d.titolo || "").split(" · ")[0],
+						cliente_nome: cli?.nome || "",
+						sempre: acc.filter((a) => !a.scade_il).length,
+						a_tempo: acc.filter((a) => a.scade_il).length,
+						scade_il: acc.filter((a) => a.scade_il).map((a) => a.scade_il).sort()[0] || null,
+						avviso_privacy: d.avviso_privacy !== false
+					};
+				}).sort((a, b) => String(b.creato_il).localeCompare(String(a.creato_il)));
+				return {
+					cartelle: cart.map((c) => ({
+						...c,
+						n: docs.filter((d) => d.cartella_id === c.id && !d.eliminato_il).length
+					})),
+					documenti: docs
+				};
+			}
+			const { data, error } = await sb.rpc("equo_archivio_lista");
+			if (error) {
+				console.warn("archivio:", error.message);
+				return { errore: error.message };
+			}
+			return data || {
+				cartelle: [],
+				documenti: []
+			};
+		},
+		async aggiorna(id, campi) {
+			if (DEMO_MODE) {
+				const d = arcDemoDocs().find((x) => x.id === id);
+				if (d) Object.assign(d, campi);
+				return { error: d ? null : { message: "non trovato" } };
+			}
+			const { error } = await sb.from("documenti").update(campi).eq("id", id);
+			return { error };
+		},
+		async creaCartella(nome) {
+			if (DEMO_MODE) {
+				const c = {
+					id: "cart-" + Date.now().toString(36),
+					nome,
+					autore_user_id: arcIo()
+				};
+				(demoState.docCartelle = demoState.docCartelle || []).push(c);
+				return { id: c.id };
+			}
+			const { data, error } = await sb.from("documenti_cartelle").insert({ nome }).select("id").single();
+			return error ? { error } : { id: data.id };
+		},
+		async rinominaCartella(id, nome) {
+			if (DEMO_MODE) {
+				const c = (demoState.docCartelle || []).find((x) => x.id === id);
+				if (c) c.nome = nome;
+				return { error: null };
+			}
+			const { error } = await sb.from("documenti_cartelle").update({ nome }).eq("id", id);
+			return { error };
+		},
+		async eliminaCartella(id) {
+			if (DEMO_MODE) {
+				demoState.docCartelle = (demoState.docCartelle || []).filter((x) => x.id !== id);
+				arcDemoDocs().forEach((d) => {
+					if (d.cartella_id === id) d.cartella_id = null;
+				});
+				return { error: null };
+			}
+			const { error } = await sb.from("documenti_cartelle").delete().eq("id", id);
+			return { error };
+		},
+		async persone(id) {
+			if (DEMO_MODE) {
+				const d = arcDemoDocs().find((x) => x.id === id);
+				if (!d) return null;
+				const cv = (typeof cavalliMieiLista !== "undefined" ? cavalliMieiLista : []).find((c) => c.id === d.cavallo_cliente_id);
+				const cli = cv && typeof clientiAttivi === "function" ? clientiAttivi().find((c) => c.id === cv.cliente_mascalcia_id) : null;
+				const acc = (d.accessi || []).filter((a) => !a.revocato_il && (!a.scade_il || new Date(a.scade_il) > /* @__PURE__ */ new Date()));
+				const modo = (u, c) => {
+					const a = acc.find((x) => u && x.user_id === u || c && x.centro_id === c);
+					return a ? {
+						modo: a.scade_il ? "7g" : "sempre",
+						scade_il: a.scade_il || null
+					} : {
+						modo: "nascosto",
+						scade_il: null
+					};
+				};
+				const p = [];
+				if (cli?.cliente_user_id) p.push({
+					tipo: "proprietario",
+					user_id: cli.cliente_user_id,
+					nome: cli.nome,
+					ruolo: "Proprietario",
+					...modo(cli.cliente_user_id)
+				});
+				if (cli?.centro_id) p.push({
+					tipo: "struttura",
+					centro_id: cli.centro_id,
+					nome: cli.nome,
+					ruolo: "Struttura",
+					bloccato: !!d.sanitario_obbligatorio,
+					...modo(null, cli.centro_id)
+				});
+				if (!cli) p.push({
+					tipo: "proprietario",
+					user_id: "demo-prop",
+					nome: "Proprietario",
+					ruolo: "Proprietario",
+					...modo("demo-prop")
+				});
+				acc.filter((a) => !p.some((x) => a.user_id && x.user_id === a.user_id || a.centro_id && x.centro_id === a.centro_id)).forEach((a) => p.push({
+					tipo: "altro",
+					user_id: a.user_id || null,
+					centro_id: a.centro_id || null,
+					nome: a.nome || "Collega",
+					ruolo: a.motivo === "consulto" ? "Consulto" : "Ricevuto",
+					...modo(a.user_id, a.centro_id)
+				}));
+				return {
+					persone: p,
+					sanitario: !!d.sanitario_obbligatorio,
+					avviso_privacy: d.avviso_privacy !== false,
+					decide: "autore"
+				};
+			}
+			const { data, error } = await sb.rpc("equo_doc_persone", { p_doc: id });
+			return error ? { errore: error.message } : data;
+		},
+		async imposta(id, chi, modo, motivo = "condivisione") {
+			if (DEMO_MODE) {
+				const d = arcDemoDocs().find((x) => x.id === id);
+				if (!d) return { ok: false };
+				d.accessi = (d.accessi || []).filter((a) => !(chi.user_id && a.user_id === chi.user_id || chi.centro_id && a.centro_id === chi.centro_id));
+				if (modo !== "nascosto") d.accessi.push({
+					id: "acc-" + Math.random().toString(36).slice(2, 8),
+					user_id: chi.user_id || null,
+					centro_id: chi.centro_id || null,
+					nome: chi.nome,
+					motivo,
+					scade_il: modo === "7g" ? new Date(Date.now() + 6048e5).toISOString() : null
+				});
+				return { ok: true };
+			}
+			const { data, error } = await sb.rpc("equo_doc_imposta", {
+				p_doc: id,
+				p_user: chi.user_id || null,
+				p_centro: chi.centro_id || null,
+				p_modo: modo,
+				p_motivo: motivo
+			});
+			return error ? {
+				ok: false,
+				errore: error.message
+			} : data;
+		},
+		async ripristina(id) {
+			if (DEMO_MODE) {
+				const d = arcDemoDocs().find((x) => x.id === id);
+				if (d) d.eliminato_il = null;
+				return { ok: !!d };
+			}
+			const { data, error } = await sb.rpc("equo_doc_ripristina", { p_doc: id });
+			return error ? {
+				ok: false,
+				errore: error.message
+			} : data;
+		},
+		async apri(id) {
+			if (DEMO_MODE) {
+				const d = arcDemoDocs().find((x) => x.id === id && !x.eliminato_il);
+				if (!d) return {
+					ok: false,
+					errore: "accesso"
+				};
+				const mio = d.autore_user_id === arcIo();
+				return {
+					ok: true,
+					...d,
+					mio,
+					autore_nome: mio ? currentUser?.nome || "Tu" : "Il professionista",
+					io: currentUser?.nome || "Demo",
+					avviso: d.avviso_privacy !== false && !mio && !(d.avvisiAccettati || []).includes(arcIo())
+				};
+			}
+			const { data, error } = await sb.rpc("equo_doc_apri", { p_doc: id });
+			if (error) {
+				if (/equo_doc_apri|schema cache|does not exist/i.test(error.message || "")) {
+					const r = await sb.from("documenti").select("id, path, mime, titolo, autore_user_id, horse_id, cavallo_cliente_id, data_documento").eq("id", id).maybeSingle();
+					return r.data ? {
+						ok: true,
+						...r.data,
+						bucket: "documenti",
+						mio: r.data.autore_user_id === arcIo(),
+						avviso: false
+					} : {
+						ok: false,
+						errore: "accesso"
+					};
+				}
+				return {
+					ok: false,
+					errore: "rete"
+				};
+			}
+			return data || {
+				ok: false,
+				errore: "accesso"
+			};
+		},
+		async accettaAvviso(id) {
+			if (DEMO_MODE) {
+				const d = arcDemoDocs().find((x) => x.id === id);
+				if (d) (d.avvisiAccettati = d.avvisiAccettati || []).push(arcIo());
+				return { ok: true };
+			}
+			const { data, error } = await sb.rpc("equo_doc_accetta_avviso", { p_doc: id });
+			return error ? { ok: false } : data;
+		},
+		async urlDi(info, secondi = 600) {
+			if (DEMO_MODE) return info.url || arcDemoDocs().find((x) => x.id === info.id)?.url || null;
+			const s = await sb.storage.from(info.bucket || "documenti").createSignedUrl(info.path, secondi);
+			return s.error ? null : s.data.signedUrl;
+		},
+		async anteprime(docs) {
+			const foto = docs.filter((d) => /^image\//.test(d.mime || "") && !ARC.mini[d.id]).slice(0, 40);
+			if (!foto.length) return;
+			if (DEMO_MODE) {
+				foto.forEach((d) => {
+					ARC.mini[d.id] = d.url;
+				});
+				return;
+			}
+			for (const b of ["documenti", "cavalli-allegati"]) {
+				const l = foto.filter((d) => (d.bucket || "documenti") === b);
+				if (!l.length) continue;
+				const { data } = await sb.storage.from(b).createSignedUrls(l.map((d) => d.path), 3600);
+				(data || []).forEach((x, i) => {
+					if (x.signedUrl) ARC.mini[l[i].id] = x.signedUrl;
+				});
+			}
+		},
+		async fotoStessoCavallo(id) {
+			const d = ARC.dati.documenti.find((x) => x.id === id) || await this.apri(id);
+			if (!d) return [];
+			let lista = [];
+			if (typeof DB.listaDocumenti === "function") lista = await DB.listaDocumenti({
+				horse_id: d.horse_id || null,
+				cavallo_cliente_id: d.cavallo_cliente_id || null
+			});
+			ARC.dati.documenti.filter((x) => !x.eliminato_il && (d.horse_id && x.horse_id === d.horse_id || d.cavallo_cliente_id && x.cavallo_cliente_id === d.cavallo_cliente_id)).forEach((x) => {
+				if (!lista.some((y) => y.id === x.id)) lista.push(x);
+			});
+			lista = lista.filter((x) => x.id !== id && /^image\//.test(x.mime || ""));
+			await this.anteprime(lista.map((x) => ({
+				...x,
+				path: x.path || ARC.dati.documenti.find((y) => y.id === x.id)?.path,
+				bucket: x.bucket || ARC.dati.documenti.find((y) => y.id === x.id)?.bucket
+			})).filter((x) => x.path || DEMO_MODE));
+			return lista.map((x) => ({
+				...x,
+				mini: ARC.mini[x.id] || null
+			}));
+		},
+		async colleghi() {
+			if (DEMO_MODE) return [{
+				altro_id: "demo-collega",
+				nome: "Laura F.",
+				ruolo: arcVet() ? "maniscalco" : "veterinario"
+			}];
+			const { data, error } = await sb.rpc("lista_colleghi");
+			return error ? [] : data || [];
+		}
+	};
+	function arcPagina() {
+		let ov = document.getElementById("arc-pagina");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.id = "arc-pagina";
+			ov.className = "arc-pagina";
+			ov.setAttribute("role", "dialog");
+			ov.setAttribute("aria-modal", "true");
+			ov.setAttribute("aria-label", "Archivio");
+			document.body.appendChild(ov);
+		}
+		return ov;
+	}
+	async function apriArchivio() {
+		if (typeof closeModal === "function" && document.getElementById("modal-menu")?.classList.contains("active")) closeModal("modal-menu");
+		ARC.aperto = true;
+		ARC.cartella = null;
+		ARC.sel = null;
+		const ov = arcPagina();
+		ov.classList.add("aperto");
+		ov.innerHTML = "<div class=\"arc-carico\">Carico l'Archivio…</div>";
+		await arcRicarica();
+	}
+	async function arcRicarica() {
+		if (!ARC.aperto) {
+			if (typeof ricaricaAllegatiAperti === "function") ricaricaAllegatiAperti();
+			const l = await arcDB.lista();
+			if (!l?.errore) ARC.dati = {
+				cartelle: l.cartelle || [],
+				documenti: l.documenti || []
+			};
+			return;
+		}
+		const d = await arcDB.lista();
+		if (d?.errore) {
+			arcPagina().innerHTML = `${arcTesta()}<div class="arc-vuoto">${/equo_archivio_lista|schema cache|does not exist/i.test(d.errore) ? "L'Archivio non è ancora attivo: manca un aggiornamento del database (SQL 69)." : "Archivio non disponibile ora. Riprova più tardi."}</div>`;
+			return;
+		}
+		ARC.dati = {
+			cartelle: d.cartelle || [],
+			documenti: d.documenti || []
+		};
+		arcRender();
+		await arcDB.anteprime(ARC.dati.documenti.filter((x) => !x.eliminato_il));
+		if (ARC.aperto) arcRender();
+	}
+	function arcChiudi() {
+		ARC.aperto = false;
+		const ov = document.getElementById("arc-pagina");
+		if (ov) {
+			ov.classList.remove("aperto");
+			ov.innerHTML = "";
+		}
+	}
+	function arcTesta() {
+		const c = ARC.cartella && ARC.dati.cartelle.find((x) => x.id === ARC.cartella);
+		return `<div class="arc-testa">
+    <button class="arc-ico" aria-label="${c ? "Torna all'Archivio" : "Chiudi"}" onclick="${c ? "arcApriCartella(null)" : "arcChiudi()"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="arc-testa-t"><div class="arc-sotto">${c ? "Archivio › Cartella" : "Menu › Archivio"}</div><div class="arc-tit">${arcEsc(c ? c.nome : "Archivio")}</div></div>
+    ${c ? `<button class="arc-ico" aria-label="Opzioni della cartella" onclick="arcOpzioniCartella('${c.id}')">⋯</button>` : ""}
+    <button class="arc-carica" onclick="arcCarica()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Carica</button>
+  </div>`;
+	}
+	function arcVisibile(d) {
+		const fino = d.scade_il ? new Date(d.scade_il).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "short"
+		}).replace(".", "") : "";
+		if (!d.sempre && !d.a_tempo) return {
+			t: d.sanitario ? "Nascosto · la scuderia lo vede (sanitario)" : "Nascosto · solo tu",
+			k: "nasc"
+		};
+		if (!d.sempre) return {
+			t: `7 giorni · fino al ${fino}` + (d.a_tempo > 1 ? ` · ${d.a_tempo} persone` : ""),
+			k: "tempo"
+		};
+		return {
+			t: `Per sempre · ${d.sempre} ${d.sempre === 1 ? "persona" : "persone"}` + (d.a_tempo ? ` · ${d.a_tempo} a 7 giorni` : ""),
+			k: "sempre"
+		};
+	}
+	function arcFiltrati() {
+		const q = ARC.q.trim().toLowerCase();
+		let l = ARC.dati.documenti.filter((d) => !d.eliminato_il);
+		if (ARC.cartella) l = l.filter((d) => d.cartella_id === ARC.cartella);
+		l = l.filter((d) => ({
+			tutti: true,
+			foto: /^image\//.test(d.mime || "") && d.categoria !== "lastra",
+			lastre: d.categoria === "lastra",
+			pdf: /pdf/.test(d.mime || "") || d.categoria === "referto",
+			disegnati: d.n_segni > 0
+		})[ARC.filtro]);
+		if (q) l = l.filter((d) => [
+			d.nome,
+			d.titolo,
+			d.cavallo_nome,
+			d.cliente_nome,
+			d.nota
+		].some((x) => String(x || "").toLowerCase().includes(q)));
+		const nome = (d) => String(d.nome || d.titolo || "");
+		if (ARC.ordine === "nome") l.sort((a, b) => nome(a).localeCompare(nome(b), "it", { sensitivity: "base" }));
+		else if (ARC.ordine === "cavallo") l.sort((a, b) => String(a.cavallo_nome || "").localeCompare(String(b.cavallo_nome || ""), "it", { sensitivity: "base" }) || String(b.creato_il).localeCompare(String(a.creato_il)));
+		return l;
+	}
+	function arcRiga(d) {
+		const v = arcVisibile(d), mini = ARC.mini[d.id], selez = ARC.sel instanceof Set;
+		const sotto = d.nome ? d.titolo : [d.cliente_nome, d.cartella_id && !ARC.cartella ? "Cartella «" + (ARC.dati.cartelle.find((c) => c.id === d.cartella_id)?.nome || "") + "»" : ""].filter(Boolean).join(" · ") || arcData(d.data_documento);
+		const tipo = /pdf/.test(d.mime || "") ? "PDF" : /^video\//.test(d.mime || "") ? "VIDEO" : /^image\//.test(d.mime || "") ? "" : "FILE";
+		return `<div class="arc-riga${selez && ARC.sel.has(d.id) ? " sel" : ""}">
+    ${selez ? `<input type="checkbox" class="arc-spunta" aria-label="Seleziona ${arcEsc(d.nome || d.titolo)}" ${ARC.sel.has(d.id) ? "checked" : ""} onchange="arcSpunta('${d.id}')">` : ""}
+    <button class="arc-thumb${d.categoria === "lastra" ? " lastra" : ""}" onclick="docVisualizza('${d.id}')" aria-label="Apri ${arcEsc(d.nome || d.titolo)}">
+      ${mini ? `<img src="${arcEsc(urlSicuro(mini))}" alt="" loading="lazy">` : `<span>${tipo}</span>`}
+      ${d.n_segni ? "<i class=\"arc-matita\" aria-label=\"Disegnata\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20l4-1 11-11-3-3L5 16z\"/></svg></i>" : ""}
+    </button>
+    <button class="arc-righe" onclick="${selez ? `arcSpunta('${d.id}')` : `arcAzioni('${d.id}')`}">
+      <b>${arcEsc(d.nome || d.titolo)}</b><small>${arcEsc(sotto)}</small>
+      <span class="arc-vis ${v.k}"><i></i>${arcEsc(v.t)}</span>
+    </button>
+    ${selez ? "" : `<button class="arc-piu" aria-label="Azioni" onclick="arcAzioni('${d.id}')">⋯</button>`}
+  </div>`;
+	}
+	function arcRender() {
+		const ov = arcPagina();
+		if (!ARC.aperto) return;
+		const l = arcFiltrati(), tot = ARC.dati.documenti.filter((d) => !d.eliminato_il).length, elim = ARC.dati.documenti.filter((d) => d.eliminato_il);
+		const selez = ARC.sel instanceof Set;
+		ov.innerHTML = `${arcTesta()}
+    ${ARC.cartella ? "" : `<div class="arc-conta">${tot} ${tot === 1 ? "contenuto" : "contenuti"} · ${ARC.dati.cartelle.length} ${ARC.dati.cartelle.length === 1 ? "cartella" : "cartelle"} · solo tuoi</div>`}
+    <label class="arc-cerca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="arc-q" placeholder="Cerca per cavallo, cliente o nome" value="${arcEsc(ARC.q)}" oninput="arcCerca(this.value)" aria-label="Cerca nell'Archivio"></label>
+    <div class="arc-chips">${ARC_FILTRI.map(([k, t]) => `<button class="arc-chip${ARC.filtro === k ? " on" : ""}" aria-pressed="${ARC.filtro === k}" onclick="arcFiltro('${k}')">${t}</button>`).join("")}</div>
+    ${ARC.cartella ? "" : `<div class="arc-sez"><span>Cartelle</span><button class="arc-nuova" onclick="arcNuovaCartella()">+ Cartella</button></div>
+    <div class="arc-cartelle">${ARC.dati.cartelle.length ? ARC.dati.cartelle.map((c) => `<button class="arc-cartella" onclick="arcApriCartella('${c.id}')">
+      <svg viewBox="0 0 26 22" aria-hidden="true"><path d="M2 4a2 2 0 0 1 2-2h6l2 3h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+      <b>${arcEsc(c.nome)}</b><small>${c.n} ${c.n === 1 ? "contenuto" : "contenuti"}</small></button>`).join("") : "<div class=\"arc-nota\">Nessuna cartella. Le cartelle sono solo tue: chi riceve un file non le vede.</div>"}</div>`}
+    <div class="arc-sez"><span>Contenuti</span><span class="arc-sez-dx">
+      <button class="arc-link" onclick="arcSelezione()">${selez ? "Fine" : "Seleziona"}</button>
+      <button class="arc-link" onclick="arcOrdine()">Ordina: <b>${{
+			data: "Data",
+			nome: "Nome",
+			cavallo: "Cavallo"
+		}[ARC.ordine]} ▾</b></button></span></div>
+    <div class="arc-lista">${l.length ? l.map(arcRiga).join("") : `<div class="arc-vuoto">${tot ? "Nessun contenuto con questi filtri." : "Qui trovi le foto, le lastre e i documenti che carichi: dalla scheda del cavallo, da «Segna un problema», dalle visite o con «Carica»."}</div>`}</div>
+    ${!ARC.cartella && elim.length ? `<div class="arc-elim"><button class="arc-link" onclick="ARC.eliminati = !ARC.eliminati; arcRender()">Eliminati negli ultimi 30 giorni (${elim.length}) ${ARC.eliminati ? "▴" : "▾"}</button>
+      ${ARC.eliminati ? elim.map((d) => `<div class="arc-riga elim"><span class="arc-righe"><b>${arcEsc(d.nome || d.titolo)}</b><small>Eliminato il ${arcData(d.eliminato_il)} · si recupera fino al ${arcData(new Date(new Date(d.eliminato_il).getTime() + 2592e6).toISOString())}</small></span>
+        <button class="arc-btn" onclick="arcRipristina('${d.id}')">Ripristina</button></div>`).join("") : ""}</div>` : ""}
+    ${selez ? `<div class="arc-selbar"><span>${ARC.sel.size} ${ARC.sel.size === 1 ? "selezionato" : "selezionati"}</span><button class="arc-btn pri" ${ARC.sel.size ? "" : "disabled"} onclick="arcSposta(null)">Sposta in cartella</button></div>` : ""}`;
+	}
+	function arcCerca(v) {
+		ARC.q = v;
+		const pos = document.getElementById("arc-q")?.selectionStart;
+		arcRender();
+		const i = document.getElementById("arc-q");
+		if (i) {
+			i.focus();
+			try {
+				i.setSelectionRange(pos, pos);
+			} catch (_) {}
+		}
+	}
+	function arcFiltro(k) {
+		ARC.filtro = k;
+		arcRender();
+	}
+	function arcOrdine() {
+		ARC.ordine = {
+			data: "nome",
+			nome: "cavallo",
+			cavallo: "data"
+		}[ARC.ordine];
+		arcRender();
+	}
+	function arcApriCartella(id) {
+		ARC.cartella = id;
+		ARC.sel = null;
+		arcRender();
+	}
+	function arcSelezione() {
+		ARC.sel = ARC.sel instanceof Set ? null : /* @__PURE__ */ new Set();
+		arcRender();
+	}
+	function arcSpunta(id) {
+		if (!(ARC.sel instanceof Set)) return;
+		ARC.sel.has(id) ? ARC.sel.delete(id) : ARC.sel.add(id);
+		arcRender();
+	}
+	function arcFoglio(id, html) {
+		let ov = document.getElementById(id);
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay arc-ov";
+			ov.id = id;
+			ov.onclick = (ev) => {
+				if (ev.target === ov) closeModal(id);
+			};
+			ov.innerHTML = `<div class="modal arc-modal" role="dialog" aria-modal="true" aria-labelledby="${id}-tit"><div class="modal-handle"></div><div id="${id}-corpo"></div></div>`;
+			document.body.appendChild(ov);
+		}
+		document.getElementById(id + "-corpo").innerHTML = html;
+		openModal(id);
+		return ov;
+	}
+	var arcDoc = (id) => ARC.dati.documenti.find((d) => d.id === id);
+	async function arcAzioni$1(id) {
+		if (!arcDoc(id)) {
+			const l = await arcDB.lista();
+			if (!l?.errore) ARC.dati = {
+				cartelle: l.cartelle || [],
+				documenti: l.documenti || []
+			};
+			await arcDB.anteprime(ARC.dati.documenti.filter((x) => x.id === id));
+		}
+		const d = arcDoc(id);
+		if (!d) return arcToast("Puoi gestire solo i contenuti che hai caricato tu.");
+		const img = /^image\//.test(d.mime || ""), cart = ARC.dati.cartelle.find((c) => c.id === d.cartella_id), v = arcVisibile(d);
+		const mb = d.byte ? d.byte > 1048576 ? (d.byte / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(d.byte / 1024)) + " KB" : "";
+		const az = [
+			img ? [
+				"arcDisegna",
+				"Disegna e misura",
+				"Penna, frecce, testo, misure, angoli, prima/dopo",
+				"M4 20l4-1 11-11-3-3L5 16z M14 6l3 3",
+				"evid"
+			] : null,
+			[
+				"arcRinomina",
+				"Rinomina",
+				"Il nome nuovo lo vedono tutti; sotto resta quello di Equo",
+				"M4 7h16M4 12h10M4 17h7 M17 14l3 3-3 3"
+			],
+			[
+				"arcSposta",
+				"Sposta in cartella",
+				cart ? "Ora in «" + cart.nome + "»" : "Ora in nessuna cartella",
+				"M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+			],
+			[
+				"arcChiLoVede",
+				"Chi lo vede",
+				v.t,
+				"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
+			],
+			[
+				"arcMandaChat",
+				"Manda in chat",
+				"A chi lo mandi riceve l'accesso, con l'avviso privacy",
+				"M4 12l16-8-6 16-2-6z"
+			],
+			[
+				"arcScarica",
+				"Scarica",
+				img && d.n_segni ? "Con i segni o solo l'originale" : "Il file originale",
+				"M12 4v11 M7 10l5 5 5-5 M5 20h14"
+			],
+			[
+				"arcElimina",
+				"Elimina",
+				"Si può recuperare per 30 giorni",
+				"M5 7h14 M9 7V5h6v2 M7 7l1 13h8l1-13",
+				"rosso"
+			]
+		].filter(Boolean);
+		arcFoglio("modal-arc-azioni", `<div class="arc-az-testa"><span class="arc-thumb grande${d.categoria === "lastra" ? " lastra" : ""}">${ARC.mini[d.id] ? `<img src="${arcEsc(urlSicuro(ARC.mini[d.id]))}" alt="">` : ""}</span>
+      <div><div class="modal-title" id="modal-arc-azioni-tit">${arcEsc(d.nome || d.titolo)}</div><small>${arcEsc(d.nome ? d.titolo : arcData(d.data_documento))}</small>
+      <small>${[
+			cart ? "Cartella: " + cart.nome : "",
+			mb,
+			d.n_segni ? d.n_segni + (d.n_segni === 1 ? " segno" : " segni") : ""
+		].filter(Boolean).map(arcEsc).join(" · ")}</small></div></div>
+    ${az.map(([f, t, s, ic, k]) => `<button class="arc-az${k ? " " + k : ""}" onclick="closeModal('modal-arc-azioni'); ${f}('${id}')">
+      <span class="arc-az-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg></span><span class="arc-az-t"><b>${t}</b><small>${arcEsc(s)}</small></span><span aria-hidden="true">›</span></button>`).join("")}`);
+	}
+	function arcDisegna(id) {
+		dsApri(id);
+	}
+	function arcRinomina(id) {
+		const d = arcDoc(id);
+		if (!d) return;
+		arcFoglio("modal-arc-nome", `<div class="modal-title" id="modal-arc-nome-tit">Rinomina</div>
+    <label class="arc-campo">Nome<input id="arc-nome-in" maxlength="80" value="${arcEsc(d.nome || "")}" placeholder="${arcEsc(d.titolo)}"></label>
+    <div class="arc-info">Lo vedono tutti quelli che possono aprirlo. Sotto, più piccolo, resta il nome di Equo:<br><b>${arcEsc(d.titolo)}</b>${d.nome ? "<br>Lascia vuoto per tornare al nome di Equo." : ""}</div>
+    <div class="arc-bott"><button class="arc-btn" onclick="closeModal('modal-arc-nome')">Annulla</button><button class="arc-btn pri" onclick="arcSalvaNome('${id}')">Salva</button></div>`);
+		setTimeout(() => document.getElementById("arc-nome-in")?.focus(), 80);
+	}
+	async function arcSalvaNome(id) {
+		const v = (document.getElementById("arc-nome-in")?.value || "").trim().slice(0, 80);
+		const { error } = await arcDB.aggiorna(id, { nome: v || null });
+		if (error) return arcToast("Nome non salvato: " + (error.message || "riprova"));
+		closeModal("modal-arc-nome");
+		arcToast("Nome salvato");
+		arcRicarica();
+	}
+	function arcSposta(id) {
+		const ids = id ? [id] : [...ARC.sel || []];
+		if (!ids.length) return;
+		const att = id ? arcDoc(id)?.cartella_id || null : void 0;
+		ARC.spostaIds = ids;
+		arcFoglio("modal-arc-sposta", `<div class="modal-title" id="modal-arc-sposta-tit">Sposta in cartella${ids.length > 1 ? " · " + ids.length + " contenuti" : ""}</div>
+    ${ARC.dati.cartelle.map((c) => `<button class="arc-opz${att === c.id ? " on" : ""}" onclick="arcSpostaIn('${c.id}')"><svg viewBox="0 0 26 22" aria-hidden="true"><path d="M2 4a2 2 0 0 1 2-2h6l2 3h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>${arcEsc(c.nome)}</button>`).join("")}
+    <button class="arc-opz${att === null ? " on" : ""}" onclick="arcSpostaIn(null)">Nessuna cartella</button>
+    <button class="arc-nuova larga" onclick="closeModal('modal-arc-sposta'); arcNuovaCartella(true)">+ Nuova cartella</button>`);
+	}
+	async function arcSpostaIn(cartella) {
+		const ids = ARC.spostaIds || [];
+		for (const i of ids) {
+			const { error } = await arcDB.aggiorna(i, { cartella_id: cartella });
+			if (error) return arcToast("Non spostato: " + (error.message || "riprova"));
+		}
+		closeModal("modal-arc-sposta");
+		ARC.sel = null;
+		arcToast(ids.length > 1 ? ids.length + " contenuti spostati" : "Spostato");
+		arcRicarica();
+	}
+	function arcNuovaCartella(conSposta) {
+		const n = conSposta ? (ARC.spostaIds || []).length : ARC.sel instanceof Set ? ARC.sel.size : 0;
+		if (!conSposta && n) ARC.spostaIds = [...ARC.sel];
+		arcFoglio("modal-arc-cartella", `<div class="modal-title" id="modal-arc-cartella-tit">Nuova cartella</div>
+    <label class="arc-campo">Nome della cartella<input id="arc-cart-in" maxlength="60" placeholder="es. Da ricontrollare"></label>
+    ${n ? `<label class="arc-check"><input type="checkbox" id="arc-cart-sposta" checked> Sposta qui ${n === 1 ? "il contenuto scelto" : "i " + n + " contenuti selezionati"}</label>` : ""}
+    <div class="arc-nota">Le cartelle sono solo tue: servono a tenere in ordine. Chi riceve un contenuto non le vede.</div>
+    <div class="arc-bott"><button class="arc-btn" onclick="closeModal('modal-arc-cartella')">Annulla</button><button class="arc-btn pri" onclick="arcCreaCartella()">Crea</button></div>`);
+		setTimeout(() => document.getElementById("arc-cart-in")?.focus(), 80);
+	}
+	async function arcCreaCartella() {
+		const nome = (document.getElementById("arc-cart-in")?.value || "").trim().slice(0, 60);
+		if (!nome) return arcToast("Scrivi il nome della cartella");
+		const r = await arcDB.creaCartella(nome);
+		if (r.error) return arcToast(/documenti_cartelle|schema cache|does not exist/i.test(r.error.message || "") ? "Manca un aggiornamento del database (SQL 69)." : "Cartella non creata: " + r.error.message);
+		closeModal("modal-arc-cartella");
+		if (document.getElementById("arc-cart-sposta")?.checked && (ARC.spostaIds || []).length) {
+			await arcSpostaIn(r.id);
+			return;
+		}
+		arcToast("Cartella creata");
+		arcRicarica();
+	}
+	function arcOpzioniCartella(id) {
+		const c = ARC.dati.cartelle.find((x) => x.id === id);
+		if (!c) return;
+		arcFoglio("modal-arc-opzc", `<div class="modal-title" id="modal-arc-opzc-tit">${arcEsc(c.nome)}</div>
+    <label class="arc-campo">Rinomina la cartella<input id="arc-opzc-in" maxlength="60" value="${arcEsc(c.nome)}"></label>
+    <div class="arc-bott"><button class="arc-btn rosso" onclick="arcEliminaCartella('${id}')">Elimina cartella</button><button class="arc-btn pri" onclick="arcSalvaCartella('${id}')">Salva</button></div>
+    <div class="arc-nota">Eliminando la cartella i contenuti non si cancellano: tornano nell'Archivio.</div>`);
+	}
+	async function arcSalvaCartella(id) {
+		const nome = (document.getElementById("arc-opzc-in")?.value || "").trim().slice(0, 60);
+		if (!nome) return;
+		const { error } = await arcDB.rinominaCartella(id, nome);
+		if (error) return arcToast("Non salvato, riprova.");
+		closeModal("modal-arc-opzc");
+		arcRicarica();
+	}
+	async function arcEliminaCartella(id) {
+		const { error } = await arcDB.eliminaCartella(id);
+		if (error) return arcToast("Non eliminata, riprova.");
+		closeModal("modal-arc-opzc");
+		ARC.cartella = null;
+		arcToast("Cartella eliminata: i contenuti sono nell'Archivio");
+		arcRicarica();
+	}
+	async function arcChiLoVede(id) {
+		const d = arcDoc(id) || { id };
+		arcFoglio("modal-arc-chi", "<div class=\"modal-title\" id=\"modal-arc-chi-tit\">Chi lo vede</div><div class=\"arc-nota\">Carico…</div>");
+		const r = await arcDB.persone(id);
+		if (!r || r.errore) {
+			document.getElementById("modal-arc-chi-corpo").innerHTML = `<div class="modal-title" id="modal-arc-chi-tit">Chi lo vede</div><div class="arc-nota">${r?.errore && /equo_doc_persone|schema cache/i.test(r.errore) ? "Manca un aggiornamento del database (SQL 69)." : "Puoi decidere chi lo vede solo per i contenuti che hai caricato tu."}</div>`;
+			return;
+		}
+		ARC.chi = {
+			id,
+			persone: (r.persone || []).map((p) => ({
+				...p,
+				nuovo: p.modo
+			})),
+			avviso: r.avviso_privacy !== false,
+			avvisoNuovo: r.avviso_privacy !== false,
+			sanitario: r.sanitario,
+			titolo: d.nome || d.titolo
+		};
+		arcChiRender();
+	}
+	function arcChiRender() {
+		const c = ARC.chi;
+		if (!c) return;
+		const fino = new Date(Date.now() + 6048e5).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "short",
+			year: "numeric"
+		}).replace(".", "");
+		const ini = (n) => String(n || "?").split(/\s+/).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
+		document.getElementById("modal-arc-chi-corpo").innerHTML = `<div class="modal-title" id="modal-arc-chi-tit">Chi lo vede</div>
+    ${c.titolo ? `<div class="arc-nota">${arcEsc(c.titolo)}</div>` : ""}
+    <div class="arc-autore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span><b>Tu</b> (autore) lo vedi sempre</span></div>
+    ${c.persone.length ? c.persone.map((p, i) => `<div class="arc-persona">
+      <div class="arc-p-testa"><span class="arc-ini">${arcEsc(ini(p.nome))}</span><span><b>${arcEsc(p.nome)}</b><small>${arcEsc(p.ruolo)}${p.tipo === "collega" ? " · segue il cavallo" : ""}</small></span></div>
+      <div class="arc-seg" role="group" aria-label="Chi lo vede: ${arcEsc(p.nome)}">${[
+			["sempre", "Per sempre"],
+			["7g", "7 giorni"],
+			["nascosto", "Nascosto"]
+		].map(([k, t]) => `<button class="${p.nuovo === k ? "on" : ""}" aria-pressed="${p.nuovo === k}" onclick="arcChiScegli(${i}, '${k}')">${t}</button>`).join("")}</div>
+      ${p.bloccato ? "<div class=\"arc-nota\">Documento sanitario obbligatorio: la scuderia lo vede comunque.</div>" : p.nuovo === "7g" ? `<div class="arc-nota">Fino al ${p.nuovo === p.modo && p.scade_il ? new Date(p.scade_il).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "short",
+			year: "numeric"
+		}).replace(".", "") : fino}, poi si chiude da solo</div>` : ""}
+    </div>`).join("") : "<div class=\"arc-nota\">Il cavallo non ha ancora un proprietario, una scuderia o colleghi su Equo.</div>"}
+    <button class="arc-nuova larga" onclick="arcConsulto()">+ Aggiungi un collega per un consulto</button>
+    <div class="arc-switch"><span><b>Avviso privacy prima di aprire</b><small>Chi lo riceve deve spuntare «Ho letto e accetto»</small></span>
+      <label class="switch"><input type="checkbox" ${c.avvisoNuovo ? "checked" : ""} onchange="ARC.chi.avvisoNuovo = this.checked" aria-label="Avviso privacy prima di aprire"><span class="switch-track"><span class="switch-thumb"></span></span></label></div>
+    <div class="arc-nota">Nel libretto del cavallo compare solo l'intervento con la data, mai gli allegati. Togliere l'accesso non cancella le copie già scaricate.</div>
+    <button class="arc-btn pri larga" id="arc-chi-salva" onclick="arcChiSalva()">Salva</button>`;
+	}
+	function arcChiScegli(i, k) {
+		const p = ARC.chi?.persone[i];
+		if (p) {
+			p.nuovo = k;
+			arcChiRender();
+		}
+	}
+	async function arcConsulto() {
+		const l = await arcDB.colleghi();
+		const gia = new Set((ARC.chi?.persone || []).map((p) => p.user_id).filter(Boolean));
+		const liberi = l.filter((x) => !gia.has(x.altro_id));
+		arcFoglio("modal-arc-consulto", `<div class="modal-title" id="modal-arc-consulto-tit">Collega per un consulto</div>
+    ${liberi.length ? liberi.map((x) => `<button class="arc-opz" onclick="arcConsultoScegli('${x.altro_id}')"><span class="arc-ini">${arcEsc(String(x.nome || "?").slice(0, 2).toUpperCase())}</span>${arcEsc(x.nome || "Collega")}<small>${arcEsc(x.ruolo || "")}</small></button>`).join("") : "<div class=\"arc-nota\">Nessun collega nella chat tra colleghi. Aggiungilo da Messaggi › Colleghi con il suo codice.</div>"}`);
+		ARC.colleghiLista = l;
+	}
+	function arcConsultoScegli(uid) {
+		const x = (ARC.colleghiLista || []).find((y) => y.altro_id === uid);
+		if (!x || !ARC.chi) return;
+		ARC.chi.persone.push({
+			tipo: "altro",
+			user_id: uid,
+			nome: x.nome || "Collega",
+			ruolo: "Consulto · " + (x.ruolo || "collega"),
+			modo: "nascosto",
+			nuovo: "sempre",
+			motivo: "consulto"
+		});
+		closeModal("modal-arc-consulto");
+		arcChiRender();
+	}
+	async function arcChiSalva() {
+		const c = ARC.chi;
+		if (!c) return;
+		const b = document.getElementById("arc-chi-salva");
+		if (b) b.disabled = true;
+		try {
+			for (const p of c.persone.filter((x) => x.nuovo !== x.modo)) {
+				const r = await arcDB.imposta(c.id, p, p.nuovo, p.motivo === "consulto" ? "consulto" : "condivisione");
+				if (!r?.ok) throw new Error(r?.errore || "non salvato");
+			}
+			if (c.avvisoNuovo !== c.avviso) {
+				const { error } = await arcDB.aggiorna(c.id, { avviso_privacy: c.avvisoNuovo });
+				if (error) throw error;
+			}
+			closeModal("modal-arc-chi");
+			ARC.chi = null;
+			arcToast("Salvato");
+			arcRicarica();
+		} catch (err) {
+			arcToast(/equo_doc_imposta|schema cache/i.test(String(err?.message || err)) ? "Manca un aggiornamento del database (SQL 69)." : "Non salvato: " + (err?.message || err));
+		} finally {
+			if (b) b.disabled = false;
+		}
+	}
+	function arcClienteDi(d) {
+		const cv = (typeof cavalliMieiLista !== "undefined" ? cavalliMieiLista : []).find((c) => c.id === d.cavallo_cliente_id || d.horse_id && c.horse_id === d.horse_id);
+		return (cv && typeof clientiAttivi === "function" ? clientiAttivi().find((c) => c.id === cv.cliente_mascalcia_id) : null) || null;
+	}
+	async function arcMandaChat(id) {
+		const d = arcDoc(id);
+		if (!d) return;
+		const cli = arcClienteDi(d);
+		if (!cli) return arcToast("Non trovo il cliente di questo cavallo: usa «Scarica».");
+		if (!cli.cliente_user_id && !cli.centro_id) return arcToast(`${cli.nome} non è su Equo: usa «Scarica» e mandalo tu.`);
+		if (typeof chiediSiNo === "function" && !await chiediSiNo(`Mandare a ${cli.nome}?`, "Lo trova nella chat con te. Lo vedrà per sempre: puoi cambiarlo quando vuoi in «Chi lo vede».", {
+			si: "Manda",
+			no: "Annulla"
+		})) return;
+		const chi = cli.cliente_user_id ? { user_id: cli.cliente_user_id } : { centro_id: cli.centro_id };
+		const r = await arcDB.imposta(id, chi, "sempre", "chat");
+		if (!r?.ok) return arcToast("Non condiviso: " + (r?.errore || "riprova"));
+		const tipo = /^image\//.test(d.mime || "") ? "foto" : /^video\//.test(d.mime || "") ? "video" : "documento";
+		const { error } = await DB.insertMessaggioMascalcia({
+			cliente_mascalcia_id: cli.id,
+			tipo,
+			testo: d.nome || d.titolo,
+			file_url: "equo-doc:" + id,
+			file_nome: DB.nomeFileDocumento ? DB.nomeFileDocumento(d, d.cavallo_nome) : d.nome || d.titolo
+		});
+		if (error) return arcToast("Accesso dato, ma il messaggio non è partito: riprova.");
+		arcToast("Mandato a " + cli.nome);
+		arcRicarica();
+	}
+	function arcScaricaBlob(blob, nome) {
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = nome;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(() => {
+			URL.revokeObjectURL(a.href);
+			a.remove();
+		}, 4e3);
+	}
+	async function arcScarica(id) {
+		const d = arcDoc(id);
+		if (!d) return;
+		const img = /^image\//.test(d.mime || ""), nome = DB.nomeFileDocumento ? DB.nomeFileDocumento(d, d.cavallo_nome) : "Equo_documento";
+		let conSegni = false;
+		if (img && d.n_segni && typeof chiediSiNo === "function") conSegni = await chiediSiNo("Come lo scarichi?", "Con i segni e le misure disegnati sopra, oppure la foto originale.", {
+			si: "Con i segni",
+			no: "Solo l'originale"
+		});
+		const info = await arcDB.apri(id), url = info?.ok ? await arcDB.urlDi(info) : null;
+		if (!url) return arcToast("Non riesco a scaricarlo, riprova.");
+		try {
+			if (conSegni) {
+				const cv = dsCanvasConSegni(await dsCaricaImmagine(url), info.segni, { maxLato: 2400 });
+				const blob = await new Promise((r) => cv.toBlob(r, "image/jpeg", .92));
+				if (!blob) throw new Error("immagine");
+				return arcScaricaBlob(blob, nome.replace(/\.[a-z0-9]+$/i, "") + "_segni.jpg");
+			}
+			arcScaricaBlob(await (await fetch(url)).blob(), nome);
+		} catch (_) {
+			window.open(url, "_blank", "noopener");
+		}
+	}
+	async function arcElimina(id) {
+		const d = arcDoc(id);
+		if (!d) return;
+		if (typeof chiediSiNo === "function" && !await chiediSiNo("Eliminare «" + (d.nome || d.titolo) + "»?", "Sparisce per tutti. Per 30 giorni lo ritrovi in fondo all'Archivio, «Eliminati», e puoi ripristinarlo.", {
+			si: "Elimina",
+			no: "Annulla"
+		})) return;
+		const { error } = DB.eliminaDocumento ? await DB.eliminaDocumento(id) : await arcDB.aggiorna(id, { eliminato_il: (/* @__PURE__ */ new Date()).toISOString() });
+		if (error) return arcToast("Non eliminato, riprova.");
+		arcToast("Eliminato · recuperabile per 30 giorni");
+		arcRicarica();
+	}
+	async function arcRipristina(id) {
+		const r = await arcDB.ripristina(id);
+		if (!r?.ok) return arcToast(r?.errore === "scaduto" ? "Sono passati più di 30 giorni: non si può più ripristinare." : "Non ripristinato, riprova.");
+		arcToast("Ripristinato");
+		arcRicarica();
+	}
+	var ARC_TIPI = [
+		["foto_clinica", "Foto"],
+		["lastra", "Lastra"],
+		["ecografia", "Ecografia"],
+		["documento", "Documento"]
+	];
+	function arcCarica() {
+		ARC.carica = {
+			cav: null,
+			tipo: "foto_clinica",
+			q: "",
+			lista: (typeof cavalliCartella === "function" ? cavalliCartella() : []).filter((c) => c.id),
+			file: null
+		};
+		arcCaricaRender();
+	}
+	function arcCaricaRender() {
+		const c = ARC.carica;
+		if (!c) return;
+		const q = c.q.trim().toLowerCase(), l = c.lista.filter((x) => !q || String(x.nome || "").toLowerCase().includes(q)).slice(0, 30);
+		const html = `<div class="modal-title" id="modal-arc-carica-tit">Carica nell'Archivio</div>
+    <div class="arc-lab">Per quale cavallo?</div>
+    ${c.cav ? `<button class="arc-opz on" onclick="ARC.carica.cav = null; arcCaricaRender()">${arcEsc(c.cav.nome)} <small>cambia</small></button>` : `<input class="arc-in" id="arc-car-q" type="search" placeholder="Cerca il cavallo" value="${arcEsc(c.q)}" oninput="ARC.carica.q = this.value; arcCaricaRender(); const i = document.getElementById('arc-car-q'); i.focus(); i.setSelectionRange(i.value.length, i.value.length)" aria-label="Cerca il cavallo">
+        <div class="arc-car-lista">${l.map((x) => `<button class="arc-opz" onclick="arcCaricaCavallo('${x.id}')">${arcEsc(x.nome)}</button>`).join("") || "<div class=\"arc-nota\">Nessun cavallo trovato.</div>"}</div>`}
+    <div class="arc-lab">Tipo</div>
+    <div class="arc-chips">${ARC_TIPI.map(([k, t]) => `<button class="arc-chip${c.tipo === k ? " on" : ""}" onclick="ARC.carica.tipo = '${k}'; arcCaricaRender()">${t}</button>`).join("")}</div>
+    <div class="arc-nota">Nasce nascosto: lo vedi solo tu finché non scegli «Chi lo vede». Foto, lastre (JPG, PNG) e PDF fino a 50 MB.</div>
+    <input type="file" id="arc-car-file" accept="image/*,application/pdf" hidden onchange="arcCaricaFile(this)">
+    <button class="arc-btn pri larga" ${c.cav ? "" : "disabled"} onclick="document.getElementById('arc-car-file').click()">Scegli il file e carica</button>`;
+		if (document.getElementById("modal-arc-carica")?.classList.contains("active")) document.getElementById("modal-arc-carica-corpo").innerHTML = html;
+		else arcFoglio("modal-arc-carica", html);
+	}
+	function arcCaricaCavallo(id) {
+		const c = ARC.carica;
+		if (!c) return;
+		c.cav = c.lista.find((x) => x.id === id) || null;
+		arcCaricaRender();
+	}
+	async function arcCaricaFile(input) {
+		const f = input.files && input.files[0];
+		input.value = "";
+		const c = ARC.carica;
+		if (!f || !c?.cav) return;
+		if (f.size > 52428800) return arcToast("File troppo grande: massimo 50 MB");
+		if (!/^(image\/|application\/pdf)/.test(f.type || "")) return arcToast("Puoi caricare foto, lastre in JPG/PNG o PDF");
+		arcToast("Caricamento in corso…");
+		let blob = f;
+		if (/^image\//.test(f.type) && typeof vaRiduci === "function") try {
+			blob = await vaRiduci(f) || f;
+		} catch (_) {
+			blob = f;
+		}
+		const r = await DB.caricaDocumentoPrivato({
+			blob,
+			mime: blob.type || f.type,
+			categoria: c.tipo,
+			cavallo_nome: c.cav.nome,
+			horse_id: c.cav.horse_id || null,
+			cavallo_cliente_id: c.cav.id,
+			autore_ruolo: arcVet() ? "veterinario" : "maniscalco"
+		});
+		if (!r?.id) return arcToast("Caricamento non riuscito: " + (r?.error?.message || "riprova"));
+		closeModal("modal-arc-carica");
+		ARC.carica = null;
+		arcToast("Caricato · nascosto, solo tu lo vedi");
+		arcRicarica();
+	}
+	function arcAvviso(titolo) {
+		return new Promise((res) => {
+			const fine = (v) => {
+				closeModal("modal-arc-avviso");
+				res(v);
+			};
+			arcFoglio("modal-arc-avviso", `<div class="arc-av-testa"><span class="arc-av-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <div class="modal-title" id="modal-arc-avviso-tit">Documento protetto</div></div>
+      ${titolo ? `<div class="arc-nota">${arcEsc(titolo)}</div>` : ""}
+      <p class="arc-av-testo">${arcEsc(ARC_AVVISO)}</p>
+      <label class="arc-check grande"><input type="checkbox" id="arc-av-ok" onchange="document.getElementById('arc-av-apri').disabled = !this.checked"> Ho letto e accetto</label>
+      <div class="arc-nota">Le foto si aprono con il tuo nome e la data in filigrana. La tua conferma viene registrata.</div>
+      <div class="arc-bott"><button class="arc-btn" id="arc-av-no">Non ora</button><button class="arc-btn pri" id="arc-av-apri" disabled>Apri il documento</button></div>`);
+			document.getElementById("arc-av-no").onclick = () => fine(false);
+			document.getElementById("arc-av-apri").onclick = () => fine(!!document.getElementById("arc-av-ok")?.checked);
+			const ov = document.getElementById("modal-arc-avviso");
+			ov.onclick = (ev) => {
+				if (ev.target === ov) fine(false);
+			};
+		});
+	}
+	async function docVisualizza$1(id) {
+		const info = await arcDB.apri(id);
+		if (!info?.ok) {
+			arcToast(info?.errore === "accesso" ? "Non hai accesso a questo documento: chi l'ha caricato può avertelo tolto." : "Non riesco ad aprire il documento, riprova.");
+			return;
+		}
+		if (info.avviso) {
+			if (!await arcAvviso(info.nome || info.titolo)) return;
+			await arcDB.accettaAvviso(id);
+		}
+		const url = await arcDB.urlDi(info);
+		if (!url) {
+			arcToast("Non riesco ad aprire il documento, riprova.");
+			return;
+		}
+		const fino = info.scade_il ? "Disponibile fino al " + new Date(info.scade_il).toLocaleDateString("it-IT", {
+			day: "numeric",
+			month: "short"
+		}).replace(".", "") : "";
+		let ov = document.getElementById("arc-vedi");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.id = "arc-vedi";
+			ov.className = "arc-vedi";
+			ov.setAttribute("role", "dialog");
+			ov.setAttribute("aria-modal", "true");
+			document.body.appendChild(ov);
+		}
+		const img = /^image\//.test(info.mime || ""), s = dsNormalizza(info.segni);
+		ov.innerHTML = `<div class="arc-vedi-top"><button class="ds-ico" aria-label="Chiudi" onclick="docChiudi()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="ds-tit"><b>${arcEsc(info.nome || info.titolo || "Documento")}</b><small>${arcEsc(info.mio ? "Tuo" : "Da " + (info.autore_nome || "un professionista"))}${fino ? " · " + fino : ""}</small></div>
+      ${info.mio && img ? `<button class="ds-salva" onclick="docChiudi(); dsApri('${id}')">Disegna</button>` : ""}</div>
+    ${img ? `<div class="arc-vedi-stage" id="arc-vedi-stage"><canvas id="arc-vedi-cv" role="img" aria-label="${arcEsc(info.nome || info.titolo || "Foto")}"></canvas>
+        ${s.items.length ? `<button class="ds-mostra on" id="arc-vedi-segni" onclick="docSegni()" aria-pressed="true"><span class="ds-sw"><span></span></span>Segni</button>` : ""}</div>
+        ${info.mio ? "" : "<div class=\"arc-vedi-nota\">Documento protetto: non condividerlo senza il permesso di chi l'ha inviato.</div>"}` : `<div class="arc-vedi-file"><b>${/pdf/.test(info.mime || "") ? "PDF" : /^video\//.test(info.mime || "") ? "Video" : "File"}</b>
+        <p>${info.mio ? "" : "Documento protetto: non condividerlo senza il permesso di chi l'ha inviato."}</p>
+        <a class="arc-btn pri" href="${arcEsc(urlSicuro(url))}" target="_blank" rel="noopener">Apri il documento</a><small>Il link vale 10 minuti.</small></div>`}`;
+		ov.classList.add("aperto");
+		if (!img) return;
+		try {
+			ARC.vedi = {
+				im: await dsCaricaImmagine(url),
+				segni: s,
+				mostra: true,
+				filigrana: info.mio ? null : (info.io || "Equo") + " · " + (/* @__PURE__ */ new Date()).toLocaleDateString("it-IT")
+			};
+			docDisegna();
+		} catch (_) {
+			arcToast("Non riesco a caricare la foto, riprova.");
+		}
+	}
+	function docDisegna() {
+		const v = ARC.vedi, cv = document.getElementById("arc-vedi-cv"), st = document.getElementById("arc-vedi-stage");
+		if (!v || !cv || !st) return;
+		const dpr = window.devicePixelRatio || 1, cw = st.clientWidth, ch = st.clientHeight;
+		cv.width = Math.round(cw * dpr);
+		cv.height = Math.round(ch * dpr);
+		cv.style.width = cw + "px";
+		cv.style.height = ch + "px";
+		const ctx = cv.getContext("2d");
+		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		const r = dsAdatta(cw, ch, v.im.naturalWidth, v.im.naturalHeight);
+		ctx.drawImage(v.im, r.x, r.y, r.w, r.h);
+		if (v.mostra) dsDisegnaSegni(ctx, v.segni, r, v.im.naturalWidth, v.im.naturalHeight, { scala: 1.1 });
+		if (v.filigrana) {
+			ctx.save();
+			ctx.beginPath();
+			ctx.rect(r.x, r.y, r.w, r.h);
+			ctx.clip();
+			ctx.translate(r.x, r.y);
+			dsFiligrana(ctx, r.w, r.h, v.filigrana);
+			ctx.restore();
+		}
+	}
+	function docSegni() {
+		if (!ARC.vedi) return;
+		ARC.vedi.mostra = !ARC.vedi.mostra;
+		const b = document.getElementById("arc-vedi-segni");
+		if (b) {
+			b.classList.toggle("on", ARC.vedi.mostra);
+			b.setAttribute("aria-pressed", ARC.vedi.mostra);
+		}
+		docDisegna();
+	}
+	function docChiudi() {
+		const ov = document.getElementById("arc-vedi");
+		if (ov) {
+			ov.classList.remove("aperto");
+			ov.innerHTML = "";
+		}
+		ARC.vedi = null;
 	}
 	// equo-app-src/src/ruoli/maniscalco/moduli/122-cavallo-al-collega.js
 	var ccEsc = (s) => escapeHtml(s == null ? "" : String(s));
@@ -14008,7 +16022,7 @@
 		let cavalli;
 		if (daStruttura) {
 			await caricaCavalliMiei().catch(() => {});
-			cavalli = (cavalliMieiLista || []).filter((c) => c.cliente_mascalcia_id === cli.id && !c.horse_id).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
+			cavalli = (cavalliMieiLista$1 || []).filter((c) => c.cliente_mascalcia_id === cli.id && !c.horse_id).sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" }));
 			if (!cavalli.length) {
 				showToast("In questa struttura non ci sono cavalli da assegnare.");
 				return;
@@ -14037,7 +16051,7 @@
 		};
 		document.getElementById("cp-tit").textContent = daStruttura ? "Assegna proprietario · " + cli.nome : "Cambia proprietario · " + (cavalli[0].nome || "cavallo");
 		const alf = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
-		const pr = clientiAttivi().filter((c) => c.id !== cli.id && !isStruttura(c)).sort(alf), sc = clientiAttivi().filter((c) => c.id !== cli.id && isStruttura(c)).sort(alf);
+		const pr = clientiAttivi$1().filter((c) => c.id !== cli.id && !isStruttura(c)).sort(alf), sc = clientiAttivi$1().filter((c) => c.id !== cli.id && isStruttura(c)).sort(alf);
 		document.getElementById("cp-dest").innerHTML = "<option value=\"\">Scegli il proprietario…</option><option value=\"__nuovo\">+ Nuovo proprietario</option>" + (pr.length ? `<optgroup label="Proprietari">${pr.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "") + (sc.length ? `<optgroup label="Altre scuderie">${sc.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")}</optgroup>` : "");
 		cpCercaInit([...pr, ...sc]);
 		document.getElementById("cp-nuovo").hidden = true;
@@ -14188,7 +16202,7 @@
 			cpCodiceStato("no", "Codice non trovato: controlla le lettere con il proprietario.");
 			return;
 		}
-		const gia = clientiAttivi().find((c) => c.cliente_user_id === prof.id);
+		const gia = clientiAttivi$1().find((c) => c.cliente_user_id === prof.id);
 		if (gia) {
 			cpCodiceStato("no", `È già tra i tuoi clienti come «${gia.nome}»: cercalo nel campo «Proprietario» qui sopra.`);
 			return;
@@ -16716,11 +18730,11 @@
 		caricaJsPdf,
 		caricaRichiamiPredefiniti,
 		caricaUbicazioni,
-		chiediSiNo,
+		chiediSiNo: chiediSiNo$1,
 		chiudiEditorFerro,
 		chiudiSchedaCavalloPro,
 		clienteDiId: clienteDiId$1,
-		clientiAttivi,
+		clientiAttivi: clientiAttivi$1,
 		closeClienteDetail,
 		closeFarrierChatThread,
 		closeQrScanner,
@@ -17017,7 +19031,71 @@
 		ccBollaHtml,
 		ccRicevi,
 		ccCeLho,
-		ccPreviewTesto
+		ccPreviewTesto,
+		ricaricaAllegatiAperti: ricaricaAllegatiAperti$1,
+		ARC,
+		arcDB,
+		apriArchivio,
+		arcChiudi,
+		arcRender,
+		arcCerca,
+		arcFiltro,
+		arcOrdine,
+		arcApriCartella,
+		arcSelezione,
+		arcSpunta,
+		arcAzioni: arcAzioni$1,
+		arcDisegna,
+		arcRinomina,
+		arcSalvaNome,
+		arcSposta,
+		arcSpostaIn,
+		arcNuovaCartella,
+		arcCreaCartella,
+		arcOpzioniCartella,
+		arcSalvaCartella,
+		arcEliminaCartella,
+		arcChiLoVede,
+		arcChiScegli,
+		arcConsulto,
+		arcConsultoScegli,
+		arcChiSalva,
+		arcMandaChat,
+		arcScarica,
+		arcElimina,
+		arcRipristina,
+		arcCarica,
+		arcCaricaCavallo,
+		arcCaricaFile,
+		arcCaricaRender,
+		arcRicarica,
+		docVisualizza: docVisualizza$1,
+		docSegni,
+		docChiudi,
+		docDisegna,
+		DS,
+		CF,
+		dsApri,
+		dsChiudi,
+		dsSalva,
+		dsStrumento,
+		dsColore,
+		dsMostra,
+		dsSeleziona,
+		dsTogli,
+		dsNota,
+		dsCalibra,
+		dsAnnulla,
+		dsRifai,
+		dsConfronto,
+		dsConfrontoScegli,
+		dsConfrontoModo,
+		dsConfrontoDisegna,
+		dsCopiaSegni,
+		dsSalvaConfronto,
+		dsConfrontoChiudi,
+		dsCanvasConSegni,
+		dsDisegnaSegni
 	});
 })();
 

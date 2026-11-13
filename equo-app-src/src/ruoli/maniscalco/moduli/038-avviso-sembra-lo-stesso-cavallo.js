@@ -193,9 +193,11 @@ async function caricaAllegatiCavallo(boxId, vista, cv){
       <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(a.nome)}</div>
         <div class="muted" style="font-size:11.5px">${a.mio ? "caricato da te" : "caricato " + (chi[a.autore_ruolo] || "") + (a.autore_nome ? " " + escapeHtml(a.autore_nome) : "")} · ${formatDataBreve(String(a.created_at).slice(0, 10))}${a.byte ? " · " + (a.byte > 1048576 ? (a.byte / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(a.byte / 1024)) + " KB") : ""}</div></div>
       <button class="btn btn-outline btn-sm" onclick="apriAllegato('${boxId}', '${a.id}', this)">Apri</button>
-      ${a.mio ? `<button class="btn btn-ghost btn-sm" style="color:var(--red);padding:6px" aria-label="Elimina" onclick="eliminaAllegato('${boxId}', '${a.id}')">✕</button>` : ""}
+      ${a.mio && a.documento && typeof arcAzioni === "function" ? `<button class="btn btn-ghost btn-sm" style="padding:6px" aria-label="Rinomina, chi lo vede, disegna, elimina" onclick="arcAzioni('${a.id}')">⋯</button>`
+        : a.mio ? `<button class="btn btn-ghost btn-sm" style="color:var(--red);padding:6px" aria-label="Elimina" onclick="eliminaAllegato('${boxId}', '${a.id}')">✕</button>` : ""}
     </div>`;
-  }).join("") : '<div class="muted" style="font-size:13px">Nessun allegato. Carica lastre, referti o foto: li vedranno anche gli altri che seguono il cavallo.</div>';
+  }).join("") : (vista === "maniscalco" ? '<div class="muted" style="font-size:13px">Nessun allegato. Carica lastre, referti o foto: all\'inizio li vedi solo tu, poi scegli chi li vede con «⋯ › Chi lo vede» (anche da Menu › Archivio).</div>'
+    : '<div class="muted" style="font-size:13px">Nessun allegato. Carica lastre, referti o foto: li vedranno anche gli altri che seguono il cavallo.</div>');
 }
 async function caricaAllegatoCavallo(input, boxId, vista){
   const f = input.files && input.files[0];
@@ -217,12 +219,14 @@ async function caricaAllegatoCavallo(input, boxId, vista){
     await sb.storage.from("cavalli-allegati").remove([path]);
     showToast((data && data.errore) || "Caricamento non riuscito, riprova."); return;
   }
-  showToast("Allegato caricato");
+  showToast(data.documento ? "Caricato · lo vedi solo tu: scegli chi lo vede con «⋯»" : "Allegato caricato");
   await caricaAllegatiCavallo(boxId, vista, ctx.cv);
 }
 async function apriAllegato(boxId, id, btn){
   const a = (allegatiCtx[boxId]?.lista || []).find(x => x.id === id);
   if(!a) return;
+  // 13/11/2026 (SQL 69): contenuto dello spazio privato → avviso privacy, segni, filigrana
+  if(a.documento && typeof docVisualizza === "function") return docVisualizza(a.id);
   // il link va aperto subito (iPhone blocca le finestre aperte dopo un'attesa)
   const w = window.open("", "_blank");
   if(btn) btn.disabled = true;
@@ -230,6 +234,9 @@ async function apriAllegato(boxId, id, btn){
   if(btn) btn.disabled = false;
   if(error || !data?.signedUrl){ if(w) w.close(); showToast("Non riesco ad aprire il file, riprova."); return; }
   if(w) w.location.href = data.signedUrl; else window.location.href = data.signedUrl;
+}
+function ricaricaAllegatiAperti(){
+  Object.entries(allegatiCtx).forEach(([box, c]) => { if(document.getElementById(box)) caricaAllegatiCavallo(box, c.vista, c.cv); });
 }
 async function eliminaAllegato(boxId, id){
   const a = (allegatiCtx[boxId]?.lista || []).find(x => x.id === id);
@@ -405,4 +412,4 @@ function renderStoricoCliente(){
 
 
 
-export { aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderAvvisoSimili, renderBoxCavalliCliente, renderCorpoCavalloPro, renderInterventiSenzaCavallo, renderTabCavalloPro, unisciSimili };
+export { ricaricaAllegatiAperti, aggiungiCavalloDaScheda, apriAllegato, apriSchedaCavalloPro, assegnaInterventoCavallo, caricaAllegatiCavallo, caricaAllegatoCavallo, chiudiSchedaCavalloPro, eliminaAllegato, eliminaInterventoOrfano, filtraStoricoCavallo, ignoraSimili, modificaAnagraficaCavalloPro, nuovoInterventoCavalloPro, renderAvvisoSimili, renderBoxCavalliCliente, renderCorpoCavalloPro, renderInterventiSenzaCavallo, renderTabCavalloPro, unisciSimili };

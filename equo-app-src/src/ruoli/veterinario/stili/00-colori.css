@@ -400,3 +400,34 @@ html body[data-tono="5"]:where(.pl-vet) #screen-app{--tono:#677086}
 :where(body.pl-vet) .hm-riga.r-off .tx span{color:#2E8F88!important}
 :where(body.pl-vet) .hm-riga.r-off .ic{border:1px solid rgba(127,209,201,.5);color:#2E8F88}
 :where(body.pl-vet) .hm-riga.r-off .fr{color:#2E8F88}
+/* ruoli/maniscalco/stili/base-62i-archivio.css */
+:where(body.pl-vet) .arc-thumb.lastra{background:linear-gradient(160deg,#1D2D50,#1D2D50);color:#677086}
+:where(body.pl-vet) .arc-vis.tempo{color:#1D2D50}
+:where(body.pl-vet) .arc-vedi{background:#1D2D50;color:#8A6D2E}
+:where(body.pl-vet) .arc-vedi-nota{color:#2E8F88}
+:where(body.pl-vet) .arc-vedi-file small{color:#2E8F88}
+:where(body.pl-vet) .ds-editor{background:#1D2D50;color:#8A6D2E}
+:where(body.pl-vet) .ds-ico{background:#1D2D50;color:#8A6D2E}
+:where(body.pl-vet) .ds-ico:disabled{color:#677086}
+:where(body.pl-vet) .ds-tit small{color:#2E8F88}
+:where(body.pl-vet) .ds-salva{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ds-cal{background:#1D2D50}
+:where(body.pl-vet) .ds-cal button{color:#2E8F88}
+:where(body.pl-vet) .ds-stage{background:#1D2D50}
+:where(body.pl-vet) .ds-mostra{color:#8A6D2E}
+:where(body.pl-vet) .ds-sw{background:#1D2D50}
+:where(body.pl-vet) .ds-sw span{background:#F7F4EE}
+:where(body.pl-vet) .ds-mostra.on .ds-sw{background:#7FD1C9}
+:where(body.pl-vet) .ds-mostra.on .ds-sw span{background:#1D2D50}
+:where(body.pl-vet) .ds-aiuto{color:#8A6D2E;text-shadow:0 1px 2px #000000}
+:where(body.pl-vet) .ds-chip{background:#1D2D50;color:#8A6D2E}
+:where(body.pl-vet) .ds-chip.on{border-color:#7FD1C9}
+:where(body.pl-vet) .ds-chip span{color:#1D2D50}
+:where(body.pl-vet) .ds-vuoto{color:#2E8F88}
+:where(body.pl-vet) .ds-selbar{color:#2E8F88}
+:where(body.pl-vet) .ds-selbar button{background:#1D2D50;color:#8A6D2E}
+:where(body.pl-vet) .ds-tool{background:#1D2D50;color:#8A6D2E}
+:where(body.pl-vet) .ds-tool.on{background:#7FD1C9;color:#1D2D50}
+:where(body.pl-vet) .ds-stile{color:#2E8F88}
+:where(body.pl-vet) .ds-col{border:2px solid #1D2D50}
+:where(body.pl-vet) .cf-cv{background:#1D2D50}

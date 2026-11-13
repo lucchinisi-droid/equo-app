@@ -58,8 +58,9 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
     const id = demoState.documenti[0].id;
     const priv = bollaAllegato("documento", "equo-doc:" + id, "Referto.pdf", "");
     const norm = bollaAllegato("documento", "https://esempio.it/a.pdf", "A.pdf", "");
-    let aperto = null; window.open = () => ({ close(){}, location: { set href(u){ aperto = u; } } });
-    await apriDocumentoPrivato(id);
+    // 13/11/2026 (SQL 69): si apre dentro Equo (avviso privacy se serve), il PDF con «Apri il documento»
+    await apriDocumentoPrivato(id); await new Promise(r => setTimeout(r, 300));
+    const aperto = document.querySelector("#arc-vedi .arc-vedi-file a")?.href || null; if(typeof docChiudi === "function") docChiudi();
     let negato = "sì"; const t = window.showToast; window.showToast = m => { negato = m; }; await apriDocumentoPrivato("doc-inesistente"); window.showToast = t;
     return { priv: priv.startsWith("<button") && priv.includes("apriDocumentoPrivato") && priv.includes("Privato"), norm: norm.startsWith('<a class="mchat-doc" href="https://esempio.it/a.pdf"'),
       aperto: String(aperto).startsWith("blob:"), negato };

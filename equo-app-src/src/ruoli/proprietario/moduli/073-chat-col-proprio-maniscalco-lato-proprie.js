@@ -14,6 +14,8 @@ function bollaAllegato(tipo, url, nome, testo){
 }
 // apre un documento privato con un link che vale pochi minuti (la finestra si apre subito, se no il telefono la blocca)
 async function apriDocumentoPrivato(id){
+  // 13/11/2026 (SQL 69): avviso privacy con la spunta e foto dentro Equo con segni e filigrana
+  if(typeof docVisualizza === "function") return docVisualizza(id);
   const w = window.open("", "_blank");
   const { url, error } = await DB.apriUrlDocumento(id);
   if(!url){
