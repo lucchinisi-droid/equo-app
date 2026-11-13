@@ -77,7 +77,9 @@ async function vrApri(){
   VS.schermo = "referto";
   const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {}, ps = vrParteScritta();
   if(!sez.length && vrScrittaVuota(ps)) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
-  VR.dest = vrDestinatari(); VR.alleg = new Set([...VR.alleg].filter(id => VA.lista.some(a => a.id === id)));
+  VR.dest = vrDestinatari(); VR.cond = VS.e?.referto_proprietario !== false;   // Fase 4 (SQL 67): il veterinario sceglie, acceso di serie
+  VR.dest.forEach(x => { if(x.k === "prop" && !VR.cond) x.on = false; });
+  VR.alleg = new Set([...VR.alleg].filter(id => VA.lista.some(a => a.id === id)));
   vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
   const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
   document.getElementById("vs-corpo").innerHTML = `
@@ -95,8 +97,10 @@ async function vrApri(){
       <button type="button" class="vd-detta piccolo" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
     </div>
     ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map(a => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
+    ${VR.dest.some(x => x.k === "prop") ? `<label class="vr-cond${VR.cond ? " on" : ""}" id="vr-cond"><input type="checkbox" ${VR.cond ? "checked" : ""} onchange="vrCond(this.checked)"><span class="vr-sw"></span>
+      <span><b>Condividi il referto col proprietario</b><small>${VR.cond ? "Lo riceve in chat e resta nei documenti del suo cavallo." : "Resta privato: il proprietario vede solo data e tipo della visita."}</small></span></label>` : ""}
     <div class="vs-h">Chi lo riceve</div>
-    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" ${x.on ? "checked" : ""} ${x.suEquo ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
+    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" id="vr-dest-${i}" ${x.on ? "checked" : ""} ${x.suEquo && !(x.k === "prop" && !VR.cond) ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
       <span><b>${vrEsc(x.nome)}</b><small>${vrEsc(x.ruolo)}${x.suEquo ? " · in chat su Equo" : " · non è su Equo: usa «Condividi»"}</small></span></label>`).join("")
       : '<div class="vs-nota">Nessun destinatario su Equo per questo cavallo: usa «Condividi» per mandarlo con WhatsApp o email.</div>'}
     <div class="vs-nota">Il referto resta nella cartella del cavallo in uno spazio privato: lo vedono tu e il proprietario, e chi lo riceve. Il proprietario può togliere l'accesso a chi vuole (non a te).</div>
@@ -256,7 +260,7 @@ async function vrCondividi(){
 async function vrInvia(){
   if(VR.invio) return; VR.invio = true;
   try{
-    const scelti = VR.dest.filter(x => x.on && x.suEquo);
+    const scelti = VR.dest.filter(x => x.on && x.suEquo && !(x.k === "prop" && VR.cond === false));
     showToast("Preparo e invio il referto…");
     const { blob, nome, titolo } = await vrCreaPdf();
     const v = VS.visita, e = VS.e;
@@ -286,7 +290,10 @@ async function vrInvia(){
     }
     // piano terapeutico ancora in bozza: parte con il referto (il riassunto è nel PDF)
     if(typeof ptAvviaDaReferto === "function"){ try{ await ptAvviaDaReferto(); }catch(err){ avvisi.push("Piano terapeutico non avviato: " + (err?.message || err)); } }
-    v.dati = { ...(v.dati || {}), _referto: { il: new Date().toISOString(), a: inviati, documento_id: id, allegati: alleg.length } };
+    // non condiviso col proprietario: il file lo vedono solo l'autore e chi l'ha ricevuto (SQL 67)
+    if(VR.cond === false){ const r = await vrDB.refertoSoloAutore(id, true); if(r?.error) avvisi.push("Il referto non è segnato come privato: manca un aggiornamento del database (SQL 67)."); }
+    if(e?.id && (e.referto_proprietario !== false) !== (VR.cond !== false)) await vrSalvaScelta(e, VR.cond !== false);
+    v.dati = { ...(v.dati || {}), _referto: { il: new Date().toISOString(), a: inviati, documento_id: id, allegati: alleg.length, privato: VR.cond === false } };
     await vsSalvaSubito();
     vrFatto(inviati, avvisi);
   }catch(err){ console.error("referto:", err); showToast("Impossibile inviare il referto: " + (err?.message || err)); }
@@ -302,4 +309,34 @@ function vrFatto(inviati, avvisi){
   document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + '<button class="vs-btn pri" onclick="vsChiudi()">Chiudi</button>';
 }
 
-export { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR };
+/* ---- Fase 4 (SQL 67): «Condividi il referto col proprietario» ---- */
+function vrCond(on){
+  VR.cond = !!on;
+  const box = document.getElementById("vr-cond");
+  if(box){ box.classList.toggle("on", VR.cond); const sm = box.querySelector("small"); if(sm) sm.textContent = VR.cond ? "Lo riceve in chat e resta nei documenti del suo cavallo." : "Resta privato: il proprietario vede solo data e tipo della visita."; }
+  VR.dest.forEach((x, i) => { if(x.k !== "prop") return; x.on = VR.cond && x.suEquo; const c = document.getElementById("vr-dest-" + i); if(c){ c.checked = x.on; c.disabled = !VR.cond || !x.suEquo; } });
+}
+// la scelta resta sulla visita (intervento) e vale anche per i referti già mandati di quella visita
+async function vrSalvaScelta(e, on){
+  if(!e?.id) return { error: null };
+  e.referto_proprietario = !!on;
+  if(DEMO_MODE){
+    const i = (demoState.interventiMascalcia || []).find(x => x.id === e.id); if(i) i.referto_proprietario = !!on;
+    (demoState.documenti || []).filter(d => d.categoria === "referto" && d.intervento_id === e.id).forEach(d => { d.solo_autore = !on; });
+    return { error: null };
+  }
+  const { error } = await DB.updateInterventoMascalcia(e.id, { referto_proprietario: !!on });
+  if(error) return { error };
+  const { data: vis } = await sb.from("visite_pro").select("id").eq("intervento_id", e.id);
+  if(vis?.length) await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map(x => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+  return { error: null };
+}
+const vrDB = {
+  async refertoSoloAutore(id, solo){
+    if(DEMO_MODE){ const d = (demoState.documenti || []).find(x => x.id === id); if(d) d.solo_autore = !!solo; return { error: null }; }
+    const { error } = await sb.from("documenti").update({ solo_autore: !!solo }).eq("id", id);
+    return { error };
+  }
+};
+
+export { vrCond, vrSalvaScelta, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR };

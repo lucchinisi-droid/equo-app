@@ -298,6 +298,7 @@
 		if (tipo === "video") return "🎬 Video";
 		if (tipo === "audio") return "🎙️ Nota vocale";
 		if (tipo === "documento") return "📄 " + (nome || "Documento PDF");
+		if (tipo === "cavallo") return "🐴 Scheda cavallo";
 		return "";
 	}
 	function previewMessaggioMascalcia(tipo, testo, fileNome) {

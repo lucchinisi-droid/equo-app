@@ -48,7 +48,8 @@ function vetRenderClienti(box){
   const nCli = attivi.length;
   document.getElementById("cli-cartella-sotto").innerHTML = `<span>${nCli} ${nCli === 1 ? "cliente" : "clienti"} · ${cavalli.length} ${cavalli.length === 1 ? "cavallo" : "cavalli"}</span>`
     + `<button class="vt-cli-nuovo" onclick="apriNuovoCliente('proprietario')">+ Cliente</button>`;
-  const collega = document.getElementById("cli-collega-btn"); if(collega) collega.style.display = "none";
+  // 11/11/2026 (Fase 4, SQL 67): anche il veterinario si collega a una scuderia con il codice del centro (o il QR)
+  const collega = document.getElementById("cli-collega-btn"); if(collega) collega.style.display = vetCliFiltro === "scuderie" ? "" : "none";
   const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
   if(f) f.inp.placeholder = "Nome, cavallo, microchip";
 

@@ -3,7 +3,7 @@
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Collega una scuderia</div>
     <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
-      Inserisci il <strong>codice della scuderia</strong> (lo trova in Equo Scuderia → Il tuo Centro → Codice invito). La scuderia riceve la richiesta e la conferma.
+      Inserisci il <strong>codice della scuderia</strong> (lo trova in Equo Scuderia → Professionisti, anche come QR). La scuderia riceve la richiesta e la conferma.
     </div>
     <div class="auth-form">
       <div class="input-group">
@@ -12,6 +12,7 @@
       </div>
       <div class="auth-error" id="collega-struttura-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="inviaRichiestaStruttura()" style="width:100%;margin-top:6px">Invia richiesta</button>
+      <button class="btn btn-outline" id="collega-struttura-qr" onclick="apriQrStruttura()" style="width:100%;margin-top:8px"><span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Inquadra il QR della scuderia</button>
     </div>
   </div>
 </div>

@@ -3111,6 +3111,7 @@
 		caricaAllegatiScud(id);
 		if (typeof mncAlCavallo === "function") mncAlCavallo(id);
 		if (typeof cavVerificaRender === "function") cavVerificaRender(id);
+		if (typeof vvAlCavallo === "function") vvAlCavallo(id);
 	}
 	function closeCavalloDetail() {
 		currentCavalloId = null;

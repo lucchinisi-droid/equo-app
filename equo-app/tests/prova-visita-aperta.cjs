@@ -160,7 +160,7 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
   const ancora = await pg.evaluate(() => window.__pt.every(id => vaaAperto(demoState.interventiMascalcia.find(e => e.id === id))));
   ok(lh.aperto && lh.vuote.length === 2 && ancora && !(await attivo("modal-vic")), "«Inizia» apre la visita; «Continuo più tardi» lascia i lavori aperti " + JSON.stringify(lh));
 
-  // 7. scheda della scuderia vista dal veterinario: richiami vaccinali, niente ferratura né «Collega a Equo Scuderia»
+  // 7. scheda della scuderia vista dal veterinario: richiami vaccinali, niente ferratura; «Collega a Equo Scuderia» c'è (Fase 4, SQL 67)
   await pg.evaluate(() => { const o = isoLocale(new Date(Date.now() - 340 * 864e5)), sc = isoLocale(new Date(Date.now() + 12 * 864e5));
     const t = demoState.clientiMascalcia.find(c => isStruttura(c)); window.__str = t.id;
     const cv = demoState.cavalliClientiMascalcia.find(c => c.cliente_mascalcia_id === t.id) || demoState.cavalliClientiMascalcia.find(c => c.ubicazione_cliente_id === t.id);
@@ -168,8 +168,8 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
     window.__cvn = cv.nome; });
   await pg.evaluate(async () => { showPage("pro-clienti"); await new Promise(r => setTimeout(r, 400)); await openClienteDetail(window.__str); }); await attesa(2000);
   const st = await pg.evaluate(() => ({ ciclo: document.getElementById("cli-ciclo")?.textContent.replace(/\s+/g, " ").trim() || "", colleg: /Collega a Equo Scuderia/.test(document.body.innerText) }));
-  ok(/Richiami della struttura/.test(st.ciclo) && !/Ferratura/.test(st.ciclo) && new RegExp("1 cavallo con il vaccino in scadenza.*" + (await pg.evaluate(() => window.__cvn))).test(st.ciclo) && /Fissa il giro dei richiami/.test(st.ciclo) && !st.colleg,
-    "Scheda scuderia (veterinario): richiami, niente ferratura né «Collega a Equo Scuderia» " + JSON.stringify(st));
+  ok(/Richiami della struttura/.test(st.ciclo) && !/Ferratura/.test(st.ciclo) && new RegExp("1 cavallo con il vaccino in scadenza.*" + (await pg.evaluate(() => window.__cvn))).test(st.ciclo) && /Fissa il giro dei richiami/.test(st.ciclo) && st.colleg,
+    "Scheda scuderia (veterinario): richiami, niente ferratura, «Collega a Equo Scuderia» (Fase 4) " + JSON.stringify(st));
   await pg.evaluate(() => vetFissaRichiami()); await attesa(500);
   const fr = await pg.evaluate(() => ({ aperto: document.getElementById("modal-vap-aperto")?.classList.contains("active"), cid: VAP.a.cid, slot: VAP.a.slot.join(","), quando: VAP.a.quando, prev: document.getElementById("vap-prev")?.textContent || "" }));
   ok(fr.aperto && fr.cid === (await pg.evaluate(() => window.__str)) && fr.slot === "vaccino" && fr.quando === "scegli" && /richiamo in scadenza/.test(fr.prev), "«Fissa il giro dei richiami» prepara l'appuntamento aperto " + JSON.stringify(fr));

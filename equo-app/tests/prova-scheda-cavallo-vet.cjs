@@ -32,8 +32,8 @@ async function pagina(b){
       ter: document.querySelector("#vc-clinica .vc-ter-t")?.textContent || "", dpa: document.querySelector("#vc-clinica .vc-dpa b")?.textContent, visite: [...document.querySelectorAll("#vc-clinica .vc-visita b")].map(x => x.textContent),
       diag: document.querySelector("#vc-clinica .vc-visita small")?.textContent, gruppi: [...document.querySelectorAll("#vc-documenti .vc-h")].map(x => x.textContent),
       docs: [...document.querySelectorAll("#vc-documenti .vc-doc small")].map(x => x.textContent), condivisi: !!document.getElementById("vc-condivisi"), ferro: !!document.querySelector(".cavpro-ferro") }));
-    ok(s.tab.join("|") === "Tutto|Anagrafica|Clinica|Storico|Documenti" && s.sez.join("|").startsWith("Anagrafica|Clinica|Storico di Aurora|Documenti|Allegati condivisi") && !s.ferro,
-      "Veterinario: tasti e sezioni (niente Ferratura) " + JSON.stringify({ tab: s.tab, sez: s.sez }));
+    ok(s.tab.join("|") === "Tutto|Anagrafica|Clinica|Storico|Documenti" && s.sez.join("|").startsWith("Anagrafica|Colleghi|Clinica|Storico di Aurora|Documenti|Allegati condivisi") && !s.ferro,
+      "Veterinario: tasti e sezioni (niente Ferratura; «Colleghi» dalla Fase 4) " + JSON.stringify({ tab: s.tab, sez: s.sez }));
     ok(/Terapia in corso/.test(s.ter) && s.dpa === "Non DPA" && s.visite[0] === "Visita standard · bozza" && s.diag === "Ascesso subsolare ASx", "Clinica: terapia, DPA, visite " + JSON.stringify(s));
     ok(s.gruppi.join("|") === "Referti · 1|Lastre · 1" && s.docs.join("|") === "tuo|maniscalco" && s.condivisi, "Documenti per tipo, allegati condivisi sotto " + JSON.stringify(s));
     // solo Clinica / solo Documenti

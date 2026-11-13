@@ -17,15 +17,30 @@ function selezionaTabPro(tab){
     if(el) el.style.display = t === tab ? "block" : "none";
   });
   const btn = document.getElementById("btn-aggiungi-pro");
-  if(btn) btn.style.display = (tab === "maniscalchi" && puoCollegareProfessionisti()) ? "" : "none";
+  // 11/11/2026 (Fase 4, SQL 67): anche i veterinari, con lo stesso collegamento dei maniscalchi
+  if(btn){
+    btn.style.display = (["maniscalchi", "veterinari"].includes(tab) && puoCollegareProfessionisti()) ? "" : "none";
+    btn.innerHTML = `<i class="fa-solid fa-plus"></i> Aggiungi ${tab === "veterinari" ? "veterinario" : "maniscalco"}`;
+  }
+  proTabCorrente = tab;
 }
+let proTabCorrente = "maniscalchi";
+const proCat = () => proTabCorrente === "veterinari" ? "veterinario" : "maniscalco";
 
 async function loadProfessionisti(){
   if(DEMO_MODE){
-    professionistiList = [{ cliente_id: "demo-pro-1", categoria: "maniscalco", nome: "Marco Ferri", stato: "attivo", certificato: true, non_letti: 0, da_confermare: 0 }];
+    professionistiList = [{ cliente_id: "demo-pro-1", categoria: "maniscalco", nome: "Marco Ferri", stato: "attivo", certificato: true, non_letti: 0, da_confermare: 0, cavalli: 3 },
+      { cliente_id: "demo-vet-1", categoria: "veterinario", nome: "Dott. Riccardo Mastrovalerio", stato: "attivo", certificato: true, non_letti: 0, da_confermare: 0, cavalli: 2 },
+      { cliente_id: "demo-vet-2", categoria: "veterinario", nome: "Dott.ssa Laura Bolaffio", stato: "da_confermare_struttura", origine: "maniscalco", certificato: false, non_letti: 0, da_confermare: 0 }];
+    proLimite = 5;
     aggiornaBadgeProfessionisti(); return;
   }
   if(!currentCentro){ professionistiList = []; return; }
+  // limite del pacchetto: maniscalchi e veterinari insieme (SQL 67)
+  sb.rpc("centro_limiti", { p_centro_id: currentCentro.id }).then(({ data }) => {
+    proLimite = data && data.maniscalchi != null && data.veterinari != null ? Number(data.maniscalchi) + Number(data.veterinari) : null;
+    renderLimitePro();
+  }).catch(() => {});
   const { data, error } = await sb.rpc("scuderia_lista_professionisti", { p_centro_id: currentCentro.id });
   if(error){ console.error("scuderia_lista_professionisti:", error); professionistiList = []; return; }
   professionistiList = data || [];
@@ -46,15 +61,36 @@ async function refreshProfessionistiModule(){
   if(hint && currentCentro?.join_code){
     hint.innerHTML = `Il maniscalco può anche chiedere il collegamento da Equo App inserendo il codice del centro <strong>${escapeHtml(currentCentro.join_code)}</strong>: la richiesta compare qui da accettare.`;
   }
+  const hintVet = document.getElementById("pro-codice-centro-hint-vet");
+  if(hintVet && currentCentro?.join_code){
+    hintVet.innerHTML = `<span>Il veterinario può anche chiedere il collegamento da Equo App con il codice del centro <strong>${escapeHtml(currentCentro.join_code)}</strong> o inquadrando questo QR: la richiesta compare qui da accettare.</span><img id="pro-qr-centro" alt="QR del centro" style="display:none">`;
+    if(typeof qrDataUrl === "function") qrDataUrl(currentCentro.join_code).then(u => { const im = document.getElementById("pro-qr-centro"); if(im && u){ im.src = u; im.style.display = ""; } }).catch(() => {});
+  }
   await loadProfessionisti();
   renderProfessionistiList();
 }
 
+let proLimite = null;
+// «Professionisti collegati: 4 di 5» (maniscalchi e veterinari insieme)
+function renderLimitePro(){
+  const n = professionistiList.filter(p => p.stato).length;
+  document.querySelectorAll(".pro-limite").forEach(el => {
+    if(proLimite == null){ el.style.display = "none"; return; }
+    el.style.display = "";
+    el.innerHTML = `<span><b>Professionisti collegati: ${n} di ${proLimite}</b> nel vostro pacchetto (maniscalchi e veterinari insieme)</span><span class="pro-limite-bar"><b style="width:${Math.min(100, Math.round(n / Math.max(1, proLimite) * 100))}%"></b></span>`;
+  });
+}
 function renderProfessionistiList(){
-  const box = document.getElementById("pro-maniscalchi-list");
-  const empty = document.getElementById("pro-maniscalchi-empty");
+  renderListaPro("maniscalco", "pro-maniscalchi-list", "pro-maniscalchi-empty");
+  renderListaPro("veterinario", "pro-veterinari-list", "pro-veterinari-empty");
+  renderLimitePro();
+}
+function renderListaPro(categoria, boxId, emptyId){
+  const box = document.getElementById(boxId);
+  const empty = document.getElementById(emptyId);
   if(!box) return;
-  const lista = professionistiList.filter(p => p.categoria === "maniscalco");
+  const vet = categoria === "veterinario", nomeCat = vet ? "veterinario" : "maniscalco";
+  const lista = professionistiList.filter(p => (p.categoria || "maniscalco") === categoria);
   empty.style.display = lista.length ? "none" : "block";
   const puo = puoCollegareProfessionisti();
   const ordine = { da_confermare_struttura: 0, attivo: 1, da_confermare_pro: 2 };
@@ -68,10 +104,10 @@ function renderProfessionistiList(){
         + (p.di_fiducia ? ' · <span style="color:#2f8a4e;font-weight:600" title="I suoi appuntamenti non hanno bisogno della vostra conferma"><i class="fa-solid fa-handshake"></i> Di fiducia</span>' : "");   // SQL 55
       azioni = `
         <button class="btn btn-outline btn-sm" onclick="apriChatProfessionista('${p.cliente_id}')"><i class="fa-solid fa-comment-dots"></i> Chatta</button>
-        <button class="btn btn-outline btn-sm" onclick="apriEventiProfessionista('${p.cliente_id}')"><i class="fa-solid fa-calendar-check"></i> Appuntamenti</button>
+        <button class="btn btn-outline btn-sm" onclick="apriEventiProfessionista('${p.cliente_id}')"><i class="fa-solid fa-calendar-check"></i> ${vet ? "Visite" : "Appuntamenti"}</button>
         ${puo ? `<button class="btn btn-ghost btn-sm" title="Chiudi collegamento" onclick="chiediScollegaProfessionista('${p.cliente_id}')"><i class="fa-solid fa-link-slash"></i></button>` : ""}`;
     } else if(p.stato === "da_confermare_pro"){
-      stato = "Invito inviato: in attesa che il maniscalco accetti";
+      stato = `Invito inviato: in attesa che il ${nomeCat} accetti`;
       azioni = puo ? `<button class="btn btn-ghost btn-sm" onclick="chiediScollegaProfessionista('${p.cliente_id}')">Annulla invito</button>` : "";
     } else if(p.stato === "da_confermare_struttura"){
       stato = '<span style="color:var(--danger);font-weight:600">Chiede di collegarsi al centro</span>';
@@ -85,8 +121,8 @@ function renderProfessionistiList(){
         <div style="display:flex;align-items:center;gap:12px;min-width:0">
           <div class="pro-avatar">${avatar}</div>
           <div style="min-width:0">
-            <div><span class="who">${escapeHtml(p.nome || "Maniscalco")}</span>${cert}${Number(p.non_letti) ? '<span class="unread-dot" title="Messaggi non letti"></span>' : ""}</div>
-            <div style="color:var(--muted);font-size:12px">Maniscalco · ${stato}</div>
+            <div><span class="who">${escapeHtml(p.nome || (vet ? "Veterinario" : "Maniscalco"))}</span>${cert}${Number(p.non_letti) ? '<span class="unread-dot" title="Messaggi non letti"></span>' : ""}</div>
+            <div style="color:var(--muted);font-size:12px">${vet ? "Veterinario" : "Maniscalco"} · ${stato}${p.stato === "attivo" && Number(p.cavalli) ? ` · ${p.cavalli} ${Number(p.cavalli) === 1 ? "cavallo seguito" : "cavalli seguiti"}` : ""}</div>
             ${p.stato === "attivo" && (p.prossimo || Number(p.da_confermare)) ? `<div style="font-size:12px;margin-top:2px">${Number(p.da_confermare) ? `<span style="color:var(--danger);font-weight:700">${p.da_confermare} da confermare</span>${p.prossimo ? " · " : ""}` : ""}${p.prossimo ? `Prossimo: ${escapeHtml(p.prossimo.tipo)} ${escapeHtml(dataAppIt(p.prossimo.data, p.prossimo.ora))}` : ""}</div>` : ""}
           </div>
         </div>
@@ -534,7 +570,10 @@ function cavalliSpuntati(boxId){
 
 function apriAggiungiProfessionista(){
   abbinaProModo = "invito"; abbinaProCliente = null;
-  document.getElementById("pro-aggiungi-titolo").textContent = "Aggiungi maniscalco";
+  const vetAgg = proCat() === "veterinario";
+  document.getElementById("pro-aggiungi-titolo").textContent = vetAgg ? "Aggiungi veterinario" : "Aggiungi maniscalco";
+  { const lab = document.getElementById("pro-codice-label"); if(lab) lab.textContent = vetAgg ? "Codice del veterinario o codice invito" : "Codice del maniscalco o codice invito";
+    const inp = document.getElementById("pro-codice-input"); if(inp) inp.placeholder = vetAgg ? "Es. EQUOMED4K2PA oppure EQUO3F8A2" : "Es. EQUOPRO0FKEM oppure EQUO3F8A2"; }
   document.getElementById("pro-codice-wrap").style.display = "";
   document.getElementById("pro-codice-btn").textContent = "Invia invito";
   document.getElementById("pro-codice-input").value = "";
@@ -562,7 +601,7 @@ async function usaCodiceInvitoScud(codice){
   const { data, error } = await sb.rpc("scuderia_usa_codice_invito", { p_centro: currentCentro.id, p_codice: codice });
   if(error) return { ok: false, errore: /scuderia_usa_codice_invito|schema cache/.test(error.message || "") ? "Manca un aggiornamento del database (SQL 52): avvisa l'assistenza." : (error.message || "Non riuscito, riprova.") };
   if(!data?.ok) return { ok: false, errore: data?.errore || "Codice non valido." };
-  const nome = data.nome || "Il maniscalco";
+  const nome = data.nome || (data.professione === "veterinario" ? "Il veterinario" : "Il maniscalco");
   return { ok: true, testo: data.gia ? (data.unita ? `${nome} era già collegato: abbiamo unito le schede, niente doppioni.` : `${nome} è già collegato alla scuderia.`)
     : `Collegati con ${nome}!` + (Number(data.cavalli) ? ` Ha già inserito ${data.cavalli} cavalli: li trovi in Cavalli da confermare.` : "") };
 }

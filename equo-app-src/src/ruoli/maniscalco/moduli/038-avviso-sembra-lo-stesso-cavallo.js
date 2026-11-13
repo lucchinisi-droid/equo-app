@@ -306,6 +306,7 @@ function renderCorpoCavalloPro(){
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
       ${cv.tipo === "equo" || cv.horse_id || cv.scuderia_cavallo_id ? '<div class="muted" style="font-size:11.5px;margin-top:8px">Nome, razza e nascita li gestisce ' + (cv.tipo !== "equo" && !cv.horse_id ? "la scuderia" : "il proprietario") + ' nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>' : ""}`)
+    + (typeof ccSezioneHtml === "function" ? ccSezioneHtml(cv, vedi) : "")   // 11/11/2026 (Fase 4): la scheda al collega veterinario/maniscalco
     + (vet ? vc.clinica : "")
     + (vet ? "" : sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
@@ -326,6 +327,7 @@ function renderCorpoCavalloPro(){
         <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Li vedono anche il proprietario collegato e la scuderia dove sta il cavallo. Ognuno può eliminare solo i file caricati da lui.</div></div>` : "");
   if(vedi("all") && !vet && (!allegatiPrima || allegatiCtx["cavpro-allegati"]?.cv !== cv)) caricaAllegatiCavallo("cavpro-allegati", "maniscalco", cv);
   if(vet && typeof vcCarica === "function") vcCarica(cv);
+  if(typeof ccCaricaNote === "function") ccCaricaNote(cv);
 }
 function storicoCavalloHtml(lista, spostamenti){
   if(!lista.length && !(spostamenti || []).length) return '<div class="muted" style="font-size:13px">Nessun intervento per questo cavallo.</div>';

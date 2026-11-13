@@ -28,6 +28,7 @@ function previewAllegato(tipo, nome){
   if(tipo === "video") return "🎬 Video";
   if(tipo === "audio") return "🎙️ Nota vocale";
   if(tipo === "documento") return "📄 " + (nome || "Documento PDF");
+  if(tipo === "cavallo") return "🐴 Scheda cavallo";   // 11/11/2026 (SQL 67): tra colleghi
   return "";
 }
 function previewMessaggioMascalcia(tipo, testo, fileNome){

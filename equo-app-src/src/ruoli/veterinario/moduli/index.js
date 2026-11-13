@@ -9,7 +9,7 @@ import { galenoTestata } from "./06-galeno.js";
 import { vsMostraScheda, vsApriDaEvento, vsMostraScelta, vsMostraMiei, vsNuova, vsTab, vsCambia, vsScegli, vsMulti, vsConcludi, vsChiudi, vsIndietro,
   vsModelloDaEsempio, vsModelloDa, vsModificaModello, vsAccendi, vsSposta, vsAggiungiCampo, vsSalvaModello, vsDemoPrepara, VS, VsDB } from "./07-scheda-visita.js";
 import { vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA } from "./09-allegati.js";
-import { vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR } from "./08-referto.js";
+import { vrCond, vrSalvaScelta, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR } from "./08-referto.js";
 import { vdVisiteRecenti, vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD } from "./10-dettatura.js";
 import { ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoce, ptCampo, ptVolte, ptOrario, ptTornaScheda, ptSalvaVoce, ptEliminaVoce, ptConferme,
   ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
@@ -22,7 +22,7 @@ import { mpAreaTocca, MP_AREE, mpCampoHtml, mpInterno, mpRidisegna, mpAttiva, mp
 import { VP, VP_MERIDIANI, VP_CLASSICI, vpCampoHtml, vpInterno, vpTocca, vpCerca, vpAggiungiScritto, vpMeridiano, vpUsati, vpComeUltima, vpReset } from "./15-punti.js";
 import { VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
   vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
-  vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta } from "./14-visita-aperta.js";
+  vapDocumenti, vapCondTutti, vapCondUno, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta } from "./14-visita-aperta.js";
 import { vapInCorso, vapIcDisegna, vapIcPiuTardi, vapChiudiVisita, vapApriLavoro, vapTogliLavoro, vapRigaAperti, vetRichiamiStruttura, vetFissaRichiami } from "./14-visita-aperta.js";
 
 // API PUBBLICA del veterinario: le funzioni chiamate dai pulsanti dell'HTML e dalle altre parti dell'app.
@@ -43,7 +43,7 @@ Object.assign(window, {
   vmNuovoMessaggio,
   galenoTestata,
   vaNomeLive, vaScegli, vaFile, vaSalva, vaAnnulla, vaImposta, vaCarica, vaApri, vaSezioneHtml, vaModifica, vaSalvaModifica, vaElimina, vaChiVede, vaTogli, vaFaiVedere, vaReset, VA,
-  vsMostraScheda, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR,
+  vsMostraScheda, vrCond, vrSalvaScelta, vrApri, vrInvia, vrCondividi, vrCreaPdf, vrSezioni, vrParteScritta, vrDestinatari, VR,
   vdVisiteRecenti, vdSezioneHtml, vdContesto, vdDetta, vdDaHome, vdApriDaEvento, vdDopoScheda, vdReset, VD,
   ptCarica, ptReset, ptSezioneHtml, ptDisegna, ptNuovaVoce, ptModificaVoce, ptCampo, ptVolte, ptOrario, ptTornaScheda, ptSalvaVoce, ptEliminaVoce, ptConferme,
   ptAvvia, ptAvviaDaReferto, ptCambiaStato, ptRigheReferto, ptAttesaReferto, ptAggiungiVoci, ptCaricaInCorso, ptConteggi, ptClientiInTerapia, ptElenco, ptApriVisita,
@@ -59,5 +59,5 @@ Object.assign(window, {
   vapInCorso, vapIcDisegna, vapIcPiuTardi, vapChiudiVisita, vapApriLavoro, vapTogliLavoro, vapRigaAperti, vetRichiamiStruttura, vetFissaRichiami,
   VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
   vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
-  vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta
+  vapDocumenti, vapCondTutti, vapCondUno, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta
 });

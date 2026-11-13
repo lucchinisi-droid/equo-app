@@ -3,8 +3,10 @@ import { onbCodiceScansionato } from "./116-onboarding.js";
 /* ---------- SCANNER QR (ripristinato 27/09) ---------- */
 let qrScanStream = null;
 let qrScanRAF = null;
+let qrPerStruttura = false;   // 11/11/2026: QR aperto da «Collega una scuderia»
 
-function openQrScanner(){
+function openQrScanner(perStruttura){
+  qrPerStruttura = perStruttura === true;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
     showToast("Il tuo browser non supporta la fotocamera.");
     return;
@@ -72,7 +74,14 @@ async function scanQrLoop(){
 
 // Instrada il codice letto dal QR o scritto: OWN = chat tra proprietari, TRA = istruttore, PRO o invito = collega il maniscalco
 // (accetta anche i link app.equohub.com/?invito=..., maiuscole/minuscole, con o senza trattini)
+// 11/11/2026 (Fase 4): «Inquadra il QR della scuderia» dalla finestra «Collega una scuderia»: il codice va lì e parte la richiesta
+function apriQrStruttura(){ openQrScanner(true); }
 function gestisciCodiceScansionato(testo){
+  if(qrPerStruttura){
+    qrPerStruttura = false;
+    const inp = document.getElementById("collega-struttura-codice");
+    if(inp){ inp.value = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase(); openModal("modal-collega-struttura"); inviaRichiestaStruttura(); return; }
+  }
   if(onbCodiceScansionato(testo)) return;   // 27/10/2026: Equo Card del cavallo inquadrata da «Aggiungi cavallo»
   const codice = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
   const tipo = tipoCodiceEquo(codice);
@@ -97,4 +106,4 @@ function gestisciCodiceScansionato(testo){
 }
 
 
-export { closeQrScanner, gestisciCodiceScansionato, openQrScanner };
+export { apriQrStruttura, closeQrScanner, gestisciCodiceScansionato, openQrScanner };

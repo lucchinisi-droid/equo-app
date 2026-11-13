@@ -29,7 +29,8 @@ import { contoAnnullaERifai, contoApriEsistente, apriNuovoConto, contoSetDate, c
 import { apriInvioConto, contoAnnulla, contoCondividi, contoInviaChat, contoScarica, contoSegnaPagato } from "./060-foglio-di-invio-gestione-del-conto.js";
 import { creaPdfConto } from "./061-pdf-del-conto-dai-dati-salvati-snapshot.js";
 import { apriAbbinamentoDaChat, closeFarrierChatThread, confermaAbbinamentoCavalli, openFarrierChatThread, proponiAbbinamentoCavalli, renderFarrierChatThread, saltaAbbinamentoCavalli, sendFarrierChatMessage } from "./074-abbinamento-cavalli-del-maniscalco-caval.js";
-import { closeQrScanner, gestisciCodiceScansionato, openQrScanner } from "./076-scanner-qr-ripristinato-27-09.js";
+import { apriQrStruttura, closeQrScanner, gestisciCodiceScansionato, openQrScanner } from "./076-scanner-qr-ripristinato-27-09.js";
+import { ccDB, ccSezioneHtml, ccCaricaNote, ccApri, ccScegli, ccAltro, ccDoc, ccAvvisa, ccInvia, ccBollaHtml, ccRicevi, ccCeLho, ccPreviewTesto } from "./122-cavallo-al-collega.js";
 import { caricaCavalliMiei, nomiCavalliCliente, paroleCercaCliente } from "./086-indice-dei-cavalli-dei-clienti-professio.js";
 import "./087-2-scelta-del-cliente-nell-appuntamento.js";
 import { mlImporto, mlPag, mlRender } from "./090-disegno.js";
@@ -472,5 +473,7 @@ Object.assign(window, {
   ofTornaOfficina,
   ofWizardAggiungi,
   hmConferme,
-  hmContaConferme
+  hmContaConferme,
+  apriQrStruttura,
+  ccDB, ccSezioneHtml, ccCaricaNote, ccApri, ccScegli, ccAltro, ccDoc, ccAvvisa, ccInvia, ccBollaHtml, ccRicevi, ccCeLho, ccPreviewTesto
 });

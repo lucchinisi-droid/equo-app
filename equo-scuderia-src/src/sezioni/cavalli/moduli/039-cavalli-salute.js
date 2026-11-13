@@ -172,7 +172,8 @@ function openCavalloDetail(id){
   renderCavalloDetail();
   caricaAllegatiScud(id);
   if(typeof mncAlCavallo === "function") mncAlCavallo(id);
-  if(typeof cavVerificaRender === "function") cavVerificaRender(id);   // «Da verificare» (SQL 54)   // riquadro «Maniscalco» (SQL 50)
+  if(typeof cavVerificaRender === "function") cavVerificaRender(id);
+  if(typeof vvAlCavallo === "function") vvAlCavallo(id);   // visite del veterinario: solo data e tipo (SQL 67)   // «Da verificare» (SQL 54)   // riquadro «Maniscalco» (SQL 50)
 }
 
 function closeCavalloDetail(){

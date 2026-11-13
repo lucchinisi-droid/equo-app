@@ -547,7 +547,7 @@
 		const nCli = attivi.length;
 		document.getElementById("cli-cartella-sotto").innerHTML = `<span>${nCli} ${nCli === 1 ? "cliente" : "clienti"} · ${cavalli.length} ${cavalli.length === 1 ? "cavallo" : "cavalli"}</span><button class="vt-cli-nuovo" onclick="apriNuovoCliente('proprietario')">+ Cliente</button>`;
 		const collega = document.getElementById("cli-collega-btn");
-		if (collega) collega.style.display = "none";
+		if (collega) collega.style.display = vetCliFiltro === "scuderie" ? "" : "none";
 		const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
 		if (f) f.inp.placeholder = "Nome, cavallo, microchip";
 		if (vetCliFiltro === "cavalli") {
@@ -2492,6 +2492,10 @@
 		const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {}, ps = vrParteScritta();
 		if (!sez.length && vrScrittaVuota(ps)) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
 		VR.dest = vrDestinatari$1();
+		VR.cond = VS.e?.referto_proprietario !== false;
+		VR.dest.forEach((x) => {
+			if (x.k === "prop" && !VR.cond) x.on = false;
+		});
 		VR.alleg = new Set([...VR.alleg].filter((id) => VA.lista.some((a) => a.id === id)));
 		vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
 		const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
@@ -2510,8 +2514,10 @@
       <button type="button" class="vd-detta piccolo" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
     </div>
     ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map((a) => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
+    ${VR.dest.some((x) => x.k === "prop") ? `<label class="vr-cond${VR.cond ? " on" : ""}" id="vr-cond"><input type="checkbox" ${VR.cond ? "checked" : ""} onchange="vrCond(this.checked)"><span class="vr-sw"></span>
+      <span><b>Condividi il referto col proprietario</b><small>${VR.cond ? "Lo riceve in chat e resta nei documenti del suo cavallo." : "Resta privato: il proprietario vede solo data e tipo della visita."}</small></span></label>` : ""}
     <div class="vs-h">Chi lo riceve</div>
-    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" ${x.on ? "checked" : ""} ${x.suEquo ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
+    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" id="vr-dest-${i}" ${x.on ? "checked" : ""} ${x.suEquo && !(x.k === "prop" && !VR.cond) ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
       <span><b>${vrEsc(x.nome)}</b><small>${vrEsc(x.ruolo)}${x.suEquo ? " · in chat su Equo" : " · non è su Equo: usa «Condividi»"}</small></span></label>`).join("") : "<div class=\"vs-nota\">Nessun destinatario su Equo per questo cavallo: usa «Condividi» per mandarlo con WhatsApp o email.</div>"}
     <div class="vs-nota">Il referto resta nella cartella del cavallo in uno spazio privato: lo vedono tu e il proprietario, e chi lo riceve. Il proprietario può togliere l'accesso a chi vuole (non a te).</div>
     <div class="vr-scorri" id="vr-scorri" role="slider" aria-label="Scorri per firmare e inviare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"
@@ -2854,7 +2860,7 @@
 		if (VR.invio) return;
 		VR.invio = true;
 		try {
-			const scelti = VR.dest.filter((x) => x.on && x.suEquo);
+			const scelti = VR.dest.filter((x) => x.on && x.suEquo && !(x.k === "prop" && VR.cond === false));
 			showToast("Preparo e invio il referto…");
 			const { blob, nome, titolo } = await vrCreaPdf();
 			const v = VS.visita, e = VS.e;
@@ -2932,13 +2938,18 @@
 			} catch (err) {
 				avvisi.push("Piano terapeutico non avviato: " + (err?.message || err));
 			}
+			if (VR.cond === false) {
+				if ((await vrDB.refertoSoloAutore(id, true))?.error) avvisi.push("Il referto non è segnato come privato: manca un aggiornamento del database (SQL 67).");
+			}
+			if (e?.id && e.referto_proprietario !== false !== (VR.cond !== false)) await vrSalvaScelta$1(e, VR.cond !== false);
 			v.dati = {
 				...v.dati || {},
 				_referto: {
 					il: (/* @__PURE__ */ new Date()).toISOString(),
 					a: inviati,
 					documento_id: id,
-					allegati: alleg.length
+					allegati: alleg.length,
+					privato: VR.cond === false
 				}
 			};
 			await vsSalvaSubito();
@@ -2959,6 +2970,50 @@
     ${avvisi.length ? `<div class="vs-nota">${avvisi.map(vrEsc).join("<br>")}</div>` : ""}`;
 		document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + "<button class=\"vs-btn pri\" onclick=\"vsChiudi()\">Chiudi</button>";
 	}
+	function vrCond(on) {
+		VR.cond = !!on;
+		const box = document.getElementById("vr-cond");
+		if (box) {
+			box.classList.toggle("on", VR.cond);
+			const sm = box.querySelector("small");
+			if (sm) sm.textContent = VR.cond ? "Lo riceve in chat e resta nei documenti del suo cavallo." : "Resta privato: il proprietario vede solo data e tipo della visita.";
+		}
+		VR.dest.forEach((x, i) => {
+			if (x.k !== "prop") return;
+			x.on = VR.cond && x.suEquo;
+			const c = document.getElementById("vr-dest-" + i);
+			if (c) {
+				c.checked = x.on;
+				c.disabled = !VR.cond || !x.suEquo;
+			}
+		});
+	}
+	async function vrSalvaScelta$1(e, on) {
+		if (!e?.id) return { error: null };
+		e.referto_proprietario = !!on;
+		if (DEMO_MODE) {
+			const i = (demoState.interventiMascalcia || []).find((x) => x.id === e.id);
+			if (i) i.referto_proprietario = !!on;
+			(demoState.documenti || []).filter((d) => d.categoria === "referto" && d.intervento_id === e.id).forEach((d) => {
+				d.solo_autore = !on;
+			});
+			return { error: null };
+		}
+		const { error } = await DB.updateInterventoMascalcia(e.id, { referto_proprietario: !!on });
+		if (error) return { error };
+		const { data: vis } = await sb.from("visite_pro").select("id").eq("intervento_id", e.id);
+		if (vis?.length) await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map((x) => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+		return { error: null };
+	}
+	var vrDB = { async refertoSoloAutore(id, solo) {
+		if (DEMO_MODE) {
+			const d = (demoState.documenti || []).find((x) => x.id === id);
+			if (d) d.solo_autore = !!solo;
+			return { error: null };
+		}
+		const { error } = await sb.from("documenti").update({ solo_autore: !!solo }).eq("id", id);
+		return { error };
+	} };
 	// equo-app-src/src/ruoli/veterinario/moduli/10-dettatura.js
 	var vdEsc = (s) => escapeHtml(s == null ? "" : String(s));
 	var VD = { attesa: false };
@@ -6414,6 +6469,7 @@
 			conto: true,
 			cert: true
 		};
+		const cond = (r) => r.l.referto_proprietario !== false;
 		const box = vapFoglio("modal-vap-doc", "vap-modal", true);
 		const dt = (/* @__PURE__ */ new Date(giorno + "T12:00")).toLocaleDateString("it-IT");
 		box.innerHTML = `<div class="modal-title" id="modal-vap-doc-tit">Visita chiusa</div>
@@ -6421,7 +6477,9 @@
     <div class="vaa-lab">Da inviare</div>
     ${vacc.length ? `<label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.cert = this.checked"><span><b>Certificati di vaccinazione</b><small>${vacc.length} ${vacc.length === 1 ? "cavallo" : "cavalli"} · uno per cavallo, con lotto: ${vaaEsc(vacc.map((r) => r.cav.nome).join(", "))}</small></span></label>` : ""}
     <label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.conto = this.checked"><span><b>Riepilogo e conto</b><small>a ${vaaEsc(pagante?.nome || "chi paga")}, con tutti i lavori</small></span></label>
-    ${visite.map((r) => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    ${visite.map((r) => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-chip-ref${cond(r) ? " on" : ""}" id="vap-cond-${r.l.id}" onclick="vapCondUno('${r.l.id}')">${cond(r) ? "Referto ✓" : "Solo data e tipo"}</button><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    ${visite.length ? `<label class="vr-cond${visite.every(cond) ? " on" : ""}" id="vap-cond"><input type="checkbox" ${visite.every(cond) ? "checked" : ""} onchange="vapCondTutti(this.checked)"><span class="vr-sw"></span>
+      <span><b>Condividi il referto col proprietario</b><small>Entra nei documenti del suo cavallo. Tocca un cavallo per cambiarlo solo per lui: spento, il proprietario vede solo data e tipo di visita.</small></span></label>` : ""}
     <div class="vaa-lab">A chi</div>
     ${dest.map((d, i) => `<label class="vap-doc${d.suEquo ? "" : " fuori"}"><input type="checkbox" ${d.on ? "checked" : ""} ${d.suEquo ? "" : "disabled"} onchange="VAP.d.dest[${i}].on = this.checked">
       <span><b>${vaaEsc(d.cliente?.nome || "")}</b><small>${vaaEsc(d.cosa)} · ${d.suEquo ? "in chat su Equo" : "non è su Equo: usa «Condividi»"}</small></span></label>`).join("")}
@@ -6431,6 +6489,33 @@
     <button class="btn btn-outline vaa-dopo" onclick="vapCondividi()">Condividi i PDF</button>
     <button class="btn btn-outline vap-altro" onclick="vapAltroDopoChiusa()">+ C'è un altro cavallo</button>`;
 		openModal("modal-vap-doc");
+	}
+	async function vapCondImposta(r, on) {
+		r.l.referto_proprietario = !!on;
+		const b = document.getElementById("vap-cond-" + r.l.id);
+		if (b) {
+			b.classList.toggle("on", !!on);
+			b.textContent = on ? "Referto ✓" : "Solo data e tipo";
+		}
+		if ((typeof vrSalvaScelta === "function" ? await vrSalvaScelta(r.l, !!on) : { error: null })?.error) showToast("Scelta non salvata: manca un aggiornamento del database (SQL 67).");
+	}
+	async function vapCondTutti(on) {
+		const l = VAP.d?.visite || [];
+		const box = document.getElementById("vap-cond");
+		if (box) box.classList.toggle("on", !!on);
+		for (const r of l) await vapCondImposta(r, on);
+	}
+	async function vapCondUno(id) {
+		const r = (VAP.d?.visite || []).find((x) => x.l.id === id);
+		if (!r) return;
+		await vapCondImposta(r, r.l.referto_proprietario === false);
+		const tutti = (VAP.d.visite || []).every((x) => x.l.referto_proprietario !== false);
+		const box = document.getElementById("vap-cond");
+		if (box) {
+			box.classList.toggle("on", tutti);
+			const c = box.querySelector("input");
+			if (c) c.checked = tutti;
+		}
 	}
 	function vapApriScheda(id) {
 		const e = (VAP.d?.righe || []).find((r) => r.l.id === id)?.l;
@@ -6848,6 +6933,8 @@
 		vaReset: vaReset$1,
 		VA,
 		vsMostraScheda,
+		vrCond,
+		vrSalvaScelta: vrSalvaScelta$1,
 		vrApri: vrApri$1,
 		vrInvia,
 		vrCondividi,
@@ -7016,6 +7103,8 @@
 		vapAggiungiLavoro,
 		vapTogliAggiunto,
 		vapDocumenti,
+		vapCondTutti,
+		vapCondUno,
 		vapApriScheda,
 		vapAltroDopoChiusa,
 		vapInvia,

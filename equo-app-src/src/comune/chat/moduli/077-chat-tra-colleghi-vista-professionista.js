@@ -22,7 +22,7 @@ async function loadColleghiList(){
     const nome = c.nome || "Collega";
     const m = c.ultimoMessaggio;
     let preview = "Inizia la conversazione";
-    if(m) preview = (m.mittente_id === currentUser.id ? "Tu: " : "") + ((m.tipo && m.tipo !== "testo") ? previewAllegato(m.tipo, m.file_nome) : (m.testo || ""));
+    if(m) preview = (m.mittente_id === currentUser.id ? "Tu: " : "") + ((m.tipo && m.tipo !== "testo") ? (m.tipo === "cavallo" && typeof ccPreviewTesto === "function" ? ccPreviewTesto(m) : previewAllegato(m.tipo, m.file_nome)) : (m.testo || ""));
     return `
     <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick="apriChatCollega(${jsArg(c.conversazione_id)}, ${jsArg(nome)}, ${jsArg(c.ruolo || "")})">
       <div class="horse-avatar">${c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : '<i class="fa-solid fa-user-doctor" style="font-size:18px"></i>'}</div>
@@ -135,6 +135,7 @@ async function renderOwnerChatThread(conversazioneId){
   }
   let lastDay = null;
   let html = "";
+  if(typeof window.ccRicorda === "function") window.ccRicorda(data);
   data.forEach(m => {
     const day = formatChatDay(m.created_at);
     if(day !== lastDay){
@@ -151,6 +152,7 @@ async function renderOwnerChatThread(conversazioneId){
     else if(m.tipo === "video") body = `<video controls src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block"></video>
       <div class="muted" style="font-size:11px;margin-top:4px">I video si condividono solo dentro Equo per ora.</div>`;
     else if(m.tipo === "documento") body = bollaAllegato("documento", m.media_url, m.file_nome, m.testo);
+    else if(m.tipo === "cavallo" && typeof ccBollaHtml === "function") body = ccBollaHtml(m, out);   // 11/11/2026 (SQL 67): scheda di un cavallo tra colleghi
     else body = `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
     html += `
       <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_proprietari")}>

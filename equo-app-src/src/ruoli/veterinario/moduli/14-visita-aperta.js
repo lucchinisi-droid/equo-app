@@ -509,6 +509,7 @@ async function vapDocumenti(cid, giorno){
   const vacc = righe.filter(r => vaaVaccino(r.l)), visite = righe.filter(r => !vaaVaccino(r.l));
   const tot = righe.reduce((s, r) => s + (Number(r.l.importo) > 0 ? Number(r.l.importo) : 0), 0);
   VAP.d = { cid, giorno, righe, vacc, visite, dest, tot, conto: true, cert: true };
+  const cond = r => r.l.referto_proprietario !== false;   // Fase 4 (SQL 67): referto al proprietario, acceso di serie
   const box = vapFoglio("modal-vap-doc", "vap-modal", true);
   const dt = new Date(giorno + "T12:00").toLocaleDateString("it-IT");
   box.innerHTML = `<div class="modal-title" id="modal-vap-doc-tit">Visita chiusa</div>
@@ -516,7 +517,9 @@ async function vapDocumenti(cid, giorno){
     <div class="vaa-lab">Da inviare</div>
     ${vacc.length ? `<label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.cert = this.checked"><span><b>Certificati di vaccinazione</b><small>${vacc.length} ${vacc.length === 1 ? "cavallo" : "cavalli"} · uno per cavallo, con lotto: ${vaaEsc(vacc.map(r => r.cav.nome).join(", "))}</small></span></label>` : ""}
     <label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.conto = this.checked"><span><b>Riepilogo e conto</b><small>a ${vaaEsc(pagante?.nome || "chi paga")}, con tutti i lavori</small></span></label>
-    ${visite.map(r => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    ${visite.map(r => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-chip-ref${cond(r) ? " on" : ""}" id="vap-cond-${r.l.id}" onclick="vapCondUno('${r.l.id}')">${cond(r) ? "Referto ✓" : "Solo data e tipo"}</button><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    ${visite.length ? `<label class="vr-cond${visite.every(cond) ? " on" : ""}" id="vap-cond"><input type="checkbox" ${visite.every(cond) ? "checked" : ""} onchange="vapCondTutti(this.checked)"><span class="vr-sw"></span>
+      <span><b>Condividi il referto col proprietario</b><small>Entra nei documenti del suo cavallo. Tocca un cavallo per cambiarlo solo per lui: spento, il proprietario vede solo data e tipo di visita.</small></span></label>` : ""}
     <div class="vaa-lab">A chi</div>
     ${dest.map((d, i) => `<label class="vap-doc${d.suEquo ? "" : " fuori"}"><input type="checkbox" ${d.on ? "checked" : ""} ${d.suEquo ? "" : "disabled"} onchange="VAP.d.dest[${i}].on = this.checked">
       <span><b>${vaaEsc(d.cliente?.nome || "")}</b><small>${vaaEsc(d.cosa)} · ${d.suEquo ? "in chat su Equo" : "non è su Equo: usa «Condividi»"}</small></span></label>`).join("")}
@@ -526,6 +529,24 @@ async function vapDocumenti(cid, giorno){
     <button class="btn btn-outline vaa-dopo" onclick="vapCondividi()">Condividi i PDF</button>
     <button class="btn btn-outline vap-altro" onclick="vapAltroDopoChiusa()">+ C'è un altro cavallo</button>`;
   openModal("modal-vap-doc");
+}
+// Fase 4 (SQL 67): «Condividi il referto col proprietario» per tutta la visita o cavallo per cavallo; vale anche dopo, dalla visita
+async function vapCondImposta(r, on){
+  r.l.referto_proprietario = !!on;
+  const b = document.getElementById("vap-cond-" + r.l.id); if(b){ b.classList.toggle("on", !!on); b.textContent = on ? "Referto ✓" : "Solo data e tipo"; }
+  const res = typeof vrSalvaScelta === "function" ? await vrSalvaScelta(r.l, !!on) : { error: null };
+  if(res?.error) showToast("Scelta non salvata: manca un aggiornamento del database (SQL 67).");
+}
+async function vapCondTutti(on){
+  const l = VAP.d?.visite || [];
+  const box = document.getElementById("vap-cond"); if(box) box.classList.toggle("on", !!on);
+  for(const r of l) await vapCondImposta(r, on);
+}
+async function vapCondUno(id){
+  const r = (VAP.d?.visite || []).find(x => x.l.id === id); if(!r) return;
+  await vapCondImposta(r, r.l.referto_proprietario === false);
+  const tutti = (VAP.d.visite || []).every(x => x.l.referto_proprietario !== false);
+  const box = document.getElementById("vap-cond"); if(box){ box.classList.toggle("on", tutti); const c = box.querySelector("input"); if(c) c.checked = tutti; }
 }
 function vapApriScheda(id){
   const e = (VAP.d?.righe || []).find(r => r.l.id === id)?.l; if(!e) return;
@@ -708,6 +729,6 @@ function vetFissaRichiami(){
 }
 
 export { vapInCorso, vapIcDisegna, vapIcPiuTardi, vapChiudiVisita, vapApriLavoro, vapTogliLavoro, vapRigaAperti, vetRichiamiStruttura, vetFissaRichiami };
-export { VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
+export { vapCondTutti, vapCondUno, VAA, VAP, VAP_DECIDERE, vapScelta, vapVia, vapDopoApertura, vapApriAperto, vapCercaDove, vapCambiaDove, vapDove, vapDoveNuovo, vapQuando, vapQuanti, vapTipoSlot, vapCrea, vapPrevedi,
   vaaEtichetta, vaaAperto, vapNomeLavoro, vaaFatto, vapNome, vapScegliCavallo, vapTogliCavallo, vapChip, vapTipo, vaaVacc, vaaRichiamo, vaaDopo, vaaSalva, vapAggiungiLavoro, vapTogliAggiunto,
   vapDocumenti, vapApriScheda, vapAltroDopoChiusa, vapInvia, vapCondividi, vaaDaCompletare, vaaBannerHtml, vaaCompleta };

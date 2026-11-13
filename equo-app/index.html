@@ -3286,6 +3286,43 @@ button.of-c{all:unset;flex:1;min-width:0;cursor:pointer}
 .sp-info{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:var(--muted);background:var(--bg)}
 .sp-info svg{flex-shrink:0;margin-top:2px;color:var(--accent)}
 .sp-vai{min-height:52px;font-size:16px}
+/* 11/11/2026 · Fase 4 (SQL 67): la scheda di un cavallo al collega (veterinario ↔ maniscalco) */
+.cc-vuoto{font-size:12.5px;line-height:1.5}
+.cc-nota{border-left:3px solid var(--accent);background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.cc-nota-t{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
+.cc-nota-t span{color:var(--muted);flex:none}
+.cc-nota-x{font-size:13px;line-height:1.45;margin-top:3px;white-space:pre-line}
+.cc-modal .modal-title{margin-bottom:12px}
+.cc-lista{display:flex;flex-direction:column;gap:7px}
+.cc-coll{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:9px 11px;font:inherit;color:var(--text);cursor:pointer;min-height:52px}
+.cc-coll.on{border-color:var(--accent);background:var(--surface2)}
+.cc-av{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.cc-c{flex:1;min-width:0;display:flex;flex-direction:column}
+.cc-c b{font-size:14px}
+.cc-c small{font-size:11.5px;color:var(--muted)}
+.cc-spunta{color:var(--accent);font-weight:800}
+.cc-codice{margin-top:2px}
+.cc-lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 6px}
+.cc-ind{width:100%;min-height:76px;resize:vertical;line-height:1.4}
+.cc-doc{display:flex;gap:9px;align-items:center;font-size:13.5px;padding:7px 0;cursor:pointer}
+.cc-doc input,.cc-avvisa input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.cc-nota-p{font-size:11.5px;line-height:1.4}
+.cc-avvisa{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border-radius:12px;padding:11px 12px;margin-top:12px;cursor:pointer}
+.cc-avvisa b{display:block;font-size:13.5px}
+.cc-avvisa small{display:block;font-size:12px;color:var(--muted);line-height:1.4}
+.cc-invia{width:100%;margin-top:14px;min-height:48px}
+.cc-bolla{min-width:220px;max-width:280px}
+.cc-bolla-lab{font-size:12px;opacity:.75;margin-bottom:4px}
+.cc-cav{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);color:var(--text)}
+.cc-cav-h{display:flex;gap:9px;align-items:center;background:var(--surface2);padding:9px 11px}
+.cc-cav-h b{display:block;font-size:14px}
+.cc-cav-h small{display:block;font-size:11.5px;color:var(--muted)}
+.cc-cav-ic{font-size:18px}
+.cc-cav-b{padding:9px 11px;font-size:12.5px;line-height:1.45}
+.cc-ind-box{background:var(--bg);border-left:3px solid var(--accent);padding:7px 9px;border-radius:6px;margin-bottom:6px;white-space:pre-line}
+.cc-ind-box b{display:block}
+.cc-bt{width:100%;margin-top:7px;min-height:40px}
+.cc-stato{font-size:12px;color:var(--muted);margin-top:4px}
 /* ---------- Tablet e computer (da 768 px) ---------- */
 @media (min-width:768px){
   body{display:block;background:var(--bg)}
@@ -4761,6 +4798,19 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(body.pl-vet) .vrs-testo{font-size:13.5px;line-height:1.5;margin:4px 0 10px}
 :where(body.pl-vet) .ciclo-fissa svg{width:18px;height:18px}
 :where(:root:not([data-theme="light"])) body.pl-vet .vic-home .tx b{color:#1D2D50}
+/* 11/11/2026 · Fase 4 (SQL 67): «Condividi il referto col proprietario» (referto e chiusura della visita) */
+:where(body.pl-vet) .vr-cond{display:flex;gap:12px;align-items:center;background:var(--vt-fondo);border:1px solid var(--vt-bordo);border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer}
+:where(body.pl-vet) .vr-cond.on{background:var(--vt-tif-chiaro);border-color:var(--vt-tif)}
+:where(body.pl-vet) .vr-cond input{position:absolute;opacity:0;width:1px;height:1px}
+:where(body.pl-vet) .vr-cond b{display:block;font-size:14px;color:var(--vt-testo)}
+:where(body.pl-vet) .vr-cond small{display:block;font-size:12px;line-height:1.4;color:var(--vt-testo2);margin-top:2px}
+:where(body.pl-vet) .vr-sw{position:relative;flex:none;width:44px;height:26px;border-radius:20px;background:var(--vt-chip);transition:background .15s}
+:where(body.pl-vet) .vr-sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s}
+:where(body.pl-vet) .vr-cond.on .vr-sw{background:var(--vt-tif-scuro)}
+:where(body.pl-vet) .vr-cond.on .vr-sw::after{left:21px}
+:where(body.pl-vet) .vr-cond input:focus-visible + .vr-sw{outline:2px solid var(--vt-notte);outline-offset:2px}
+:where(body.pl-vet) .vap-chip-ref{flex:none;border:0;border-radius:20px;padding:6px 10px;font:inherit;font-size:11.5px;font-weight:700;background:var(--vt-oro-chiaro);color:var(--vt-oro-testo);cursor:pointer;margin-right:6px;min-height:32px}
+:where(body.pl-vet) .vap-chip-ref.on{background:var(--vt-tif-chiaro);color:var(--vt-tif-testo)}
 </style>
 <style id="trc-css">
 .tr-az{display:flex;gap:6px;margin-left:auto;flex:none}
@@ -7098,7 +7148,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
     <div class="modal-handle"></div>
     <div class="modal-title"><span class="fa-icon"><i class="fa-solid fa-building"></i></span>Collega una scuderia</div>
     <div class="muted" style="font-size:13px;margin-bottom:14px;line-height:1.5">
-      Inserisci il <strong>codice della scuderia</strong> (lo trova in Equo Scuderia → Il tuo Centro → Codice invito). La scuderia riceve la richiesta e la conferma.
+      Inserisci il <strong>codice della scuderia</strong> (lo trova in Equo Scuderia → Professionisti, anche come QR). La scuderia riceve la richiesta e la conferma.
     </div>
     <div class="auth-form">
       <div class="input-group">
@@ -7107,6 +7157,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
       </div>
       <div class="auth-error" id="collega-struttura-error" style="display:none"></div>
       <button class="btn btn-primary" onclick="inviaRichiestaStruttura()" style="width:100%;margin-top:6px">Invia richiesta</button>
+      <button class="btn btn-outline" id="collega-struttura-qr" onclick="apriQrStruttura()" style="width:100%;margin-top:8px"><span class="fa-icon" style="width:14px;height:14px"><i class="fa-solid fa-qrcode"></i></span> Inquadra il QR della scuderia</button>
     </div>
   </div>
 </div>
@@ -12811,7 +12862,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		ns.hidden = !nScad;
 		ns.textContent = nScad;
 		const attivi = typeof clientiAttivi === "function" ? clientiAttivi() : [];
-		const nCav = typeof cavalliCartella === "function" ? cavalliCartella().length : 0;
+		const nCav = typeof cavalliCartella$1 === "function" ? cavalliCartella$1().length : 0;
 		const nCli = attivi.filter((c) => !isStruttura(c)).length, nScu = attivi.filter(isStruttura).length;
 		document.getElementById("hm-r-cav").innerHTML = `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`;
 		document.getElementById("hm-r-cli").innerHTML = `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`;
@@ -17140,7 +17191,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
         <dt>Proprietario</dt><dd>${cv.tipo === "equo" ? "su Equo (collegato)" : escapeHtml(clientiMascalcia.find((x) => x.id === currentClienteId)?.nome || "—")}${modificabile && !cv.horse_id ? ` <button type="button" class="cavpro-link" onclick="apriCambiaProprietario(false)">Cambia</button>` : ""}</dd>
         <dt>Dove sta</dt><dd>${escapeHtml(luogoDi(cv.ub || { cliente_mascalcia_id: currentClienteId }).nome)}</dd>
       </dl>
-      ${cv.tipo === "equo" || cv.horse_id || cv.scuderia_cavallo_id ? "<div class=\"muted\" style=\"font-size:11.5px;margin-top:8px\">Nome, razza e nascita li gestisce " + (cv.tipo !== "equo" && !cv.horse_id ? "la scuderia" : "il proprietario") + " nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>" : ""}`) + (vet ? vc.clinica : "") + (vet ? "" : sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
+      ${cv.tipo === "equo" || cv.horse_id || cv.scuderia_cavallo_id ? "<div class=\"muted\" style=\"font-size:11.5px;margin-top:8px\">Nome, razza e nascita li gestisce " + (cv.tipo !== "equo" && !cv.horse_id ? "la scuderia" : "il proprietario") + " nella sua app; con «Modifica» aggiungi altezza, peso, sesso, disciplina e segni particolari.</div>" : ""}`) + (typeof ccSezioneHtml === "function" ? ccSezioneHtml(cv, vedi) : "") + (vet ? vc.clinica : "") + (vet ? "" : sez("fer", "Ferratura", `<button class="btn btn-outline btn-sm" onclick="apriFerroCavallo('${cv.key}')">Modifica</button>`, `
       <div class="cavpro-ferro"><div class="cavpro-ferro-n">${lavoroCav(cv) === "pareggio" ? "Pareggio" : cv.ferro_numero ? escapeHtml(cv.ferro_numero + " " + (MISURA_SISTEMA_LABEL[cv.ferro_sistema || "italiana"] || "")) : "—"}</div>
         <div class="muted" style="font-size:12.5px;line-height:1.5"><b style="color:var(--text)">${escapeHtml(descrFerraturaCavallo(cv))}</b><br>
         ${ultimiNuovi ? "<span class=\"solo-completa\">Ultimi ferri nuovi: " + formatDataBreve(ultimiNuovi.data_intervento) + "<br></span>" : ""}
@@ -17156,6 +17207,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
         <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Li vedono anche il proprietario collegato e la scuderia dove sta il cavallo. Ognuno può eliminare solo i file caricati da lui.</div></div>` : "");
 		if (vedi("all") && !vet && (!allegatiPrima || allegatiCtx["cavpro-allegati"]?.cv !== cv)) caricaAllegatiCavallo("cavpro-allegati", "maniscalco", cv);
 		if (vet && typeof vcCarica === "function") vcCarica(cv);
+		if (typeof ccCaricaNote === "function") ccCaricaNote(cv);
 	}
 	function storicoCavalloHtml(lista, spostamenti) {
 		if (!lista.length && !(spostamenti || []).length) return "<div class=\"muted\" style=\"font-size:13px\">Nessun intervento per questo cavallo.</div>";
@@ -19164,7 +19216,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		document.getElementById("collega-struttura-error").style.display = "none";
 		openModal("modal-collega-struttura");
 	}
-	async function inviaRichiestaStruttura() {
+	async function inviaRichiestaStruttura$1() {
 		const input = document.getElementById("collega-struttura-codice");
 		const err = document.getElementById("collega-struttura-error");
 		const codice = input.value.trim().toUpperCase();
@@ -19420,10 +19472,6 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
         <button class="btn btn-primary btn-sm btn-conferma" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', true, this).then(() => openClienteDetail('${c.id}'))">Accetta</button>
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="rispondiInvitoStruttura('${c.id}', false, this).then(() => closeClienteDetail())">Rifiuta</button></div>` : ""}
       <button class="btn btn-ghost btn-sm" id="cliente-scollega-btn" style="width:100%;color:var(--red)" onclick="scollegaStrutturaCorrente()">${c.collegamento_stato === "attivo" ? "Scollega da Equo Scuderia" : "Annulla richiesta"}</button>`;
-		} else if (isStruttura(c) && isManiscalcoUtente() && typeof eVeterinario === "function" && eVeterinario()) {
-			if (qrCard) qrCard.style.display = "none";
-			boxScud.style.display = "none";
-			boxScud.innerHTML = "";
 		} else if (isStruttura(c) && isManiscalcoUtente()) {
 			if (qrCard) qrCard.style.display = "none";
 			boxScud.style.display = "block";
@@ -19598,7 +19646,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	try {
 		cliCartella = localStorage.getItem("equo-cli-cartella") || "cavalli";
 	} catch (_) {}
-	function cavalliCartella() {
+	function cavalliCartella$1() {
 		const attiviId = new Set(clientiAttivi().map((c) => c.id));
 		const righe = (cavalliMieiLista || []).filter((c) => attiviId.has(c.cliente_mascalcia_id)).map((c) => ({
 			...c,
@@ -19641,7 +19689,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const alfabetico = (a, b) => (a.nome || "").localeCompare(b.nome || "", "it", { sensitivity: "base" });
 		const proprietari = attivi.filter((c) => !isStruttura(c)).sort(alfabetico);
 		const scuderie = attivi.filter(isStruttura).sort(alfabetico);
-		const cavalli = cavalliCartella();
+		const cavalli = cavalliCartella$1();
 		if (![
 			"cavalli",
 			"clienti",
@@ -21267,7 +21315,9 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 	// equo-app-src/src/ruoli/maniscalco/moduli/076-scanner-qr-ripristinato-27-09.js
 	var qrScanStream = null;
 	var qrScanRAF = null;
-	function openQrScanner() {
+	var qrPerStruttura = false;
+	function openQrScanner(perStruttura) {
+		qrPerStruttura = perStruttura === true;
 		if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
 			showToast("Il tuo browser non supporta la fotocamera.");
 			return;
@@ -21345,7 +21395,20 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		}
 		if (qrScanStream) qrScanRAF = requestAnimationFrame(scanQrLoop);
 	}
+	function apriQrStruttura() {
+		openQrScanner(true);
+	}
 	function gestisciCodiceScansionato(testo) {
+		if (qrPerStruttura) {
+			qrPerStruttura = false;
+			const inp = document.getElementById("collega-struttura-codice");
+			if (inp) {
+				inp.value = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
+				openModal("modal-collega-struttura");
+				inviaRichiestaStruttura();
+				return;
+			}
+		}
 		if (onbCodiceScansionato(testo)) return;
 		const codice = String(codiceEquoDaTesto(testo) || "").trim().toUpperCase();
 		const tipo = tipoCodiceEquo(codice);
@@ -21371,6 +21434,386 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		openModal("modal-collega-maniscalco");
 		collegaManiscalco();
 	}
+	// equo-app-src/src/ruoli/maniscalco/moduli/122-cavallo-al-collega.js
+	var ccEsc = (s) => escapeHtml(s == null ? "" : String(s));
+	var CC = {
+		cv: null,
+		riga: null,
+		colleghi: [],
+		scelto: null,
+		altro: false,
+		docs: [],
+		docSel: /* @__PURE__ */ new Set(),
+		avvisa: true,
+		puoAvvisare: false,
+		invio: false,
+		msg: null
+	};
+	var ccVerso = () => typeof eVeterinario === "function" && eVeterinario() ? "maniscalco" : "veterinario";
+	var ccPrefisso = () => ccVerso() === "maniscalco" ? "EQUOPRO" : "EQUOMED";
+	var ccNomeNorm = (s) => String(s || "").toLowerCase().replace(/\(.*?\)/g, "").replace(/[^a-z0-9]/g, "");
+	var ccData = (iso) => iso ? new Date(iso).toLocaleDateString("it-IT", {
+		day: "numeric",
+		month: "short",
+		year: "numeric"
+	}) : "";
+	var ccDB = {
+		async colleghiPerCavallo(riga) {
+			if (DEMO_MODE) return (demoState.colleghi || []).map((c) => ({
+				...c,
+				id: c.altro_id,
+				segue: !!c.segue
+			}));
+			const { data, error } = await sb.rpc("pro_colleghi_per_cavallo", { p_riga: riga });
+			if (error) {
+				console.warn("pro_colleghi_per_cavallo:", error.message);
+				return (await DB.listColleghi()).map((c) => ({
+					...c,
+					id: c.altro_id,
+					segue: false
+				}));
+			}
+			return data || [];
+		},
+		async mandaCavalloCollega({ conv, riga, indicazioni, documenti, avvisa }) {
+			if (DEMO_MODE) {
+				const cv = (demoState.cavalliClientiMascalcia || []).find((x) => x.id === riga);
+				if (!cv) return {
+					ok: false,
+					errore: "Cavallo non trovato."
+				};
+				const cm = (demoState.clientiMascalcia || []).find((x) => x.id === cv.cliente_mascalcia_id) || {};
+				const col = (demoState.colleghi || []).find((c) => c.conversazione_id === conv) || {};
+				const docs = (demoState.documenti || []).filter((d) => (documenti || []).includes(d.id)).map((d) => ({
+					id: d.id,
+					titolo: d.titolo,
+					mime: d.mime
+				}));
+				const ind = String(indicazioni || "").trim() || null;
+				const dati = {
+					riga: cv.id,
+					nome: cv.nome,
+					microchip: cv.microchip || null,
+					codice_equo: cv.codice_equo || null,
+					horse_id: cv.horse_id || null,
+					razza: cv.razza || null,
+					cliente: cm.nome,
+					tipo_cliente: cm.tipo_cliente || "proprietario",
+					cliente_user_id: cm.cliente_user_id || null,
+					centro_id: cm.centro_id || null,
+					professione: eVeterinario() ? "veterinario" : "maniscalco",
+					indicazioni: ind,
+					documenti: docs
+				};
+				const id = "mo-" + ++demoIdCounter;
+				demoState.messaggiProprietari.push({
+					id,
+					conversazione_id: conv,
+					mittente_id: "demo-user",
+					tipo: "cavallo",
+					testo: "🐴 " + cv.nome + (ind ? " · " + ind.slice(0, 120) : ""),
+					dati,
+					letto: true,
+					created_at: (/* @__PURE__ */ new Date()).toISOString()
+				});
+				let avvisato = false;
+				if (avvisa !== false && (cm.cliente_user_id || cm.centro_id && cm.collegamento_stato === "attivo")) {
+					await DB.insertMessaggioMascalcia({
+						cliente_mascalcia_id: cm.id,
+						tipo: "testo",
+						testo: "ℹ️ Ho condiviso la scheda di " + cv.nome + " con " + (col.nome || "un collega") + " (" + (col.ruolo || "professionista") + ")" + (ind ? ", con le mie indicazioni" : "") + (docs.length ? " e " + docs.length + (docs.length === 1 ? " documento" : " documenti") : "") + ", per seguirlo insieme."
+					});
+					avvisato = true;
+				}
+				return {
+					ok: true,
+					messaggio: id,
+					avvisato,
+					documenti: docs.length,
+					collega: col.nome
+				};
+			}
+			const { data, error } = await sb.rpc("pro_manda_cavallo_collega", {
+				p_conv: conv,
+				p_riga: riga,
+				p_indicazioni: indicazioni || null,
+				p_documenti: documenti && documenti.length ? documenti : null,
+				p_avvisa: avvisa !== false
+			});
+			if (error) return {
+				ok: false,
+				errore: /pro_manda_cavallo_collega|schema cache/.test(error.message) ? "Manca un aggiornamento del database (SQL 67)." : error.message
+			};
+			return data || {
+				ok: false,
+				errore: "Non riuscito"
+			};
+		},
+		async riceviCavalloCollega(msg, riga) {
+			if (DEMO_MODE) {
+				const m = demoState.messaggiProprietari.find((x) => x.id === msg && x.tipo === "cavallo");
+				if (!m) return {
+					ok: false,
+					errore: "Scheda non trovata."
+				};
+				const d = m.dati || {}, miei = demoState.cavalliClientiMascalcia || [];
+				let cv = riga ? miei.find((x) => x.id === riga) : miei.find((x) => !x.archiviato_il && (d.horse_id && x.horse_id === d.horse_id || d.microchip && String(x.microchip || "").toUpperCase() === String(d.microchip).toUpperCase()));
+				let nuovoCli = false, nuovoCav = false;
+				if (!cv) {
+					let c = (demoState.clientiMascalcia || []).find((x) => !x.archiviato_il && (d.cliente_user_id && x.cliente_user_id === d.cliente_user_id || d.centro_id && x.centro_id === d.centro_id)) || (demoState.clientiMascalcia || []).find((x) => !x.archiviato_il && String(x.nome || "").trim().toLowerCase() === String(d.cliente || "").trim().toLowerCase());
+					if (!c) {
+						c = {
+							id: "cm-" + ++demoIdCounter,
+							nome: d.cliente || "Cliente",
+							tipo_cliente: d.tipo_cliente === "struttura" ? "struttura" : "proprietario",
+							codice_invito: "EQUODEMO" + demoIdCounter,
+							created_at: (/* @__PURE__ */ new Date()).toISOString()
+						};
+						demoState.clientiMascalcia.push(c);
+						nuovoCli = true;
+					}
+					cv = {
+						id: "cv-" + ++demoIdCounter,
+						cliente_mascalcia_id: c.id,
+						nome: d.nome || "Cavallo",
+						microchip: d.microchip || null,
+						razza: d.razza || null,
+						note_colleghi: []
+					};
+					miei.push(cv);
+					nuovoCav = true;
+				}
+				if (d.indicazioni && !(cv.note_colleghi || []).some((n) => n.messaggio === m.id)) cv.note_colleghi = [...cv.note_colleghi || [], {
+					da: "Collega",
+					professione: d.professione,
+					il: m.created_at,
+					testo: d.indicazioni,
+					messaggio: m.id
+				}];
+				m.dati = {
+					...d,
+					ricevuto: { il: (/* @__PURE__ */ new Date()).toISOString() }
+				};
+				const cli = (demoState.clientiMascalcia || []).find((x) => x.id === cv.cliente_mascalcia_id);
+				return {
+					ok: true,
+					riga: cv.id,
+					cliente_id: cv.cliente_mascalcia_id,
+					cliente: cli?.nome,
+					nuovo_cliente: nuovoCli,
+					nuovo_cavallo: nuovoCav
+				};
+			}
+			const { data, error } = await sb.rpc("pro_ricevi_cavallo_collega", {
+				p_msg: msg,
+				p_riga: riga || null
+			});
+			if (error) return {
+				ok: false,
+				errore: error.message
+			};
+			return data || {
+				ok: false,
+				errore: "Non riuscito"
+			};
+		},
+		async noteColleghiCavallo(riga) {
+			if (!riga) return [];
+			if (DEMO_MODE) return ((demoState.cavalliClientiMascalcia || []).find((x) => x.id === riga) || {}).note_colleghi || [];
+			const { data, error } = await sb.from("cavalli_clienti_mascalcia").select("note_colleghi").eq("id", riga).maybeSingle();
+			return error ? [] : data?.note_colleghi || [];
+		}
+	};
+	function ccNoteHtml(note, nome) {
+		const l = (note || []).slice().sort((a, b) => String(b.il || "").localeCompare(String(a.il || "")));
+		if (!l.length) return `<div class="muted cc-vuoto">Manda la scheda di ${ccEsc(nome || "questo cavallo")} a un ${ccVerso()} che usa Equo, con le tue indicazioni: arriva nella chat tra colleghi.</div>`;
+		return l.map((n) => `<div class="cc-nota"><div class="cc-nota-t"><b>Indicazioni ${n.professione === "veterinario" ? "del veterinario" : n.professione === "maniscalco" ? "del maniscalco" : "del collega"}${n.da ? " " + ccEsc(n.da) : ""}</b><span>${ccEsc(ccData(n.il))}</span></div><div class="cc-nota-x">${ccEsc(n.testo)}</div></div>`).join("");
+	}
+	function ccSezioneHtml$1(cv, vedi) {
+		if (!cv || vedi && !vedi("ana")) return "";
+		return `<div class="card cavpro-sez" id="cc-sez"><div class="cavpro-sez-testa"><span>Colleghi</span><button class="btn btn-outline btn-sm" id="cc-manda" onclick="ccApri()">Manda al ${ccVerso()}</button></div>
+    <div id="cc-note">${ccNoteHtml(cv.note_colleghi, cv.nome)}</div></div>`;
+	}
+	async function ccCaricaNote$1(cv) {
+		if (!cv?.id) return;
+		const note = await ccDB.noteColleghiCavallo(cv.id);
+		cv.note_colleghi = note;
+		const box = document.getElementById("cc-note");
+		if (box) box.innerHTML = ccNoteHtml(note, cv.nome);
+	}
+	function ccFoglio() {
+		let ov = document.getElementById("modal-cc");
+		if (!ov) {
+			ov = document.createElement("div");
+			ov.className = "modal-overlay";
+			ov.id = "modal-cc";
+			ov.setAttribute("onclick", "closeOut(event,'modal-cc')");
+			ov.innerHTML = "<div class=\"modal cc-modal\"><div class=\"modal-handle\"></div><div id=\"modal-cc-corpo\"></div></div>";
+			document.body.appendChild(ov);
+		}
+		return document.getElementById("modal-cc-corpo");
+	}
+	async function ccApri() {
+		const cv = (typeof schedaCavalli !== "undefined" ? schedaCavalli : []).find((c) => c.key === schedaCavalloKey);
+		if (!cv) return;
+		let riga = cv.id;
+		if (!riga) {
+			({cavallo_cliente_id: riga} = await DB.risolviCavalloPerIntervento(currentClienteId, cv));
+			if (riga) cv.id = riga;
+		}
+		if (!riga) return showToast("Non riesco ad aprire la scheda del cavallo, riprova.");
+		const cli = (clientiMascalcia || []).find((x) => x.id === (cv.cliente_mascalcia_id || currentClienteId)) || {};
+		const [col, docs] = await Promise.all([ccDB.colleghiPerCavallo(riga), DB.listaDocumenti({
+			cavallo_cliente_id: riga,
+			horse_id: cv.horse_id || null
+		}).catch(() => [])]);
+		const verso = ccVerso();
+		Object.assign(CC, {
+			cv,
+			riga,
+			colleghi: (col || []).filter((c) => c.ruolo === verso),
+			altro: false,
+			docSel: /* @__PURE__ */ new Set(),
+			avvisa: true,
+			invio: false,
+			docs: (docs || []).filter((d) => DEMO_MODE || d.autore_user_id === currentUser.id),
+			puoAvvisare: !!(cli.cliente_user_id || cli.centro_id && cli.collegamento_stato === "attivo")
+		});
+		CC.scelto = CC.colleghi[0]?.conversazione_id || null;
+		if (!CC.colleghi.length) CC.altro = true;
+		const ultima = verso === "maniscalco" && typeof VC !== "undefined" && VC.cv === cv ? (VC.visite || []).find((v) => v.dati && (v.dati.indicazioni || v.dati.terapia)) : null;
+		CC.testo = ultima ? String(ultima.dati.indicazioni || ultima.dati.terapia || "") : "";
+		ccDisegna();
+		openModal("modal-cc");
+	}
+	function ccDisegna() {
+		const box = ccFoglio(), verso = ccVerso(), cv = CC.cv;
+		const ind = document.getElementById("cc-ind");
+		if (ind) CC.testo = ind.value;
+		box.innerHTML = `<div class="modal-title">Manda ${ccEsc(cv.nome)} al ${verso}</div>
+    <div class="cc-lista">${CC.colleghi.map((c) => `<button type="button" class="cc-coll${!CC.altro && CC.scelto === c.conversazione_id ? " on" : ""}" onclick="ccScegli('${c.conversazione_id}')">
+      <span class="cc-av">${ccEsc(String(c.nome || "?").trim().charAt(0).toUpperCase())}</span><span class="cc-c"><b>${ccEsc(c.nome || "Collega")}</b><small>${c.segue ? "Segue già questo cliente" : ccEsc(ROLE_LABELS?.[c.ruolo] || c.ruolo || "Collega")}</small></span>
+      <span class="cc-spunta">${!CC.altro && CC.scelto === c.conversazione_id ? "✓" : ""}</span></button>`).join("")}
+      <button type="button" class="cc-coll altro${CC.altro ? " on" : ""}" onclick="ccAltro()"><span class="cc-av">+</span><span class="cc-c"><b>Un altro ${verso}</b><small>con il suo codice ${ccPrefisso()}…</small></span></button>
+      ${CC.altro ? `<input class="input cc-codice" id="cc-codice" placeholder="${ccPrefisso()}…" style="text-transform:uppercase" autocomplete="off">` : ""}</div>
+    <div class="cc-lab">Indicazioni per il ${verso}</div>
+    <textarea class="input cc-ind" id="cc-ind" rows="3" placeholder="${verso === "maniscalco" ? "Es. ferro a cuore anteriore sx, ricontrollo rx tra 6 settimane" : "Es. ascesso anteriore dx, zoppia da ieri: puoi passare?"}">${ccEsc(CC.testo || "")}</textarea>
+    ${CC.docs.length ? `<div class="cc-lab">Allega i tuoi documenti</div>${CC.docs.slice(0, 12).map((d) => `<label class="cc-doc"><input type="checkbox" ${CC.docSel.has(d.id) ? "checked" : ""} onchange="ccDoc('${d.id}', this.checked)"><span>${ccEsc(d.titolo || "Documento")}</span></label>`).join("")}
+      <div class="muted cc-nota-p">Li vede solo lui, per consulto: resta scritto nello storico del documento.</div>` : ""}
+    ${CC.puoAvvisare ? `<label class="cc-avvisa"><input type="checkbox" ${CC.avvisa ? "checked" : ""} onchange="ccAvvisa(this.checked)"><span><b>Avvisa il proprietario</b><small>Riceve un messaggio nella chat con te: sa a chi hai mandato la scheda.</small></span></label>` : ""}
+    <div class="auth-error" id="cc-err" style="display:none"></div>
+    <button class="btn btn-primary cc-invia" id="cc-invia" onclick="ccInvia()">Invia in chat</button>`;
+	}
+	function ccScegli(conv) {
+		CC.altro = false;
+		CC.scelto = conv;
+		ccDisegna();
+	}
+	function ccAltro() {
+		CC.altro = true;
+		ccDisegna();
+		setTimeout(() => document.getElementById("cc-codice")?.focus(), 50);
+	}
+	function ccDoc(id, on) {
+		if (on) CC.docSel.add(id);
+		else CC.docSel.delete(id);
+	}
+	function ccAvvisa(on) {
+		CC.avvisa = !!on;
+	}
+	async function ccInvia() {
+		if (CC.invio) return;
+		const err = document.getElementById("cc-err"), btn = document.getElementById("cc-invia");
+		const errore = (t) => {
+			if (err) {
+				err.textContent = t;
+				err.style.display = "block";
+			}
+		};
+		if (err) err.style.display = "none";
+		const indicazioni = (document.getElementById("cc-ind")?.value || "").trim();
+		CC.invio = true;
+		if (btn) btn.disabled = true;
+		try {
+			let conv = CC.altro ? null : CC.scelto, nome = (CC.colleghi.find((c) => c.conversazione_id === conv) || {}).nome, ruolo = ccVerso();
+			if (!conv) {
+				const codice = (document.getElementById("cc-codice")?.value || "").trim().toUpperCase();
+				if (!codice) return errore("Scrivi il codice del collega (" + ccPrefisso() + "…).");
+				const r = await DB.creaChatCollega(codice);
+				if (!r?.ok) return errore({
+					codice_non_valido: "Codice non trovato: controlla che sia un codice professionista.",
+					codice_tuo: "Questo è il tuo codice."
+				}[r?.errore] || "Non riesco ad aprire la chat con il collega.");
+				conv = r.conversazione_id;
+				nome = r.nome || "Collega";
+				ruolo = r.ruolo || ruolo;
+			}
+			const res = await ccDB.mandaCavalloCollega({
+				conv,
+				riga: CC.riga,
+				indicazioni,
+				documenti: [...CC.docSel],
+				avvisa: CC.puoAvvisare ? CC.avvisa : false
+			});
+			if (!res?.ok) return errore(res?.errore || "Non inviato, riprova.");
+			closeModal("modal-cc");
+			showToast(`Scheda di ${CC.cv.nome} mandata a ${nome || res.collega || "il collega"}` + (res.avvisato ? " · il proprietario è avvisato" : ""));
+			if (typeof apriChatCollega === "function") apriChatCollega(conv, nome || "Collega", ruolo);
+		} finally {
+			CC.invio = false;
+			if (btn) btn.disabled = false;
+		}
+	}
+	function ccSimili(d) {
+		const tutti = typeof cavalliCartella === "function" ? cavalliCartella() : [];
+		const chip = String(d.microchip || "").trim().toUpperCase(), nome = ccNomeNorm(d.nome);
+		return tutti.filter((x) => x.id && (chip && String(x.microchip || "").trim().toUpperCase() === chip || d.horse_id && x.horse_id === d.horse_id || nome && ccNomeNorm(x.nome) === nome));
+	}
+	function ccBollaHtml(m, out) {
+		const d = m.dati || {};
+		const sotto = [
+			d.cliente,
+			d.microchip ? "chip …" + String(d.microchip).slice(-6) : "",
+			d.razza
+		].filter(Boolean).join(" · ");
+		const docs = (d.documenti || []).map((x) => `<button type="button" class="mchat-doc" onclick="apriDocumentoPrivato('${ccEsc(x.id)}')"><span class="mchat-doc-ico">${/^image\//.test(x.mime || "") ? "FOTO" : /^video\//.test(x.mime || "") ? "VIDEO" : "PDF"}</span><span class="mchat-doc-nome">${ccEsc(x.titolo || "Documento")}</span></button>`).join("");
+		const simili = !out && !d.ricevuto ? ccSimili(d) : [];
+		const azioni = out ? `<div class="cc-stato">${d.ricevuto ? "✓ Il collega l'ha aggiunto ai suoi cavalli" : "Inviata: il collega la aggiunge ai suoi cavalli"}</div>` : d.ricevuto ? `<div class="cc-stato">✓ È tra i tuoi cavalli</div>` : `<button type="button" class="btn btn-primary btn-sm cc-bt" onclick="ccRicevi('${ccEsc(m.id)}')">+ Aggiungi ai miei cavalli</button>` + (simili.length ? `<button type="button" class="btn btn-outline btn-sm cc-bt" onclick="ccCeLho('${ccEsc(m.id)}')">Ce l'ho già: collega</button>` : "");
+		const chi = d.professione === "veterinario" ? "del veterinario" : d.professione === "maniscalco" ? "del maniscalco" : "del collega";
+		return `<div class="cc-bolla"><div class="cc-bolla-lab">${out ? "Hai mandato un cavallo" : "Ti ha mandato un cavallo"}</div>
+    <div class="cc-cav"><div class="cc-cav-h"><span class="cc-cav-ic">🐴</span><span><b>${ccEsc(d.nome || "Cavallo")}</b><small>${ccEsc(sotto)}</small></span></div>
+    <div class="cc-cav-b">${d.indicazioni ? `<div class="cc-ind-box"><b>Indicazioni ${chi}</b>${ccEsc(d.indicazioni)}</div>` : ""}${docs}${azioni}</div></div></div>`;
+	}
+	function ccPreviewTesto(m) {
+		return "🐴 " + (m?.dati && m.dati.nome || "Scheda cavallo");
+	}
+	async function ccRicevi(msg, riga) {
+		const r = await ccDB.riceviCavalloCollega(msg, riga || null);
+		if (!r?.ok) return showToast(r?.errore || "Non riuscito, riprova.");
+		closeModal("modal-cc");
+		showToast(r.nuovo_cavallo ? `Aggiunto ai tuoi cavalli${r.cliente ? " · cliente " + r.cliente : ""}${r.nuovo_cliente ? " (nuovo)" : ""}` : "Collegato al tuo cavallo: le indicazioni sono nella sua scheda");
+		if (typeof loadClientiMascalcia === "function") try {
+			await loadClientiMascalcia();
+		} catch (_) {}
+		if (typeof currentConversazioneId !== "undefined" && currentConversazioneId && typeof renderOwnerChatThread === "function") await renderOwnerChatThread(currentConversazioneId);
+		return r;
+	}
+	function ccCeLho(msg) {
+		const simili = ccSimili((CC.msgCache?.[msg] || (DEMO_MODE ? demoState.messaggiProprietari.find((x) => x.id === msg) : null))?.dati || {});
+		const box = ccFoglio();
+		const nomeCli = (id) => ((clientiMascalcia || []).find((c) => c.id === id) || {}).nome || "";
+		box.innerHTML = `<div class="modal-title">Quale dei tuoi cavalli è?</div>
+    <div class="cc-lista">${simili.map((x) => `<button type="button" class="cc-coll" onclick="ccRicevi('${ccEsc(msg)}', '${ccEsc(x.id)}')"><span class="cc-av">🐴</span><span class="cc-c"><b>${ccEsc(x.nome)}</b><small>${ccEsc([nomeCli(x.cliente_mascalcia_id), x.microchip ? "chip " + x.microchip : ""].filter(Boolean).join(" · "))}</small></span><span class="cc-spunta">›</span></button>`).join("")}</div>
+    <button class="btn btn-outline cc-invia" onclick="ccRicevi('${ccEsc(msg)}')">Nessuno: aggiungilo come nuovo</button>`;
+		openModal("modal-cc");
+	}
+	function ccRicorda(lista) {
+		CC.msgCache = {};
+		(lista || []).forEach((m) => {
+			if (m.tipo === "cavallo") CC.msgCache[m.id] = m;
+		});
+	}
+	window.ccRicorda = ccRicorda;
 	// equo-app-src/src/ruoli/maniscalco/moduli/104-cambia-proprietario.js
 	var cpCtx = null;
 	async function apriCambiaProprietario(daStruttura) {
@@ -23784,7 +24227,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		});
 	}
 	function ferDettaApri(e, cv) {
-		if (e && !cv) cv = cavalliCartella().find((x) => e.cavallo_cliente_id && x.id === e.cavallo_cliente_id || e.horse_id && x.horse_id === e.horse_id) || null;
+		if (e && !cv) cv = cavalliCartella$1().find((x) => e.cavallo_cliente_id && x.id === e.cavallo_cliente_id || e.horse_id && x.horse_id === e.horse_id) || null;
 		if (!cv) return showToast("Cavallo non trovato nelle tue cartelle");
 		apriSchedaFerratura(cv, cv.cliente_mascalcia_id || e?.cliente_mascalcia_id || null, null);
 		ferDetta(e ? e.id : null);
@@ -23971,7 +24414,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		FD,
 		ferStatoAttuale,
 		cavalliQuiStanno,
-		cavalliCartella,
+		cavalliCartella: cavalliCartella$1,
 		pagResiduo,
 		ofStimaKm,
 		agDescrizioneTipo,
@@ -24146,7 +24589,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		incApri,
 		inviaEventoInChat,
 		inviaPropostaStruttura,
-		inviaRichiestaStruttura,
+		inviaRichiestaStruttura: inviaRichiestaStruttura$1,
 		isPremium,
 		isStruttura,
 		isStrutturaCollegata,
@@ -24374,7 +24817,21 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		ofTornaOfficina,
 		ofWizardAggiungi,
 		hmConferme,
-		hmContaConferme
+		hmContaConferme,
+		apriQrStruttura,
+		ccDB,
+		ccSezioneHtml: ccSezioneHtml$1,
+		ccCaricaNote: ccCaricaNote$1,
+		ccApri,
+		ccScegli,
+		ccAltro,
+		ccDoc,
+		ccAvvisa,
+		ccInvia,
+		ccBollaHtml,
+		ccRicevi,
+		ccCeLho,
+		ccPreviewTesto
 	});
 })();
 
@@ -28997,7 +29454,7 @@ let chatBadgePollTimer = null;
 			const nome = c.nome || "Collega";
 			const m = c.ultimoMessaggio;
 			let preview = "Inizia la conversazione";
-			if (m) preview = (m.mittente_id === currentUser.id ? "Tu: " : "") + (m.tipo && m.tipo !== "testo" ? previewAllegato(m.tipo, m.file_nome) : m.testo || "");
+			if (m) preview = (m.mittente_id === currentUser.id ? "Tu: " : "") + (m.tipo && m.tipo !== "testo" ? m.tipo === "cavallo" && typeof ccPreviewTesto === "function" ? ccPreviewTesto(m) : previewAllegato(m.tipo, m.file_nome) : m.testo || "");
 			return `
     <div class="inbox-item ${c.unread > 0 ? "unread" : ""}" onclick="apriChatCollega(${jsArg(c.conversazione_id)}, ${jsArg(nome)}, ${jsArg(c.ruolo || "")})">
       <div class="horse-avatar">${c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : "<i class=\"fa-solid fa-user-doctor\" style=\"font-size:18px\"></i>"}</div>
@@ -29125,6 +29582,7 @@ let chatBadgePollTimer = null;
 		}
 		let lastDay = null;
 		let html = "";
+		if (typeof window.ccRicorda === "function") window.ccRicorda(data);
 		data.forEach((m) => {
 			const day = formatChatDay(m.created_at);
 			if (day !== lastDay) {
@@ -29141,6 +29599,7 @@ let chatBadgePollTimer = null;
 			else if (m.tipo === "video") body = `<video controls src="${escapeHtml(m.media_url)}" style="max-width:220px;border-radius:12px;display:block"></video>
       <div class="muted" style="font-size:11px;margin-top:4px">I video si condividono solo dentro Equo per ora.</div>`;
 			else if (m.tipo === "documento") body = bollaAllegato("documento", m.media_url, m.file_nome, m.testo);
+			else if (m.tipo === "cavallo" && typeof ccBollaHtml === "function") body = ccBollaHtml(m, out);
 			else body = `<div class="mchat-bubble-text">${escapeHtml(m.testo)}</div>`;
 			html += `
       <div class="mchat-bubble ${out ? "out" : "in"}"${attrBolla(m, out, "messaggi_proprietari")}>
@@ -31899,6 +32358,7 @@ const mlSigla = k => String(k || "").toUpperCase();
 		if (tipo === "video") return "🎬 Video";
 		if (tipo === "audio") return "🎙️ Nota vocale";
 		if (tipo === "documento") return "📄 " + (nome || "Documento PDF");
+		if (tipo === "cavallo") return "🐴 Scheda cavallo";
 		return "";
 	}
 	function previewMessaggioMascalcia(tipo, testo, fileNome) {
@@ -40146,7 +40606,7 @@ plAggiorna();
 		const nCli = attivi.length;
 		document.getElementById("cli-cartella-sotto").innerHTML = `<span>${nCli} ${nCli === 1 ? "cliente" : "clienti"} · ${cavalli.length} ${cavalli.length === 1 ? "cavallo" : "cavalli"}</span><button class="vt-cli-nuovo" onclick="apriNuovoCliente('proprietario')">+ Cliente</button>`;
 		const collega = document.getElementById("cli-collega-btn");
-		if (collega) collega.style.display = "none";
+		if (collega) collega.style.display = vetCliFiltro === "scuderie" ? "" : "none";
 		const f = typeof cercaFiltri !== "undefined" && cercaFiltri.clienti;
 		if (f) f.inp.placeholder = "Nome, cavallo, microchip";
 		if (vetCliFiltro === "cavalli") {
@@ -42091,6 +42551,10 @@ plAggiorna();
 		const cav = vrCavallo(), sez = vrSezioni(), d = VS.visita.dati || {}, ps = vrParteScritta();
 		if (!sez.length && vrScrittaVuota(ps)) return showToast("La scheda è vuota: non c'è niente da mettere nel referto");
 		VR.dest = vrDestinatari$1();
+		VR.cond = VS.e?.referto_proprietario !== false;
+		VR.dest.forEach((x) => {
+			if (x.k === "prop" && !VR.cond) x.on = false;
+		});
 		VR.alleg = new Set([...VR.alleg].filter((id) => VA.lista.some((a) => a.id === id)));
 		vsTesta("Referto pronto", cav.nome + " · " + VS.visita.modello_nome);
 		const gia = d._referto ? `<div class="vs-nota">Referto già inviato il ${new Date(d._referto.il).toLocaleDateString("it-IT")}${d._referto.a?.length ? " a " + vrEsc(d._referto.a.join(", ")) : ""}: se lo rimandi, arriva la versione nuova.</div>` : "";
@@ -42109,8 +42573,10 @@ plAggiorna();
       <button type="button" class="vd-detta piccolo" onclick="vdDetta()"><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><span><b>Detta</b><small>Galeno scrive relazione e terapia</small></span></button>
     </div>
     ${VA.lista.length ? `<div class="vs-h">Allegati da mandare con il referto</div>${VA.lista.map((a) => `<label class="vr-dest"><input type="checkbox" ${VR.alleg.has(a.id) ? "checked" : ""} onchange="this.checked ? VR.alleg.add('${a.id}') : VR.alleg.delete('${a.id}')"><span><b>${vrEsc(a.titolo)}</b><small>${vrEsc(DB.DOC_TIPI[a.categoria] || "Documento")}</small></span></label>`).join("")}` : ""}
+    ${VR.dest.some((x) => x.k === "prop") ? `<label class="vr-cond${VR.cond ? " on" : ""}" id="vr-cond"><input type="checkbox" ${VR.cond ? "checked" : ""} onchange="vrCond(this.checked)"><span class="vr-sw"></span>
+      <span><b>Condividi il referto col proprietario</b><small>${VR.cond ? "Lo riceve in chat e resta nei documenti del suo cavallo." : "Resta privato: il proprietario vede solo data e tipo della visita."}</small></span></label>` : ""}
     <div class="vs-h">Chi lo riceve</div>
-    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" ${x.on ? "checked" : ""} ${x.suEquo ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
+    ${VR.dest.length ? VR.dest.map((x, i) => `<label class="vr-dest${x.suEquo ? "" : " fuori"}"><input type="checkbox" id="vr-dest-${i}" ${x.on ? "checked" : ""} ${x.suEquo && !(x.k === "prop" && !VR.cond) ? "" : "disabled"} onchange="VR.dest[${i}].on = this.checked">
       <span><b>${vrEsc(x.nome)}</b><small>${vrEsc(x.ruolo)}${x.suEquo ? " · in chat su Equo" : " · non è su Equo: usa «Condividi»"}</small></span></label>`).join("") : "<div class=\"vs-nota\">Nessun destinatario su Equo per questo cavallo: usa «Condividi» per mandarlo con WhatsApp o email.</div>"}
     <div class="vs-nota">Il referto resta nella cartella del cavallo in uno spazio privato: lo vedono tu e il proprietario, e chi lo riceve. Il proprietario può togliere l'accesso a chi vuole (non a te).</div>
     <div class="vr-scorri" id="vr-scorri" role="slider" aria-label="Scorri per firmare e inviare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"
@@ -42453,7 +42919,7 @@ plAggiorna();
 		if (VR.invio) return;
 		VR.invio = true;
 		try {
-			const scelti = VR.dest.filter((x) => x.on && x.suEquo);
+			const scelti = VR.dest.filter((x) => x.on && x.suEquo && !(x.k === "prop" && VR.cond === false));
 			showToast("Preparo e invio il referto…");
 			const { blob, nome, titolo } = await vrCreaPdf();
 			const v = VS.visita, e = VS.e;
@@ -42531,13 +42997,18 @@ plAggiorna();
 			} catch (err) {
 				avvisi.push("Piano terapeutico non avviato: " + (err?.message || err));
 			}
+			if (VR.cond === false) {
+				if ((await vrDB.refertoSoloAutore(id, true))?.error) avvisi.push("Il referto non è segnato come privato: manca un aggiornamento del database (SQL 67).");
+			}
+			if (e?.id && e.referto_proprietario !== false !== (VR.cond !== false)) await vrSalvaScelta$1(e, VR.cond !== false);
 			v.dati = {
 				...v.dati || {},
 				_referto: {
 					il: (/* @__PURE__ */ new Date()).toISOString(),
 					a: inviati,
 					documento_id: id,
-					allegati: alleg.length
+					allegati: alleg.length,
+					privato: VR.cond === false
 				}
 			};
 			await vsSalvaSubito();
@@ -42558,6 +43029,50 @@ plAggiorna();
     ${avvisi.length ? `<div class="vs-nota">${avvisi.map(vrEsc).join("<br>")}</div>` : ""}`;
 		document.getElementById("vs-piede").innerHTML = (prop ? `<button class="vs-btn" onclick="vsChiudi();openChatThread('${prop.cliente.id}')">Apri la chat</button>` : "") + "<button class=\"vs-btn pri\" onclick=\"vsChiudi()\">Chiudi</button>";
 	}
+	function vrCond(on) {
+		VR.cond = !!on;
+		const box = document.getElementById("vr-cond");
+		if (box) {
+			box.classList.toggle("on", VR.cond);
+			const sm = box.querySelector("small");
+			if (sm) sm.textContent = VR.cond ? "Lo riceve in chat e resta nei documenti del suo cavallo." : "Resta privato: il proprietario vede solo data e tipo della visita.";
+		}
+		VR.dest.forEach((x, i) => {
+			if (x.k !== "prop") return;
+			x.on = VR.cond && x.suEquo;
+			const c = document.getElementById("vr-dest-" + i);
+			if (c) {
+				c.checked = x.on;
+				c.disabled = !VR.cond || !x.suEquo;
+			}
+		});
+	}
+	async function vrSalvaScelta$1(e, on) {
+		if (!e?.id) return { error: null };
+		e.referto_proprietario = !!on;
+		if (DEMO_MODE) {
+			const i = (demoState.interventiMascalcia || []).find((x) => x.id === e.id);
+			if (i) i.referto_proprietario = !!on;
+			(demoState.documenti || []).filter((d) => d.categoria === "referto" && d.intervento_id === e.id).forEach((d) => {
+				d.solo_autore = !on;
+			});
+			return { error: null };
+		}
+		const { error } = await DB.updateInterventoMascalcia(e.id, { referto_proprietario: !!on });
+		if (error) return { error };
+		const { data: vis } = await sb.from("visite_pro").select("id").eq("intervento_id", e.id);
+		if (vis?.length) await sb.from("documenti").update({ solo_autore: !on }).in("visita_id", vis.map((x) => x.id)).eq("categoria", "referto").eq("autore_user_id", currentUser.id);
+		return { error: null };
+	}
+	var vrDB = { async refertoSoloAutore(id, solo) {
+		if (DEMO_MODE) {
+			const d = (demoState.documenti || []).find((x) => x.id === id);
+			if (d) d.solo_autore = !!solo;
+			return { error: null };
+		}
+		const { error } = await sb.from("documenti").update({ solo_autore: !!solo }).eq("id", id);
+		return { error };
+	} };
 	// equo-app-src/src/ruoli/veterinario/moduli/10-dettatura.js
 	var vdEsc = (s) => escapeHtml(s == null ? "" : String(s));
 	var VD = { attesa: false };
@@ -46013,6 +46528,7 @@ plAggiorna();
 			conto: true,
 			cert: true
 		};
+		const cond = (r) => r.l.referto_proprietario !== false;
 		const box = vapFoglio("modal-vap-doc", "vap-modal", true);
 		const dt = (/* @__PURE__ */ new Date(giorno + "T12:00")).toLocaleDateString("it-IT");
 		box.innerHTML = `<div class="modal-title" id="modal-vap-doc-tit">Visita chiusa</div>
@@ -46020,7 +46536,9 @@ plAggiorna();
     <div class="vaa-lab">Da inviare</div>
     ${vacc.length ? `<label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.cert = this.checked"><span><b>Certificati di vaccinazione</b><small>${vacc.length} ${vacc.length === 1 ? "cavallo" : "cavalli"} · uno per cavallo, con lotto: ${vaaEsc(vacc.map((r) => r.cav.nome).join(", "))}</small></span></label>` : ""}
     <label class="vap-doc"><input type="checkbox" checked onchange="VAP.d.conto = this.checked"><span><b>Riepilogo e conto</b><small>a ${vaaEsc(pagante?.nome || "chi paga")}, con tutti i lavori</small></span></label>
-    ${visite.map((r) => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    ${visite.map((r) => `<div class="vap-doc"><span class="vap-doc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span><b>Referto · ${vaaEsc(r.cav.nome)}</b><small>dalla scheda della visita</small></span><button type="button" class="vap-chip-ref${cond(r) ? " on" : ""}" id="vap-cond-${r.l.id}" onclick="vapCondUno('${r.l.id}')">${cond(r) ? "Referto ✓" : "Solo data e tipo"}</button><button type="button" class="vap-mini" onclick="vapApriScheda('${r.l.id}')">Apri</button></div>`).join("")}
+    ${visite.length ? `<label class="vr-cond${visite.every(cond) ? " on" : ""}" id="vap-cond"><input type="checkbox" ${visite.every(cond) ? "checked" : ""} onchange="vapCondTutti(this.checked)"><span class="vr-sw"></span>
+      <span><b>Condividi il referto col proprietario</b><small>Entra nei documenti del suo cavallo. Tocca un cavallo per cambiarlo solo per lui: spento, il proprietario vede solo data e tipo di visita.</small></span></label>` : ""}
     <div class="vaa-lab">A chi</div>
     ${dest.map((d, i) => `<label class="vap-doc${d.suEquo ? "" : " fuori"}"><input type="checkbox" ${d.on ? "checked" : ""} ${d.suEquo ? "" : "disabled"} onchange="VAP.d.dest[${i}].on = this.checked">
       <span><b>${vaaEsc(d.cliente?.nome || "")}</b><small>${vaaEsc(d.cosa)} · ${d.suEquo ? "in chat su Equo" : "non è su Equo: usa «Condividi»"}</small></span></label>`).join("")}
@@ -46030,6 +46548,33 @@ plAggiorna();
     <button class="btn btn-outline vaa-dopo" onclick="vapCondividi()">Condividi i PDF</button>
     <button class="btn btn-outline vap-altro" onclick="vapAltroDopoChiusa()">+ C'è un altro cavallo</button>`;
 		openModal("modal-vap-doc");
+	}
+	async function vapCondImposta(r, on) {
+		r.l.referto_proprietario = !!on;
+		const b = document.getElementById("vap-cond-" + r.l.id);
+		if (b) {
+			b.classList.toggle("on", !!on);
+			b.textContent = on ? "Referto ✓" : "Solo data e tipo";
+		}
+		if ((typeof vrSalvaScelta === "function" ? await vrSalvaScelta(r.l, !!on) : { error: null })?.error) showToast("Scelta non salvata: manca un aggiornamento del database (SQL 67).");
+	}
+	async function vapCondTutti(on) {
+		const l = VAP.d?.visite || [];
+		const box = document.getElementById("vap-cond");
+		if (box) box.classList.toggle("on", !!on);
+		for (const r of l) await vapCondImposta(r, on);
+	}
+	async function vapCondUno(id) {
+		const r = (VAP.d?.visite || []).find((x) => x.l.id === id);
+		if (!r) return;
+		await vapCondImposta(r, r.l.referto_proprietario === false);
+		const tutti = (VAP.d.visite || []).every((x) => x.l.referto_proprietario !== false);
+		const box = document.getElementById("vap-cond");
+		if (box) {
+			box.classList.toggle("on", tutti);
+			const c = box.querySelector("input");
+			if (c) c.checked = tutti;
+		}
 	}
 	function vapApriScheda(id) {
 		const e = (VAP.d?.righe || []).find((r) => r.l.id === id)?.l;
@@ -46447,6 +46992,8 @@ plAggiorna();
 		vaReset: vaReset$1,
 		VA,
 		vsMostraScheda,
+		vrCond,
+		vrSalvaScelta: vrSalvaScelta$1,
 		vrApri: vrApri$1,
 		vrInvia,
 		vrCondividi,
@@ -46615,6 +47162,8 @@ plAggiorna();
 		vapAggiungiLavoro,
 		vapTogliAggiunto,
 		vapDocumenti,
+		vapCondTutti,
+		vapCondUno,
 		vapApriScheda,
 		vapAltroDopoChiusa,
 		vapInvia,
