@@ -4568,7 +4568,8 @@ body.pl-vet #bottom-nav-pro .nav-hammer .hm-ham{box-shadow:0 0 0 3px #7FD1C9!imp
 body.pl-vet .hm-flot.piu{background:#7FD1C9!important;color:#12233F!important;border-color:#fff!important}
 body.pl-vet .hm-flot.piu svg{stroke:#12233F!important;color:#12233F!important}
 body.pl-vet .hm-flot.msg{background:var(--accent)!important;color:#fff!important}
-body.pl-vet .topbar-avatar,body.pl-vet .menu-profile-avatar{background:#2B3F6B!important;color:#fff!important;border:2px solid #7FD1C9!important;box-shadow:none!important}
+/* 13/11/2026: solo il colore di fondo, così la foto del profilo si vede (prima «background» la copriva) */
+body.pl-vet .topbar-avatar,body.pl-vet .menu-profile-avatar{background-color:#2B3F6B!important;background-size:cover!important;background-position:center!important;color:#fff!important;border:2px solid #7FD1C9!important;box-shadow:none!important}
 body.pl-vet .tb-pallino{background:#C9A96E!important}
 body.pl-vet .topbar .icon-btn,body.pl-vet .topbar button:not(.topbar-avatar){color:var(--accent)}
 /* fogli della Home (Portami da, Scadenze, Altro) */
@@ -39743,6 +39744,8 @@ function plCostruisciMenuBase(){
       plTile(HM_IC.users, "Clienti", "hmCartella('clienti')"),
       plTile(PLI.scuderia, "Scuderie", "hmCartella('scuderie')"),
       plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
+      // 13/11/2026 (Simone): Archivio anche nel «+» del maniscalco (SQL 69)
+      plTile('<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>', "Archivio", "apriArchivio()"),
       plTile(PLI.furgone, "Officina mobile", "showPage('pro-officina')"),
       plTile(PLI.scad, "Scadenze", "hmScadenze()"),
       plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
@@ -39792,6 +39795,8 @@ registraPerRuolo("plCostruisciMenu", Object.keys(PL_AGENTE), function(){
   const nuovo = plRuolo() === "vet" ? [plTile(HM_IC.cal, "Nuovo appuntamento", "openInterventoModal(null)")] : [];
   m.innerHTML = plSez("Vai a", [...nuovo,
     plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
+    // 13/11/2026 (Simone): Archivio per maniscalco e veterinario (SQL 69)
+    plTile('<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>', "Archivio", "apriArchivio()"),
     plTile(HM_IC.users, "Clienti", "showPage('pro-clienti')"),
     plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
     plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),
@@ -42517,7 +42522,7 @@ plAggiorna();
     </div>
     ${vhRigheHtml(vhNuovoHtml())}
     ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
-    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
+    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Serve aiuto?</b>
       <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
 		if (diOggi.length && vhKm.giorno !== oggi && typeof ofStimaKm === "function") {
 			vhKm = {
@@ -42596,7 +42601,14 @@ plAggiorna();
     ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
     ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
     ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}
-    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}</div>`;
+    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}
+    ${vhArchivioHtml()}</div>`;
+	}
+	var VH_ARC = "<svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg>";
+	function vhArchivioHtml() {
+		return `<button class="hm-riga r-arc" onclick="apriArchivio()"><span class="ic">${VH_ARC}</span>
+    <span class="tx"><b>Archivio</b><span>Foto, lastre e documenti</span></span>
+    <span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
 	}
 	function vhVai(filtro) {
 		showPage("pro-clienti");

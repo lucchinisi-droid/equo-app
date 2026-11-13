@@ -81,6 +81,8 @@ function plCostruisciMenuBase(){
       plTile(HM_IC.users, "Clienti", "hmCartella('clienti')"),
       plTile(PLI.scuderia, "Scuderie", "hmCartella('scuderie')"),
       plTile(HM_IC.wallet, "Incassi", "hmDaIncassare()", 0, "solo-incassi"),
+      // 13/11/2026 (Simone): Archivio anche nel «+» del maniscalco (SQL 69)
+      plTile('<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>', "Archivio", "apriArchivio()"),
       plTile(PLI.furgone, "Officina mobile", "showPage('pro-officina')"),
       plTile(PLI.scad, "Scadenze", "hmScadenze()"),
       plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),

@@ -164,7 +164,8 @@ body.pl-vet #bottom-nav-pro .nav-hammer .hm-ham{box-shadow:0 0 0 3px #7FD1C9!imp
 body.pl-vet .hm-flot.piu{background:#7FD1C9!important;color:#12233F!important;border-color:#fff!important}
 body.pl-vet .hm-flot.piu svg{stroke:#12233F!important;color:#12233F!important}
 body.pl-vet .hm-flot.msg{background:var(--accent)!important;color:#fff!important}
-body.pl-vet .topbar-avatar,body.pl-vet .menu-profile-avatar{background:#2B3F6B!important;color:#fff!important;border:2px solid #7FD1C9!important;box-shadow:none!important}
+/* 13/11/2026: solo il colore di fondo, così la foto del profilo si vede (prima «background» la copriva) */
+body.pl-vet .topbar-avatar,body.pl-vet .menu-profile-avatar{background-color:#2B3F6B!important;background-size:cover!important;background-position:center!important;color:#fff!important;border:2px solid #7FD1C9!important;box-shadow:none!important}
 body.pl-vet .tb-pallino{background:#C9A96E!important}
 body.pl-vet .topbar .icon-btn,body.pl-vet .topbar button:not(.topbar-avatar){color:var(--accent)}
 /* fogli della Home (Portami da, Scadenze, Altro) */

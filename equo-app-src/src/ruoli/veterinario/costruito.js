@@ -145,7 +145,7 @@
     </div>
     ${vhRigheHtml(vhNuovoHtml())}
     ${avviso ? `<button class="vh-galeno" onclick="${avviso.az}"><span class="g">${VH_IC.piu}</span><span><b>Galeno:</b> ${escapeHtml(avviso.t)}</span></button>` : ""}
-    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Segnalaci un problema o un consiglio</b>
+    <div class="vh-aiuto"><span class="ic"><i class="fa-solid fa-life-ring"></i></span><span class="t"><b>Serve aiuto?</b>
       <small>Un errore, un'idea per migliorare l'app: ti rispondiamo via email.</small></span><button type="button" class="vh-aiuto-bt" onclick="apriTicketAssistenza()">Scrivici</button></div>`;
 		if (diOggi.length && vhKm.giorno !== oggi && typeof ofStimaKm === "function") {
 			vhKm = {
@@ -224,7 +224,14 @@
     ${riga("r-cav", "vhVai('cavalli')", "Cavalli", `<strong>${nCav}</strong> ${nCav === 1 ? "cavallo che segui" : "cavalli che segui"}`)}
     ${riga("r-cli", "vhVai('privati')", "Clienti", `<strong>${nCli}</strong> ${nCli === 1 ? "proprietario" : "proprietari"}`)}
     ${riga("r-scu", "vhVai('scuderie')", "Scuderie", `<strong>${nScu}</strong> ${nScu === 1 ? "scuderia o maneggio" : "scuderie e maneggi"}`)}
-    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}</div>`;
+    ${riga("r-inc", "showPage('pro-incassi')", "Incassi", inc, "solo-incassi")}
+    ${vhArchivioHtml()}</div>`;
+	}
+	var VH_ARC = "<svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg>";
+	function vhArchivioHtml() {
+		return `<button class="hm-riga r-arc" onclick="apriArchivio()"><span class="ic">${VH_ARC}</span>
+    <span class="tx"><b>Archivio</b><span>Foto, lastre e documenti</span></span>
+    <span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`;
 	}
 	function vhVai(filtro) {
 		showPage("pro-clienti");

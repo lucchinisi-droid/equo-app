@@ -29,6 +29,8 @@ registraPerRuolo("plCostruisciMenu", Object.keys(PL_AGENTE), function(){
   const nuovo = plRuolo() === "vet" ? [plTile(HM_IC.cal, "Nuovo appuntamento", "openInterventoModal(null)")] : [];
   m.innerHTML = plSez("Vai a", [...nuovo,
     plTile(HM_IC.wallet, "Incassi", "showPage('pro-incassi')"),
+    // 13/11/2026 (Simone): Archivio per maniscalco e veterinario (SQL 69)
+    plTile('<svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>', "Archivio", "apriArchivio()"),
     plTile(HM_IC.users, "Clienti", "showPage('pro-clienti')"),
     plTile(HM_IC.cerca, "Cerca", "apriCercaTutto()"),
     plTile(HM_IC.qr, "Invita clienti", "openCodicePersonaleModal()"),

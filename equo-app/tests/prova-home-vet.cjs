@@ -25,8 +25,9 @@ const problemi = []; const ok = (c, m) => { console.log((c ? "OK  " : "NO  ") + 
       aiuto: box.querySelector(".vh-aiuto b")?.textContent, bt: box.querySelector(".vh-aiuto-bt")?.textContent }; });
   const iGiro = h.ordine.indexOf("vh-giro"), iRighe = h.ordine.indexOf("hm-righe"), iAiuto = h.ordine.indexOf("vh-aiuto");
   // 3/11/2026 sera: niente «Prossime visite»; sotto i cerchi il tasto Tiffany «Nuovo appuntamento», poi Cavalli · Clienti · Scuderie · Incassi
-  ok(h.ordine.indexOf("vh-tit") < 0 && h.ordine.indexOf("vh-visita") < 0 && iGiro >= 0 && iRighe > iGiro && iAiuto > iRighe && h.righe.join("|") === "Nuovo appuntamento|Cavalli|Clienti|Scuderie|Incassi" && h.icone === 5 && !h.emoji
-    && /cavall/.test(h.sotto[1]) && /propriet/.test(h.sotto[2]) && /scuder/.test(h.sotto[3]) && h.aiuto === "Segnalaci un problema o un consiglio" && h.bt === "Scrivici",
+  // 13/11/2026: + Archivio sotto Incassi; il riquadro dell'assistenza si chiama «Serve aiuto?»
+  ok(h.ordine.indexOf("vh-tit") < 0 && h.ordine.indexOf("vh-visita") < 0 && iGiro >= 0 && iRighe > iGiro && iAiuto > iRighe && h.righe.join("|") === "Nuovo appuntamento|Cavalli|Clienti|Scuderie|Incassi|Archivio" && h.icone === 6 && !h.emoji
+    && /cavall/.test(h.sotto[1]) && /propriet/.test(h.sotto[2]) && /scuder/.test(h.sotto[3]) && h.aiuto === "Serve aiuto?" && h.bt === "Scrivici",
     "Home: niente lista, tasto Nuovo appuntamento, poi Cavalli · Clienti · Scuderie · Incassi con le icone della Home, poi Segnalaci " + JSON.stringify(h));
 
   // tasto Nuovo appuntamento: Tiffany con bordo e testo blu notte, apre il nuovo appuntamento
