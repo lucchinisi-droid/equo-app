@@ -157,7 +157,10 @@ body.pl-vet #bottom-nav-pro{background:var(--surface)!important;border-color:var
 body.pl-vet #bottom-nav-pro .nav-btn{background:transparent!important;color:var(--muted)!important}
 body.pl-vet #bottom-nav-pro .nav-btn svg,body.pl-vet #bottom-nav-pro .nav-btn svg *{color:inherit!important;stroke:currentColor!important}
 body.pl-vet #bottom-nav-pro .nav-btn small{color:inherit!important}
-body.pl-vet #bottom-nav-pro .nav-btn.active{color:var(--accent)!important;font-weight:700}
+/* 14/11/2026 (Simone): la voce attiva è una pillola Tiffany con icona e scritta blu notte, così si capisce subito su che pagina sei */
+body.pl-vet #bottom-nav-pro .nav-btn:not(.nav-hammer){border-radius:18px!important;transition:background .15s}
+body.pl-vet #bottom-nav-pro .nav-btn.active:not(.nav-hammer){background:#7FD1C9!important;color:#1D2D50!important;font-weight:800}
+body.pl-vet #bottom-nav-pro .nav-btn.active:not(.nav-hammer) svg{stroke-width:2.2}
 body.pl-vet #bottom-nav-pro .nav-hammer small{color:var(--accent)!important}
 body.pl-vet #bottom-nav-pro .nav-hammer .hm-ham{box-shadow:0 0 0 3px #7FD1C9!important}
 /* tasto + flottante e profilo in alto */
@@ -215,7 +218,7 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
 :where(:root:not([data-theme="light"])) body.pl-vet .vt-cli-invita{background:transparent;color:#7FD1C9}
 :where(:root:not([data-theme="light"])) body.pl-vet .btn-primary,
 :where(:root:not([data-theme="light"])) body.pl-vet .btn-conferma{color:#12233F!important}
-:where(:root:not([data-theme="light"])) body.pl-vet #bottom-nav-pro .nav-btn.active{color:#7FD1C9!important}
+:where(:root:not([data-theme="light"])) body.pl-vet #bottom-nav-pro .nav-btn.active:not(.nav-hammer){background:#7FD1C9!important;color:#1D2D50!important}
 
 /* ---------- SCHEDA DELLA VISITA (2/11/2026 · 07-scheda-visita.js) · colori del mockup C ---------- */
 :where(body.pl-vet) .vs-foglio{position:fixed;inset:0;z-index:95;background:var(--vt-fondo);color:var(--vt-testo);display:none;flex-direction:column;font-size:15px}

@@ -180,6 +180,13 @@ function vhDetta(){ if(typeof vdDaHome === "function") return vdDaHome(); }
 function vhMeteo(){ const m = document.getElementById("hm-meteo"); if(m) m.click(); }
 
 quandoApriPagina(function(p){ if(p === "pro-home") renderHomeVet(); });
+// 14/11/2026 (Simone): una voce del menu in basso è sempre accesa; le pagine aperte dalla Home (Incassi, Archivio…) accendono «Home»
+quandoApriPagina(function(p){
+  if(typeof eVeterinario !== "function" || !eVeterinario()) return;
+  const voci = [...document.querySelectorAll("#bottom-nav-pro .nav-btn[data-page]")];
+  if(!voci.length || voci.some(b => b.classList.contains("active"))) return;
+  const home = voci.find(b => b.dataset.page === "pro-home"); if(home) home.classList.add("active");
+});
 quandoAggiornaBarra(function(){ if(document.body.classList.contains("pl-vet") && !document.getElementById("vh")) renderHomeVet(); });
 
 export { renderHomeVet, vhGiornata, vhDetta, vhMeteo, vhVai, vhRigheHtml, vhVisite };

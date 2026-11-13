@@ -254,6 +254,13 @@
 	quandoApriPagina(function(p) {
 		if (p === "pro-home") renderHomeVet$1();
 	});
+	quandoApriPagina(function(p) {
+		if (typeof eVeterinario !== "function" || !eVeterinario()) return;
+		const voci = [...document.querySelectorAll("#bottom-nav-pro .nav-btn[data-page]")];
+		if (!voci.length || voci.some((b) => b.classList.contains("active"))) return;
+		const home = voci.find((b) => b.dataset.page === "pro-home");
+		if (home) home.classList.add("active");
+	});
 	quandoAggiornaBarra(function() {
 		if (document.body.classList.contains("pl-vet") && !document.getElementById("vh")) renderHomeVet$1();
 	});
