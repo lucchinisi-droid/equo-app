@@ -296,6 +296,7 @@ html body[data-tono="5"]:where(.pl-vet) #screen-app{--tono:#677086}
 :where(body.pl-vet) .r-cli{--tinta:#E6E0D4;--colore:#2B3F6B}
 :where(body.pl-vet) .r-scu{--tinta:#F7F4EE;--colore:#7FD1C9}
 :where(body.pl-vet) .r-inc{--tinta:#F7F4EE;--colore:#7FD1C9}
+:where(body.pl-vet) .r-arc{--tinta:#E3F4F2;--colore:#1D2D50}
 :where(body.pl-vet) .r-app{--tinta:#2B3F6B;--colore:#2B3F6B}
 :root:not([data-theme="light"]) :where(body.pl-vet) .r-cav{--colore:#E3F4F2}
 :root:not([data-theme="light"]) :where(body.pl-vet) .r-cli{--colore:#2B3F6B}

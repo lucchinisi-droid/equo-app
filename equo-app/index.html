@@ -2611,10 +2611,11 @@ body.incassi-nascosti .hm-cerchi{grid-template-columns:repeat(4,1fr)}
 .r-cli{--tinta:#e6dcf3;--colore:#6b4fae}
 .r-scu{--tinta:#f1e2c6;--colore:#9a6a24}
 .r-inc{--tinta:#f7e3ad;--colore:#a8721c}
+.r-arc{--tinta:#d5eeea;--colore:#2e7d6f}   /* 14/11/2026: Archivio, verde acqua */
 .r-app{--tinta:#dfe9f5;--colore:#2f6fae}
 :root:not([data-theme="light"]) .hm-riga,:root:not([data-theme="light"]) .hm-menu-piu button span{--tinta:color-mix(in srgb,var(--colore) 30%,transparent)}
 :root:not([data-theme="light"]) .r-cav{--colore:#6fd39b}:root:not([data-theme="light"]) .r-cli{--colore:#b9a2ea}
-:root:not([data-theme="light"]) .r-scu{--colore:#e0b26a}:root:not([data-theme="light"]) .r-inc{--colore:#f0c05e}:root:not([data-theme="light"]) .r-app{--colore:#86b6ea}
+:root:not([data-theme="light"]) .r-scu{--colore:#e0b26a}:root:not([data-theme="light"]) .r-inc{--colore:#f0c05e}:root:not([data-theme="light"]) .r-arc{--colore:#7fd1c9}:root:not([data-theme="light"]) .r-app{--colore:#86b6ea}
 /* Messaggi (sinistra) e «+» (destra) flottanti: solo in Home */
 .hm-flot{display:none;position:fixed;bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;align-items:center;justify-content:center;z-index:61;box-shadow:0 8px 20px rgba(59,44,16,.25);border:0;cursor:pointer;font:inherit;transition:transform .2s,background .2s}
 .hm-flot svg{width:24px;height:24px}
@@ -4273,6 +4274,7 @@ html body[data-tono="5"]:where(.pl-vet) #screen-app{--tono:#677086}
 :where(body.pl-vet) .r-cli{--tinta:#E6E0D4;--colore:#2B3F6B}
 :where(body.pl-vet) .r-scu{--tinta:#F7F4EE;--colore:#7FD1C9}
 :where(body.pl-vet) .r-inc{--tinta:#F7F4EE;--colore:#7FD1C9}
+:where(body.pl-vet) .r-arc{--tinta:#E3F4F2;--colore:#1D2D50}
 :where(body.pl-vet) .r-app{--tinta:#2B3F6B;--colore:#2B3F6B}
 :root:not([data-theme="light"]) :where(body.pl-vet) .r-cav{--colore:#E3F4F2}
 :root:not([data-theme="light"]) :where(body.pl-vet) .r-cli{--colore:#2B3F6B}
@@ -5470,6 +5472,8 @@ body.pl-vet .mchat-send-btn{background:var(--accent)!important;border-color:var(
         <button class="hm-riga r-cli" onclick="hmCartella('clienti')"><span class="ic"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="tx"><b>Clienti</b><span id="hm-r-cli">proprietari</span></span><svg class="hm-svg fondo" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>
         <button class="hm-riga r-scu" onclick="hmCartella('scuderie')"><span class="ic"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M2 21h20"/><rect x="8" y="13" width="8" height="8"/><path d="m8 13 8 8M16 13l-8 8"/><path d="M10 9.5h4"/></svg></span><span class="tx"><b>Scuderie</b><span id="hm-r-scu">scuderie e maneggi</span></span><svg class="hm-svg fondo" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M2 21h20"/><rect x="8" y="13" width="8" height="8"/><path d="m8 13 8 8M16 13l-8 8"/><path d="M10 9.5h4"/></svg><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>
         <button class="hm-riga r-inc solo-incassi" onclick="showPage('pro-incassi')"><span class="ic"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wallet"/></svg></span><span class="tx"><b>Incassi</b><span id="hm-r-inc"></span></span><svg class="hm-svg fondo" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wallet"/></svg><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>
+        <!-- 14/11/2026 (Simone, mockup): Archivio dopo Incassi, prima di Officina mobile -->
+        <button class="hm-riga r-arc" onclick="apriArchivio()"><span class="ic"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="tx"><b>Archivio</b><span>Foto, lastre e documenti</span></span><svg class="hm-svg fondo" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>
         <button class="hm-riga r-off" onclick="showPage('pro-officina')"><span class="ic"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 16V7a1 1 0 0 1 1-1h11l4 4h3a1 1 0 0 1 1 1v5"/><path d="M14 6v4h6"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/><path d="M8.5 17.5h7M2 16h2.5M19.5 17.5H22"/></svg></span><span class="tx"><b>Officina mobile</b><span id="hm-r-off">furgone, aiutanti, materiali e spese</span></span><span class="fr"><svg class="hm-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>
       </div>
     </div>
@@ -12936,6 +12940,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		const v = (ic, t, az, cls) => `<button class="${cls || ""}" onclick="hmChiudi();${az}"><span>${ic}</span>${t}</button>`;
 		hmFoglio("Altro", "", `<div class="hm-griglia">
     ${v(HM_IC.wallet, "Incassi", "showPage('pro-incassi')", "solo-incassi")}
+    ${v("<svg class=\"hm-svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg>", "Archivio", "apriArchivio()")}
     ${v(HM_IC.cal, "Agenda", "showPage('pro-agenda')")}
     ${v(HM_IC.inbox, "Messaggi", "hmMessaggi()")}
     ${v(HM_IC.qr, "Il mio codice e QR", "openCodicePersonaleModal()")}

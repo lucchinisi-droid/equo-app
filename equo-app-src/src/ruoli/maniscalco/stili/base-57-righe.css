@@ -17,7 +17,8 @@
 .r-cli{--tinta:#e6dcf3;--colore:#6b4fae}
 .r-scu{--tinta:#f1e2c6;--colore:#9a6a24}
 .r-inc{--tinta:#f7e3ad;--colore:#a8721c}
+.r-arc{--tinta:#d5eeea;--colore:#2e7d6f}   /* 14/11/2026: Archivio, verde acqua */
 .r-app{--tinta:#dfe9f5;--colore:#2f6fae}
 :root:not([data-theme="light"]) .hm-riga,:root:not([data-theme="light"]) .hm-menu-piu button span{--tinta:color-mix(in srgb,var(--colore) 30%,transparent)}
 :root:not([data-theme="light"]) .r-cav{--colore:#6fd39b}:root:not([data-theme="light"]) .r-cli{--colore:#b9a2ea}
-:root:not([data-theme="light"]) .r-scu{--colore:#e0b26a}:root:not([data-theme="light"]) .r-inc{--colore:#f0c05e}:root:not([data-theme="light"]) .r-app{--colore:#86b6ea}
+:root:not([data-theme="light"]) .r-scu{--colore:#e0b26a}:root:not([data-theme="light"]) .r-inc{--colore:#f0c05e}:root:not([data-theme="light"]) .r-arc{--colore:#7fd1c9}:root:not([data-theme="light"]) .r-app{--colore:#86b6ea}
