@@ -3342,6 +3342,11 @@ button.of-c{all:unset;flex:1;min-width:0;cursor:pointer}
 .arc-cerca input{border:none;outline:none;background:transparent;font:400 15px 'DM Sans',sans-serif;color:var(--text);flex:1;min-width:0}
 .arc-chips{display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap}
 .arc-modal .arc-chips{padding:4px 0 10px}
+/* 14/11/2026 (Simone): i filtri dell'archivio stanno su una riga sola che scorre col dito */
+.arc-chips.arc-filtri{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-padding:0 16px}
+.arc-chips.arc-filtri::-webkit-scrollbar{display:none}
+.arc-chips.arc-filtri .arc-chip{flex:none;white-space:nowrap}
+.arc-chips.arc-filtri::after{content:"";flex:0 0 10px}
 .arc-chip{min-height:34px;padding:0 12px;border-radius:17px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:500 13px 'DM Sans',sans-serif;cursor:pointer}
 .arc-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 .arc-sez{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 16px 8px}
@@ -22665,8 +22670,8 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
 		["tutti", "Tutti"],
 		["foto", "Foto"],
 		["lastre", "Lastre"],
-		["pdf", "PDF e referti"],
-		["disegnati", "Disegnati"]
+		["pdf", "Documenti"],
+		["disegnati", "Annotati"]
 	];
 	var ARC_AVVISO = "Questo documento è protetto dalla normativa sulla privacy e dai diritti del professionista che lo ha inviato. Non puoi condividerlo, inoltrarlo o pubblicarlo senza la sua autorizzazione.";
 	var arcIo = () => currentUser?.id;
@@ -23090,7 +23095,7 @@ let wgPro = { incassatoMese: 0, daIncassareMese: 0, unread: 0, ultimo: null, set
     ${ARC.cartella ? "" : `<div class="arc-conta">${tot} ${tot === 1 ? "contenuto" : "contenuti"} · ${ARC.dati.cartelle.length} ${ARC.dati.cartelle.length === 1 ? "cartella" : "cartelle"} · solo tuoi</div>`}
     <label class="arc-cerca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input type="search" id="arc-q" placeholder="Cerca per cavallo, cliente o nome" value="${arcEsc(ARC.q)}" oninput="arcCerca(this.value)" aria-label="Cerca nell'Archivio"></label>
-    <div class="arc-chips">${ARC_FILTRI.map(([k, t]) => `<button class="arc-chip${ARC.filtro === k ? " on" : ""}" aria-pressed="${ARC.filtro === k}" onclick="arcFiltro('${k}')">${t}</button>`).join("")}</div>
+    <div class="arc-chips arc-filtri">${ARC_FILTRI.map(([k, t]) => `<button class="arc-chip${ARC.filtro === k ? " on" : ""}" aria-pressed="${ARC.filtro === k}" onclick="arcFiltro('${k}')">${t}</button>`).join("")}</div>
     ${ARC.cartella ? "" : `<div class="arc-sez"><span>Cartelle</span><button class="arc-nuova" onclick="arcNuovaCartella()">+ Cartella</button></div>
     <div class="arc-cartelle">${ARC.dati.cartelle.length ? ARC.dati.cartelle.map((c) => `<button class="arc-cartella" onclick="arcApriCartella('${c.id}')">
       <svg viewBox="0 0 26 22" aria-hidden="true"><path d="M2 4a2 2 0 0 1 2-2h6l2 3h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>

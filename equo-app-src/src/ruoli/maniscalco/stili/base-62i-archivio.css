@@ -17,6 +17,11 @@
 .arc-cerca input{border:none;outline:none;background:transparent;font:400 15px 'DM Sans',sans-serif;color:var(--text);flex:1;min-width:0}
 .arc-chips{display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap}
 .arc-modal .arc-chips{padding:4px 0 10px}
+/* 14/11/2026 (Simone): i filtri dell'archivio stanno su una riga sola che scorre col dito */
+.arc-chips.arc-filtri{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-padding:0 16px}
+.arc-chips.arc-filtri::-webkit-scrollbar{display:none}
+.arc-chips.arc-filtri .arc-chip{flex:none;white-space:nowrap}
+.arc-chips.arc-filtri::after{content:"";flex:0 0 10px}
 .arc-chip{min-height:34px;padding:0 12px;border-radius:17px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:500 13px 'DM Sans',sans-serif;cursor:pointer}
 .arc-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 .arc-sez{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 16px 8px}

@@ -9,7 +9,7 @@ import { dsApri, dsCanvasConSegni, dsCaricaImmagine, dsDisegnaSegni, dsFiligrana
 const arcEsc = s => escapeHtml(s == null ? "" : String(s));
 const arcToast = t => { if(typeof showToast === "function") showToast(t); };
 const ARC = { dati: { cartelle: [], documenti: [] }, filtro: "tutti", q: "", cartella: null, ordine: "data", sel: null, mini: {}, eliminati: false, carica: null, chi: null, aperto: false };
-const ARC_FILTRI = [["tutti", "Tutti"], ["foto", "Foto"], ["lastre", "Lastre"], ["pdf", "PDF e referti"], ["disegnati", "Disegnati"]];
+const ARC_FILTRI = [["tutti", "Tutti"], ["foto", "Foto"], ["lastre", "Lastre"], ["pdf", "Documenti"], ["disegnati", "Annotati"]];   // 14/11/2026 (Simone): nomi nuovi, una riga che scorre
 const ARC_AVVISO = "Questo documento è protetto dalla normativa sulla privacy e dai diritti del professionista che lo ha inviato. Non puoi condividerlo, inoltrarlo o pubblicarlo senza la sua autorizzazione.";
 const arcIo = () => currentUser?.id;
 const arcVet = () => typeof eVeterinario === "function" && eVeterinario();
@@ -226,7 +226,7 @@ function arcRender(){
     ${ARC.cartella ? "" : `<div class="arc-conta">${tot} ${tot === 1 ? "contenuto" : "contenuti"} · ${ARC.dati.cartelle.length} ${ARC.dati.cartelle.length === 1 ? "cartella" : "cartelle"} · solo tuoi</div>`}
     <label class="arc-cerca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input type="search" id="arc-q" placeholder="Cerca per cavallo, cliente o nome" value="${arcEsc(ARC.q)}" oninput="arcCerca(this.value)" aria-label="Cerca nell'Archivio"></label>
-    <div class="arc-chips">${ARC_FILTRI.map(([k, t]) => `<button class="arc-chip${ARC.filtro === k ? " on" : ""}" aria-pressed="${ARC.filtro === k}" onclick="arcFiltro('${k}')">${t}</button>`).join("")}</div>
+    <div class="arc-chips arc-filtri">${ARC_FILTRI.map(([k, t]) => `<button class="arc-chip${ARC.filtro === k ? " on" : ""}" aria-pressed="${ARC.filtro === k}" onclick="arcFiltro('${k}')">${t}</button>`).join("")}</div>
     ${ARC.cartella ? "" : `<div class="arc-sez"><span>Cartelle</span><button class="arc-nuova" onclick="arcNuovaCartella()">+ Cartella</button></div>
     <div class="arc-cartelle">${ARC.dati.cartelle.length ? ARC.dati.cartelle.map(c => `<button class="arc-cartella" onclick="arcApriCartella('${c.id}')">
       <svg viewBox="0 0 26 22" aria-hidden="true"><path d="M2 4a2 2 0 0 1 2-2h6l2 3h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
