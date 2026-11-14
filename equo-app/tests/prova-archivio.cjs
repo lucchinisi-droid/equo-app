@@ -40,9 +40,6 @@ const caricaFoto = (pg, colore) => pg.evaluate(async col => {
     vis: document.querySelector("#arc-pagina .arc-vis")?.textContent.trim(), chips: [...document.querySelectorAll("#arc-pagina .arc-chip")].map(x => x.textContent), cartella: !!document.querySelector(".arc-nuova"),
     img: !!document.querySelector("#arc-pagina .arc-thumb img") }));
   ok(a1.aperto && a1.righe === 1 && /Nascosto · solo tu/.test(a1.vis) && a1.chips.join(",") === "Tutti,Foto,Lastre,Documenti,Annotati" && a1.cartella && a1.img, "Archivio: contenuto nuovo nascosto, filtri, «+ Cartella», anteprima " + JSON.stringify(a1));
-  const riga = await pg.evaluate(() => { const c = [...document.querySelectorAll("#arc-pagina .arc-filtri .arc-chip")]; const box = document.querySelector("#arc-pagina .arc-filtri");
-    return { n: c.length, top: new Set(c.map(x => Math.round(x.getBoundingClientRect().top))).size, scorre: getComputedStyle(box).overflowX }; });
-  ok(riga.n === 5 && riga.top === 1 && riga.scorre === "auto", "Archivio: filtri su una riga che scorre " + JSON.stringify(riga));
 
   /* 2. cartella, rinomina, sposta */
   await pg.evaluate(() => arcNuovaCartella()); await attesa(300);

@@ -132,6 +132,25 @@ function vrTestoConferma(){
 }
 
 /* ---- PDF (colori del mockup C: blu notte e Tiffany) ---- */
+// immagini allegate per il PDF: foto e lastre (non PDF né video), con i segni disegnati sopra e la legenda numerata
+async function vrImmaginiAllegati(alleg){
+  const out = [];
+  for(const a of alleg.filter(x => /^image\//.test(x.mime || ""))){
+    const titolo = a.nome || a.titolo || "Immagine";
+    try{
+      const url = typeof arcDB !== "undefined" ? await arcDB.urlDi(a) : null;
+      if(!url || typeof dsCaricaImmagine !== "function" || typeof dsCanvasConSegni !== "function") throw new Error("immagine");
+      const im = await dsCaricaImmagine(url);
+      const s = typeof dsNormalizza === "function" ? dsNormalizza(a.segni) : { items: [], cal: null };
+      const cv = dsCanvasConSegni(im, s.items.length ? s : null, { maxLato: 1400 });
+      const W = im.naturalWidth, H = im.naturalHeight;
+      const voci = s.items.map((it, i) => (i + 1) + " · " + (typeof dsEtichetta === "function" ? dsEtichetta(it, W, H, s.cal) : ""));
+      if(s.cal) voci.push("Calibrata su " + (s.cal.rif || s.cal.mm + " mm"));
+      out.push({ titolo, url: cv.toDataURL("image/jpeg", 0.85), w: cv.width, h: cv.height, legenda: voci.join("   ") });
+    }catch(_){ out.push({ titolo, errore: true }); }
+  }
+  return out;
+}
 async function vrCreaPdf(){
   const JsPDF = await caricaJsPdf();
   const doc = new JsPDF({ unit: "mm", format: "a4" });
@@ -230,7 +249,33 @@ async function vrCreaPdf(){
     doc.setFillColor(...chiaro); doc.rect(M, y - 5, W - M * 2, 8, "F");
     doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...notte); doc.text("ALLEGATI", M + 3, y); y += 8;
     doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...testo);
-    alleg.forEach(a => { if(y > 272) nuovaPagina(); doc.text("· " + a.titolo, M + 3, y); y += 6; });
+    alleg.forEach(a => { if(y > 272) nuovaPagina(); doc.text(doc.splitTextToSize("· " + (a.nome || a.titolo), W - M * 2 - 6)[0], M + 3, y); y += 6; });
+    // 14/11/2026 (Simone, scelta B): tutte le foto e lastre allegate dentro il PDF, con i segni e le misure dove ci sono
+    const foto = await vrImmaginiAllegati(alleg);
+    if(foto.length){
+      y += 4; if(y > 225) nuovaPagina();
+      doc.setFillColor(...chiaro); doc.rect(M, y - 5, W - M * 2, 8, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...notte); doc.text("FOTO E LASTRE", M + 3, y); y += 8;
+      const larg = (W - M * 2 - 6) / 2;
+      let col = 0, hRiga = 0;
+      const aCapo = () => { y += hRiga + 4; col = 0; hRiga = 0; };
+      foto.forEach(f => {
+        doc.setFontSize(8);
+        const leg = f.legenda ? doc.splitTextToSize(f.legenda, larg) : [];
+        const s = f.errore ? 0 : Math.min(larg / f.w, 78 / f.h), w = f.errore ? larg : f.w * s, h = f.errore ? 10 : f.h * s;
+        const alto = 4 + h + 2 + leg.length * 3.6;
+        if(y + alto > 272){ if(col) aCapo(); nuovaPagina(); col = 0; hRiga = 0; }
+        const xx = M + col * (larg + 6);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...grigio);
+        doc.text(doc.splitTextToSize(f.titolo, larg)[0], xx + larg / 2, y, { align: "center" });
+        if(f.errore){ doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.text("immagine non inclusa", xx + larg / 2, y + 7, { align: "center" }); }
+        else doc.addImage(f.url, "JPEG", xx + (larg - w) / 2, y + 2, w, h);
+        if(leg.length){ doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...testo); doc.text(leg, xx, y + 2 + h + 4); }
+        hRiga = Math.max(hRiga, alto);
+        if(col === 1) aCapo(); else col = 1;
+      });
+      if(col) aCapo();
+    }
   }
   if(y > 250) nuovaPagina();
   y += 8; doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...testo);

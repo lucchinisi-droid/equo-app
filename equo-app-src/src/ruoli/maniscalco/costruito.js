@@ -19095,7 +19095,10 @@
 		dsSalvaConfronto,
 		dsConfrontoChiudi,
 		dsCanvasConSegni,
-		dsDisegnaSegni
+		dsDisegnaSegni,
+		dsCaricaImmagine,
+		dsNormalizza,
+		dsEtichetta
 	});
 })();
 
